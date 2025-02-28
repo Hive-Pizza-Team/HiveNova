@@ -133,7 +133,7 @@ class PlayerUtil
 			':authlevel'			=> $authlevel,
 			':universe'				=> $universe,
 			':language'				=> $userLanguage,
-			':registerAddress'		=> !empty($userIpAddress) ? $userIpAddress : Session::getClientIp(),
+			':registerAddress'		=> !empty($userIpAddress) ? $userIpAddress : '127.0.0.1',
 			':onlinetime'			=> TIMESTAMP,
 			':registerTimestamp'	=> TIMESTAMP,
 			':password'				=> $userPassword,
