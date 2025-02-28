@@ -210,7 +210,7 @@ class Session
 	        $this->delete();
 	    }
 
-        $userIpAddress = self::getClientIp();
+        $userIpAddress = '127.0.0.1';
 
 	if(!(isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)==2 && MODE === 'INGAME')) {
 		$sql	= 'REPLACE INTO %%SESSION%% SET
