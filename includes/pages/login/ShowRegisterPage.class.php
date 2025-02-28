@@ -289,7 +289,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			':password'				=> PlayerUtil::cryptPassword($password),
 			':mailAddress'			=> $mailAddress,
 			':timestamp'			=> TIMESTAMP,
-			':remoteAddr'			=> Session::getClientIp(),
+			':remoteAddr'			=> '127.0.0.1',
 			':language'				=> $language,
 			':universe'				=> Universe::current(),
 			':referralID'			=> $referralID,
