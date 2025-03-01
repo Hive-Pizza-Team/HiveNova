@@ -6,7 +6,7 @@ $database = mysqli_fetch_all(mysqli_query($connection, "SELECT id FROM uni1_user
 
 $random_event = rand(1,7);
 $time = time();
-$nickname = '<span class="admin">SteemNova Event System</span>';
+$nickname = '<span class="admin">HiveNova Event System</span>';
 $subject = '<span class="admin">New Event</span>';
 
 for($i=0; $i<=(count($database)-1); $i++) {
