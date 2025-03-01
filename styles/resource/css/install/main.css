@@ -1,73 +1,77 @@
-table{
-	margin: auto;
-	width:900px;
+table {
+    margin: auto;
+    width: 900px;
 }
 
-body > table{
-	width:960px;
+body>table {
+    width: 960px;
 }
 
-.yes{
-	color:lime;
-}
-.ok{
-	color:yellow;
-}
-.no{
-	color:red;
+.yes {
+    color: lime;
 }
 
-#menu{
-	padding: 0 !important;
+.ok {
+    color: yellow;
 }
 
-#content{
-	margin:0 auto;
-	width:80%;
-	padding:0;
+.no {
+    color: red;
 }
 
-span > a{
-	color: inherit;
+#menu {
+    padding: 0 !important;
 }
 
-.desc{
-	font-style:italic;
-	margin-top: -10px;
-   	max-width: 400px;
+#content {
+    margin: 0 auto;
+    width: 80%;
+    padding: 0;
 }
-.desc > a{
-	text-decoration:underline;
+
+span>a {
+    color: inherit;
 }
-.desc > a:hover{
-	text-decoration:none;
+
+.desc {
+    font-style: italic;
+    margin-top: -10px;
+    max-width: 400px;
+}
+
+.desc>a {
+    text-decoration: underline;
+}
+
+.desc>a:hover {
+    text-decoration: none;
 }
 
 #lang {
-	float:right;
+    float: right;
 }
 
-.req{
-	width:900px;
-	border-collapse: collapse;
-	max-width:900px;
+.req {
+    width: 900px;
+    border-collapse: collapse;
+    max-width: 900px;
 }
 
-.req > tbody > tr > td{
-	width:50%;
+.req>tbody>tr>td {
+    width: 50%;
 }
 
-.req > tbody > tr > td{
-	padding:0px;
+.req>tbody>tr>td {
+    padding: 0px;
 }
 
-.border > tbody > tr > td{
-	padding:3px 0px;
+.border>tbody>tr>td {
+    padding: 3px 0px;
 }
 
-.border > tbody > tr{
-	border-bottom:1px solid #CCC;
-	height:24px;
+.border>tbody>tr {
+    border-bottom: 1px solid #CCC;
+    height: 24px;
 }
 
 #licence {
@@ -78,27 +82,41 @@ span > a{
     padding: 0 10px;
 }
 
-#licence a{
+#licence a {
     color: #000000;
-	text-decoration:underline;
+    text-decoration: underline;
 }
-#licence a:hover{
-	text-decoration:none;
+
+#licence a:hover {
+    text-decoration: none;
 }
 
 .noborder {
-	border:0 none !important;
+    border: 0 none !important;
+}
+
+h1 {
+    margin: 0px;
+    padding: 2px;
+    font-weight: bold;
+    color: #E31337;
+}
+
+.req>tbody>tr:nth-child(odd) {
+    background-color: #212529;
+    color: #f0f0f8;
 }
 
 .fatalerror {
-	background-color:#FFEEEE;
-	border: 1px solid #CC0000;
-    color: #CC0000;
-	padding:7px 10px 7px 45px
+    background-color: #FFEEEE;
+    border: 1px solid #E31337;
+    color: #E31337;
+    padding: 7px 10px 7px 45px
 }
-.noerror { 
-	background-color: #EEFFEE;
-	border: 1px solid #009900;
-	color: #009900;
-	padding:7px 10px 7px 45px
+
+.noerror {
+    background-color: #EEFFEE;
+    border: 1px solid #009900;
+    color: #009900;
+    padding: 7px 10px 7px 45px
 }
