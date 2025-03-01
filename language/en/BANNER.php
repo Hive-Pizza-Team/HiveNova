@@ -28,4 +28,4 @@ $LNG['ub_defenses']		= 'Defenses';
 
 $LNG['ub_fights']		= 'Battles';
 $LNG['ub_quote']		= 'Quote';
-$LNG['ub_rank']			= 'Position';
+$LNG['ub_rank']			= 'Rank';
