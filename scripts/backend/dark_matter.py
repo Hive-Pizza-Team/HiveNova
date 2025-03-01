@@ -73,7 +73,7 @@ def pay_users(__user, __amount, __timestamp, _database):
     __query = "UPDATE {0} SET darkmatter=(darkmatter+{1}) WHERE username='{2}'".format(_table_name, __amount, __user)
     #          UPDATE <table_name> SET darkmatter=darkmatter+<amount> WHERE username=<player>	
     print(__query)
-    _cursor.execute(__query);	                                                        	# add dark matter to the users
+    _cursor.execute(__query);	                                                        	# add pizzabits to the users
 
     print("#DGB PU;{0};{1};{2}".format(_time, __user ,__amount)+'\n')					# and inform about it ;D # TODO
     with open(_lastpaid, 'w') as f:										#  \  

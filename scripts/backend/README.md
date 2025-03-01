@@ -17,7 +17,7 @@ Player transfers SBD or STEEM to the @Steemnova account and the rest is handled 
 	* it is also downloading whole acc history with given limit to the glob. var. `_json`
 1. get_transfers()
 	* this function is taking only `transactions` from whole account history and it's logging it to the csv file for future payments
-	* also here is the multiplier for Dark Matter to pay
+	* also here is the multiplier for Pizzabits to pay
 	* it saves with given \*.csv header
 		* function prefix;transaction timestamp;recived from;amount recived;dm amount to add
 		* `function;timestamp;player;recived;darkmatter`

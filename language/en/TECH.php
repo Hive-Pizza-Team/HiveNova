@@ -37,7 +37,7 @@ $LNG['shortNames'] = array (
 217 => 'Battle Transporter',
 218 => 'Avatar',
 219 => 'Battle Recycler',
-220 => 'Dark Matter Collector',
+220 => 'Pizzabits Collector',
 
 401 => 'Missile Launcher',
 402 => 'Light Laser Turret',
@@ -137,7 +137,7 @@ $LNG['tech'] = array(
 217 => 'Battle Transporter',
 218 => 'Avatar',
 219 => 'Battle Recycler',
-220 => 'Dark Matter Collector',
+220 => 'Pizzabits Collector',
 
 400 => 'Planetary Defense',
 401 => 'Missile Launcher',
@@ -249,7 +249,7 @@ $LNG['shortDescription'] = array(
 217 => 'Is a development of the large cargo, it has more carry capacity and flies faster with the right techonology.',
 218 => 'The absolute worst case scenario, albeit very slowly.',
 219 => 'Is a huge cargo space and new engines, enable it to fly faster and gather more in debris fields .',
-220 => 'After long years of research dark matter is now collectable from the moon.',
+220 => 'After long years of research pizzabits is now collectable from the moon.',
 
 401 => 'The Rocket Launcher is a simple but cost-effective defense.',
 402 => 'Light Lasers are simple ground based defense weapons. They use special targeting systems to track and attack enemy ships. They fire a high intensity laser, designed to cut through the hull of the target.',
@@ -294,7 +294,7 @@ $LNG['shortDescription'] = array(
 902 => 'Crystals are the main resource used to build electronic circuits and form certain alloy compounds.',
 903 => 'Deuterium is found in the deepest sea. It is the most expensive resource and needs the most energy as well.',
 911 => 'Energy is needed for the production of every resource.',
-921 => 'Dark Matter is a very mysterious resource. Nobody really knows where it comes from. Sometimes it just appears out of nowhere.',
+921 => 'Pizzabits is a very mysterious resource. Nobody really knows where it comes from. Sometimes it just appears out of nowhere.',
 );
 
 $LNG['longDescription'] = array(
@@ -356,7 +356,7 @@ $LNG['longDescription'] = array(
 217 => 'Is a development of the large cargo, it has more carry capacity and flies faster with the right techonology.',
 218 => 'The absolute worst case scenario, albeit very slowly.',
 219 => 'Is a huge cargo space and new engines, enable it to fly faster and gather more in debris fields .',
-220 => 'After long years of research dark matter is now collectable from the moon.',
+220 => 'After long years of research pizzabits is now collectable from the moon.',
 
 401 => 'The Rocket Launcher is a simple but cost-effective defense.',
 402 => 'Light Lasers are simple ground based weapons that utilize special targeting systems to track the enemy and fire a high intensity laser designed to cut through the hull of the target.',
@@ -402,5 +402,5 @@ $LNG['longDescription'] = array(
 902 => 'Crystals are the main resource used to build electronic circuits and form certain alloy compounds. It gets produced in mines under the ground, where the raw material instantly is made into cicuits.',
 903 => 'Deuterium is found in the deepest sea. It belongs to the rarest resources in the Universe. Because you have to get to the ground of the sea in order to get Deuterium, it is the most expensive resource.',
 911 => 'Energy is needed for the production of every resource.',
-921 => 'Dark Matter is a very mysterious resource. Nobody really knows where it comes from. Sometimes it just appears out of nowhere and sometimes it is even found in old ships. Some even say that it doesn\'t exist, but it has been proven otherwise. You can use Dark Matter to hire the most experienced officers in the universe.',
+921 => 'Pizzabits is a very mysterious resource. Nobody really knows where it comes from. Sometimes it just appears out of nowhere and sometimes it is even found in old ships. Some even say that it doesn\'t exist, but it has been proven otherwise. You can use Pizzabits to hire the most experienced officers in the universe.',
 );

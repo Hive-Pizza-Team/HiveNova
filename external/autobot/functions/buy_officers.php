@@ -30,7 +30,7 @@ for ($i = 0;$i <= count($get_bots) - 1;$i++) {
 	    }
 	    mysqli_query($connection, "UPDATE uni1_users SET darkmatter = darkmatter - $cost WHERE id = $id");
 	} else {
-	    echo 'Not enough Dark Matter - ' . $get_bots[$i][1] . ' / ' . $get_officer_data[1] . PHP_EOL;
+	    echo 'Not enough Pizzabits - ' . $get_bots[$i][1] . ' / ' . $get_officer_data[1] . PHP_EOL;
 	    break;
 	}
     }

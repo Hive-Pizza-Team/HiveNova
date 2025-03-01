@@ -190,7 +190,7 @@ class MissionCaseExpedition extends MissionFunctions implements Mission
 			$this->UpdateFleet($fleetColName, $this->_fleet[$fleetColName] + $founded);
 		}
 		
-		// Find Dark Matter: 9%. Values from 2Moons
+		// Find Pizzabits: 9%. Values from 2Moons
 		elseif ($GetEvent < 415)
 		{
 			$eventSize   = mt_rand(0, 100);
