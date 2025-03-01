@@ -187,7 +187,7 @@ $LNG['tech'] = array(
 	902 => 'Crystal',
 	903 => 'Deuterium',
 	911 => 'Energy',
-	921 => 'Dark Matter',
+	921 => 'Pizzabits',
 );
 
 $LNG['shortDescription'] = array(
