@@ -32,8 +32,8 @@ $LNG['questions'][1][1]['body']		= <<<BODY
 BODY;
 $LNG['questions'][1][2]['title']	= 'Step 2';
 $LNG['questions'][1][2]['body']		= <<<BODY
-<p>To expand your Empire and compete with other players you need to interact with other buildings aswell. Through the research and construction of a Hangar to begin construction of your Fleet and Planetary Defense. Details can be found here:</p>
-<h3>The Hangar:</h3>
+<p>To expand your Empire and compete with other players you need to interact with other buildings aswell. Through the research and construction of a Shipyard to begin construction of your Fleet and Planetary Defense. Details can be found here:</p>
+<h3>The Shipyard:</h3>
 <p>Here are all the ships that you have available in the game. Some ships will have higher technological requirements to be built. An overview of the ships or defence which has technological requirements can be found under the title "technology" in the menu. Leveling up the Shipyard enables you faster construction of your ships and defences.</p>
 <h3>The Research Lab:</h3>
 <p>These are used to construct new buildings, ships and defenses. Also the researches can be used to get some bonuses. The research can be accelerated through the expansion of the Research Lab</p>
