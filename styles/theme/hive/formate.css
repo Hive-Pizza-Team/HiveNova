@@ -1,7 +1,7 @@
 /* 
 $background: #040E1E url('/images/background.jpg');
-$foreground: #E6EBFB;
-$ui-background: #344566; 
+$foreground: #f0f0f8;
+$ui-background: #E31337; 
 */
 
 html {
@@ -11,7 +11,7 @@ html {
 
 body {
     /* background: rgba(13, 16, 20, 0.50); */
-    /* color: #E6EBFB; */
+    /* color: #f0f0f8; */
 
     font-size: 12px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -29,7 +29,7 @@ th,
 tr,
 table,
 a:visited {
-    color: #fff;
+    color: #f0f0f8;
 }
 
 body.mceContentBody,
@@ -39,7 +39,7 @@ select,
 option,
 textarea,
 .ui-widget-content {
-    background: #1b4c6e;
+    background: #212529;
     padding: 2px;
 }
 
@@ -47,11 +47,6 @@ input[type="radio"] {
     background: transparent;
     border: 0 none;
 }
-
-
-/* #menu li:first-child, #menu li:last-child{
-	background-color:transparent;
-} */
 
 .card .title {
     background-image: url("img/bkd_title.png");
@@ -61,14 +56,14 @@ input[type="radio"] {
 }
 
 .card .content {
-    background: rgba(13, 16, 20, 0.95);
+    background: rgba(33, 37, 41, 0.95);
     border: 1px solid #000;
 }
 
 a:hover {
-    color: #ffd600;
-    text-decoration: none font-weight:bold;
-
+    color: #E31337;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 table,
@@ -88,24 +83,18 @@ textarea,
 #userpic,
 input,
 button {
-    border: 1px solid #ffeec0;
+    border: 1px solid #E31337;
 }
 
 button.selected {
-    border: 1px solid #1C1FD3;
-}
-
-td,
-th input,
-.tip {
-    border: 1px solid #000;
+    border: 1px solid #E31337;
 }
 
 td,
 .tip {
     text-align: center;
-    background: #0D1014;
-    background: rgba(13, 16, 20, 0.95);
+    background: #212529;
+    background: rgba(33, 37, 41, 0.95);
 }
 
 input,
@@ -122,13 +111,12 @@ th,
     border: 1px solid #000;
 }
 
-
 .trade-disallowed>td {
     background: #001004;
 }
 
 .trade-enemy>.table_username {
-    color: #F00;
+    color: #E31337;
 }
 
 .trade-ally>.table_username {
@@ -148,7 +136,6 @@ th,
     text-align: center;
 }
 
-
 .no-border,
 .no-border>th,
 .no-border>td {
@@ -158,7 +145,7 @@ th,
 th a:hover,
 .ui-widget-header a:hover,
 .article a:hover {
-    color: #FFF;
+    color: #e7e7f1;
     font-weight: bold;
 }
 
@@ -173,36 +160,36 @@ textarea {
 }
 
 select {
-    border: 1px solid #212121
+    border: 1px solid #212529
 }
 
 /*Global Messgae */
 
 .admin {
-    color: red;
+    color: #E31337;
 }
 
 .mod {
-    color: yellow;
+    color: #f0f0f8;
 }
 
 .ops {
-    color: skyblue;
+    color: #e7e7f1;
 }
 
 .messages_body .admin {
     font-weight: 700;
-    color: red;
+    color: #E31337;
 }
 
 .messages_body .mod {
     font-weight: 700;
-    color: yellow;
+    color: #f0f0f8;
 }
 
 .messages_body .ops {
     font-weight: 700;
-    color: skyblue;
+    color: #e7e7f1;
 }
 
 .res_max {
@@ -210,7 +197,7 @@ select {
 }
 
 .res_name {
-    color: red;
+    color: #E31337;
     font-weight: 700
 }
 
@@ -223,7 +210,11 @@ select {
 }
 
 .galaxy-alliance-enemy {
-    color: #FF0000;
+    color: #E31337;
+}
+
+.galaxy-alliance-own {
+    color: #E31337
 }
 
 .galaxy-short-noob,
@@ -233,12 +224,12 @@ select {
 
 .galaxy-short-strong,
 .galaxy-username-strong {
-    color: #ffa0a0
+    color: #E31337
 }
 
 .galaxy-short-vacation,
 .galaxy-username-vacation {
-    color: #659ec7
+    color: #e7e7f1
 }
 
 .galaxy-short-inactive,
@@ -251,8 +242,9 @@ select {
     color: #999
 }
 
-.galaxy-short-banned {
-    text-decoration: line-through
+.galaxy-short-banned,
+.galaxy-username-banned {
+    color: #E31337;
 }
 
 .ownattack {
@@ -309,7 +301,12 @@ select {
 .harvest,
 .transport,
 .success {
-    color: lime
+    color: #0F0
+}
+
+.noresources,
+.noressources {
+    color: #E31337
 }
 
 .owntransport {
@@ -329,7 +326,7 @@ select {
 .build_submit {
     background: none repeat scroll 0 0 transparent;
     border: 0 none;
-    color: lime;
+    color: #0F0;
     font-size: medium;
 }
 
@@ -340,16 +337,16 @@ select {
 /** LOGO **/
 
 .logo .fixed {
-    background: #0D1014;
-    background: rgba(13, 16, 20, 0.95);
+    background: #212529;
+    background: rgba(33, 37, 41, 0.95);
     border-bottom: 1px solid black;
 }
 
 /** HEADER **/
 
 header .fixed {
-    background: #0D1014;
-    background: rgba(13, 16, 20, 0.95);
+    background: #212529;
+    background: rgba(33, 37, 41, 0.95);
     /* border: 1px solid black; */
     border-bottom: 1px solid black;
 }
@@ -368,7 +365,7 @@ header .fixed {
 
 menu a {
     text-align: center;
-    background: #1d5888cf;
+    background: #E31337;
 
 }
 
@@ -431,7 +428,7 @@ th a,
 .attack,
 .federation,
 .error {
-    color: red
+    color: #E31337
 }
 
 #fleetstatustable td {
@@ -753,7 +750,7 @@ input:hover {
 
 .ui-state-default {
     border: 1px solid #000 !important;
-    background: #0D1014 !important;
+    background: #212529 !important;
 }
 
 .ui-state-default>a {
@@ -783,7 +780,6 @@ input:hover {
     div .bulida {
         border: none;
     }
-}
 }
 
 .card {
@@ -820,4 +816,8 @@ input:hover {
 .card {
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
+}
+
+body {
+    background-color: #212529;
 }
