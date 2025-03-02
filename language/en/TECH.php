@@ -75,7 +75,7 @@ $LNG['bonus'] = array(
 
 $LNG['tech'] = array(
   0 => 'Buildings',
-  1 => 'Metal Mine',
+  1 => 'Ore Extractor',
   2 => 'Crystal Mine',
   3 => 'Deuterium Refinery',
   4 => 'Solar Power plant',
@@ -191,7 +191,7 @@ $LNG['tech'] = array(
 );
 
 $LNG['shortDescription'] = array(
-1 => 'Used in the extraction of metal ore, metal mines are of primary importance to all emerging and established empires.',
+1 => 'Used in the extraction of metal ore, ore extractors are of primary importance to all emerging and established empires.',
 2 => 'Crystals are the main resource used to build electronic circuits and form certain alloy compounds.',
 3 => 'Deuterium is used as fuel for spaceships and is harvested in the deep sea. Deuterium is a rare substance and is thus relatively expensive.',
 4 => 'Solar power plants absorb energy from solar radiation. All mines need energy to operate.',
@@ -298,7 +298,7 @@ $LNG['shortDescription'] = array(
 );
 
 $LNG['longDescription'] = array(
-1 => 'Used in the extraction of metal ore, metal mines are of primary importance to all emerging and established empires.',
+1 => 'Used in the extraction of metal ore, ore extractors are of primary importance to all emerging and established empires.',
 2 => 'Crystals are the main resource used to build electronic circuits and form certain alloy compounds.',
 3 => 'Deuterium is used as fuel for spaceships and is harvested in the deep sea. Deuterium is a rare substance and is thus relatively expensive.',
 4 => 'Solar power plants absorb energy from solar radiation. All mines need energy to operate.',
