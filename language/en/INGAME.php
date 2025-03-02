@@ -1209,7 +1209,7 @@ $LNG['bs_reset']							= 'Reset';
 //----------------------------------------------------------------------------//
 // Mercador de Naves
 
-$LNG['ft_head']								= 'Merchant fleets';
+$LNG['ft_head']								= 'Ship Merchant';
 $LNG['ft_count']							= 'Number';
 $LNG['ft_max']								= 'max';
 $LNG['ft_total']							= 'TOTAL';
