@@ -9,7 +9,7 @@
 
 	<logo>
 		<div class="fixed">
-			<a href="game.php?page=overview"><img src="styles/resource/images/meta.png" /></a>
+			<a href="game.php?page=overview"><img src="styles/resource/images/HiveNova.png" /></a>
 		</div>
 	</logo>
 	
