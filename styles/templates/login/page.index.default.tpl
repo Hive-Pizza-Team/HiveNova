@@ -28,7 +28,7 @@
 				</form>
 				{if $facebookEnable}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
 								
-				<div class="wrapper">
+				<div class="wrapper" hidden>
 					<div class="container">
 						<a href="{$steemconnectUrl}" class="login-button button_standard button-steem" title="Log in with SteemConnect"><span class="icon icon-steem"></span>Log in with SteemConnect</a>
 						<p>As a security best practice, it is recommended to use private POSTING key</p>
