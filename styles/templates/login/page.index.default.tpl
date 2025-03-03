@@ -37,7 +37,7 @@
 
 				<div class="wrapper">
 					<div class="container">
-						<a href="DoKeychainLogin()" class="login-button button_standard button-steem" title="Log in with HiveKeychain">Log in with HiveKeychain</a>
+						<a href="DoKeychainLogin()" class="login-button button_standard" title="Log in with HiveKeychain">Log in with HiveKeychain</a>
 					</div>
 				</div>
 
