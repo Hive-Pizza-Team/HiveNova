@@ -44,7 +44,7 @@ $LNG['universe']					= 'Universe';
 $LNG['uni_closed']					= ' (closed)';
 
 // Button
-$LNG['buttonRegister']				= 'Regist Now!';
+$LNG['buttonRegister']				= 'Register!';
 $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Lost Password?';
 
