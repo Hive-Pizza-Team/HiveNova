@@ -35,7 +35,7 @@ class SteemconnectAuth implements externalAuth
 	
 	public function isActiveMode()
 	{
-		return TRUE; //Config::get()->steemconnect_on == 1;
+		return FALSE; //Config::get()->steemconnect_on == 1;
 	}
 	
 	public function isValid()
