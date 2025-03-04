@@ -67,8 +67,8 @@ input[type="radio"] {
 
 a:hover {
     color: #ffd600;
-    text-decoration: none font-weight:bold;
-
+    text-decoration: none;
+    font-weight: bold;
 }
 
 table,
@@ -783,7 +783,6 @@ input:hover {
     div .bulida {
         border: none;
     }
-}
 }
 
 .card {
