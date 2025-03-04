@@ -1,132 +1,164 @@
 body {
-	background-position:-217px -84px !important;
+    background-position: -217px -84px !important;
 }
 
 body#topnav {
-	background-position:-217px 0 !important;
+    background-position: -217px 0 !important;
 }
 
-body#menu{
-	background-position:0 0 !important;
+body#menu {
+    background-position: 0 0 !important;
 }
+
 body.standalone {
-	background-position:center center !important;
+    background-position: center center !important;
 }
 
 
-table{
-	margin: auto;
+table {
+    margin: auto;
 }
 
-.yes{
-	color:lime;
-}
-.ok{
-	color:yellow;
-}
-.no{
-	color:red;
+.yes {
+    color: #0F0;
 }
 
-#menu{
-	padding: 0 !important;
+.ok {
+    color: #f0f0f8;
 }
 
-#content{
-	margin:0 auto;
-	width:80%;
-	padding:0;
+.no {
+    color: #E31337;
+}
+
+#menu {
+    padding: 0 !important;
+}
+
+#content {
+    margin: 0 auto;
+    width: 80%;
+    padding: 0;
 }
 
 select#universe {
-	border: 1px #FFF solid;
-	padding:1px 2px;
-	color: #FFF;
-	position:relative;
-	top:-1px;
+    border: 1px #FFF solid;
+    padding: 1px 2px;
+    color: #FFF;
+    position: relative;
+    top: -1px;
 }
 
 pre {
-	font-size:13px;
+    font-size: 13px;
 }
 
-a.out, a.topn {
-	cursor: pointer;
-	background: #000;
-	font-size: 13px;
-	font-stretch:expanded;
-	cursor: pointer;
-	text-align:center;
-	border: 1px #FFF solid;
-	color: #FFF;
+a.out,
+a.topn {
+    cursor: pointer;
+    background: #212529;
+    font-size: 13px;
+    font-stretch: expanded;
+    cursor: pointer;
+    text-align: center;
+    border: 1px #FFF solid;
+    color: #FFF;
 }
 
 a.topn:hover {
-	background: #FFF;
-	color: #000;
+    background: #FFF;
+    color: #212529;
 }
 
 a.out {
-	border: 1px #FF0000 solid;
-	color: #FF0000;
+    border: 1px #E31337 solid;
+    color: #E31337;
 }
 
 a.out:hover {
-	background: #FF0000;
-	color: #FFF;
+    background: #E31337;
+    color: #FFF;
 }
 
-#progressbar{border: 1px solid}
-.ui-progressbar-value { background-image: url("../images/jquery/pbar-ani.gif")};
-.button{background:url("../images/Adm/blank.gif");border:1px lime solid;color:#FFFFFF;}
-.button:hover{background:url("../images/Adm/blank.gif");border:1px aqua solid;cursor:pointer;color:#FFFFFF;}
-.span{ vertical-align:baseline}
-.gf-snippet, .gfc-resultsHeader{display:none}
+#progressbar {
+    border: 1px solid
+}
+
+.ui-progressbar-value {
+    background-image: url("../images/jquery/pbar-ani.gif")
+}
+
+;
+
+.button {
+    background: url("../images/Adm/blank.gif");
+    border: 1px #E31337 solid;
+    color: #FFFFFF;
+}
+
+.button:hover {
+    background: url("../images/Adm/blank.gif");
+    border: 1px #f0f0f8 solid;
+    cursor: pointer;
+    color: #FFFFFF;
+}
+
+.span {
+    vertical-align: baseline
+}
+
+.gf-snippet,
+.gfc-resultsHeader {
+    display: none
+}
 
 select[name="timezone"] {
-	max-width:300px;
-}
-#install > tbody > tr > td{
-	padding:5px 10px;
+    max-width: 300px;
 }
 
-.desc{
-	font-style:italic;
-	margin-top: -10px;
+#install>tbody>tr>td {
+    padding: 5px 10px;
+}
+
+.desc {
+    font-style: italic;
+    margin-top: -10px;
     max-width: 400px;
 }
-.desc > a{
-	text-decoration:underline;
+
+.desc>a {
+    text-decoration: underline;
 }
-.desc > a:hover{
-	text-decoration:none;
+
+.desc>a:hover {
+    text-decoration: none;
 }
 
 #lang {
-	float:right;
+    float: right;
 }
 
-.req{
-	width:100%;
-	border-collapse: collapse;
-	max-width:100%;
+.req {
+    width: 100%;
+    border-collapse: collapse;
+    max-width: 100%;
 }
 
-.req > tbody > tr > td{
-	width:50%;
+.req>tbody>tr>td {
+    width: 50%;
 }
 
-.req > tbody > tr > td{
-	padding:0px;
+.req>tbody>tr>td {
+    padding: 0px;
 }
 
-.border > tbody > tr > td{
-	padding:3px 0px;
+.border>tbody>tr>td {
+    padding: 3px 0px;
 }
 
-.border > tbody > tr{
-	border-bottom:1px solid #CCC;
-	height:24px;
+.border>tbody>tr {
+    border-bottom: 1px solid #CCC;
+    height: 24px;
 }
 
 #licence {
@@ -137,27 +169,29 @@ select[name="timezone"] {
     padding: 0 10px;
 }
 
-#licence a{
+#licence a {
     color: #000000;
-	text-decoration:underline;
+    text-decoration: underline;
 }
-#licence a:hover{
-	text-decoration:none;
+
+#licence a:hover {
+    text-decoration: none;
 }
 
 .noborder {
-	border:0 none !important;
+    border: 0 none !important;
 }
 
 .fatalerror {
-	background-color:#FFEEEE;
-	border: 1px solid #CC0000;
-    color: #CC0000;
-	padding:7px 10px 7px 45px
+    background-color: #FFEEEE;
+    border: 1px solid #E31337;
+    color: #E31337;
+    padding: 7px 10px 7px 45px
 }
-.noerror { 
-	background-color: #EEFFEE;
-	border: 1px solid #009900;
-	color: #009900;
-	padding:7px 10px 7px 45px
+
+.noerror {
+    background-color: #EEFFEE;
+    border: 1px solid #009900;
+    color: #009900;
+    padding: 7px 10px 7px 45px
 }
