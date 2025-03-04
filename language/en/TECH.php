@@ -75,9 +75,9 @@ $LNG['bonus'] = array(
 
 $LNG['tech'] = array(
   0 => 'Buildings',
-  1 => 'Metal Mine',
-  2 => 'Crystal Mine',
-  3 => 'Deuterium Refinery',
+  1 => 'Ore Extractor',
+  2 => 'Silicon Refinery',
+  3 => 'Deuterium Centrifuge',
   4 => 'Solar Power plant',
   6 => 'University',
  12 => 'Deuterium Power Plant',
@@ -191,7 +191,7 @@ $LNG['tech'] = array(
 );
 
 $LNG['shortDescription'] = array(
-1 => 'Used in the extraction of metal ore, metal mines are of primary importance to all emerging and established empires.',
+1 => 'Used in the extraction of metal ore, ore extractors are of primary importance to all emerging and established empires.',
 2 => 'Crystals are the main resource used to build electronic circuits and form certain alloy compounds.',
 3 => 'Deuterium is used as fuel for spaceships and is harvested in the deep sea. Deuterium is a rare substance and is thus relatively expensive.',
 4 => 'Solar power plants absorb energy from solar radiation. All mines need energy to operate.',
@@ -298,7 +298,7 @@ $LNG['shortDescription'] = array(
 );
 
 $LNG['longDescription'] = array(
-1 => 'Used in the extraction of metal ore, metal mines are of primary importance to all emerging and established empires.',
+1 => 'Used in the extraction of metal ore, ore extractors are of primary importance to all emerging and established empires.',
 2 => 'Crystals are the main resource used to build electronic circuits and form certain alloy compounds.',
 3 => 'Deuterium is used as fuel for spaceships and is harvested in the deep sea. Deuterium is a rare substance and is thus relatively expensive.',
 4 => 'Solar power plants absorb energy from solar radiation. All mines need energy to operate.',
@@ -399,7 +399,7 @@ $LNG['longDescription'] = array(
 707 => 'Shortens flying time. Does not affect Expeditions.',
 	
 901 => 'Metal is the main resource for Buildings and Ships. It is the cheapest resource, but it is needed the most as well. Producing Metal is the least energy expensive. The bigger the mines are, the deeper they dig into the earth.',
-902 => 'Crystals are the main resource used to build electronic circuits and form certain alloy compounds. It gets produced in mines under the ground, where the raw material instantly is made into cicuits.',
+902 => 'Crystals are the main resource used to build electronic circuits and form certain alloy compounds. It gets produced in mines under the ground, where the raw material instantly is made into circuits.',
 903 => 'Deuterium is found in the deepest sea. It belongs to the rarest resources in the Universe. Because you have to get to the ground of the sea in order to get Deuterium, it is the most expensive resource.',
 911 => 'Energy is needed for the production of every resource.',
 921 => 'Pizzabits is a very mysterious resource. Nobody really knows where it comes from. Sometimes it just appears out of nowhere and sometimes it is even found in old ships. Some even say that it doesn\'t exist, but it has been proven otherwise. You can use Pizzabits to hire the most experienced officers in the universe.',

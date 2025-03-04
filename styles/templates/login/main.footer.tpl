@@ -1,5 +1,5 @@
 <footer>
-	<a href="" title="Discord" target="copy">Discord</a> community server<br>Project <a href="https://github.com/Hive-Pizza-Team/HiveNova" title="HiveNova" target="copy">HiveNova</a> 2025
+	<a href="https://discord.gg/BWqmGbtuDn" title="Discord" target="copy">Discord</a> community server<br>Project <a href="https://github.com/Hive-Pizza-Team/HiveNova" title="HiveNova" target="copy">HiveNova</a> 2025
 </footer>
 </div>
 <div id="dialog" style="display:none;"></div>

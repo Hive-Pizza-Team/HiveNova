@@ -77,13 +77,13 @@ $LNG['lm_empire']							= 'Empire';
 $LNG['lm_fleet']							= 'Fleet';
 $LNG['lm_buildings']						= 'Buildings';
 $LNG['lm_research']							= 'Research';
-$LNG['lm_shipshard']						= 'Hangar';
+$LNG['lm_shipshard']						= 'Shipyard';
 $LNG['lm_defenses']							= 'Defenses';
 $LNG['lm_marketplace']						= 'Marketplace';
 $LNG['lm_resources']						= 'Resources';
 $LNG['lm_officiers']						= 'Officers';
 $LNG['lm_trader']							= 'Market';
-$LNG['lm_fleettrader']						= 'Merchant of Fleets';
+$LNG['lm_fleettrader']						= 'Ship Merchant';
 $LNG['lm_technology']						= 'Technologies';
 $LNG['lm_messages']							= 'Messages';
 $LNG['lm_alliance']							= 'Alliance';
@@ -1209,7 +1209,7 @@ $LNG['bs_reset']							= 'Reset';
 //----------------------------------------------------------------------------//
 // Mercador de Naves
 
-$LNG['ft_head']								= 'Merchant fleets';
+$LNG['ft_head']								= 'Ship Merchant';
 $LNG['ft_count']							= 'Number';
 $LNG['ft_max']								= 'max';
 $LNG['ft_total']							= 'TOTAL';
