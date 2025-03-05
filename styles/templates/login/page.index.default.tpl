@@ -35,11 +35,11 @@
 					</div>
 				</div> -->
 
-				<div class="wrapper">
+				<!-- <div class="wrapper">
 					<div class="container">
 						<a href="DoKeychainLogin()" class="login-button button_standard" title="Log in with HiveKeychain">Log in with HiveKeychain</a>
 					</div>
-				</div>
+				</div>-->
 
 				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
 				<br>
