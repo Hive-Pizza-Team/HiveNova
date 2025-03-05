@@ -370,7 +370,7 @@ menu a {
 }
 
 menu a:hover {
-  color: #2cbbf7;
+  color: #E31337;
   font-weight: bold;
 }
 
@@ -673,7 +673,7 @@ th a,
 }
 
 .buildn a:hover {
-  color: #2cbbf7;
+  color: #E31337;
   font-weight: bold;
 
 }
@@ -733,7 +733,7 @@ th a,
 
 
 input:hover {
-  color: #2cbbf7;
+  color: #E31337;
 }
 
 .ui-autocomplete,
