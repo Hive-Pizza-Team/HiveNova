@@ -365,8 +365,8 @@ header .fixed {
 
 menu a {
   text-align: center;
-  background: #E31337;
-
+  background: #212529;
+  border: 1px solid #E31337;
 }
 
 menu a:hover {
