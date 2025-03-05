@@ -358,7 +358,7 @@ header .fixed {
 /** MENU **/
 
 .menu-separator {
-  background-image: url(img/bkd_title.png);
+  background-image: url('img/bkd_title.png');
   /* color: #FFF; */
   /* border: 1px solid black; */
 }
@@ -508,7 +508,7 @@ th a,
 }
 
 .planeto {
-  background: #592eabb3;
+  background-image: url('img/bkd_title.png');
   text-align: center;
   border: #6321a9b3;
   border-radius: 15px;
@@ -661,7 +661,7 @@ th a,
   line-height: 1.4;
   padding: 10px;
   text-align: center;
-  background: #303463c9;
+  background: rgba(33, 37, 41, 0.95);
   height: 140px
 }
 
@@ -669,7 +669,7 @@ th a,
   border-radius: 15px;
   padding: 6px;
   overflow: auto;
-  background: #19528ead;
+  background: rgba(33, 37, 41, 0.95);
 }
 
 .buildn a:hover {
