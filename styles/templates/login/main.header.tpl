@@ -6,7 +6,7 @@
 <!--[if (gt IE 9)|!(IE)]><!--> <html lang="{$lang}" class="no-js"> <!--<![endif]-->
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" type="text/css" href="styles/theme/nova/formate.css?v={$REV}">
+	<link rel="stylesheet" type="text/css" href="styles/theme/{$dpath|default:'nova'}/formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/main.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/base/jquery.fancybox.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/icon-font/style.css?v={$REV}">

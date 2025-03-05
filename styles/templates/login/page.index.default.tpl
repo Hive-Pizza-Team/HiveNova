@@ -34,9 +34,16 @@
 						<p>As a security best practice, it is recommended to use private POSTING key</p>
 					</div>
 				</div> -->
- 
+
+				<!-- <div class="wrapper">
+					<div class="container">
+						<a href="DoKeychainLogin()" class="login-button button_standard" title="Log in with HiveKeychain">Log in with HiveKeychain</a>
+					</div>
+				</div>-->
+
 				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
-				<!-- <br><span class="small">{$loginInfo}</span> -->
+				<br>
+				<span class="small">{$loginInfo}</span>
 			
 	</div>
 </section>

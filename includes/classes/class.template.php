@@ -93,7 +93,7 @@ class template extends Smarty
 			'date'				=> explode("|", date('Y\|n\|j\|G\|i\|s\|Z', TIMESTAMP)),
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'VERSION'			=> $config->VERSION,
-			'dpath'				=> 'styles/theme/gow/',
+			'dpath'				=> 'styles/theme/' . DEFAULT_THEME . '/',
 			'bodyclass'			=> 'full'
 		));
 	}
