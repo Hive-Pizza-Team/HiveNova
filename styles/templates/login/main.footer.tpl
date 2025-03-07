@@ -4,7 +4,7 @@
 	Project <a href="https://github.com/Hive-Pizza-Team/HiveNova" title="HiveNova" target="copy">HiveNova</a> 2025
 	<br>
 	<svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">
-		<image href="../../images/login/badge_powered-by-hive_dark.svg" height="100" width="200" />
+		<image href="styles/resource/images/login/badge_powered-by-hive_dark.svg" height="100" width="200" />
 	  </svg>
 </footer>
 </div>
