@@ -27,9 +27,9 @@ class ShowLoginPage extends AbstractLoginPage
 	
 	function show() 
 	{
-		// if (empty($_POST)) {
-		// 	HTTP::redirectTo('index.php');	
-		// }
+		if (empty($_POST)) {
+			HTTP::redirectTo('index.php');	
+		}
 
 		$db = Database::get();
 
