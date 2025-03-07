@@ -14,13 +14,13 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" type="text/css">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 	<title>{block name="title"} - {$gameName}{/block}</title>
-	<meta name="keywords" content="HiveNova, Hive, Browsergame, MMOSG, MMOG, Strategy, XNova, 2Moons, Space">
-	<meta name="description" content="Massively Multiplayer Online Strategy Game (MMOSG) for Hiveians. Space Browsergame with competition between Alliances for Hive cryptocurrency. Free-to-play, win-to-pay style.">
+	<meta name="keywords" content="HiveNova, Hive, Browsergame, MMOSG, MMOG, Strategy, SteemNova, XNova, 2Moons, Space">
+	<meta name="description" content="Massively Multiplayer Online Strategy Game (MMOSG) for Hiveians. Space Browsergame with competition between Alliances. Free-to-play style.">
 	<!-- open graph protocol -->
 	<meta property="og:title" content="HiveNova">
 	<meta property="og:type" content="website">
 	<meta property="og:description" content="Massively Multiplayer Online Strategy Game (MMOSG) for Hiveians. Space Browsergame with competition between Alliances for Hive cryptocurrency. Free-to-play, win-to-pay style.">
-	<meta property="og:image" content="styles/resource/images/login/HiveNova.png">
+	<meta property="og:image" content="https://nova.hive.pizza/styles/resource/images/login/HiveNova.png">
 	<!--[if lt IE 9]>
 	<script src="scripts/base/html5.js"></script>
 	<![endif]-->
