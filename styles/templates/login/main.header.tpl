@@ -20,7 +20,7 @@
 	<meta property="og:title" content="HiveNova">
 	<meta property="og:type" content="website">
 	<meta property="og:description" content="Massively Multiplayer Online Strategy Game (MMOSG) for Hiveians. Space Browsergame with competition between Alliances for Hive cryptocurrency. Free-to-play, win-to-pay style.">
-	<meta property="og:image" content="https://nova.hive.pizza/HiveNova.png">
+	<meta property="og:image" content="https://nova.hive.pizza/styles/resource/images/login/HiveNova.png">
 	<!--[if lt IE 9]>
 	<script src="scripts/base/html5.js"></script>
 	<![endif]-->
