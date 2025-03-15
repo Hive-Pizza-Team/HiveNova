@@ -20,7 +20,7 @@
 	<meta property="og:title" content="{$gameName}">
 	<meta property="og:type" content="website">
 	<meta property="og:description" content="Massively Multiplayer Online Strategy Game (MMOSG) for Hiveians. Space Browsergame with competition between alliances. Free-to-play style. Come get mooned!">
-	<meta property="og:image" content="https://nova.hive.pizza/styles/resource/images/login/HiveNova.png">
+	<meta property="og:image" content="https://moon.hive.pizza/styles/resource/images/login/HiveNova.png">
 	<!--[if lt IE 9]>
 	<script src="scripts/base/html5.js"></script>
 	<![endif]-->
