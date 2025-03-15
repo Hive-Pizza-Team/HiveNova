@@ -153,14 +153,11 @@ abstract class AbstractLoginPage
 		} else {
 			$basePath = PROTOCOL.HTTP_HOST.HTTP_BASE;
 		}
-
-		$config	= Config::get();
 		
 		$this->assign(array(
             'lang'    			=> $LNG->getLanguage(),
 			'bodyclass'			=> $this->getWindow(),
 			'basepath'			=> $basePath,
-			'gameName' 			=> $config->game_name,
 			'isMultiUniverse'	=> count(Universe::availableUniverses()) > 1,
 			'unisWildcast'		=> UNIS_WILDCAST,
 		));
