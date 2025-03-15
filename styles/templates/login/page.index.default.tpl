@@ -4,7 +4,7 @@
 	<h1>{$descHeader}</h1>
 	<p class="desc">{$descText}</p>
 	<p class="desc"><ul id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul></p>
-	<p><a href="" target="copy">Moon - OGame-inspired browsergame for Hiveians</a>
+	<p><a href="" target="copy">${gameName} - OGame-inspired browsergame for Hiveians</a>
 	</p>
 </section>
 <section>
