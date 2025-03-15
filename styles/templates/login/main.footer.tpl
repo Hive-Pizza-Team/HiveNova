@@ -1,7 +1,7 @@
 <footer>
 	<a href="https://discord.gg/BWqmGbtuDn" title="Discord" target="copy">Discord</a> community server
 	<br>
-	Project <a href="https://github.com/Hive-Pizza-Team/HiveNova" title="HiveNova" target="copy">{$gameName}</a> 2025
+	Project <a href="https://github.com/Hive-Pizza-Team/HiveNova" title="HiveNova" target="copy">HiveNova</a> 2025
 	<br>
 	<svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">
 		<image href="styles/resource/images/login/badge_powered-by-hive_dark.svg" height="100" width="200" />
