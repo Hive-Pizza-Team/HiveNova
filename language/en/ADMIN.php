@@ -53,25 +53,25 @@ $LNG['time_minutes'] = 'Minutes';
 $LNG['time_seconds'] = 'Seconds';
 //###########################################################//
 
-$LNG['info_information'] = 'Send or report bugs in the forum for <a href="%s" target="tracker">2Moons</a><br>Otherwise there will be support!';
+$LNG['info_information'] = 'Send or report bugs in the forum for <a href="%s" target="tracker">2Moons</a><br>Otherwise we cannot support!';
 
 //---------------	Sim ou não	------------------------//
 $LNG['one_is_yes_1'] = 'Yes';
-$LNG['one_is_yes_0'] = 'no';
+$LNG['one_is_yes_0'] = 'No';
 
 $LNG['one_is_no_1'] = 'Yes';
-$LNG['one_is_no_0'] = 'no';
+$LNG['one_is_no_0'] = 'No';
 //###########################################################//
 
 
 //---------------	Botões	------------------------//
-$LNG['button_submit'] = 'Send';
+$LNG['button_submit'] = 'Submit';
 $LNG['button_add'] = 'Profile';
 $LNG['button_delete'] = 'Delete';
 $LNG['button_filter'] = 'Filter';
 $LNG['button_deselect'] = 'Delete selected';
 $LNG['button_reset'] = 'Reset';
-$LNG['button_des_se'] = 'Select all or deselect';
+$LNG['button_des_se'] = 'Select/Deselect all';
 //###########################################################//
 
 
@@ -108,43 +108,43 @@ $LNG['ad_editor_title'] = 'Account Editor';
 $LNG['ad_editor_buildings'] = 'Buildings';
 $LNG['ad_editor_ships'] = 'Ships';
 $LNG['ad_editor_defenses'] = 'Defences';
-$LNG['ad_editor_researchs'] = 'Search';
+$LNG['ad_editor_researchs'] = 'Research';
 $LNG['ad_editor_officiers'] = 'Officiers';
 $LNG['ad_editor_personal'] = 'Personal Data';
 $LNG['ad_editor_planets'] = 'Planet & Moon';
-$LNG['ad_editor_resources'] = 'Ressources';
+$LNG['ad_editor_resources'] = 'Resources';
 $LNG['ad_editor_alliances'] = 'Alliance';
 $LNG['ad_editor_authlevels'] = 'Permissions';
 
 $LNG['ad_add_not_exist'] = 'ID does not exist!';
 
 //	Pesquisas
-$LNG['ad_add_tech_success'] = 'The Research has been inserted successfully!';
+$LNG['ad_add_tech_success'] = 'The Research has been added successfully!';
 $LNG['ad_delete_tech_success'] = 'The Research has been removed successfully!';
 $LNG['ad_research_title'] = 'Research';
 $LNG['ad_research'] = 'Research';
 
 //	Officiais
-$LNG['ad_offi_title'] = 'Officiers';
-$LNG['ad_offi'] = 'Officiers';
-$LNG['ad_add_offi_success'] = 'The Officiers were entered successfully!';
-$LNG['ad_delete_offi_success'] = 'The Officiers were removed successfully!';
+$LNG['ad_offi_title'] = 'Officers';
+$LNG['ad_offi'] = 'Officers';
+$LNG['ad_add_offi_success'] = 'The Officers were entered successfully!';
+$LNG['ad_delete_offi_success'] = 'The Officers were removed successfully!';
 
 //	Recursos
-$LNG['ad_add_res_sucess'] = 'Resources have been inserted successfully!';
+$LNG['ad_add_res_sucess'] = 'Resources have been added successfully!';
 $LNG['ad_delete_res_sucess'] = 'The Researches were removed successfully!';
-$LNG['ad_main_title'] = 'Ressources and Technologies';
+$LNG['ad_main_title'] = 'Resources and Technologies';
 
 //	Naves
 $LNG['ad_ships_title'] = 'Ships';
 $LNG['ad_ships'] = 'Ships';
-$LNG['ad_add_ships_sucess'] = 'The ships have been uploaded successfully!';
+$LNG['ad_add_ships_sucess'] = 'The ships have been added successfully!';
 $LNG['ad_delete_ships_sucess'] = 'The ships were removed successfully!';
 
 //	Defesas
 $LNG['ad_defenses_title'] = 'Defences';
 $LNG['ad_defenses'] = 'Defences';
-$LNG['ad_add_defenses_success'] = 'The defenses were uploaded successfully!';
+$LNG['ad_add_defenses_success'] = 'The defenses were added successfully!';
 $LNG['ad_delete_defenses_success'] = 'The defenses were removed successfully!';
 
 //	Edificios
@@ -153,7 +153,7 @@ $LNG['ad_buildings'] = 'Buildings';
 $LNG['ad_planet_id'] = 'ID of the planet or Moon';
 $LNG['ad_levels'] = 'Level';
 $LNG['ad_count'] = 'Number';
-$LNG['ad_add_build_success'] = 'The buildings were entered successfully!';
+$LNG['ad_add_build_success'] = 'The buildings were added successfully!';
 $LNG['ad_delete_build_success'] = 'The buildings were removed successfully!';
 
 // Dados Pessoais
@@ -177,7 +177,7 @@ $LNG['ad_ally_delete'] = 'Delete Alliance';
 $LNG['ad_ally_delete_u'] = 'Delete Member';
 $LNG['ad_ally_user_id'] = '(Insert User ID)';
 $LNG['ad_ally_succes'] = 'Success';
-$LNG['ad_ally_not_exist3'] = 'The user does not exist in the alliance';
+$LNG['ad_ally_not_exist3'] = 'The user is not in this alliance';
 $LNG['ad_ally_not_exist'] = 'The Alliance doesnt exist!';
 $LNG['ad_ally_not_exist2'] = 'The Member doesnt exist!';
 
@@ -191,18 +191,18 @@ $LNG['ad_pla_delete_b'] = 'Remove all buildings';
 $LNG['ad_pla_delete_s'] = 'Remove all ships';
 $LNG['ad_pla_delete_d'] = 'Remove all defenses';
 $LNG['ad_pla_delete_hd'] = 'Remove Shipyard waiting list';
-$LNG['ad_pla_delete_cb'] = 'Remove list of construction';
+$LNG['ad_pla_delete_cb'] = 'Remove Building construction list';
 $LNG['ad_pla_delete_planet'] = 'Delete planet';
 $LNG['ad_pla_title_a'] = 'If the planet has a moon, will be allowed to change ID';  // ???
 $LNG['ad_pla_title_l'] = 'If the Moon is, your coordinates will also be changed';
 $LNG['ad_pla_change_p'] = 'Coordinates of Planets';
 $LNG['ad_pla_change_pp'] = 'Accent to make change of coordinates';  // ???
 $LNG['ad_pla_succes'] = 'Changes made successfully';
-$LNG['ad_pla_error_planets'] = 'The moons cannot change of coordinates';
+$LNG['ad_pla_error_planets'] = 'The moons cannot change coordinates';
 $LNG['ad_pla_error_user'] = 'The player does not exist!';
 $LNG['ad_pla_error_planets2'] = 'The planet does not exist';
 $LNG['ad_pla_error_planets3'] = 'The coordinates are in use!';
-$LNG['ad_pla_error_planets4'] = 'Cannot modify the planet if ja has Moon!';
+$LNG['ad_pla_error_planets4'] = 'Cannot modify the planet if it has a Moon!';
 $LNG['ad_pla_error_planets5'] = 'There is a planet in the same coordinates';
 $LNG['ad_pla_delete_planet_s'] = 'Planet successfully removed';
 
