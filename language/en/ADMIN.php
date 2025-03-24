@@ -249,7 +249,7 @@ $LNG['bo_unban'] = 'Unlock';
 //---------------	Encriptador de MD5	------------------------//
 $LNG['et_md5_encripter'] = 'MD5 Encryptor';
 $LNG['et_pass'] = 'Password entry you want';
-$LNG['et_result'] = 'Result of Encription';
+$LNG['et_result'] = 'Result of Encryption';
 $LNG['et_encript'] = 'Generate code';
 //###########################################################//
 
