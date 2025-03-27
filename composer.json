@@ -1,5 +1,5 @@
 {
-    "name": "2moons/2moons",
+    "name": "Hive-Pizza-Team/HiveNova",
     "description": "Online browser game.",
     "type": "project",
     "license": "MIT",
@@ -7,9 +7,20 @@
         {
             "name": "Jan-Otto Kröpke",
             "email": "kroepke@outlook.com"
+        },
+        {
+            "name": "hivetrending"
+        },
+        {
+            "name": "thecrazygm"
+        },
+        {
+            "name": "ecoinstant"
         }
     ],
     "minimum-stability": "stable",
-    "require": {},
+    "require": {
+        "mahdiyari/hive-php": "^1.1"
+    },
     "require-dev": {}
 }

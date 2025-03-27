@@ -59,6 +59,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'username'			=> $USER['username'],
 				'email'				=> $USER['email'],
 				'permaEmail'		=> $USER['email_2'],
+				'hiveAccount'		=> $USER['hive_account'],
 				'userLang'			=> $USER['lang'],
 				'theme'				=> $USER['dpath'],
 				'planetSort'		=> $USER['planet_sort'],
@@ -198,6 +199,9 @@ class ShowSettingsPage extends AbstractGamePage
 		$newpassword2		= HTTP::_GP('newpassword2', '');
 		
 		$email				= HTTP::_GP('email', $USER['email']);
+
+		$hiveAccount		= HTTP::_GP('hiveAccount', '');
+		$hivesign           = HTTP::_GP('hivesign', '');
 		
 		$timezone			= HTTP::_GP('timezone', '');	
 		$language			= HTTP::_GP('language', '');	
@@ -369,6 +373,28 @@ class ShowSettingsPage extends AbstractGamePage
 			$db->update($sql, array(
 				':userID'	=> $USER['id'],
 			));
+		}
+
+		if(!empty($hivesign) && !empty($hiveAccount) && $USER['hive_account'] != $hiveAccount) {
+			// validate signature before saving hive account in DB
+			if (!PlayerUtil::isHiveAccountValid($hiveAccount))
+			{
+				$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
+					'label'	=> $LNG['sys_back'],
+					'url'	=> 'game.php?page=settings'
+				)));
+			} else if (!PlayerUtil::isHiveSignValid($hiveAccount, $hivesign)) {
+				$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
+					'label'	=> $LNG['sys_back'],
+					'url'	=> 'game.php?page=settings'
+				)));
+			} else {
+				$sql	= "UPDATE %%USERS%% SET hive_account = :hiveaccount WHERE id = :userID;";
+				$db->update($sql, array(
+					':hiveaccount'  => $hiveAccount,
+					':userID'       => $USER['id']
+				));
+			}
 		}
 
 		$sql =  "UPDATE %%USERS%% SET

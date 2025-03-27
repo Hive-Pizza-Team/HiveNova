@@ -99,6 +99,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 			'speedSelect'	=> FleetFunctions::$allowedSpeed,
 			'typeSelect'   	=> array(1 => $LNG['type_planet_1'], 2 => $LNG['type_planet_2'], 3 => $LNG['type_planet_3']),
 			'fleetdata'		=> $FleetData,
+			'max_planets'   => Config::get()->max_planets,
 		));
 		
 		$this->display('page.fleetStep1.default.tpl');

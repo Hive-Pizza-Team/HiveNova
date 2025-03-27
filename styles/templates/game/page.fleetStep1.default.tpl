@@ -63,10 +63,10 @@
 	</tr>
 	<tr style="height:20px;">
 		<td>
-			<a href="javascript:setTarget({$galaxy},{$system},16,1);updateVars();">{$LNG.type_mission_15}[{$galaxy}:{$system}:16]</a>
+			<a href="javascript:setTarget({$galaxy},{$system},14,1);updateVars();">{$LNG.type_mission_15}[{$galaxy}:{$system}:14]</a>
 		</td>
 		<td>
-			<a href="javascript:setTarget({$galaxy},{$system},17,1);updateVars();">{$LNG.type_mission_16}[{$galaxy}:{$system}:17]</a>
+			<a href="javascript:setTarget({$galaxy},{$system},15,1);updateVars();">{$LNG.type_mission_16}[{$galaxy}:{$system}:15]</a>
 		</td>
 	</tr>
 </table>
