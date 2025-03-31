@@ -53,6 +53,28 @@ class PlayerUtil
 		}
 	}
 
+	static public function isHiveAccountValid($hiveaccount)
+	{
+		if (is_null($hiveaccount) || strlen($hiveaccount) == 0 || strlen($hiveaccount) > 16) {
+			return false;
+		}
+		return preg_match('/^[a-z][-a-z0-9]+[a-z0-9](\.[a-z][-a-z0-9]+[a-z0-9])*$/', $hiveaccount);
+	}
+
+	static public function isHiveSignValid($hiveaccount, $signedblob)
+	{
+		// verify length
+		if (is_null($signedblob) || strlen($signedblob) == 0 || strlen($signedblob) > 132) {
+			return false;
+		}
+		// verify content
+		if (!PlayerUtil::isNameValid($signedblob)) {
+			return false;
+		}
+		// verify signature using hive-php
+		return true;
+	}
+
 	static public function isMailValid($address) {
 		
 		if(function_exists('filter_var')) {

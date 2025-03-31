@@ -266,3 +266,53 @@ $(function() {
 		return false;
 	});
 });
+
+const HiveKeychainLogin = async () => {
+	if (!hive_keychain) {
+		alert('You must install HiveKeychain extension first');
+		return;
+	}
+
+	try
+  	{
+		const hiveaccount = prompt("Enter hive account name: ");
+		await hive_keychain.requestSignBuffer(
+			hiveaccount,
+			`${hiveaccount} is my account.`,
+			"Active",
+			(response) => {
+				if (response.success) {
+					document.querySelector('input#hiveAccount').value = hiveaccount;
+					document.querySelector('input#hivesign').value = response.result;
+					document.getElementById('saveChanges').click();
+				} else {
+					console.error('Keychain error', response.error);
+				}
+			},
+			null,
+			'Moon Login'
+		);
+	} catch (error) {
+		console.error({ error });
+	}
+}
+
+const DepositPizzaTokens = async (hiveaccount) => {
+	if (!hive_keychain) {
+		alert('You must install HiveKeychain extension first');
+		return;
+	}
+
+	try
+	{
+		const amount = parseFloat(prompt("Enter PIZZA ammount: "));
+		const depositWallet = 'moon.deposit';
+		const memo = '';
+		const tokenSymbol = 'PIZZA';
+		hive_keychain.requestSendToken(hiveaccount, depositWallet, amount.toFixed(2), memo, tokenSymbol, (response) => {
+			console.log(response);
+		});
+	} catch (error) {
+		console.error({ error });
+	}
+}

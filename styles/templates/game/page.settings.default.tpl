@@ -39,7 +39,20 @@
 	<tr>
 	    <td style="height:22px;">{$LNG.op_permanent_email_adress}</td>
 	    <td>{$permaEmail}</td>
-		</tr>
+	</tr>
+	<tr>
+	    <td style="height:22px;">Hive Account</td>
+		<td><input id="hiveAccount" name="hiveAccount" maxlength="16" size="16" value="{$hiveAccount}" readonly></input></td>
+		<input id="hivesign" name="hivesign" type="hidden"></input>
+	</tr>
+	<tr>
+		<td style="height:22px;"></td>
+		<td><button type="button" onclick="HiveKeychainLogin()" class="login-button button_standard" title="Link Hive Account">Link Hive Account</button></td>
+	</tr>
+	<tr>
+		<td style="height:22px;">1 PIZZA = 10 Pizzabits</td>
+		<td><button type="button" onclick="DepositPizzaTokens('{$hiveAccount}')" class="login-button button_standard" title="Deposit Pizza Tokens">Deposit $PIZZA</button></td>
+	</tr>
 		<tr>
 			<th colspan="2">{$LNG.op_general_settings}</th>
 		</tr>
@@ -132,7 +145,7 @@
 		</tr>
 		{/if}
 		<tr>
-			<td colspan="2"><input value="{$LNG.op_save_changes}" type="submit"></td>
+			<td colspan="2"><input id="saveChanges" value="{$LNG.op_save_changes}" type="submit"></td>
 		</tr>
 		</tbody>
 	</table>
