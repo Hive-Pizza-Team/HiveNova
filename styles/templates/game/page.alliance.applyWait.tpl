@@ -9,7 +9,7 @@
 		<td>{$request_text}</td>
 	</tr>
 	<tr>
-		<td><input type="submit" value="{$LNG.al_continue}"></td>
+		<td><input type="submit" value="{$LNG.al_delete_request}"></td>
 	</tr>
 </table>
 </form>
