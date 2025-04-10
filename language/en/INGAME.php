@@ -589,7 +589,7 @@ $LNG['al_tag_required']					    = 'Missing the tag of the Alliance';
 $LNG['al_name_required']					= 'Missing the name of the Alliance';
 $LNG['al_already_exists']					= 'The Alliance %s already exists.';
 $LNG['al_created']					        = 'The Alliance %s was created';
-$LNG['al_continue']							= 'Continue';
+$LNG['al_continue']							= 'Cancel Application';
 $LNG['al_alliance_closed']			        = 'This Alliance does not support more members';
 $LNG['al_request_confirmation_message']     = 'Registered application. You will receive a message when youre accepted or/rejected. <br><a href="game.php?page=alliance">back</a>';
 $LNG['al_default_request_text']		        = 'The leader of the Alliance didnt wrote any message of introduction.';
