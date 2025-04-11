@@ -49,7 +49,7 @@ $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Lost Password?';
 
 // Start
-$LNG['gameInformations']    		= "A real-time space strategy game.\nPlay in any browser.\nFree dopamine and tears";
+$LNG['gameInformations']    		= "Free dopamine and tears";
 
 // Login
 $LNG['loginHeader']					= 'Login';
