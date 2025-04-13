@@ -165,7 +165,7 @@ $LNG['ov_moving_fleets']					= 'Moving fleets';
 //----------------------------------------------------------------------------//
 // Galaxy
 
-$LNG['gl_no_deuterium_to_view_galaxy']		= 'You dont have enough deuterium to view the galaxy';
+$LNG['gl_no_deuterium_to_view_galaxy']		= 'You dont have enough uranium to view the galaxy';
 $LNG['gl_legend']							= 'Legend';
 $LNG['gl_strong_player']					= 'Strong player';
 $LNG['gl_week_player']						= 'Weak player';
@@ -240,7 +240,7 @@ $LNG['gl_trade_space']	= 'Trading zone';
 
 //----------------------------------------------------------------------------//
 // Sensor Phalanx
-$LNG['px_no_deuterium']						= "You don't have enough deuterium!";
+$LNG['px_no_deuterium']						= "You don't have enough uranium!";
 $LNG['px_scan_position']					= 'Investigate position';
 $LNG['px_fleet_movement']					= 'Fleet in movement';
 $LNG['px_no_fleet']							= 'There are no moving fleets.';
@@ -308,7 +308,7 @@ $LNG['fl_shortcut_name']					= 'Name';
 $LNG['fl_flying_time']					    = 'Time of Flying';
 $LNG['fl_flying_arrival']					= 'Arrival';
 $LNG['fl_flying_return']					= 'Return';
-$LNG['fl_fuel_consumption']			        = 'Consumption of deuterium';
+$LNG['fl_fuel_consumption']			        = 'Consumption of uranium';
 $LNG['fl_max_speed']						= 'Max Speed';
 $LNG['fl_cargo_capacity']				    = 'Cargo capacity';
 $LNG['fl_shortcut']							= 'Shortcuts';
@@ -378,7 +378,7 @@ $LNG['fl_only_planets_colonizable']			= 'Only planets can be colonized.';
 $LNG['fl_player_is_noob']					= 'Player is in the Noob Protection!';
 $LNG['fl_player_is_strong']					= 'Player is too strong!';
 $LNG['fl_no_hold_depot']					= 'No Alliance Depot is located on the target.';
-$LNG['fl_not_enough_deuterium']				= 'Not enough deuterium available.';
+$LNG['fl_not_enough_deuterium']				= 'Not enough uranium available.';
 $LNG['fl_not_enough_space']					= 'You do not have enough cargo space available.';
 $LNG['fl_hold_time_not_exists']				= 'Invalid retention time.';
 $LNG['fl_system_places']					= 'Special locations';
@@ -512,7 +512,7 @@ $LNG['in_attack_pt']   			            = 'Attack Power';
 $LNG['in_capacity']    				        = 'Cargo capacity';
 $LNG['in_units']       			            = 'Unit';
 $LNG['in_base_speed'] 				        = 'Base speed';
-$LNG['in_consumption'] 	                    = 'Fuel used(Deuterium)';
+$LNG['in_consumption'] 	                    = 'Fuel used(Uranium)';
 $LNG['in_jump_gate_start_moon']			    = 'Moon jump';
 $LNG['in_jump_gate_finish_moon']			= 'Destination Moon jump';
 $LNG['in_jump_gate_select_ships']	        = 'Use the jump portal: number of ships';
