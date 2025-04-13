@@ -389,11 +389,26 @@ class ShowSettingsPage extends AbstractGamePage
 					'url'	=> 'game.php?page=settings'
 				)));
 			} else {
-				$sql	= "UPDATE %%USERS%% SET hive_account = :hiveaccount WHERE id = :userID;";
-				$db->update($sql, array(
-					':hiveaccount'  => $hiveAccount,
-					':userID'       => $USER['id']
-				));
+
+				// check if hiveaccount is already linked to a user
+				$db = Database::get();
+				$sql = "SELECT COUNT(*) as state FROM %%USERS%% WHERE `hiveacount` = :hiveAccount;";
+				$linkedAccounts = $db->selectSingle($sql, array(
+					':hiveAccount'	=> $hiveAccount
+				), 'state');
+		
+				if($linkedAccounts != 0) {
+					$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
+						'label'	=> $LNG['sys_back'],
+						'url'	=> 'game.php?page=settings'
+					)));
+				} else {
+					$sql	= "UPDATE %%USERS%% SET hive_account = :hiveaccount WHERE id = :userID;";
+					$db->update($sql, array(
+						':hiveaccount'  => $hiveAccount,
+						':userID'       => $USER['id']
+					));
+				}
 			}
 		}
 
