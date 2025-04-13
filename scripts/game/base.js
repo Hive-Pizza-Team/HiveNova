@@ -268,7 +268,7 @@ $(function() {
 });
 
 const HiveKeychainLogin = async () => {
-	if (!hive_keychain) {
+	if (typeof(hive_keychain) == "undefined") {
 		alert('You must install HiveKeychain extension first');
 		return;
 	}
@@ -298,14 +298,14 @@ const HiveKeychainLogin = async () => {
 }
 
 const DepositPizzaTokens = async (hiveaccount) => {
-	if (!hive_keychain) {
+	if (typeof(hive_keychain) == "undefined") {
 		alert('You must install HiveKeychain extension first');
 		return;
 	}
 
 	try
 	{
-		const amount = parseFloat(prompt("Enter PIZZA ammount: "));
+		const amount = parseFloat(prompt("Enter $PIZZA amount: "));
 		const depositWallet = 'moon.deposit';
 		const memo = '';
 		const tokenSymbol = 'PIZZA';
