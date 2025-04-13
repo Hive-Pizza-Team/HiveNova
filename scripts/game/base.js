@@ -305,7 +305,7 @@ const DepositPizzaTokens = async (hiveaccount) => {
 
 	try
 	{
-		const amount = parseFloat(prompt("Enter PIZZA ammount: "));
+		const amount = parseFloat(prompt("Enter $PIZZA amount: "));
 		const depositWallet = 'moon.deposit';
 		const memo = '';
 		const tokenSymbol = 'PIZZA';
