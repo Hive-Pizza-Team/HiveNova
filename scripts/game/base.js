@@ -268,7 +268,7 @@ $(function() {
 });
 
 const HiveKeychainLogin = async () => {
-	if (typeof(hive_keychain) != "undefined") {
+	if (typeof(hive_keychain) == "undefined") {
 		alert('You must install HiveKeychain extension first');
 		return;
 	}
@@ -298,7 +298,7 @@ const HiveKeychainLogin = async () => {
 }
 
 const DepositPizzaTokens = async (hiveaccount) => {
-	if (typeof(hive_keychain) != "undefined") {
+	if (typeof(hive_keychain) == "undefined") {
 		alert('You must install HiveKeychain extension first');
 		return;
 	}
