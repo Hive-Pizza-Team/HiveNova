@@ -16,11 +16,11 @@
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 	<title>{block name="title"} - {$gameName}{/block}</title>
 	<meta name="keywords" content="{$gameName}, Hive, Browsergame, MMOSG, MMOG, Strategy, SteemNova, XNova, 2Moons, Space">
-	<meta name="description" content="Massively Multiplayer Online Strategy Game (MMOSG) for Hiveians. Space Browsergame with competition between alliances. Free-to-play style. Come get mooned!">
+	<meta name="description" content="Multiplayer Orbiting Optimization Network (MOON) game for Hivers. Space themed empire building game in the browser. Free-to-play. Come get mooned!">
 	<!-- open graph protocol -->
 	<meta property="og:title" content="{$gameName}">
 	<meta property="og:type" content="website">
-	<meta property="og:description" content="Massively Multiplayer Online Strategy Game (MMOSG) for Hiveians. Space Browsergame with competition between alliances. Free-to-play style. Come get mooned!">
+	<meta property="og:description" content="Multiplayer Orbiting Optimization Network (MOON) game for Hivers. Space themed empire building game in the browser. Free-to-play. Come get mooned!">
 	<meta property="og:image" content="https://moon.hive.pizza/styles/resource/images/login/HiveNova.png">
 	<!--[if lt IE 9]>
 	<script src="scripts/base/html5.js"></script>
