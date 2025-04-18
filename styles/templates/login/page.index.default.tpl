@@ -9,7 +9,7 @@
 </section>
 <section>
 	<div class="contentbox">
-				<h1>{$LNG.loginHeader} Hive</h1>
+				<h1>{$LNG.loginHeader} with Hive</h1>
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
 					<input name="username" id="username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
