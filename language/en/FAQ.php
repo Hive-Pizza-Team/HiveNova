@@ -130,5 +130,5 @@ $LNG['questions'][2][5]['body']		= <<<BODY
 <p>Pizzabits is the fourth resource of the game. You can spend them on officers, a ship merchant, or a traveling salesperson. None of those things is core to the gameplay. Buildings, ships, defenses, and research do not require Pizzabits.</p>
 <p>There are two ways to gain Pizzabits: from expedition missions and deposits. A deposit of 1 pizza is converted to 10 Pizzabits. And they cannot be transferred between players or converted back to PIZZA.</p>
 <p>Pizzabit purchases only last for one universe or season. They will not transfer to a new season.</p>
-<p>A linked Hive account is required to deposit PIZZA and to earn rewards. Please contact us in Discord to learn how to create a Hive account</p>
+<p>A linked Hive account is required to deposit PIZZA and to earn rewards. Please contact us in Discord to learn how to create a Hive account.</p>
 BODY;
