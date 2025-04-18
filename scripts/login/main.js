@@ -69,7 +69,7 @@ const HiveKeychainLogin = async () => {
 		return;
 	}
 
-	if (document.querySelector('#loginHive > input#username').value.length = 0 || document.querySelector('#loginHive > input#username').value.length > 16) {
+	if (document.querySelector('#loginHive > input#username').value.length == 0 || document.querySelector('#loginHive > input#username').value.length > 16) {
 		alert('You must enter a valid Hive account name first.');
 		return;
 	}
@@ -84,8 +84,8 @@ const HiveKeychainLogin = async () => {
 			"Posting",
 			(response) => {
 				if (response.success) {
-					document.querySelector('input#hiveAccount').value = hiveaccount;
-					document.querySelector('input#hivesign').value = response.result;
+					document.querySelector('#loginHive > input#hiveAccount').value = hiveaccount;
+					document.querySelector('#loginHive > input#hivesign').value = response.result;
 					document.getElementById('loginHive').submit();
 				} else {
 					console.error('Keychain error', response.error);
