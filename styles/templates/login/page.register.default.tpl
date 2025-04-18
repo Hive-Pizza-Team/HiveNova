@@ -1,6 +1,6 @@
 
 {block name="title" prepend}{$LNG.buttonRegisterHive}{/block}
-{block name="content1"}
+{block name="content"}
 <div id="registerFormWrapper">
 <form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register">
 	<div class="rowForm">
@@ -28,7 +28,7 @@
 </form>
 {/block}
 {block name="title" prepend}{$LNG.siteTitleRegister}{/block}
-{block name="content2"}
+{block name="content"}
 <form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register">
 <input type="hidden" value="send" name="mode">
 <input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
