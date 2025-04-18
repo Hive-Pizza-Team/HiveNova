@@ -3,17 +3,23 @@
 {block name="content"}
 <h1>{$LNG.buttonRegisterHive}</h1>
 <div id="registerFormWrapper">
-<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register">
+<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" onsubmit="return false;">
 	<div class="rowForm">
 		<label for="universe">{$LNG.universe}</label>
 		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
 		{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
 	</div>
 	<div class="rowForm">
-		<label for="hiveAccount">{$LNG.hiveAccount}</label>
-		<input id="hiveAccount" name="hiveAccount" maxlength="16" size="16"></input>
+		<label for="username">{$LNG.hiveAccount}</label>
+		<input id="username" name="username" maxlength="16" size="16"></input>
 	</div>
+	<input type="hidden" class="input" name="password" id="password"></input>
+	<input type="hidden" class="input" name="passwordReplay" id="passwordReplay"></input>
 	<input id="hivesign" name="hivesign" type="hidden"></input>
+	<input id="hiveAccount" name="hiveAccount" type="hidden"></input>
+	<input type="hidden" class="input" name="email" id="email"></input>
+	<input type="hidden" class="input" name="emailReplay" id="emailReplay"></input>
+
 	{if count($languages) > 1}
 	<div class="rowForm">
 		<label for="language">{$LNG.registerLanguage}</label>
@@ -29,7 +35,7 @@
 		<span class="inputDesc">{$registerRulesDesc}</span>
 	</div>
 	<div class="rowForm">
-		<input type="submit" class="submitButton" value="{$LNG.buttonRegisterHive}">
+		<input type="submit" class="submitButton" value="{$LNG.buttonRegisterHive}" onclick="HiveKeychainRegister()">
 	</div>
 </form>
 <br><hr>
@@ -61,7 +67,7 @@
 	{/if}
 	<div class="rowForm">
 		<label for="username">{$LNG.registerUsername}</label>
-		<input type="text" class="input" name="username" id="username" maxlenght="32">
+		<input type="text" class="input" name="username" id="username" maxlength="32">
 		{if !empty($error.username)}<span class="error errorUsername"></span>{/if}
 		<span class="inputDesc">{$LNG.registerUsernameDesc}</span>
 	</div>
