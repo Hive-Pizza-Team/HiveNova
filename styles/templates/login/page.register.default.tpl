@@ -5,6 +5,11 @@
 <div id="registerFormWrapper">
 <form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register">
 	<div class="rowForm">
+		<label for="universe">{$LNG.universe}</label>
+		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
+		{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
+	</div>
+	<div class="rowForm">
 		<label for="hiveAccount">{$LNG.hiveAccount}</label>
 		<input id="hiveAccount" name="hiveAccount" maxlength="16" size="16"></input>
 	</div>
