@@ -45,6 +45,7 @@ $LNG['uni_closed']					= ' (closed)';
 
 // Button
 $LNG['buttonRegister']				= 'Register!';
+$LNG['buttonRegisterHive']			= 'Register with Hive!';
 $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Lost Password?';
 
@@ -53,7 +54,7 @@ $LNG['gameInformations']    		= "Free dopamine and tears";
 
 // Login
 $LNG['loginHeader']					= 'Login';
-$LNG['loginUsername']				= 'Username';
+$LNG['loginUsername']				= 'Username or Hive Account';
 $LNG['loginPassword']				= 'Password';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'With the login I accept the %s.';
@@ -69,7 +70,7 @@ $LNG['registerPasswordDesc']		= 'The password must be at least %s characters lon
 $LNG['registerPasswordReplay']		= 'Repeat Password';
 $LNG['registerPasswordReplayDesc']	= 'Please enter the same password.';
 $LNG['registerEmail']				= 'E-Mail';
-$LNG['registerEmailDesc']			= 'Please enter your E-Mail address!';
+$LNG['registerEmailDesc']			= 'Please enter your E-Mail!';
 $LNG['registerEmailReplay']			= 'Repeat E-Mail';
 $LNG['registerEmailReplayDesc']		= 'Please input of your email address once again to the security!';
 $LNG['registerLanguage']			= 'Language';
@@ -79,6 +80,7 @@ $LNG['registerCaptchaDesc']			= 'Please enter the characters below in the empty 
 $LNG['registerCaptchaReload']		= 'Reload Captcha.';
 $LNG['registerRules']				= 'Rules';
 $LNG['registerRulesDesc']			= 'I agree with the %s';
+$LNG['hiveAccount']                 = 'Hive Account';
 
 $LNG['registerBack']				= 'Back';
 $LNG['registerNext']				= 'Next';

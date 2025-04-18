@@ -1,6 +1,30 @@
 {block name="title" prepend}{$LNG.siteTitleRegister}{/block}
 {block name="content"}
 <div id="registerFormWrapper">
+<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register">
+	<div class="rowForm">
+		<label for="hiveAccount">{$LNG.hiveAccount}</label>
+		<input id="hiveAccount" name="hiveAccount" maxlength="16" size="16"></input>
+	</div>
+	<input id="hivesign" name="hivesign" type="hidden"></input>
+	{if count($languages) > 1}
+	<div class="rowForm">
+		<label for="language">{$LNG.registerLanguage}</label>
+		<select name="lang" id="language">{html_options options=$languages selected=$lang}</select>
+		{if !empty($error.language)}<span class="error errorLanguage"></span>{/if}
+		<div class="clear"></div>
+	</div>
+	{/if}
+	<div class="rowForm">
+		<label for="rules">{$LNG.registerRules}</label>
+		<input type="checkbox" name="rules" id="rules" value="1">
+		{if !empty($error.rules)}<span class="error errorRules"></span>{/if}
+		<span class="inputDesc">{$registerRulesDesc}</span>
+	</div>
+	<div class="rowForm">
+		<input type="submit" class="submitButton" value="{$LNG.buttonRegisterHive}">
+	</div>
+</form>
 <form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register">
 <input type="hidden" value="send" name="mode">
 <input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">

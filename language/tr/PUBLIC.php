@@ -47,6 +47,7 @@ $LNG['uni_closed']					= ' (Offline)';
 
 // Button
 $LNG['buttonRegister']				= 'Kayit Ol!';
+$LNG['buttonRegisterHive']			= 'Register with Hive!';
 $LNG['buttonScreenshot']			= 'Ekran Goruntuleri';
 $LNG['buttonLostPassword']			= 'Sifremi Unuttum?';
 
@@ -81,6 +82,7 @@ $LNG['registerCaptchaDesc']			= 'Lutfen bos alana asagidaki karakterleri giriniz
 $LNG['registerCaptchaReload']		= 'Yeni Kod Iste.';
 $LNG['registerRules']				= 'Kurallar';
 $LNG['registerRulesDesc']			= '%si kabul ediyorum';
+$LNG['hiveAccount']                 = 'Hive Account';
 
 $LNG['registerBack']				= 'Geri';
 $LNG['registerNext']				= 'Ileri';

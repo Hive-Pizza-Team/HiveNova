@@ -47,6 +47,7 @@ $LNG['uni_closed']					= ' (fechado)';
 
 // Button
 $LNG['buttonRegister']				= 'Regista Agora!';
+$LNG['buttonRegisterHive']			= 'Register with Hive!';
 $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Perdeste a Password?';
 
@@ -81,6 +82,7 @@ $LNG['registerCaptchaDesc']			= 'Por favor, insere os caracteres abaixo no campo
 $LNG['registerCaptchaReload']		= 'Recarregar Captcha.';
 $LNG['registerRules']				= 'Regras';
 $LNG['registerRulesDesc']			= 'Concordo com o %s';
+$LNG['hiveAccount']                 = 'Hive Account';
 
 $LNG['registerBack']				= 'Voltar';
 $LNG['registerNext']				= 'Próximo';
