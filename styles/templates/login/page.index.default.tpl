@@ -12,10 +12,12 @@
 				<h1>{$LNG.loginHeader} Hive</h1>
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
-					<input name="hiveaccount" id="hiveaccount" placeholder="{$LNG.loginHiveAccount}">
-					<input name="hivesign" id="hivesign" type="hidden">
+					<input name="username" id="username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
+					<input name="password" id="password" type="password" type="hidden">
+					<input name="hivesign" id="hivesign" type="text type="hidden">
 					<button onclick="HiveKeychainLogin()" class="button_keychain" title="Log in with HiveKeychain"></button>
 				</form>
+				<hr>
 				<h1>{$LNG.loginHeader} with Password</h1>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<div class="row">
