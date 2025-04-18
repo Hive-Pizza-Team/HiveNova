@@ -13,8 +13,8 @@
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
 					<input name="username" id="username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
-					<input name="password" id="password" type="password" type="hidden">
-					<input name="hivesign" id="hivesign" type="text type="hidden">
+					<input name="password" id="password" type="hidden">
+					<input name="hivesign" id="hivesign" type="hidden">
 					<button onclick="HiveKeychainLogin()" class="button_keychain" title="Log in with HiveKeychain"></button>
 				</form>
 				<hr>
