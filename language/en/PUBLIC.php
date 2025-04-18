@@ -54,12 +54,13 @@ $LNG['gameInformations']    		= "Free dopamine and tears";
 
 // Login
 $LNG['loginHeader']					= 'Login';
-$LNG['loginUsername']				= 'Username or Hive Account';
+$LNG['loginUsername']				= 'Username';
 $LNG['loginPassword']				= 'Password';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'With the login I accept the %s.';
 $LNG['loginWelcome']				= 'Welcome to %s';
 $LNG['loginServerDesc']				= '%s is a real-time space strategy game. Play in any browser.';
+$LNG['loginHiveAccount']				= 'Hive Account';
 
 // Register
 $LNG['registerFacebookAccount']		= 'Facebook Account';

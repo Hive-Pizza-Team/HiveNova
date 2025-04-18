@@ -16,8 +16,7 @@
 						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
 						<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}">
 						<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
-						<input name="hiveaccount" id="hiveaccount" type="hidden">
-						<input name="hivesign" id="hivesign" type="hidden">
+						
 						{if $verkey["capaktiv"]==1}
 							<script src='https://www.google.com/recaptcha/api.js'></script>
 							<script>function onSubmit() { document.getElementById("login").submit(); } </script>
@@ -29,13 +28,15 @@
 				</form>
 				{if $facebookEnable}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
 
-
-				<div class="wrapper">
-					<div class="container">
-						<button onclick="HiveKeychainLogin()" class="login-button button_keychain" title="Log in with HiveKeychain"><img src="styles/resource/images/login/keychain.png"></button>
-					</div>
-				</div>
-
+				<h1>{$LNG.loginHeader} Hive</h1>
+				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post">
+					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
+					<input name="hiveaccount" id="hiveaccount" placeholder="{$LNG.loginHiveAccount}">
+					<input name="hivesign" id="hivesign" type="hidden">
+					<button onclick="HiveKeychainLogin()" class="login-button button_keychain" title="Log in with HiveKeychain"><img width="100px" src="styles/resource/images/login/keychain.png"></button>
+				</form>
+				
+				<hr>
 				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
 				<br>
 				<span class="small">{$loginInfo}</span>
