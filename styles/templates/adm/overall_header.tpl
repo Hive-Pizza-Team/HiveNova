@@ -18,7 +18,6 @@
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/validationEngine.jquery.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/theme/gow/formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/icon-font/style.css?v={$REV}">
-	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/steemconnect_button.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/hivekeychain_button.css?v={$REV}">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" type="text/css">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">

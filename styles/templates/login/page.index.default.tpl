@@ -14,7 +14,7 @@
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
 					<input name="hiveaccount" id="hiveaccount" placeholder="{$LNG.loginHiveAccount}">
 					<input name="hivesign" id="hivesign" type="hidden">
-					<button onclick="HiveKeychainLogin()" class="login-button button_keychain" title="Log in with HiveKeychain"><img width="100px" src="styles/resource/images/login/keychain.png"></button>
+					<button onclick="HiveKeychainLogin()" class="button_keychain" title="Log in with HiveKeychain"></button>
 				</form>
 				<h1>{$LNG.loginHeader} with Password</h1>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
