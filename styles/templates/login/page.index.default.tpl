@@ -9,8 +9,14 @@
 </section>
 <section>
 	<div class="contentbox">
-		
-				<h1>{$LNG.loginHeader}</h1>
+				<h1>{$LNG.loginHeader} Hive</h1>
+				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post">
+					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
+					<input name="hiveaccount" id="hiveaccount" placeholder="{$LNG.loginHiveAccount}">
+					<input name="hivesign" id="hivesign" type="hidden">
+					<button onclick="HiveKeychainLogin()" class="login-button button_keychain" title="Log in with HiveKeychain"><img width="100px" src="styles/resource/images/login/keychain.png"></button>
+				</form>
+				<h1>{$LNG.loginHeader} with Password</h1>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<div class="row">
 						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
@@ -28,14 +34,6 @@
 				</form>
 				{if $facebookEnable}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
 
-				<h1>{$LNG.loginHeader} Hive</h1>
-				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post">
-					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
-					<input name="hiveaccount" id="hiveaccount" placeholder="{$LNG.loginHiveAccount}">
-					<input name="hivesign" id="hivesign" type="hidden">
-					<button onclick="HiveKeychainLogin()" class="login-button button_keychain" title="Log in with HiveKeychain"><img width="100px" src="styles/resource/images/login/keychain.png"></button>
-				</form>
-				
 				<hr>
 				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
 				<br>
