@@ -12,14 +12,6 @@
 				<div><input type="submit" value="{$LNG.adm_absenden}"></div>
 			</td>
         </tr>
-		<tr>
-			<div class="wrapper">
-				<div class="container">
-					<a href="DoKeychainLogin()" class="login-button button_standard button-steem" title="Log in with HiveKeychain">Log in with HiveKeychain</a>
-					<p>As a security best practice, it is recommended to use private POSTING key</p>
-				</div>
-			</div>
-		</tr>
     </table>
 	</form>
 </div>
