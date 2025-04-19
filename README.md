@@ -63,6 +63,7 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 ## Copyright and License
 
 HiveNova is a fork of the Open Source Game Framework [jkroepke/2Moons](https://github.com/jkroepke/2Moons) engine.
+Background image created by [@mkdrwal](https://hive.blog/@mkdrwal)
 
 * Code copyright 2009-2016 Jan-Otto Kröpke released under the MIT License.
 * Code copyright 2018 @steemnova released under the MIT License.
