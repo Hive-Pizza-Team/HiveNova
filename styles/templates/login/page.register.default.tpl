@@ -3,7 +3,7 @@
 {block name="content"}
 <h1>{$LNG.buttonRegisterHive}</h1>
 <div id="registerFormWrapper">
-<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register">
+<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" onsubmit="return false;">
 	<input type="hidden" value="send" name="mode">
 	<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 	<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
