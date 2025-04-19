@@ -18,15 +18,15 @@
 		</tr>
 		<tr>
 			<td width="50%">{$LNG.op_username}</td>
-	    <td width="50%" style="height:22px;">{if $changeNickTime < 0}<input name="username" size="20" value="{$username}" type="text">{else}{$username}{/if}</td>
+	    <td width="50%" style="height:22px;">{if $changeNickTime < 0 && !$isHiveKeychainAct}<input name="username" size="20" value="{$username}" type="text">{else}{$username}{/if}</td>
 	</tr>
 	<tr>
 	    <td>{$LNG.op_old_pass}</td>
-	    <td><input name="password" size="20" type="password" class="autocomplete"></td>
+	    <td>{if !$isHiveKeychainAct}<input name="password" size="20" type="password" class="autocomplete">{/if}</td>
 	</tr>
 	<tr>
 	    <td>{$LNG.op_new_pass}</td>
-	    <td><input name="newpassword" size="20" maxlength="40" type="password" class="autocomplete"></td>
+	    <td>{if !$isHiveKeychainAct}<input name="newpassword" size="20" maxlength="40" type="password" class="autocomplete">{/if}</td>
 	</tr>
 	<tr>
 	    <td>{$LNG.op_repeat_new_pass}</td>
@@ -34,7 +34,7 @@
 	</tr>
 	<tr>
 	    <td><a title="{$LNG.op_email_adress_descrip}">{$LNG.op_email_adress}</a></td>
-	    <td><input name="email" maxlength="64" size="20" value="{$email}" type="text"></td>
+	    <td>{if !$isHiveKeychainAct}<input name="email" maxlength="64" size="20" value="{$email}" type="text">{else}{$email}{/if}</td>
 	</tr>
 	<tr>
 	    <td style="height:22px;">{$LNG.op_permanent_email_adress}</td>
