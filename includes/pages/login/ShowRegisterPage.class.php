@@ -206,13 +206,36 @@ class ShowRegisterPage extends AbstractLoginPage
 			':universe'		=> Universe::current(),
 			':mailAddress'	=> $mailAddress,
 		), 'count');
+
+		$sql = "SELECT (
+			SELECT COUNT(*)
+			FROM %%USERS%%
+			WHERE universe = :universe
+			AND (
+				hive_account = :hiveAccount
+			)
+		) + (
+			SELECT COUNT(*)
+			FROM %%USERS_VALID%%
+			WHERE universe = :universe
+			AND hive_account = :hiveAccount
+		) as count;";
+
+		$countHiveAccount = $db->selectSingle($sql, array(
+			':universe'		=> Universe::current(),
+			':hive_account'	=> $hiveAccount,
+		), 'count');
 		
-		if($countUsername!= 0) {
+		if($countUsername != 0) {
 			$errors[]	= $LNG['registerErrorUsernameExist'];
 		}
 			
 		if($countMail != 0) {
 			$errors[]	= $LNG['registerErrorMailExist'];
+		}
+
+		if($countHiveAccount != 0) {
+			$errors[]	= $LNG['registerErrorHiveAccountExist'];
 		}
 		
 		if ($config->capaktiv === '1')

@@ -33,7 +33,7 @@ $LNG['uni_closed']					= ' (fermée)';
 
 // Button
 $LNG['buttonRegister']				= 'S\'enregistrer maintenant!';
-$LNG['buttonRegisterHive']			= 'Register with Hive!';
+$LNG['buttonRegisterHive']			= 'S\'inscrire à Hive!';
 $LNG['buttonScreenshot']			= 'Capture d\'écran';
 $LNG['buttonLostPassword']			= 'Mot de passe perdu ?';
 
@@ -68,7 +68,7 @@ $LNG['registerCaptchaDesc']			= 'S\'il vous plaît entrez les caractères ci-des
 $LNG['registerCaptchaReload']		= 'Recharger Captcha.';
 $LNG['registerRules']				= 'Règles';
 $LNG['registerRulesDesc']			= 'Je suis d\'accord avec les %s';
-$LNG['hiveAccount']                 = 'Hive Account';
+$LNG['hiveAccount']                 = 'Compte de la Hive';
 
 $LNG['registerBack']				= 'Retour';
 $LNG['registerNext']				= 'Suivant';
@@ -85,6 +85,8 @@ $LNG['registerErrorMailSame']		= 'Les deux adresses e-Mail renseignèes ne sont 
 $LNG['registerErrorMailExist']		= 'L\'adresse e-mail est dèjà enregistrè!';
 $LNG['registerErrorRules']			= 'Vous devez accepter les règles!';
 $LNG['registerErrorCaptcha']		= 'Le code de sècuritè est incorrect!';
+$LNG['registerErrorHiveAccountInvalid']	= 'Vous devez entrer un compte Hive valide!';
+$LNG['registerErrorHiveAccountExist']	= 'Le compte Hive est déjà enregistré!';
 
 $LNG['registerMailVertifyTitle']	= 'Activation de l\'enregistrement sur le jeu: %s';
 $LNG['registerMailVertifyError']	= 'Impossible d\'envoyer l\'e-Mail: %s';

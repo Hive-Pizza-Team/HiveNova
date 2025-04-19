@@ -47,7 +47,7 @@ $LNG['uni_closed']					= ' (Offline)';
 
 // Button
 $LNG['buttonRegister']				= 'Kayit Ol!';
-$LNG['buttonRegisterHive']			= 'Register with Hive!';
+$LNG['buttonRegisterHive']			= 'Hive ile kayıt olun!';
 $LNG['buttonScreenshot']			= 'Ekran Goruntuleri';
 $LNG['buttonLostPassword']			= 'Sifremi Unuttum?';
 
@@ -82,7 +82,7 @@ $LNG['registerCaptchaDesc']			= 'Lutfen bos alana asagidaki karakterleri giriniz
 $LNG['registerCaptchaReload']		= 'Yeni Kod Iste.';
 $LNG['registerRules']				= 'Kurallar';
 $LNG['registerRulesDesc']			= '%si kabul ediyorum';
-$LNG['hiveAccount']                 = 'Hive Account';
+$LNG['hiveAccount']                 = 'Kovan Hesabı';
 
 $LNG['registerBack']				= 'Geri';
 $LNG['registerNext']				= 'Ileri';
@@ -99,6 +99,8 @@ $LNG['registerErrorMailSame']		= 'Farki 2 email adresi girdiniz!';
 $LNG['registerErrorMailExist']		= 'Bu email zaten kayitli!';
 $LNG['registerErrorRules']			= 'Oyuna baslamadan once kurallari kabul etmelisiniz!';
 $LNG['registerErrorCaptcha']		= 'Guvenlik kodu dogru degil!';
+$LNG['registerErrorHiveAccountInvalid']	= 'Geçerli bir Hive hesabı girmelisiniz!';
+$LNG['registerErrorHiveAccountExist']	= 'Hive hesabı zaten kayıtlı!';
 
 $LNG['registerMailVertifyTitle']	= 'Activation of registration on the game: %s';
 $LNG['registerMailVertifyError']	= 'Email gondermede basarisiz oldu: %s';
