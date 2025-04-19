@@ -74,7 +74,7 @@ const HiveKeychainLogin = async () => {
 		return;
 	}
 
-	const hiveaccount = document.querySelector('#loginHive > input#username').value;
+	const hiveaccount = document.querySelector('#loginHive > input#username').value.toLowerCase().trim();
 
 	try
   	{
