@@ -35,7 +35,7 @@
 		<span class="inputDesc">{$registerRulesDesc}</span>
 	</div>
 	<div class="rowForm">
-		<input type="submit" class="submitButton" value="{$LNG.buttonRegisterHive}" onclick="HiveKeychainRegister()">
+		<button onclick="HiveKeychainRegister()" value="{$LNG.buttonRegisterHive}" title="{$LNG.buttonRegisterHive}"></button>
 	</div>
 </form>
 <br><hr>
