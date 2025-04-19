@@ -3,7 +3,7 @@
 {block name="content"}
 <h1>{$LNG.buttonRegisterHive}</h1>
 <div id="registerFormWrapper">
-<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" onsubmit="return false;">
+<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register">
 	<div class="rowForm">
 		<label for="universe">{$LNG.universe}</label>
 		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
@@ -35,7 +35,7 @@
 		<span class="inputDesc">{$registerRulesDesc}</span>
 	</div>
 	<div class="rowForm">
-		<button onclick="HiveKeychainRegister()" value="{$LNG.buttonRegisterHive}" title="{$LNG.buttonRegisterHive}"></button>
+		<input type="submit" class="submitButton" value="{$LNG.buttonRegisterHive}" title="{$LNG.buttonRegisterHive}" onclick="HiveKeychainRegister()">
 	</div>
 </form>
 <br><hr>
