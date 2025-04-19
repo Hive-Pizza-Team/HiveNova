@@ -11,12 +11,12 @@ const HiveKeychainRegister = async () => {
 		return;
 	}
 
-	if (document.querySelector('#registerFormHive > input#username').value.length == 0 || document.querySelector('#registerFormHive > input#username').value.length > 16) {
+	if (document.querySelector('#registerFormHive input#username').value.length == 0 || document.querySelector('#registerFormHive input#username').value.length > 16) {
 		alert('You must enter a valid Hive account name first.');
 		return;
 	}
 
-	const hiveaccount = document.querySelector('#registerFormHive > input#username').value;
+	const hiveaccount = document.querySelector('#registerFormHive input#username').value;
 
 	try
   	{
