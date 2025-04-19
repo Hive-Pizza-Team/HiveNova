@@ -24,7 +24,6 @@
 						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
 						<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}">
 						<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
-						
 						{if $verkey["capaktiv"]==1}
 							<script src='https://www.google.com/recaptcha/api.js'></script>
 							<script>function onSubmit() { document.getElementById("login").submit(); } </script>
@@ -35,7 +34,6 @@
 					</div>
 				</form>
 				{if $facebookEnable}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
-
 				<hr>
 				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
 				<br>
