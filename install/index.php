@@ -577,7 +577,7 @@ switch ($mode) {
 					exit;
 				}
 
-				list($userId, $planetId) = PlayerUtil::createPlayer(Universe::current(), $username, $hashPassword, $mail, $LNG->getLanguage(), 1, 1, 2, NULL, AUTH_ADM);
+				list($userId, $planetId) = PlayerUtil::createPlayer(Universe::current(), $username, $hashPassword, $mail, '', $LNG->getLanguage(), 1, 1, 2, NULL, AUTH_ADM);
 
 				$session	= Session::create();
 				$session->userId		= $userId;
