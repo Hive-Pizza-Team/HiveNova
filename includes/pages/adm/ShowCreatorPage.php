@@ -89,7 +89,7 @@ function ShowCreatorPage()
 				$Language	= array_key_exists($Language, $LNG->getAllowedLangs(false)) ? $Language : $config->lang;
 
 				PlayerUtil::createPlayer(Universe::getEmulated(), $UserName,
-					PlayerUtil::cryptPassword($UserPass), $UserMail, '', $Language, $Galaxy, $System, $Planet,
+					PlayerUtil::cryptPassword($UserPass), $UserMail, $Language, $Galaxy, $System, $Planet,
 					$LNG['fcm_planet'], $UserAuth);
 				
 				$template->message($LNG['new_user_success'], '?page=create&mode=user', 5, true);

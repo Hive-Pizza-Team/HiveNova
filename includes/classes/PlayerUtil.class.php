@@ -96,7 +96,7 @@ class PlayerUtil
 			|| $config->max_planets < $position);
 	}
 	
-	static public function createPlayer($universe, $userName, $userPassword, $userMail, $hiveAccount = '', $userLanguage = NULL, $galaxy = NULL, $system = NULL, $position = NULL, $name = NULL, $authlevel = 0, $userIpAddress = NULL)
+	static public function createPlayer($universe, $userName, $userPassword, $userMail, $userLanguage = NULL, $galaxy = NULL, $system = NULL, $position = NULL, $name = NULL, $authlevel = 0, $userIpAddress = NULL)
 	{
 		$config	= Config::get($universe);
 		
@@ -153,7 +153,6 @@ class PlayerUtil
 			':email'				=> $userMail,
 			':email2'				=> $userMail,
 			':authlevel'			=> $authlevel,
-			':hiveAccount'          => $hiveAccount
 			':universe'				=> $universe,
 			':language'				=> $userLanguage,
 			':registerAddress'		=> !empty($userIpAddress) ? $userIpAddress : '127.0.0.1',
@@ -170,7 +169,6 @@ class PlayerUtil
 		username		= :username,
 		email			= :email,
 		email_2			= :email2,
-		hive_account    = :hiveAccount
 		authlevel		= :authlevel,
 		universe		= :universe,
 		lang			= :language,

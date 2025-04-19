@@ -56,7 +56,7 @@ class ShowVertifyPage extends AbstractLoginPage
 			':validationID'	=> $validationID
 		));
 
-		list($userID, $planetID) = PlayerUtil::createPlayer($userData['universe'], $userData['userName'], $userData['password'], $userData['email'], $userData['hiveAccount'], $userData['language']);
+		list($userID, $planetID) = PlayerUtil::createPlayer($userData['universe'], $userData['userName'], $userData['password'], $userData['email'], $userData['language']);
 
 		if($config->mail_active == 1)
 		{

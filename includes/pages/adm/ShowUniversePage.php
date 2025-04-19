@@ -154,7 +154,7 @@ function ShowUniversePage() {
 
 			Config::reload();
 
-			list($userID, $planetID) = PlayerUtil::createPlayer($newUniverse, $USER['username'], '', $USER['email'], '', $USER['lang'], 1, 1, 1, NULL, AUTH_ADM);
+			list($userID, $planetID) = PlayerUtil::createPlayer($newUniverse, $USER['username'], '', $USER['email'], $USER['lang'], 1, 1, 1, NULL, AUTH_ADM);
 			$GLOBALS['DATABASE']->query("UPDATE ".USERS." SET password = '".$USER['password']."' WHERE id = ".$userID.";");
 
 			if($universeCount === 1)
