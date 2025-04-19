@@ -16,7 +16,7 @@ const HiveKeychainRegister = async () => {
 		return;
 	}
 
-	const hiveaccount = document.querySelector('#registerFormHive input#username').value;
+	const hiveaccount = document.querySelector('#registerFormHive input#username').value.toLowerCase().trim();;
 
 	try
   	{
