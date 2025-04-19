@@ -216,9 +216,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			SELECT COUNT(*)
 			FROM %%USERS%%
 			WHERE universe = :universe
-			AND (
-				hive_account = :hiveAccount
-			)
+			AND hive_account = :hiveAccount
 		) + (
 			SELECT COUNT(*)
 			FROM %%USERS_VALID%%
@@ -228,7 +226,7 @@ class ShowRegisterPage extends AbstractLoginPage
 
 		$countHiveAccount = $db->selectSingle($sql, array(
 			':universe'		=> Universe::current(),
-			':hive_account'	=> $hiveAccount,
+			':hiveAccount'	=> $hiveAccount,
 		), 'count');
 		
 		if($countUsername != 0) {
