@@ -45,6 +45,7 @@ $LNG['uni_closed']					= ' (closed)';
 
 // Button
 $LNG['buttonRegister']				= 'Register!';
+$LNG['buttonRegisterHive']			= 'Register with Hive!';
 $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Lost Password?';
 
@@ -59,6 +60,7 @@ $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'With the login I accept the %s.';
 $LNG['loginWelcome']				= 'Welcome to %s';
 $LNG['loginServerDesc']				= '%s is a real-time space strategy game. Play in any browser.';
+$LNG['loginHiveAccount']				= 'Hive Account';
 
 // Register
 $LNG['registerFacebookAccount']		= 'Facebook Account';
@@ -69,7 +71,7 @@ $LNG['registerPasswordDesc']		= 'The password must be at least %s characters lon
 $LNG['registerPasswordReplay']		= 'Repeat Password';
 $LNG['registerPasswordReplayDesc']	= 'Please enter the same password.';
 $LNG['registerEmail']				= 'E-Mail';
-$LNG['registerEmailDesc']			= 'Please enter your E-Mail address!';
+$LNG['registerEmailDesc']			= 'Please enter your E-Mail!';
 $LNG['registerEmailReplay']			= 'Repeat E-Mail';
 $LNG['registerEmailReplayDesc']		= 'Please input of your email address once again to the security!';
 $LNG['registerLanguage']			= 'Language';
@@ -79,6 +81,7 @@ $LNG['registerCaptchaDesc']			= 'Please enter the characters below in the empty 
 $LNG['registerCaptchaReload']		= 'Reload Captcha.';
 $LNG['registerRules']				= 'Rules';
 $LNG['registerRulesDesc']			= 'I agree with the %s';
+$LNG['hiveAccount']                 = 'Hive Account';
 
 $LNG['registerBack']				= 'Back';
 $LNG['registerNext']				= 'Next';
@@ -95,6 +98,8 @@ $LNG['registerErrorMailSame']		= 'Email addresses do not match!';
 $LNG['registerErrorMailExist']		= 'The E-Mail address is already registered!';
 $LNG['registerErrorRules']			= 'You have to accept the rules pleb!';
 $LNG['registerErrorCaptcha']		= 'The security code is incorrect!';
+$LNG['registerErrorHiveAccountInvalid']	= 'You must enter a valid Hive account!';
+$LNG['registerErrorHiveAccountExist']	= 'The Hive account is already registered!';
 
 $LNG['registerMailVertifyTitle']	= 'Registration successful for game: %s';
 $LNG['registerMailVertifyError']	= 'Failed to send mail: %s';

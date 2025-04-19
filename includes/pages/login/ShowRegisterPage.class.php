@@ -133,6 +133,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			$externalAuthUID	= $externalAuth['account'];
 			$externalAuthMethod	= strtolower(str_replace(array('_', '\\', '/', '.', "\0"), '', $externalAuth['method']));
 		}
+		$hiveAccount   = HTTP::_GP('hiveAccount', '');
 		
 		$errors 	= array();
 		
@@ -143,7 +144,7 @@ class ShowRegisterPage extends AbstractLoginPage
 		if(!PlayerUtil::isNameValid($userName)) {
 			$errors[]	= $LNG['registerErrorUsernameChar'];
 		}
-		
+
 		if(strlen($password) < 6) {
 			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], 6);
 		}
@@ -166,6 +167,10 @@ class ShowRegisterPage extends AbstractLoginPage
 		
 		if($rulesChecked != 1) {
 			$errors[]	= $LNG['registerErrorRules'];
+		}
+
+		if(!empty($hiveAccount) && !PlayerUtil::isHiveAccountValid($hiveAccount)) {
+			$errors[]	= $LNG['registerErrorHiveAccountInvalid'];
 		}
 		
 		$db = Database::get();
@@ -206,13 +211,34 @@ class ShowRegisterPage extends AbstractLoginPage
 			':universe'		=> Universe::current(),
 			':mailAddress'	=> $mailAddress,
 		), 'count');
+
+		$sql = "SELECT (
+			SELECT COUNT(*)
+			FROM %%USERS%%
+			WHERE universe = :universe
+			AND hive_account = :hiveAccount
+		) + (
+			SELECT COUNT(*)
+			FROM %%USERS_VALID%%
+			WHERE universe = :universe
+			AND hive_account = :hiveAccount
+		) as count;";
+
+		$countHiveAccount = $db->selectSingle($sql, array(
+			':universe'		=> Universe::current(),
+			':hiveAccount'	=> $hiveAccount,
+		), 'count');
 		
-		if($countUsername!= 0) {
+		if($countUsername != 0) {
 			$errors[]	= $LNG['registerErrorUsernameExist'];
 		}
 			
 		if($countMail != 0) {
 			$errors[]	= $LNG['registerErrorMailExist'];
+		}
+
+		if(!empty($hiveAccount) && $countHiveAccount != 0) {
+			$errors[]	= $LNG['registerErrorHiveAccountExist'];
 		}
 		
 		if ($config->capaktiv === '1')
@@ -280,7 +306,8 @@ class ShowRegisterPage extends AbstractLoginPage
 				`universe` = :universe,
 				`referralID` = :referralID,
 				`externalAuthUID` = :externalAuthUID,
-				`externalAuthMethod` = :externalAuthMethod;";
+				`externalAuthMethod` = :externalAuthMethod,
+				`hive_account` = :hiveAccount;";
 
 
 		$db->insert($sql, array(
@@ -294,7 +321,8 @@ class ShowRegisterPage extends AbstractLoginPage
 			':universe'				=> Universe::current(),
 			':referralID'			=> $referralID,
 			':externalAuthUID'		=> $externalAuthUID,
-			':externalAuthMethod'	=> $externalAuthMethod
+			':externalAuthMethod'	=> $externalAuthMethod,
+			':hiveAccount'          => $hiveAccount
 		));
 
 		$validationID	= $db->lastInsertId();

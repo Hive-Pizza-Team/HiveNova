@@ -43,6 +43,7 @@ $LNG['uni_closed']					= ' (closed)';
 
 // Button
 $LNG['buttonRegister']				= 'Erstelle deinen Account!';
+$LNG['buttonRegisterHive']			= 'Registrieren Sie sich bei Hive!';
 $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Passwort vergessen?';
 
@@ -77,6 +78,7 @@ $LNG['registerCaptchaDesc']			= 'Bitte gebe die untenstehenden Zeichen ohne Leer
 $LNG['registerCaptchaReload']		= 'Captcha neuladen.';
 $LNG['registerRules']				= 'Regeln';
 $LNG['registerRulesDesc']			= 'Ich bin mit den %s einverstanden.';
+$LNG['hiveAccount']                 = 'Hive-Konto';
 
 $LNG['registerBack']				= 'Zurück';
 $LNG['registerNext']				= 'Weiter';
@@ -93,6 +95,8 @@ $LNG['registerErrorMailSame']		= 'Sie haben 2 unterschiedliche E-Mail-Adressen a
 $LNG['registerErrorMailExist']		= 'Die E-Mail-Adresse ist bereits registriert!';
 $LNG['registerErrorRules']			= 'Du musst die Regeln akzeptieren!';
 $LNG['registerErrorCaptcha']		= 'Der Sicherheitscode ist falsch!';
+$LNG['registerErrorHiveAccountInvalid']	= 'Sie müssen ein gültiges Hive-Konto angeben!';
+$LNG['registerErrorHiveAccountExist']	= 'The Hive account is already registered!';
 
 $LNG['registerMailVertifyTitle']	= 'Aktivierung der Registrierung auf der Website: %s';
 $LNG['registerMailVertifyError']	= 'Fehler beim Versenden der Mail: %s';

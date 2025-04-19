@@ -45,6 +45,7 @@ $LNG['uni_closed']					= ' (cerrado)';
 
 // Button
 $LNG['buttonRegister']				= 'Registrate Ahora!';
+$LNG['buttonRegisterHive']			= '¡Regístrese en Hive!';
 $LNG['buttonScreenshot']			= 'Imagenes del Juego';
 $LNG['buttonLostPassword']			= 'Recuperar contraseña?';
 
@@ -79,6 +80,7 @@ $LNG['registerCaptchaDesc']			= 'Por favor ingrese los caracteres de la imagen e
 $LNG['registerCaptchaReload']		= 'Recargar Captcha.';
 $LNG['registerRules']				= 'Reglas';
 $LNG['registerRulesDesc']			= 'Estoy deacuerdo con las %s';
+$LNG['hiveAccount']                 = 'Cuenta Hive';
 
 $LNG['registerBack']				= 'Atras';
 $LNG['registerNext']				= 'Siguiente';
@@ -95,6 +97,8 @@ $LNG['registerErrorMailSame']		= 'Has introducido 2 direcciones de email diferen
 $LNG['registerErrorMailExist']		= 'La dirección de E-Mail ya esta en uso!';
 $LNG['registerErrorRules']			= 'Tienes que aceptar las Reglas!';
 $LNG['registerErrorCaptcha']		= 'El Codigo de seguridad no es correcto!';
+$LNG['registerErrorHiveAccountInvalid']	= 'Debes introducir una cuenta válida de Hive.';
+$LNG['registerErrorHiveAccountExist']	= 'La cuenta Colmena ya está registrada.';
 
 $LNG['registerMailVertifyTitle']	= 'La activación del registro en el juego: %s';
 $LNG['registerMailVertifyError']	= 'Fallo en el envio del mail: %s';

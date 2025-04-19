@@ -1,21 +1,20 @@
-# HiveNova - 2Moons engine-based browsergame for Hiveians
+# HiveNova - Space empire building browser game for Hivers
 
-Forked from SteemNova 2 (https://github.com/steemnova/steemnova)
-![](https://steemitimages.com/DQmNhKvcRhp5THpijqS45M18MiDpg1Cvc78Sv9rKCiJi5NJ/image.png)
+![MOON_Discord_Event_Banner](https://github.com/user-attachments/assets/96607107-b195-4164-9537-241430acc86e)
 
+Play the game at https://moon.hive.pizza
 
-## The game
+---
 
-The open source browsergame framework is based on [2Moons](https://gitter.im/2MoonsGame/Lobby/).
+## The Game
 
-Full source code is placed at [github.com/steemnova/steemnova](https://github.com/steemnova/steemnova) repository. It is fork of [jkroepke/2Moons](https://github.com/jkroepke/2Moons) for Steem community purposes. SteemNova repository is the center of the game. The opportunity was given to change the game code by Steemians, most probably [Utopians](https://utopian.io/) as a contribution. There are many things to modify starting from **graphics, languages, code improvements up to Steem integration and bughunting**.
+The open-source game framework is based on [2Moons](https://gitter.im/2MoonsGame/Lobby/).
 
-<p align="center">
-<img src="https://www.steem.center/images/archive/5/55/20160814202358%21Steem_Logo.png">
-</p>
+Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.com/Hive-Pizza-Team/HiveNova) repository. It is a fork of [jkroepke/2Moons](https://github.com/jkroepke/2Moons) and SteemNova 2 (https://github.com/steemnova/steemnova) for Hive community purposes. HiveNova repository is the core of the game code.
 
+![badge_powered-by-hive_dark](https://github.com/user-attachments/assets/803e396c-f165-40de-936c-03dd624153ad)
 
-## Repository structure
+## Repository Structure
 
 - [cache] - temporary cached server .tpl webpages
 - [chat] - AJAX ingame client-side chat
@@ -59,17 +58,15 @@ Full source code is placed at [github.com/steemnova/steemnova](https://github.co
 
 ## Screenshots
 
-<p align="center">
-<img src="https://user-images.githubusercontent.com/56807194/69483643-10b60100-0e2a-11ea-826f-d657bcceb40a.png">
-  <i>In game screen</i>
-</p>
+![screenshot](https://github.com/user-attachments/assets/3705e3c5-540c-4915-9f1b-8d4e2c6142ae)
 
-## Copyright and license
+## Copyright and License
 
-HiveNova is a fork of Open Source Browsergame Framework [jkroepke/2Moons](https://github.com/jkroepke/2Moons) engine.
+HiveNova is a fork of the Open Source Game Framework [jkroepke/2Moons](https://github.com/jkroepke/2Moons) engine.
+Background image created by [@mkdrwal](https://hive.blog/@mkdrwal)
 
-Code copyright 2009-2016 Jan-Otto Kröpke released under the MIT License.
-Code copyright 2018 @steemnova released under the MIT License.
-Code copyright 2018-2020 @IntinteDAO released under the MIT License. (f66f0bf9f2d502f9cc3932e7f05e4795b3622ce6)
-Code copyright 07.05.2020-2020 @IntinteDAO released under the AGPLv3 License
-
+* Code copyright 2009-2016 Jan-Otto Kröpke released under the MIT License.
+* Code copyright 2018 @steemnova released under the MIT License.
+* Code copyright 2018-2020 @IntinteDAO released under the MIT License. (f66f0bf9f2d502f9cc3932e7f05e4795b3622ce6)
+* Code copyright 07.05.2020-2020 @IntinteDAO released under the AGPLv3 License
+* Code copyright 2025 @TeamMithril released under the AGPLv3 License
