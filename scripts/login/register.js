@@ -27,10 +27,8 @@ const HiveKeychainRegister = async () => {
 			(response) => {
 				if (response.success) {
 					document.querySelector('#registerFormHive > input#hiveAccount').value = hiveaccount;
-					document.querySelector('#registerFormHive > input#hivesign').value = response.result;
 					document.querySelector('#registerFormHive > input#password').value = response.result;
 					document.querySelector('#registerFormHive > input#passwordReplay').value = response.result;
-					document.querySelector('#registerFormHive > input#password').value = response.result;
 					document.querySelector('#registerFormHive > input#email').value = `${hiveaccount}@hive.blog`;
 					document.querySelector('#registerFormHive > input#emailReplay').value = `${hiveaccount}@hive.blog`;
 					document.getElementById('registerFormHive').submit();

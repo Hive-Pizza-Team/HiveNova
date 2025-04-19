@@ -4,6 +4,10 @@
 <h1>{$LNG.buttonRegisterHive}</h1>
 <div id="registerFormWrapper">
 <form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register">
+	<input type="hidden" value="send" name="mode">
+	<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
+	<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
+	<input type="hidden" value="{$referralData.id}" name="referralID">
 	<div class="rowForm">
 		<label for="universe">{$LNG.universe}</label>
 		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
@@ -15,7 +19,6 @@
 	</div>
 	<input type="hidden" class="input" name="password" id="password"></input>
 	<input type="hidden" class="input" name="passwordReplay" id="passwordReplay"></input>
-	<input id="hivesign" name="hivesign" type="hidden"></input>
 	<input id="hiveAccount" name="hiveAccount" type="hidden"></input>
 	<input type="hidden" class="input" name="email" id="email"></input>
 	<input type="hidden" class="input" name="emailReplay" id="emailReplay"></input>
