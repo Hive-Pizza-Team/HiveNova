@@ -15,7 +15,6 @@
 					<input name="username" id="username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
 					<input name="password" id="password" type="hidden">
 					<input name="hiveAccount" id="hiveAccount" type="hidden">
-					<input name="hivesign" id="hivesign" type="hidden">
 					<button onclick="HiveKeychainLogin()" class="button_keychain" title="Log in with HiveKeychain"></button>
 				</form>
 				<hr>

@@ -85,7 +85,6 @@ const HiveKeychainLogin = async () => {
 			(response) => {
 				if (response.success) {
 					document.querySelector('#loginHive > input#hiveAccount').value = hiveaccount;
-					document.querySelector('#loginHive > input#hivesign').value = response.result;
 					document.querySelector('#loginHive > input#password').value = response.result;
 					document.getElementById('loginHive').submit();
 				} else {
