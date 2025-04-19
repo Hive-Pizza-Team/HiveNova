@@ -1,47 +1,6 @@
 
 {block name="title" prepend}{$LNG.siteTitleRegister}{/block}
 {block name="content"}
-<h1>{$LNG.buttonRegisterHive}</h1>
-<div id="registerFormWrapper">
-<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" onsubmit="return false;">
-	<input type="hidden" value="send" name="mode">
-	<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
-	<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
-	<input type="hidden" value="{$referralData.id}" name="referralID">
-	<div class="rowForm">
-		<label for="universe">{$LNG.universe}</label>
-		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
-		{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
-	</div>
-	<div class="rowForm">
-		<label for="username">{$LNG.hiveAccount}</label>
-		<input id="username" name="username" maxlength="16" size="16"></input>
-	</div>
-	<input type="hidden" class="input" name="password" id="password"></input>
-	<input type="hidden" class="input" name="passwordReplay" id="passwordReplay"></input>
-	<input id="hiveAccount" name="hiveAccount" type="hidden"></input>
-	<input type="hidden" class="input" name="email" id="email"></input>
-	<input type="hidden" class="input" name="emailReplay" id="emailReplay"></input>
-
-	{if count($languages) > 1}
-	<div class="rowForm">
-		<label for="language">{$LNG.registerLanguage}</label>
-		<select name="lang" id="language">{html_options options=$languages selected=$lang}</select>
-		{if !empty($error.language)}<span class="error errorLanguage"></span>{/if}
-		<div class="clear"></div>
-	</div>
-	{/if}
-	<div class="rowForm">
-		<label for="rules">{$LNG.registerRules}</label>
-		<input type="checkbox" name="rules" id="rules" value="1">
-		{if !empty($error.rules)}<span class="error errorRules"></span>{/if}
-		<span class="inputDesc">{$registerRulesDesc}</span>
-	</div>
-	<div class="rowForm">
-		<input type="submit" class="submitButton" value="{$LNG.buttonRegisterHive}" title="{$LNG.buttonRegisterHive}" onclick="HiveKeychainRegister()">
-	</div>
-</form>
-<br><hr>
 <h1>{$LNG.siteTitleRegister}</h1>
 <form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register">
 <input type="hidden" value="send" name="mode">
@@ -132,6 +91,47 @@
 	</div>
 	<div class="rowForm">
 		<input type="submit" class="submitButton" value="{$LNG.buttonRegister}">
+	</div>
+</form>
+<br><hr>
+<h1>{$LNG.buttonRegisterHive}</h1>
+<div id="registerFormWrapper">
+<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" onsubmit="return false;">
+	<input type="hidden" value="send" name="mode">
+	<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
+	<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
+	<input type="hidden" value="{$referralData.id}" name="referralID">
+	<div class="rowForm">
+		<label for="universe">{$LNG.universe}</label>
+		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
+		{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
+	</div>
+	<div class="rowForm">
+		<label for="username">{$LNG.hiveAccount}</label>
+		<input id="username" name="username" maxlength="16" size="16"></input>
+	</div>
+	<input type="hidden" class="input" name="password" id="password"></input>
+	<input type="hidden" class="input" name="passwordReplay" id="passwordReplay"></input>
+	<input id="hiveAccount" name="hiveAccount" type="hidden"></input>
+	<input type="hidden" class="input" name="email" id="email"></input>
+	<input type="hidden" class="input" name="emailReplay" id="emailReplay"></input>
+
+	{if count($languages) > 1}
+	<div class="rowForm">
+		<label for="language">{$LNG.registerLanguage}</label>
+		<select name="lang" id="language">{html_options options=$languages selected=$lang}</select>
+		{if !empty($error.language)}<span class="error errorLanguage"></span>{/if}
+		<div class="clear"></div>
+	</div>
+	{/if}
+	<div class="rowForm">
+		<label for="rules">{$LNG.registerRules}</label>
+		<input type="checkbox" name="rules" id="rules" value="1">
+		{if !empty($error.rules)}<span class="error errorRules"></span>{/if}
+		<span class="inputDesc">{$registerRulesDesc}</span>
+	</div>
+	<div class="rowForm">
+		<input type="submit" class="submitButton" value="{$LNG.buttonRegisterHive}" title="{$LNG.buttonRegisterHive}" onclick="HiveKeychainRegister()">
 	</div>
 </form>
 {/block}
