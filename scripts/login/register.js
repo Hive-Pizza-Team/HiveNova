@@ -11,12 +11,12 @@ const HiveKeychainRegister = async () => {
 		return;
 	}
 
-	if (document.querySelector('#loginHive > input#username').value.length == 0 || document.querySelector('#loginHive > input#username').value.length > 16) {
+	if (document.querySelector('#registerFormHive > input#username').value.length == 0 || document.querySelector('#registerFormHive > input#username').value.length > 16) {
 		alert('You must enter a valid Hive account name first.');
 		return;
 	}
 
-	const hiveaccount = document.querySelector('#loginHive > input#username').value;
+	const hiveaccount = document.querySelector('#registerFormHive > input#username').value;
 
 	try
   	{
@@ -26,9 +26,14 @@ const HiveKeychainRegister = async () => {
 			"Posting",
 			(response) => {
 				if (response.success) {
-					document.querySelector('#loginHive > input#hiveAccount').value = hiveaccount;
-					document.querySelector('#loginHive > input#hivesign').value = response.result;
-					document.getElementById('loginHive').submit();
+					document.querySelector('#registerFormHive > input#hiveAccount').value = hiveaccount;
+					document.querySelector('#registerFormHive > input#hivesign').value = response.result;
+					document.querySelector('#registerFormHive > input#password').value = response.result;
+					document.querySelector('#registerFormHive > input#passwordReplay').value = response.result;
+					document.querySelector('#registerFormHive > input#password').value = response.result;
+					document.querySelector('#registerFormHive > input#email').value = `${hiveaccount}@hive.blog`;
+					document.querySelector('#registerFormHive > input#emailReplay').value = `${hiveaccount}@hive.blog`;
+					document.getElementById('registerFormHive').submit();
 				} else {
 					console.error('Keychain error', response.error);
 				}
