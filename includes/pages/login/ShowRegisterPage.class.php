@@ -133,6 +133,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			$externalAuthUID	= $externalAuth['account'];
 			$externalAuthMethod	= strtolower(str_replace(array('_', '\\', '/', '.', "\0"), '', $externalAuth['method']));
 		}
+		$hiveAccount   = HTTP::_GP('hiveAccount', '');
 		
 		$errors 	= array();
 		
@@ -143,7 +144,7 @@ class ShowRegisterPage extends AbstractLoginPage
 		if(!PlayerUtil::isNameValid($userName)) {
 			$errors[]	= $LNG['registerErrorUsernameChar'];
 		}
-		
+
 		if(strlen($password) < 6) {
 			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], 6);
 		}
@@ -166,6 +167,10 @@ class ShowRegisterPage extends AbstractLoginPage
 		
 		if($rulesChecked != 1) {
 			$errors[]	= $LNG['registerErrorRules'];
+		}
+
+		if(!empty($hiveAccount) && !PlayerUtil::isHiveAccountValid($hiveAccount)) {
+			$errors[]	= $LNG['registerErrorHiveAccountInvalid'];
 		}
 		
 		$db = Database::get();
@@ -234,7 +239,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			$errors[]	= $LNG['registerErrorMailExist'];
 		}
 
-		if($countHiveAccount != 0) {
+		if(!empty($hiveAccount) && $countHiveAccount != 0) {
 			$errors[]	= $LNG['registerErrorHiveAccountExist'];
 		}
 		
@@ -303,7 +308,8 @@ class ShowRegisterPage extends AbstractLoginPage
 				`universe` = :universe,
 				`referralID` = :referralID,
 				`externalAuthUID` = :externalAuthUID,
-				`externalAuthMethod` = :externalAuthMethod;";
+				`externalAuthMethod` = :externalAuthMethod,
+				`hive_account` = :hiveAccount;";
 
 
 		$db->insert($sql, array(
@@ -317,7 +323,8 @@ class ShowRegisterPage extends AbstractLoginPage
 			':universe'				=> Universe::current(),
 			':referralID'			=> $referralID,
 			':externalAuthUID'		=> $externalAuthUID,
-			':externalAuthMethod'	=> $externalAuthMethod
+			':externalAuthMethod'	=> $externalAuthMethod,
+			':hiveAccount'          => $hiveAccount
 		));
 
 		$validationID	= $db->lastInsertId();
