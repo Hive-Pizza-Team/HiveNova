@@ -217,6 +217,11 @@ class ShowRegisterPage extends AbstractLoginPage
 			FROM %%USERS%%
 			WHERE universe = :universe
 			AND hive_account = :hiveAccount
+		) + (
+			SELECT COUNT(*)
+			FROM %%USERS_VALID%%
+			WHERE universe = :universe
+			AND hive_account = :hiveAccount
 		) as count;";
 
 		$countHiveAccount = $db->selectSingle($sql, array(

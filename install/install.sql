@@ -843,6 +843,7 @@ CREATE TABLE `%PREFIX%users_valid` (
  `validationKey` varchar(32) NOT NULL,
  `password` varchar(60) NOT NULL,
  `email` varchar(64) NOT NULL,
+ `hive_account` varchar(16) NOT NULL DEFAULT '',
  `date` int(11) NOT NULL,
  `ip` varchar(40) NOT NULL,
  `language` varchar(3) NOT NULL,
