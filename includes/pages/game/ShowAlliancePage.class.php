@@ -827,6 +827,7 @@ class ShowAlliancePage extends AbstractGamePage
 			}
 
 			$text 		= HTTP::_GP('text', '', true);
+			$text		= str_replace(array("[img]",".php","[/img]"),"",$text);
 			$textMode  	= HTTP::_GP('textMode', 'external');
 
 			$textSQL	= "";

@@ -21,15 +21,15 @@ function ShowMultiIPPage()
 {
 	global $LNG;
 	
-	if(!isset($_GET['action'])) { $_GET['action'] = ''; }
-	switch($_GET['action'])
+	if(!isset($_POST['action'])) { $_POST['action'] = ''; }
+	switch($_POST['action'])
 	{
 		case 'known':
-			$GLOBALS['DATABASE']->query("INSERT INTO ".MULTI." SET userID = ".((int) $_GET['id']).";");
+			$GLOBALS['DATABASE']->query("INSERT INTO ".MULTI." SET userID = ".((int) $_POST['id']).";");
 			HTTP::redirectTo("admin.php?page=multiips");
 		break;
 		case 'unknown':
-			$GLOBALS['DATABASE']->query("DELETE FROM ".MULTI." WHERE userID = ".((int) $_GET['id']).";");
+			$GLOBALS['DATABASE']->query("DELETE FROM ".MULTI." WHERE userID = ".((int) $_POST['id']).";");
 			HTTP::redirectTo("admin.php?page=multiips");
 		break;
 	}

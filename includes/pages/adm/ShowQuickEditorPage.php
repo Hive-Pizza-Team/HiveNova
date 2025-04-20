@@ -36,7 +36,7 @@ function ShowQuickEditorPage()
 			}
 			$PlanetData	= $GLOBALS['DATABASE']->getFirstRow("SELECT ".$SpecifyItemsPQ." `name`, `id_owner`, `planet_type`, `galaxy`, `system`, `planet`, `destruyed`, `diameter`, `field_current`, `field_max`, `temp_min`, `temp_max`, `metal`, `crystal`, `deuterium` FROM ".PLANETS." WHERE `id` = '".$id."';");
 						
-			if($action == 'send'){
+			if($_POST && $action == 'send'){
 				$SQL	= "UPDATE ".PLANETS." SET ";
 				$Fields	= $PlanetData['field_current'];
 				foreach($DataIDs as $ID)
@@ -149,7 +149,7 @@ function ShowQuickEditorPage()
 			$UserData	= $GLOBALS['DATABASE']->getFirstRow("SELECT ".$SpecifyItemsPQ." `username`, `authlevel`, `galaxy`, `system`, `planet`, `id_planet`, `darkmatter`, `authattack`, `authlevel` FROM ".USERS." WHERE `id` = '".$id."';");
 			$ChangePW	= $USER['id'] == ROOT_USER || ($id != ROOT_USER && $USER['authlevel'] > $UserData['authlevel']);
 		
-			if($action == 'send'){
+			if($_POST && $action == 'send'){
 				$SQL	= "UPDATE ".USERS." SET ";
 				foreach($DataIDs as $ID)
 				{
