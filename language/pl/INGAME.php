@@ -226,7 +226,7 @@ $LNG['gl_no'] 								= 'Nie';
 $LNG['gl_points'] 							= 'Punkty';
 $LNG['gl_player']							= 'Gracz';
 $LNG['gl_to']								= 'do';
-$LNG['gl_fuel_warning']                     = 'Ostrzeżenie: skanowanie galaktyki kosztuje uran.'
+$LNG['gl_fuel_warning']                     = 'Ostrzeżenie: skanowanie galaktyki kosztuje uran.';
 
 
 //----------------------------------------------------------------------------//
