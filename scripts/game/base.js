@@ -310,9 +310,9 @@ const DepositPizzaTokens = async (hiveaccount) => {
 		const memo = '';
 		const tokenSymbol = 'PIZZA';
 		hive_keychain.requestSendToken(hiveaccount, depositWallet, amount.toFixed(3), memo, tokenSymbol, (response) => {
-			alert(JSON.stringify(response));
+			console.debug(JSON.stringify(response));
 		});
 	} catch (error) {
-		alert(JSON.stringify(error));
+		alert(error.message);
 	}
 }
