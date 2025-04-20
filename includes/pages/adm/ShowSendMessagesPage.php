@@ -51,7 +51,7 @@ function ShowSendMessagesPage() {
 			if($Mode == 0 || $Mode == 2) {
 				$From    	= '<span class="'.$class.'">'.$LNG['user_level_'.$USER['authlevel']].' '.$USER['username'].'</span>';
 				$pmSubject 	= '<span class="'.$class.'">'.$Subject.'</span>';
-				$pmMessage 	= '<span class="'.$class.'">'.BBCode::parse($Message).'</span>';
+				$pmMessage 	= '<span class="'.$class.'">'.$Message.'</span>';
 				$USERS		= $GLOBALS['DATABASE']->query("SELECT `id`, `username` FROM ".USERS." WHERE `universe` = '".Universe::getEmulated()."'".(!empty($Lang) ? " AND `lang` = '".$GLOBALS['DATABASE']->sql_escape($Lang)."'": "").";");
 				while($UserData = $GLOBALS['DATABASE']->fetch_array($USERS))
 				{
@@ -69,7 +69,7 @@ function ShowSendMessagesPage() {
 				{				
 					$userList[$UserData['email']]	= array(
 						'username'	=> $UserData['username'],
-						'body'		=> BBCode::parse(str_replace('{USERNAME}', $UserData['username'], $Message))
+						'body'		=> str_replace('{USERNAME}', $UserData['username'], $Message)
 					);
 				}
 				
