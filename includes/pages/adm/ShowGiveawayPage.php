@@ -21,7 +21,7 @@ function ShowGiveaway()
 	global $LNG, $resource, $reslist;
 	$template	= new template();	
 	$action	= HTTP::_GP('action', '');
-	if ($action == 'send') {
+	if ($_POST && $action == 'send') {
 		$planet			= HTTP::_GP('planet', 0);
 		$moon			= HTTP::_GP('moon', 0);
 		$mainplanet		= HTTP::_GP('mainplanet', 0);

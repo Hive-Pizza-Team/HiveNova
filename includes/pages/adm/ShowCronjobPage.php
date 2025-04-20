@@ -114,7 +114,7 @@ function ShowCronjobEdit($post_id)
 	elseif (!file_exists('includes/classes/cronjob/'.$post_class.'.class.php')) 
 		$error_msg[] = $LNG['cronjob_error_filenotfound'].'includes/classes/cronjobs/'.$post_class.'.class.php';
 	
-	if (count($error_msg) == 0)
+	if ($_POST && count($error_msg) == 0)
 	{
 		if ($post_id != 0)
 			$GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET name = '".$GLOBALS['DATABASE']->sql_escape($post_name)."', min = '".$post_min."', hours = '".$post_hours."', month = '".$post_month."', dow = '".$post_dow."', dom = '".$post_dom."', class = '".$GLOBALS['DATABASE']->sql_escape($post_class)."' WHERE cronjobID = $post_id;");
