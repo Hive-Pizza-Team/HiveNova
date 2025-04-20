@@ -232,6 +232,8 @@ $LNG['gl_no'] 								= 'Hayir';
 $LNG['gl_points'] 							= 'Puan';
 $LNG['gl_player']							= 'Oyuncu';
 $LNG['gl_to']								= ' ';
+$LNG['gl_fuel_warning']                     = 'Uyarı: Galaksi taraması uranyuma mal olur.';
+
 
 //----------------------------------------------------------------------------//
 // Radar

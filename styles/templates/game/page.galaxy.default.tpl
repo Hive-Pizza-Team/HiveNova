@@ -34,6 +34,11 @@
 				<input type="submit" value="{$LNG.gl_show}">
 			</td>
 		</tr>
+		<tr>
+			<td colspan="2">
+				{$LNG.gl_fuel_warning}
+			</td>
+		</tr>
 	</table>
 	</form>
 	{if $action == 'sendMissle'}
