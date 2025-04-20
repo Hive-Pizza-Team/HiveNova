@@ -326,10 +326,6 @@ class ShowOverviewPage extends AbstractGamePage
 	
 	function rename() 
 	{
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-		}
-
 		global $LNG, $PLANET;
 
 		$newname        = HTTP::_GP('name', '', UTF8_SUPPORT);

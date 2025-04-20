@@ -871,7 +871,7 @@ class ShowAlliancePage extends AbstractGamePage
 				':AllianceDiplo'			=> $this->allianceData['ally_diplo'],
 				':AllianceEvents'			=> $this->allianceData['ally_events'],
 				':AllianceID'				=> $this->allianceData['id'],
-				':text'						=> $text
+				':text'						=> str_replace('.php','',$text);
 			));
 		} else {
 			switch ($textMode) {
