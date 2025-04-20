@@ -222,6 +222,8 @@ $LNG['gl_no'] 								= 'No';
 $LNG['gl_points'] 							= 'Puntos';
 $LNG['gl_player']							= 'Jugador';
 $LNG['gl_to']								= 'hacia';
+$LNG['gl_fuel_warning']                     = 'Advertencia: escanear galaxias cuesta uranio.'
+
 
 //----------------------------------------------------------------------------//
 //PHALANX

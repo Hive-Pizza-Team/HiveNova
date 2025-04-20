@@ -237,6 +237,8 @@ $LNG['gl_player']							= 'Player';
 $LNG['gl_to']								= 'to';
 $LNG['gl_to']								= 'to';
 $LNG['gl_trade_space']	= 'Trading zone';
+$LNG['gl_fuel_warning']                     = 'Warning: galaxy scan costs uranium.'
+
 
 //----------------------------------------------------------------------------//
 // Sensor Phalanx

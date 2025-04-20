@@ -226,6 +226,8 @@ $LNG['gl_no'] 								= 'Não';
 $LNG['gl_points'] 							= 'Pontos';
 $LNG['gl_player']							= 'Jogador';
 $LNG['gl_to']								= 'a';
+$LNG['gl_fuel_warning']                     = 'Aviso: a análise da galáxia custa urânio.'
+
 
 //----------------------------------------------------------------------------//
 // Sensor Phalanx

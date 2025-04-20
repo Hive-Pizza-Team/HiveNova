@@ -212,6 +212,8 @@ $LNG['gl_no'] 								= 'Non';
 $LNG['gl_points'] 							= 'Points';
 $LNG['gl_player']							= 'Joueur';
 $LNG['gl_to']								= 'à';
+$LNG['gl_fuel_warning']                     = 'Attention : le balayage des galaxies coûte de l\'uranium.'
+
 
 //----------------------------------------------------------------------------//
 //PHALANX
