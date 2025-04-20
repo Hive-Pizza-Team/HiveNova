@@ -144,7 +144,7 @@ class ShowTicketPage extends AbstractGamePage
 
 		foreach($answerResult as $answerRow) {
 			$answerRow['time']		= _date($LNG['php_tdformat'], $answerRow['time'], $USER['timezone']);
-			$answerRow['message']	= BBCode::parse($answerRow['message']);
+			$answerRow['message']	= $answerRow['message'];
 			$answerList[$answerRow['answerID']]	= $answerRow;
 			if (empty($ticket_status))
 			{
