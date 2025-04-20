@@ -21,12 +21,12 @@ function ShowSearchPage()
 {
 	global $LNG, $USER;
 	
-	if(!isset($_GET['delete'])) { $_GET['delete']=''; }
+	if(!isset($_POST['delete'])) { $_POST['delete']=''; }
 	if ($_GET['delete'] == 'user') {
-        PlayerUtil::deletePlayer((int) $_GET['user']);
+        PlayerUtil::deletePlayer((int) $_POST['user']);
         message($LNG['se_delete_succes_p'], '?page=search&search=users&minimize=on', 2);
-	} elseif ($_GET['delete'] == 'planet'){
-		PlayerUtil::deletePlanet((int) $_GET['planet']);
+	} elseif ($_POST['delete'] == 'planet'){
+		PlayerUtil::deletePlanet((int) $_POST['planet']);
         message($LNG['se_delete_succes_p'], '?page=search&search=planet&minimize=on', 2);
     }
 	
