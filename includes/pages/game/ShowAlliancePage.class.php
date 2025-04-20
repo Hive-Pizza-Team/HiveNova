@@ -827,6 +827,7 @@ class ShowAlliancePage extends AbstractGamePage
 			}
 
 			$text 		= HTTP::_GP('text', '', true);
+			$text		= str_replace(array("[img]",".php","[/img]"),"",$text);
 			$textMode  	= HTTP::_GP('textMode', 'external');
 
 			$textSQL	= "";
@@ -871,7 +872,7 @@ class ShowAlliancePage extends AbstractGamePage
 				':AllianceDiplo'			=> $this->allianceData['ally_diplo'],
 				':AllianceEvents'			=> $this->allianceData['ally_events'],
 				':AllianceID'				=> $this->allianceData['id'],
-				':text'						=> str_replace(".php","",$text);
+				':text'						=> $text;
 			));
 		} else {
 			switch ($textMode) {
