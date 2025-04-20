@@ -35,7 +35,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td>
+			<td colspan="2">
 				{$LNG.gl_fuel_warning}
 			</td>
 		</tr>
