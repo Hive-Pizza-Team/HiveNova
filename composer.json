@@ -22,31 +22,3 @@
     ],
     "minimum-stability": "stable"
 }
-
-
-{
-    "name": "hivenova",
-    "description": "Online browser game.",
-    "type": "project",
-    "license": "AGPL-3.0-only",
-    "authors": [
-        {
-            "name": "Jan-Otto Kröpke",
-            "email": "kroepke@outlook.com"
-        },
-        {
-            "name": "hivetrending"
-        },
-        {
-            "name": "thecrazygm"
-        },
-        {
-            "name": "ecoinstant"
-        }
-    ],
-    "minimum-stability": "stable",
-    "require": {
-        "mahdiyari/hive-php": "^1.1"
-    },
-    "require-dev": {}
-}
