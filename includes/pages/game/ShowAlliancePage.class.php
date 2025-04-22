@@ -798,6 +798,10 @@ class ShowAlliancePage extends AbstractGamePage
 		$textMode  	= HTTP::_GP('textMode', 'external');
 
 		if ($send) {
+			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+				return;
+			}
+			
 			$db = Database::get();
 
 			$this->allianceData['ally_owner_range'] 		= HTTP::_GP('owner_range', '', true);
