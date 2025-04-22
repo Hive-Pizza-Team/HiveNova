@@ -262,9 +262,6 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
 
 		$text		= HTTP::_GP('text', '', true);
 		$allianceId	= HTTP::_GP('id', 0);
@@ -292,6 +289,10 @@ class ShowAlliancePage extends AbstractGamePage
 		}
 
 		if (!empty($text)) {
+			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+				return;
+			}
+
 			$sql = "INSERT INTO %%ALLIANCE_REQUEST%% SET
                 allianceId	= :allianceId,
                 text		= :text,
