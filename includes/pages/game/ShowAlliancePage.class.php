@@ -1000,14 +1000,14 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
-
 		$db	= Database::get();
 
 		$postleader = HTTP::_GP('newleader', 0);
 		if (!empty($postleader)) {
+			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+				return;
+			}
+
 			$sql = "SELECT ally_rank_id FROM %%USERS%% WHERE id = :LeaderID;";
 			$Rank = $db->selectSingle($sql, array(
 				':LeaderID'	=> $postleader
