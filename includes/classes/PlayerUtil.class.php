@@ -16,10 +16,11 @@
  */
 
 // import hive-php and instantiate $hive
-define('ROOT_PATH', str_replace('\\', '/',dirname(__FILE__)).'/');
-set_include_path(ROOT_PATH.'vendor/mahdiyari/hive-php/lib/'.':'.ROOT_PATH.':'.get_include_path());
-include 'vendor/autoload.php';
-require_once('Hive.php');
+$hivePhp = __DIR__.'/../../vendor/mahdiyari/hive-php/lib/Hive.php';
+if (file_exists($hivePhp)) {
+    require_once $hivePhp;
+}
+
 $hive = new Hive\Hive();
 
 
