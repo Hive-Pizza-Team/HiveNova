@@ -797,10 +797,6 @@ class ShowAlliancePage extends AbstractGamePage
 		$send 		= HTTP::_GP('send', 0);
 		$textMode  	= HTTP::_GP('textMode', 'external');
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
-
 		if ($send) {
 			$db = Database::get();
 
