@@ -1685,6 +1685,7 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
+
 		$db = Database::get();
 
 		$id	= HTTP::_GP('ally_id', '', UTF8_SUPPORT);
