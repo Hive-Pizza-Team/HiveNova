@@ -1,26 +1,24 @@
 {
-    "name": "Hive-Pizza-Team/HiveNova",
+    "name": "hive-pizza-team/hivenova",
     "description": "Online browser game.",
     "type": "project",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Jan-Otto Kröpke",
-            "email": "kroepke@outlook.com"
-        },
-        {
-            "name": "hivetrending"
-        },
-        {
-            "name": "thecrazygm"
-        },
-        {
-            "name": "ecoinstant"
-        }
-    ],
-    "minimum-stability": "stable",
     "require": {
         "mahdiyari/hive-php": "^1.1"
     },
-    "require-dev": {}
+    "license": "AGPL-3.0-only",
+    "authors": [
+        {
+            "name": "hivetrending",
+            "role": "Developer"
+        },
+        {
+            "name": "thecrazygm",
+            "role": "Developer"
+        },
+        {
+            "name": "ecoinstant",
+            "role": "Translator"
+        }
+    ],
+    "minimum-stability": "stable"
 }

@@ -123,6 +123,10 @@ class ShowSettingsPage extends AbstractGamePage
 	
 	public function send()
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		global $USER;
 		if($USER['urlaubs_modus'] == 1) {
 			$this->sendVacation();
@@ -133,6 +137,10 @@ class ShowSettingsPage extends AbstractGamePage
 	
 	private function sendVacation() 
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		global $USER, $LNG; $PLANET;
 		
 		$delete		= HTTP::_GP('delete', 0);
@@ -189,6 +197,10 @@ class ShowSettingsPage extends AbstractGamePage
 	
 	private function sendDefault()
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		global $USER, $LNG, $THEME;
 		
 		$adminprotection	= HTTP::_GP('adminprotection', 0);
