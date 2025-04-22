@@ -1091,10 +1091,6 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
-
 		$id    = HTTP::_GP('id', 0);
 
 		$db = Database::get();
