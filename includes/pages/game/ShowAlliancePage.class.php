@@ -1608,10 +1608,6 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
-
 		$db = Database::get();
 
 		$sql = "UPDATE %%DIPLO%% SET accept = 1 WHERE id = :id AND owner_2 = :allianceId;";
@@ -1628,10 +1624,6 @@ class ShowAlliancePage extends AbstractGamePage
 		if (!$this->rights['DIPLOMATIC']) {
 			$this->redirectToHome();
 		}
-
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
 
 		$db = Database::get();
 
