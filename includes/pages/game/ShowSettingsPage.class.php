@@ -189,6 +189,10 @@ class ShowSettingsPage extends AbstractGamePage
 	
 	private function sendDefault()
 	{
+		if (!$_SERVER['REQUEST_METHOD'] === 'POST') {
+			return;
+	    }
+
 		global $USER, $LNG, $THEME;
 		
 		$adminprotection	= HTTP::_GP('adminprotection', 0);
