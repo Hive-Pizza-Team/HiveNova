@@ -29,10 +29,6 @@ $mode 		= HTTP::_GP('mode', 'show');
 $page		= str_replace(array('_', '\\', '/', '.', "\0"), '', $page);
 $pageClass	= 'Show'.ucfirst($page).'Page';
 
-if(isset($_REQUEST['access_token'])) // SteemConnectv2 callback
-{
-	$pageClass = 'ShowSteemconnectPage';
-}
 
 $path		= 'includes/pages/login/'.$pageClass.'.class.php';
 

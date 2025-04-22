@@ -262,6 +262,7 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
+
 		$text		= HTTP::_GP('text', '', true);
 		$allianceId	= HTTP::_GP('id', 0);
 
@@ -288,6 +289,10 @@ class ShowAlliancePage extends AbstractGamePage
 		}
 
 		if (!empty($text)) {
+			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+				return;
+			}
+
 			$sql = "INSERT INTO %%ALLIANCE_REQUEST%% SET
                 allianceId	= :allianceId,
                 text		= :text,
@@ -336,6 +341,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 	function cancelApply()
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		global $LNG, $USER;
 
 		if (!$this->hasApply) {
@@ -401,6 +410,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 	private function createAlliance()
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		$action	= $this->getAction();
 		if ($action == "send") {
 			$this->createAllianceProcessor();
@@ -411,6 +424,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 	private function createAllianceProcessor()
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		global $USER, $LNG;
 		$allianceTag	= HTTP::_GP('atag', '', UTF8_SUPPORT);
 		$allianceName	= HTTP::_GP('aname', '', UTF8_SUPPORT);
@@ -670,6 +687,10 @@ class ShowAlliancePage extends AbstractGamePage
 	{
 		global $USER;
 
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		$db = Database::get();
 
 		$sql	= "UPDATE %%USERS%% SET ally_id = 0, ally_register_time = 0, ally_register_time = 5 WHERE id = :UserID;";
@@ -700,6 +721,11 @@ class ShowAlliancePage extends AbstractGamePage
 		$action	= HTTP::_GP('action', '');
 
 		if ($action == "send") {
+
+			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+				return;
+			}
+
 			$rankId		= HTTP::_GP('rankID', 0);
 			$subject 	= HTTP::_GP('subject', '', true);
 			$text 		= HTTP::_GP('text', $LNG['mg_no_subject'], true);
@@ -773,6 +799,10 @@ class ShowAlliancePage extends AbstractGamePage
 		$textMode  	= HTTP::_GP('textMode', 'external');
 
 		if ($send) {
+			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+				return;
+			}
+			
 			$db = Database::get();
 
 			$this->allianceData['ally_owner_range'] 		= HTTP::_GP('owner_range', '', true);
@@ -921,6 +951,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminClose()
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		global $USER;
 		if ($this->allianceData['ally_owner'] == $USER['id']) {
 			$db = Database::get();
@@ -971,6 +1005,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 		$postleader = HTTP::_GP('newleader', 0);
 		if (!empty($postleader)) {
+			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+				return;
+			}
+
 			$sql = "SELECT ally_rank_id FROM %%USERS%% WHERE id = :LeaderID;";
 			$Rank = $db->selectSingle($sql, array(
 				':LeaderID'	=> $postleader
@@ -1139,6 +1177,10 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		$db = Database::get();
 
 		$text  		= makebr(HTTP::_GP('text', '', true));
@@ -1232,6 +1274,10 @@ class ShowAlliancePage extends AbstractGamePage
 		if (!$this->rights['RANKS']) {
 			$this->redirectToHome();
 		}
+
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
 
 		$newRank	= HTTP::_GP('newrank', array(), true);
 		$delete		= HTTP::_GP('deleteRank', 0);
@@ -1408,6 +1454,10 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->sendJSON();
 		}
 
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		$userRanks	= HTTP::_GP('rank', array());
 
 		$db = Database::get();
@@ -1454,6 +1504,10 @@ class ShowAlliancePage extends AbstractGamePage
 		if (!$this->rights['KICK']) {
 			$this->redirectToHome();
 		}
+
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
 
 		$db = Database::get();
 
@@ -1554,6 +1608,10 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
+
 		$db = Database::get();
 
 		$sql = "UPDATE %%DIPLO%% SET accept = 1 WHERE id = :id AND owner_2 = :allianceId;";
@@ -1570,6 +1628,10 @@ class ShowAlliancePage extends AbstractGamePage
 		if (!$this->rights['DIPLOMATIC']) {
 			$this->redirectToHome();
 		}
+
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
 
 		$db = Database::get();
 
@@ -1622,6 +1684,10 @@ class ShowAlliancePage extends AbstractGamePage
 		if (!$this->rights['DIPLOMATIC']) {
 			$this->redirectToHome();
 		}
+
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			return;
+	    }
 
 		$db = Database::get();
 

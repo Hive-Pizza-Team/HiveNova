@@ -293,7 +293,7 @@ const HiveKeychainLogin = async () => {
 			'Moon Login'
 		);
 	} catch (error) {
-		console.error({ error });
+		alert(error.message);
 	}
 }
 
