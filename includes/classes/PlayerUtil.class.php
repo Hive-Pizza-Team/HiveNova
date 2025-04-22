@@ -21,9 +21,6 @@ if (file_exists($hivePhp)) {
     require_once $hivePhp;
 }
 
-$hive = new Hive\Hive();
-
-
 class PlayerUtil
 {
 	static public function cryptPassword($password)
@@ -85,6 +82,8 @@ class PlayerUtil
 		if (!PlayerUtil::isNameValid($signedblob)) {
 			return false;
 		}
+
+		$hive = new Hive\Hive();
 
 		// verify signature using hive-php
 		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
