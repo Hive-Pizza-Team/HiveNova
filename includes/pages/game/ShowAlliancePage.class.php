@@ -1559,10 +1559,6 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
-
 		$db = Database::get();
 
 		$diplomaticList	= array(
