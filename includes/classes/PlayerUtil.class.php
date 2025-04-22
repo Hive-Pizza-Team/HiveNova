@@ -73,7 +73,7 @@ class PlayerUtil
 	static public function isHiveSignValid($hiveaccount, $signedblob)
 	{
 		// verify account
-		if (!isHiveAccountValid($hiveaccount)) {
+		if (!$PlayerUtil::isHiveAccountValid($hiveaccount)) {
 			return false;
 		}
 
