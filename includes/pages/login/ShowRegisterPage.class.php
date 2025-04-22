@@ -137,7 +137,7 @@ class ShowRegisterPage extends AbstractLoginPage
 
 		if ($hiveAccount !== '') {
 			// validate hive signature
-			if (!PlayerUtil::isHiveSignValid($hiveAccount,$password) {
+			if (!PlayerUtil::isHiveSignValid($hiveAccount,$password)) {
 				$errors[]	= $LNG['registerErrorPasswordSame'];
 			}
 		}
