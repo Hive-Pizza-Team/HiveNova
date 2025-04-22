@@ -100,7 +100,7 @@ class PlayerUtil
 		}
 
 		$message = hash('sha256', $hiveaccount.' is my account.');
-		$verified = $publicKey->verify($message, $signature);
+		$verified = $publicKey->verify($message, $signedblob);
 		if ($verified) {
 			return true;
 		}
