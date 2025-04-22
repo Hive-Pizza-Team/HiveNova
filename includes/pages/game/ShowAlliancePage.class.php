@@ -717,14 +717,14 @@ class ShowAlliancePage extends AbstractGamePage
 		if (!$this->rights['ROUNDMAIL'])
 			$this->redirectToHome();
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-		}
-		
-
 		$action	= HTTP::_GP('action', '');
 
 		if ($action == "send") {
+
+			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+				return;
+			}
+
 			$rankId		= HTTP::_GP('rankID', 0);
 			$subject 	= HTTP::_GP('subject', '', true);
 			$text 		= HTTP::_GP('text', $LNG['mg_no_subject'], true);
@@ -1058,10 +1058,6 @@ class ShowAlliancePage extends AbstractGamePage
 		if (!$this->rights['SEEAPPLY'] || !$this->rights['MANAGEAPPLY']) {
 			$this->redirectToHome();
 		}
-
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
 
 		$db = Database::get();
 
