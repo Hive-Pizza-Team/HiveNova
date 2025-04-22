@@ -1242,10 +1242,6 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
-
 		$sql = "SELECT * FROM %%ALLIANCE_RANK%% WHERE allianceId = :allianceId;";
 		$rankResult = Database::get()->select($sql, array(
 			':allianceId'	=> $this->allianceData['id']
