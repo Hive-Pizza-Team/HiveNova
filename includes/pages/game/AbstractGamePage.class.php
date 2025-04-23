@@ -158,7 +158,7 @@ abstract class AbstractGamePage
 			'current_pid'		=> $PLANET['id'],
 			'image'				=> $PLANET['image'],
 			'username'			=> $USER['username'],
-			'avatar'			=> getPlayerAvatarURL($USER),
+			'avatar'			=> PlayerUtil::getPlayerAvatarURL($USER),
 			'resourceTable'		=> $resourceTable,
 			'shortlyNumber'		=> $themeSettings['TOPNAV_SHORTLY_NUMBER'],
 			'closed'			=> !$config->game_disable,
