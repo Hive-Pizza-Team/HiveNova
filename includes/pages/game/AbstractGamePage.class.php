@@ -147,14 +147,6 @@ abstract class AbstractGamePage
 			$commitShort = substr($commit, 0, 7);
 		}
 
-		$avatar = 'styles/resource/images/user.png';
-		if (Session::load()->data !== null)
-		{
-			try{
-				$avatar = json_decode(Session::load()->data->account->json_metadata)->profile->profile_image;
-			}catch(Exception $e){}
-		}
-
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
 			'new_message' 		=> $USER['messages'],
@@ -166,7 +158,7 @@ abstract class AbstractGamePage
 			'current_pid'		=> $PLANET['id'],
 			'image'				=> $PLANET['image'],
 			'username'			=> $USER['username'],
-			'avatar'			=> $avatar,
+			'avatar'			=> PlayerUtil::getPlayerAvatarURL($USER),
 			'resourceTable'		=> $resourceTable,
 			'shortlyNumber'		=> $themeSettings['TOPNAV_SHORTLY_NUMBER'],
 			'closed'			=> !$config->game_disable,

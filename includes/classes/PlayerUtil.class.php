@@ -75,7 +75,7 @@ class PlayerUtil
 		}
 
 		// verify length
-		if (is_null($signedblob) || strlen($signedblob) == 0 || strlen($signedblob) > 132) {
+		if (is_null($signedblob) || strlen($signedblob) < 32 || strlen($signedblob) > 132) {
 			return false;
 		}
 		// verify content
@@ -106,6 +106,32 @@ class PlayerUtil
 		}
 
 		return false;
+	}
+
+	static public function isHiveAccountExists($hiveaccount) {
+		// verify account
+		if (!PlayerUtil::isHiveAccountValid($hiveaccount)) {
+			return false;
+		}
+
+		$hive = new Hive\Hive();
+
+		// check existence using hive-php
+		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
+
+		if(is_array($result) && count($result) > 0) {
+			return true;
+		}
+
+		return false;
+	}
+
+	static public function getPlayerAvatarURL($USER){
+		if (PlayerUtil::isHiveAccountValid($USER['username']) && isset($USER['hive_account']) && $USER['username'] === $USER['hive_account']) {
+			return 'https://images.hive.blog/u/'.$USER['username'].'/avatar';
+		}
+
+		return 'styles/resource/images/user.png';
 	}
 
 	static public function isMailValid($address) {
