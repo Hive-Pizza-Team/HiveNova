@@ -36,7 +36,7 @@ class ShowLoginPage extends AbstractLoginPage
 		$username = HTTP::_GP('username', '', UTF8_SUPPORT);
 		$password = HTTP::_GP('password', '', true);
 
-		$sql = "SELECT id, password FROM %%USERS%% WHERE universe = :universe AND username = :username;";
+		$sql = "SELECT id, password, hive_account FROM %%USERS%% WHERE universe = :universe AND username = :username;";
 		$loginData = $db->selectSingle($sql, array(
 			':universe'	=> Universe::current(),
 			':username'	=> $username
@@ -62,7 +62,7 @@ class ShowLoginPage extends AbstractLoginPage
 		{
 			$verify = "false";
 
-			if (PlayerUtil::isHiveAccountValid($username) && PlayerUtil::isHiveSignValid($username,$password)) {
+			if (PlayerUtil::isHiveAccountValid($loginData['hive_account']) && PlayerUtil::isHiveSignValid($loginData['hive_account'],$password)) {
 				$verify = "true";
 			} else if (password_verify($password, $loginData['password'])) {
 				$verify = "true";

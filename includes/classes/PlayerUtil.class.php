@@ -75,7 +75,7 @@ class PlayerUtil
 		}
 
 		// verify length
-		if (is_null($signedblob) || strlen($signedblob) == 0 || strlen($signedblob) > 132) {
+		if (is_null($signedblob) || strlen($signedblob) < 32 || strlen($signedblob) > 132) {
 			return false;
 		}
 		// verify content
