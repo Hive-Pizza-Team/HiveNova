@@ -279,7 +279,7 @@ const HiveKeychainLogin = async () => {
 		await hive_keychain.requestSignBuffer(
 			hiveaccount,
 			`${hiveaccount} is my account.`,
-			"Active",
+			"Posting",
 			(response) => {
 				if (response.success) {
 					document.querySelector('input#hiveAccount').value = hiveaccount;
