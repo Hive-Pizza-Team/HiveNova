@@ -5,13 +5,14 @@
 		<th colspan="3">{$LNG.pl_overview}</th>
 		</tr>
 	<tr>
-		<td style="width:40%">{$LNG.pl_name}</td>
-		<td colspan="2">{$name}</td>
-	</tr>
-	<tr>
 		<td></td>
 		<td colspan="2"><img src="{$avatar}"></td>
 	</tr>
+	<tr>
+		<td style="width:40%">{$LNG.pl_name}</td>
+		<td colspan="2">{$name}</td>
+	</tr>
+
 	<tr>
 		<td>{$LNG.pl_homeplanet}</td>
 		<td colspan="2">{$homeplanet} <a href="#" onclick="parent.location = 'game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}';return false;">[{$galaxy}:{$system}:{$planet}]</a></td>
