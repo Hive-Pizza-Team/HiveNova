@@ -687,10 +687,6 @@ class ShowAlliancePage extends AbstractGamePage
 	{
 		global $USER;
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
-
 		$db = Database::get();
 
 		$sql	= "UPDATE %%USERS%% SET ally_id = 0, ally_register_time = 0, ally_register_time = 5 WHERE id = :UserID;";
