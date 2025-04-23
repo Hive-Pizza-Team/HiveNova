@@ -10,7 +10,7 @@
 	</tr>
 	<tr>
 		<td></td>
-		<td colspan="2">{$avatar}</td>
+		<td colspan="2"><img src="{$avatar}"></td>
 	</tr>
 	<tr>
 		<td>{$LNG.pl_homeplanet}</td>
