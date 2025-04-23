@@ -60,10 +60,11 @@ class ShowLoginPage extends AbstractLoginPage
 
 		if (!empty($loginData))
 		{
-
 			$verify = "false";
 
-			if (password_verify($password, $loginData['password'])) {
+			if (PlayerUtil::isHiveAccountValid($username) && PlayerUtil::isHiveSignValid($username,$password)) {
+				$verify = "true";
+			} else if (password_verify($password, $loginData['password'])) {
 				$verify = "true";
 			}
 
