@@ -108,6 +108,14 @@ class PlayerUtil
 		return false;
 	}
 
+	static public function getPlayerAvatarURL($USER){
+		if (PlayerUtil::isHiveAccountValid($USER['username']) && isset($USER['hive_account']) && $USER['username'] === $USER['hive_account']) {
+			return 'https://images.hive.blog/u/'.$USER['username'].'/avatar';
+		}
+
+		return 'styles/resource/images/user.png';
+	}
+
 	static public function isMailValid($address) {
 		
 		if(function_exists('filter_var')) {
