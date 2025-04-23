@@ -147,13 +147,7 @@ abstract class AbstractGamePage
 			$commitShort = substr($commit, 0, 7);
 		}
 
-		$avatar = 'styles/resource/images/user.png';
-		if (Session::load()->data !== null)
-		{
-			try{
-				$avatar = json_decode(Session::load()->data->account->json_metadata)->profile->profile_image;
-			}catch(Exception $e){}
-		}
+		$avatar = 'https://images.hive.blog/u/'.$USER['hive_account'].'/avatar'
 
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
