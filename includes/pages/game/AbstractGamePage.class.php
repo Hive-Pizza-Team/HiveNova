@@ -147,7 +147,10 @@ abstract class AbstractGamePage
 			$commitShort = substr($commit, 0, 7);
 		}
 
-		$avatar = 'https://images.hive.blog/u/'.$USER['hive_account'].'/avatar'
+		$avatar = 'styles/resource/images/user.png';
+		if (PlayerUtil::isHiveAccountValid($USER['username'] && $USER['hive_account'] && $USER['username'] == $USER['hive_account'] )) {
+			$avatar = 'https://images.hive.blog/u/'.$USER['username'].'/avatar'
+		}
 
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
