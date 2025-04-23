@@ -108,6 +108,24 @@ class PlayerUtil
 		return false;
 	}
 
+	static public function isHiveAccountExists($hiveaccount) {
+		// verify account
+		if (!PlayerUtil::isHiveAccountValid($hiveaccount)) {
+			return false;
+		}
+
+		$hive = new Hive\Hive();
+
+		// check existence using hive-php
+		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
+
+		if(is_array($result) && count($result) > 0) {
+			return true;
+		}
+
+		return false;
+	}
+
 	static public function getPlayerAvatarURL($USER){
 		if (PlayerUtil::isHiveAccountValid($USER['username']) && isset($USER['hive_account']) && $USER['username'] === $USER['hive_account']) {
 			return 'https://images.hive.blog/u/'.$USER['username'].'/avatar';
