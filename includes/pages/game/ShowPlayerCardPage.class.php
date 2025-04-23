@@ -69,7 +69,7 @@ class ShowPlayerCardPage extends AbstractGamePage
 			'id'			=> $PlayerID,
 			'yourid'		=> $USER['id'],
 			'name'			=> $query['username'],
-			'avatar'		=> PlayerUtil::getPlayerAvatarURL($query);
+			'avatar'		=> PlayerUtil::getPlayerAvatarURL($query),
 			'homeplanet'	=> $query['name'],
 			'galaxy'		=> $query['galaxy'],
 			'system'		=> $query['system'],
