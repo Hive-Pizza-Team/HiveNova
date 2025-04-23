@@ -48,7 +48,7 @@
 
 {if $IsLabinBuild}<div class="hidden-div">{$LNG.bd_building_lab}</div>{/if}
 <div>
-<div class="planeto"> <button id="lab1">Imperial</button> | <button id="lab2">Military</button> | <button id="lab3">Engins</button> | <button id="lab4">Mining</button> | <button id="lab5">All</button></div>		
+<div class="planeto"> <button id="lab1">Imperial</button> | <button id="lab2">Military</button> | <button id="lab3">Engines</button> | <button id="lab4">Mining</button> | <button id="lab5">All</button></div>		
 
 	{foreach $ResearchList as $ID => $Element}
 	<div class="infos" id="t{$ID}">
