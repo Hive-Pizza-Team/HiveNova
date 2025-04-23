@@ -9,6 +9,10 @@
 		<td colspan="2">{$name}</td>
 	</tr>
 	<tr>
+		<td></td>
+		<td colspan="2">{$avatar}</td>
+	</tr>
+	<tr>
 		<td>{$LNG.pl_homeplanet}</td>
 		<td colspan="2">{$homeplanet} <a href="#" onclick="parent.location = 'game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}';return false;">[{$galaxy}:{$system}:{$planet}]</a></td>
 	</tr>
