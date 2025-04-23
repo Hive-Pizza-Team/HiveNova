@@ -15,6 +15,12 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+// import hive-php and instantiate $hive
+$hivePhp = __DIR__.'/../../vendor/mahdiyari/hive-php/lib/Hive.php';
+if (file_exists($hivePhp)) {
+    require_once $hivePhp;
+}
+
 class PlayerUtil
 {
 	static public function cryptPassword($password)
@@ -63,6 +69,11 @@ class PlayerUtil
 
 	static public function isHiveSignValid($hiveaccount, $signedblob)
 	{
+		// verify account
+		if (!PlayerUtil::isHiveAccountValid($hiveaccount)) {
+			return false;
+		}
+
 		// verify length
 		if (is_null($signedblob) || strlen($signedblob) == 0 || strlen($signedblob) > 132) {
 			return false;
@@ -71,8 +82,30 @@ class PlayerUtil
 		if (!PlayerUtil::isNameValid($signedblob)) {
 			return false;
 		}
+
+		$hive = new Hive\Hive();
+
 		// verify signature using hive-php
-		return true;
+		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
+
+		if(!is_array($result) || count($result) == 0 || !array_key_exists('posting',$result[0])) {
+			return false;
+		}
+
+		$publicKeyString = $result[0]['posting']['key_auths'][0][0];
+		$publicKey = $hive->publicKeyFrom($publicKeyString);
+
+		if (is_null($publicKey)) {
+			return false;
+		}
+
+		$message = hash('sha256', $hiveaccount.' is my account.');
+		$verified = $publicKey->verify($message, $signedblob);
+		if ($verified) {
+			return true;
+		}
+
+		return false;
 	}
 
 	static public function isMailValid($address) {

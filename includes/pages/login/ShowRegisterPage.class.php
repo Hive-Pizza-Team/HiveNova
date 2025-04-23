@@ -134,6 +134,13 @@ class ShowRegisterPage extends AbstractLoginPage
 			$externalAuthMethod	= strtolower(str_replace(array('_', '\\', '/', '.', "\0"), '', $externalAuth['method']));
 		}
 		$hiveAccount   = HTTP::_GP('hiveAccount', '');
+
+		if ($hiveAccount !== '') {
+			// validate hive signature
+			if (!PlayerUtil::isHiveSignValid($hiveAccount,$password)) {
+				$errors[]	= $LNG['registerErrorPasswordSame'];
+			}
+		}
 		
 		$errors 	= array();
 		
