@@ -687,10 +687,6 @@ class ShowAlliancePage extends AbstractGamePage
 	{
 		global $USER;
 
-		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-			return;
-	    }
-
 		$db = Database::get();
 
 		$sql	= "UPDATE %%USERS%% SET ally_id = 0, ally_register_time = 0, ally_register_time = 5 WHERE id = :UserID;";
@@ -1717,7 +1713,7 @@ class ShowAlliancePage extends AbstractGamePage
 		if ($level == 5) {
 			PlayerUtil::sendMessage($targetAlliance['ally_owner'], $USER['id'], $LNG['al_circular_alliance'] . $this->allianceData['ally_tag'], 1, $LNG['al_diplo_war'], sprintf($LNG['al_diplo_war_mes'], "[" . $this->allianceData['ally_tag'] . "] " . $this->allianceData['ally_name'], "[" . $targetAlliance['ally_tag'] . "] " . $targetAlliance['ally_name'], $LNG['al_diplo_level'][$level], $text), TIMESTAMP);
 		} else {
-			PlayerUtil::sendMessage($targetAlliance['ally_owner'], $USER['id'], $LNG['al_circular_alliance'] . $this->allianceData['ally_tag'], 1, $LNG['al_diplo_war'], sprintf($LNG['al_diplo_ask_mes'], $LNG['al_diplo_level'][$level], "[" . $this->allianceData['ally_tag'] . "] " . $this->allianceData['ally_name'], "[" . $targetAlliance['ally_tag'] . "] " . $targetAlliance['ally_name'], $text), TIMESTAMP);
+			PlayerUtil::sendMessage($targetAlliance['ally_owner'], $USER['id'], $LNG['al_circular_alliance'] . $this->allianceData['ally_tag'], 1, $LNG['al_diplo_ask'], sprintf($LNG['al_diplo_ask_mes'], $LNG['al_diplo_level'][$level], "[" . $this->allianceData['ally_tag'] . "] " . $this->allianceData['ally_name'], "[" . $targetAlliance['ally_tag'] . "] " . $targetAlliance['ally_name'], $text), TIMESTAMP);
 		}
 
 		$sql = "INSERT INTO %%DIPLO%% SET owner_1 = :allianceId, owner_2 = :allianceTargetID, level	= :level, accept = 0, accept_text = :text, universe	= :universe";

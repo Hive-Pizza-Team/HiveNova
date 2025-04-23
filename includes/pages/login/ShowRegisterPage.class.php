@@ -239,6 +239,12 @@ class ShowRegisterPage extends AbstractLoginPage
 		if($countUsername != 0) {
 			$errors[]	= $LNG['registerErrorUsernameExist'];
 		}
+
+		if(PlayerUtil::isHiveAccountExists($userName) && empty($hiveAccount)) {
+			// disallow registering a non-hive account with same name as an existing hive account
+			// to avoid collisions
+			$errors[]	= $LNG['registerErrorUsernameExist'];
+		}
 			
 		if($countMail != 0) {
 			$errors[]	= $LNG['registerErrorMailExist'];
