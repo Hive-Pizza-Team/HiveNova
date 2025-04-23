@@ -1608,7 +1608,6 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-
 		$db = Database::get();
 
 		$sql = "UPDATE %%DIPLO%% SET accept = 1 WHERE id = :id AND owner_2 = :allianceId;";
