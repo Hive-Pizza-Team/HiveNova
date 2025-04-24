@@ -129,8 +129,9 @@ class PlayerUtil
 	}
 
 	static public function getPlayerAvatarURL($USER){
-		if (PlayerUtil::isHiveAccountValid($USER['username']) && isset($USER['hive_account']) && strtolower($USER['username']) === $USER['hive_account']) {
-			return 'https://images.hive.blog/u/'.$USER['username'].'/avatar';
+		$usernameLower = strtolower($USER['username']);
+		if (PlayerUtil::isHiveAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
+			return 'https://images.hive.blog/u/'.$usernameLower.'/avatar';
 		}
 
 		return 'styles/resource/images/user.png';
