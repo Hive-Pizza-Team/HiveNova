@@ -110,10 +110,6 @@ abstract class AbstractLoginPage
 	
 	protected function printMessage($message, $redirectButtons = null, $redirect = null, $fullSide = true)
 	{
-		if (!is_array($redirectButtons)) {
-			return;
-		}
-
 		$this->assign(array(
 			'message'			=> $message,
 			'redirectButtons'	=> $redirectButtons,
