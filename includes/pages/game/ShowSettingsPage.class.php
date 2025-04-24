@@ -270,7 +270,7 @@ class ShowSettingsPage extends AbstractGamePage
 			else
 			{
 				$sql = "SELECT
-					(SELECT COUNT(*) FROM %%USERS%% WHERE universe = :universe AND username = :username) +
+					(SELECT COUNT(*) FROM %%USERS%% WHERE universe = :universe AND username = :username AND id != :userid) +
 					(SELECT COUNT(*) FROM %%USERS_VALID%% WHERE universe = :universe AND username = :username) +
 					(SELECT COUNT(*) FROM %%USERS%% WHERE universe = :universe AND hive_account = :username AND id != :userid)
 				AS count";
