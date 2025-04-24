@@ -115,7 +115,7 @@ abstract class AbstractLoginPage
 			'redirectButtons'	=> $redirectButtons,
 		));
 		
-		if(isset($redirect)) {
+		if(isset($redirect) && is_array($redirect)) {
 			$this->tplObj->gotoside($redirect[0], $redirect[1]);
 		}
 		
