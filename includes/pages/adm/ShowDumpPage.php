@@ -57,7 +57,7 @@ function ShowDumpPage()
 
 			while($table = $GLOBALS['DATABASE']->fetchArray($sqlTableRaw))
 			{
-				if(DB_PREFIX == substr($table['Name'], 0, $prefixCounts))
+				if(DB_PREFIX == substr($table['Name'], 0, $prefixCounts) || $table['Name'] === 'transactions')
 				{
 					$dumpData['sqlTables'][]	= $table['Name'];
 				}
