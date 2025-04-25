@@ -34,5 +34,5 @@ function resourceTicker(config, init) {
 }
 
 function getRessource(name) {
-	return parseInt($('#current_'+name).data('real')).toLocaleString();
+	return parseInt($('#current_'+name).data('real'));
 }

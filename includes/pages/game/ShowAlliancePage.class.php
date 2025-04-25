@@ -1710,6 +1710,11 @@ class ShowAlliancePage extends AbstractGamePage
 		$level	= HTTP::_GP('level', 0);
 		$text	= HTTP::_GP('text', '', true);
 
+		if(strlen($text) > 255) {
+			// accept_text max len = 255
+			$text = substr($text, 0, 255);
+		}
+
 		if ($level == 5) {
 			PlayerUtil::sendMessage($targetAlliance['ally_owner'], $USER['id'], $LNG['al_circular_alliance'] . $this->allianceData['ally_tag'], 1, $LNG['al_diplo_war'], sprintf($LNG['al_diplo_war_mes'], "[" . $this->allianceData['ally_tag'] . "] " . $this->allianceData['ally_name'], "[" . $targetAlliance['ally_tag'] . "] " . $targetAlliance['ally_name'], $LNG['al_diplo_level'][$level], $text), TIMESTAMP);
 		} else {

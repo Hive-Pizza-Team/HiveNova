@@ -42,7 +42,7 @@
 	</tr>
 	<tr>
 	    <td style="height:22px;">Hive Account</td>
-		<td><input id="hiveAccount" name="hiveAccount" maxlength="16" size="16" value="{$hiveAccount}" readonly></input></td>
+		<td><input id="hiveAccount" name="hiveAccount" maxlength="16" size="16" value="{$hiveAccount}" placeholder="⬇⬇⬇⬇⬇" readonly></input></td>
 		<input id="hivesign" name="hivesign" type="hidden"></input>
 	</tr>
 	<tr>

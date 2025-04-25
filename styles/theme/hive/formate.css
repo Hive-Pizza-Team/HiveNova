@@ -209,6 +209,14 @@ select {
   color: #99FFFF;
 }
 
+.galaxy-alliance-nap {
+  color: #aa99ff;
+}
+
+.galaxy-alliance-trade {
+  color: #ffec99;
+}
+
 .galaxy-alliance-enemy {
   color: #E31337;
 }
