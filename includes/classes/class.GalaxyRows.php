@@ -199,15 +199,20 @@ class GalaxyRows
 			switch($this->galaxyRow['diploLevel'])
 			{
 				case 1:
+					$Class  = array('friend');
+					break;
 				case 2:
 					$Class	= array('member');
-				break;
+					break;
+				case 3:
+					$Class  = array('trade');
+					break;
 				case 4:
-					$Class	= array('friend');
-				break;
+					$Class	= array('nap');
+					break;
 				case 5:
 					$Class	= array('enemy');
-				break;
+					break;
 			}
 			
 			if($USER['ally_id'] == $this->galaxyRow['ally_id'])
