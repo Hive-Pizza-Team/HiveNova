@@ -752,7 +752,6 @@ $LNG['al_diplo_exists']						= 'There is already a valid or not yet accepted dip
 $LNG['al_diplo_accept_send']                = 'Output requests';
 $LNG['al_diplo_create']                     = 'Create new Pact.';
 $LNG['al_diplo_create_done']                = 'The Pact created successfully.';
-$LNG['al_diplo_create_done']                = 'The Pact creation failed.';
 $LNG['al_diplo_ally']                       = 'Alliance';
 $LNG['al_diplo_level_des']                  = 'Kind of Pacts';
 $LNG['al_diplo_text']                       = 'Text/Request';
