@@ -58,10 +58,10 @@ class GalaxyRows
 		LEFT JOIN %%PLANETS%% m ON m.id = p.id_luna
 		LEFT JOIN %%STATPOINTS%% s ON s.id_owner = u.id AND s.stat_type = :statTypeUser
 		LEFT JOIN %%ALLIANCE%% a ON a.id = u.ally_id
-		LEFT JOIN %%DIPLO%% as d ON (d.owner_1 = :allianceId AND d.owner_2 = a.id) OR (d.owner_1 = a.id AND d.owner_2 = :allianceId)
+		LEFT JOIN %%DIPLO%% as d ON d.accept = 1 AND ((d.owner_1 = :allianceId AND d.owner_2 = a.id) OR (d.owner_1 = a.id AND d.owner_2 = :allianceId))
 		LEFT JOIN %%STATPOINTS%% allys ON allys.stat_type = :statTypeAlliance AND allys.id_owner = a.id
 		LEFT JOIN %%BUDDY%% buddy ON (buddy.sender = :userId AND buddy.owner = u.id) OR (buddy.sender = u.id AND buddy.owner = :userId)
-		WHERE p.universe = :universe AND p.galaxy = :galaxy AND p.system = :system AND p.planet_type = :planetTypePlanet AND (d.accept != 0)
+		WHERE p.universe = :universe AND p.galaxy = :galaxy AND p.system = :system AND p.planet_type = :planetTypePlanet
 		GROUP BY p.id;';
 
 		$galaxyResult	= Database::get()->select($sql, array(
