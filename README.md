@@ -62,11 +62,14 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 
 ## Copyright and License
 
-HiveNova is a fork of the Open Source Game Framework [jkroepke/2Moons](https://github.com/jkroepke/2Moons) engine.
+HiveNova is a fork of the Open Source Game Framework [jkroepke/2Moons](https://github.com/jkroepke/2Moons) framework.
 Background image created by [@mkdrwal](https://hive.blog/@mkdrwal)
 
-* Code copyright 2009-2016 Jan-Otto Kröpke released under the MIT License.
+HiveNova relies on the Ogame Probabilistic Battle Engine [(OPBE)](https://github.com/jstar88/opbe).
+
+* 2Moons code copyright 2009-2016 Jan-Otto Kröpke released under the MIT License.
+* OPBE code copyright 2013 Jstar released under the AGPLv3 License.
 * Code copyright 2018 @steemnova released under the MIT License.
-* Code copyright 2018-2020 @IntinteDAO released under the MIT License. (f66f0bf9f2d502f9cc3932e7f05e4795b3622ce6)
+* Code copyright 2018-2020 @IntinteDAO released under the MIT License.
 * Code copyright 07.05.2020-2020 @IntinteDAO released under the AGPLv3 License
 * Code copyright 2025 @TeamMithril released under the AGPLv3 License
