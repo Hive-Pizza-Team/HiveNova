@@ -7,13 +7,12 @@ function add(){
 
 function check(){
 	$.post('game.php?page=battleSimulator&mode=send', $('#form').serialize(), function(data){
-		try{ 
+		try { 
 			data	= $.parseJSON(data);
-			window.open('game.php?page=raport&raport='+data).focus();
+			window.open('game.php?page=raport&raport='+data, '_top').focus();
 		} catch(e) {
 			Dialog.alert(data);
 			Dialog.alert('game.php?page=raport&raport='+data);
-			Dialog.alert(JSON.stringify(e));
 			return false;
 		}
 	});
