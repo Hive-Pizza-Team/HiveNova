@@ -6,22 +6,16 @@ function add(){
 }
 
 function check(){
-	var kb = window.open('about:blank', 'kb', 'scrollbars=yes,statusbar=no,toolbar=no,location=no,directories=no,resizable=no,menubar=no,width='+screen.width+',height='+screen.height+', screenX=0, screenY=0, top=0, left=0');
-	$("#submit:visible").removeAttr('style').hide().fadeOut();
-	$("#wait:hidden").removeAttr('style').hide().fadeIn();
 	$.post('game.php?page=battleSimulator&mode=send', $('#form').serialize(), function(data){
-		try{ 
+		try { 
 			data	= $.parseJSON(data);
-			kb.focus();
-			kb.location.href = 'CombatReport.php?raport='+data;
+			window.open('game.php?page=raport&raport='+data, '_top').focus();
 		} catch(e) {
-			kb.window.close();
 			Dialog.alert(data);
+			Dialog.alert('game.php?page=raport&raport='+data);
+			return false;
 		}
 	});
-	
-	setTimeout(function(){$("#submit:hidden").removeAttr('style').hide().fadeIn();}, 10000);
-	setTimeout(function(){$("#wait:visible").removeAttr('style').hide().fadeOut();}, 10000);
 	return true;
 }
 
