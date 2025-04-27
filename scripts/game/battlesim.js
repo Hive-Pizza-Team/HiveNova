@@ -12,6 +12,7 @@ function check(){
 			window.open('game.php?page=raport&raport='+data).focus();
 		} catch(e) {
 			Dialog.alert(data);
+			Dialog.alert(JSON.stringify(e));
 		}
 	});
 	
