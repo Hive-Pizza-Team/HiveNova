@@ -30,17 +30,17 @@
                     <tr style="height:20px;">
         				<td class="transparent">{$LNG.tech.901}</td>
         				<td class="transparent"><a href="javascript:maxResource('metal');">{$LNG.fl_max}</a></th>
-        				<td class="transparent"><input name="metal" size="10" onchange="calculateTransportCapacity();" type="text"></td>
+        				<td class="transparent"><input name="metal" size="10" onchange="calculateTransportCapacity();" type="text" inputmode="numeric"></td>
         			</tr>
                     <tr style="height:20px;">
         				<td class="transparent">{$LNG.tech.902}</td>
         				<td class="transparent"><a href="javascript:maxResource('crystal');">{$LNG.fl_max}</a></th>
-        				<td class="transparent"><input name="crystal" size="10" onchange="calculateTransportCapacity();" type="text"></td>
+        				<td class="transparent"><input name="crystal" size="10" onchange="calculateTransportCapacity();" type="text" inputmode="numeric"></td>
         			</tr>
                     <tr style="height:20px;">
         				<td class="transparent">{$LNG.tech.903}</td>
         				<td class="transparent"><a href="javascript:maxResource('deuterium');">{$LNG.fl_max}</a></td>
-        				<td class="transparent"><input name="deuterium" size="10" onchange="calculateTransportCapacity();" type="text"></td>
+        				<td class="transparent"><input name="deuterium" size="10" onchange="calculateTransportCapacity();" type="text" inputmode="numeric"></td>
         			</tr>
                     <tr style="height:20px;">
         				<td class="transparent">{$LNG.fl_resources_left}</td>

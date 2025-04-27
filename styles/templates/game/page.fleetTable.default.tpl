@@ -100,7 +100,7 @@
 		<td id="ship{$FleetRow.id}_value">{$FleetRow.count|number}</td>
 		{if $FleetRow.speed != 0}
 		<td><a href="javascript:maxShip('ship{$FleetRow.id}');">{$LNG.fl_max}</a></td>
-		<td><input name="ship{$FleetRow.id}" id="ship{$FleetRow.id}_input" size="10" value="0"></td>
+		<td><input type="text" inputmode="numeric" name="ship{$FleetRow.id}" id="ship{$FleetRow.id}_input" size="10" value="0"></td>
 		{else}
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
