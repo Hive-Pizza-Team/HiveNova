@@ -9,8 +9,7 @@ function check(){
 	$.post('game.php?page=battleSimulator&mode=send', $('#form').serialize(), function(data){
 		try{ 
 			data	= $.parseJSON(data);
-			Dialog.alert(data);
-			window.open('_blank','game.php?page=raport&raport='+data).focus();
+			window.open('game.php?page=raport&raport='+data).focus();
 		} catch(e) {
 			Dialog.alert(data);
 		}
