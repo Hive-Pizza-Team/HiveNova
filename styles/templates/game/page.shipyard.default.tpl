@@ -74,6 +74,8 @@
 data			= {$BuildList|json};
 bd_operating	= '{$LNG.bd_operating}';
 bd_available	= '{$LNG.bd_available}';
+
+$('#SolarEnergy').text(number_format({$SolarEnergy},0))
 </script>
 
 {if !empty($BuildList)}
@@ -83,8 +85,6 @@ bd_available	= '{$LNG.bd_available}';
 $(function() {
     ShipyardInit();
 });
-
-$('#SolarEnergy').text(number_format({$SolarEnergy},0))
 
 </script>
 {/if}
