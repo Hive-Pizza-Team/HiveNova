@@ -40,7 +40,7 @@ class MissionCaseACS extends MissionFunctions implements Mission
 		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
 		$sql		= 'SELECT name FROM %%PLANETS%% WHERE id = :planetId;';
 		$planetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_start_id'],
+			':planetId'	=> $this->_fleet['fleet_end_id'],
 		), 'name');
 
 		$Message 	= sprintf(

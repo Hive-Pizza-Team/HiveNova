@@ -11,9 +11,9 @@
 		<tr style="height:20px;">
 			<td style="width:50%">{$LNG.fl_destiny}</td>
 			<td>
-				<input type="text" id="galaxy" name="galaxy" size="3" maxlength="2" onkeyup="updateVars()" value="{$galaxy}">
-				<input type="text" id="system" name="system" size="3" maxlength="3" onkeyup="updateVars()" value="{$system}">
-				<input type="text" id="planet" name="planet" size="3" maxlength="2" onkeyup="updateVars()" value="{$planet}">
+				<input type="text" inputmode="numeric" id="galaxy" name="galaxy" size="3" maxlength="2" onkeyup="updateVars()" value="{$galaxy}">
+				<input type="text" inputmode="numeric" id="system" name="system" size="3" maxlength="3" onkeyup="updateVars()" value="{$system}">
+				<input type="text" inputmode="numeric" id="planet" name="planet" size="3" maxlength="2" onkeyup="updateVars()" value="{$planet}">
 				<select id="type" name="type" onchange="updateVars()">
 					{html_options options=$typeSelect selected=$type}
 				</select>
