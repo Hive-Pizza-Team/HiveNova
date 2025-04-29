@@ -26,7 +26,7 @@
 				<tr>
 					<td style="width:33%;">{$LNG.tech.$fleetID}</td>
 					<td style="width:33%;"><span id="ship{$fleetID}_value">{$amount|number}</span></td>
-					<td style="width:33%;"><input class="jumpgate" name="ship[{$fleetID}]" id="ship{$fleetID}_input" size="7" value="0" type="text"><input onclick="Gate.max({$fleetID});" value="max" type="button"></td>
+					<td style="width:33%;"><input class="jumpgate" name="ship[{$fleetID}]" id="ship{$fleetID}_input" size="7" value="0" type="text" inputmode="numeric"><input onclick="Gate.max({$fleetID});" value="max" type="button"></td>
 				</tr>
 				{/foreach}
 				<tr>

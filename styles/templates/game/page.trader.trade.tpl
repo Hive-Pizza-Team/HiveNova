@@ -20,7 +20,7 @@
 	{foreach $tradeResources as $tradeResource}
 	<tr>
 		<td><label for="resource{$tradeResource}">{$LNG.tech[$tradeResource]}</label></td>
-		<td><input name="trade[{$tradeResource}]" id="resource{$tradeResource}" class="trade_input" type="text" value="0" size="30" data-resource="{$tradeResource}"></td>
+		<td><input name="trade[{$tradeResource}]" id="resource{$tradeResource}" class="trade_input" type="text" inputmode="numeric" value="0" size="30" data-resource="{$tradeResource}"></td>
 		<td><span id="resource{$tradeResource}Shortly"></span></td>
 		<td>{$charge[$tradeResource]}</td>
 	</tr>
