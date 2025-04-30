@@ -132,7 +132,7 @@ function ShowSearchPage()
 			    7 => $LNG['se_search_users_7'],
 			    8 => $LNG['se_search_users_8']
             );
-			$SpecifyItems	= "id,username,email_2,onlinetime,register_time,user_lastip,authlevel,bana,urlaubs_modus";
+			$SpecifyItems	= "id,username,hive_account,email_2,onlinetime,register_time,user_lastip,authlevel,bana,urlaubs_modus";
 			$SName			= $LNG['se_input_userss'];
 			if ($SearchFile == "vacation"){
 				$SpecialSpecify	= "AND urlaubs_modus = '1'";
@@ -154,7 +154,7 @@ function ShowSearchPage()
 			$SpecialSpecify	.= " AND universe = '".Universe::getEmulated()."'";
 			
 			(($SearchFor == "name") ? $WhereItem = "WHERE username" : $WhereItem = "WHERE id");
-			$ArrayOSec		= array("id", "username", "email_2", "onlinetime", "register_time", "user_lastip", "authlevel", "bana", "urlaubs_modus");
+			$ArrayOSec		= array("id", "username", "hive_account", "email_2", "onlinetime", "register_time", "user_lastip", "authlevel", "bana", "urlaubs_modus");
 			$Array0SecCount	= count($ArrayOSec);
 
 			for ($OrderNum = 0; $OrderNum < $Array0SecCount; $OrderNum++)
