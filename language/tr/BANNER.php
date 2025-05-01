@@ -23,10 +23,10 @@
 
 $LNG['ub_points']		= 'Puan';
 $LNG['ub_fleets']		= 'Filo';
-$LNG['ub_researh']		= 'Arastirma';
+$LNG['ub_researh']		= 'Araştırma';
 $LNG['ub_buildings']	= 'Bina';
 $LNG['ub_defenses']		= 'Savunma';
 
-$LNG['ub_fights']		= 'Savaslar';
-$LNG['ub_quote']		= 'Basari Yuzdesi';
-$LNG['ub_rank']			= 'Sira';
+$LNG['ub_fights']		= 'Savaşlar';
+$LNG['ub_quote']		= 'Başarı Yüzdesi';
+$LNG['ub_rank']			= 'Sıra';
