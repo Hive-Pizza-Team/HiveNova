@@ -22,19 +22,19 @@
 
 
 //---------------	Genel	------------------------//
-$LNG['adm_login']			= 'Giris';
-$LNG['adm_username']		= 'Kullanici Adi';
-$LNG['adm_password']		= 'Sifre';
-$LNG['adm_absenden']		= 'Enter';
-$LNG['adm_password_info']	= 'Admin menusu icin sifreni gir';
-$LNG['adm_bad_password']	= 'Yanlis Sifre!';
-$LNG['404_page']			= 'Bu sayfaya erisim yetkiniz yok!';
-$LNG['adm_cp_title']		= 'Administration Panel';
+$LNG['adm_login']			= 'Giriş';
+$LNG['adm_username']		= 'Kullanıcı Adı';
+$LNG['adm_password']		= 'Şifre';
+$LNG['adm_absenden']		= 'Giriş Yap';
+$LNG['adm_password_info']	= 'Admin menüsü için şifreni gir';
+$LNG['adm_bad_password']	= 'Yanlış Şifre!';
+$LNG['404_page']			= 'Bu sayfaya erişim yetkiniz yok!';
+$LNG['adm_cp_title']		= 'Admin Paneli';
 $LNG['adm_cp_index']		= 'Admin Ana Sayfa';
 $LNG['mu_moderation_page']	= 'Izinler';
 $LNG['mu_universe']			= 'Evren';
-$LNG['adm_cp_logout']		= 'Oyuna Geri Don';
-$LNG['mu_disclaimer']		= 'Iletisim';
+$LNG['adm_cp_logout']		= 'Oyuna Geri Dön';
+$LNG['mu_disclaimer']		= 'Iletişim';
 
 
 
@@ -42,41 +42,41 @@ $LNG['mu_disclaimer']		= 'Iletisim';
 $LNG['ad_number'] = 'ID';
 $LNG['ad_max'] = '(max. %d)';
 $LNG['only_numbers'] = 'Sadece rakam girebilirsiniz!';
-$LNG['select_option'] = 'Seciniz ...';
+$LNG['select_option'] = 'Seçiniz ...';
 
 // 	Derece
 $LNG['rank_0'] = 'Oyuncu';
-$LNG['rank_1'] = 'Moderator';
-$LNG['rank_2'] = 'Yonetici';
+$LNG['rank_1'] = 'Moderatör';
+$LNG['rank_2'] = 'Yönetici';
 $LNG['rank_3'] = 'Admin';
 
 
 // 	Zaman
-$LNG['time_days'] = 'Gun';
+$LNG['time_days'] = 'Gün';
 $LNG['time_hours'] = 'Saat';
 $LNG['time_minutes'] = 'Dakika';
 $LNG['time_seconds'] = 'Saniye';
 //###########################################################//
 
-$LNG['info_information'] = 'Buglari foruma  <a href="%s" target="tracker">2Moons</a><br>yada destek sayfasindan bildirebilirsiniz!';
+$LNG['info_information'] = 'Bugları foruma  <a href="%s" target="tracker">2Moons</a><br>yada destek sayfasından bildirebilirsiniz!';
 
-//---------------	Evet yada Hayir	------------------------//
+//---------------	Evet yada Hayır	------------------------//
 $LNG['one_is_yes_1'] = 'Evet';
-$LNG['one_is_yes_0'] = 'Hayir';
+$LNG['one_is_yes_0'] = 'Hayır';
 
 $LNG['one_is_no_1'] = 'Evet';
-$LNG['one_is_no_0'] = 'Hayir';
+$LNG['one_is_no_0'] = 'Hayır';
 //###########################################################//
 
 
 //---------------	Butonlar	------------------------//
-$LNG['button_submit'] = 'Gonder';
+$LNG['button_submit'] = 'Gönder';
 $LNG['button_add'] = 'Ekle';
 $LNG['button_delete'] = 'Sil';
 $LNG['button_filter'] = 'Filtrele';
-$LNG['button_deselect'] = 'Secileni Sil';
+$LNG['button_deselect'] = 'Seçileni Sil';
 $LNG['button_reset'] = 'Temizle';
-$LNG['button_des_se'] = 'Hepsi/Hicbiri';
+$LNG['button_des_se'] = 'Hepsi/Hiçbiri';
 //###########################################################//
 
 
@@ -100,105 +100,105 @@ $LNG['count_res'] = 'Hammadde Miktari';
 $LNG['buildings_title'] = 'Binalar';
 $LNG['ships_title'] = 'Gemiler';
 $LNG['defenses_title'] = 'Savunma';
-$LNG['researchs_title'] = 'Arastirma';
+$LNG['researchs_title'] = 'Araştırma';
 $LNG['officiers_title'] = 'Subaylar';
 //###########################################################//
 
 
 //---------------	Sol Menu	------------------------//
 $LNG['mu_general'] 						= '**Genel**';
-$LNG['mu_connected'] 					= 'Online';
+$LNG['mu_connected'] 					= 'Çevrimiçi';
 $LNG['mu_settings'] 					= 'Server Ayarlari';
-$LNG['mu_unisettings']                  = 'Evren Ayarlari';
+$LNG['mu_unisettings']                  = 'Evren Ayarları';
 $LNG['mu_global_message'] 				= 'Genel Mesaj';
-$LNG['mu_users_settings'] 				= '**Duzenleme Menusu**';
-$LNG['mu_add_delete_resources'] 		= 'Hesaplari Duzenle';
-$LNG['mu_stats_options'] 				= 'Istatistik Ayarlari';
-$LNG['mu_manage_users'] 				= 'Oyunculari Duzenle';
+$LNG['mu_users_settings'] 				= '**Düzenleme Menüsü**';
+$LNG['mu_add_delete_resources'] 		= 'Hesapları Duzenle';
+$LNG['mu_stats_options'] 				= 'Istatistik Ayarları';
+$LNG['mu_manage_users'] 				= 'Oyuncuları Düzenle';
 $LNG['mu_ban_options'] 					= 'Ceza/Ban Sistemi';
-$LNG['mu_moon_options'] 				= 'Ay Ayarlari';
-$LNG['mu_observation'] 					= '**Oyun Menusu**';
+$LNG['mu_moon_options'] 				= 'Ay Ayarları';
+$LNG['mu_observation'] 					= '**Oyun Menüsü**';
 $LNG['mu_flying_fleets'] 				= 'Filo Hareketleri';
 $LNG['mu_user_list'] 					= 'Oyuncu Listesi';
 $LNG['mu_moon_list'] 					= 'Ay Listesi';
 $LNG['mu_mess_list']					= 'Mesaj Listesi';
 $LNG['mu_planet_list'] 					= 'Gezegen Listesi';
-$LNG['mu_error_list'] 					= 'Errors in Data Base';
+$LNG['mu_error_list'] 					= 'Veri Tabanında Hata';
 $LNG['mu_active_planets'] 				= 'Aktif Gezegenler';
-$LNG['mu_tools'] 						= '**Araclar**';
+$LNG['mu_tools'] 						= '**Araçlar**';
 $LNG['mu_md5_encripter'] 				= 'MD5 Kodlama';
-$LNG['mu_optimize_db'] 					= 'Veritabani Kontrol';
-$LNG['mu_manual_points_update'] 		= 'Manual Puan';
-$LNG['mu_mpu_confirmation'] 			= 'Mevcur degeleri guncelliyorsunuz, bunu yaparak su an serverdaki guncel aktiviteler hakkinda bilgi sahibi yapar (Bellek kullanimi, SQL, vb.)';
-$LNG['mu_search_page'] 					= 'Gelismis Arama';
-$LNG['mu_info_account_page']	 		= 'Hesap Bilgileri (Yonetici/Moderator)';
-$LNG['mu_planets_options'] 				= 'Gezegen Ayarlari';
+$LNG['mu_optimize_db'] 					= 'Veritabanı Kontrol';
+$LNG['mu_manual_points_update'] 		= 'Manuel Puan';
+$LNG['mu_mpu_confirmation'] 			= 'Mevcut degeleri güncelliyorsunuz, bunu yaparak şu an sunucudaki güncel aktiviteler hakkında bilgi sahibi yapar (Bellek kullanımı, SQL, vb.)';
+$LNG['mu_search_page'] 					= 'Gelişmiş Arama';
+$LNG['mu_info_account_page']	 		= 'Hesap Bilgileri (Yönetici/Moderatör)';
+$LNG['mu_planets_options'] 				= 'Gezegen Ayarları';
 $LNG['mu_user_logs']				    = 'Admin Log';
 $LNG['mu_support']                      = 'Destek Bileti';
-$LNG['mu_chat']                         = 'Chat Ayarlari';
-$LNG['mu_module']                       = 'Moduller';
-$LNG['mu_mod_update']              		= 'MOD versiyon kontrolu';
-$LNG['mu_fb_options'] 					= 'Facebook Kayit';
-$LNG['mu_ts_options']                   = 'Teamspeak Ayarlari';
+$LNG['mu_chat']                         = 'Sohbet Ayarları';
+$LNG['mu_module']                       = 'Modüller';
+$LNG['mu_mod_update']              		= 'MOD versiyon kontrolü';
+$LNG['mu_fb_options'] 					= 'Facebook Kayıt';
+$LNG['mu_ts_options']                   = 'Teamspeak Ayarları';
 $LNG['mu_game_info']                    = 'Bilgi';
 $LNG['mu_vaild_users']				    = 'Oyuncu aktiviteleri';
 $LNG['mu_news']					        = 'Haberler';
 $LNG['mu_multiip_page']					= 'Multi IPs';
-$LNG['mu_clear_cache']					= 'Bellegi Temizle';
+$LNG['mu_clear_cache']					= 'Belleği Temizle';
 $LNG['mu_vertify']				     	= 'Oyun Indexini Kontrol et';
-$LNG['mu_cronjob']					= 'Zamanlanmis Gorevler';
+$LNG['mu_cronjob']					= 'Zamanlanmış Görevler';
 $LNG['mu_logs']						= 'Admin Log';
-$LNG['mu_giveaway']					= 'Genel Hediye/Evrene Dagit';
-$LNG['mu_disclamer']				= 'Iletisim Ayarlari';
-$LNG['mu_dump']						= 'Veritabani Yedekle';
+$LNG['mu_giveaway']					= 'Genel Hediye/Evrene Dağıt';
+$LNG['mu_disclamer']				= 'Iletişim Ayarları';
+$LNG['mu_dump']						= 'Veritabanı Yedekle';
 
-$LNG['vt_error']					= 'Hasfile dosyasi yok! - Guncelle!';
-$LNG['vt_fail']						= 'Degisen Dosyalar';
-$LNG['vt_info']						= 'Bu listedeki dosyalar guncellenmis ve orijinalinden farki olan dosyalardir.<br>Eger siz bir degisiklik yapmadiysaniz mutlaka orijinali ile degistirin.';
+$LNG['vt_error']					= 'Hasfile dosyası yok! - Güncelle!';
+$LNG['vt_fail']						= 'Değişen Dosyalar';
+$LNG['vt_info']						= 'Bu listedeki dosyalar güncellenmiş ve orijinalinden farkı olan dosyalardır.<br>Eger siz bir değişiklik yapmadıysanız mutlaka orijinali ile değiştirin.';
 
 //###########################################################//
 //---------------  Evren ve Server Parametreleri	------------------------//
-$LNG['se_server_parameters'] = '<font color="yellow">Server Ayarlari</font>';
-$LNG['se_evren_parameters'] = '<font color="yellow">Evren Ayarlari</font>';
+$LNG['se_server_parameters'] = '<font color="yellow">Sunucu Ayarları</font>';
+$LNG['se_evren_parameters'] = '<font color="yellow">Evren Ayarları</font>';
 $LNG['se_game_name'] = 'Oyun ismi';
 $LNG['se_uni_name'] = 'Evren Ismi';
 $LNG['se_lang'] = 'Dil';
-$LNG['se_general_speed'] = 'Oyun Hizi';
-$LNG['se_energy_speed']		= 'Enerji Faktoru';
-$LNG['se_normal_speed'] = 'Normal hiz: 1';
-$LNG['se_normal_speed_resoruces'] = 'Normal hiz: 1';
-$LNG['se_normal_speed_fleet'] = 'Normal hiz: 1';
-$LNG['se_normal_speed_halt'] = 'Normal hiz: 1';
-$LNG['se_fleet_speed'] = 'Filo Ucus Hizi';
-$LNG['se_resources_producion_speed'] = 'Hammadde Uretim Hizi';
-$LNG['se_halt_speed'] = 'Kesif Hizi';
+$LNG['se_general_speed'] = 'Oyun Hızı';
+$LNG['se_energy_speed']		= 'Enerji Faktörü';
+$LNG['se_normal_speed'] = 'Normal hız: 1';
+$LNG['se_normal_speed_resoruces'] = 'Normal hız: 1';
+$LNG['se_normal_speed_fleet'] = 'Normal hız: 1';
+$LNG['se_normal_speed_halt'] = 'Normal hız: 1';
+$LNG['se_fleet_speed'] = 'Filo Uçuş Hızı';
+$LNG['se_resources_producion_speed'] = 'Ham madde Üretim Hızı';
+$LNG['se_halt_speed'] = 'Keşif Hızı';
 $LNG['se_forum_link'] = 'Forum Linki';
-$LNG['se_server_op_close'] = 'Server Online?';
-$LNG['se_server_status_message'] = 'Server offline mesaji';
-$LNG['se_server_planet_parameters'] = '<font color=yellow>Gezegen Ayarlari</font>';
-$LNG['se_initial_fields'] = 'Baslangic Alani:';
+$LNG['se_server_op_close'] = 'Sunucu Aktif?';
+$LNG['se_server_status_message'] = 'Sunucu çevrimdışı mesaji';
+$LNG['se_server_planet_parameters'] = '<font color=yellow>Gezegen Ayarları</font>';
+$LNG['se_initial_fields'] = 'Baslangıç Alanı:';
 $LNG['se_fields'] = 'Unitelik Alan';
-$LNG['se_per_hour'] = 'per hour';
+$LNG['se_per_hour'] = 'saat başı';
 $LNG['se_metal_production'] = 'Metal Ana Gelir';
 $LNG['se_crystal_production'] = 'Kristal Ana Gelir';
 $LNG['se_deuterium_production'] = 'Deuterium Ana Gelir';
-$LNG['se_several_parameters'] = '<font color="yellow">Diger Parametreler</font>';
-$LNG['se_title_admins_protection'] = 'Bu mod aktif edildiginde admin ve moderatorlere saldiri yapilamaz.';
-$LNG['se_admin_protection'] = 'Admin Oyun Korumasi';
-$LNG['se_debug_mode'] = 'Hata Ayiklama(Debug) modu';
+$LNG['se_several_parameters'] = '<font color="yellow">Diğer Parametreler</font>';
+$LNG['se_title_admins_protection'] = 'Bu mod aktif edildiğinde admin ve moderatorlere saldırı yapılamaz.';
+$LNG['se_admin_protection'] = 'Admin Oyun Koruması';
+$LNG['se_debug_mode'] = 'Hata Ayıklama(Debug) modu';
 $LNG['se_save_parameters'] = 'Kaydet';
-$LNG['se_configuration_title'] = 'Server Ayarlari';
-$LNG['se_server_naame'] = 'Server Ismi';
-$LNG['se_cookie_name'] = 'Cerezler';
-$LNG['se_cookie_advert']				= 'Eger cerezler (cookie) degistiginde tekrar login olmaniz lazim.<br>Eger birden fazla evreniniz varsa degistirmeniz onerilir.';
-$LNG['se_debug_message']				= 'Hata ayiklama(Debug) modu su an yapilan istisare kayitlarini gosteriyor.';
-$LNG['se_def_cdr']						= 'Savunmadan cikan harabe';
-$LNG['se_ships_cdr']					= 'Filodan cikan harabe';
+$LNG['se_configuration_title'] = 'Sunucu Ayarları';
+$LNG['se_server_naame'] = 'Sunucu Ismi';
+$LNG['se_cookie_name'] = 'Çerezler';
+$LNG['se_cookie_advert']				= 'Çerezler (cookie) değistiğinde tekrar giriş yapmanız gerekiyor.<br>Eğer birden fazla evreniniz varsa değiştirmeniz önerilir.';
+$LNG['se_debug_message']				= 'Hata ayıklama(Debug) modu şu an yapılan istişare kayıtlarini gösteriyor.';
+$LNG['se_def_cdr']						= 'Savunmadan çıkan harabe';
+$LNG['se_ships_cdr']					= 'Filodan çıkan harabe';
 $LNG['se_def_cdr_message']				= 'Buradan saldirida kaybedilen savunmadan cikan harabe yuzdesini ayarlayabilirsiniz';
-$LNG['se_ships_cdr_message']			= 'Buradan saldirida kaybedilen gemilerden cikan harabe yuzdesini ayarlayabilirsiniz';
-$LNG['se_noob_protect'] 				= 'Zayif Oyuncu Korumasi';
-$LNG['se_noob_protect2'] 				= 'Zayif oyuncu koruma puani';
-$LNG['se_noob_protect3'] 				= 'Zayif/Guclu oyuncu puan katsayisi';
+$LNG['se_ships_cdr_message']			= 'Buradan saldırıda kaybedilen gemilerden çıkan harabe yüzdesini ayarlayabilirsiniz';
+$LNG['se_noob_protect'] 				= 'Zayıf Oyuncu Koruması';
+$LNG['se_noob_protect2'] 				= 'Zayıf oyuncu koruma puanı';
+$LNG['se_noob_protect3'] 				= 'Zayıf/Güçlü oyuncu puan katsayısı';
 $LNG['se_noob_protect_e2'] 				= 'Buradan oyuncunun kac puana kadar zayif oyuncu olarak gosterildigini ayarlayabilirsiniz';
 $LNG['se_noob_protect_e3'] 				= 'Bu ayarla sadirabildikleriniz : Sizin puan x buradaki katsayi. Ornek olarak x5, bunin anlami eger 1000 puaniniz varsa sadece 5x1000 yani puani 5000\'den az olan oyunculara saldirabilirsiniz, yada,  eger 50.000 puaniniz varsa 50.000/10 = 10.000 ve 50.000x10 =100.000 puanlari arasindaki oyuncularsa savasabilirsiniz.';
 $LNG['se_recaptcha_whats']              = 'Guvenlik kodu(RECAPTCHA) nedir?';
