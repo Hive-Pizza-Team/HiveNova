@@ -213,7 +213,7 @@ class Session
 
         $userIpAddress = '127.0.0.1';
 
-	if(!(isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)>=2 && MODE === 'INGAME')) {
+	if(!(isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)==2 && MODE === 'INGAME')) {
 		$sql	= 'REPLACE INTO %%SESSION%% SET
 		sessionID	= :sessionId,
 		userID		= :userId,
