@@ -166,6 +166,7 @@ abstract class AbstractGamePage
 			'hasAdminAccess'	=> !empty(Session::load()->adminAccess),
 			'hasGate'			=> $PLANET[$resource[43]] > 0,
 			'discordUrl'		=> DISCORD_URL,
+			'badges'            => PlayerUtil::getPlayerBadges($USER),
 		));
 	}
 

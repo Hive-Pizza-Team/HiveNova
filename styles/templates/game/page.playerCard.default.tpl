@@ -10,7 +10,7 @@
 	</tr>
 	<tr>
 		<td style="width:40%">{$LNG.pl_name}</td>
-		<td colspan="2">{$name}</td>
+		<td colspan="2">{$name} {$badges}</td>
 	</tr>
 
 	<tr>

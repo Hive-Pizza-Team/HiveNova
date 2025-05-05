@@ -1,9 +1,9 @@
 <label class="hamburger" for="toggle-menu" class="toggle-menu"><i class="fas fa-bars"></i></label>
 
 <div class="planetImage no-mobile">
-   <img src="{$avatar}" width="50" height="50"></a>
+   <img src="{$avatar}" width="50" height="50">
    <div>{$LNG.tech.615}</div>
-   <div><a href="game.php?page=settings"><b>{$username}</b></div>
+   <div><a href="game.php?page=settings"><b>{$username}</b></a></div>
 </div>
 
 <div class="planetSelectorWrapper">

@@ -137,6 +137,15 @@ class PlayerUtil
 		return 'styles/resource/images/user.png';
 	}
 
+	static public function getPlayerBadges($USER){
+		$usernameLower = strtolower($USER['username']);
+		if (PlayerUtil::isHiveAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
+			return '♦️';
+		}
+
+		return '';
+	}
+
 	static public function isMailValid($address) {
 		
 		if(function_exists('filter_var')) {
