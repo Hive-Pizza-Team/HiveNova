@@ -3,7 +3,7 @@
 <div class="planetImage no-mobile">
    <img src="{$avatar}" width="50" height="50">
    <div>{$LNG.tech.615}</div>
-   <div><a href="game.php?page=settings"><b>{$username} {$badges}</b></a></div>
+   <div><a href="game.php?page=settings"><b>{$username}</b></a></div>
 </div>
 
 <div class="planetSelectorWrapper">
