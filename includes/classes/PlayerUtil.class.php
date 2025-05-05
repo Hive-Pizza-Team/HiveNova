@@ -143,7 +143,7 @@ class PlayerUtil
 			return '♦️';
 		}
 
-		return '';
+		return '✉️';
 	}
 
 	static public function isMailValid($address) {
