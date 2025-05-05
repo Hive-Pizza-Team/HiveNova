@@ -25,118 +25,118 @@
 $LNG['faq_overview']	= "FAQ";
 
 $LNG['questions']					= array();
-$LNG['questions'][1]['category']	= 'Yeni Baslayanlar Icin Ipuclari';
-$LNG['questions'][1][1]['title']	= '1. Adim';
+$LNG['questions'][1]['category']	= 'Yeni Başlayanlar Için Ipuçları';
+$LNG['questions'][1][1]['title']	= '1. Adım';
 $LNG['questions'][1][1]['body']		= <<<BODY
-<p>Bu bolumde oyundaki temel binalardan bahsedecegiz. Bu size oyuna nerden ve basarili bir imparatorluga ulasmak icin hangi binalardan baslayacaginiz ile ilgili ipuclari verecek. </p>
+<p>Bu bölümde oyundaki temel binalardan bahsedeceğiz. Bu size oyuna nerden ve başarılı bir imparatorluğa ulaşmak için hangi binalardan baslayacağınız ile ilgili ipuçları verecek. </p>
 <h3>Solar Enerji Santrali:</h3>
-<p>Eksiksiz, dogru ve tam kapasiteli hammade uretmek icin Solar Enerji Santralinizin sagladigi enerji, maden binalarinin sagladigi enerjiden daha fazla olmak zorunda. Eger, enerjiniz negatifte olursa, maden uretiminde enerjiye bagli bir uretim dususu gorulur</p>
+<p>Eksiksiz, doğru ve tam kapasiteli ham madde üretmek icin Solar Enerji Santralinizin sağladığı enerji, maden binalarının sağladığı enerjiden daha fazla olmak zorunda. Eğer, enerjiniz negatifte olursa, maden üretiminde enerjiye bağlı bir üretim düşüşü görülür</p>
 <h3>Metal Madeni:</h3>
-<p> Metal evrende hemen her gezegende olan 3 madenden bir tanesi. Metal neredeyse herseyin uretiminde kullanilir. O yuzden metal madeninizin diger madenlerden daha yuksek kademelerde olmasi tavsiye edilir..</p>
-<h3>Kristal Madeni ve Deterium Sentezleyicisi</h3>
-<p> Kristal gemiler, arastirmalar ve binalar icin hayati onem tasiyan bir madendir. The Crystal is an important resource for buildings, ships, and research. Uretim kapasitesi metale gore daha dusuktur. Oyuna devam ettikce Kristal ihtiyacinin ne kadar onemli oldugunu goreceksiniz. Kristal ihtiyaci da maliyeti de oyunla beraber artacak. Deuterium evrendeki en buyuk enerji kaynagi. Temel kullanim amaci gemi yakitlari olmakla beraber bazi arastirmalarda da deuterium ihtiyaci duyulmaktadir..</p>
+<p> Metal, evrende hemen her gezegende olan 3 madenden bir tanesi. Metal neredeyse her şeyin üretiminde kullanılır. O yüzden metal madeninizin diğer madenlerden daha yüksek kademelerde olması tavsiye edilir..</p>
+<h3>Kristal Madeni ve Deuterium Sentezleyicisi</h3>
+<p> Kristal, gemiler, araştırmalar ve binalar için hayati önem taşıyan bir madendir. Üretim kapasitesi metale göre daha düşüktür. Oyuna devam ettikçe Kristal ihtiyacının ne kadar önemli olduğunu göreceksiniz. Kristal ihtiyacı da maliyeti de oyunla beraber artacak. Deuterium evrendeki en büyük enerji kaynağı. Temel kullanım amacı gemi yakıtlari olmakla beraber bazı araştırmalarda da Deuterium ihtiyacı duyulmaktadır..</p>
 BODY;
-$LNG['questions'][1][2]['title']	= '2. Adim';
+$LNG['questions'][1][2]['title']	= '2. Adım';
 $LNG['questions'][1][2]['body']		= <<<BODY
-<p>Imparatorlugunuzu genisletmek ve rakiplerinizle basa cikabilmek icin diger binalari da uygun bir sekilde gelistirmeniz lazim. Gerekli arastirmalari ve binalari yaptiginizda filonuzu yapmaya baslayabilirsiniz. Ayni zamanda savunma uniteleri ile de gezegeni saldirilardan korumus olursunuz. Kisaca bu binalari tanitalim:</p>
+<p>Imparatorluğunuzu genişletmek ve rakiplerinizle başa çıkabilmek için diğer binaları da uygun bir şekilde geliştirmeniz lazım. Gerekli araştırmaları ve binaları yaptığınızda filonuzu yapmaya başlayabilirsiniz. Aynı zamanda savunma üniteleri ile de gezegeni saldırılardan korumuş olursunuz. Kısaca bu binaları tanıtalım:</p>
 <h3>Tersane:</h3>
-<p>Butun gemiler burada uretilir. Bazi gemilerin uretilmeleri icin daha gelismis tersanelere ve arastirmalara gerek duyulur. Teknolojiler menusunden hangi geminin uretilmek icin nelere ihtiyaci oldugunu bulabilirsiniz. Ayni zamanda tersane gelistikce gemilerin ve savunma unitelerinin uretim hizlari da gelisir.</p>
-<h3>Bilimsel Arastirma Labaratuvari:</h3>
-<p> Bilimsel arastirmalar yeni binalarin, gemilerin ve savunma unitelerinin uretilebilmesi icin gereklidir. Ayni zamanda bilimsel arastirmalar size evrendeki mucadelenizde bir takim artilar getirecektir. Gemilerinizin hizini artirmak, Savunmanizi guclendirmek, yada casusluk ve filo hareketlerinizi gelistirmek gibi. </p>
+<p>Bütün gemiler burada üretilir. Bazı gemilerin üretilmeleri için daha gelişmiş tersanelere ve araştırmalara gerek duyulur. Teknolojiler menüsünden hangi geminin üretilmek için nelere ihtiyacı olduğunu bulabilirsiniz. Aynı zamanda tersane geliştikçe gemilerin ve savunma ünitelerinin üretim hızları da gelişir.</p>
+<h3>Bilimsel Araştırma Labaratuvarı:</h3>
+<p> Bilimsel araştırmalar yeni binaların, gemilerin ve savunma ünitelerinin üretilebilmesi için gereklidir. Aynı zamanda bilimsel araştırmalar size evrendeki mücadelenizde bir takım artılar getirecektir. Gemilerinizin hızını artırmak, Savunmanızı güçlendirmek, ya da casusluk ve filo hareketlerinizi geliştirmek gibi. </p>
 
-<h3>Robot Fabrikasi:</h3>
-<p>R obot fabrikalari gezegenin altyapisi ve organizasyonu icin gereken vasifsiz is gucunu uretiyorlar.Kademesi arttikca diger binalarin yapim sureci de daha hizli isliyor. Her kademe bina insa suresini belli olcude azaltiyor. </p>
+<h3>Robot Fabrikası:</h3>
+<p>Robot fabrikaları gezegenin altyapısı ve organizasyonu için gereken vasıfsız iş gücünü üretiyorlar. Kademesi arttıkça diğer binaların yapım süreci de daha hızlı işliyor. Her kademe bina inşa süresini belli ölçüde azaltıyor. </p>
 BODY;
-$LNG['questions'][1][3]['title']	= '3. Adim';
+$LNG['questions'][1][3]['title']	= '3. Adım';
 $LNG['questions'][1][3]['body']		= <<<BODY
-<p>Bu bolumde biraz gezegen savunmasindan ve filo hareketlerinden bahsedecegiz.</p>
+<p>Bu bölümde biraz gezegen savunmasından ve filo hareketlerinden bahsedeceğiz.</p>
 <h3>Galakside:</h3>
-<p>Galakside gezinerek diger gezegenlere bakarak diger oyuncular hakkinda bilgi sahibi olursunuz. Ayni zamanda casus gondererek daha detayli bilgi sagibi olabilirsiniz. Gonderilen casus sayisini sol menudeki ayarlar seceneginden degistirebilirsiniz. </p>
+<p>Galakside gezinerek diğer gezegenlere bakarak diğer oyuncular hakkında bilgi sahibi olursunuz. Aynı zamanda casus göndererek daha detaylı bilgi sahibi olabilirsiniz. Gönderilen casus sayısını sol menüdeki ayarlar seçeneğinden değiştirebilirsiniz. </p>
 <h3>Sending Fleets:</h3>
-<p>Sahip oldugunuz gemileri sol menudeki Filolar secenegini tiklayarak gorebilirsiniz. Gemi yollamak icin oncelikle hangi gemiden kac tane gondereceginizi secmeniz gerekmektedir. Daha sonra geminin gidecegi koordinatlari ve gidis hizini seciniz. Hizinizi dusurdukce yakit tuketimi azalir. En sonunda ise, gorevi secmelisiniz. (Kolonilestirmek, nakliye, konuslanmak, saldiri ve yoket gibi)
+<p>Sahip olduğunuz gemileri sol menüdeki Filolar seçeneğini tıklayarak görebilirsiniz. Gemi yollamak için öncelikle hangi gemiden kac tane göndereceğinizi seçmneniz gerekmektedir. Daha sonra geminin gideceği koordinatları ve gidiş hızını seçiniz. Hızınızı düşürdükçe yakıt tüketimi azalır. En sonunda ise, görevi seçmelisiniz. (Kolonileştirmek, nakliye, konuşlanmak, saldırı ve yok et gibi)
 
 </p>
 <h3>Savunma:</h3>
-<p> Gezegeninizi korumak icin mutlaka savunma uniteleri uretmelisiniz. Tabiki gemilerde oldugu gibi savunma uniteleri icin de tersanenin kurulmus olmasi gerekiyor. Gemilerinizin aksine savunma uniteleri saldirilar tarafindan yokedilse bile 70% oraninda tekrar kendini yeniler. </p>
+<p> Gezegeninizi korumak için mutlaka savunma üniteleri üretmelisiniz. Tabiki gemilerde olduğu gibi savunma üniteleri için de tersanenin kurulmuş olması gerekiyor. Gemilerinizin aksine savunma üniteleri saldırılar tarafından yok edilse bile 70% oranında tekrar kendini yeniler. </p>
 BODY;
 
-$LNG['questions'][2]['category']	= 'Gelismis Bilgiler';
-$LNG['questions'][2][1]['title']	= 'Saldiri';
+$LNG['questions'][2]['category']	= 'Gelişmiş Bilgiler';
+$LNG['questions'][2][1]['title']	= 'Saldırı';
 $LNG['questions'][2][1]['body']		= <<<BODY
-<h3>Saldiri:</h3>
-<p>Diger oyunculara saldirarak imparatorlugunuzu guclendirebilirsiniz. Ama ayni zamanda dikkatli de olmalisiniz. Bir kac cesit saldiri tipi vardir:</p>
+<h3>Saldırı:</h3>
+<p>Diğer oyunculara saldırarak imparatorluğunuzu güçlendirebilirsiniz. Ama aynı zamanda dikkatli de olmalısınız. Birkaç çesit saldıtı tipi vardır:</p>
 <ul>
 	<li>"Farmar"</li>
 	<li>ACS</li>
 	<li>Raid (or war)</li>
 	<li>Intercept</li>
 </ul>
-<h3>Yagma:</h3>
-<p> Bu etrafinizdaki oyunculari tarayarak, filosu zayif ve gezegeninde saldirmaya deger madeni olanlara saldirmaktir. Bu sekilde kayip vermeden yada cok az bir kayipla karli bi saldiri gerceklestirmis olursunuz. Ele gecirdiginiz madenler gemileriniz dondugunde imparatorlugunuza eklenir. </p>
-<h3>Ittifak Saldirisi:</h3>
-<p>Saldirilarin Doruk Noktasi.<br> Evrende bir cok guclu rakibiniz, tek basiniza vurmanizin imkansiz oldugu rakipleriniz olabilir. Ama ittifaginiz ile beraberce saldiri duzenleyebiliriniz. Boylece kazanilmasi sizin icin imkansiz olan bir savasi kazanmis olursunuz. Dusman yokedildikten sonra kazanilan ittifakca anlasilan sekilde paylasilir. <br></p>
+<h3>Yağma:</h3>
+<p> Bu etrafınızdaki oyuncuları tarayarak, filosu zayıf ve gezegeninde saldırmaya değer madeni olanlara saldırmaktır. Bu şekilde kayıp vermeden ya da çok az bir kayıpla karlı bi saldırı gerçekleştirmiş olursunuz. Ele geçirdiğiniz madenler gemileriniz döndüğünde imparatorluğunuza eklenir. </p>
+<h3>Ittifak Saldırısı:</h3>
+<p>Saldırıların Doruk Noktası.<br> Evrende bir çok güçlü rakibiniz, tek başınıza vurmanızın imkansiz olduğu rakipleriniz olabilir. Ama ittifağınız ile beraberce saldırı düzenleyebilirsiniz. Böylece kazanılması sizin için imkansız olan bir savaşı kazanmış olursunuz. Düşman yok edildikten sonra kazanılan ittifakça anlaşılan şekilde paylaşılır. <br></p>
 <h3>Filo Savasi:</h3>
-<p>Bu iki filonun savasmasidir. Yenebileceginiz rakip filoya saldirdiktan sonra ortaya buyuk bir harabe (filo miktarina endeksli) ortaya cikar. Bunu geri donusumculeriniz vasitasiyla toplayabilirsiniz. Savas bittikten sonra savas raporundan savasin ayrintilarini gorebilirsiniz.
+<p>Bu iki filonun savaşmasıdır. Yenebileceğiniz rakip filoya saldirdiktan sonra ortaya büyük bir harabe (filo miktarına endeksli) ortaya çıkar. Bunu geri dönüşümcüleriniz vasıtasıyla toplayabilirsiniz. Savaş bittikten sonra savaş raporundan savaşın ayrıntılarını görebilirsiniz.
 </p>
-<h3>Roket Saldirilari</h3>
-<p>Bir dusmaniniz var ve cok guclu savunmasi var. Gemi kaybetmek istemiyorsunuz. O zaman yapmaniz gereken roket saldirisi. Gezegeninizdeki roket silonuzu gelistirdikce gonderebileceginiz roket sayisi ve menziliniz artar. Ayrica Gezegenler arasi roketlerin yokettigi savunmalar kendilerini yenileyemez.</p>
+<h3>Roket Saldırıları</h3>
+<p>Bir düşmanınız var ve çok güçlü savunması var. Gemi kaybetmek istemiyorsunuz. O zaman yapmanız gereken roket saldırısı. Gezegeninizdeki roket silonuzu geliştirdikçe gönderebileceğiniz roket sayısı ve menziliniz artar. Ayrıca Gezegenler arası roketlerin yok ettigi savunmalar kendilerini yenileyemez.</p>
 
 BODY;
 
 $LNG['questions'][2][2]['title']	= 'Korunma';
 $LNG['questions'][2][2]['body']		= <<<BODY
-<h3>Kendinizi Nasil Savunursunuz</h3>
-<p>Buyuk bir filonuz ve savunmaniz varsa bir cok oyuncuyu korkutursunuz ama ayni zamanda bir cok oyuncunun da istahini kabartirsiniz. Yani, buyuk filo buyuk sorumluluk demek ve korumaniz gerek. Eger dikkatli olmazsaniz buyuk ugraslarla yaptiginiz filoyu bir anda kaybedebilirsiniz. Savunma uniteleri belki kendilerini 70% oraninda yeniler ama gemilerde bu olmaz!
+<h3>Kendinizi Nasıl Savunursunuz</h3>
+<p>Büyük bir filonuz ve savunmanız varsa birçok oyuncuyu korkutursunuz ama aynı zamanda birçok oyuncunun da iştahını kabartırsınız. Yani, büyük filo büyük sorumluluk demek ve korumanız gerek. Eğer dikkatli olmazsanız büyük uğraşlarla yaptığınız filoyu bir anda kaybedebilirsiniz. Savunma üniteleri belki kendilerini 70% oranında yeniler ama gemilerde bu olmaz!
 </p>
-<p>Bir baska korunma yontemi, gezegeninize yakalayici roketler yaparak gelecek roket saldirilarindan korumus olursunuz. </p>
-<p> Ilave olarak, casusluk kademinizi artirdikca diger oyuncularin sizinle ilgili edinebilecegi bilgi de azalir. Filonuzu ve savunmanizi goremeyen dusmanlar risk almak istemezz. </p>
-<p>En iyi savunma yolu, dusmanlarinizin gercekten nelerinizin oldgunu bilmemesidir. Boylece soz oyunda degilken veya internet erisiminiz yokken size saldirmak icin 2 kezdusunmeleri gerekcektir. </p>
+<p>Bir başka korunma yöntemi, gezegeninize yakalayıcı roketler yaparak gelecek roket saldırılarından korumuş olursunuz. </p>
+<p> Ilave olarak, casusluk kademinizi artırdıkça diğer oyuncuların sizinle ilgili edinebileceği bilgi de azalır. Filonuzu ve savunmanızı göremeyen düşmanlar risk almak istemez. </p>
+<p>En iyi savunma yolu, düşmanlarınızın gerçekten nelerinizin olduğunu bilmemesidir. Böylece siz oyunda değilken veya internet erişiminiz yokken size saldırmak için 2 kez düşünmeleri gerekecektir. </p>
 <h3>Filonuzu koruma"</h3>
-<p> Filonuzu korumak, oyundaki en buyuk gerekliliklerden birisidir. Ne yazik ki bir cok oyuncu bu konuda buyuk hatalar yapmakta. Sonucta kimse 24 saat oyunda kalamaz ve herkesin oyunda oldugu zaman belli degil. O yuzden oyunda olmayacaginiz sure zarfinda filonuzu korumak icin bir kac yontem var. <br>
+<p> Filonuzu korumak, oyundaki en büyük gerekliliklerden birisidir. Ne yazık ki birçok oyuncu bu konuda büyük hatalar yapmakta. Sonuçta kimse 24 saat oyunda kalamaz ve herkesin oyunda olduğu zaman belli değil. O yüzden oyunda olmayacağınız süre zarfında filonuzu korumak icçn birkaç yöntem var. <br>
 
-Konuslanmaya Gondermek : Eger ayiniz yoksa filonuzu ve madenlerinizi baska bir gezegene, daha sonra tekrar online olacaginiz zaman varacak hizda konuslanmaya gonderebilirsiniz. Bu, etraftaki aylar tarafindan gorulebilir. Ama eger saldiri alacaksaniz, filoyu geri cektiginizde bu radarlardan kaybolur. <br>
+Konuşlanmaya Göndermek : Eğer ayınız yoksa filonuzu ve madenlerinizi başka bir gezegene, daha sonra tekrar çevrimiçi olacaginiz zaman varacak hızda konuşlanmaya gönderebilirsiniz. Bu, etraftaki aylar tarafından görülebilir. Ama eğer saldırı alacaksanız, filoyu geri cektiğinizde bu radarlardan kaybolur. <br>
 
-Eger bir adet ayiniz varsa, gezegenden aya konuslanma gondermek yapilacak en akillica secenektir. Cunku rakip sizin gezegenden kalkan filonuzu gorebilir ama Ay’a gidecek filolari goremez. Ay’a radarla bakilamaz. <br>
+Eğer bir adet ayınız varsa, gezegenden aya konuşlanma göndermek yapılacak en akıllıca seçenektir. Çünkü rakip sizin gezegenden kalkan filonuzu görebilir ama Ay’a gidecek filolari göremez. Ay’a radarla bakılamaz. <br>
 
-Eger birden fazla ayiniz varsa en guvenli yol, Ay’dan Aya konuslanma gondermek. Boylece hic kimse filonuzu goremez. Ne kalktigi koordinata ne de varacagi koordinata radar atilabilir. <br>
+Eğer birden fazla ayınız varsa en güvenli yol, Ay’dan Aya konuşlanma göndermek. Böylece hiç kimse filonuzu göremez. Ne kalktığı koordinata ne de varacağı koordinata radar atılabilir. <br>
 </p>
 BODY;
 
 $LNG['questions'][2][3]['title']	= 'AYLAR';
 $LNG['questions'][2][3]['body']		= <<<BODY
-<p> Savaslardan sonra ortaya cikan harabelerin birleserek gezegende bir uydu olusturma sansi var. Tabi bunun icin en az 100,000 unitenin savasta imha olmasi lazim. Savastaki ortaya cikan harabe miktari arttikca Ay ortaya cikma sansi da artar. Harabe ne kadar buyuk olursa olsun maksimum ay sansi %20 olarak sinirlanmistir. </p>
+<p> Savaşlardan sonra ortaya çıkan harabelerin birleşerek gezegende bir uydu oluşturma şansı var. Tabi bunun için en az 100,000 ünitenin savaşta imha olması lazım. Savaşta ortaya çıkan harabe miktarı arttıkça Ay ortaya çıkma şansı da artar. Harabe ne kadar büyük olursa olsun maksimum ay şansı %20 olarak sınırlanmıştır. </p>
 <h3>Genel</h3>
-<p>Aylarin da gezegenler gibi isimleri vardir. Ama varsayilan isim “AY” olarak belirlenmistir. Birden fazla ayiniz olabilir ama gezegen basina sadece 1 tane olur. Aylarda kuracaginiz radar istasyonlari ile dusman filolari gorebilirsiniz. Yada sicrama gecitleri yaparak bir koordinattan bir koordinata yakit tuketmeden aninda isinlanabilirsiniz. </p>
+<p>Ayların da gezegenler gibi isimleri vardır. Ama varsayılan isim “AY” olarak belirlenmiştir. Birden fazla ayınız olabilir ama gezegen başına sadece 1 tane olur. Aylarda kuracağınız radar istasyonları ile düşman filolari görebilirsiniz. Ya da sıçrama gecçtleri yaparak bir koordinattan bir koordinata yakıt tüketmeden anında ışınlanabilirsiniz. </p>
 <h3>Aylarin Alanlari</h3>
-<p> Ay harabeye bagli olarak olusabilir. Ayni zamanda oyun yoneticisinden izin alinip bir arkadasiniz yada ittifak uyeniz ile denenebilir. Ay cikarmak icin gereken en ideal rakam 1667 kucuk nakliyedir. Uretimleri kolay ve istedigi hammadde az ve yokedilmeleri kolaydir. 1667 kucuk nakliye size 20% lik (ki bu maksimum sans) ay olusma sansi verir. </p>
+<p> Ay harabeye bağlı olarak oluşabilir. Aynı zamanda oyun yöneticisinden izin alınıp bir arkadaşınız ya da ittifak üyeniz ile denenebilir. Ay çıkarmak için gereken en ideal rakam 1667 küçük nakliyedir. Üretimleri kolay ve istediği ham madde az ve yok edilmeleri kolaydir. 1667 küçük nakliye size 20% lik (ki bu maksimum şans) ay oluşma şansı verir. </p>
 
-<p>Diger bir ihtimal ise savunma olarak 3334 adet roket atici yada hafif lazer yapmaktir. </p><p> Savastaki maden arttikca ayin buyuklugu de artmaktadir. Aylarin buyuklugu savas ne kadar olursa olsun maksimum 8944 kmdir.
+<p>Diğer bir ihtimal ise savunma olarak 3334 adet roket atıcı ya da hafif lazer yapmaktır. </p><p> Savaştaki maden arttıkça ayın büyüklüğü de artmaktadır. Ayların büyüklüğü savaş ne kadar olursa olsun maksimum 8944 km'dir.
 
-<h3>Yapilanma</h3>
-<p>Ayda yapilacak binalar gezegenlerdeki kadar cok degildir. Ay’da yapilmasi mumkun binalar : Maden depolari, Robot fabrikasi, Nanit, Tersane, Ittifak Deposu, Ay Merkez Istasyonu, Radar ve Sicrama Gecididir. Eger ayda gemi yada savunma uretmeyi dusunmuyorsaniz tersane kurmanin bir anlami yok. Ama ittifak depose cok yararli olacaktir. <br> Fakat ayda olup gezegende olmayan 3 ozel bina vardir. Bunlar: </p>
-<ul><li><p><b>Ay Merkez Istasyonu</b><br> Bu bina ayda bina yapimi icin kullanilabilecek alan acar. Her kademe size kullanmak icin 3 birimlik alan verir. </p></li>
-<li><p><b>Radar Istasyonu</b><br> Bu diger gezegenlerdeki filo aktivitelerini gorebilmek uzere size radar sensoru verir. Fakat radar sensoru diger aylardaki filo hareketlerini goremezler. Kademe arttikca gorebileceginiz menzil de artar. </p></li>
-<li><p><b>Sicrama Gecidi</b><br> Filolarinizi bir aydan digerine isinlamak icin kullanilir. Isinlama aninda gerceklesir ve bunun icin yakit istemez. Ama, sicrama gecidi ile aydaki madenler beraber gitmez. Bu islemin gerceklesmesi icin aydaki filonun isinlancagi diger ayda da sicrama gecidi olmasi gerekmektedir.  Her sicramadan sonra belli bir sure beklemeniz gerekir.</p></li></ul>
-<p>Asagida aylar icin ideal gelisim plani verilmistir:<br>
-<b>Kisaltmalar:</b><br>
+<h3>Yapılanma</h3>
+<p>Ayda yapılacak binalar gezegenlerdeki kadar çok değildir. Ay’da yapılmas mümkün binalar : Maden depoları, Robot fabrikası, Nanit, Tersane, Ittifak Deposu, Ay Merkez Istasyonu, Radar ve Sıçrama Geçididir. Eğer ayda gemi ya da savunma üretmeyi düşünmüyorsanız tersane kurmanın bir anlamı yok. Ama ittifak deposu çok yararlı olacaktır. <br> Fakat ayda olup gezegende olmayan 3 özel bina vardır. Bunlar: </p>
+<ul><li><p><b>Ay Merkez Istasyonu</b><br> Bu bina ayda bina yapımı için kullanilabilecek alan açar. Her kademe size kullanmak için 3 birimlik alan verir. </p></li>
+<li><p><b>Radar Istasyonu</b><br> Bu diğer gezegenlerdeki filo aktivitelerini görebilmek üzere size radar sensörü verir. Fakat radar sensörü diğer aylardaki filo hareketlerini göremezler. Kademe arttıkça görebileceğiniz menzil de artar. </p></li>
+<li><p><b>Sıçrama Geçidi</b><br> Filolarınızı bir aydan diğerine ışınlamak icin kullanılır. Işınlama anında gerçekleşir ve bunun icin yakıt istemez. Ama, sıçrama geçidi ile aydaki madenler beraber gitmez. Bu işlemin gerçekleşmesi için aydaki filonun ışınlancağı diğer ayda da sıçrama geçidi olması gerekmektedir.  Her sıçramadan sonra belli bir süre beklemeniz gerekir.</p></li></ul>
+<p>Aşağıda aylar için ideal gelişim planı verilmiştir:<br>
+<b>Kısaltmalar:</b><br>
 MRK - Ay Merkez Istasyonu<br>
 RDR - Radar Istasyonu<br>
-SG - Sicrama Gecidi<br>
-RF - Robot Fabrikasi</p>
+SG - Sıçrama Geçidi<br>
+RF - Robot Fabrikası</p>
 <p>MRK1 - RF1 - RF2 - MRK2 - RDR1 - RF3 - MRK3 - RDR2 - RF4 - MRK4 - RDR3 - RF5 - MRK5 - RDR4 - RF6 - MRK6 - RDR5 - RDR6 - MRK7 - RDR7 - RDR8 - MRK8 - SG1<br>
-Bu siralama eger herhangi bir fikriniz yoksa tavsiye edilen siralamadir. Tabiki tecrubeli oyuncularin kendilerine gore gelistirdikleri fikirleri ve stratejileri vardir. <p>
-<h3>Ay Yoketme</h3>
-<p>Ay olustugu gibi yokedilebilir de. Ama her gemi ayi yokedemez. Bunun icin ozel gemiler vardir. </p>
-<p>Olum Yildizi yada diger adiyla R.I.P. adli gemi ile ay yokedilebilir. Bunu icin filo menusunden bu gemiyi ve miktarini secip, vurulacak ayin koordinatlarini girdikten sonra gorevlerden “Yoket” secenegini isaretlemelisiniz. Fakat onemli bir nokta ayin yokedilme ihtimali kadar filonuzun da yok olma sansi var. !</p>
+Bu sıralama eğer herhangi bir fikriniz yoksa tavsiye edilen sıralamadır. Tabiki tecrübeli oyuncularin kendilerine göre geliştirdikleri fikirleri ve stratejileri vardır. <p>
+<h3>Ay Yok etme</h3>
+<p>Ay oluştuğu gibi yok edilebilir de. Ama her gemi ayı yok edemez. Bunun için özel gemiler vardır. </p>
+<p>Ölum Yıldızı ya da digğr adıyla R.I.P. adlı gemi ile ay yok edilebilir. Bunun icin filo menüsünden bu gemiyi ve miktarinı seçip, vurulacak ayın koordinatlarını girdikten sonra görevlerden “Yok et” seçeneğini işaretlemelisiniz. Fakat önemli bir nokta ayın yok edilme ihtimali kadar filonuzun da yok olma şansı var. !</p>
 BODY;
 
 $LNG['questions'][2][4]['title']	= 'Ittifak';
 $LNG['questions'][2][4]['body']		= <<<BODY
-<h3>Nasil Ittifak Kurulur</h3>
-<p>Soldaki Menuden ittifak secenegine tikladiktan sonra “Yeni Ittifak Olustur: secenegi ile ittifak kurabilirsiniz. Yapmaniz gereken Ittifak ismini ve TAG (Kisaltma) girmektir. Bunu gerceklestirdikten sonra ittifaginiz kurulmus ve sizde kurucusu olacaksiniz.</p>
-<p>Ittifak kurulduktan sonra asagidaki bilgiler bulacaksiniz:<br>"Uyeler": Buradan ittifaktaki uyelerin sayisini gorebilirsiniz<br>"Rutbeniz": burada ittifaktaki konumunuzu goreceksiniz. Eger kurucu iseniz ittifagi yonet linkinden ittifakla ilgili duzenlemeler yapabilirsiniz.<br>"Sirkuler Mesaji": Buradan ittifak uyelerine mesaj gonderebilirsiniz.</p>
-<h3>Ittifagin Yonetimi</h3>
-<p>Bu menuden ittifakla ilgili bilgileri duzenleyebilirsiniz. Ittifagin tanimi,  metinler ve sayfasi gibi. Ayni zamanda uyeleri yonet menusuyle rutbeler belirleyip, uyelerin yekilerini atayabilirsiniz. Eger ilerde ittifagi devretmek isterseniz uyelerden birine Sag Kol ozelligi vermeniz gerkmektedir.
-<br> Ayni zamanda ittifagi dagit menusuyle de ittifagi dagitabilirsiniz Ama ittifaktan ayril dediginizde Ittifak belirlediginiz Sag Kol’a devredilir. Ayni zamanda kurucu yada kurucunun yetki verdigi uyeler bu sayfadan uye basvurularini degerlendirebilir. </p>
+<h3>Nasıl Ittifak Kurulur</h3>
+<p>Soldaki Menüden ittifak seçeneğine tıkladıktan sonra “Yeni Ittifak Oluştur: sçceneği ile ittifak kurabilirsiniz. Yapmanız gereken Ittifak ismini ve TAG (Kısaltma) girmektir. Bunu gerçekleştirdikten sonra ittifağınız kurulmuş ve siz de kurucusu olacaksınız.</p>
+<p>Ittifak kurulduktan sonra aşağıdaki bilgiler bulacaksınız:<br>"Uyeler": Buradan ittifaktaki üyelerin sayısını görebilirsiniz<br>"Rütbeniz": burada ittifaktaki konumunuzu göreceksiniz. Eğer kurucu iseniz ittifağı yönet linkinden ittifakla ilgili düzenlemeler yapabilirsiniz.<br>"Sirküler Mesajı": Buradan ittifak üyelerine mesaj gönderebilirsiniz.</p>
+<h3>Ittifağın Yönetimi</h3>
+<p>Bu menüden ittifakla ilgili bilgileri düzenleyebilirsiniz. Ittifağın tanımı,  metinler ve sayfası gibi. Aynı zamanda üyeleri yönet menüsüyle rütbeler belirleyip, üyelerin yetkilerini atayabilirsiniz. Eğer ileride ittifağı devretmek isterseniz üyelerden birine Sağ Kol özelliği vermeniz gerekmektedir.
+<br> Aynı zamanda ittifağı dağıt menüsüyle de ittifağı dağıtabilirsiniz Ama ittifaktan ayrıl dediğinizde Ittifak belirlediğiniz Sağ Kol’a devredilir. Aynı zamanda kurucu ya da kurucunun yetki verdiği üyeler bu sayfadan üye başvurularını değerlendirebilir. </p>
 BODY;
 
