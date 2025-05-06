@@ -143,7 +143,7 @@ class PlayerUtil
 			return '<a href="https://peakd.com/@'.$USER['hive_account'].'" target="_blank">♦️</a>';
 		}
 
-		if (!is_null($USER['hive_account']) && $usernameLower !== $USER['hive_account']) {
+		if ($USER['hive_account'] !== '' && $usernameLower !== $USER['hive_account']) {
 			return '🔗';
 		}
 
