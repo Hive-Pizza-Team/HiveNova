@@ -140,7 +140,7 @@ class PlayerUtil
 	static public function getPlayerBadges($USER){
 		$usernameLower = strtolower($USER['username']);
 		if (PlayerUtil::isHiveAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
-			return '♦️';
+			return '<a href="https://peakd.com/@'.$USER['hive_account'].'">♦️</a>';
 		}
 
 		return '';
