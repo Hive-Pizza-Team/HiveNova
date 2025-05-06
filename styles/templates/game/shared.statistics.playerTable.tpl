@@ -2,6 +2,7 @@
 	<th style="width:60px;">{$LNG.st_position}</th>
 	<th>{$LNG.st_player}</th>
 	<th>&nbsp;</th>
+	<th>&nbsp;</th>
 	<th>{$LNG.st_alliance}</th>
 	<th>{$LNG.st_points}</th>
 </tr>
