@@ -42,10 +42,10 @@ class ShowIndexPage extends AbstractLoginPage
 		}
 		
 		$Code	= HTTP::_GP('code', 0);
-		$loginCode	= false;
+		$loginErrorMessage	= '';
 		if(isset($LNG['login_error_'.$Code]))
 		{
-			$loginCode	= $LNG['login_error_'.$Code];
+			$loginErrorMessage	= $LNG['login_error_'.$Code];
 		}
 
 		$db = Database::get();
@@ -58,7 +58,7 @@ class ShowIndexPage extends AbstractLoginPage
 		$config				= Config::get();
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
-			'code'					=> $loginCode,
+			'code'					=> $loginErrorMessage,
 			'steemconnectUrl'		=> $steemconnectUrl,
 			'verkey'			=> $verkey,
 			'descHeader'			=> sprintf($LNG['loginWelcome'], $config->game_name),
@@ -67,7 +67,8 @@ class ShowIndexPage extends AbstractLoginPage
 			'loginInfo'				=> sprintf($LNG['loginInfo'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>')
 		));
 
-
+		require 'includes/pages/login/ShowErrorPage.class.php';
+		ShowErrorPage::printError($loginErrorMessage);
 		
 		$this->display('page.index.default.tpl');
 	}
