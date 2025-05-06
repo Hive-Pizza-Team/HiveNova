@@ -143,7 +143,11 @@ class PlayerUtil
 			return '<a href="https://peakd.com/@'.$USER['hive_account'].'" target="_blank">♦️</a>';
 		}
 
-		return '';
+		if (!is_null($USER['hive_account']) && $usernameLower !== $USER['hive_account']) {
+			return '🔗';
+		}
+
+		return '⛓️‍💥';
 	}
 
 	static public function isMailValid($address) {
