@@ -21,14 +21,14 @@
 
 // Site Title
 $LNG['siteTitleIndex']				= 'Ana Sayfa';
-$LNG['siteTitleRegister']			= 'Kayit Ol';
-$LNG['siteTitleScreens']			= 'Ekran Goruntuleri';
+$LNG['siteTitleRegister']			= 'Kayıt Ol';
+$LNG['siteTitleScreens']			= 'Ekran Görüntüleri';
 $LNG['siteTitleBanList']			= 'Banlananlar';
-$LNG['siteTitleBattleHall']			= 'En Buyuk Savaslar';
+$LNG['siteTitleBattleHall']			= 'En Büyük Savaşlar';
 $LNG['siteTitleRules']				= 'Kurallar';
 $LNG['siteTitleNews']				= 'Haberler';
-$LNG['siteTitleDisclamer']			= 'Iletisim';
-$LNG['siteTitleLostPassword']		= 'Sifremi Unuttum?';
+$LNG['siteTitleDisclamer']			= 'Iletişim';
+$LNG['siteTitleLostPassword']		= 'Şifremi Unuttum?';
 
 // Menu
 $LNG['forum']						= 'Forum';
@@ -36,116 +36,116 @@ $LNG['menu_index']					= 'Anasayfa';
 $LNG['menu_news']					= 'Haberler';
 $LNG['menu_rules']					= 'Kurallar';
 $LNG['menu_banlist']				= 'Banlananlar';
-$LNG['menu_battlehall']				= 'En Buyuk Savaslar';
-$LNG['menu_disclamer']				= 'Iletisim';
-$LNG['menu_register']				= 'Kayit';
+$LNG['menu_battlehall']				= 'En Büyük Savaşlar';
+$LNG['menu_disclamer']				= 'Iletişim';
+$LNG['menu_register']				= 'Kayıt';
 
 // Universe select
-$LNG['chose_a_uni']					= 'Evreni Seciniz';
+$LNG['chose_a_uni']					= 'Evreni Seçiniz';
 $LNG['universe']					= 'Evren';
 $LNG['uni_closed']					= ' (Offline)';
 
 // Button
-$LNG['buttonRegister']				= 'Kayit Ol!';
+$LNG['buttonRegister']				= 'Kayıt Ol!';
 $LNG['buttonRegisterHive']			= 'Hive ile kayıt olun!';
-$LNG['buttonScreenshot']			= 'Ekran Goruntuleri';
-$LNG['buttonLostPassword']			= 'Sifremi Unuttum?';
+$LNG['buttonScreenshot']			= 'Ekran Görüntüleri';
+$LNG['buttonLostPassword']			= 'Şifremi Unuttum?';
 
 // Start
-$LNG['gameInformations']			= "Gercek zamanli uzay strateji oyunu.\nBuyuk bir rekabet seni bekliyor.\nTek ihtiyacin internet.Herhan gibi bir browser ile oynayabilirsin. Internet Explorer, Mozilla, Chrome\nUcretsiz Kayit";
+$LNG['gameInformations']			= "Gerçek zamanlı uzay strateji oyunu.\nBüyük bir rekabet seni bekliyor.\nTek ihtiyacın internet.Herhangi bir tarayıcı ile oynayabilirsin. Internet Explorer, Mozilla, Chrome\nÜcretsiz Kayıt";
 
 // Login
-$LNG['loginHeader']					= 'Giris';
-$LNG['loginUsername']				= 'Kullanici Adi';
-$LNG['loginPassword']				= 'Sifre';
-$LNG['loginButton']					= 'Giris';
-$LNG['loginInfo']					= 'Giris yaparak tum %si kabul etmis oluyorsunuz.';
-$LNG['loginWelcome']				= ' %s hosgeldiniz ';
-$LNG['loginServerDesc']				= '%s tam zamanli bir uzay strateji oyunu. Yuzlerce oyuncunun <strong>ayni anda beraber oynayabildigi</strong> ve ellerinden geleni yaptigi bir oyun. Tek ihtiyacin olan herhangi bir web tarayicisi.';
+$LNG['loginHeader']					= 'Giriş';
+$LNG['loginUsername']				= 'Kullanıdı Adı';
+$LNG['loginPassword']				= 'Şifre';
+$LNG['loginButton']					= 'Giriş';
+$LNG['loginInfo']					= 'Giriş yaparak tüm %si kabul etmiş oluyorsunuz.';
+$LNG['loginWelcome']				= ' %s hoş geldiniz ';
+$LNG['loginServerDesc']				= '%s tam zamanlı bir uzay strateji oyunu. Yüzlerce oyuncunun <strong>aynı anda beraber oynayabildiği</strong> ve ellerinden geleni yaptığı bir oyun. Tek ihtiyacın olan herhangi bir web tarayıcısı.';
 
 // Register
-$LNG['registerFacebookAccount']		= 'Facebook Hesabi';
-$LNG['registerUsername']			= 'Kullanici Adi';
-$LNG['registerUsernameDesc']		= 'Kullanici adi 3 ila 25 karakter arasinda olmalidir ayrica sadece rakam, harf,tire (-) ve altcizgi (_) kullanilabilir. ';
-$LNG['registerPassword']			= 'Sifre';
-$LNG['registerPasswordDesc']		= 'Sifre en az %s karakterden olusmalidir.';
-$LNG['registerPasswordReplay']		= 'Tekrar sifre';
-$LNG['registerPasswordReplayDesc']	= 'Lurfen sifrenizi tekrar giriniz';
+$LNG['registerFacebookAccount']		= 'Facebook Hesabı';
+$LNG['registerUsername']			= 'Kullanıcı Adı';
+$LNG['registerUsernameDesc']		= 'Kullanıcı adı 3 ila 25 karakter arasında olmalıdır ayrıca sadece rakam, harf,tire (-) ve altçizgi (_) kullanılabilir. ';
+$LNG['registerPassword']			= 'Şifre';
+$LNG['registerPasswordDesc']		= 'Şifre en az %s karakterden oluşmalıdır.';
+$LNG['registerPasswordReplay']		= 'Tekrar şifre';
+$LNG['registerPasswordReplayDesc']	= 'Lütfen şifrenizi tekrar giriniz';
 $LNG['registerEmail']				= 'E-Mail';
-$LNG['registerEmailDesc']			= 'Lutfen e-mail adresinizi yaziniz!';
+$LNG['registerEmailDesc']			= 'Lütfen e-mail adresinizi yazınız!';
 $LNG['registerEmailReplay']			= 'Tekrar email';
-$LNG['registerEmailReplayDesc']		= 'Guvenlik icin e-mail adrenizi tekrar giriniz.!';
+$LNG['registerEmailReplayDesc']		= 'Güvenlik icin e-mail adrenizi tekrar yazınız.!';
 $LNG['registerLanguage']			= 'Dil';
-$LNG['registerReferral']			= 'Oneren:';
-$LNG['registerCaptcha']				= 'Guvenlik kodu';
-$LNG['registerCaptchaDesc']			= 'Lutfen bos alana asagidaki karakterleri giriniz. Buyuk kucuk harf duyarli degildir. ';
+$LNG['registerReferral']			= 'Öneren:';
+$LNG['registerCaptcha']				= 'Güvenlik kodu';
+$LNG['registerCaptchaDesc']			= 'Lütfen boş alana asağıdaki karakterleri giriniz. Büyük küçük harf duyarlı değildir. ';
 $LNG['registerCaptchaReload']		= 'Yeni Kod Iste.';
 $LNG['registerRules']				= 'Kurallar';
 $LNG['registerRulesDesc']			= '%si kabul ediyorum';
-$LNG['hiveAccount']                 = 'Kovan Hesabı';
+$LNG['hiveAccount']                 = 'Hive Hesabı';
 
 $LNG['registerBack']				= 'Geri';
 $LNG['registerNext']				= 'Ileri';
 
-$LNG['registerErrorUniClosed']		= 'Bu evren icin kayitlar kapandi.!';
-$LNG['registerErrorUsernameEmpty']	= 'Kullanici adi girmediniz!';
-$LNG['registerErrorUsernameChar']	= 'Kullanici adi sadece rakam, harf,tire (-) ve altcizgi (_) den olusur!';
-$LNG['registerErrorUsernameExist']	= 'Bu kullanici ismi zaten mevcut!';
-$LNG['registerErrorPasswordLength']	= 'Sifre en az %s karakter olmak zorunda';
-$LNG['registerErrorPasswordSame']	= 'Sifreler birbirini tutmuyor!';
-$LNG['registerErrorMailEmpty']		= 'Lutfen e-mail adresini giriniz!';
-$LNG['registerErrorMailInvalid']	= 'E-mail adresini yanlis girdiniz!';
-$LNG['registerErrorMailSame']		= 'Farki 2 email adresi girdiniz!';
-$LNG['registerErrorMailExist']		= 'Bu email zaten kayitli!';
-$LNG['registerErrorRules']			= 'Oyuna baslamadan once kurallari kabul etmelisiniz!';
-$LNG['registerErrorCaptcha']		= 'Guvenlik kodu dogru degil!';
+$LNG['registerErrorUniClosed']		= 'Bu evren için kayıtlar kapandı.!';
+$LNG['registerErrorUsernameEmpty']	= 'Kullanıcı adı girmediniz!';
+$LNG['registerErrorUsernameChar']	= 'Kullanıcı adı sadece rakam, harf,tire (-) ve altçizgi (_) den oluşur!';
+$LNG['registerErrorUsernameExist']	= 'Bu kullanıcı adı zaten mevcut!';
+$LNG['registerErrorPasswordLength']	= 'Şifre en az %s karakter olmak zorunda';
+$LNG['registerErrorPasswordSame']	= 'Şifreler birbirini tutmuyor!';
+$LNG['registerErrorMailEmpty']		= 'Lütfen e-mail adresini giriniz!';
+$LNG['registerErrorMailInvalid']	= 'E-mail adresini yanlış girdiniz!';
+$LNG['registerErrorMailSame']		= 'Farklı 2 email adresi girdiniz!';
+$LNG['registerErrorMailExist']		= 'Bu email zaten kayıtlı!';
+$LNG['registerErrorRules']			= 'Oyuna başlamadan önce kuralları kabul etmelisiniz!';
+$LNG['registerErrorCaptcha']		= 'Güvenlik kodu doğru değil!';
 $LNG['registerErrorHiveAccountInvalid']	= 'Geçerli bir Hive hesabı girmelisiniz!';
 $LNG['registerErrorHiveAccountExist']	= 'Hive hesabı zaten kayıtlı!';
 
 $LNG['registerMailVertifyTitle']	= 'Activation of registration on the game: %s';
-$LNG['registerMailVertifyError']	= 'Email gondermede basarisiz oldu: %s';
+$LNG['registerMailVertifyError']	= 'Email göndermede başarısız oldu: %s';
 
-$LNG['registerMailCompleteTitle']	= ' %s dunyasina hosgeldiniz!';
+$LNG['registerMailCompleteTitle']	= ' %s dünyasina hoş geldiniz!';
 
-$LNG['registerSendComplete']		= 'Thank you for the registration. You must check your email (Attention with the SPAM) with further information.';
+$LNG['registerSendComplete']		= 'Kayıt olduğunuz için teşekkürler. Daha fazla bilgi için mail adresinizi kontrol ediniz.';
 
 $LNG['registerWelcomePMSenderName']	= 'Admin';
-$LNG['registerWelcomePMSubject']	= 'Hosgeldiniz';
-$LNG['registerWelcomePMText']		= ' %s dunyasina hosgeldin! Oncelikle solar enerji santrali yapmalisin, cunku hammadde uretimi icin enerjiye ihtiyacin vars. Insa etmek icin soldaki menuden binlara tiklayip,  acilan pencerede yukaridan 4. bina (solar enerji ) binasini insa et demen lazim </br> Enerjiden sonra madenleri insa etmeye baslayabilirsin. </br></br> Gemi uretmek icinse tersane yapmalisin. Onun icin de Robot Fabrikasini 2. kademeye getirmelisin.  Hangi binanin hangisini, yada hangi geminin uretilmesi icin nelere ihtiyacin var gormek icin soldaki menuden teknoloji butonuna tiklayip gorebilirsin. </br> Eger sorularin varsa, yeni baslayanlar menusune girebilirsin yada destek bileti gonderebilirsin.  </br></br> Hos ve guzel vakit gecirmen dilegiyle!';
+$LNG['registerWelcomePMSubject']	= 'Hoş geldiniz';
+$LNG['registerWelcomePMText']		= ' %s dünyasina hoş geldin! Öncelikle solar enerji santrali yapmalısın, çünkü ham madde üretimi için enerjiye ihtiyacin var. Insa etmek için soldaki menüden binalara tıklayıp,  açılan pencerede yukarıdan 4. bina (solar enerji) binasını inşa et demen lazım </br> Enerjiden sonra madenleri inşa etmeye başlayabilirsin. </br></br> Gemi üretmek içinse tersane yapmalısın. Onun için de Robot Fabrikasını 2. kademeye getirmelisin.  Hangi binanın hangisini, ya da hangi geminin üretilmesi icin nelere ihtiyacın var görmek icin soldaki menüden teknoloji butonuna tıklayip görebilirsin. </br> Eğer soruların varsa, yeni başlayanlar menüsüne girebilirsin ya da destek bileti gönderebilirsin.  </br></br> Hoş ve güzel vakit geçirmen dileğiyle!';
 
 //Vertify
 
 $LNG['vertifyNoUserFound']			= 'Hata!';
-$LNG['vertifyAdminMessage']			= 'Kullanici adi "%s" aktif!';
+$LNG['vertifyAdminMessage']			= 'Kullanıcı adı "%s" aktif!';
 
 
 //lostpassword
-$LNG['passwordInfo']				= 'Eger sifreni unuttuysan, kullanici adi ve kayitli email adresini saglamalisin.';
-$LNG['passwordUsername']			= 'Kullanici Adi';
+$LNG['passwordInfo']				= 'Eğer şifreni unuttuysan, Kullanıcı adı ve kayıtlı email adresini sağlamalısın.';
+$LNG['passwordUsername']			= 'Kullanıcı Adı';
 $LNG['passwordMail']				= 'E-Mail';
-$LNG['passwordCaptcha']				= 'Guvenlik Kodu';
-$LNG['passwordSubmit']				= 'Gonder';
-$LNG['passwordErrorUsernameEmpty']	= 'Kullanici adi girmediniz!';
-$LNG['passwordErrorMailEmpty']		= 'Yanlis e-mail adresi girdiniz!';
-$LNG['passwordErrorUnknown']		= 'Girdiginiz bilgiler veri tabaninda mevcut degil.';
-$LNG['passwordErrorOnePerDay']		= 'Bu hesap icin sifre son 24 saat icinde talep edildi. Tekrar sifre talep icin 24 saat beklemeniz gerekmekte ';
+$LNG['passwordCaptcha']				= 'Güvenlik Kodu';
+$LNG['passwordSubmit']				= 'Gönder';
+$LNG['passwordErrorUsernameEmpty']	= 'Kullanıcı adı girmediniz!';
+$LNG['passwordErrorMailEmpty']		= 'Yanlış e-mail adresi girdiniz!';
+$LNG['passwordErrorUnknown']		= 'Girdiğiniz bilgiler veri tabanında mevcut değil.';
+$LNG['passwordErrorOnePerDay']		= 'Bu hesap için şifre son 24 saat içinde talep edildi. Tekrar şifre talep için 24 saat beklemeniz gerekmekte ';
 
-$LNG['passwordValidMailTitle']		= 'Sifremi unuttum : %s';
-$LNG['passwordValidMailSend']		= 'Email gonderildi.';
+$LNG['passwordValidMailTitle']		= 'Şifremi unuttum : %s';
+$LNG['passwordValidMailSend']		= 'Email gönderildi.';
 
-$LNG['passwordValidInValid']		= 'Hatali Islem!';
-$LNG['passwordChangedMailSend']		= 'Yeni sifrenizi mail adresinize gonderdik.';
-$LNG['passwordChangedMailTitle']	= ' %s evrenindeki yeni sifreniz :';
+$LNG['passwordValidInValid']		= 'Hatalı Islem!';
+$LNG['passwordChangedMailSend']		= 'Yeni şifrenizi mail adresinize gönderdik.';
+$LNG['passwordChangedMailTitle']	= ' %s evrenindeki yeni şifreniz :';
 
 $LNG['passwordBack']				= 'Geri';
 $LNG['passwordNext']				= 'Ileri';
 
 //case default
 
-$LNG['login_error_1']				= 'Kullanici adi yada sifre yanlis!';
-$LNG['login_error_2']				= 'Baskasi farki bir bilgisayardan bu hesaba girdi, yada IP adresiniz degisti!';
-$LNG['login_error_3']				= 'Oturumunuz sonlandi!';
-$LNG['login_error_4']				= 'Sorun olustu. Lutfen tekrar deneyiniz!';
+$LNG['login_error_1']				= 'Kullanıcı adı yada şifre yanlış!';
+$LNG['login_error_2']				= 'Başkası farklı bir bilgisayardan bu hesaba girdi, ya da IP adresiniz değişti!';
+$LNG['login_error_3']				= 'Oturumunuz sonlandı!';
+$LNG['login_error_4']				= 'Sorun oluştu. Lütfen tekrar deneyiniz!';
 
 //Rules
 $LNG['rulesHeader']					= 'Kurallar';
@@ -159,8 +159,8 @@ $LNG['news_does_not_exist']			= 'Yeni haber yok!';
 $LNG['disclamerLabelAddress']		= 'Adres:';
 $LNG['disclamerLabelPhone']			= 'Telefon:';
 $LNG['disclamerLabelMail']			= 'Destek Email:';
-$LNG['disclamerLabelNotice']		= 'Ayrintili bilgi';
+$LNG['disclamerLabelNotice']		= 'Ayrıntılı bilgi';
 
 
  //Giris Sayfasi
- $LNG['Browser']				= 'Onerilen browser.';
+ $LNG['Browser']				= 'Önerilen browser.';
