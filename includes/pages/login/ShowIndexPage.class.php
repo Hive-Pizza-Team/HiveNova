@@ -67,7 +67,9 @@ class ShowIndexPage extends AbstractLoginPage
 			'loginInfo'				=> sprintf($LNG['loginInfo'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>')
 		));
 
-		ShowErrorPage::printError($loginErrorMessage);
+		if ($loginErrorMessage) {
+			ShowErrorPage::printError($loginErrorMessage);
+		}
 		
 		$this->display('page.index.default.tpl');
 	}
