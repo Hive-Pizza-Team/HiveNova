@@ -64,7 +64,7 @@ class ShowIndexPage extends AbstractLoginPage
 		));
 
 		if ($loginErrorMessage) {
-			ShowErrorPage::printError($loginErrorMessage, array(array(
+			AbstractLoginPage::printMessage($loginErrorMessage, array(array(
 				'label'	=> $LNG['sys_back'],
 				'url'	=> 'index.php')), array('index.php', 5), true);
 		}
