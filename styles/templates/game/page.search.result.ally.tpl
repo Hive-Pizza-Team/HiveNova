@@ -9,7 +9,7 @@
 	{foreach $searchList as $searchRow}
 	<tr>
 		<td><a href="game.php?page=alliance&amp;mode=info&amp;id={$searchRow.allyid}">{$searchRow.allytag}</a></td>
-		<td>{$searchRow.allyname}</td>
+		<td><a href="game.php?page=alliance&amp;mode=info&amp;id={$searchRow.allyid}">{$searchRow.allyname}</a></td>
 		<td>{$searchRow.allymembers}</td>
 		<td>{$searchRow.allypoints}</td>
 	</tr>
