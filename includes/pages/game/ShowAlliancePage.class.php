@@ -105,7 +105,7 @@ class ShowAlliancePage extends AbstractGamePage
 
 		$this->setAllianceData($allianceId);
 
-		if (!isset($this->allianceData)) {
+		if (!isset($this->allianceData) || !is_array($this->allianceData)) {
 			$this->printMessage($LNG['al_not_exists']);
 		}
 
