@@ -641,3 +641,11 @@ footer {
     padding-left: 110px;
     text-align: left;
 }
+
+.table519 {
+    /* min-width:519px !important; */
+    /* width:519px !important */
+    max-width: 519px !important;
+    margin-left: auto;
+    margin-right: auto;
+}
