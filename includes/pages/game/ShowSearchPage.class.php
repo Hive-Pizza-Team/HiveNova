@@ -124,6 +124,7 @@ class ShowSearchPage extends AbstractGamePage
 				{
 					$searchList[]	= array(
 						'allypoints'	=> pretty_number($searchRow['total_points']),
+						'allyid'		=> $searchRow['id'],
 						'allytag'		=> $searchRow['ally_tag'],
 						'allymembers'	=> $searchRow['ally_members'],
 						'allyname'		=> $searchRow['ally_name'],
