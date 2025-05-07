@@ -66,7 +66,7 @@ class ShowIndexPage extends AbstractLoginPage
 		if ($loginErrorMessage) {
 			AbstractLoginPage::printMessage($loginErrorMessage, array(array(
 				'label'	=> $LNG['sys_back'],
-				'url'	=> 'index.php')));
+				'url'	=> 'index.php')), array('index.php', 5), false);
 		}
 		
 		$this->display('page.index.default.tpl');
