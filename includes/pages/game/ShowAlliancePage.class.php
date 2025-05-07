@@ -103,6 +103,10 @@ class ShowAlliancePage extends AbstractGamePage
 		$statisticData	= array();
 		$diplomaticmaticData	= false;
 
+		if (!$allianceId) {
+			$this->printMessage($LNG['al_not_exists']);
+		}
+
 		$this->setAllianceData($allianceId);
 
 		if (!isset($this->allianceData) || !is_array($this->allianceData)) {
