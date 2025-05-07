@@ -206,6 +206,11 @@ class Session
 	        return;
 	    }
 
+		// do not save a session with null data
+		if(is_null($this->data)) {
+			return;
+		}
+
 	    // sessions require an valid user.
 	    if(empty($this->data['userId'])) {
 	        $this->delete();
