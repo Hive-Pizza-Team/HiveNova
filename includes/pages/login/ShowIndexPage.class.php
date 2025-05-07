@@ -52,14 +52,10 @@ class ShowIndexPage extends AbstractLoginPage
 		$sql = "SELECT capaktiv, cappublic, capprivate FROM uni1_config";
 		$verkey = $db->selectSingle($sql);
 
-		require 'includes/libs/steemconnect/steemconnect.php';
-		$steemconnectUrl = Steemconnect::getLoginUrl();
-
 		$config				= Config::get();
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
 			'code'					=> $loginErrorMessage,
-			'steemconnectUrl'		=> $steemconnectUrl,
 			'verkey'			=> $verkey,
 			'descHeader'			=> sprintf($LNG['loginWelcome'], $config->game_name),
 			'descText'				=> sprintf($LNG['loginServerDesc'], $config->game_name),
@@ -68,10 +64,9 @@ class ShowIndexPage extends AbstractLoginPage
 		));
 
 		if ($loginErrorMessage) {
-			ShowErrorPage::printError($loginErrorMessage, array(array(
+			AbstractLoginPage::printMessage($loginErrorMessage, array(array(
 				'label'	=> $LNG['sys_back'],
-				'url'	=> 'index.php'))
-			, array('index.php', 5));
+				'url'	=> 'index.php')), array('index.php', 5), true);
 		}
 		
 		$this->display('page.index.default.tpl');
