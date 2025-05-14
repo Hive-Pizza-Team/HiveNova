@@ -43,7 +43,7 @@ Bashing is only allowed when your Alliance is at war with another Alliance. The 
 The bashing rule only applies for active users and excludes misile attacks and espionage missions.</p>
 	</li>
 	<li>
-		<h1>4. Bugusing</h1>
+		<h1>4. Bug Exploiting</h1>
 		<p>Using a bug for anyones profit intentionally or not reporting a bug intentionally is strictly forbidden.</p>
 	</li>
 	<li>
