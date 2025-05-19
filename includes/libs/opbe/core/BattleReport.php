@@ -250,11 +250,11 @@ class BattleReport
                     foreach ($values as $idShipType => $lost)
                     {
 			if($idShipType<ID_MAX_SHIPS) {
-                        $metal += $lost[0]*SHIP_DEBRIS_FACTOR;
-                        $crystal += $lost[1]*SHIP_DEBRIS_FACTOR;
+                        $metal += $lost[0]*$SHIP_DEBRIS_FACTOR;
+                        $crystal += $lost[1]*$SHIP_DEBRIS_FACTOR;
 			} else {
-                        $metal += $lost[0]*DEFENSE_DEBRIS_FACTOR;
-                        $crystal += $lost[1]*DEFENSE_DEBRIS_FACTOR;
+                        $metal += $lost[0]*$DEFENSE_DEBRIS_FACTOR;
+                        $crystal += $lost[1]*$DEFENSE_DEBRIS_FACTOR;
 			}
                     }
                 }
@@ -275,11 +275,11 @@ class BattleReport
                     foreach ($values as $idShipType => $lost)
                     {
 			if($idShipType<ID_MAX_SHIPS) {
-                        $metal += $lost[0]*SHIP_DEBRIS_FACTOR;
-                        $crystal += $lost[1]*SHIP_DEBRIS_FACTOR;
+                        $metal += $lost[0]*$SHIP_DEBRIS_FACTOR;
+                        $crystal += $lost[1]*$SHIP_DEBRIS_FACTOR;
 			} else {
-                        $metal += $lost[0]*DEFENSE_DEBRIS_FACTOR;
-                        $crystal += $lost[1]*DEFENSE_DEBRIS_FACTOR;
+                        $metal += $lost[0]*$DEFENSE_DEBRIS_FACTOR;
+                        $crystal += $lost[1]*$DEFENSE_DEBRIS_FACTOR;
 			}
                     }
                 }
