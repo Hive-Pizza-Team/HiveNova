@@ -237,7 +237,7 @@ class BattleReport
     {
         return min(floor(array_sum($this->getDebris()) / MOON_UNIT_PROB), MAX_MOON_PROB);
     }
-    public function getAttackerDebris(SHIP_DEBRIS_FACTOR, DEFENSE_DEBRIS_FACTOR)
+    public function getAttackerDebris($SHIP_DEBRIS_FACTOR, $DEFENSE_DEBRIS_FACTOR)
     {
         $metal = 0;
         $crystal = 0;
@@ -262,7 +262,7 @@ class BattleReport
         }
         return array($metal, $crystal);
     }
-    public function getDefenderDebris(SHIP_DEBRIS_FACTOR, DEFENSE_DEBRIS_FACTOR)
+    public function getDefenderDebris($SHIP_DEBRIS_FACTOR, $DEFENSE_DEBRIS_FACTOR)
     {
         $metal = 0;
         $crystal = 0;
