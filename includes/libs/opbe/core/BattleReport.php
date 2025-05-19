@@ -262,7 +262,7 @@ class BattleReport
         }
         return array($metal, $crystal);
     }
-    public function getDefenderDebris()
+    public function getDefenderDebris(SHIP_DEBRIS_FACTOR, DEFENSE_DEBRIS_FACTOR)
     {
         $metal = 0;
         $crystal = 0;
@@ -289,8 +289,8 @@ class BattleReport
     }
     public function getDebris()
     {
-        $aDebris = $this->getAttackerDebris();
-        $dDebris = $this->getDefenderDebris();
+        $aDebris = $this->getAttackerDebris(SHIP_DEBRIS_FACTOR, DEFENSE_DEBRIS_FACTOR);
+        $dDebris = $this->getDefenderDebris(SHIP_DEBRIS_FACTOR, DEFENSE_DEBRIS_FACTOR);
         return array($aDebris[0] + $dDebris[0], $aDebris[1] + $dDebris[1]);
     }
     
