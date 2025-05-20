@@ -169,11 +169,11 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
 
     /********** DEBRIS **********/
     //attackers
-    $debAtt = $report->getAttackerDebris();
+    $debAtt = $report->getAttackerDebris($FleetTF,$DefTF);
     $debAttMet = $debAtt[0];
     $debAttCry = $debAtt[1];
     //defenders
-    $debDef = $report->getDefenderDebris();
+    $debDef = $report->getDefenderDebris($FleetTF,$DefTF);
     $debDefMet = $debDef[0];
     $debDefCry = $debDef[1];
     //total
