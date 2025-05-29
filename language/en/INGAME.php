@@ -893,7 +893,7 @@ $LNG['sh_loading']							= '(Loading ...)';
 //----------------------------------------------------------------------------//
 //OPTIONS
 $LNG['op_error']							= 'Error';
-$LNG['op_cant_activate_vacation_mode']		= 'You can\'t activate vacation mode with in-progress fleets.';
+$LNG['op_cant_activate_vacation_mode']		= 'You can\'t activate vacation mode with in-progress activities.';
 $LNG['op_password_changed']					= 'Password changed';
 $LNG['op_username_changed']					= 'Username changed';
 $LNG['op_options_changed']					= 'Options changed';
