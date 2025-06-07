@@ -38,8 +38,8 @@ $LNG['questions'][1][2]['body']		= <<<BODY
 <p>After constructing a Shipyard, you can begin assembling a fleet and planet defenses. Look at the Technologies tab to find the list of all available ships in the game. Some ships have higher technology requirements. Leveling up the Shipyard enables faster construction of ships and defenses.</p>
 <h3>The Research Lab:</h3>
 <p>Researching new technologies unlocks new buildings, ships, and defenses. The Technologies tab also shows the list of all available research. Research can also yield bonuses for production and combat. Research progress can be accelerated by upgrading the Research Lab building.</p>
-<h3>Robot Factory:</h3>
-<p>The Robot Factory is a crucial building for expediting the construction queue. Upgrading this building reduces construction time for other buildings.</p>
+<h3>Gigafactory:</h3>
+<p>The Gigafactory is a crucial building for expediting the construction queue. Upgrading this building reduces construction time for other buildings.</p>
 BODY;
 $LNG['questions'][1][3]['title']	= 'Step 3 - First Combat';
 $LNG['questions'][1][3]['body']		= <<<BODY
