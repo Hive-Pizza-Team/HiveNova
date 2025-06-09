@@ -2,20 +2,13 @@
 	<li>
 		<h1>1. Accounts</h1>
 		<p>We cannot monitor how many accounts each player uses, and so it will be permitted by all players to play with as many game accounts as they find entertaining.  Human time and attention are the real limits, not "accounts".  
-<br />
+<br /></p>
 
 		<h1>2. Don't Push "Up"</h1>
-		<p>In the spirit of fair and fun play, we encourage all forms of team work, especially outward and downwards in points, and this includes in-game resources.  We will attempt to make game conditions to support this type of teamwork - and avoid game conditions that support snowball strategies.  
+		<p>In the spirit of fair and fun play, we encourage all forms of team work, especially outward and downwards in points, and this includes in-game resources.  We will attempt to make game conditions to support this type of teamwork - and avoid game conditions that support snowball strategies.  The top player's points will determine the limits of pushing, and it should generally be encouraged that players with less points than the top player do anything they find fun to "catch up".  
 
-<br />- Resources sent from a lower ranked account to a higher ranked one with nothing tangible in return.
-<br />- A player crashing his fleet into a higher ranked one for the higher ranked one to keep the Debris Field, and thus profiting from it.
-<br />- Loans that are not returned within 48 hours.
-<br />- Trades in which the higher ranked player does not return the resources within 48 hours.
-<br />- Players answering to a higher ranked player extortion by paying resources.
-<br />- Trades that mean an unfair profit to the higher ranked player by falling outside the following range of ratios:
-<br />
-<br />3:2:1 Where each unit of deuterium is worth 2 units of crystal or 3 units of metal.
-<br />2:1:1 Where each unit of deuterium is worth 1 unit of crystal or 2 units of metal.</p>
+<br />- We cannot monitor or evaluate outside transactions of tangible or intangible nature, so players are permitted to gift, trade, bargain or buy in-game assets out of game.
+</p>
 	</li>
 	<li>
 		<h1>3. Bashing</h1>
