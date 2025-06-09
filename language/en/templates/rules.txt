@@ -1,30 +1,11 @@
 <ul id="rules">
 	<li>
 		<h1>1. Accounts</h1>
-		<p>Each player is allowed to control a single account. Each account is entitled to be played by a single player at a time, account sitting being the only exception.
-Account sitting entitles a given player to have his account watched over under the following regulations:
+		<p>We cannot monitor how many accounts each player uses, and so it will be permitted by all players to play with as many game accounts as they find entertaining.  Human time and attention are the real limits, not "accounts".  
 <br />
-<br />- Support must be informed before the sitting takes place, by opening a ticket.
-<br />- No Fleet movements are allowed while the account is being sat unless an attack that may raid or crash the account is incoming, in which case you may save your fleet(s) by deploying or transporting to a planet or to a moon owned by the account being sat. You may not ninja an incoming attack in cases where you would need to move a fleet for it.
-<br />- An account may only be sat for a maximum period of 48 continuous hours (admin permission needs to be obtained in cases where a time extension is needed).
-<br /><br />The sitter may, on the account being sat and while the sitting period lasts:
 
-<br />- Spend Resources on buildings or researches.
-<br />- Fleetsave any ship that imminently endangered by an incoming attacking fleet, only with a deployment or transport mission to one of the accounts own planets.
-<br />- Place an account into vacation mode.
-
-<br /><br />The sitter may not:
-
-<br />- Transport resources, neither between planets/moons of the account being sat, nor to any other planet/moon.
-<br />- Spend Resources on defensive structures or ships.
-<br />- Sit an account if he sat another one within the previous 7 days.
-<br />- Sit an account that was sat within the previous 7 days.
-<br />- Remove an account from vacation mode.</p>
-	</li>
-	<li>
-		<h1>2. Pushing</h1>
-		<p>It is not allowed for any account to obtain unfair profit out of a lower ranked account in a matter of resources.
-This includes but is not limited to:
+		<h1>2. Don't Push "Up"</h1>
+		<p>In the spirit of fair and fun play, we encourage all forms of team work, especially outward and downwards in points, and this includes in-game resources.  We will attempt to make game conditions to support this type of teamwork - and avoid game conditions that support snowball strategies.  
 
 <br />- Resources sent from a lower ranked account to a higher ranked one with nothing tangible in return.
 <br />- A player crashing his fleet into a higher ranked one for the higher ranked one to keep the Debris Field, and thus profiting from it.
