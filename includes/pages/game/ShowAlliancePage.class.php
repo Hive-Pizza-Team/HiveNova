@@ -664,7 +664,7 @@ class ShowAlliancePage extends AbstractGamePage
 				'register_time'	=> _date($LNG['php_tdformat'], $memberListRow['ally_register_time'], $USER['timezone']),
 				'points'		=> $memberListRow['total_points'],
 				'rankName'		=> $memberListRow['ally_rankName'],
-				'onlinetime'    => $memberListRow['onlinetime'],
+				'onlinetime'    => _date($LNG['php_tdformat'], $memberListRow['onlinetime'], $USER['timezone']),
 				'onlinetimesec'	=> floor((TIMESTAMP - $memberListRow['onlinetime']) / 60),
 			);
 		}
@@ -1420,7 +1420,7 @@ class ShowAlliancePage extends AbstractGamePage
 				'register_time'	=> _date($LNG['php_tdformat'], $memberListRow['ally_register_time'], $USER['timezone']),
 				'points'		=> $memberListRow['total_points'],
 				'rankID'		=> $memberListRow['ally_rank_id'],
-				'onlinetime'    => $memberListRow['onlinetime'],
+				'onlinetime'    => _date($LNG['php_tdformat'], $memberListRow['onlinetime'], $USER['timezone']),
 				'onlinetimesec'	=> floor((TIMESTAMP - $memberListRow['onlinetime']) / 60),
 				'kickQuestion'	=> sprintf($LNG['al_kick_player'], $memberListRow['username'])
 			);
