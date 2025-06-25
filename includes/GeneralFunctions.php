@@ -112,7 +112,7 @@ function getPlanets($USER)
 			$sql	.= 'id ' . $order;
 			break;
 		case 1:
-			$sql	.= 'galaxy ' . $order . ', system ' . $order . ', planet ' . $order . ', planet_type ' . $order;
+			$sql	.= 'galaxy ' . $order . ', `system` ' . $order . ', planet ' . $order . ', planet_type ' . $order;
 			break;
 		case 2:
 			$sql	.= 'name ' . $order;
