@@ -1,13 +1,16 @@
 <ul id="rules">
 	<li>
-		<h1>1. Accounts</h1>
+		<h1>1. Accounts and Play</h1>
 		<p>We cannot monitor how many accounts each player uses, and so it will be permitted by all players to play with as many game accounts as they find entertaining.  Human time and attention are the real limits, not "accounts".  
 <br /></p>
+<br /><p>We support a fair and fun "spirit of the game".  Therefore, any and all automation deleveloped (ie "botting") should be disclosed to the team so that we can open up similar tools for all players.
+
+</p>
 
 		<h1>2. Don't Push "Up"</h1>
 		<p>In the spirit of fair and fun play, we encourage all forms of team work, especially outward and downwards in points, and this includes in-game resources.  We will attempt to make game conditions to support this type of teamwork - and avoid game conditions that support snowball strategies.  The top player's points will determine the limits of pushing, and it should generally be encouraged that players with less points than the top player do anything they find fun to "catch up".  
 
-<br />- We cannot monitor or evaluate outside transactions of tangible or intangible nature, so players are permitted to gift, trade, bargain or buy in-game assets out of game.
+<br />We cannot monitor or evaluate outside transactions of tangible or intangible nature, so players are permitted to gift, trade, bargain or buy in-game assets out of game.
 </p>
 	</li>
 	<li>
