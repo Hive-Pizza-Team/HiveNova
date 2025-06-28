@@ -1279,3 +1279,4 @@ $LNG['admin_se_dm_energie_cost'] = 'Пост переновой продвиже
 $LNG['admin_se_dm_energie_power'] = 'Получ енергий Фазвыйвание';
 $LNG['admin_se_dm_fleettime_cost'] = 'Кост перейзи флоти';
 $LNG['admin_se_dm_fleettime_power'] = 'Получ перевода Флоти';
+$LNG['admin_se_purchases'] = 'Офицеры и Управхи';

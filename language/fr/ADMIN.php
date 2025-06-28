@@ -1390,3 +1390,4 @@ $LNG['admin_se_dm_energie_cost'] = 'Coût de l'amélioration de l'nergie';
 $LNG['admin_se_dm_energie_power'] = 'Puissance de l'Amélioration d'Energie';
 $LNG['admin_se_dm_fleettime_cost'] = 'Coût de l'amélioration de la flotte';
 $LNG['admin_se_dm_fleettime_power'] = 'Puissance de Mise à Niveau de la Flotte';
+$LNG['admin_se_purchases'] = 'Officiers et Améliorations';

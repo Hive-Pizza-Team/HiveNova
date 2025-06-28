@@ -1365,3 +1365,4 @@ $LNG['admin_se_dm_energie_cost'] = 'Cost of Energy Upgrade';
 $LNG['admin_se_dm_energie_power'] = 'Power of Energy Upgrade';
 $LNG['admin_se_dm_fleettime_cost'] = 'Cost of Fleet Upgrade';
 $LNG['admin_se_dm_fleettime_power'] = 'Power of Fleet Upgrade';
+$LNG['admin_se_purchases'] = 'Officers and Upgrades';

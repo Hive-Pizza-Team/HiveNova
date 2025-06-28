@@ -1336,3 +1336,4 @@ $LNG['admin_se_dm_energie_cost'] = 'Çevre Güncelleme Maliyeti';
 $LNG['admin_se_dm_energie_power'] = 'ıçı Enerçi Güncelleme Kuvveti';
 $LNG['admin_se_dm_fleettime_cost'] = 'ıstasyon Güncelleme Maliyeti';
 $LNG['admin_se_dm_fleettime_power'] = 'ıtükım Güçönünü ğuçaltırma';
+$LNG['admin_se_purchases'] = 'Subaylar ve GeliÅŸtirmeler';

@@ -1354,3 +1354,4 @@ $LNG['admin_se_dm_energie_cost'] = 'Costo de la actualización energética';
 $LNG['admin_se_dm_energie_power'] = 'Poder de la Actualización de Energía';
 $LNG['admin_se_dm_fleettime_cost'] = 'Costo de la Actualización de la Flota';
 $LNG['admin_se_dm_fleettime_power'] = 'Poder de Actualización de la Flota';
+$LNG['admin_se_purchases'] = 'Oficiales y Mejoras';
