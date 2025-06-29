@@ -268,218 +268,145 @@
 	<td></td>
 </tr>
 <tr>
-	<th colspan="2">{$LNG.admin_se_purchases}</th><th>&nbsp;</th>
+	<th>{$LNG.admin_se_purchases}</th><th>Cost</th><th>Power</th>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_amiral_cost}</td>
-        <td><input name="rpg_amiral_cost" maxlength="20" size="15" value="{$rpg_amiral_cost}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_geologue}</td>
+        <td><input name="rpg_geologue_cost" maxlength="20" size="15" value="{$se_rpg_geologue_cost}" type="text"></td>
+        <td><input name="rpg_geologue_power" maxlength="20" size="15" value="{$se_rpg_geologue_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_amiral_power}</td>
-        <td><input name="rpg_amiral_power" maxlength="20" size="15" value="{$rpg_amiral_power}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_amiral}</td>
+        <td><input name="rpg_amiral_cost" maxlength="20" size="15" value="{$se_rpg_amiral_cost}" type="text"></td>
+        <td><input name="rpg_amiral_power" maxlength="20" size="15" value="{$se_rpg_amiral_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_ingenieur_cost}</td>
-        <td><input name="rpg_ingenieur_cost" maxlength="20" size="15" value="{$rpg_ingenieur_cost}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_ingenieur}</td>
+        <td><input name="rpg_ingenieur_cost" maxlength="20" size="15" value="{$se_rpg_ingenieur_cost}" type="text"></td>
+        <td><input name="rpg_ingenieur_power" maxlength="20" size="15" value="{$se_rpg_ingenieur_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_ingenieur_power}</td>
-        <td><input name="rpg_ingenieur_power" maxlength="20" size="15" value="{$rpg_ingenieur_power}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_technocrate}</td>
+        <td><input name="rpg_technocrate_cost" maxlength="20" size="15" value="{$se_rpg_technocrate_cost}" type="text"></td>
+        <td><input name="rpg_technocrate_power" maxlength="20" size="15" value="{$se_rpg_technocrate_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_technocrate_cost}</td>
-        <td><input name="rpg_technocrate_cost" maxlength="20" size="15" value="{$rpg_technocrate_cost}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_espion}</td>
+        <td><input name="rpg_espion_cost" maxlength="20" size="15" value="{$se_rpg_espion_cost}" type="text"></td>
+        <td><input name="rpg_espion_power" maxlength="20" size="15" value="{$se_rpg_espion_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_technocrate_power}</td>
-        <td><input name="rpg_technocrate_power" maxlength="20" size="15" value="{$rpg_technocrate_power}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_constructeur}</td>
+        <td><input name="rpg_constructeur_cost" maxlength="20" size="15" value="{$se_rpg_constructeur_cost}" type="text"></td>
+        <td><input name="rpg_constructeur_power" maxlength="20" size="15" value="{$se_rpg_constructeur_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_espion_cost}</td>
-        <td><input name="rpg_espion_cost" maxlength="20" size="15" value="{$rpg_espion_cost}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_scientifique}</td>
+        <td><input name="rpg_scientifique_cost" maxlength="20" size="15" value="{$se_rpg_scientifique_cost}" type="text"></td>
+        <td><input name="rpg_scientifique_power" maxlength="20" size="15" value="{$se_rpg_scientifique_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_espion_power}</td>
-        <td><input name="rpg_espion_power" maxlength="20" size="15" value="{$rpg_espion_power}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_commandant}</td>
+        <td><input name="rpg_commandant_cost" maxlength="20" size="15" value="{$se_rpg_commandant_cost}" type="text"></td>
+        <td><input name="rpg_commandant_power" maxlength="20" size="15" value="{$se_rpg_commandant_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_constructeur_cost}</td>
-        <td><input name="rpg_constructeur_cost" maxlength="20" size="15" value="{$rpg_constructeur_cost}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_stockeur}</td>
+        <td><input name="rpg_stockeur_cost" maxlength="20" size="15" value="{$se_rpg_stockeur_cost}" type="text"></td>
+        <td><input name="rpg_stockeur_power" maxlength="20" size="15" value="{$se_rpg_stockeur_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_constructeur_power}</td>
-        <td><input name="rpg_constructeur_power" maxlength="20" size="15" value="{$rpg_constructeur_power}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_defenseur}</td>
+        <td><input name="rpg_defenseur_cost" maxlength="20" size="15" value="{$se_rpg_defenseur_cost}" type="text"></td>
+        <td><input name="rpg_defenseur_power" maxlength="20" size="15" value="{$se_rpg_defenseur_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_scientifique_cost}</td>
-        <td><input name="rpg_scientifique_cost" maxlength="20" size="15" value="{$rpg_scientifique_cost}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_destructeur}</td>
+        <td><input name="rpg_destructeur_cost" maxlength="20" size="15" value="{$se_rpg_destructeur_cost}" type="text"></td>
+        <td><input name="rpg_destructeur_power" maxlength="20" size="15" value="{$se_rpg_destructeur_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_scientifique_power}</td>
-        <td><input name="rpg_scientifique_power" maxlength="20" size="15" value="{$rpg_scientifique_power}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_general}</td>
+        <td><input name="rpg_general_cost" maxlength="20" size="15" value="{$se_rpg_general_cost}" type="text"></td>
+        <td><input name="rpg_general_power" maxlength="20" size="15" value="{$se_rpg_general_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_commandant_cost}</td>
-        <td><input name="rpg_commandant_cost" maxlength="20" size="15" value="{$rpg_commandant_cost}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_bunker}</td>
+        <td><input name="rpg_bunker_cost" maxlength="20" size="15" value="{$se_rpg_bunker_cost}" type="text"></td>
+        <td><input name="rpg_bunker_power" maxlength="20" size="15" value="{$se_rpg_bunker_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_commandant_power}</td>
-        <td><input name="rpg_commandant_power" maxlength="20" size="15" value="{$rpg_commandant_power}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_raideur}</td>
+        <td><input name="rpg_raideur_cost" maxlength="20" size="15" value="{$se_rpg_raideur_cost}" type="text"></td>
+        <td><input name="rpg_raideur_power" maxlength="20" size="15" value="{$se_rpg_raideur_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_stockeur_cost}</td>
-        <td><input name="rpg_stockeur_cost" maxlength="20" size="15" value="{$rpg_stockeur_cost}" type="text"></td>
+        <td>{$LNG.admin_se_rpg_empereur}</td>
+        <td><input name="rpg_empereur_cost" maxlength="20" size="15" value="{$se_rpg_empereur_cost}" type="text"></td>
+        <td><input name="rpg_empereur_power" maxlength="20" size="15" value="{$se_rpg_empereur_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_stockeur_power}</td>
-        <td><input name="rpg_stockeur_power" maxlength="20" size="15" value="{$rpg_stockeur_power}" type="text"></td>
+	<th>{$LNG.admin_se_purchases}</th><th>Cost</th><th>Power</th>
+</tr>
+
+<tr>
+        <td>{$LNG.admin_se_dm_attack}</td>
+        <td><input name="dm_attack_cost" maxlength="20" size="15" value="{$se_dm_attack_cost}" type="text"></td>
+        <td><input name="dm_attack_power" maxlength="20" size="15" value="{$se_dm_attack_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_defenseur_cost}</td>
-        <td><input name="rpg_defenseur_cost" maxlength="20" size="15" value="{$rpg_defenseur_cost}" type="text"></td>
+        <td>{$LNG.admin_se_dm_defensive}</td>
+        <td><input name="dm_defensive_cost" maxlength="20" size="15" value="{$se_dm_defensive_cost}" type="text"></td>
+        <td><input name="dm_defensive_power" maxlength="20" size="15" value="{$se_dm_defensive_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_defenseur_power}</td>
-        <td><input name="rpg_defenseur_power" maxlength="20" size="15" value="{$rpg_defenseur_power}" type="text"></td>
+        <td>{$LNG.admin_se_dm_buildtime}</td>
+        <td><input name="dm_buildtime_cost" maxlength="20" size="15" value="{$se_dm_buildtime_cost}" type="text"></td>
+        <td><input name="dm_buildtime_power" maxlength="20" size="15" value="{$se_dm_buildtime_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_destructeur_cost}</td>
-        <td><input name="rpg_destructeur_cost" maxlength="20" size="15" value="{$rpg_destructeur_cost}" type="text"></td>
+        <td>{$LNG.admin_se_dm_researchtime}</td>
+        <td><input name="dm_researchtime_cost" maxlength="20" size="15" value="{$se_dm_researchtime_cost}" type="text"></td>
+        <td><input name="dm_researchtime_power" maxlength="20" size="15" value="{$se_dm_researchtime_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_destructeur_power}</td>
-        <td><input name="rpg_destructeur_power" maxlength="20" size="15" value="{$rpg_destructeur_power}" type="text"></td>
+        <td>{$LNG.admin_se_dm_resource}</td>
+        <td><input name="dm_resource_cost" maxlength="20" size="15" value="{$se_dm_resource_cost}" type="text"></td>
+        <td><input name="dm_resource_power" maxlength="20" size="15" value="{$se_dm_resource_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_general_cost}</td>
-        <td><input name="rpg_general_cost" maxlength="20" size="15" value="{$rpg_general_cost}" type="text"></td>
+        <td>{$LNG.admin_se_dm_energie}</td>
+        <td><input name="dm_energie_cost" maxlength="20" size="15" value="{$se_dm_energie_cost}" type="text"></td>
+        <td><input name="dm_energie_power" maxlength="20" size="15" value="{$se_dm_energie_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-        <td>{$LNG.admin_se_rpg_general_power}</td>
-        <td><input name="rpg_general_power" maxlength="20" size="15" value="{$rpg_general_power}" type="text"></td>
+        <td>{$LNG.admin_se_dm_fleettime}</td>
+        <td><input name="dm_fleettime_cost" maxlength="20" size="15" value="{$se_dm_fleettime_cost}" type="text"></td>
+        <td><input name="dm_fleettime_power" maxlength="20" size="15" value="{$se_dm_fleettime_power}" type="text"></td>
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
-<tr>
-        <td>{$LNG.admin_se_rpg_bunker_cost}</td>
-        <td><input name="rpg_bunker_cost" maxlength="20" size="15" value="{$rpg_bunker_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_rpg_bunker_power}</td>
-        <td><input name="rpg_bunker_power" maxlength="20" size="15" value="{$rpg_bunker_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_rpg_raideur_cost}</td>
-        <td><input name="rpg_raideur_cost" maxlength="20" size="15" value="{$rpg_raideur_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_rpg_raideur_power}</td>
-        <td><input name="rpg_raideur_power" maxlength="20" size="15" value="{$rpg_raideur_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_rpg_empereur_cost}</td>
-        <td><input name="rpg_empereur_cost" maxlength="20" size="15" value="{$rpg_empereur_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_rpg_empereur_power}</td>
-        <td><input name="rpg_empereur_power" maxlength="20" size="15" value="{$rpg_empereur_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_attack_cost}</td>
-        <td><input name="dm_attack_cost" maxlength="20" size="15" value="{$dm_attack_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_attack_power}</td>
-        <td><input name="dm_attack_power" maxlength="20" size="15" value="{$dm_attack_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_defensive_cost}</td>
-        <td><input name="dm_defensive_cost" maxlength="20" size="15" value="{$dm_defensive_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_defensive_power}</td>
-        <td><input name="dm_defensive_power" maxlength="20" size="15" value="{$dm_defensive_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_buildtime_cost}</td>
-        <td><input name="dm_buildtime_cost" maxlength="20" size="15" value="{$dm_buildtime_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_buildtime_power}</td>
-        <td><input name="dm_buildtime_power" maxlength="20" size="15" value="{$dm_buildtime_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_researchtime_cost}</td>
-        <td><input name="dm_researchtime_cost" maxlength="20" size="15" value="{$dm_researchtime_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_researchtime_power}</td>
-        <td><input name="dm_researchtime_power" maxlength="20" size="15" value="{$dm_researchtime_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_resource_cost}</td>
-        <td><input name="dm_resource_cost" maxlength="20" size="15" value="{$dm_resource_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_resource_power}</td>
-        <td><input name="dm_resource_power" maxlength="20" size="15" value="{$dm_resource_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_energie_cost}</td>
-        <td><input name="dm_energie_cost" maxlength="20" size="15" value="{$dm_energie_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_energie_power}</td>
-        <td><input name="dm_energie_power" maxlength="20" size="15" value="{$dm_energie_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_fleettime_cost}</td>
-        <td><input name="dm_fleettime_cost" maxlength="20" size="15" value="{$dm_fleettime_cost}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
-<tr>
-        <td>{$LNG.admin_se_dm_fleettime_power}</td>
-        <td><input name="dm_fleettime_power" maxlength="20" size="15" value="{$dm_fleettime_power}" type="text"></td>
-        <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
-</tr>
+
 <tr>
 	<th colspan="2">{$se_news_head}</th><th>&nbsp;</th>
 </tr><tr>

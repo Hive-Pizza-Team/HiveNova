@@ -92,6 +92,8 @@ function ShowConfigUniPage()
 			'max_dm_missions'		=> $config->max_dm_missions,
 			'alliance_create_min_points' => $config->alliance_create_min_points,
 			'max_fleet_per_build'   => $config->max_fleet_per_build,
+			'rpg_geologue_cost'  	=> 20,
+			'rpg_geologue_power'    => 20
 		);
 		
 		$game_disable			= isset($_POST['closed']) && $_POST['closed'] == 'on' ? 1 : 0;
@@ -157,6 +159,8 @@ function ShowConfigUniPage()
 		$ref_max_referals		= HTTP::_GP('ref_max_referals', 0);
 		$max_dm_missions		= HTTP::_GP('max_dm_missions', 1);
 		$alliance_create_min_points = HTTP::_GP('alliance_create_min_points', 0);
+		$rpg_geologue_price     = HTTP::_GP('rpg_geologue_cost', 20);
+		$rpg_geologue_power     = HTTP::_GP('rpg_geologue_power', 20);
 			
 		$config_after = array(
 			'noobprotectiontime'	=> $noobprotectiontime,
@@ -220,7 +224,9 @@ function ShowConfigUniPage()
 			'silo_factor'			=> $silo_factor,
 			'max_dm_missions'		=> $max_dm_missions,
 			'alliance_create_min_points' => $alliance_create_min_points,
-			'max_fleet_per_build'	=> $max_fleet_per_build
+			'max_fleet_per_build'	=> $max_fleet_per_build,
+			'rpg_geologue_price'	=> $rpg_geologue_price,
+			'rpg_geologue_power'	=> $rpg_geologue_power
         );
 
 
@@ -466,7 +472,51 @@ function ShowConfigUniPage()
 		'ref_max_referals'				=> $config->ref_max_referals,
 		'silo_factor'					=> $config->silo_factor,
 		'max_dm_missions'				=> $config->max_dm_missions,
-		'alliance_create_min_points' 	=> $config->alliance_create_min_points
+		'alliance_create_min_points' 	=> $config->alliance_create_min_points,
+		'se_rpg_geologue_cost'			=> 20,
+		'se_rpg_geologue_power'			=> 20,
+		'se_rpg_amiral_cost'			=> 20,
+		'se_rpg_amiral_power'  			=> 20,
+		'se_rpg_ingenieur_cost'			=> 20,
+		'se_rpg_ingenieur_power'		=> 20,
+		'se_rpg_technocrate_cost'		=> 20,
+		'se_rpg_technocrate_power' 		=> 20,
+		'se_rpg_espion_cost'  			=> 20,
+		'se_rpg_espion_power'  			=> 20,
+		'se_rpg_constructeur_cost'  	=> 20,
+		'se_rpg_constructeur_power' 	=> 20,
+		'se_rpg_scientifique_cost'  	=> 20,
+		'se_rpg_scientifique_power'  	=> 20,
+		'se_rpg_commandant_cost'  		=> 20,
+		'se_rpg_commandant_power'  		=> 20,
+		'se_rpg_stockeur_cost'  		=> 20,
+		'se_rpg_stockeur_power'  		=> 20,
+		'se_rpg_defenseur_cost'  		=> 20,
+		'se_rpg_defenseur_power'  		=> 20,
+		'se_rpg_destructeur_cost'  		=> 20,
+		'se_rpg_destructeur_power'  	=> 20,
+		'se_rpg_general_cost'  			=> 20,
+		'se_rpg_general_power'  		=> 20,
+		'se_rpg_bunker_cost'  			=> 20,
+		'se_rpg_bunker_power'  			=> 20,
+		'se_rpg_raideur_cost'  			=> 20,
+		'se_rpg_raideur_power'  		=> 20,
+		'se_rpg_empereur_cost'  		=> 20,
+		'se_rpg_empereur_power'  		=> 20,
+		'se_dm_attack_cost'  			=> 20,
+		'se_dm_attack_power'  			=> 20,
+		'se_dm_defensive_cost'  		=> 20,
+		'se_dm_defensive_power'  		=> 20,
+		'se_dm_buildtime_cost'  		=> 20,
+		'se_dm_buildtime_power'  		=> 20,
+		'se_dm_researchtime_cost'  		=> 20,
+		'se_dm_researchtime_power'  	=> 20,
+		'se_dm_resource_cost'  			=> 20,
+		'se_dm_resource_power'  		=> 20,
+		'se_dm_energie_cost'  			=> 20,
+		'se_dm_energie_power'  			=> 20,
+		'se_dm_fleettime_cost'  		=> 20,
+		'se_dm_fleettime_power'			=> 20
 	));
 	
 	$template->show('ConfigBodyUni.tpl');
