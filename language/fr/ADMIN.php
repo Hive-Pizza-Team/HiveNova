@@ -1413,3 +1413,5 @@ $LNG['admin_se_dm_researchtime'] = 'Mise à niveau de la recherche';
 $LNG['admin_se_dm_resource'] = 'Mise à niveau des ressources';
 $LNG['admin_se_dm_energie'] = 'Amélioration d'Energie';
 $LNG['admin_se_dm_fleettime'] = 'Mise à niveau de la flotte';
+$LNG['admin_se_cost'] = 'Coüt (Pizzabits)';
+$LNG['admin_se_power'] = 'Puissance (% bonus par niveau)';

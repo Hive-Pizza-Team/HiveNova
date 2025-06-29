@@ -1359,3 +1359,5 @@ $LNG['admin_se_dm_researchtime'] = 'Araştırma Geliştirme';
 $LNG['admin_se_dm_resource'] = 'Kaynak Geliştirme';
 $LNG['admin_se_dm_energie'] = 'Enerji Güncellemesi';
 $LNG['admin_se_dm_fleettime'] = 'İmhaat Çekiliştirme';
+$LNG['admin_se_cost'] = 'Fiyat (Pizzabits)';
+$LNG['admin_se_power'] = 'Güç (% seviye başına bonus)';

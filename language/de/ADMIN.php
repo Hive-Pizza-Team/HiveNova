@@ -1383,3 +1383,5 @@ $LNG['admin_se_dm_researchtime'] = 'Forschungsaufwertung';
 $LNG['admin_se_dm_resource'] = 'Ressourcen-Aufwertung';
 $LNG['admin_se_dm_energie'] = 'Energie-Aufwertung';
 $LNG['admin_se_dm_fleettime'] = 'Überholzung der Flotte';
+$LNG['admin_se_cost'] = 'Kosten (Pizzabits)';
+$LNG['admin_se_power'] = 'Kraft (% Bonus pro Ebene)';

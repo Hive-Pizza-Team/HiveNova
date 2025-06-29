@@ -22,9 +22,8 @@ function ShowConfigUniPage()
 	global $LNG;
 
 	$config = Config::get(Universe::getEmulated());
-	
-	if (!empty($_POST))
-	{
+
+	if (!empty($_POST)) {
 		$config_before = array(
 			'noobprotectiontime'	=> $config->noobprotectiontime,
 			'noobprotectionmulti'	=> $config->noobprotectionmulti,
@@ -47,7 +46,7 @@ function ShowConfigUniPage()
 			'initial_fields'		=> $config->initial_fields,
 			'metal_basic_income'	=> $config->metal_basic_income,
 			'crystal_basic_income'	=> $config->crystal_basic_income,
-			'deuterium_basic_income'=> $config->deuterium_basic_income,
+			'deuterium_basic_income' => $config->deuterium_basic_income,
 			'debug'					=> $config->debug,
 			'adm_attack'			=> $config->adm_attack,
 			'lang'					=> $config->lang,
@@ -73,7 +72,7 @@ function ShowConfigUniPage()
 			'max_overflow'			=> $config->max_overflow,
 			'moon_factor'			=> $config->moon_factor,
 			'moon_chance'			=> $config->moon_chance,
-			'darkmatter_cost_trader'=> $config->darkmatter_cost_trader,
+			'darkmatter_cost_trader' => $config->darkmatter_cost_trader,
 			'factor_university'		=> $config->factor_university,
 			'max_fleets_per_acs'	=> $config->max_fleets_per_acs,
 			'vmode_min_time'		=> $config->vmode_min_time,
@@ -95,17 +94,17 @@ function ShowConfigUniPage()
 			'rpg_geologue_cost'  	=> $config->rpg_geologue_cost,
 			'rpg_geologue_power'    => $config->rpg_geologue_power
 		);
-		
+
 		$game_disable			= isset($_POST['closed']) && $_POST['closed'] == 'on' ? 1 : 0;
 		$noobprotection 		= isset($_POST['noobprotection']) && $_POST['noobprotection'] == 'on' ? 1 : 0;
 		$debug 					= isset($_POST['debug']) && $_POST['debug'] == 'on' ? 1 : 0;
-		$adm_attack 			= isset($_POST['adm_attack']) && $_POST['adm_attack'] == 'on' ? 1 : 0;		
+		$adm_attack 			= isset($_POST['adm_attack']) && $_POST['adm_attack'] == 'on' ? 1 : 0;
 		$OverviewNewsFrame  	= isset($_POST['newsframe']) && $_POST['newsframe'] == 'on' ? 1 : 0;
 		$reg_closed 			= isset($_POST['reg_closed']) && $_POST['reg_closed'] == 'on' ? 1 : 0;
 		$user_valid				= isset($_POST['user_valid']) && $_POST['user_valid'] == 'on' ? 1 : 0;
 		$debris_moon			= isset($_POST['debris_moon']) && $_POST['debris_moon'] == 'on' ? 1 : 0;
 		$ref_active				= isset($_POST['ref_active']) && $_POST['ref_active'] == 'on' ? 1 : 0;
-		
+
 		$OverviewNewsText		= $_POST['NewsText'];
 		$close_reason			= HTTP::_GP('close_reason', '', true);
 		$uni_name				= HTTP::_GP('uni_name', '', true);
@@ -113,7 +112,7 @@ function ShowConfigUniPage()
 		$game_speed 			= (2500 * HTTP::_GP('game_speed', 0.0));
 		$fleet_speed 			= (2500 * HTTP::_GP('fleet_speed', 0.0));
 		$resource_multiplier	= HTTP::_GP('resource_multiplier', 0.0);
-        $storage_multiplier   	= HTTP::_GP('storage_multiplier', 0.0);
+		$storage_multiplier   	= HTTP::_GP('storage_multiplier', 0.0);
 		$halt_speed				= HTTP::_GP('halt_speed', 0.0);
 		$energySpeed			= HTTP::_GP('energySpeed', 0.0);
 		$initial_fields			= HTTP::_GP('initial_fields', 0);
@@ -159,9 +158,51 @@ function ShowConfigUniPage()
 		$ref_max_referals		= HTTP::_GP('ref_max_referals', 0);
 		$max_dm_missions		= HTTP::_GP('max_dm_missions', 1);
 		$alliance_create_min_points = HTTP::_GP('alliance_create_min_points', 0);
-		$rpg_geologue_cost     = HTTP::_GP('rpg_geologue_cost', 20);
-		$rpg_geologue_power     = HTTP::_GP('rpg_geologue_power', 20);
-			
+		$rpg_geologue_cost     = HTTP::_GP('rpg_geologue_cost', 0);
+		$rpg_geologue_power     = HTTP::_GP('rpg_geologue_power', 0);
+		$rpg_amiral_cost = HTTP::_GP('rpg_amiral_cost', 0);
+		$rpg_amiral_power = HTTP::_GP('rpg_amiral_power', 0);
+		$rpg_ingenieur_cost = HTTP::_GP('rpg_ingenieur_cost', 0);
+		$rpg_ingenieur_power = HTTP::_GP('rpg_ingenieur_power', 0);
+		$rpg_technocrate_cost = HTTP::_GP('rpg_technocrate_cost', 0);
+		$rpg_technocrate_power = HTTP::_GP('rpg_technocrate_power', 0);
+		$rpg_espion_cost = HTTP::_GP('rpg_espion_cost', 0);
+		$rpg_espion_power = HTTP::_GP('rpg_espion_power', 0);
+		$rpg_constructeur_cost = HTTP::_GP('rpg_constructeur_cost', 0);
+		$rpg_constructeur_power = HTTP::_GP('rpg_constructeur_power', 0);
+		$rpg_scientifique_cost = HTTP::_GP('rpg_scientifique_cost', 0);
+		$rpg_scientifique_power = HTTP::_GP('rpg_scientifique_power', 0);
+		$rpg_commandant_cost = HTTP::_GP('rpg_commandant_cost', 0);
+		$rpg_commandant_power = HTTP::_GP('rpg_commandant_power', 0);
+		$rpg_stockeur_cost = HTTP::_GP('rpg_stockeur_cost', 0);
+		$rpg_stockeur_power = HTTP::_GP('rpg_stockeur_power', 0);
+		$rpg_defenseur_cost = HTTP::_GP('rpg_defenseur_cost', 0);
+		$rpg_defenseur_power = HTTP::_GP('rpg_defenseur_power', 0);
+		$rpg_destructeur_cost = HTTP::_GP('rpg_destructeur_cost', 0);
+		$rpg_destructeur_power = HTTP::_GP('rpg_destructeur_power', 0);
+		$rpg_general_cost = HTTP::_GP('rpg_general_cost', 0);
+		$rpg_general_power = HTTP::_GP('rpg_general_power', 0);
+		$rpg_bunker_cost = HTTP::_GP('rpg_bunker_cost', 0);
+		$rpg_bunker_power = HTTP::_GP('rpg_bunker_power', 0);
+		$rpg_raideur_cost = HTTP::_GP('rpg_raideur_cost', 0);
+		$rpg_raideur_power = HTTP::_GP('rpg_raideur_power', 0);
+		$rpg_empereur_cost = HTTP::_GP('rpg_empereur_cost', 0);
+		$rpg_empereur_power = HTTP::_GP('rpg_empereur_power', 0);
+		$dm_attack_cost = HTTP::_GP('dm_attack_cost', 0);
+		$dm_attack_power = HTTP::_GP('dm_attack_power', 0);
+		$dm_defensive_cost = HTTP::_GP('dm_defensive_cost', 0);
+		$dm_defensive_power = HTTP::_GP('dm_defensive_power', 0);
+		$dm_buildtime_cost = HTTP::_GP('dm_buildtime_cost', 0);
+		$dm_buildtime_power = HTTP::_GP('dm_buildtime_power', 0);
+		$dm_researchtime_cost = HTTP::_GP('dm_researchtime_cost', 0);
+		$dm_researchtime_power = HTTP::_GP('dm_researchtime_power', 0);
+		$dm_resource_cost = HTTP::_GP('dm_resource_cost', 0);
+		$dm_resource_power = HTTP::_GP('dm_resource_power', 0);
+		$dm_energie_cost = HTTP::_GP('dm_energie_cost', 0);
+		$dm_energie_power = HTTP::_GP('dm_energie_power', 0);
+		$dm_fleettime_cost = HTTP::_GP('dm_fleettime_cost', 0);
+		$dm_fleettime_power = HTTP::_GP('dm_fleettime_power', 0);
+
 		$config_after = array(
 			'noobprotectiontime'	=> $noobprotectiontime,
 			'noobprotectionmulti'	=> $noobprotectionmulti,
@@ -184,7 +225,7 @@ function ShowConfigUniPage()
 			'initial_fields'		=> $initial_fields,
 			'metal_basic_income'	=> $metal_basic_income,
 			'crystal_basic_income'	=> $crystal_basic_income,
-			'deuterium_basic_income'=> $deuterium_basic_income,
+			'deuterium_basic_income' => $deuterium_basic_income,
 			'debug'					=> $debug,
 			'adm_attack'			=> $adm_attack,
 			'lang'					=> $lang,
@@ -206,7 +247,7 @@ function ShowConfigUniPage()
 			'max_overflow'			=> $max_overflow,
 			'moon_factor'			=> $moon_factor,
 			'moon_chance'			=> $moon_chance,
-			'darkmatter_cost_trader'=> $darkmatter_cost_trader,
+			'darkmatter_cost_trader' => $darkmatter_cost_trader,
 			'factor_university'		=> $factor_university,
 			'max_fleets_per_acs'	=> $max_fleets_per_acs,
 			'vmode_min_time'		=> $vmode_min_time,
@@ -226,26 +267,69 @@ function ShowConfigUniPage()
 			'alliance_create_min_points' => $alliance_create_min_points,
 			'max_fleet_per_build'	=> $max_fleet_per_build,
 			'rpg_geologue_cost'		=> $rpg_geologue_cost,
-			'rpg_geologue_power'	=> $rpg_geologue_power
-        );
+			'rpg_geologue_power'		=> $rpg_geologue_power,
+			'rpg_amiral_cost'		=> $rpg_amiral_cost,
+			'rpg_amiral_power'		=> $rpg_amiral_power,
+			'rpg_amiral_cost'		=> $rpg_amiral_cost,
+			'rpg_amiral_power'		=> $rpg_amiral_power,
+			'rpg_ingenieur_cost'		=> $rpg_ingenieur_cost,
+			'rpg_ingenieur_power'		=> $rpg_ingenieur_power,
+			'rpg_technocrate_cost'		=> $rpg_technocrate_cost,
+			'rpg_technocrate_power'		=> $rpg_technocrate_power,
+			'rpg_espion_cost'		=> $rpg_espion_cost,
+			'rpg_espion_power'		=> $rpg_espion_power,
+			'rpg_constructeur_cost'		=> $rpg_constructeur_cost,
+			'rpg_constructeur_power'		=> $rpg_constructeur_power,
+			'rpg_scientifique_cost'		=> $rpg_scientifique_cost,
+			'rpg_scientifique_power'		=> $rpg_scientifique_power,
+			'rpg_commandant_cost'		=> $rpg_commandant_cost,
+			'rpg_commandant_power'		=> $rpg_commandant_power,
+			'rpg_stockeur_cost'		=> $rpg_stockeur_cost,
+			'rpg_stockeur_power'		=> $rpg_stockeur_power,
+			'rpg_defenseur_cost'		=> $rpg_defenseur_cost,
+			'rpg_defenseur_power'		=> $rpg_defenseur_power,
+			'rpg_destructeur_cost'		=> $rpg_destructeur_cost,
+			'rpg_destructeur_power'		=> $rpg_destructeur_power,
+			'rpg_general_cost'		=> $rpg_general_cost,
+			'rpg_general_power'		=> $rpg_general_power,
+			'rpg_bunker_cost'		=> $rpg_bunker_cost,
+			'rpg_bunker_power'		=> $rpg_bunker_power,
+			'rpg_raideur_cost'		=> $rpg_raideur_cost,
+			'rpg_raideur_power'		=> $rpg_raideur_power,
+			'rpg_empereur_cost'		=> $rpg_empereur_cost,
+			'rpg_empereur_power'		=> $rpg_empereur_power,
+			'dm_attack_cost'		=> $dm_attack_cost,
+			'dm_attack_power'		=> $dm_attack_power,
+			'dm_defensive_cost'		=> $dm_defensive_cost,
+			'dm_defensive_power'		=> $dm_defensive_power,
+			'dm_buildtime_cost'		=> $dm_buildtime_cost,
+			'dm_buildtime_power'		=> $dm_buildtime_power,
+			'dm_researchtime_cost'		=> $dm_researchtime_cost,
+			'dm_researchtime_power'		=> $dm_researchtime_power,
+			'dm_resource_cost'		=> $dm_resource_cost,
+			'dm_resource_power'		=> $dm_resource_power,
+			'dm_energie_cost'		=> $dm_energie_cost,
+			'dm_energie_power'		=> $dm_energie_power,
+			'dm_fleettime_cost'		=> $dm_fleettime_cost,
+			'dm_fleettime_power'		=> $dm_fleettime_power,
+		);
 
 
-		foreach($config_after as $key => $value)
-		{
+		foreach ($config_after as $key => $value) {
 			$config->$key	= $value;
 		}
 		$config->save();
-		
+
 		$LOG = new Log(3);
 		$LOG->target = 1;
 		$LOG->old = $config_before;
 		$LOG->new = $config_after;
 		$LOG->save();
 
-		if($config->adm_attack == 0)
-			$GLOBALS['DATABASE']->query("UPDATE ".USERS." SET `authattack` = '0' WHERE `universe` = '".Universe::getEmulated()."';");
+		if ($config->adm_attack == 0)
+			$GLOBALS['DATABASE']->query("UPDATE " . USERS . " SET `authattack` = '0' WHERE `universe` = '" . Universe::getEmulated() . "';");
 	}
-	
+
 	$template	= new template();
 	$template->loadscript('../base/jquery.autosize-min.js');
 	$template->execscript('$(\'textarea\').autosize();');
@@ -266,7 +350,7 @@ function ShowConfigUniPage()
 		'se_storage_producion_speed'	=> $LNG['se_storage_producion_speed'],
 		'se_normal_speed_resoruces'		=> $LNG['se_normal_speed_resoruces'],
 		'se_normal_speed_halt'			=> $LNG['se_normal_speed_halt'],
-		'se_forum_link'					=> $LNG['se_forum_link'	],
+		'se_forum_link'					=> $LNG['se_forum_link'],
 		'se_server_op_close'			=> $LNG['se_server_op_close'],
 		'se_server_status_message'		=> $LNG['se_server_status_message'],
 		'se_server_planet_parameters'	=> $LNG['se_server_planet_parameters'],
@@ -356,7 +440,7 @@ function ShowConfigUniPage()
 		'se_moon_chance'				=> $LNG['se_moon_chance'],
 		'se_moon_chance_info'			=> $LNG['se_moon_chance_info'],
 		'se_darkmatter_cost_trader'		=> $LNG['se_darkmatter_cost_trader'],
-		'se_darkmatter_cost_trader_info'=> $LNG['se_darkmatter_cost_trader_info'],
+		'se_darkmatter_cost_trader_info' => $LNG['se_darkmatter_cost_trader_info'],
 		'se_factor_university'			=> $LNG['se_factor_university'],
 		'se_factor_university_info'		=> $LNG['se_factor_university_info'],
 		'se_max_fleets_per_acs'			=> $LNG['se_max_fleets_per_acs'],
@@ -425,9 +509,9 @@ function ShowConfigUniPage()
 		'smtp_sendmail' 				=> $config->smtp_sendmail,
 		'smtp_ssl'						=> $config->smtp_ssl,
 		'user_valid'           	 		=> $config->user_valid,
-	    'newsframe'                 	=> $config->OverviewNewsFrame,
-        'reg_closed'                	=> $config->reg_closed,
-        'NewsTextVal'               	=> $config->OverviewNewsText,  
+		'newsframe'                 	=> $config->OverviewNewsFrame,
+		'reg_closed'                	=> $config->reg_closed,
+		'NewsTextVal'               	=> $config->OverviewNewsText,
 		'capprivate' 					=> $config->capprivate,
 		'cappublic' 	   				=> $config->cappublic,
 		'capaktiv'      	           	=> $config->capaktiv,
@@ -435,7 +519,7 @@ function ShowConfigUniPage()
 		'trade_allowed_ships'        	=> $config->trade_allowed_ships,
 		'trade_charge'		        	=> $config->trade_charge,
 		'Selector'						=> array(
-			'langs' => $LNG->getAllowedLangs(false), 
+			'langs' => $LNG->getAllowedLangs(false),
 			'mail'  => array(0 => $LNG['se_mail_sel_0'], 1 => $LNG['se_mail_sel_1'], 2 => $LNG['se_mail_sel_2']),
 			'encry' => array('' => $LNG['se_smtp_ssl_1'], 'ssl' => $LNG['se_smtp_ssl_2'], 'tls' => $LNG['se_smtp_ssl_3'])
 		),
@@ -475,49 +559,49 @@ function ShowConfigUniPage()
 		'alliance_create_min_points' 	=> $config->alliance_create_min_points,
 		'se_rpg_geologue_cost'			=> $config->rpg_geologue_cost,
 		'se_rpg_geologue_power'			=> $config->rpg_geologue_power,
-		'se_rpg_amiral_cost'			=> 30,
-		'se_rpg_amiral_power'  			=> 30,
-		'se_rpg_ingenieur_cost'			=> 10,
-		'se_rpg_ingenieur_power'		=> 20,
-		'se_rpg_technocrate_cost'		=> 20,
-		'se_rpg_technocrate_power' 		=> 20,
-		'se_rpg_espion_cost'  			=> 20,
-		'se_rpg_espion_power'  			=> 20,
-		'se_rpg_constructeur_cost'  	=> 20,
-		'se_rpg_constructeur_power' 	=> 20,
-		'se_rpg_scientifique_cost'  	=> 20,
-		'se_rpg_scientifique_power'  	=> 20,
-		'se_rpg_commandant_cost'  		=> 20,
-		'se_rpg_commandant_power'  		=> 20,
-		'se_rpg_stockeur_cost'  		=> 20,
-		'se_rpg_stockeur_power'  		=> 20,
-		'se_rpg_defenseur_cost'  		=> 20,
-		'se_rpg_defenseur_power'  		=> 20,
-		'se_rpg_destructeur_cost'  		=> 20,
-		'se_rpg_destructeur_power'  	=> 20,
-		'se_rpg_general_cost'  			=> 20,
-		'se_rpg_general_power'  		=> 20,
-		'se_rpg_bunker_cost'  			=> 20,
-		'se_rpg_bunker_power'  			=> 20,
-		'se_rpg_raideur_cost'  			=> 20,
-		'se_rpg_raideur_power'  		=> 20,
-		'se_rpg_empereur_cost'  		=> 20,
-		'se_rpg_empereur_power'  		=> 20,
-		'se_dm_attack_cost'  			=> 20,
-		'se_dm_attack_power'  			=> 20,
-		'se_dm_defensive_cost'  		=> 20,
-		'se_dm_defensive_power'  		=> 20,
-		'se_dm_buildtime_cost'  		=> 20,
-		'se_dm_buildtime_power'  		=> 20,
-		'se_dm_researchtime_cost'  		=> 20,
-		'se_dm_researchtime_power'  	=> 20,
-		'se_dm_resource_cost'  			=> 20,
-		'se_dm_resource_power'  		=> 20,
-		'se_dm_energie_cost'  			=> 20,
-		'se_dm_energie_power'  			=> 20,
-		'se_dm_fleettime_cost'  		=> 20,
-		'se_dm_fleettime_power'			=> 20
+		'se_rpg_amiral_cost'			=> $config->rpg_amiral_cost,
+		'se_rpg_amiral_power'			=> $config->rpg_amiral_power,
+		'se_rpg_ingenieur_cost'		=> $config->rpg_ingenieur_cost,
+		'se_rpg_ingenieur_power'		=> $config->rpg_ingenieur_power,
+		'se_rpg_technocrate_cost'		=> $config->rpg_technocrate_cost,
+		'se_rpg_technocrate_power'		=> $config->rpg_technocrate_power,
+		'se_rpg_espion_cost'		=> $config->rpg_espion_cost,
+		'se_rpg_espion_power'		=> $config->rpg_espion_power,
+		'se_rpg_constructeur_cost'		=> $config->rpg_constructeur_cost,
+		'se_rpg_constructeur_power'		=> $config->rpg_constructeur_power,
+		'se_rpg_scientifique_cost'		=> $config->rpg_scientifique_cost,
+		'se_rpg_scientifique_power'		=> $config->rpg_scientifique_power,
+		'se_rpg_commandant_cost'		=> $config->rpg_commandant_cost,
+		'se_rpg_commandant_power'		=> $config->rpg_commandant_power,
+		'se_rpg_stockeur_cost'		=> $config->rpg_stockeur_cost,
+		'se_rpg_stockeur_power'		=> $config->rpg_stockeur_power,
+		'se_rpg_defenseur_cost'		=> $config->rpg_defenseur_cost,
+		'se_rpg_defenseur_power'		=> $config->rpg_defenseur_power,
+		'se_rpg_destructeur_cost'		=> $config->rpg_destructeur_cost,
+		'se_rpg_destructeur_power'		=> $config->rpg_destructeur_power,
+		'se_rpg_general_cost'		=> $config->rpg_general_cost,
+		'se_rpg_general_power'		=> $config->rpg_general_power,
+		'se_rpg_bunker_cost'		=> $config->rpg_bunker_cost,
+		'se_rpg_bunker_power'		=> $config->rpg_bunker_power,
+		'se_rpg_raideur_cost'		=> $config->rpg_raideur_cost,
+		'se_rpg_raideur_power'		=> $config->rpg_raideur_power,
+		'se_rpg_empereur_cost'		=> $config->rpg_empereur_cost,
+		'se_rpg_empereur_power'		=> $config->rpg_empereur_power,
+		'se_dm_attack_cost'		=> $config->dm_attack_cost,
+		'se_dm_attack_power'		=> $config->dm_attack_power,
+		'se_dm_defensive_cost'		=> $config->dm_defensive_cost,
+		'se_dm_defensive_power'		=> $config->dm_defensive_power,
+		'se_dm_buildtime_cost'		=> $config->dm_buildtime_cost,
+		'se_dm_buildtime_power'		=> $config->dm_buildtime_power,
+		'se_dm_researchtime_cost'		=> $config->dm_researchtime_cost,
+		'se_dm_researchtime_power'		=> $config->dm_researchtime_power,
+		'se_dm_resource_cost'		=> $config->dm_resource_cost,
+		'se_dm_resource_power'		=> $config->dm_resource_power,
+		'se_dm_energie_cost'		=> $config->dm_energie_cost,
+		'se_dm_energie_power'		=> $config->dm_energie_power,
+		'se_dm_fleettime_cost'		=> $config->dm_fleettime_cost,
+		'se_dm_fleettime_power'		=> $config->dm_fleettime_power,
 	));
-	
+
 	$template->show('ConfigBodyUni.tpl');
 }

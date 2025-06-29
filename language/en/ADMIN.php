@@ -1388,3 +1388,5 @@ $LNG['admin_se_dm_researchtime'] = 'Research Upgrade';
 $LNG['admin_se_dm_resource'] = 'Resource Upgrade';
 $LNG['admin_se_dm_energie'] = 'Energy Upgrade';
 $LNG['admin_se_dm_fleettime'] = 'Fleet Upgrade';
+$LNG['admin_se_cost'] = 'Cost (Pizzabits)';
+$LNG['admin_se_power'] = 'Power (% bonus per level)';

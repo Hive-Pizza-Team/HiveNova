@@ -1386,3 +1386,5 @@ $LNG['admin_se_dm_researchtime'] = 'Uaktualnienie Badań';
 $LNG['admin_se_dm_resource'] = 'Uaktualnienie zasobów';
 $LNG['admin_se_dm_energie'] = 'Uaktualnienie Energetyczne';
 $LNG['admin_se_dm_fleettime'] = 'Uaktualnienie floty';
+$LNG['admin_se_cost'] = 'Cena (Pizzabits)';
+$LNG['admin_se_power'] = 'Siła (% premia po poziomie)';
