@@ -92,8 +92,8 @@ function ShowConfigUniPage()
 			'max_dm_missions'		=> $config->max_dm_missions,
 			'alliance_create_min_points' => $config->alliance_create_min_points,
 			'max_fleet_per_build'   => $config->max_fleet_per_build,
-			'rpg_geologue_cost'  	=> 20,
-			'rpg_geologue_power'    => 20
+			'rpg_geologue_cost'  	=> $config->rpg_geologue_cost,
+			'rpg_geologue_power'    => $config->rpg_geologue_power
 		);
 		
 		$game_disable			= isset($_POST['closed']) && $_POST['closed'] == 'on' ? 1 : 0;
@@ -159,7 +159,7 @@ function ShowConfigUniPage()
 		$ref_max_referals		= HTTP::_GP('ref_max_referals', 0);
 		$max_dm_missions		= HTTP::_GP('max_dm_missions', 1);
 		$alliance_create_min_points = HTTP::_GP('alliance_create_min_points', 0);
-		$rpg_geologue_price     = HTTP::_GP('rpg_geologue_cost', 20);
+		$rpg_geologue_cost     = HTTP::_GP('rpg_geologue_cost', 20);
 		$rpg_geologue_power     = HTTP::_GP('rpg_geologue_power', 20);
 			
 		$config_after = array(
@@ -225,7 +225,7 @@ function ShowConfigUniPage()
 			'max_dm_missions'		=> $max_dm_missions,
 			'alliance_create_min_points' => $alliance_create_min_points,
 			'max_fleet_per_build'	=> $max_fleet_per_build,
-			'rpg_geologue_price'	=> $rpg_geologue_price,
+			'rpg_geologue_cost'		=> $rpg_geologue_cost,
 			'rpg_geologue_power'	=> $rpg_geologue_power
         );
 
@@ -473,11 +473,11 @@ function ShowConfigUniPage()
 		'silo_factor'					=> $config->silo_factor,
 		'max_dm_missions'				=> $config->max_dm_missions,
 		'alliance_create_min_points' 	=> $config->alliance_create_min_points,
-		'se_rpg_geologue_cost'			=> 20,
-		'se_rpg_geologue_power'			=> 20,
-		'se_rpg_amiral_cost'			=> 20,
-		'se_rpg_amiral_power'  			=> 20,
-		'se_rpg_ingenieur_cost'			=> 20,
+		'se_rpg_geologue_cost'			=> $config->rpg_geologue_cost,
+		'se_rpg_geologue_power'			=> $config->rpg_geologue_power,
+		'se_rpg_amiral_cost'			=> 30,
+		'se_rpg_amiral_power'  			=> 30,
+		'se_rpg_ingenieur_cost'			=> 10,
 		'se_rpg_ingenieur_power'		=> 20,
 		'se_rpg_technocrate_cost'		=> 20,
 		'se_rpg_technocrate_power' 		=> 20,
