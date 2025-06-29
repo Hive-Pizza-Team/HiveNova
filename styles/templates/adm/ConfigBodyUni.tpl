@@ -268,7 +268,7 @@
 	<td></td>
 </tr>
 <tr>
-	<th>{$LNG.admin_se_purchases}</th><th>{$LNG.admin_se_cost}</th><th>{$LNG.admin_se_power}</th>
+	<th>{$LNG.admin_se_purchases}</th><th><center>{$LNG.admin_se_cost}</center></th><th><center>{$LNG.admin_se_power}</center></th>
 </tr>
 <tr>
         <td>{$LNG.admin_se_rpg_geologue}</td>
@@ -361,7 +361,7 @@
         <td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip"></td>
 </tr>
 <tr>
-	<th>{$LNG.admin_se_purchases}</th><th>{$LNG.admin_se_cost}</th><th>{$LNG.admin_se_power}</th>
+	<th>{$LNG.admin_se_purchases}</th><th><center>{$LNG.admin_se_cost}</center></th><th><center>{$LNG.admin_se_power}</center></th>
 </tr>
 
 <tr>
