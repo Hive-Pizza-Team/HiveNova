@@ -48,88 +48,89 @@ ADD COLUMN `dm_fleettime_power` SMALLINT UNSIGNED NOT NULL DEFAULT 10
 UPDATE %PREFIX%vars
 SET cost921
 = 1
-WHERE name like 'rpg_%'
-OR name like 'dm_%';
+WHERE (name like 'rpg_%'
+OR name like 'dm_%')
+AND elementID >= 600;
 
 UPDATE %PREFIX%vars
-SET `bonusAttack` = `bonusAttack` / `bonusAttack`
+SET `bonusAttack` = `bonusAttack` / ABS(`bonusAttack`)
 WHERE `bonusAttack` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusDefensive` = `bonusDefensive` / `bonusDefensive`
+SET `bonusDefensive` = `bonusDefensive` / ABS(`bonusDefensive`)
 WHERE `bonusDefensive` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusShield` = `bonusShield` / `bonusShield`
+SET `bonusShield` = `bonusShield` / ABS(`bonusShield`)
 WHERE `bonusShield` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusBuildTime` = `bonusBuildTime` / `bonusBuildTime`
+SET `bonusBuildTime` = `bonusBuildTime` / ABS(`bonusBuildTime`)
 WHERE `bonusBuildTime` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusResearchTime` = `bonusResearchTime` / `bonusResearchTime`
+SET `bonusResearchTime` = `bonusResearchTime` / ABS(`bonusResearchTime`)
 WHERE `bonusResearchTime` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusShipTime` = `bonusShipTime` / `bonusShipTime`
+SET `bonusShipTime` = `bonusShipTime` / ABS(`bonusShipTime`)
 WHERE `bonusShipTime` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusDefensiveTime` = `bonusDefensiveTime` / `bonusDefensiveTime`
+SET `bonusDefensiveTime` = `bonusDefensiveTime` / ABS(`bonusDefensiveTime`)
 WHERE `bonusDefensiveTime` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusResource` = `bonusResource` / `bonusResource`
+SET `bonusResource` = `bonusResource` / ABS(`bonusResource`)
 WHERE `bonusResource` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusEnergy` = `bonusEnergy` / `bonusEnergy`
+SET `bonusEnergy` = `bonusEnergy` / ABS(`bonusEnergy`)
 WHERE `bonusEnergy` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusResourceStorage` = `bonusResourceStorage` / `bonusResourceStorage`
+SET `bonusResourceStorage` = `bonusResourceStorage` / ABS(`bonusResourceStorage`)
 WHERE `bonusResourceStorage` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusShipStorage` = `bonusShipStorage` / `bonusShipStorage`
+SET `bonusShipStorage` = `bonusShipStorage` / ABS(`bonusShipStorage`)
 WHERE `bonusShipStorage` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusFlyTime` = `bonusFlyTime` / `bonusFlyTime`
+SET `bonusFlyTime` = `bonusFlyTime` / ABS(`bonusFlyTime`)
 WHERE `bonusFlyTime` != 0
 AND
 (`name` like 'rpg_%'
@@ -137,21 +138,21 @@ OR `name` like 'dm_%');
 
 
 UPDATE %PREFIX%vars
-SET `bonusFleetSlots` = `bonusFleetSlots` / `bonusFleetSlots`
+SET `bonusFleetSlots` = `bonusFleetSlots` / ABS(`bonusFleetSlots`)
 WHERE `bonusFleetSlots` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusPlanets` = `bonusPlanets` / `bonusPlanets`
+SET `bonusPlanets` = `bonusPlanets` / ABS(`bonusPlanets`)
 WHERE `bonusPlanets` != 0
 AND
 (`name` like 'rpg_%'
 OR `name` like 'dm_%');
 
 UPDATE %PREFIX%vars
-SET `bonusSpyPower` = `bonusSpyPower` / `bonusSpyPower`
+SET `bonusSpyPower` = `bonusSpyPower` / ABS(`bonusSpyPower`)
 WHERE `bonusSpyPower` != 0
 AND
 (`name` like 'rpg_%'
