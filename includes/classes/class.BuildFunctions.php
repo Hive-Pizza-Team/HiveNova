@@ -64,7 +64,8 @@ class BuildFunctions
 
     public static function getElementPrice($USER, $PLANET, $Element, $forDestroy = false, $forLevel = NULL) {
         global $pricelist, $resource, $reslist;
-
+        $config	= Config::get($USER['universe']);
+                
         if (in_array($Element, $reslist['fleet']) || in_array($Element, $reslist['defense']) || in_array($Element, $reslist['missile'])) {
             $elementLevel = $forLevel;
         } elseif (isset($forLevel)) {
@@ -102,6 +103,13 @@ class BuildFunctions
             if($forDestroy === true) {
                 $price[$resType]	/= 2;
             }
+
+            if(in_array($Element, $reslist['officier']) || in_array($Element, $reslist['dmfunc'])) {
+                // multiple officier, upgrade price by Universe config
+                $elementName = $resource[$Element];
+                $configCost = $config->__get($elementName.'_cost');
+                $price[$resType]	*= $configCost;
+            }
         }
 
         return $price;
@@ -129,7 +137,6 @@ class BuildFunctions
     public static function getBuildingTime($USER, $PLANET, $Element, $elementPrice = NULL, $forDestroy = false, $forLevel = NULL)
     {
         global $resource, $reslist, $requeriments;
-
         $config	= Config::get($USER['universe']);
 
         $time   = 0;
@@ -253,7 +260,8 @@ class BuildFunctions
 
     public static function getAvalibleBonus($Element)
     {
-        global $pricelist;
+        global $USER,$pricelist,$resource;
+        $config	= Config::get($USER['universe']);
 
         $elementBonus	= array();
 
@@ -265,7 +273,13 @@ class BuildFunctions
                 continue;
             }
 
-            $elementBonus[$bonus]	= $pricelist[$Element]['bonus'][$bonus];
+            $elementName = $resource[$Element];
+            $bonusPowerFromConfig = $config->__get($elementName.'_power');
+
+            $adjustedBonus = $pricelist[$Element]['bonus'][$bonus];
+            $adjustedBonus[0] = $temp * $bonusPowerFromConfig / 100;
+
+            $elementBonus[$bonus]	= $adjustedBonus;
         }
 
         return $elementBonus;

@@ -18,6 +18,8 @@
 function getFactors($USER, $Type = 'basic', $TIME = NULL)
 {
 	global $resource, $pricelist, $reslist;
+	$config	= Config::get($USER['universe']);
+
 	if (empty($TIME))
 		$TIME	= TIMESTAMP;
 
@@ -26,6 +28,11 @@ function getFactors($USER, $Type = 'basic', $TIME = NULL)
 
 	foreach ($reslist['bonus'] as $elementID) {
 		$bonus = $pricelist[$elementID]['bonus'];
+
+		// adjust for universe config
+		$elementName = $resource[$elementID];
+		$bonusPowerFromConfig = $config->__get($elementName.'_power');
+
 
 		if (isset($PLANET[$resource[$elementID]])) {
 			$elementLevel = $PLANET[$resource[$elementID]];
@@ -41,11 +48,11 @@ function getFactors($USER, $Type = 'basic', $TIME = NULL)
 			}
 
 			foreach ($bonusList as $bonusKey) {
-				$factor[$bonusKey]	+= $bonus[$bonusKey][0];
+				$factor[$bonusKey]	+= $bonus[$bonusKey][0] * $bonusPowerFromConfig / 100;
 			}
 		} else {
 			foreach ($bonusList as $bonusKey) {
-				$factor[$bonusKey]	+= $elementLevel * $bonus[$bonusKey][0];
+				$factor[$bonusKey]	+= $elementLevel * $bonus[$bonusKey][0] * $bonusPowerFromConfig / 100;
 			}
 		}
 	}

@@ -462,7 +462,7 @@ $LNG['rs_ress_bonus']                       = 'Bonus (Officers/Bonus):';
 // Officers
 $LNG['of_recruit']							= 'Recruit';
 $LNG['of_max_lvl']							= 'Max Level';
-$LNG['of_offi']								= 'Official';
+$LNG['of_offi']								= 'Officer';
 $LNG['of_lvl']								= 'Level';
 $LNG['of_dm_trade']							= '%s - Shop';
 $LNG['of_still']							= 'Continue';
