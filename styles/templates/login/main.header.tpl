@@ -11,7 +11,6 @@
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/base/jquery.fancybox.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/icon-font/style.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/hivekeychain_button.css?v={$REV}">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" type="text/css">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 	<title>{block name="title"} - {$gameName}{/block}</title>
 	<meta name="keywords" content="{$gameName}, Hive, Browsergame, MMOSG, MMOG, Strategy, SteemNova, XNova, 2Moons, Space">

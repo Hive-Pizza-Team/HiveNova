@@ -4,12 +4,10 @@
 	<h1>{$descHeader}</h1>
 	<p class="desc">{$descText}</p>
 	<p class="desc"><ul id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul></p>
-	<p><a href="" target="copy">{$gameName} - space empire building game for Hivers</a>
-	</p>
 </section>
 <section>
 	<div class="contentbox">
-				<h1>{$LNG.loginHeader} with Hive</h1>
+				<h1>{$LNG.loginHeader} {$LNG.loginHiveAccount}</h1>
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
 					<input name="username" id="username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
@@ -17,8 +15,8 @@
 					<input name="hiveAccount" id="hiveAccount" type="hidden">
 					<button onclick="HiveKeychainLogin()" class="button_keychain" title="Log in with HiveKeychain"></button>
 				</form>
-				<hr>
-				<h1>{$LNG.loginHeader} with Password</h1>	
+				<br><br>
+				<h1>{$LNG.loginHeader} {$LNG.loginPassword}</h1>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<div class="row">
 						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$UNI}</select>
@@ -34,7 +32,8 @@
 					</div>
 				</form>
 				{if $facebookEnable}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
-				<hr>
+				<br><br>
+				<h1>{$LNG.buttonRegister} First</h1>
 				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
 				<br>
 				<span class="small">{$loginInfo}</span>
