@@ -63,7 +63,7 @@
 		{/if}
 	{/if}
 	<tr>
-		<td colspan="2" style="height:100px" class="bbcode">{if $ally_description}{$ally_description}{else}{$LNG.al_description_message}{/if}</td>
+		<td colspan="2" style="height:100px">{if $ally_description}{$ally_description}{else}{$LNG.al_description_message}{/if}</td>
 	</tr>
 	{if $ally_web}
 	<tr>
@@ -75,7 +75,7 @@
 		<th colspan="2">{$LNG.al_inside_section}</th>
 	</tr>
 	<tr>
-		<td colspan="2" height="100" class="bbcode">{$ally_text}</td>
+		<td colspan="2" height="100">{$ally_text}</td>
 	</tr>
 	<tr>
 		<th colspan="2">{$LNG.al_diplo}</th>
