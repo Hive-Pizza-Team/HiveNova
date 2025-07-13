@@ -113,8 +113,6 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->printMessage($LNG['al_not_exists']);
 		}
 
-		require 'includes/classes/BBCode.class.php';
-
 		if ($this->allianceData['ally_diplo'] == 1) {
 			$diplomaticmaticData	= $this->getDiplomatic();
 		}
@@ -532,8 +530,6 @@ class ShowAlliancePage extends AbstractGamePage
 	{
 		global $USER, $LNG;
 
-		require 'includes/classes/BBCode.class.php';
-
 		$db	= Database::get();
 
 		if ($this->allianceData['ally_owner'] == $USER['id']) {
@@ -590,7 +586,7 @@ class ShowAlliancePage extends AbstractGamePage
 			'ally_max_members'	 		=> $this->allianceData['ally_max_members'],
 			'ally_name'					=> $this->allianceData['ally_name'],
 			'ally_image'				=> $this->allianceData['ally_image'],
-			'ally_description'			=> $this->allianceData['ally_description'],
+			'ally_description'			=> nl2br($this->allianceData['ally_description']),
 			'ally_text' 				=> $this->allianceData['ally_text'],
 			'rankName'					=> $rankName,
 			'requests'					=> sprintf($LNG['al_new_requests'], $ApplyCount),
@@ -1152,8 +1148,6 @@ class ShowAlliancePage extends AbstractGamePage
 				'url'	=> 'game.php?page=alliance&mode=admin&action=mangeApply'
 			)));
 		}
-
-		require 'includes/classes/BBCode.class.php';
 
 		$applyDetail['text']    	= $applyDetail['text'];
 		$applyDetail['kbmetal']    	= pretty_number($applyDetail['kbmetal']);
