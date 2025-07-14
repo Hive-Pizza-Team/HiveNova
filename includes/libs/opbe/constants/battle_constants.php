@@ -72,7 +72,10 @@ define('REPAIRED_DO_DEBRIS',true);
 
 define('POINT_UNIT', 1000); //Ogame point = 1000 resources.
 define('MOON_UNIT_PROB', 100000);
-define('MAX_MOON_PROB', 20); //max probability to moon creation.
+
+// MAX_MOON_PROB is COMMENTED OUT BECAUSE THE VALUES COME FROM UNIVERSE CONFIG
+// define('MAX_MOON_PROB', 20); //max probability to moon creation.
+
 define('MOON_MIN_START_SIZE', 2000);
 define('MOON_MAX_START_SIZE', 6000);
 define('MOON_MIN_FACTOR', 100);
