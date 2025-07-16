@@ -191,7 +191,9 @@ HTML;
 		// define('MOON_UNIT_PROB', $moonFactor);
 
 		// Max. Chance of Moon
-		define('MAX_MOON_PROB', $config->moon_chance); // max probability to moon creation.
+		if (!defined('MAX_MOON_PROB')) {
+			define('MAX_MOON_PROB', $config->moon_chance); // max probability to moon creation.
+		}
 		
 		$combatResult 		= calculateAttack($fleetAttack, $fleetDefend, $fleetIntoDebris, $defIntoDebris);
 
