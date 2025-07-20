@@ -185,6 +185,15 @@ HTML;
 
 		$fleetIntoDebris	= $config->Fleet_Cdr / 100;
 		$defIntoDebris		= $config->Defs_Cdr / 100;
+
+		// Chance of Moon
+		// $moonFactor = $config->moon_factor * 100000;
+		// define('MOON_UNIT_PROB', $moonFactor);
+
+		// Max. Chance of Moon
+		if (!defined('MAX_MOON_PROB')) {
+			define('MAX_MOON_PROB', $config->moon_chance); // max probability to moon creation.
+		}
 		
 		$combatResult 		= calculateAttack($fleetAttack, $fleetDefend, $fleetIntoDebris, $defIntoDebris);
 

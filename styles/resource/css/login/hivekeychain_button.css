@@ -1,7 +1,7 @@
 .button_keychain {
     background: url(/styles/resource/images/login/keychain.png) no-repeat scroll 0 0 transparent;
-    background-size: cover; 
-    color: #000000;
+    background-size: cover;
+    background-color: #212529;
     cursor: pointer;
     font-weight: bold;
     height: 40px;

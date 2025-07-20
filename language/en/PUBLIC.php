@@ -50,7 +50,7 @@ $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Lost Password?';
 
 // Start
-$LNG['gameInformations']    		= "Free dopamine and tears";
+$LNG['gameInformations']    		= "Mobile friendly\nPlay in any browser\nNo download required\nAlly with friends & enemies\nDominate the universe\nEarn dopamine, collect skulls\n";
 
 // Login
 $LNG['loginHeader']					= 'Login';
@@ -59,8 +59,8 @@ $LNG['loginPassword']				= 'Password';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'With the login I accept the %s.';
 $LNG['loginWelcome']				= 'Welcome to %s';
-$LNG['loginServerDesc']				= '%s is a real-time space strategy game. Play in any browser.';
-$LNG['loginHiveAccount']				= 'Hive Account';
+$LNG['loginServerDesc']				= '%s is a real-time space strategy game.';
+$LNG['loginHiveAccount']			= 'Hive Account';
 
 // Register
 $LNG['registerFacebookAccount']		= 'Facebook Account';
