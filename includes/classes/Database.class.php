@@ -53,7 +53,6 @@ class Database
 		//error behaviour
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-		$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 		// $db->query("set character set utf8");
 		// $db->query("set names utf8");
 		// $db->query("SET sql_mode = 'STRICT_ALL_TABLES'");
