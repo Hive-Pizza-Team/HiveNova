@@ -1,1 +1,5 @@
 .DS_Store
+cache
+vendor
+includes/backups
+includes/config.php

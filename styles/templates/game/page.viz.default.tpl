@@ -93,8 +93,16 @@
     movingObjects.length = 0;
 
     data.forEach(row => {
-        const startGroup = circleGroups[row.startGroup];
-        const endGroup = circleGroups[row.endGroup];
+        row.startGroup  = parseInt(row.startGroup);
+        row.startCircle = parseInt(row.startCircle);
+        row.startPoint = parseInt(row.startPoint);
+        row.endGroup  = parseInt(row.endGroup);
+        row.endCircle = parseInt(row.endCircle);
+        row.endPoint = parseInt(row.endPoint);
+        row.duration = parseFloat(row.duration);
+
+        const startGroup = circleGroups[row.startGroup - 1];
+        const endGroup = circleGroups[row.endGroup - 1];
 
         const startRadius = (row.startCircle + 1) * 0.1;
         const startAngle = (row.startPoint / pointsPerCircle) * 2 * Math.PI;
