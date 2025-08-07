@@ -1,4 +1,4 @@
-# HiveNova - Space empire building browser game for Hivers
+# HiveNova - Space empire building browser game
 
 ![MOON_Discord_Event_Banner](https://github.com/user-attachments/assets/96607107-b195-4164-9537-241430acc86e)
 
