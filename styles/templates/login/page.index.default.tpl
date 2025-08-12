@@ -16,6 +16,7 @@
 					<button onclick="HiveKeychainLogin()" class="button_keychain" title="Log in with HiveKeychain"></button>
 				</form>
 				<br><br>
+	</div><div class="contentbox">
 				<h1>{$LNG.loginHeader} {$LNG.loginPassword}</h1>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<div class="row">
