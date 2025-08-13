@@ -44,7 +44,7 @@ $quickStartFile        = 'includes/FIRST_INSTALL';
 if (is_file($quickStartFile) && is_writeable($quickStartFile) && unlink($quickStartFile)) {
 	@touch($enableInstallToolFile);
 }
-// Only allow Install Tool access if the file "include/ENABLE_INSTALL_TOOL" is found
+// Only allow Install Tool access if the file "includes/ENABLE_INSTALL_TOOL" is found
 if (is_file($enableInstallToolFile) && (time() - filemtime($enableInstallToolFile) > 3600)) {
 	$content      = file_get_contents($enableInstallToolFile);
 	$verifyString = 'KEEP_FILE';
