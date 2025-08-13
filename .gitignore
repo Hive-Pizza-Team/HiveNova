@@ -1,5 +1,6 @@
 .DS_Store
-cache/*
+cache
+vendor
+includes/backups
 includes/config.php
 includes/error.log
-vendor
