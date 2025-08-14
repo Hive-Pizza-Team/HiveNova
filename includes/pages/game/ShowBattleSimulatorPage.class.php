@@ -26,7 +26,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 
 	function send()
 	{
-		global $reslist, $pricelist, $LNG;
+		global $reslist, $pricelist, $LNG, $USER;
 		
 		if(!isset($_REQUEST['battleinput'])) {
 			$this->sendJSON(0);
@@ -59,8 +59,9 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					'military_tech' => $BattleSlot[0][109],
 					'defence_tech' => $BattleSlot[0][110],
 					'shield_tech' => $BattleSlot[0][111],
+					'dm_attack' => 0,
 					'dm_defensive' => 0,
-					'dm_attack' => 0
+					'universe' => $USER['universe']
 				); 
 				
 				$attacker['player']['factor']	= getFactors($attacker['player'], 'attack');
@@ -103,6 +104,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					'shield_tech' => $BattleSlot[1][111],
 					'dm_attack' => 0,
 					'dm_defensive' => 0,
+					'universe' => $USER['universe']
 				); 
 				
 				$defender['player']['factor']	= getFactors($defender['player'], 'attack');
