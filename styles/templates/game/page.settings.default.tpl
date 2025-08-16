@@ -51,7 +51,7 @@
 	</tr>
 	<tr>
 		<td style="height:22px;">1 PIZZA = 10 Pizzabits</td>
-		<td><button type="button" onclick="DepositPizzaTokens('{$hiveAccount}')" class="login-button button_standard" title="Deposit Pizza Tokens">Deposit $PIZZA</button></td>
+		<td><button type="button" onclick="DepositPizzaTokens('{$hiveAccount}')" class="login-button button_standard" title="Deposit Pizza Tokens" {if $disableDepositButton}disabled{/if}>Deposit $PIZZA</button></td>
 	</tr>
 		<tr>
 			<th colspan="2">{$LNG.op_general_settings}</th>

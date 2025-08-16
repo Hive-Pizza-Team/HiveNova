@@ -61,6 +61,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'permaEmail'		=> $USER['email_2'],
 				'hiveAccount'		=> $USER['hive_account'],
 				'isHiveKeychainAct' => (substr_compare($USER['email'], '@hive.blog', -strlen('@hive.blog')) === 0),
+				'disableDepositButton' => ($USER['universe'] === "1"),
 				'userLang'			=> $USER['lang'],
 				'theme'				=> $USER['dpath'],
 				'planetSort'		=> $USER['planet_sort'],
