@@ -15,7 +15,8 @@
 					<input name="hiveAccount" id="hiveAccount" type="hidden">
 					<button onclick="HiveKeychainLogin()" class="button_keychain" title="Log in with HiveKeychain"></button>
 				</form>
-				<br><br>
+				<br>
+				<span class="small">{$loginInfo}</span>
 	</div><div class="contentbox">
 				<h1>{$LNG.loginHeader} {$LNG.loginPassword}</h1>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
@@ -32,12 +33,14 @@
 						{/if}
 					</div>
 				</form>
-				{if $facebookEnable}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
-				<br><br>
-				<h1>{$LNG.buttonRegister} First</h1>
-				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
 				<br>
 				<span class="small">{$loginInfo}</span>
+				{if $facebookEnable}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
+			</div>
+			<div class="contentbox">
+				<h1>{$LNG.buttonRegister} First</h1>
+				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
+			</div>
 			
 	</div>
 </section>
