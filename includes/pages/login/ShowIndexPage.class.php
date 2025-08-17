@@ -35,7 +35,7 @@ class ShowIndexPage extends AbstractLoginPage
 	
 		$universeSelect	= array();
 		
-		foreach(Universe::availableUniverses() as $uniId)
+		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
 			$config = Config::get($uniId);
 			$universeSelect[$uniId]	= $config->uni_name.($config->game_disable == 0 ? $LNG['uni_closed'] : '');
