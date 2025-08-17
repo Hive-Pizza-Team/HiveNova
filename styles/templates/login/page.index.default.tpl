@@ -9,7 +9,7 @@
 	<div class="contentbox">
 				<h1>{$LNG.loginHeader} {$LNG.loginHiveAccount}</h1>
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
-					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect array_key_first($universeSelect)}</select>
+					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=array_key_first($universeSelect)}</select>
 					<input name="username" id="username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
 					<input name="password" id="password" type="hidden">
 					<input name="hiveAccount" id="hiveAccount" type="hidden">
@@ -21,7 +21,7 @@
 				<h1>{$LNG.loginHeader} {$LNG.loginPassword}</h1>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<div class="row">
-						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect array_key_first($universeSelect)}</select>
+						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=array_key_first($universeSelect)}</select>
 						<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}">
 						<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
 						{if $verkey["capaktiv"]==1}
