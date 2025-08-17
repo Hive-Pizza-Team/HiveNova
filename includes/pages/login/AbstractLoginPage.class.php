@@ -40,7 +40,7 @@ abstract class AbstractLoginPage
 	protected function getUniverseSelector()
 	{
 		$universeSelect	= array();
-		foreach(Universe::availableUniverses() as $uniId)
+		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
 			$universeSelect[$uniId]	= Config::get($uniId)->uni_name;
 		}

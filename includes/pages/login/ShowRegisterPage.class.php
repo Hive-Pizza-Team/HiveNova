@@ -32,7 +32,7 @@ class ShowRegisterPage extends AbstractLoginPage
 		$externalAuth	= HTTP::_GP('externalAuth', array());
 		$referralID 	= HTTP::_GP('referralID', 0);
 
-		foreach(Universe::availableUniverses() as $uniId)
+		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
 			$config = Config::get($uniId);
 			$universeSelect[$uniId]	= $config->uni_name.($config->game_disable == 0 || $config->reg_closed == 1 ? $LNG['uni_closed'] : '');
