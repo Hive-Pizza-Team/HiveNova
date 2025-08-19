@@ -187,37 +187,47 @@ class PlayerUtil
 				throw new Exception(sprintf("Position is not empty: %s:%s:%s!", $galaxy, $system, $position));
 			}
 		} else {
-			$galaxy	= $config->LastSettedGalaxyPos;
+			// Retrieve the last set positions from the configuration
+			$galaxy = $config->LastSettedGalaxyPos;
 			$system = $config->LastSettedSystemPos;
-			$planet	= $config->LastSettedPlanetPos;
+			$planet = $config->LastSettedPlanetPos;
 
-			if($galaxy > $config->max_galaxy) {
-				$galaxy	= 1;
+			// Validate galaxy/system bounds
+			if ($galaxy > $config->max_galaxy) {
+				$galaxy = 1;
+			}
+			if ($system > $config->max_system) {
+				$system = 1;
 			}
 
-			if($system > $config->max_system) {
-				$system	= 1;
-			}
-			
+			// Loop until a free position is found
 			do {
+				// Randomly select a planet position within the specified range
 				$position = mt_rand(round($config->max_planets * 0.2), round($config->max_planets * 0.8));
+
+				// Increment the planet-per-system counter if it's less than 3
 				if ($planet < 3) {
 					$planet += 1;
 				} else {
+					// Reset planet-per-system counter
+					$planet = 1;
+
+					// If the system position is at its maximum, reset it and increment the galaxy
 					if ($system >= $config->max_system) {
 						$system = 1;
-						if($galaxy >= $config->max_galaxy) {
-							$galaxy	= 1;
+						if ($galaxy >= $config->max_galaxy) {
+							$galaxy = 1;
 						} else {
 							$galaxy += 1;
 						}
 					} else {
+						// Otherwise, just increment the system position
 						$system += 1;
 					}
 				}
 			} while (self::isPositionFree($universe, $galaxy, $system, $position) === false);
 
-			// Update last coordinates to config table
+			// Update the last set positions in the configuration
 			$config->LastSettedGalaxyPos = $galaxy;
 			$config->LastSettedSystemPos = $system;
 			$config->LastSettedPlanetPos = $planet;
