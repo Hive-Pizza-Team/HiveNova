@@ -47,12 +47,14 @@ class ShowVizPage extends AbstractGamePage
             fleet_end_planet as endPoint,
             (fleet_end_time - fleet_start_time)/100 as duration
 			FROM %%FLEETS%%
+            WHERE fleet_universe = :fleet_universe
             ORDER BY fleet_id
             LIMIT 100',
             array(
                 #':maxGalaxy'    => $config->max_galaxy,
                 ':maxSystem'    => $config->max_system,
                 #':maxPlanets'   => $config->max_planets
+                'fleet_universe' => Universe::current()
             )
         );
         $fleetsJson = json_encode($fleetData);
