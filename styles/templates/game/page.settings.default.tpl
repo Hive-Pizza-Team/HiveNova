@@ -22,11 +22,11 @@
 	</tr>
 	<tr>
 	    <td>{$LNG.op_old_pass}</td>
-	    <td>{if !$isHiveKeychainAct}<input name="password" size="20" type="password" class="autocomplete">{/if}</td>
+	    <td><input name="password" size="20" type="password" class="autocomplete"></td>
 	</tr>
 	<tr>
 	    <td>{$LNG.op_new_pass}</td>
-	    <td>{if !$isHiveKeychainAct}<input name="newpassword" size="20" maxlength="40" type="password" class="autocomplete">{/if}</td>
+	    <td><input name="newpassword" size="20" maxlength="40" type="password" class="autocomplete"></td>
 	</tr>
 	<tr>
 	    <td>{$LNG.op_repeat_new_pass}</td>
