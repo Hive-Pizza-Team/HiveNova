@@ -408,9 +408,11 @@ class ShowSettingsPage extends AbstractGamePage
 
 				// check if hiveaccount is already linked to a user
 				$db = Database::get();
-				$sql = "SELECT COUNT(*) as state FROM %%USERS%% WHERE `hive_account` = :hiveAccount;";
+				$universe = Universe::current();
+				$sql = "SELECT COUNT(*) as state FROM %%USERS%% WHERE `hive_account` = :hiveAccount AND `universe` = :universe;";
 				$linkedAccounts = $db->selectSingle($sql, array(
-					':hiveAccount'	=> $hiveAccount
+					':hiveAccount'	=> $hiveAccount,
+					':universe'     => $universe
 				), 'state');
 		
 				if($linkedAccounts != 0) {
