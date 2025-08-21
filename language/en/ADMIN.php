@@ -969,7 +969,7 @@ $LNG['po_add_moon'] = 'Add moon';
 
 $LNG['sp_admin_answer'] = 'Response of %s to %s<br><br><font color="red">%s</font>';
 $LNG['sp_answer_message_title'] = 'Support Ticket #%d';
-$LNG['sp_answer_message'] = 'Do you have a response to your ticket number: #%d!';
+$LNG['sp_answer_message'] = 'You have a response to your ticket number: #%d!';
 $LNG['sp_admin_closed'] = '%s closed the Ticket to %s';
 $LNG['sp_admin_open'] = '%s reopened the Ticket to %s';
 
