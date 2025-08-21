@@ -610,7 +610,7 @@ class ShowAlliancePage extends AbstractGamePage
 	public function memberList()
 	{
 		global $USER, $LNG;
-		if (!$this->rights['MEMBERLIST']) {
+		if (!isset($this->rights) || !$this->rights['MEMBERLIST']) {
 			$this->redirectToHome();
 		}
 
@@ -902,7 +902,7 @@ class ShowAlliancePage extends AbstractGamePage
 				':AllianceID'				=> $this->allianceData['id'],
 				':text'						=> $text
 			));
-		} else {
+		} else if (isset($this->allianceData)) {
 			switch ($textMode) {
 				case 'internal':
 					$text	= $this->allianceData['ally_text'];
@@ -914,6 +914,9 @@ class ShowAlliancePage extends AbstractGamePage
 					$text	= $this->allianceData['ally_description'];
 					break;
 			}
+		} else {
+			// should not be here. allianceData is null
+			return;
 		}
 
 		require_once 'includes/classes/class.FlyingFleetHandler.php';
