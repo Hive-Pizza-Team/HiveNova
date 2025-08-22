@@ -88,7 +88,7 @@ class PlayerUtil
 		// verify signature using hive-php
 		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
 
-		if(!is_array($result) || count($result) == 0 || !array_key_exists('posting',$result[0])) {
+		if(!is_array($result) || count($result) == 0 || !isset($result[0]) || !array_key_exists('posting',$result[0])) {
 			return false;
 		}
 
