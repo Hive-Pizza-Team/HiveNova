@@ -17,14 +17,19 @@
 
 class statbuilder
 {
+    private $starttime;
+    private $memory;
+    private $time;
+    private $recordData;
+    private $Unis;
+
 	function __construct()
 	{
 		$this->starttime   	= microtime(true);
-		$this->memory		= array(round(memory_get_usage() / 1024,1),round(memory_get_usage(1) / 1024,1));
+		$this->memory		= [round(memory_get_usage() / 1024, 1), round(memory_get_usage(true) / 1024, 1)];
 		$this->time   		= TIMESTAMP;
-
-		$this->recordData  	= array();
-		$this->Unis			= array();
+		$this->recordData  	= [];
+		$this->Unis 		= [];
 
 		$uniResult	= Database::get()->select("SELECT uni FROM %%CONFIG%% ORDER BY uni ASC;");
 		foreach($uniResult as $uni)
@@ -62,7 +67,7 @@ class statbuilder
 		$select_buildings	=	'';
 		$selected_tech		=	'';
 		$select_fleets		=	'';
-		$select_officers		=	'';
+		$select_officers	=	'';
 				
 		foreach($reslist['build'] as $Building){
 			$select_buildings	.= " p.".$resource[$Building].",";
