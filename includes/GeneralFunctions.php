@@ -619,7 +619,7 @@ function exceptionHandler($exception)
 
 	/* Debug via Support Ticket */
 	global $USER;
-	if (isset($USER)) {
+	if (isset($USER) && isset($USER['username']) && isset($USER['id'])) {
 		$ErrSource = $USER['id'];
 		$ErrName = $USER['username'];
 	} else {
