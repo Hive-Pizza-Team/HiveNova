@@ -58,6 +58,16 @@ class ShowFleetStep3Page extends AbstractGamePage
 		$formData		= $_SESSION['fleet'][$token];
         unset($_SESSION['fleet'][$token]);
 
+		$requiredKeys = array_flip([
+			'distance', 'targetGalaxy', 'targetSystem', 'targetPlanet', 'targetType',
+			'fleetGroup', 'fleet', 'fleetRoom', 'fleetSpeed', 'ownPlanet'
+		]);
+		if (count(array_intersect_key($requiredKeys, $formData)) === count($requiredKeys)) {
+			// All required keys exist!
+		} else {
+			FleetFunctions::GotoFleetPage(0);
+		}
+
 		$distance		= $formData['distance'];
 		$targetGalaxy	= $formData['targetGalaxy'];
 		$targetSystem	= $formData['targetSystem'];
