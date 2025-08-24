@@ -1646,9 +1646,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 		$diplomaticMode	= HTTP::_GP('diploMode', 0);
 
-		$sql = "SELECT ally_tag,ally_name,id FROM %%ALLIANCE%% WHERE id != :allianceId ORDER BY ally_tag ASC;";
+		$sql = "SELECT ally_tag,ally_name,id FROM %%ALLIANCE%% WHERE id != :allianceId AND ally_universe = :universe  ORDER BY ally_tag ASC;";
 		$diplomaticAlly = $db->select($sql, array(
-			':allianceId'   => $USER['ally_id']
+			':allianceId'   => $USER['ally_id'],
+			':universe'		=> Universe::current()
 		));
 
 		$AllyList = array();
