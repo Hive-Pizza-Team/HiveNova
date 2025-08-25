@@ -610,7 +610,7 @@ class ShowAlliancePage extends AbstractGamePage
 	public function memberList()
 	{
 		global $USER, $LNG;
-		if (!$this->rights['MEMBERLIST']) {
+		if (!isset($this->rights) || !$this->rights['MEMBERLIST']) {
 			$this->redirectToHome();
 		}
 
@@ -902,7 +902,7 @@ class ShowAlliancePage extends AbstractGamePage
 				':AllianceID'				=> $this->allianceData['id'],
 				':text'						=> $text
 			));
-		} else {
+		} else if (isset($this->allianceData)) {
 			switch ($textMode) {
 				case 'internal':
 					$text	= $this->allianceData['ally_text'];
@@ -914,6 +914,9 @@ class ShowAlliancePage extends AbstractGamePage
 					$text	= $this->allianceData['ally_description'];
 					break;
 			}
+		} else {
+			// should not be here. allianceData is null
+			return;
 		}
 
 		require_once 'includes/classes/class.FlyingFleetHandler.php';
@@ -1643,9 +1646,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 		$diplomaticMode	= HTTP::_GP('diploMode', 0);
 
-		$sql = "SELECT ally_tag,ally_name,id FROM %%ALLIANCE%% WHERE id != :allianceId ORDER BY ally_tag ASC;";
+		$sql = "SELECT ally_tag,ally_name,id FROM %%ALLIANCE%% WHERE id != :allianceId AND ally_universe = :universe  ORDER BY ally_tag ASC;";
 		$diplomaticAlly = $db->select($sql, array(
-			':allianceId'   => $USER['ally_id']
+			':allianceId'   => $USER['ally_id'],
+			':universe'		=> Universe::current()
 		));
 
 		$AllyList = array();
