@@ -276,7 +276,7 @@ class ShowAlliancePage extends AbstractGamePage
 			':universe'     => Universe::current()
 		));
 
-		if (!isset($allianceResult)) {
+		if (!isset($allianceResult) || !is_array($allianceResult)) {
 			$this->redirectToHome();
 		}
 
