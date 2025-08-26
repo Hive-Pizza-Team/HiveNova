@@ -135,7 +135,7 @@ class statbuilder
 				$userWinner		= reset($elementArray);
 				$maxAmount		= key($elementArray);
 				$userWinner		= array_unique($userWinner);
-				$universe		= 1;
+				$universe		= $universeID;
 
 				if(count($userWinner) > 3)
 				{
