@@ -50,6 +50,7 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 
 - Clone the repo
 - Install components: `apt install apache2 php7.3 php7.3-gd php7.3-fpm php7.3-mysql php7.3-curl php-ds libapache2-mod mysql-server`
+- Set php.ini config value: `pdo_mysql.default_charset = utf8mb4`
 - Setup mysql: `create user USER identified by PASSWORD; create database DB; grant all privileges on DB.* to USER;`
 - Set write privileges to dirs: `cache/`, `includes/`
 - Run wizard: `127.0.0.1/install/install.php`
