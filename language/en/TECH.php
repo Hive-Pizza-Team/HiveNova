@@ -282,8 +282,8 @@ $LNG['shortDescription'] = array(
 614 => 'The Conqueror is a member of the Imperial Army, it has the ability to navigate a particular type of ship that no one else could do or take off.',
 615 => 'The Emperor placed under his command available to all officers in the empire, combining their skills to dominate the universe and to become an opponent almost invincible.',
 
-701 => 'Increases the attack value of armor for ships and planetary defenses.',
-702 => 'Increases the value of shields for ships and planetary defenses.',
+701 => 'Increases the power of weapons and armor for ships and planetary defenses.',
+702 => 'Increases the power of shields for ships and planetary defenses.',
 703 => 'Shortens the construction time for buildings',
 704 => 'Increases resource production',
 705 => 'Increases energy production',
@@ -390,8 +390,8 @@ $LNG['longDescription'] = array(
 615 => 'The Emperor placed under his command available to all officers in the empire, combining their skills to dominate the universe and to become an opponent almost invincible.',
 
 
-701 => 'Increases the attack value of the ships and defenses.',
-702 => 'Increases the value of ships shields',
+701 => 'Increases the power of weapons and armor for ships and planetary defenses.',
+702 => 'Increases the power of shields for ships and planetary defense',
 703 => 'Shorten the construction time for buildings',
 704 => 'Increases resource production',
 705 => 'Increases energy production',
