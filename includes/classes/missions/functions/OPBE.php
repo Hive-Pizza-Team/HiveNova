@@ -77,9 +77,9 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
     {
         $player = $attacker['player'];
         //techs + bonus. Note that the bonus is divided by the factor because the result sum will be multiplied by the same inside OPBE
-        list($attTech,$defenceTech,$shieldTech) = getTechsFromArray($player);
+        list($attTech,$armorTech,$shieldTech) = getTechsFromArray($player);
         //--
-        $attackerPlayerObj = $attackerGroupObj->createPlayerIfNotExist($player['id'], array(), $attTech, $shieldTech, $defenceTech);
+        $attackerPlayerObj = $attackerGroupObj->createPlayerIfNotExist($player['id'], array(), $attTech, $shieldTech, $armorTech);
         $attackerFleetObj = new Fleet($fleetID);
         foreach ($attacker['unit'] as $element => $amount)
         {
@@ -96,9 +96,9 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
     {
         $player = $defender['player'];
         //techs + bonus. Note that the bonus is divided by the factor because the result sum will be multiplied by the same inside OPBE
-        list($attTech,$defenceTech,$shieldTech) = getTechsFromArray($player);
+        list($attTech,$armorTech,$shieldTech) = getTechsFromArray($player);
         //--
-        $defenderPlayerObj = $defenderGroupObj->createPlayerIfNotExist($player['id'], array(), $attTech, $shieldTech, $defenceTech);
+        $defenderPlayerObj = $defenderGroupObj->createPlayerIfNotExist($player['id'], array(), $attTech, $shieldTech, $armorTech);
         $defenderFleetObj = getFleet($fleetID);
         foreach ($defender['unit'] as $element => $amount)
         {
@@ -146,25 +146,6 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
         $attInfo = updatePlayers($attackerGroupObj, $attackers);
         $defInfo = updatePlayers($defenderGroupObj, $defenders);
         $ROUND[$i] = roundInfo($report, $attackers, $defenders, $attackerGroupObj, $defenderGroupObj, $i + 1, $attInfo, $defInfo);
-
-        if(isset($ROUND[$i]["attackers"][0])) {
-        for($j=0; $j<=(count($ROUND[$i]["attackers"])-1); $j++) {
-
-        if(!empty($ROUND[$i]["attackers"][$j]["techs"][1])){
-        $true_armor = $ROUND[$i]["attackers"][$j]["techs"][1];
-        $ROUND[$i]["attackers"][$j]["techs"][1]=$ROUND[$i]["attackers"][$j]["techs"][2];
-        $ROUND[$i]["attackers"][$j]["techs"][2]=$true_armor;
-        }}}
-
-        if(isset($ROUND[$i]["defenders"][0])) {
-        for($j=0; $j<=(count($ROUND[$i]["defenders"])-1); $j++) {
-
-        if(!empty($ROUND[$i]["defenders"][$j]["techs"][1])){
-        $true_armor = $ROUND[$i]["defenders"][$j]["techs"][1];
-        $ROUND[$i]["defenders"][$j]["techs"][1]=$ROUND[$i]["defenders"][$j]["techs"][2];
-        $ROUND[$i]["defenders"][$j]["techs"][2]=$true_armor;
-        }}}
-
     }
 
     /********** DEBRIS **********/
@@ -301,7 +282,7 @@ function updatePlayers(PlayerGroup $playerGroup, &$players)
  * 
  * @param int $id
  * @param int $count
- * @return a Ship or Defense instance
+ * @return ShipType
  */
 function getShipType($id, $count)
 {
@@ -338,21 +319,21 @@ function getFleet($id)
 function getTechsFromArray($player)
 {
     $attTech = $player['military_tech'] + $player['factor']['Attack'] / WEAPONS_TECH_INCREMENT_FACTOR;
-    $shieldTech = $player['defence_tech'] + $player['factor']['Shield'] / SHIELDS_TECH_INCREMENT_FACTOR;
-    $defenceTech = $player['shield_tech'] + $player['factor']['Defensive'] / ARMOUR_TECH_INCREMENT_FACTOR;
-    return array($attTech,$defenceTech,$shieldTech);
+    $shieldTech = $player['shield_tech'] + $player['factor']['Shield'] / SHIELDS_TECH_INCREMENT_FACTOR;
+    $armorTech = $player['defence_tech'] + $player['factor']['Defensive'] / ARMOUR_TECH_INCREMENT_FACTOR;
+    return array($attTech,$armorTech,$shieldTech);
 }
 
 function getTechsFromArrayForReport($player)
 {
-    list($attTech, $defenceTech, $shieldTech) = getTechsFromArray($player);
+    list($attTech, $armorTech, $shieldTech) = getTechsFromArray($player);
     $attTech = 1 + $attTech * WEAPONS_TECH_INCREMENT_FACTOR;
-    $defenceTech = 1 + $defenceTech * ARMOUR_TECH_INCREMENT_FACTOR;
+    $armorTech = 1 + $armorTech * ARMOUR_TECH_INCREMENT_FACTOR;
     $shieldTech = 1 + $shieldTech * SHIELDS_TECH_INCREMENT_FACTOR;
     
     return array(
         $attTech,
-        $defenceTech,
+        $armorTech,
         $shieldTech);
 }
 
