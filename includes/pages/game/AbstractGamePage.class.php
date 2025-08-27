@@ -100,6 +100,8 @@ abstract class AbstractGamePage
 		if($USER['bana']==1) { echo 'You received a Ban. If you think this is a mistake, write on our Discord: <a href="https://discord.gg/BWqmGbtuDn">https://discord.gg/BWqmGbtuDn</a>'; die(); }
 		if(isset($USER['PLANETS'])) {
 			$USER['PLANETS']	= getPlanets($USER);
+		} else {
+			die();
 		}
 
 		foreach($USER['PLANETS'] as $PlanetQuery)
