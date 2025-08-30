@@ -65,7 +65,9 @@
     {/if}
 	<table class="table569">
     <tr>
-		<th colspan="8">{$LNG.gl_solar_system} {$galaxy}:{$system}</th>
+		<th colspan="3">{$LNG.gl_solar_system} {$galaxy}:{$system}</th>
+		<th colspan="2">Controlled by:</th>
+		<th colspan="3">{$controllingAlliance}</th>
 	</tr>
 	<tr>
 		<th style="white-space: nowrap">{$LNG.gl_pos}</th>

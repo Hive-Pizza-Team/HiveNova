@@ -83,6 +83,24 @@ class ShowGalaxyPage extends AbstractGamePage
 			':statType'	=> 1
 		));
 
+		$controlSql = 'SELECT ally_name, count(*) c
+		FROM %%ALLIANCE%% a
+		LEFT JOIN %%USERS%% u ON a.id = u.ally_id
+		LEFT JOIN %%PLANETS%% p ON u.id = p.id_owner
+		WHERE p.galaxy = :galaxy
+		AND p.system = :system
+		AND p.universe = :universe
+		GROUP BY ally_name
+		ORDER BY c DESC
+		LIMIT 1;';
+
+		$controllingAlliance = Database::get()->selectSingle($controlSql, array(
+			':galaxy'	=> $galaxy,
+			':system'	=> $system,
+			':universe' => Universe::current()
+		));
+		isset($controllingAlliance['ally_name']) ? $controllingAlliance = $controllingAlliance['ally_name'] : $controllingAlliance = "-";
+
 		$galaxyRows	= new GalaxyRows;
 		$galaxyRows->setGalaxy($galaxy);
 		$galaxyRows->setSystem($system);
@@ -127,6 +145,7 @@ class ShowGalaxyPage extends AbstractGamePage
 				'friend'					=> $LNG['gl_short_friend'],
 				'member'					=> $LNG['gl_short_member'],
 			),
+			'controllingAlliance'		=> $controllingAlliance
 		));
 		
 		$this->display('page.galaxy.default.tpl');
