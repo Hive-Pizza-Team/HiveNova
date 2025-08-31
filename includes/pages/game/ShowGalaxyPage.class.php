@@ -83,7 +83,7 @@ class ShowGalaxyPage extends AbstractGamePage
 			':statType'	=> 1
 		));
 
-		$controlSql = 'SELECT ally_name, planet_count FROM (
+		$controlSql = 'SELECT ally_name, planet_count, MAX(planet_count) max_planet_count FROM (
 			SELECT ally_name, count(*) planet_count
 			FROM %%ALLIANCE%% a
 			LEFT JOIN %%USERS%% u ON a.id = u.ally_id
@@ -94,7 +94,7 @@ class ShowGalaxyPage extends AbstractGamePage
 			GROUP BY ally_name
 			ORDER BY planet_count DESC
 		) control
-		HAVING planet_count = MAX(planet_count)
+		HAVING planet_count = max_planet_count
 		LIMIT 2;';
 
 		$controllingAlliances = Database::get()->select($controlSql, array(
