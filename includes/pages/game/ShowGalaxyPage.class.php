@@ -94,7 +94,6 @@ class ShowGalaxyPage extends AbstractGamePage
 			GROUP BY ally_name
 			ORDER BY planet_count DESC
 		) control
-		GROUP BY ally_name
 		HAVING planet_count = MAX(planet_count)
 		LIMIT 2;';
 
