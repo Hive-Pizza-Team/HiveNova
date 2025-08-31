@@ -83,23 +83,32 @@ class ShowGalaxyPage extends AbstractGamePage
 			':statType'	=> 1
 		));
 
-		$controlSql = 'SELECT ally_name, count(*) c
-		FROM %%ALLIANCE%% a
-		LEFT JOIN %%USERS%% u ON a.id = u.ally_id
-		LEFT JOIN %%PLANETS%% p ON u.id = p.id_owner
-		WHERE p.galaxy = :galaxy
-		AND p.system = :system
-		AND p.universe = :universe
+		$controlSql = 'SELECT ally_name, planet_count FROM (
+			SELECT ally_name, count(*) planet_count
+			FROM %%ALLIANCE%% a
+			LEFT JOIN %%USERS%% u ON a.id = u.ally_id
+			LEFT JOIN %%PLANETS%% p ON u.id = p.id_owner
+			WHERE p.galaxy = :galaxy
+			AND p.system = :system
+			AND p.universe = :universe
+			GROUP BY ally_name
+			ORDER BY planet_count DESC
+		) control
 		GROUP BY ally_name
-		ORDER BY c DESC
-		LIMIT 1;';
+		HAVING planet_count = MAX(planet_count)
+		LIMIT 2;';
 
-		$controllingAlliance = Database::get()->selectSingle($controlSql, array(
+		$controllingAlliances = Database::get()->select($controlSql, array(
 			':galaxy'	=> $galaxy,
 			':system'	=> $system,
 			':universe' => Universe::current()
 		));
-		isset($controllingAlliance['ally_name']) ? $controllingAlliance = $controllingAlliance['ally_name'] : $controllingAlliance = "-";
+
+		if (count($controllingAlliances) === 1) {
+			isset($controllingAlliances[0]['ally_name']) ? $controllingAlliance = $controllingAlliances[0]['ally_name'] : $controllingAlliance = "-";
+		} else {
+			$controllingAlliance = "-";
+		}
 
 		$galaxyRows	= new GalaxyRows;
 		$galaxyRows->setGalaxy($galaxy);
