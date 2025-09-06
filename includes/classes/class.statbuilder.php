@@ -17,14 +17,19 @@
 
 class statbuilder
 {
+    private $starttime;
+    private $memory;
+    private $time;
+    private $recordData;
+    private $Unis;
+
 	function __construct()
 	{
 		$this->starttime   	= microtime(true);
-		$this->memory		= array(round(memory_get_usage() / 1024,1),round(memory_get_usage(1) / 1024,1));
+		$this->memory		= [round(memory_get_usage() / 1024, 1), round(memory_get_usage(true) / 1024, 1)];
 		$this->time   		= TIMESTAMP;
-
-		$this->recordData  	= array();
-		$this->Unis			= array();
+		$this->recordData  	= [];
+		$this->Unis 		= [];
 
 		$uniResult	= Database::get()->select("SELECT uni FROM %%CONFIG%% ORDER BY uni ASC;");
 		foreach($uniResult as $uni)
@@ -62,7 +67,7 @@ class statbuilder
 		$select_buildings	=	'';
 		$selected_tech		=	'';
 		$select_fleets		=	'';
-		$select_officers		=	'';
+		$select_officers	=	'';
 				
 		foreach($reslist['build'] as $Building){
 			$select_buildings	.= " p.".$resource[$Building].",";
@@ -116,40 +121,45 @@ class statbuilder
 		return $Return;
 	}
 	
-	private function setRecords($userID, $elementID, $amount)
+	private function setRecords($userID, $elementID, $amount, $universe)
 	{
-		$this->recordData[$elementID][$amount][]	= $userID;
+		$this->recordData[$universe][$elementID][$amount][]	= $userID;
 	}
 	
 	private function writeRecordData()
 	{
 		$QueryData	= array();
-		foreach($this->recordData as $elementID => $elementArray) {
-			krsort($elementArray, SORT_NUMERIC);
-			$userWinner		= reset($elementArray);
-			$maxAmount		= key($elementArray);
-			$userWinner		= array_unique($userWinner);
+		foreach($this->recordData as $universeID => $universeArray) {
+			foreach($universeArray as $elementID => $elementArray) {
+				krsort($elementArray, SORT_NUMERIC);
+				$userWinner		= reset($elementArray);
+				$maxAmount		= key($elementArray);
+				$userWinner		= array_unique($userWinner);
+				$universe		= $universeID;
 
-			if(count($userWinner) > 3)
-			{
-				$keys			= array_rand($userWinner, 3);
-
-				foreach($keys as $key)
+				if(count($userWinner) > 3)
 				{
-					$QueryData[]	= "(".$userWinner[$key].",".$elementID.",".$maxAmount.")";
+					$keys			= array_rand($userWinner, 3);
+
+					foreach($keys as $key)
+					{
+						$QueryData[]	= "(".$userWinner[$key].",".$elementID.",".$maxAmount.",".$universe.")";
+					}
 				}
-			}
-			else
-			{
-				foreach($userWinner as $userID) {
-					$QueryData[]	= "(".$userID.",".$elementID.",".$maxAmount.")";
+				else
+				{
+					foreach($userWinner as $userID) {
+						$QueryData[]	= "(".$userID.",".$elementID.",".$maxAmount.",".$universe.")";
+					}
 				}
 			}
 		}
 		
 		if(!empty($QueryData)) {
+			// there has been a case where TRUNCATE fails
+
 			$SQL	= "TRUNCATE TABLE %%RECORDS%%;";
-			$SQL	.= "INSERT INTO %%RECORDS%% (userID, elementID, level) VALUES ".implode(', ', $QueryData).";";
+			$SQL	.= "INSERT INTO %%RECORDS%% (userID, elementID, level, universe) VALUES ".implode(', ', $QueryData).";";
 			$this->SaveDataIntoDB($SQL);
 		}
 	}
@@ -180,7 +190,7 @@ class statbuilder
 			}
 			$TechCounts		+= $USER[$resource[$Techno]];
 
-            $this->setRecords($USER['id'], $Techno, $USER[$resource[$Techno]]);
+            $this->setRecords($USER['id'], $Techno, $USER[$resource[$Techno]], $USER['universe']);
 		}
 		
 		return array('count' => $TechCounts, 'points' => ($TechPoints / Config::get()->stat_settings));
@@ -202,7 +212,7 @@ class statbuilder
 			}
 			$BuildCounts	+= $PLANET[$resource[$Build]];
 			
-			$this->setRecords($PLANET['id_owner'], $Build, $PLANET[$resource[$Build]]);
+			$this->setRecords($PLANET['id_owner'], $Build, $PLANET[$resource[$Build]], $PLANET['universe']);
 		}
 		return array('count' => $BuildCounts, 'points' => ($BuildPoints / Config::get()->stat_settings));
 	}
@@ -220,7 +230,7 @@ class statbuilder
 			$DefensePoints += $Units * $USER[$resource[$Defense]];
 			$DefenseCounts += $USER[$resource[$Defense]];
 		
-			$this->setRecords($USER['id'], $Defense, $USER[$resource[$Defense]]);
+			$this->setRecords($USER['id'], $Defense, $USER[$resource[$Defense]], $USER['universe']);
 		}
 		
 		return array('count' => $DefenseCounts, 'points' => ($DefensePoints / Config::get()->stat_settings));
@@ -239,7 +249,7 @@ class statbuilder
 			$FleetPoints   += $Units * $USER[$resource[$Fleet]];
 			$FleetCounts   += $USER[$resource[$Fleet]];
 			
-			$this->setRecords($USER['id'], $Fleet, $USER[$resource[$Fleet]]);
+			$this->setRecords($USER['id'], $Fleet, $USER[$resource[$Fleet]], $USER['universe']);
 		}
 		
 		return array('count' => $FleetCounts, 'points' => ($FleetPoints / Config::get()->stat_settings));
@@ -252,7 +262,7 @@ class statbuilder
 		foreach($reslist['officier'] as $Officier) {
 			if($USER[$resource[$Officier]] == 0) continue;
 
-			$this->setRecords($USER['id'], $Officier, $USER[$resource[$Officier]]);
+			$this->setRecords($USER['id'], $Officier, $USER[$resource[$Officier]], $USER['universe']);
 		}
 	}
 	
