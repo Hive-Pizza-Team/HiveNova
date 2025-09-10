@@ -373,7 +373,7 @@ class ShowOverviewPage extends AbstractGamePage
 							':userId' => $USER['id'],
 						));
 						// refresh the page
-						Session::load()->planetId     = $$NEXT_PLANET['id'];
+						Session::load()->planetId     = $NEXT_PLANET['id'];
 						$this->sendJSON(array('ok' => true, 'message' => $LNG['ov_planet_abandoned']));
 					}
                 } else {
