@@ -127,6 +127,7 @@ class ShowGalaxyPage extends AbstractGamePage
 				'friend'					=> $LNG['gl_short_friend'],
 				'member'					=> $LNG['gl_short_member'],
 			),
+			'controllingAlliance'		=> $galaxyRows->getSystemControlData($galaxy, $system)
 		));
 		
 		$this->display('page.galaxy.default.tpl');

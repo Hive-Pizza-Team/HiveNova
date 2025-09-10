@@ -102,6 +102,54 @@ class GalaxyRows
 		
 		return $this->galaxyData;
 	}
+
+	/** 
+	 * Retrieves formatted system control statistics for the specified galactic coordinates. 
+	 * @param int $galaxy The target galaxy number
+	 * @param int $system The target star system number
+	 * @return string Formatted control data
+	*/
+	public function getSystemControlData($galaxy, $system) {
+		$controlSql = 'SELECT ally_name
+			FROM (
+				SELECT ally_name, COUNT(*) planet_count
+				FROM %%ALLIANCE%% a
+				LEFT JOIN %%USERS%% u ON a.id = u.ally_id
+				LEFT JOIN %%PLANETS%% p ON u.id = p.id_owner
+				WHERE p.galaxy = :galaxy
+				AND p.system = :system
+				AND p.universe = :universe
+				GROUP BY ally_name
+			) AS sub
+			WHERE planet_count = (
+				SELECT MAX(planet_count)
+				FROM (
+					SELECT COUNT(*) planet_count
+					FROM %%ALLIANCE%% a
+					LEFT JOIN %%USERS%% u ON a.id = u.ally_id
+					LEFT JOIN %%PLANETS%% p ON u.id = p.id_owner
+					WHERE p.galaxy = :galaxy
+					AND p.system = :system
+					AND p.universe = :universe
+					GROUP BY ally_name
+				) AS max_sub
+			)
+			ORDER BY ally_name;';
+
+		$controllingAlliances = Database::get()->select($controlSql, array(
+			':galaxy'	=> $galaxy,
+			':system'	=> $system,
+			':universe' => Universe::current()
+		));
+
+		if (count($controllingAlliances) === 1 && isset($controllingAlliances[0]['ally_name'])) {
+			$controllingAlliance = $controllingAlliances[0]['ally_name'];
+		} else {
+			$controllingAlliance = "-";
+		}
+
+		return $controllingAlliance;
+	}
 	
 	protected function setLastActivity()
 	{
