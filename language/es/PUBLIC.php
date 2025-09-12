@@ -1,6 +1,6 @@
 <?php
 /**
- *  2Moons 
+ *  2Moons
  *   by Jan-Otto Kröpke 2009-2016
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,136 +14,137 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-// Translated into Espanish by Orion . All rights reversed (C) 2012
+// Traducido al español latinoamericano para HiveNova
 // 2Moons - Copyright (C) 2010-2012 Jän Kropke
 
 // Site Title
-$LNG['siteTitleIndex']				= 'Indice';
+$LNG['siteTitleIndex']				= 'Inicio';
 $LNG['siteTitleRegister']			= 'Registro';
-$LNG['siteTitleScreens']			= 'Imagenes del Juego';
-$LNG['siteTitleBanList']			= 'Baneados';
-$LNG['siteTitleBattleHall']			= 'Salón de la Fama';
+$LNG['siteTitleScreens']			= 'Capturas de pantalla';
+$LNG['siteTitleBanList']			= 'Sal&oacute;n de baneados';
+$LNG['siteTitleBattleHall']			= 'Sal&oacute;n de batalla';
 $LNG['siteTitleRules']				= 'Reglas';
 $LNG['siteTitleNews']				= 'Noticias';
-$LNG['siteTitleDisclamer']			= 'Contactar';
-$LNG['siteTitleLostPassword']			= 'Olvidaste tu contraseña?';
+$LNG['siteTitleDisclamer']			= 'Contactar administrador';
+$LNG['siteTitleLostPassword']		= '&iquest;Olvidaste tu contrase&ntilde;a?';
 
 // Menu
 $LNG['forum']						= 'Foro';
-$LNG['menu_index']					= 'Indice';
+$LNG['menu_index']					= 'Inicio';
 $LNG['menu_news']					= 'Noticias';
 $LNG['menu_rules']					= 'Reglas';
-$LNG['menu_banlist']				= 'Baneados';
-$LNG['menu_battlehall']				= 'Salón de la Fama';
-$LNG['menu_disclamer']				= 'Contactar';
-$LNG['menu_register']				= 'Registrar';
+$LNG['menu_banlist']				= 'Sal&oacute;n de baneados';
+$LNG['menu_battlehall']				= 'Sal&oacute;n de batalla';
+$LNG['menu_disclamer']				= 'Contactos';
+$LNG['menu_register']				= 'Registro';
 
 // Universe select
-$LNG['chose_a_uni']					= 'Elige el Universo';
+$LNG['chose_a_uni']					= 'Elige el universo';
 $LNG['universe']					= 'Universo';
 $LNG['uni_closed']					= ' (cerrado)';
 
 // Button
-$LNG['buttonRegister']				= 'Registrate Ahora!';
-$LNG['buttonRegisterHive']			= '¡Regístrese en Hive!';
-$LNG['buttonScreenshot']			= 'Imagenes del Juego';
-$LNG['buttonLostPassword']			= 'Recuperar contraseña?';
+$LNG['buttonRegister']				= '&iexcl;Reg&iacute;strate!';
+$LNG['buttonRegisterHive']			= '&iexcl;Reg&iacute;strate con Hive!';
+$LNG['buttonScreenshot']			= 'Capturas de pantalla';
+$LNG['buttonLostPassword']			= '&iquest;Olvidaste tu contrase&ntilde;a?';
 
 // Start
-$LNG['gameInformations']			= "Un juego de estrategia espacial en tiempo real.\nJuega junto con cientos de jugadores.\nNada de descarga, s&oacute;lo se requiere un navegador est&aacute;ndar.\nRegistro Gratuito";
+$LNG['gameInformations']			= "Compatible con m&oacute;viles\nJuega en cualquier navegador\nNo requiere descarga\nAl&iacute;ate con amigos y enemigos\nDomina el universo\nGana dopamina, colecciona cr&aacute;neos\n";
 
 // Login
-$LNG['loginHeader']					= 'Iniciar Sesión';
+$LNG['loginHeader']					= 'Iniciar sesi&oacute;n';
 $LNG['loginUsername']				= 'Usuario';
-$LNG['loginPassword']				= 'Contraseña';
-$LNG['loginButton']					= 'Iniciar Sesión';
-$LNG['loginInfo']					= 'Con el Inicio de Sesión acepto las %s.';
+$LNG['loginPassword']				= 'Contrase&ntilde;a';
+$LNG['loginButton']					= 'Iniciar sesi&oacute;n';
+$LNG['loginInfo']					= 'Al iniciar sesi&oacute;n acepto las %s.';
 $LNG['loginWelcome']				= 'Bienvenido a %s';
-$LNG['loginServerDesc']				= '%s es un juego de estrategia espacial con cientos de jugadores jugando juntos <strong>al mismo tiempo</strong> tratando de ser el mejor. Todo lo que necesitas para jugar es un navegador estándar.';
+$LNG['loginServerDesc']				= '%s es un juego de estrategia espacial en tiempo real.';
+$LNG['loginHiveAccount']			= 'Cuenta Hive';
 
 // Register
 $LNG['registerFacebookAccount']		= 'Cuenta Facebook';
 $LNG['registerUsername']			= 'Usuario';
-$LNG['registerUsernameDesc']		= 'El nombre de usuario debe tener por lo menos 3 y un máximo de 25 caracteres y puntos, y pueden consistir en números, letras, guiones y espacios';
-$LNG['registerPassword']			= 'Contraseña';
-$LNG['registerPasswordDesc']		= 'La Contraseña debe tener por lo menos %s caracteres de longitud.';
-$LNG['registerPasswordReplay']		= 'Repetir Contraseña';
-$LNG['registerPasswordReplayDesc']	= 'Por Favor ingrese la misma contraseña.';
-$LNG['registerEmail']				= 'E-Mail';
-$LNG['registerEmailDesc']			= 'Por Favor introduce tu direccion de E-Mail (Necesaria para confirmacion de cuenta)!';
-$LNG['registerEmailReplay']			= 'Repetir E-Mail';
-$LNG['registerEmailReplayDesc']		= 'Por favor, introduzca su dirección de correo electrónico de nuevo para confirmación de seguridad!';
+$LNG['registerUsernameDesc']		= 'El nombre de usuario debe tener al menos 3 y un m&aacute;ximo de 25 caracteres, y puede consistir en n&uacute;meros, letras, guiones bajos y espacios';
+$LNG['registerPassword']			= 'Contrase&ntilde;a';
+$LNG['registerPasswordDesc']		= 'La contrase&ntilde;a debe tener al menos %s caracteres de longitud.';
+$LNG['registerPasswordReplay']		= 'Repetir contrase&ntilde;a';
+$LNG['registerPasswordReplayDesc']	= 'Por favor ingresa la misma contrase&ntilde;a.';
+$LNG['registerEmail']				= 'Correo electr&oacute;nico';
+$LNG['registerEmailDesc']			= '&iexcl;Por favor ingresa tu correo electr&oacute;nico!';
+$LNG['registerEmailReplay']			= 'Repetir correo electr&oacute;nico';
+$LNG['registerEmailReplayDesc']		= '&iexcl;Por favor ingresa tu direcci&oacute;n de correo electr&oacute;nico una vez m&aacute;s por seguridad!';
 $LNG['registerLanguage']			= 'Idioma';
 $LNG['registerReferral']			= 'Invitado por:';
-$LNG['registerCaptcha']				= 'Código de Seguridad';
-$LNG['registerCaptchaDesc']			= 'Por favor ingrese los caracteres de la imagen en el campo vacío. No tiene mayúsculas y minúsculas';
+$LNG['registerCaptcha']				= 'C&oacute;digo de seguridad';
+$LNG['registerCaptchaDesc']			= 'Por favor ingresa los caracteres de abajo en el campo vac&iacute;o. No distingue may&uacute;sculas y min&uacute;sculas';
 $LNG['registerCaptchaReload']		= 'Recargar Captcha.';
 $LNG['registerRules']				= 'Reglas';
-$LNG['registerRulesDesc']			= 'Estoy deacuerdo con las %s';
+$LNG['registerRulesDesc']			= 'Estoy de acuerdo con las %s';
 $LNG['hiveAccount']                 = 'Cuenta Hive';
 
-$LNG['registerBack']				= 'Atras';
+$LNG['registerBack']				= 'Atr&aacute;s';
 $LNG['registerNext']				= 'Siguiente';
 
-$LNG['registerErrorUniClosed']		= 'El registro está cerrado en este Universo.!';
-$LNG['registerErrorUsernameEmpty']	= 'Tienes que introducir un nombre de Usuario!';
-$LNG['registerErrorUsernameChar']	= 'Su nombre de usuario debe consistir sólo en números, letras, espacios, _, -, .!';
-$LNG['registerErrorUsernameExist']	= 'El nombre de usuario ya está en uso!';
-$LNG['registerErrorPasswordLength']	= 'La contraseña debe tener al menos %s caracteres de longitud!';
-$LNG['registerErrorPasswordSame']	= 'Introducidas 2 contraseñas diferentes!';
-$LNG['registerErrorMailEmpty']		= 'Tienes que especificar una dirección de E-Mail!';
-$LNG['registerErrorMailInvalid']	= 'Dirección de E-Mail invalida!';
-$LNG['registerErrorMailSame']		= 'Has introducido 2 direcciones de email diferentes!';
-$LNG['registerErrorMailExist']		= 'La dirección de E-Mail ya esta en uso!';
-$LNG['registerErrorRules']			= 'Tienes que aceptar las Reglas!';
-$LNG['registerErrorCaptcha']		= 'El Codigo de seguridad no es correcto!';
-$LNG['registerErrorHiveAccountInvalid']	= 'Debes introducir una cuenta válida de Hive.';
-$LNG['registerErrorHiveAccountExist']	= 'La cuenta Colmena ya está registrada.';
+$LNG['registerErrorUniClosed']		= '&iexcl;El registro est&aacute; cerrado en este universo!';
+$LNG['registerErrorUsernameEmpty']	= '&iexcl;Debes ingresar un nombre de usuario!';
+$LNG['registerErrorUsernameChar']	= '&iexcl;Tu nombre de usuario debe consistir solo en n&uacute;meros, letras, espacios, _, -, .!';
+$LNG['registerErrorUsernameExist']	= '&iexcl;El nombre de usuario ya est&aacute; en uso!';
+$LNG['registerErrorPasswordLength']	= '&iexcl;La contrase&ntilde;a debe tener al menos %s caracteres de longitud!';
+$LNG['registerErrorPasswordSame']	= '&iexcl;Las contrase&ntilde;as no coinciden!';
+$LNG['registerErrorMailEmpty']		= '&iexcl;Debes especificar una direcci&oacute;n de correo electr&oacute;nico!';
+$LNG['registerErrorMailInvalid']	= '&iexcl;Direcci&oacute;n de correo electr&oacute;nico inv&aacute;lida!';
+$LNG['registerErrorMailSame']		= '&iexcl;Las direcciones de correo electr&oacute;nico no coinciden!';
+$LNG['registerErrorMailExist']		= '&iexcl;La direcci&oacute;n de correo electr&oacute;nico ya est&aacute; registrada!';
+$LNG['registerErrorRules']			= '&iexcl;Debes aceptar las reglas!';
+$LNG['registerErrorCaptcha']		= '&iexcl;El c&oacute;digo de seguridad es incorrecto!';
+$LNG['registerErrorHiveAccountInvalid']	= '&iexcl;Debes ingresar una cuenta v&aacute;lida de Hive!';
+$LNG['registerErrorHiveAccountExist']	= '&iexcl;La cuenta Hive ya est&aacute; registrada!';
 
-$LNG['registerMailVertifyTitle']	= 'La activación del registro en el juego: %s';
-$LNG['registerMailVertifyError']	= 'Fallo en el envio del mail: %s';
+$LNG['registerMailVertifyTitle']	= 'Registro exitoso para el juego: %s';
+$LNG['registerMailVertifyError']	= 'Error al enviar el correo: %s';
 
-$LNG['registerMailCompleteTitle']	= 'Bienvenido a %s!';
+$LNG['registerMailCompleteTitle']	= '&iexcl;Bienvenido a %s!';
 
-$LNG['registerSendComplete']		= 'Gracias por tu registro. Debes consultar tu correo electrónico (atención con el SPAM) para más información.';
+$LNG['registerSendComplete']		= 'Gracias por tu registro. Debes revisar tu correo electr&oacute;nico (cuidado con el SPAM) para obtener m&aacute;s informaci&oacute;n.';
 
 $LNG['registerWelcomePMSenderName']	= 'Administrador';
 $LNG['registerWelcomePMSubject']	= 'Bienvenido';
-$LNG['registerWelcomePMText']		= 'Bienvenido a %s! En primer lugar tienes que construir una planta de energía solar, ya que es el edificio que genera la energía que se necesita para la producción de materias primas. Para crear una, haga clic izquierdo en el menú de "edificios". Entonces construya el cuarto edificio contando apartir de la parte superior. </br> Cuando tengas construida la planta de energía, podrás comenzar a construir las minas. Ir a los edificios en el menú y construir una mina de metal, seguido de una mina de cristal. </br></br>Con el fin de poder construir tus propias flotas, debes tener un Hangar. Para ver lo que se necesita para desbloquear ese edificio se puede echar un vistazo al apartado "Tecnologías" en el menú de la izquierda.</br>Si tienes más preguntas puedes mirar en la guía de principiantes, nuestro foro o abrir un ticket de soporte. </br></br> El equipo te desea mucha diversión explorando el universo!';
+$LNG['registerWelcomePMText']		= '&iexcl;Bienvenido a %s! Primero construye una planta de energ&iacute;a solar, porque la energ&iacute;a es necesaria para la producci&oacute;n de materias primas. Para construir una, haz clic izquierdo en el men&uacute; en "edificios". Luego construye el 4to edificio desde arriba. </br> Cuando tengas energ&iacute;a, puedes comenzar a construir minas. Ve a edificios en el men&uacute; y construye un extractor de mineral, seguido de una refiner&iacute;a de silicio. </br></br>Para poder construir naves necesitas tener un astillero. Para ver qu&eacute; se necesita para desbloquear ese edificio puedes echar un vistazo a "Tecnolog&iacute;as" en el men&uacute; izquierdo.</br>Si tienes m&aacute;s preguntas puedes ver un tutorial, nuestro discord o encontrar una alianza. </br></br>&iexcl;El equipo te desea mucha diversi&oacute;n explorando el universo!';
 
 //Vertify
 
-$LNG['vertifyNoUserFound']			= 'Solicitud no válida!';
-$LNG['vertifyAdminMessage']			= 'El Usuario "%s" ha sido activado!';
+$LNG['vertifyNoUserFound']			= '&iexcl;Solicitud inv&aacute;lida!';
+$LNG['vertifyAdminMessage']			= '&iexcl;El usuario "%s" ha sido activado!';
 
 
 //lostpassword
-$LNG['passwordInfo']				= 'Si ha olvidado su contraseña, debe especificar el nombre de usuario y la dirección de E-Mail que consta en su cuenta.';
+$LNG['passwordInfo']				= 'Si has olvidado tu contrase&ntilde;a, debes especificar el nombre de usuario y la direcci&oacute;n de correo electr&oacute;nico que ingresaste en tu cuenta.';
 $LNG['passwordUsername']			= 'Usuario';
-$LNG['passwordMail']				= 'E-Mail';
-$LNG['passwordCaptcha']				= 'Codigo de Seguridad';
+$LNG['passwordMail']				= 'Correo electr&oacute;nico';
+$LNG['passwordCaptcha']				= 'C&oacute;digo de seguridad';
 $LNG['passwordSubmit']				= 'Enviar';
-$LNG['passwordErrorUsernameEmpty']	= 'No has especificado el nombre de usuario!';
-$LNG['passwordErrorMailEmpty']		= 'Ha introducido una dirección de e-mail desconocida!';
+$LNG['passwordErrorUsernameEmpty']	= '&iexcl;No has especificado el nombre de usuario!';
+$LNG['passwordErrorMailEmpty']		= '&iexcl;Has especificado una direcci&oacute;n de correo electr&oacute;nico desconocida!';
 $LNG['passwordErrorUnknown']		= 'No se pudo encontrar con los datos de la cuenta.';
-$LNG['passwordErrorOnePerDay']		= 'Contraseña para esta cuenta de usuario solicitada en las últimas 24. Sólo se puede solicitar la contraseña para esta cuenta de usuario cada 24 horas. ';
+$LNG['passwordErrorOnePerDay']		= 'L&iacute;mite de restablecimiento de contrase&ntilde;a para esta cuenta de usuario alcanzado. Solo puedes solicitar el restablecimiento de contrase&ntilde;a una vez cada 24 horas. ';
 
-$LNG['passwordValidMailTitle']		= 'Olvidó su contraseña en el juego: %s';
-$LNG['passwordValidMailSend']		= 'Recibirás un correo electrónico en breve con información adicional.';
+$LNG['passwordValidMailTitle']		= 'Olvid&eacute; mi contrase&ntilde;a en el juego: %s';
+$LNG['passwordValidMailSend']		= 'Recibir&aacute;s un correo electr&oacute;nico en breve con m&aacute;s informaci&oacute;n.';
 
-$LNG['passwordValidInValid']		= 'Solicitud no valida!';
-$LNG['passwordChangedMailSend']		= 'Recibirás un correo electrónico en breve con tu nueva contraseña.';
-$LNG['passwordChangedMailTitle']	= 'Nueva contraseña en el juego: %s';
+$LNG['passwordValidInValid']		= '&iexcl;Solicitud inv&aacute;lida!';
+$LNG['passwordChangedMailSend']		= 'Recibir&aacute;s un correo electr&oacute;nico en breve con tu nueva contrase&ntilde;a.';
+$LNG['passwordChangedMailTitle']	= 'Nueva contrase&ntilde;a en el juego: %s';
 
-$LNG['passwordBack']				= 'Anterior';
+$LNG['passwordBack']				= 'Atr&aacute;s';
 $LNG['passwordNext']				= 'Siguiente';
 
 //case default
 
-$LNG['login_error_1']				= 'Incorrecto Usuario/Contraseña!';
-$LNG['login_error_2']				= 'Alguien se ha conectado desde otro PC en su cuenta, o su dirección IP es diferente!';
-$LNG['login_error_3']				= 'Tu sesión ha expirado!';
-$LNG['login_error_4']				= 'Se ha producido un error en la autorización externa, inténtalo de nuevo!';
+$LNG['login_error_1']				= '&iexcl;Usuario/contrase&ntilde;a incorrectos! &iexcl;Aseg&uacute;rate de registrarte primero!';
+$LNG['login_error_2']				= '&iexcl;Alguien se ha conectado desde una PC diferente en tu cuenta, o tu IP es diferente!';
+$LNG['login_error_3']				= '&iexcl;Tu sesi&oacute;n ha expirado!';
+$LNG['login_error_4']				= '&iexcl;Hubo un error en la autorizaci&oacute;n externa, por favor int&eacute;ntalo de nuevo!';
 
 //Rules
 $LNG['rulesHeader']					= 'Reglas';
@@ -151,10 +152,10 @@ $LNG['rulesHeader']					= 'Reglas';
 //NEWS
 $LNG['news_overview']				= 'Noticias';
 $LNG['news_from']					= 'El %s por %s';
-$LNG['news_does_not_exist']			= 'No hay Noticias Disponibles!';
+$LNG['news_does_not_exist']			= '&iexcl;No hay noticias disponibles!';
 
 //Impressum
-$LNG['disclamerLabelAddress']		= 'Dirección:';
-$LNG['disclamerLabelPhone']			= 'Nr. de Teléfono:';
-$LNG['disclamerLabelMail']			= 'Dirección de E-Mail:';
-$LNG['disclamerLabelNotice']		= 'Información de Contacto';
+$LNG['disclamerLabelAddress']		= 'Direcci&oacute;n del juego:';
+$LNG['disclamerLabelPhone']			= 'N&uacute;mero de tel&eacute;fono:';
+$LNG['disclamerLabelMail']			= 'Correo de soporte:';
+$LNG['disclamerLabelNotice']		= 'M&aacute;s informaci&oacute;n';

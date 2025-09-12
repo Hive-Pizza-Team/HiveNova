@@ -1,7 +1,6 @@
 <?php
-
 /**
- *  2Moons 
+ *  2Moons
  *   by Jan-Otto Kröpke 2009-2016
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,161 +13,122 @@
  * @version 1.8.0
  * @link https://github.com/jkroepke/2Moons
  */
-
-
+// Traducido al español latinoamericano para HiveNova
+// 2Moons - Copyright (C) 2010-2012 Slaver
 $LNG['faq_overview']	= "FAQ";
  
 $LNG['questions']					= array();
-$LNG['questions'][1]['category']	= 'Einsteiger-Tipps';
-$LNG['questions'][1][1]['title']	= 'Schritt 1';
+$LNG['questions'][1]['category']	= 'Consejos para principiantes';
+$LNG['questions'][1][1]['title']	= 'Paso 1 - Tus primeros edificios';
 $LNG['questions'][1][1]['body']		= <<<BODY
-<p>In diesem Teil des Tutorials werden die Hauptgebäude beschrieben. Dabei wird erklärt welche zu Beginn gebaut werden sollten und wofür diese benötigt werden. Um ein erfolgreiches Imperium zu errichten ist es wichtig die Gebäude in sinniger Reihenfolge zu bauen.</p>
-<h3>Das Solarkraftwerk:</h3>
-<p>Um Ressourcen zu produzieren, die du zum Aufbau deines Imperiums brauchst ist es notwendig dieses Gebäude gleich als erstes mit aufzubauen. Es liefert die Energie mit denen deine Minen die Ressourcen Metall, Kristall und Deuterium produzieren. Sobald der Bau abgeschlossen ist kannst du in der Ressourcen-Leiste so wie unter dem Punkt "Produktion" einsehen wieviel Energie zur Verfügung steht.</p>
-<h3>Die Metallmine:</h3>
-<p>Metall ist eine der drei Ressourcen, die dir im Spiel zur Verfügung stehen. Metall wird für fast alles gebraucht was man bauen oder forschen kann. Daher ist ein guter Ausbau dieser Mine ratsam. Grade am Anfang ist es wichtig, dass diese Mine um einige Stufen höher betrieben wird, als die anderen.</p>
-<h3>Die Kristallmine und der Deuteriumsynthetisierer:</h3>
-<p>Kristall ist ein wichtiger Rohstoff für Gebäude, Schiffe und Forschungen. Es wird in geringerem Umfang produziert als Metall, was es dadurch aber nicht weniger wert macht. Im Verlaufe des Spiels wirst du sehen wie heiß umkämpft Kristall sein kann. Deuterium ist Energielieferant (Deuteriumsynthetisierer), Flottentreibstoff und Grundressource einiger wichtiger Forschungen und Bauten (Forschungslabor).</p>
+<p>Esta parte del tutorial describe los edificios principales del juego.</p>
+<h3>Planta de energía solar:</h3>
+<p>La planta solar genera energía, que se utiliza para producir los tres recursos primarios. Para que esta producción ocurra, la energía utilizada en la producción no puede exceder la energía generada por la planta. Cuando la carga excede la energía disponible, los números de energía en el menú se vuelven rojos. Evita operar con un déficit de energía.</p>
+<h3>Extractor de mineral:</h3>
+<p>El metal es el primero de los tres recursos primarios disponibles en el juego. Se utiliza para casi todo lo que puedes construir o investigar. Por lo tanto, se aconseja la expansión de los extractores de mineral.</p>
+<h3>Refinería de silicio:</h3>
+<p>El silicio se utiliza mucho para edificios, naves e investigación. Se produce más lentamente que el metal, haciéndolo más costoso.</p>
+<h3>Centrífuga de uranio:</h3>
+<p>El uranio es una fuente de combustible, muy utilizada para investigación, como combustible para naves y para escanear sistemas estelares.</p>
 BODY;
-$LNG['questions'][1][2]['title']	= 'Schritt 2';
+$LNG['questions'][1][2]['title']	= 'Paso 2 - Tus siguientes edificios';
 $LNG['questions'][1][2]['body']		= <<<BODY
-<p>Um dein Imperium zu vergrößern und dich mit anderen Spielern zu messen oder zu interagieren brauchst du weitere Gebäude. Durch Forschung und den Bau einer Raumschiffwerft beginnt der Aufbau deiner Flotte und der planetaren Verteidigung. Näheres findest du hier:</p>
-<h3>Die Raumschiffswerft:</h3>
-<p>Hier werden alle Schiffe die dir in diesem Spiel zur Verfügung stehen gebaut. Auch wenn dir die Werft schon sehr früh im Spiel zur Verfügung steht benötigst du jedoch noch weitere Forschungen um bestimmte Schiffsklassen bauen zu können. Einen Überblick welches Schiff oder Verteidigung welche technischen Voraussetzungen hat findest du unter dem Menüpunkt "Technik". Je höher die Raumschiffwerft ausgebaut ist, desto schneller kann gebaut werden.</p>
-<h3>Das Forschungslabor:</h3>
-<p>Hier können Forschungen gestartet werden. Diese dienen dazu neue Gebäude, Forschungen und Verteidigungsanlagen bauen zu können. Ausserdem bringen bestimmte Forschungen einen Bonus für bereits existierende Errungenschaften. Auch die Forschungen können mittels Ausbau des Forschungslabors beschleunigt werden.</p>
-<h3>Die Roboterfabrik:</h3>
-<p>Die Roboterfabrik ist ein essenzielles Gebäude. Durch ihren Ausbau kann die Produktionszeit von Raumschiffen so wie auch die Bauzeit von Gebäuden reduziert werden. Sollten also die Bauzeiten deutlich länger werden, kann man diese mit dem Ausbau der Roboterfabrik wieder verringern.</p>
+<p>Para expandir tu imperio y competir con otros jugadores necesitas construir edificios adicionales.</p>
+<h3>El astillero:</h3>
+<p>Después de construir un astillero, puedes comenzar a ensamblar una flota y defensas planetarias. Mira la pestaña de Tecnologías para encontrar la lista de todas las naves disponibles en el juego. Algunas naves tienen requisitos tecnológicos más altos. Subir de nivel el astillero permite una construcción más rápida de naves y defensas.</p>
+<h3>El laboratorio de investigación:</h3>
+<p>Investigar nuevas tecnologías desbloquea nuevos edificios, naves y defensas. La pestaña de Tecnologías también muestra la lista de toda la investigación disponible. La investigación también puede generar bonificaciones para producción y combate. El progreso de investigación se puede acelerar mejorando el edificio del laboratorio de investigación.</p>
+<h3>Gigafábrica:</h3>
+<p>La gigafábrica es un edificio crucial para acelerar la cola de construcción. Mejorar este edificio reduce el tiempo de construcción para otros edificios.</p>
 BODY;
-$LNG['questions'][1][3]['title']	= 'Schritt 3';
+$LNG['questions'][1][3]['title']	= 'Paso 3 - Primer combate';
 $LNG['questions'][1][3]['body']		= <<<BODY
-<p>Dieser Teil des Tutorials widmet sich der Verteidigung des eigenen Planeten so wie die ersten Aktionen mit der eigenen Flotte. Dabei wird kurz beschrieben welche Möglichkeiten man hat die Flotte zu versenden und mit anderen Spielern zu interagieren.</p>
-<h3>Die Galaxieansicht:</h3>
-<p>Sie dient dazu andere Spieler zu lokalisieren. Man findet dort detaillierte Informationen zu den anderen Planten und kann auch Teile seiner Flotte direkt aus dieser Ansicht verschicken. Zusätzlich kann man über diese Ansicht auch Kontakt zu anderen Spielern aufnehmen oder einen anderen Planeten ausspionieren, sofern man bereits Spionagesonden bauen kann und gebaut hat.</p>
-<h3>Flotten verschicken:</h3>
-<p>Flotten können entweder über die Galaxieansicht, oder über den Punkt "Flotten" versendet werden. Zuerst wird ausgewählt welche Anzahl an Schiffen eines bestimmten Schifftyps fliegen soll. Dabei muss eingestellt werden wo das Ziel (Koordinaten, welche man in der Galaxieansicht erhält) ist, so wie auch die Geschwindigkeit mit der dieses erreicht werden soll. Auch kann der Typ der Mission wie "Angreifen", "Stationieren", "Halten", "Abbau" oder "Halten" bestimmt werden.</p>
-<h3>Die Verteidigung:</h3>
-<p>Um den eigenen Planeten zu schützen können stehen mit dem Bau der Raumschiffswerft ebenfalls der Bau von Verteidigungsanlagen zu Verfügung. Diese bieten einigen Schutz vor Angreifern und kämfpen mit der eigenen Flotte die sich zum Zeitpunkt des Angriffs auf dem Planeten befindet gegen ihren Gegner. Im Unterschied zur Flotte stellen sich 70% der Verteidigung nach dem Kampf selbst wieder her.</p>
+<p>Esta parte del tutorial está dedicada a defender el planeta y las primeras acciones con tu propia flota.</p>
+<h3>Galaxia:</h3>
+<p>La pestaña de Galaxia se utiliza para encontrar planetas y jugadores cercanos. Aquí encontrarás información detallada sobre planetas. Las acciones rápidas te permiten enviar flotas y misiles. Además de eso, puedes enviar mensajes a otros jugadores y enviar sondas espía para recopilar inteligencia.</p>
+<h3>Envío de flotas:</h3>
+<p>Puedes enviar tu flota directamente desde la pestaña de Galaxia o la pestaña de Flotas. Primero, selecciona la cantidad de tipos de naves para enviar en una misión. Segundo, ingresa las coordenadas (auto-completadas si hiciste clic en el planeta) y selecciona la velocidad de vuelo. Un vuelo más lento consume menos combustible.</p>
+<p>El último paso es seleccionar qué tipo de misión, como atacar, transferir, transportar, reciclar, colonizar, expedición o desplegar.</p>
+<p>Transferir significa regalar la nave al jugador objetivo. Reciclar es para recolectar escombros de batalla. Colonizar es solo para naves coloniales para asentarse en un nuevo planeta. Expedición está disponible cuando vuelas al espacio profundo para exploración.</p>
+<h3>Defensa planetaria:</h3>
+<p>Las defensas protegen tus planetas además de las naves estacionadas. Estas ofrecen cierta protección contra naves enemigas que realizan incursiones. A diferencia de las naves de flota, el 70% de las defensas destruidas se reparan después de la batalla.</p>
 BODY;
-
-$LNG['questions'][2]['category']	= 'Erweiterte Informationen';
-$LNG['questions'][2][1]['title']	= 'Raiden';
+$LNG['questions'][2]['category']	= 'Paso 4 - Combate avanzado';
+$LNG['questions'][2][1]['title']	= 'Incursión';
 $LNG['questions'][2][1]['body']		= <<<BODY
-<h3>Raiden:</h3>
-<p>Ist der landläufige Begriff für andere Spieler angreifen um sich deren Ressourcen zu bemächtigen.
-Es gibt mehrere Arten des Raids:</p>
+<h3>Incursiones:</h3>
+<p>Una incursión es un ataque al planeta de otro jugador para robar recursos. Si un ataque es exitoso, hasta el 50% de los recursos en el planeta objetivo pueden ser tomados como botín. Hay varios tipos de ataques, tales como:</p>
 <ul>
-	<li>Farmraid</li>
-	<li>Fleetatt</li>
-	<li>Raid</li>
-	<li>Abfangen</li>
+<li>Incursiones a inactivos</li>
+<li>SAC (Sistema de combate de alianza)</li>
+<li>Interceptar una flota</li>
 </ul>
-<h3>Farmraid:</h3>
-<p>Sie sind wohl die massenhaftesten Aktionen, die am Tag in einem Universum geflogen werden.<br>
-Dazu werden scannt man die Planeten in seiner Umgebung ab und schickt kleine Flotten los, die genug Transportkapazitäten und Schusskraft haben um eine kleinere Deff zu durchbrechen und mit Gewinn (die Summe aus geklauten Ressourcen übersteigt deutverbrauch und eigene Verluste) aus dem Angriff hervorzugehen.</p>
-<h3>Fleetatt:</h3>
-<p>Die Königsklasse des Raid.<br>
-Hier werden gezielt gegnerische Flotten gejagt.<br>
-Es ist deshalb die Königsklasse, da ausser Spiosonden und einer guten Portion Glück auch noch Phalanxen und gutes Timing eine Rolle spielen. Ist eine gegnerische Flotte erstmal erspäht muss diese nur noch eingefangen und Recycelt werden. Dies gestaltet sich meist nicht leicht, da sich Flotten, die tatsächlich gewinn bringen oftmals ausserhalb der eigenen Recyclerkapazitäten bewegen. Dann müssen ausser der eigenen Flotte noch die Recycler oder gegebenen Falls auch die AKS- Partner Koordiniert werden.</p>
-<h3>TF Raid:</h3>
-<p>Die bequemste aber auch unbeliebteste Art Gewinn zu machen. Man klaut anderen die Trümmerfelder.
-Da die Regel bei trümmerfeldern gilt, dass sie niemandem gehören und der es behalten darf, der es auch findet, sind TF -Klaus oftmals ein großes Ärgernis.</p>
-<h3>Abfangen</h3>
-<p>Der Lebensinhalt eines Fleeters besteht darin, Flotte zu bauen und Flotte zu zerstören. Da man nicht immer Flotten rumstehen sieht, muss man sich manchmal, vorallem um sehr gute Spieler zu erwischen, ein bisschen mehr anstrengen. Man kann deren Flotten abfangen, wenn sie saven oder einen Angriff fliegen. Dies ist meistens allerdings nicht so einfach, da es Wege gibt, sich davor zu schützen.</p>
-<ul>
-	<li><p>Wenn man einen Mond hat, ist das Abfangen leichter als ohne, da man mit seiner Sensorphalanx andere Planeten phalanxen kann (die Flottenbewegungen auskunschaften kann), wenn sie in deiner Reichweite sind. Wenn man dann eine Flotte findet, die sich lohnt abgefangen zu werden. Muss man ausrechnen wie lange die Flotte noch fliegt, wenn sie ihr Ziel erreicht hat, also die Rückflugszeit ist herauszufinden. Dafür werden die Angaben der Triebwerke benötigt (Verbrennungstriebwerk, Impulstriebwerk und Hyperraumantrieb), welche man durch einen Spionagebericht leicht herausfinden kann. Man kann jetzt mit einen Taschenrechner ausrechnen, wie lange die Flotte noch fliegt oder man benutzt Hilfmittel. Ein Funkwecker, auf der man die Zeit sehen kann, wann die Flotte exakt ankommt ist von Vorteil.</p>
-	<p>Ein Flottenflugzeitrechner ist ebenfalls sinnvoll, das erspart den Taschenrechner. Einen Link dazu findest du auf den offiziellen Plattformen.<br>Nun startet man Flotte und Recycler so, dass sie 3-5Sekunden nach der Flotte des gegners an seinen Planet/ Mond ankommt und diese vernichtet. Recycler sollten auch gut getimed sein.</p></li>
-	<li><p>Wenn man eine Flotte, die vom Mond zum Trümmerfeld fliegt abfangen will, braucht man die ungefähre Zeit wann sie losgeflogen ist. Dann schießt man an den Orten, an den man glaubt, sie würde das Tf einsammeln, ein sichtbares Trümmerfeld (mit zum Beispiel Spionagesonden). Man rechnet nun aus, wie lange die Flotte dorthinfliegt und geht zu dieser Uhrzeit in das System und klickt immerwieder auf "Aktuallisieren", bis das Trümmerfeld verschwindet. Man merkt sich dann die Zeit, am besten wieder mit der Funkuhr und rechnet wie lange die Flotte zum zurückfliegen braucht. Nun nimmt man die Zeit wo das Trümmerfeld verschwand und addiert die Flugzeit, die die gegnerische Flotte für den Rückflug braucht, was die Ankunftszeit ergibt. Man muss nun nurnoch die Recycler und Flotte passend hinter die Flotte timen und schon ist der Abfang gelungen.</p>
-	<p><b>Achtung:</b> So ein Abfang klappt nicht immer, da es Möglichkeiten gibt sich dagegen zu schützen, zum Beispiel einen Recycler vorschicken, der das Trümmerfeld schon vorher abbaut.</p></li>
-	<li>Eine weitere Form des Abfangens ist das "Halten" bei Freunden mit der eigenen Flotte um sie vor anderen Flotten, die sie angreifen zu beschützen, indem man diese zum Rückzug zwingt, weil die Verteidigende Flotte sonst zu stark wäre. Man kann sich gegen dieses Abgefangen werden schützen, indem man einen Savescan macht (siehe Savescan).</li>
-	<li><p>Wenn ein Spieler von einen Planeten zum anderen auf Stationieren fliegt und dann abbricht, ist es in der Phalanx nichtmehr sichtbar. Doch auch hier gibt es einen Trick, wie man diese Flotte bekommt. Man beobachtet eine Zeitlang das Saveverhalten des Opfers, also wann er losfliegt und wann er abbricht. Wenn man ungefähr weiß, wann er ungefähr abbricht, setzt man sich wieder in sein System und phalanxt im Sekundentakt seinen Planeten. Wenn er abbricht und man die Flotte dann plötzlich nichtmehr in der Phalanx sieht, schaut man auf die Funkuhr, die vorhin bereits erwähnt wurde und rechnet mit dem Rückflugsimulator die Rückflugsstrecke aus, addiert sie auf die Abbruchszeit und fliegt mit seiner Flotte und Recyclern so los, dass man ca. 4-6Sekunden nach der Flotte des Opfers ankommt.</p><p>Wenn ein Spieler vom Mond aufs TF saved und er einen Recycler oder mehrere vorschickt, ist es fast nicht abfangbar. Es gibt jedoch einen Weg, man muss den Mond zerstören. Man schickt also einen oder mehrere Rips zum Mond mit dem Angriff "zerstören" (siehte Mond).</p><p>Wenn der Mond zerstört ist phalanxt man den Planeten, zu der die Flotte zurückfliegt (Wenn der Mond weg ist, fliegt Flotte automatisch zum Plani) und hängt sich wieder ein paar Sekunden hinter die Flotte des Gegners.</p><p>Es ist bei jeder dieser Techniken sehr Hilfreich, wenn man das Saveverhalten des Gegners gut kennt. Das heißt, wenn man weiß, dass er vielleicht jeden Abend um 23Uhr saved oder jeden Mittag um 12Uhr online kommt. Also vor dem Abfangen, den Gegner genau studieren.</li></ul>
+<h3>Incursiones a inactivos:</h3>
+<p>Un saqueador enfocado trata de robar recursos rápida y fácilmente. A menudo, tus vecinos son todos jugadores activos que están en línea o guardando flota. Los jugadores inactivos son objetivos más fáciles ya que es poco probable que se conecten.</p>
+<h3>Sistema de combate de alianza (SAC):</h3>
+<p>El sistema de combate de alianza (SAC) permite a amigos y miembros de alianza combinar temporalmente sus flotas para ataque o defensa, permitiéndoles derribar o repeler a un enemigo más poderoso. Construir un depósito de alianza no es un prerequisito para usar SAC.</p>
+<h3>Interceptar una flota:</h3>
+<p>La intercepción de flotas es brutal. Debes determinar cómo, cuándo y dónde el jugador está guardando la flota. Para hacer eso, tienes que observar al jugador. Usando un sensor falange, puedes detectar flotas en planetas. Dependiendo de cómo el jugador se esconde, puede que tengas que destruir la(s) luna(s) para detectar las flotas.</p>
 BODY;
-
-$LNG['questions'][2][2]['title']	= 'Saven';
+$LNG['questions'][2][2]['title']	= 'Tácticas de guardar flota';
 $LNG['questions'][2][2]['body']		= <<<BODY
-<h3>Wie schütze ich mich</h3>
-<p>Eine große Anzahl von Verteidigungsgeschützen schreckt schon einige Spieler ab, leider werden andere dadurch angelockt, und diese kommen so oft wieder, bis man nur noch sehr wenig, oder gar nichts mehr hat. Dadurch verliert man sehr viele Ressourcen, da bei den Geschützen, nichts ins Trümmerfeld geht, wenn diese zerstört werden. Einzige Ausnahme bilden die sog. Deff-ins-TF-Unis, wo man aber erst recht nicht so viele Geschütze aufbaut, da man dadurch dem Angreifer die Ressourcen quasi schenkt.</p>
-<p>Hinzu kommt, dass es auch noch Interplanetarraketen gibt, deren einzige Aufgabe es ist, die Verteidigung zu zerstören. Im Gegensatz zum normalen Angriff bauen sich die Geschütze hierbei nicht wieder auf. Ein gut geplanter Angriff mit Interplanetarraketen mindert die Gefahr für die eigene Flotte stark.</p>
-<p>Auch eine große Flotte hält nur die Spieler ab, die zu schwach sind, aber die, deren Flotte stärker ist, kommen gerne vorbei, da sie dann auch gleich das entstandene Trümmerfeld einsacken. Letztlich gibt es auch noch das AKS, was es mehreren schwächeren Spielern ermöglicht ihre Flotten zusammen zu legen, und dadurch doch noch stärker zu sein.</p>
-<p>Die Erhöhung der Spionagetechnik ist die teuerste Möglichkeit dem anderen Spieler alle Informationen, außer den vorhandenen Ress, vorzuenthalten. Leider kann man fehlende Spionagelevel durch die entsprechende Anzahl an Spionagesonden ausgleichen. Und wenn genug Ressourcen im Spionagebericht zu sehen sind, schick der andere Spieler auch mal viel mehr Sonden, um alles zu erfahren.</p>
-<p>Die beste Möglichkeit, sich zu schützen, besteht darin, dass kein Spieler sehen kann, wie viel man wirklich hat. Das bedeutet, dass man zumindest während der Zeit, die man nicht im Internet sein kann, seine Flotte mitsamt den auf dem Planeten vorhandenen Ressourcen von einem Planeten zum nächsten schickt. Da Angriffe im freien Flug nicht möglich sind, sind die Schiffe mit den Ressourcen erstmal sicher.</p>
-<h3>Saven ist die beste Deff</h3>
-<p>Das Saven der Flotte ist einer der wichtigsten Bestandteile von OGame, doch leider beherrschen viele Spieler das Saven nicht. Deswegen hier eine Erklärung: Es gibt viele Möglichkeiten, seine Ressourcen, und seine Flotte mehr oder weniger sicher vor Übergriffen gegnerischer Flotten zu schützen. Dabei sind manche fast zu 100% sicher, andere jedoch sehr unsicher.<br>
-Die erste Methode des Savens ist das „Stationieren-Rückruf“ Saven. Dazu schickt der Spieler seine Flotte auf einen eigenen Planeten in seiner Nähe mit dem Auftrag zu stationieren. Diesen Flug bricht er dann nach einiger Zeit ab, da der Rückflug einer Stationierung nicht in der Phalanx ersichtlich ist. Diese Savemethode ist nicht 100% sicher, aber, wenn man nicht erst im letzten Moment abbricht, sondern schon einige Stunden vorher, nur mit enormer Mühe abzufangen.</p>
-<p>Eine sehr weit verbreitete Methode, die Flotte zu saven ist der Flug von einem Mond zu einem Trümmerfeld. Dieser ist an sich relativ sicher, da er nicht in der Phalanx zu sehen ist. Jedoch gibt es Möglichkeiten, den genauen Zeitpunkt der Rückkehr der Flotte festzustellen, in dem man kontrolliert, wann das Trümmerfeld von den Recyklern der Flotte abgebaut wird. Eine Möglichkeit, diese Saveart sicherer zu machen ist, vor der eigentlichen Flotte so genannte Schattenrecykler zu schicken, die das Trümmerfeld schon eher abbauen, so dass die Zeit ein wenig verschleiert wird. Eine weitere Art, diesen Flug sicher zu machen ist, wenn man an einem Planeten, der vollkommen verteidigungsfrei ist das Trümmerfeld abbaut, da dieses nie in der Galaxieansicht angezeigt wird, weil es leer, aber trotzdem anfliegbar ist.</p>
-<p>Die wohl sicherste Methode um die Flotte zu saven, ist das Stationieren von Mond zu Mond. Dieser Flug kann in keiner Phalanx gesehen werden, und auch das Beobachten von TFs ist hierbei sinnlos. Die einzige Möglichkeit, diesen Flug abzufangen, ist, einen der Monde zu zerstören, was durch große Monde fast unmöglich, bzw. sehr unwahrscheinlich/teuer wird.</p>
+<h3>Proteger naves usando tácticas de guardar flota:</h3>
+<p>Las defensas pesadas pueden hacer que los saqueadores duden en atacar naves estacionadas en un planeta. En algunos universos, las defensas destruidas no contribuyen al campo de escombros.</p>
+<p>Los misiles se pueden usar para eliminar defensas, ya que el único objetivo de los misiles interplanetarios es destruir defensas. Los misiles son de un solo uso, a diferencia de las naves. Un ataque bien planeado, con varios misiles interplanetarios, reduce el peligro de perder una flota. Los misiles interceptores son menos costosos y contrarrestan la amenaza de misiles.</p>
+<p>Un aumento en el nivel de investigación de espionaje te permite sondear los planetas y defensas de otros jugadores.</p>
+<p>Es mejor que ningún jugador pueda ver todo lo que tienes mientras estás desconectado. Los saqueadores solo pueden sondear y robar los recursos en el planeta, no la carga que está volando por el espacio. Los enemigos pueden decidir que eres débil y pobre, y por lo tanto no molestarse en atacarte.</p>
+<h3>Guardar flota:</h3>
+<p>Guardar flota es un componente clave de la estrategia del juego. Funciona enviando tu flota a un planeta cercano en una misión de transferencia, verificando el tiempo para que puedas estar en línea para "regresar" el vuelo antes de que llegue al destino.</p>
+<p>Otra forma de proteger la flota es enviarla a una luna o un campo de escombros. Los enemigos no pueden usar el sensor falange para escanear lunas para encontrar la flota.</p>
 BODY;
-
-$LNG['questions'][2][2]['title']	= 'Allianzkampfsystem';
-$LNG['questions'][2][2]['body']		= <<<BODY
-<h3>Angreifen mit dem AKS</h3>
-<p>Damit ihr gemeinsam angreifen könnt, musst du zuerst einmal eine Flotte mit dem Auftrag "Angreifen" auf das Ziel eures Angriffs abschicken. Nachdem der Angriff gestartet wurde, kannst du dann im Flottenmenü über den Button "Verband" deine Flotte in einen Flottenverband umwandeln. Im Flottenverbandsmenü hast du dann die Möglichkeit den Verband umzubenennen und neue Spieler in den Verband einzuladen, wobei der Spieler der den Angriff gestartet automatisch mit eingeladen ist Nun müssen sich nur noch alle gewünschten Flotten anschließen und euer Flottenverband ist komplett. Dazu muss jeder eingeladene Spieler beim Versenden seiner eigenen Schiffe die richtigen Zielkoordinaten angeben, den Auftrag "Verbandsangriff" auswählen und die Flotte abschicken. Der Verband fliegt immer so lange, wie die langsamste Teilflotte benötigt. Schnellere Flotten verändern die Restflugzeit nicht, wenn sie dem Verband beitreten. Langsamere Flotten erhöhen die Restflugzeit allerdings auf ihre eigene Flugzeit. Zu beachten ist noch, dass maximal 5 Spieler einen gemeinsamen Angriff fliegen können und insgesamt maximal 16 einzelne Flotten in einem Verband fliegen dürfen. Eine Flotte, die sich einem Verband anschließt, darf dessen Restflugzeit um maximal 30% erhöhen. Wenn die Restflugzeit also 100 Minuten beträgt, darf eine Flotte, die sich dem Verband zu diesem Zeitpunkt anschließen möchte, eine maximale Flugzeit von 130 Minuten haben.<br>
-<b>Achtung:</b> wenn die Flotte der Verbandsgründers zurückgerufen wird, fliegen die anderen trotzdem weiter!</p>
-<h3>Verteidigen mit dem AKS</h3>
-<p>Wenn du von einer feindlichen Flotte angegriffen wirst, hast du die Möglichkeit, dir von befreundeten Spielern helfen zu lassen, egal ob der Angreifer einfach zu stark für dich alleine ist, oder du einfach weniger Verluste und mehr Gewinn bei einem Abfang anstrebst. Damit dir befreundete Spieler helfen können, müssen sie dir ihre Flotte zur Unterstützung schicken. Das können alle Spieler sein, die entweder deiner Allianz angehören oder auf deiner Buddyliste stehen. Ist das der Fall, können sie in ihrem Flottenmenü die Koordinaten auswählen, auf denen du angegriffen wirst, einstellen wie lange sie ihre Flotten bei dir stationieren wollen und dann mit dem Auftrag "Halten" losfliegen. Zusätzlich zu den Deuteriumkosten für den Flug fallen je nach Größe der Flotte und Dauer des Aufenthalts weitere Kosten an, die direkt beim Start abgebucht werden. Während befreundete Flotten bei dir stationiert sind, nehmen sie an allen Kämpfen auf diesem Planeten oder Mond teil. Sie tauchen auf einem Spionagebericht so auf, als wären es deine eigenen Schiffe. Es ist also wichtig, die haltenden Flotten so zu schicken, dass sie relativ knapp vor der Angreiferflotte ankommen, um bei einem eventuellen Savecan nicht entdeckt zu werden. Spieler die ihre Flotten zur Unterstützung geschickt haben, können diese jederzeit im Flottenmenü zurückrufen. Wird diese Möglichkeit nicht genutzt, wartet die Flotte einfach ihre eingestellte Haltezeit ab und fliegt dann wieder zu ihrem Besitzer zurück.</p>
-<h3>Deuteriumsverbrauch pro 1 Stunde halten:</h3>
-<p>Kleiner Transporter: 5<br>
-Großer Transporter: 5<br>
-Leichter Jäger: 2<br>
-Schwerer Jäger: 7<br>
-Kreuzer: 30<br>
-Schlachtschiff: 50<br>
-Kolonieschiff: 100<br>
-Recycler: 30<br>
-Spionagesonde: 1/10<br>
-Bomber: 100<br>
-Zerstörer: 100<br>
-Todesstern: 1/10</p>
-BODY;
-
-$LNG['questions'][2][3]['title']	= 'Monde';
+$LNG['questions'][2][3]['title']	= 'Lunas';
 $LNG['questions'][2][3]['body']		= <<<BODY
-<p>Ein Mond kann entstehen wenn ein Trümmerfeld von mindestens 100.000 Units, das ist dann eine 1%ige Chance Mondchance, entsteht. Maximum sind aber nur 20% Mondchance egal wie groß das TF dann ist.</p>
-<h3>Allgemeines</h3>
-<p>Monde kann man umbenenne wie Planeten nur dass hinter dem Namen immer ein „(Mond“ stehen bleibt. Man kann maximal einen Mond pro Planet haben. Monde haben den nutzen dass man von ihnen Unsichtbar für andere Saven kann, also sollte ein Mond schon relativ früh geschossen werden. Auf dem Mond kann man Roboterfabrik, Raumschiffwerft, Metallspeicher, Kristallspeicher, Deuteriumtank, Allianzdepot, Mondbasis, Sensorphalanx und Sprungtor bauen.</p>
-<h3>Mondschuss</h3>
-<p>Als Mondschuss bezeichnet man das absichtliche zerstören von Schiffen um ein Trümmerfeld zu erzeugen. Meist benützt man dafür Leichte Jäger, genau 1667 damit man eine 20%ige Chance bekommt. Man benutzt LJ weil sie relativ leicht zu zerstören sind und weil sie ganz nahe an die 20% Chance dran kommen. Man muss bei Mondschüssen beachten dass wenn der Stärkere beim Schwächeren LJ zerstört nur der Schwächere das TF abbauen darf. Und wenn der Schwächere den Stärkeren mit zu zerstörenden Schiffen angreift dann darf wieder nur der Schwächere das TF abbauen, sonst wäre es Pushen.</p><p>In einem DiTF Uni ist es besser wenn man Verteidigung baut und diese dann in mehreren Wellen plätten lässt um mehrere Mondversuche nacheinander machen zu können. Dazu empfehlen sich 3334 Raketenwerfer oder 3334 Leichte Lasergeschütze.</p><p>Wenn ein Mond entstanden ist steht im KB „Die enormen Mengen an freiem Metall und Kristall ziehen sich an und formen einen Trabanten um den Planeten.</p><p>Mondwahrscheinlichkeit zwischen 1% und 19% ’ Zufällige Größe Mondwahrscheinlichkeit beträgt 20% ’ Mond mit mehr als 8000km Durchmesser.<br>Ein Mond kann nie größer als 8944 km im Durchmesser sein.</p>
-<h3>Gebäude und Bebauung</h3>
-<p>Gebäude sind wie oben schon geschrieben Roboterfabrik, Raumschiffwerft, Metallspeicher, Kristallspeicher, Deuteriumtank, Allianzdepot, Mondbasis, Sensorphalanx und Sprungtor. Man sollte allerdings keinesfalls Die Tanks und Speicher bauen, da diese auf dem Mond keinen sinn haben, weil eh nichts produziert wird. Raumschiffswerft sollte man auch nicht unbedingt bauen da es auch unnütz ist am Mond Schiffe und Verteidigung zu bauen, wegen der langen Bauzeiten. Beim Allianzdepot ist man strittig ob es sinnvoll ist es zu baun, aber es belebt eben wertvolle Felder.<br>
-Die drei besonderen Gebäude auf dem Mond sind:</p>
-<ul><li><p><b>Mondbasis</b><br>Sie dient dazu neue bebaubare Felder zu schaffen, pro ausgebauter Stufe bekommt man 3 neue Felder auf dem Mond, wobei eines	die Basis der nächsten Stuf besetzten sollte.</p></li>
-<li><p><b>Sensorphalanx</b><br>Er dient dazu auf Feindlichen Planeten nachschauen zu können was für Schiffsbewegungen er gerade hat, allerdings gilt das für Planeten und nicht für Monde. Pro ausgebauter Stufe erhöht sich die Reichweite.</p></li>
-<li><p><b>Sprungtor</b><br>Mit dem Sprungtor kann man Schiffe ohne Zeitverlust von einem Mond zu einem anderen Transferieren, jedoch kann man keine Ressourcen mitnehmen. Zwischen 2 Sprüngen muss eine 1 vergehen, sonst überhitzt sich das Sprungtor.</p></li></ul>
-<p>Hier folgt eine Liste mit der optimalen Bebauung eines Mondes:<br>
-<b>Legende:</b><br>
-MB – Mondbasis<br>
-SP – Sensorphalanx<br>
-ST – Sprungtor<br>
-RB – Roboterfabrik</p>
-<p>MB1 – RB1 – RB2 – MB2 – SP1 – RB3 – MB3 – SP2 – RB4 – MB4 – SP3 – RB5 – MB5 – SP4 – RB6 – MB6 – SP5 – SP6 – MB7 – SP7 – SP8 – MB8 – ST1<br>
-Man kann nach dieser Liste SP weiter ausbauen wenn man will bzw. genug Ressourcen hat. Man kann auch Roboterfabrik wieder etwas abreisen und dann SP weiter ausbauen!</p>
-<h3>Zerstörung</h3>
-<p>Ein Mond kann auch wieder zerstört werden, die geht allerdings nur mit Rips (Todesssternen).</p>
-<p>Im Auftrags Menü wählt man statt „Angreifen“ „Zerstören“ aus. Es muss aber zuerst die auf dem Mond stehende Fleet durch den Rip zerstört werden bevor er versuchen kann den Mond zu zerstören. Die Rips können natürlich auch wenn sie den Kampf überstanden haben bei der Zerstörung des Monds selbst zerstört werden. Die Besonderheit bei der Mondzerstörung, es entsteht kein TF!</p>
-<h3>Mondangriffe mit Todessternen:</h3>
-<p>Die Chance auf Mondzerstörung ist „(100 - Wurzel(Mondgröße)) * Wurzel(Anzahl RIPs)“. Die Chance, dass die zum Angriff geschickten TS beim Mondangriff zerstört werden, beträgt „Wurzel(Mondgröße) / 2“. Je größer der Mond, umso riskanter also der Versuch seiner Zerstörung.</p>
-<h3>Mondchance und Mondgröße:</h3>
-<p>100.000 TF-Einheiten ergeben 1% Mondwahrscheinlichkeit. Maximale Mondwahrscheinlichkeit: 20%. Seit einer Änderung haben alle Mondbesitzer die maximale Anzahl an bebaubaren Feldern (79) zur Verfügung. <br>
-Vormals errechnete sich dies wie folgt:<br>
-Maximale Felder = ABRUNDEN((Durchmesser des Mondes/1000)2)<br>
-Größtmöglicher Mond: 8944 km Durchmesser, also 79 Felder.</p>
+<p>Una luna puede formarse cuando un campo de escombros tiene al menos 100,000 unidades. Tienes suerte con una tirada de dados. La configuración predeterminada del universo es una probabilidad del 1% para una luna. Las posibilidades máximas, sin embargo, son solo del 20%, sin importar qué tan grande sea el campo de escombros.</p>
+<h3>Información general de lunas</h3>
+<p>Las lunas pueden ser nombradas, y el nombre predeterminado es "Luna". Puedes tener más de una luna, pero solo una por planeta.</p>
+<h3>Tamaños de lunas</h3>
+<p>Una luna puede generarse dependiendo del número de unidades destruidas en combate. Destruir 1667 cargueros ligeros/cazadores tiene una probabilidad del 20% de generar una luna. Los cargueros ligeros son recomendados porque son fácilmente destruidos.</p>
+<p>El planeta objetivo debe tener defensas suficientes para destruir las naves. Construye al menos 3334 lanzamisiles o torretas láser ligeras.</p>
+<p>La cantidad de destrucción de la batalla determinará el tamaño de la luna.</p>
+<p>La probabilidad para lunas entre 1% y 19% es aleatoria, mientras que una probabilidad del 20% significa que la luna tendrá un diámetro promedio de 8000 km. Las lunas regulares nunca exceden los 8944 km de diámetro.</p>
+<h3>Construcción</h3>
+<p>En las lunas, puedes construir almacenamiento de recursos, una fábrica de robots o nanobots, una base lunar, un sensor falange, un depósito de alianza, un astillero y un portal de salto. El astillero no es muy útil porque puedes transferir naves rápidamente desde el planeta. El depósito de alianza ayuda a defender la luna.</p>
+<p>Los tres edificios específicos en la luna son:</p>
+<ul><li><p><b>Base lunar</b><br>Utilizada para crear nuevos campos, y cada nivel añade 3 campos adicionales.</p></li>
+<li><p><b>Sensor falange</b><br>Utilizado para ver actividades de flotas enemigas hacia y desde planetas, pero no puede escanear lunas. Tiene un rango limitado de galaxias, pero puede ser mejorado para extender el rango.</p></li>
+<li><p><b>Portales de salto</b><br>Utilizados para teletransportar una flota de una luna a otra instantáneamente. No puede ser usado para transferir recursos.</p></li></ul>
+<p>Aquí hay una lista del desarrollo ideal de una luna:<br>
+<b>Leyenda:</b><br>
+BL — Base lunar<br>
+SF — Falange<br>
+PS — Portal de salto<br>
+FR — Fábrica de robots</p>
+<p>BL1 — FR1 — FR2 — BL2 — SF1 — FR3 — BL3 — SF2 — FR4 — BL4 — SF3 — FR5 — BL5 — SF4 — FR6 — BL6 — SF5 — SF6 — BL7 — SF7 — SF8 — BL8 — PS1<br>
+Este orden solo se sugiere si eres nuevo, porque por supuesto un jugador experto tiene sus propias ideas.<p>
+<h3>Destrucción de lunas:</h3>
+<p>Las lunas pueden ser destruidas por un tipo de nave, llamada fortaleza de batalla. En el menú de flota, selecciona una fortaleza de batalla y apunta a una luna, luego elige destruir para el tipo de misión. Las misiones de destrucción no están garantizadas de tener éxito. Mientras más grande sea la luna, más fortalezas de batalla se requieren.</p>
 BODY;
-
-$LNG['questions'][2][4]['title']	= 'Allianzen';
+$LNG['questions'][2][4]['title']	= 'Alianza';
 $LNG['questions'][2][4]['body']		= <<<BODY
-<h3>Wie gründe ich eine Ally?</h3>
-<p>Um eine Allianz zu gründen, klicke im Menü links auf "Allianzen". Danach klicke auf "Eigene Allianz gründen". Im folgenden Menü musst du einen "Allianz-Tag" und einen Allianz-Namen eingeben, das "Allianz-Tag" ist die Abkürzung für deine Allianz. Als Beispiel: Wenn du deine Allianz "Die Top Ally" nennst, wäre ein mögliches Allianz-Tag "DTA".<br>
-Beachte bitte, dass keine Sonderzeichen erlaubt sind, nur Buchstaben, Ziffern und Leerzeichen können verwendet werden.<br>
-Sobald du das Allianz-Tag und einen Namen eingegeben hast, klicke auf "Gründen".<br>
-Wenn es schon eine Allianz mit diesem Name oder Tag gibt, bekommst du eine dementsprechende Meldung, in diesem Fall musst du dir entweder ein anderes Allianz-Tag oder einen anderen Namen überlegen.<br>
-Wurde die Allianz erfolgreich gegründet, bekommst du das auch angezeigt. Klickst du dann auf "Weiter", kommst du in das noch ganz leere Allianzmenü, das du ab jetzt über einen Klick auf "Allianzen" im linken Menü erreichst. Dort siehst du mehrere Auswahlmöglichkeiten und Informationen, zuoberst den Tag und Namen deiner Allianz.</p>
-<p>Darunter findest du folgende Links:<br>
-"Mitgliederliste": In der Mitgliederliste siehst du alle Mitglieder deiner Allianz, mit ihren Punkten, Koordinaten des Heimatplaneten und dem Datum ihres Beitritts, sowie ihrem Onlinestatus. Mit einem Klick auf die Spaltenüberschriften kannst du die Sortierreihenfolge verändern.<br>
-"Ihr Rang": Hier steht dein Rangname, daneben findest du den Link zum Allianzverwaltungsmenü, dazu gleich mehr.<br>
-"Rundmail": Mit einem Klick auf "Rundmail versenden" kannst du eine Nachricht an die gesamte Allianz oder auch nur an bestimmte Ränge senden.</p>
-<h3>Das Allianzverwaltungsmenü</h3>
-<p>Ganz oben im Allianzverwaltungsmenü gibt es den Link "Rechte einstellen". Hier kannst du die Rechte für die verschiedenen Ränge einstellen, zB das Recht, die Allianz aufzulösen oder Rundmails zu verschicken. Darunter findest du den Link "Mitglieder verwalten". Hier kannst du Mitglieder aus der Allianz werfen, ihnen Ränge zuweisen und auch sehen, wieviele Tage sie schon nicht mehr in ihren Accounts eingeloggt waren. Mit den zwei Buttons unter dem "Mitglieder verwalten"-Link kannst du das Allianz-Tag und den Allianz-Namen ändern.<br>
-Unter "Textverwaltung" kannst du die Allianztexte ändern. Den externen Text sieht jeder OGamer, den internen Text nur Mitglieder deiner Allianz. Der Bewerbungstext ist eine Art Vorlage für Leute, die sich für deine Allianz bewerben.<br>
-Bei den Einstellungen kannst du ein Bild verlinken, dass auf der Allianzseite dargestellt wird, sowie einen Link zu einem Allianzforum eingeben, falls du eines hast. Außerdem kannst du festlegen, ob Bewerbungen möglich sind oder nicht, und welchen Rangnamen du als Gründer verwenden willst. Wenn du dort nichts eingibst, ist dein Rangname "Gründer".<br>
-Mit "Allianz auflösen" kannst du logischerweise die Allianz auflösen, und mit "Allianz abtreten/übernehmen" kannst du die Allianz an ein anderes Allianzmitglied übergeben, dieses bekommt dann den Gründerstatus.</p>
+<h3>Formar una alianza</h3>
+<p>Para formar una nueva alianza, navega al menú de alianza y selecciona "Crear alianza". Elige tu abreviación de etiqueta corta y proporciona un nombre para tu alianza.</p>
+<p>Para gestionar la alianza encontrarás los siguientes enlaces:</p>
+<p>Miembros: ver la lista de todos los miembros</p>
+<p>Tu rango: Aquí encuentra tu rango en la alianza</p>
+<p>Mensaje global: enviar un mensaje de difusión a todos los jugadores en la alianza</p>
+<h3>Gestionar tu alianza:</h3>
+<p>Editar la descripción de la alianza, editar rangos, editar los miembros</p>
+<p>Actualizar texto externo, una breve descripción de tu alianza para todos los jugadores que visiten la página de la alianza.</p>
+<p>Actualizar texto interno, contenido exclusivo solo visible para los miembros de la alianza. Por ejemplo enemigos actuales, aliados, coordenadas objetivo, etc.</p>
+<p>También en la configuración, puedes editar la imagen mostrada en la página de la alianza.</p>
+<h3>Disolver una alianza:</h3>
+<p>Esta opción te permite eliminar una alianza. Si deseas detenerla sin eliminar, considera transferir la propiedad a otro jugador en su lugar.</p>
+BODY;
+$LNG['questions'][2][5]['title']	= 'Pizzabits';
+$LNG['questions'][2][5]['body']		= <<<BODY
+<h3>¿Qué son los pizzabits?</h3>
+<p>Los pizzabits son el cuarto recurso del juego. Puedes gastarlos en oficiales, un comerciante de naves o un vendedor ambulante. Ninguna de esas cosas es central para la jugabilidad. Los edificios, naves, defensas e investigación no requieren pizzabits.</p>
+<p>Hay dos formas de obtener pizzabits: de misiones de expedición y depósitos. Un depósito de 1 pizza se convierte en 10 pizzabits. Y no pueden ser transferidos entre jugadores o convertidos de vuelta a PIZZA.</p>
+<p>Las compras de pizzabits solo duran para un universo o temporada. No se transferirán a una nueva temporada.</p>
+<p>Se requiere una cuenta Hive vinculada para depositar PIZZA y ganar recompensas. Por favor contáctanos en Discord para aprender cómo crear una cuenta Hive.</p>
 BODY;
