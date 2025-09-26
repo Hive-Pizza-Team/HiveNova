@@ -51,6 +51,18 @@ class ShowOfficierPage extends AbstractGamePage
 			':newTime'	=> $USER[$resource[$Element]],
 			':userId'	=> $USER['id']
 		));
+
+		$sql    = 'INSERT INTO %%DM_TRANSACTIONS%% SET
+					timestamp = NOW(),
+					user_id = :user_id,
+					amount_spent = :amount_spent,
+					item_purchased_id = :item_purchased_id;';
+
+		Database::get()->insert($sql, array(
+			'user_id'		=> $USER['id'],
+			'amount_spent'	=> $costResources[921],
+			'item_purchased_id' => $Element
+		));
 	}
 
 	public function UpdateOfficier($Element)
@@ -80,6 +92,18 @@ class ShowOfficierPage extends AbstractGamePage
 		Database::get()->update($sql, array(
 			':newTime'	=> $USER[$resource[$Element]],
 			':userId'	=> $USER['id']
+		));
+
+		$sql    = 'INSERT INTO %%DM_TRANSACTIONS%% SET
+			timestamp = NOW(),
+			user_id = :user_id,
+			amount_spent = :amount_spent,
+			item_purchased_id = :item_purchased_id;';
+
+		Database::get()->insert($sql, array(
+			'user_id'		=> $USER['id'],
+			'amount_spent'	=> $costResources[921],
+			'item_purchased_id' => $Element
 		));
 	}
 	
