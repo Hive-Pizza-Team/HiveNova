@@ -248,7 +248,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 		if ($targetPlanet != Config::get()->max_planets + 1)
 		{
 			$db = Database::get();
-            $sql = "SELECT u.id, u.urlaubs_modus, u.user_lastip, u.authattack,
+            $sql = "SELECT u.id, u.urlaubs_modus, u.onlinetime, u.user_lastip, u.authattack,
             	p.destruyed, p.der_metal, p.der_crystal, p.destruyed
                 FROM %%USERS%% as u, %%PLANETS%% as p WHERE
                 p.universe = :universe AND
@@ -271,7 +271,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 				$this->sendJSON($LNG['fl_error_no_moon']);
 			}
 
-			if ($targetPlanetType != 2 && !empty($planetData['urlaubs_modus']))
+			if ($targetPlanetType != 2 && isVacationMode($planetData) && !isLongtermInactive($planetData))
 			{
 				$this->sendJSON($LNG['fl_in_vacation_player']);
 			}

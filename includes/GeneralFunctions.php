@@ -468,6 +468,21 @@ function isVacationMode($USER)
 	return ($USER['urlaubs_modus'] == 1) ? true : false;
 }
 
+function isLongtermInactive($USER) {
+	if (isset($USER['onlinetime']) && $USER['onlinetime'] < TIMESTAMP - INACTIVE_LONG) {
+		return true;
+	}
+	return false;
+}
+
+function isInactive($USER) {
+	if (isset($USER['onlinetime']) && $USER['onlinetime'] < TIMESTAMP - INACTIVE) {
+		return true;
+	}
+	return false;
+}
+
+
 function clearGIF()
 {
 	header('Cache-Control: no-cache');
