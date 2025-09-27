@@ -177,6 +177,19 @@ class ShowTraderPage extends AbstractGamePage
 		if ($tradeSum > 0)
 		{
 			$USER[$resource[921]]	-= Config::get()->darkmatter_cost_trader;
+
+			# log the dm transaction
+			$sql    = 'INSERT INTO %%DM_TRANSACTIONS%% SET
+			timestamp = NOW(),
+			user_id = :user_id,
+			amount_spent = :amount_spent,
+			memo = :memo;';
+
+			Database::get()->insert($sql, array(
+				'user_id'		=> $USER['id'],
+				'amount_spent'	=> Config::get()->darkmatter_cost_trader,
+				'memo' => 'trader'
+			));
 		}
 		
 		$this->printMessage($LNG['tr_exchange_done'], array(array(
