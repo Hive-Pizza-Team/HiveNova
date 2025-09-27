@@ -108,6 +108,27 @@ class MissionFunctions
 
 		Database::get()->update($sql, $param);
 
+		if (isset($param[':planetId']) && isset($param[':darkmatter']) && $param[':darkmatter'] > 0) {
+			# get user ID
+			$sql = 'SELECT id_owner FROM %%PLANETS%% WHERE p.`id` = :planetId';
+			$userID = Database::get()->selectSingle($sql, array(
+				':planetId' => $param[':planetId'])
+			, 'id_owner');
+
+			# log the dm transaction
+			$sql    = 'INSERT INTO %%DM_TRANSACTIONS%% SET
+						timestamp = NOW(),
+						user_id = :user_id,
+						amount_received = :amount_received,
+						memo = :memo;';
+
+			Database::get()->insert($sql, array(
+				'user_id'		=> $userID,
+				'amount_received'	=> $param[':darkmatter'],
+				'memo' => 'expedition'
+			));
+		}
+
 		$this->KillFleet();
 	}
 	
