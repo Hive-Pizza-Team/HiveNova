@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-define('DB_VERSION_REQUIRED', 9);
+define('DB_VERSION_REQUIRED', 10);
 define('DB_NAME'			, $database['databasename']);
 define('DB_PREFIX'			, $database['tableprefix']);
 
@@ -65,5 +65,6 @@ $dbTableNames	= array(
 	'VARS'	 			=> DB_PREFIX.'vars',
 	'VARS_RAPIDFIRE'	=> DB_PREFIX.'vars_rapidfire',
 	'VARS_REQUIRE'	 	=> DB_PREFIX.'vars_requriements',
+	'DM_TRANSACTIONS'	=> DB_PREFIX.'dm_transactions'
 );
 // MOD-TABLES
