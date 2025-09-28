@@ -271,7 +271,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 				$this->sendJSON($LNG['fl_error_no_moon']);
 			}
 
-			if ($targetPlanetType != 2 && isVacationMode($planetData) && !isLongtermInactive($planetData))
+			if ($targetPlanetType != 2 && isVacationMode($planetData))
 			{
 				$this->sendJSON($LNG['fl_in_vacation_player']);
 			}

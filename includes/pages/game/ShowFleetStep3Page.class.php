@@ -304,7 +304,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 			)));
 		}
 
-		if ($targetMission != 8 && IsVacationMode($targetPlayerData) && !isLongtermInactive($targetPlayerData)) {
+		if ($targetMission != 8 && IsVacationMode($targetPlayerData)) {
 			$this->printMessage($LNG['fl_target_exists'], array(array(
 				'label'	=> $LNG['sys_back'],
 				'url'	=> 'game.php?page=fleetStep1'

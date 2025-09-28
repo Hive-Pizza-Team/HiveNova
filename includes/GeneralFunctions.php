@@ -68,15 +68,15 @@ function userStatus($data, $noobprotection = false)
 		$Array[] = 'banned';
 	}
 
-	if (isset($data['urlaubs_modus']) && $data['urlaubs_modus'] == 1) {
+	if (isVacationMode($data)) {
 		$Array[] = 'vacation';
 	}
 
-	if (isset($data['onlinetime']) && $data['onlinetime'] < TIMESTAMP - INACTIVE_LONG) {
+	if (isLongtermInactive($data)) {
 		$Array[] = 'longinactive';
 	}
 
-	if (isset($data['onlinetime']) && $data['onlinetime'] < TIMESTAMP - INACTIVE) {
+	if (isInactive($data)) {
 		$Array[] = 'inactive';
 	}
 
@@ -464,8 +464,11 @@ function getRandomString()
 }
 
 function isVacationMode($USER)
-{
-	return ($USER['urlaubs_modus'] == 1) ? true : false;
+{	
+	if (!isLongtermInactive($USER) && $USER['urlaubs_modus'] == 1) {
+		return true;
+	}
+	return false;
 }
 
 function isLongtermInactive($USER) {

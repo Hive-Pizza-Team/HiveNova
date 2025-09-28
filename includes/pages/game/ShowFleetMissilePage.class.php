@@ -82,7 +82,7 @@ class ShowFleetMissilePage extends AbstractGamePage
 
 		if (Config::get()->adm_attack == 1 && $targetUser['authattack'] > $USER['authlevel'])
 			$error = $LNG['fl_admin_attack'];	
-		elseif(isVacationMode($targetUser) && !isLongtermInactive($targetUser))
+		elseif(isVacationMode($targetUser))
 			$error = $LNG['fl_in_vacation_player'];
 			
 		$sql = "SELECT total_points FROM %%STATPOINTS%% WHERE stat_type = '1' AND id_owner = :ownerId;";
