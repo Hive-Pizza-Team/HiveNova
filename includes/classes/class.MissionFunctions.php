@@ -110,7 +110,7 @@ class MissionFunctions
 
 		if (isset($param[':planetId']) && isset($param[':darkmatter']) && $param[':darkmatter'] > 0) {
 			# get user ID
-			$sql = 'SELECT id_owner FROM %%PLANETS%% WHERE p.`id` = :planetId';
+			$sql = 'SELECT id_owner FROM %%PLANETS%% WHERE `id` = :planetId';
 			$userID = Database::get()->selectSingle($sql, array(
 				':planetId' => $param[':planetId'])
 			, 'id_owner');
