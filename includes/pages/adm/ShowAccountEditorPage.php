@@ -596,7 +596,7 @@ function ShowAccountEditorPage()
 					$P	=	$GLOBALS['DATABASE']->getFirstRow("SELECT galaxy,`system`,planet,planet_type FROM ".PLANETS." WHERE `id` = '".$id."' AND `universe` = '".Universe::getEmulated()."';");
 					if ($P['planet_type'] == '1')
 					{
-						if (PlayerUtil::checkPosition(Universe::getEmulated(), $galaxy, $system, $planet,$P['planet_type']))
+						if (!PlayerUtil::checkPosition(Universe::getEmulated(), $galaxy, $system, $planet,$P['planet_type']))
 						{
 							$template->message($LNG['ad_pla_error_planets3'], '?page=accounteditor&edit=planets');
 							exit;
@@ -605,7 +605,7 @@ function ShowAccountEditorPage()
 						$GLOBALS['DATABASE']->query ("UPDATE ".PLANETS." SET `galaxy` = '".$galaxy."', `system` = '".$system."', `planet` = '".$planet."' WHERE `id` = '".$id."' AND `universe` = '".Universe::getEmulated()."';");
 
 					} else {
-						if(PlayerUtil::checkPosition(Universe::getEmulated(), $galaxy, $system, $planet, $P['planet_type']))
+						if(!PlayerUtil::checkPosition(Universe::getEmulated(), $galaxy, $system, $planet, $P['planet_type']))
 						{
 							$template->message($LNG['ad_pla_error_planets5'], '?page=accounteditor&edit=planets');
 							exit;
