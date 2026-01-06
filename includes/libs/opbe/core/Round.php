@@ -93,23 +93,58 @@ class Round
         }       
         // here we add to fire manager each fire shotted from an defender's ShipType to all attackers
         $attackersMerged = $this->attackers->getEquivalentFleetContent();
+        $defenderFirepowerBreakdown = array();
+        $totalDefenderFirepower = 0;
+        
         foreach ($this->defenders->getIterator() as $idPlayer => $player)
         {
             foreach ($player->getIterator() as $idFleet => $fleet)
             {
                 foreach ($fleet->getIterator() as $idShipType => $shipType)
                 {
-                    $this->fire_d->add(new Fire($shipType, $attackersMerged));
+                    $fire = new Fire($shipType, $attackersMerged);
+                    $this->fire_d->add($fire);
+                    
+                    // DEBUG: Track defender firepower breakdown
+                    $unitId = $shipType->getId();
+                    $firepower = $fire->getAttackerTotalFire();
+                    $shots = $fire->getAttackerTotalShots();
+                    $defenderFirepowerBreakdown[$unitId] = array(
+                        'count' => $shipType->getCount(),
+                        'power' => $firepower,
+                        'shots' => $shots,
+                        'powerPerUnit' => $shipType->getCount() > 0 ? $firepower / $shipType->getCount() : 0
+                    );
+                    $totalDefenderFirepower += $firepower;
                 }
             }
-        }        
+        }
+        
+        // DEBUG: Log total defender firepower breakdown
+        log_comment("*** DEBUG DEFENDER FIREPOWER BREAKDOWN - Round " . $this->number . " ***");
+        log_comment("Total Defender Firepower: $totalDefenderFirepower");
+        foreach ($defenderFirepowerBreakdown as $unitId => $data) {
+            $isMissileLauncher = ($unitId == 401) ? " [MISSILE LAUNCHER]" : "";
+            log_comment("Unit ID: $unitId$isMissileLauncher, Count: " . $data['count'] . ", Total Power: " . $data['power'] . ", Power/Unit: " . round($data['powerPerUnit'], 2) . ", Shots: " . $data['shots']);
+        }
+        log_comment("*** END DEFENDER FIREPOWER BREAKDOWN ***");
+        
         //--------------------------------------------------------------------------//
 
         //------------------------- Sending the fire -------------------------------//
         echo "***** firing to defenders *****<br>";
         $this->physicShotsToDefenders = $this->defenders->inflictDamage($this->fire_a);
+        
+        // DEBUG: Log total defender firepower before applying to attackers
+        $totalDefenderFire = $this->fire_d->getAttackerTotalFire();
+        $totalDefenderShots = $this->fire_d->getAttackerTotalShots();
+        log_comment("*** DEBUG BEFORE DEFENDER FIRE - Round " . $this->number . " - Total Firepower: $totalDefenderFire, Total Shots: $totalDefenderShots ***");
+        
         echo "***** firing to attackers *****<br>";
         $this->physicShotsToAttachers = $this->attackers->inflictDamage($this->fire_d);
+        
+        // DEBUG: Log after fire application
+        log_comment("*** DEBUG AFTER DEFENDER FIRE - Round " . $this->number . " - Fire applied to attackers ***");
         //--------------------------------------------------------------------------//
 
         //------------------------- Cleaning ships ---------------------------------//

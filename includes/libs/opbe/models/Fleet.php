@@ -136,15 +136,44 @@ class Fleet extends IterableUtil
     public function inflictDamage(FireManager $fires)
     {
         $physicShots = array();
+        $totalShotsReceived = 0;
+        $totalPowerReceived = 0;
+        
+        // DEBUG: Track total incoming fire
+        foreach ($fires->getIterator() as $fire) {
+            $totalShotsReceived += $fire->getAttackerTotalShots();
+            $totalPowerReceived += $fire->getAttackerTotalFire();
+        }
+        
+        if ($GLOBALS['round'] <= 1) {
+            log_comment("*** DEBUG Fleet::inflictDamage - Fleet ID: " . $this->id . ", Total Incoming Shots: $totalShotsReceived, Total Incoming Power: $totalPowerReceived ***");
+        }
+        
         //doesn't matter who shot first, but who receive first the damage
         foreach ($fires->getIterator() as $fire)
         {
+            $firingUnitId = $fire->getId();
+            $firePower = $fire->getPower();
+            $fireShots = $fire->getAttackerTotalShots();
+            $targetFleetTotal = $this->getTotalCount();
+            
+            // DEBUG: Log fire details
+            if ($firingUnitId == 401 || $GLOBALS['round'] <= 1) {
+                log_comment("DEBUG Fleet::inflictDamage - Fire from Unit ID: $firingUnitId, Power: $firePower, Total Shots: $fireShots, Target Fleet Total: $targetFleetTotal");
+            }
+            
             $tmp = array();
             foreach ($this->getOrderedIterator() as $idShipTypeDefender => $shipTypeDefender)
             {
                 $idShipTypeAttacker = $fire->getId();
                 log_comment( "---- firing from $idShipTypeAttacker to $idShipTypeDefender ----");
                 $xs = $fire->getShotsFiredByAllToDefenderType($shipTypeDefender, true);
+                
+                // DEBUG: Log shot distribution
+                if ($firingUnitId == 401 || $GLOBALS['round'] <= 1) {
+                    log_comment("DEBUG Shot Distribution - Fire from $firingUnitId to Target $idShipTypeDefender: Shots=" . $xs->result . ", Rest=" . $xs->rest);
+                }
+                
                 $ps = $shipTypeDefender->inflictDamage($fire->getPower(), $xs->result);
                 log_var('$xs',$xs);
                 $tmp[$idShipTypeDefender] = $xs->rest;

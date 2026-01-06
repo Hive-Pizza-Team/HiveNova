@@ -62,6 +62,10 @@ class Fire
         $this->attackerShipType = $attackerShipType;
         $this->defenderFleet = $defenderFleet;
         $this->calculateTotal();
+        // DEBUG: Track firepower for missile launchers (ID 401)
+        if ($attackerShipType->getId() == 401) {
+            log_comment("*** DEBUG MISSILE LAUNCHER FIRE: ID=401, Count=" . $attackerShipType->getCount() . ", Power=" . $this->power . ", Shots=" . $this->shots . " ***");
+        }
     }
     public function getPower()
     {
@@ -100,13 +104,28 @@ class Fire
      */
     private function calculateTotal()
     {
-        $this->shots += $this->attackerShipType->getCount();
-        $this->power += $this->getNormalPower();
+        $unitId = $this->attackerShipType->getId();
+        $unitCount = $this->attackerShipType->getCount();
+        $basePower = $this->getNormalPower();
+        
+        $this->shots += $unitCount;
+        $this->power += $basePower;
+        
+        // DEBUG: Log base firepower calculation
+        if ($unitId == 401 || $GLOBALS['round'] <= 1) {
+            log_comment("DEBUG Fire::calculateTotal - Unit ID: $unitId, Count: $unitCount, Base Power: $basePower, Base Shots: $unitCount");
+        }
 
         if (USE_RF)
         {
             $this->calculateRf();
         }
+        
+        // DEBUG: Log final firepower after rapid fire
+        if ($unitId == 401 || $GLOBALS['round'] <= 1) {
+            log_comment("DEBUG Fire::calculateTotal - Unit ID: $unitId, Final Power: " . $this->power . ", Final Shots: " . $this->shots);
+        }
+        
         log_var('$this->shots',$this->shots);
         /*  old way
         $this->shots = 0;
@@ -131,9 +150,18 @@ class Fire
     private function calculateRf()
     {
         //rapid fire
-        $tmpshots = round($this->getShotsFromOneAttackerShipOfType($this->attackerShipType) * $this->attackerShipType->getCount());
+        $unitId = $this->attackerShipType->getId();
+        $rfShotsPerUnit = $this->getShotsFromOneAttackerShipOfType($this->attackerShipType);
+        $tmpshots = round($rfShotsPerUnit * $this->attackerShipType->getCount());
+        $rfPower = $tmpshots * $this->attackerShipType->getPower();
+        
+        // DEBUG: Log rapid fire calculation
+        if ($unitId == 401 || $GLOBALS['round'] <= 1) {
+            log_comment("DEBUG Fire::calculateRf - Unit ID: $unitId, RF Shots Per Unit: $rfShotsPerUnit, Total RF Shots: $tmpshots, RF Power: $rfPower");
+        }
+        
         log_var('$tmpshots',$tmpshots);
-        $this->power += $tmpshots * $this->attackerShipType->getPower();
+        $this->power += $rfPower;
         $this->shots += $tmpshots;
 
         /* old way
@@ -178,13 +206,33 @@ class Fire
     private function getProbabilityToShotAgainForAttackerShipOfType(ShipType $shipType_A)
     {
         $p = 0;
+        $unitId = $shipType_A->getId();
+        $targetFleetTotal = $this->defenderFleet->getTotalCount();
+        
+        // DEBUG: Log rapid fire probability calculation
+        if ($unitId == 401 || $GLOBALS['round'] <= 1) {
+            log_comment("DEBUG Fire::getProbabilityToShotAgain - Unit ID: $unitId, Target Fleet Total Count: $targetFleetTotal");
+        }
+        
         foreach ($this->defenderFleet->getIterator() as $idFleet => $shipType_D)
         {
             $RF = $shipType_A->getRfTo($shipType_D);
             $probabilityToShotAgain = 1 - GeometricDistribution::getProbabilityFromMean($RF);
-            $probabilityToHitThisType = $shipType_D->getCount() / $this->defenderFleet->getTotalCount();
-            $p += $probabilityToShotAgain * $probabilityToHitThisType;
+            $probabilityToHitThisType = $shipType_D->getCount() / $targetFleetTotal;
+            $contribution = $probabilityToShotAgain * $probabilityToHitThisType;
+            $p += $contribution;
+            
+            // DEBUG: Log rapid fire details for each target type
+            if ($unitId == 401 || $GLOBALS['round'] <= 1) {
+                log_comment("DEBUG RF Detail - Firing Unit: $unitId -> Target: " . $shipType_D->getId() . ", RF: $RF, Prob: $probabilityToShotAgain, HitProb: $probabilityToHitThisType, Contribution: $contribution");
+            }
         }
+        
+        // DEBUG: Log final probability
+        if ($unitId == 401 || $GLOBALS['round'] <= 1) {
+            log_comment("DEBUG Fire::getProbabilityToShotAgain - Unit ID: $unitId, Final Probability: $p");
+        }
+        
         return $p;
 
         /* old way
@@ -241,9 +289,26 @@ class Fire
     }
     public function getShotsFiredByAllToOne($real = false)
     {
-        $num = new Number($this->getAttackerTotalShots());
-        $denum = new Number($this->defenderFleet->getTotalCount());
-        return Math::divide($num, $denum, $real);
+        $totalShots = $this->getAttackerTotalShots();
+        $targetFleetTotal = $this->defenderFleet->getTotalCount();
+        $unitId = $this->attackerShipType->getId();
+        
+        // DEBUG: Log shot distribution calculation
+        if ($unitId == 401 || $GLOBALS['round'] <= 1) {
+            log_comment("DEBUG Fire::getShotsFiredByAllToOne - Unit ID: $unitId, Total Shots: $totalShots, Target Fleet Total: $targetFleetTotal");
+        }
+        
+        $num = new Number($totalShots);
+        $denum = new Number($targetFleetTotal);
+        $result = Math::divide($num, $denum, $real);
+        
+        // DEBUG: Log result
+        if ($unitId == 401 || $GLOBALS['round'] <= 1) {
+            $resultValue = $real ? $result : $result->result;
+            log_comment("DEBUG Fire::getShotsFiredByAllToOne - Unit ID: $unitId, Shots Per Target Unit: $resultValue");
+        }
+        
+        return $result;
     }
     /**
      * Fire::__toString()
