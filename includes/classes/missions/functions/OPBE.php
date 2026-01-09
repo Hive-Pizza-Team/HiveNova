@@ -328,8 +328,8 @@ function getTechsFromArrayForReport($player)
 {
     list($attTech, $armorTech, $shieldTech) = getTechsFromArray($player);
     $attTech = 1 + $attTech * WEAPONS_TECH_INCREMENT_FACTOR;
-    $armorTech = 1 + $armorTech * ARMOUR_TECH_INCREMENT_FACTOR;
     $shieldTech = 1 + $shieldTech * SHIELDS_TECH_INCREMENT_FACTOR;
+    $armorTech = 1 + $armorTech * ARMOUR_TECH_INCREMENT_FACTOR;
     
     return array(
         $attTech,
