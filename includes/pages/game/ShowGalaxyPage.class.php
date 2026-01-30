@@ -78,10 +78,13 @@ class ShowGalaxyPage extends AbstractGamePage
 		FROM %%STATPOINTS%%
 		WHERE id_owner = :userId AND stat_type = :statType';
 
-		$USER	+= Database::get()->selectSingle($sql, array(
+		$statResult = Database::get()->selectSingle($sql, array(
 			':userId'	=> $USER['id'],
 			':statType'	=> 1
 		));
+		if ($statResult) {
+			$USER += $statResult;
+		}
 
 		$galaxyRows	= new GalaxyRows;
 		$galaxyRows->setGalaxy($galaxy);
