@@ -56,9 +56,9 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 				$attacker['player']				= array(
 					'id' => (1000 + $BattleSlotID + 1),
 					'username'	=> $LNG['bs_atter'].' Nr.'.($BattleSlotID + 1),
-					'military_tech' => $BattleSlot[0][109],
-					'defence_tech' => $BattleSlot[0][110],
-					'shield_tech' => $BattleSlot[0][111],
+					'military_tech' => (int) $BattleSlot[0][109],
+					'defence_tech' => (int) $BattleSlot[0][110],
+					'shield_tech' => (int) $BattleSlot[0][111],
 					'dm_attack' => 0,
 					'dm_defensive' => 0,
 					'universe' => $USER['universe']
@@ -74,7 +74,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					}
 				}
 				
-				$attacker['unit'] 	= $BattleSlot[0];
+				$attacker['unit'] 	= array_map('intval', $BattleSlot[0]);
 				
 				$attackers[]	= $attacker;
 			}
@@ -99,9 +99,9 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 				$defender['player']				= array(
 					'id' => (2000 + $BattleSlotID + 1),
 					'username'	=> $LNG['bs_deffer'].' Nr.'.($BattleSlotID + 1),
-					'military_tech' => $BattleSlot[1][109],
-					'defence_tech' => $BattleSlot[1][110],
-					'shield_tech' => $BattleSlot[1][111],
+					'military_tech' => (int) $BattleSlot[1][109],
+					'defence_tech' => (int) $BattleSlot[1][110],
+					'shield_tech' => (int) $BattleSlot[1][111],
 					'dm_attack' => 0,
 					'dm_defensive' => 0,
 					'universe' => $USER['universe']
@@ -117,7 +117,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					}
 				}
 				
-				$defender['unit'] 	= $BattleSlot[1];
+				$defender['unit'] 	= array_map('intval', $BattleSlot[1]);
 				$defenders[]	= $defender;
 			}
 		}
@@ -133,9 +133,9 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		if($combatResult['won'] == "a")
 		{
 			$stealResource = calculateSteal($attackers, array(
-			'metal' => $BattleArray[0][1][901],
-			'crystal' => $BattleArray[0][1][902],
-			'deuterium' => $BattleArray[0][1][903]
+			'metal' => (int) $BattleArray[0][1][901],
+			'crystal' => (int) $BattleArray[0][1][902],
+			'deuterium' => (int) $BattleArray[0][1][903]
 			), true);
 		}
 		else
