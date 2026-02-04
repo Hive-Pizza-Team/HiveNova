@@ -110,7 +110,11 @@ class ShowResourcesPage extends AbstractGamePage
 		if($PLANET['energy_used'] != 0) {
 			$prodLevel	= min(1, $PLANET['energy'] / abs($PLANET['energy_used']));
 		} else {
-			$prodLevel	= 0;
+			// If there is no energy consumption registered (e.g. all other
+			// production is set to 0), we still want production/consumption
+			// formulas (like uranium power plant fuel usage) to apply based
+			// solely on their own slider, so use full production factor.
+			$prodLevel	= 1;
 		}
 
 		/* Data for eval */
