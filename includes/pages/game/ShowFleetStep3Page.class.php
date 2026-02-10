@@ -405,7 +405,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 			$StayDuration    = round($availableMissions['StayBlock'][$stayTime] * 3600, 0);
 		}
 
-		$fleetStorage		-= $consumption;
+		$fleetStorage		= floor($fleetStorage - $consumption);
 
 		$fleetResource	= array(
 			901	=> min($TransportMetal, floor($PLANET[$resource[901]])),
