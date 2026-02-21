@@ -310,7 +310,7 @@ class ShowResearchPage extends AbstractGamePage
 
 			$quickinfo[$BuildArray[0]]	= $BuildArray[1];
 
-			if($BuildArray[4] != $PLANET['id'])
+			if($BuildArray[4] != $PLANET['id'] && isset($USER['PLANETS'][$BuildArray[4]]))
 				$PlanetName		= $USER['PLANETS'][$BuildArray[4]]['name'];
 
 			$scriptData[] = array(

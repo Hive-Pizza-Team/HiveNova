@@ -105,10 +105,10 @@ class ShowRaportPage extends AbstractGamePage
 			':reportID'	=> $RID
 		));
 
-		$Info		= array($reportData["attacker"], $reportData["defender"]);
-		
-		if(!isset($reportData)) {
+			
+		if(empty($reportData)) {
 			$this->printMessage($LNG['sys_raport_not_found']);
+		return;
 		}
 		
 		$combatReport			= unserialize($reportData['raport']);
@@ -117,7 +117,7 @@ class ShowRaportPage extends AbstractGamePage
 		
 		$this->assign(array(
 			'Raport'	=> $combatReport,
-			'Info'		=> $Info,
+			'Info'		=> array($reportData["attacker"], $reportData["defender"]),
 			'pageTitle'	=> $LNG['lm_topkb']
 		));
 		
@@ -142,6 +142,7 @@ class ShowRaportPage extends AbstractGamePage
 
 		if(empty($reportData)) {
 			$this->printMessage($LNG['sys_raport_not_found']);
+		return;
 		}
 		
 		// empty is BC for pre r2484
@@ -150,6 +151,7 @@ class ShowRaportPage extends AbstractGamePage
 
 		if(empty($reportData)) {
 			$this->printMessage($LNG['sys_raport_not_found']);
+		return;
 		}
 
 		$combatReport			= unserialize($reportData['raport']);
