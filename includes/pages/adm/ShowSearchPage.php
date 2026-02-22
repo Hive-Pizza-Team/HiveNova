@@ -36,7 +36,7 @@ function ShowSearchPage()
 	$SearchKey		= HTTP::_GP('key_user', '', UTF8_SUPPORT);
 	$Page 			= HTTP::_GP('side', 0);
 	$Order			= HTTP::_GP('key_order', '');
-	$OrderBY		= HTTP::_GP('key_acc', '');
+	$OrderBY		= in_array(strtoupper(HTTP::_GP('key_acc', '')), ['ASC', 'DESC']) ? strtoupper(HTTP::_GP('key_acc', '')) : 'ASC';
 	$limit			= HTTP::_GP('limit', 25);
 
 	$Selector	= array(

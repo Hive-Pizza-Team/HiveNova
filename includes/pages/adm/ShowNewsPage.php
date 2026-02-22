@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  2Moons 
+ *  2Moons
  *   by Jan-Otto Kröpke 2009-2016
  *
  * For the full copyright and license information, please view the LICENSE
@@ -22,18 +22,31 @@ function ShowNewsPage(){
 
 	if($_POST['action'] == 'send') {
 		$edit_id 	= HTTP::_GP('id', 0);
-		$title 		= $GLOBALS['DATABASE']->sql_escape(HTTP::_GP('title', '', true));
-		$text 		= $GLOBALS['DATABASE']->sql_escape(HTTP::_GP('text', '', true));
-		$query		= ($_GET['mode'] == 2) ? "INSERT INTO ".NEWS." (`id` ,`user` ,`date` ,`title` ,`text`) VALUES ( NULL , '".$USER['username']."', '".TIMESTAMP."', '".$title."', '".$text."');" : "UPDATE ".NEWS." SET `title` = '".$title."', `text` = '".$text."', `date` = '".TIMESTAMP."' WHERE `id` = '".$edit_id."' LIMIT 1;";
-		
-		$GLOBALS['DATABASE']->query($query);
+		$title 		= HTTP::_GP('title', '', true);
+		$text 		= HTTP::_GP('text', '', true);
+		$mode		= HTTP::_GP('mode', 0);
+		if ($mode == 2) {
+			Database::get()->insert(
+				"INSERT INTO %%NEWS%% (`id`, `user`, `date`, `title`, `text`) VALUES (NULL, :user, :date, :title, :text);",
+				[':user' => $USER['username'], ':date' => TIMESTAMP, ':title' => $title, ':text' => $text]
+			);
+		} else {
+			Database::get()->update(
+				"UPDATE %%NEWS%% SET `title` = :title, `text` = :text, `date` = :date WHERE `id` = :id LIMIT 1;",
+				[':title' => $title, ':text' => $text, ':date' => TIMESTAMP, ':id' => $edit_id]
+			);
+		}
 	} elseif($_POST['action'] == 'delete' && isset($_POST['id'])) {
-		$GLOBALS['DATABASE']->query("DELETE FROM ".NEWS." WHERE `id` = '".HTTP::_GP('id', 0)."';");
+		Database::get()->delete(
+			"DELETE FROM %%NEWS%% WHERE `id` = :id;",
+			[':id' => HTTP::_GP('id', 0)]
+		);
 	}
 
-	$query = $GLOBALS['DATABASE']->query("SELECT * FROM ".NEWS." ORDER BY id ASC");
+	$rows = Database::get()->select("SELECT * FROM %%NEWS%% ORDER BY id ASC");
 
-	while ($u = $GLOBALS['DATABASE']->fetch_array($query)) {
+	$NewsList = [];
+	foreach ($rows as $u) {
 		$NewsList[]	= array(
 			'id'		=> $u['id'],
 			'title'		=> $u['title'],
@@ -42,13 +55,16 @@ function ShowNewsPage(){
 			'confirm'	=> sprintf($LNG['nws_confirm'], $u['title']),
 		);
 	}
-	
+
 	$template	= new template();
 
 
 	if($_GET['action'] == 'edit' && isset($_GET['id'])) {
-		$News = $GLOBALS['DATABASE']->getFirstRow("SELECT id, title, text FROM ".NEWS." WHERE id = '".$GLOBALS['DATABASE']->sql_escape($_GET['id'])."';");
-		$template->assign_vars(array(	
+		$News = Database::get()->selectSingle(
+			"SELECT id, title, text FROM %%NEWS%% WHERE id = :id;",
+			[':id' => HTTP::_GP('id', 0)]
+		);
+		$template->assign_vars(array(
 			'mode'			=> 1,
 			'nws_head'		=> sprintf($LNG['nws_head_edit'], $News['title']),
 			'news_id'		=> $News['id'],
@@ -56,13 +72,13 @@ function ShowNewsPage(){
 			'news_text'		=> $News['text'],
 		));
 	} elseif($_GET['action'] == 'create') {
-		$template->assign_vars(array(	
+		$template->assign_vars(array(
 			'mode'			=> 2,
 			'nws_head'		=> $LNG['nws_head_create'],
 		));
 	}
-	
-	$template->assign_vars(array(	
+
+	$template->assign_vars(array(
 		'NewsList'		=> $NewsList,
 		'button_submit'	=> $LNG['button_submit'],
 		'nws_total'		=> sprintf($LNG['nws_total'], $NewsList && count($NewsList)),
@@ -75,6 +91,6 @@ function ShowNewsPage(){
 		'nws_create'	=> $LNG['nws_create'],
 		'nws_content'	=> $LNG['nws_content'],
 	));
-	
+
 	$template->show('NewsPage.tpl');
 }

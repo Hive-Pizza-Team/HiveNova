@@ -26,7 +26,7 @@ function ShowAccountDataPage()
 	$id_u	= HTTP::_GP('id_u', 0);
 	if (!empty($id_u))
 	{
-		$OnlyQueryLogin 	= $GLOBALS['DATABASE']->getFirstRow("SELECT `id`, `authlevel` FROM ".USERS." WHERE `id` = '".$id_u."' AND `universe` = '".Universe::getEmulated()."';");
+		$OnlyQueryLogin 	= Database::get()->selectSingle("SELECT `id`, `authlevel` FROM %%USERS%% WHERE `id` = :id AND `universe` = :universe;", [':id' => $id_u, ':universe' => Universe::getEmulated()]);
 
 		if(!isset($OnlyQueryLogin))
 		{
@@ -45,7 +45,7 @@ function ShowAccountDataPage()
 			 urlaubs_until,u.ally_id,a.ally_name,".$SpecifyItemsUQ."
 			 u.ally_register_time,u.ally_rank_id,u.bana,u.banaday";
 			
-			$UserQuery 	= 	$GLOBALS['DATABASE']->getFirstRow("SELECT ".$SpecifyItemsU." FROM ".USERS." as u LEFT JOIN ".ALLIANCE." a ON a.id = u.ally_id WHERE u.`id` = '".$id_u."';");
+			$UserQuery 	= 	Database::get()->selectSingle("SELECT ".$SpecifyItemsU." FROM %%USERS%% as u LEFT JOIN %%ALLIANCE%% a ON a.id = u.ally_id WHERE u.`id` = :id;", [':id' => $id_u]);
 
 			
 			$reg_time		= _date($LNG['php_tdformat'], $UserQuery['register_time'], $USER['timezone']);
@@ -90,7 +90,7 @@ function ShowAccountDataPage()
 			{
 				$mas			= '<a ref="#" onclick="$(\'#banned\').slideToggle();return false"> '.$LNG['ac_more'].'</a>';
 				
-				$BannedQuery	= $GLOBALS['DATABASE']->getFirstRow("SELECT theme,time,longer,author FROM ".BANNED." WHERE `who` = '".$UserQuery['username']."';");
+				$BannedQuery	= Database::get()->selectSingle("SELECT theme,time,longer,author FROM %%BANNED%% WHERE `who` = :username;", [':username' => $UserQuery['username']]);
 				
 				
 				$sus_longer	= _date($LNG['php_tdformat'], $BannedQuery['longer'], $USER['timezone']);
@@ -106,7 +106,7 @@ function ShowAccountDataPage()
 			"tech_count,defs_count,fleet_count,build_count,build_points,tech_points,defs_points,fleet_points,tech_rank,build_rank,defs_rank,fleet_rank,total_points,
 			stat_type";
 			
-			$StatQuery	= $GLOBALS['DATABASE']->getFirstRow("SELECT ".$SpecifyItemsS." FROM ".STATPOINTS." WHERE `id_owner` = '".$id_u."' AND `stat_type` = '1';");
+			$StatQuery	= Database::get()->selectSingle("SELECT ".$SpecifyItemsS." FROM %%STATPOINTS%% WHERE `id_owner` = :id AND `stat_type` = 1;", [':id' => $id_u]);
 
 			$count_tecno	= pretty_number($StatQuery['tech_count']);
 			$count_def		= pretty_number($StatQuery['defs_count']);
@@ -150,7 +150,7 @@ function ShowAccountDataPage()
 				$SpecifyItemsA	= 
 				"ally_owner,id,ally_tag,ally_name,ally_web,ally_description,ally_text,ally_request,ally_image,ally_members,ally_register_time";
 				
-				$AllianceQuery		= $GLOBALS['DATABASE']->getFirstRow("SELECT ".$SpecifyItemsA." FROM ".ALLIANCE." WHERE `ally_name` = '".$alianza."';");
+				$AllianceQuery		= Database::get()->selectSingle("SELECT ".$SpecifyItemsA." FROM %%ALLIANCE%% WHERE `ally_name` = :ally_name;", [':ally_name' => $alianza]);
 				
 				
 				$alianza				= $alianza;
@@ -208,12 +208,12 @@ function ShowAccountDataPage()
 				}
 				
 				
-				$SearchLeader		= $GLOBALS['DATABASE']->getFirstRow("SELECT `username` FROM ".USERS." WHERE `id` = '".$ali_lider."';");
+				$SearchLeader		= Database::get()->selectSingle("SELECT `username` FROM %%USERS%% WHERE `id` = :id;", [':id' => $ali_lider]);
 				$ali_lider	= $SearchLeader['username'];
 
 
 
-				$StatQueryAlly	= $GLOBALS['DATABASE']->getFirstRow("SELECT ".$SpecifyItemsS." FROM ".STATPOINTS." WHERE `id_owner` = '".$ali_lider."' AND `stat_type` = '2';");
+				$StatQueryAlly	= Database::get()->selectSingle("SELECT ".$SpecifyItemsS." FROM %%STATPOINTS%% WHERE `id_owner` = :id AND `stat_type` = 2;", [':id' => $ali_lider]);
 						
 				$count_tecno_ali	= pretty_number($StatQueryAlly['tech_count']);
 				$count_def_ali		= pretty_number($StatQueryAlly['defs_count']);
@@ -244,9 +244,9 @@ function ShowAccountDataPage()
 			// COMIENZA EL SAQUEO DE DATOS DE LOS PLANETAS
 			$SpecifyItemsP	= "planet_type,id,name,galaxy,`system`,planet,destruyed,diameter,field_current,field_max,temp_min,temp_max,metal,crystal,deuterium,energy,".$SpecifyItemsPQ."energy_used";
 				
-			$PlanetsQuery	= $GLOBALS['DATABASE']->query("SELECT ".$SpecifyItemsP." FROM ".PLANETS." WHERE `id_owner` = '".$id_u."';");
+			$PlanetsRows	= Database::get()->select("SELECT ".$SpecifyItemsP." FROM %%PLANETS%% WHERE `id_owner` = :id;", [':id' => $id_u]);
 			
-			while ($PlanetsWhile	= $GLOBALS['DATABASE']->fetch_array($PlanetsQuery))
+			foreach ($PlanetsRows as $PlanetsWhile)
 			{
 				if ($PlanetsWhile['planet_type'] == 3)
 				{
@@ -490,8 +490,8 @@ function ShowAccountDataPage()
 		exit;
 	}
 	$Userlist	= "";
-	$UserWhileLogin	= $GLOBALS['DATABASE']->query("SELECT `id`, `username`, `authlevel` FROM ".USERS." WHERE `authlevel` <= '".$USER['authlevel']."' AND `universe` = '".Universe::getEmulated()."' ORDER BY `username` ASC;");
-	while($UserList	= $GLOBALS['DATABASE']->fetch_array($UserWhileLogin))
+	$UserWhileRows	= Database::get()->select("SELECT `id`, `username`, `authlevel` FROM %%USERS%% WHERE `authlevel` <= :authlevel AND `universe` = :universe ORDER BY `username` ASC;", [':authlevel' => $USER['authlevel'], ':universe' => Universe::getEmulated()]);
+	foreach ($UserWhileRows as $UserList)
 	{
 		$Userlist	.= "<option value=\"".$UserList['id']."\">".$UserList['username']."&nbsp;&nbsp;(".$LNG['rank_'.$UserList['authlevel']].")</option>";
 	}
