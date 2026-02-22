@@ -14,22 +14,27 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-class Database
+class Database implements DatabaseInterface
 {
 	protected $dbHandle = NULL;
 	protected $dbTableNames = array();
 	protected $lastInsertId = false;
 	protected $rowCount = false;
 	protected $queryCounter = 0;
-	protected static $instance = NULL;
+	protected static DatabaseInterface|null $instance = NULL;
 
 
-	public static function get()
+	public static function get(): DatabaseInterface
 	{
 		if (!isset(self::$instance))
 			self::$instance = new self();
 
 		return self::$instance;
+	}
+
+	public static function setInstance(DatabaseInterface $db): void
+	{
+		self::$instance = $db;
 	}
 
 	public function getDbTableNames()

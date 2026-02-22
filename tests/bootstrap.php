@@ -18,3 +18,9 @@ require_once __DIR__ . '/../includes/classes/class.FleetFunctions.php';
 require_once __DIR__ . '/../includes/classes/HTTP.class.php';
 require_once __DIR__ . '/../includes/classes/Language.class.php';
 require_once __DIR__ . '/../includes/GeneralFunctions.php';
+
+// Testable infrastructure classes
+require_once __DIR__ . '/../includes/classes/DatabaseInterface.php';
+require_once __DIR__ . '/../includes/classes/Database.class.php';
+require_once __DIR__ . '/../includes/classes/Config.class.php';
+require_once __DIR__ . '/../includes/classes/class.PlanetRessUpdate.php';

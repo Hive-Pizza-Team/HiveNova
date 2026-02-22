@@ -38,7 +38,9 @@ abstract class AbstractGamePage
 			$this->setWindow('full');
 			if(!$this->disableEcoSystem)
 			{
+				global $resource, $reslist;
 				$this->ecoObj	= new ResourceUpdate();
+				$this->ecoObj->setResourceData($resource, $reslist);
 				$this->ecoObj->CalcResource();
 			}
 			$this->initTemplate();

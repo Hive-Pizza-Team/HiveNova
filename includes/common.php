@@ -50,6 +50,7 @@ set_error_handler(errorHandler(...));
 
 require 'includes/classes/ArrayUtil.class.php';
 require 'includes/classes/Cache.class.php';
+require 'includes/classes/DatabaseInterface.php';
 require 'includes/classes/Database.class.php';
 require 'includes/classes/Config.class.php';
 require 'includes/classes/class.FleetFunctions.php';

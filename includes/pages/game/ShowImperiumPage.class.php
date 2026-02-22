@@ -48,7 +48,8 @@ class ShowImperiumPage extends AbstractGamePage
         $PLANETS	= array();
 		
 		$PlanetRess	= new ResourceUpdate();
-		
+		$PlanetRess->setResourceData($resource, $reslist);
+
 		foreach ($PlanetsRAW as $CPLANET)
 		{
             list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, true);

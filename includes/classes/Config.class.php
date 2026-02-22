@@ -67,6 +67,12 @@ class Config
 		return self::$instances[$universe];
 	}
 
+	public static function setInstance(Config $config, int|string|null $universe = null): void
+	{
+		$key = $universe ?? 1;
+		self::$instances[$key] = $config;
+	}
+
 	static public function reload()
 	{
 		self::generateInstances();
