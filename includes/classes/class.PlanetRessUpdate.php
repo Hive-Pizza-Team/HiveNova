@@ -241,6 +241,12 @@ class ResourceUpdate
 	{
 		global $ProdGrid;
 
+		// So eval()'d formulae from getProd() can use these (they expect globals)
+		$resource = $this->resource;
+		$reslist  = $this->reslist;
+		$USER     = $this->USER;
+		$PLANET   = $this->PLANET;
+
 		if ($this->PLANET['planet_type'] == 3)
 		{
 			$this->config->metal_basic_income     	= 0;
