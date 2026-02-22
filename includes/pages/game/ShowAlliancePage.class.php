@@ -151,7 +151,7 @@ class ShowAlliancePage extends AbstractGamePage
 		$this->assign(array(
 			'diplomaticData'				=> $diplomaticmaticData,
 			'statisticData'					=> $statisticData,
-			'ally_description' 				=> nl2br((string) $this->allianceData['ally_description']),
+			'ally_description' 				=> nl2br(htmlspecialchars((string) $this->allianceData['ally_description'])),
 			'ally_id'	 					=> $this->allianceData['id'],
 			'ally_image' 					=> $this->allianceData['ally_image'],
 			'ally_web'						=> $this->allianceData['ally_web'],
@@ -587,8 +587,8 @@ class ShowAlliancePage extends AbstractGamePage
 			'ally_max_members'	 		=> $this->allianceData['ally_max_members'],
 			'ally_name'					=> $this->allianceData['ally_name'],
 			'ally_image'				=> $this->allianceData['ally_image'],
-			'ally_description'			=> nl2br((string) $this->allianceData['ally_description']),
-			'ally_text' 				=> $this->allianceData['ally_text'],
+			'ally_description'			=> nl2br(htmlspecialchars((string) $this->allianceData['ally_description'])),
+			'ally_text' 				=> nl2br(htmlspecialchars((string) $this->allianceData['ally_text'])),
 			'rankName'					=> $rankName,
 			'requests'					=> sprintf($LNG['al_new_requests'], $ApplyCount),
 			'applyCount'				=> $ApplyCount,
@@ -804,8 +804,10 @@ class ShowAlliancePage extends AbstractGamePage
 			$db = Database::get();
 
 			$this->allianceData['ally_owner_range'] 		= HTTP::_GP('owner_range', '', true);
-			$this->allianceData['ally_web'] 				= filter_var(HTTP::_GP('web', ''), FILTER_VALIDATE_URL);
-			$this->allianceData['ally_image'] 				= str_replace(".php","",filter_var(HTTP::_GP('image', ''), FILTER_VALIDATE_URL));
+			$rawWeb = filter_var(HTTP::_GP('web', ''), FILTER_VALIDATE_URL);
+			$this->allianceData['ally_web'] = ($rawWeb && preg_match('#^https?://#i', $rawWeb)) ? $rawWeb : '';
+			$rawImage = filter_var(HTTP::_GP('image', ''), FILTER_VALIDATE_URL);
+			$this->allianceData['ally_image'] = ($rawImage && preg_match('#^https?://#i', $rawImage)) ? str_replace('.php', '', $rawImage) : '';
 			$this->allianceData['ally_request_notallow'] 	= HTTP::_GP('request_notallow', 0);
 			$this->allianceData['ally_max_members'] 		= max(HTTP::_GP('ally_max_members', ''), $this->allianceData['ally_members']);
 			$this->allianceData['ally_request_min_points']  = HTTP::_GP('request_min_points', 0);

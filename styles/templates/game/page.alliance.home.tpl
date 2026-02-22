@@ -6,16 +6,16 @@
 	</tr>
 	{if $ally_image}
 	<tr>
-		<td colspan="2"><img style="max-width: 1024px;" src="{$ally_image}"></td>
+		<td colspan="2"><img style="max-width: 1024px;" src="{$ally_image|htmlspecialchars}"></td>
 	</tr>
 	{/if}
 	<tr>
 		<td style="width:50%">{$LNG.al_ally_info_tag}</td>
-		<td style="width:50%">{$ally_tag}</td>
+		<td style="width:50%">{$ally_tag|htmlspecialchars}</td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_ally_info_name}</td>
-		<td>{$ally_name}</td>
+		<td>{$ally_name|htmlspecialchars}</td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_ally_info_members}</td>
@@ -68,7 +68,7 @@
 	{if $ally_web}
 	<tr>
 		<td>{$LNG.al_web_text}</td>
-		<td><a href="{$ally_web}">{$ally_web}</a></td>
+		<td><a href="{$ally_web|htmlspecialchars}">{$ally_web|htmlspecialchars}</a></td>
 	</tr>
 	{/if}
 	<tr>

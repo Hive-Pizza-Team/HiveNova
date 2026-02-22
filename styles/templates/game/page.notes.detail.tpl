@@ -15,13 +15,13 @@
 		<tr>
 			<td><labal for="title">{$LNG.nt_subject_note}</label></td>
 			<td>
-				<input type="text" id="title" name="title" size="30" maxlength="30" value="{$noteDetail.title}">
+				<input type="text" id="title" name="title" size="30" maxlength="30" value="{$noteDetail.title|htmlspecialchars}">
 			</td>
 		</tr>
 		<tr>
 			<td><labal for="text">{$LNG.nt_note}</label> (<span id="cntChars">0</span>&nbsp;/&nbsp;10.000&nbsp;{$LNG.nt_characters})</th>
 			<td>
-				<textarea name="text" id="text" cols="60" rows="10" maxlength="10000" onkeyup="$('#cntChars').text($(this).val().length);">{$noteDetail.text}</textarea>
+				<textarea name="text" id="text" cols="60" rows="10" maxlength="10000" onkeyup="$('#cntChars').text($(this).val().length);">{$noteDetail.text|htmlspecialchars}</textarea>
 			</td>
 		</tr>
 		<tr>
