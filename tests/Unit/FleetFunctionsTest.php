@@ -155,4 +155,78 @@ class FleetFunctionsTest extends TestCase
         // With FlyTime = 1.0: SpeedFactor *= max(0, 1 + 1.0) = 2 → roughly double
         $this->assertGreaterThan($base, $scaled);
     }
+
+    // -------------------------------------------------------------------------
+    // GetMaxFleetSlots
+    // -------------------------------------------------------------------------
+
+    public function testGetMaxFleetSlotsBaseSlotPlusComputerPlusBonus(): void
+    {
+        // GetMaxFleetSlots returns 1 + $USER[$resource[108]] + $USER['factor']['FleetSlots']
+        $GLOBALS['resource'][108] = 108;
+        $USER = [108 => 4, 'factor' => ['FleetSlots' => 2]];
+        $this->assertSame(7, FleetFunctions::GetMaxFleetSlots($USER));
+    }
+
+    public function testGetMaxFleetSlotsMinimumIsOneWithNoTechOrBonus(): void
+    {
+        $GLOBALS['resource'][108] = 108;
+        $USER = [108 => 0, 'factor' => ['FleetSlots' => 0]];
+        $this->assertSame(1, FleetFunctions::GetMaxFleetSlots($USER));
+    }
+
+    // -------------------------------------------------------------------------
+    // GetFleetRoom
+    // -------------------------------------------------------------------------
+
+    public function testGetFleetRoomCalculatesCapacityForSingleShipType(): void
+    {
+        // capacity 1000, 3 ships, no storage bonus → 3000
+        $GLOBALS['pricelist'][201]['capacity'] = 1000;
+        $GLOBALS['USER'] = ['factor' => ['ShipStorage' => 0]];
+        $this->assertEquals(3000, FleetFunctions::GetFleetRoom([201 => 3]));
+    }
+
+    public function testGetFleetRoomAppliesStorageBonus(): void
+    {
+        // capacity 1000, 1 ship, 50% bonus → 1500
+        $GLOBALS['pricelist'][201]['capacity'] = 1000;
+        $GLOBALS['USER'] = ['factor' => ['ShipStorage' => 0.5]];
+        $this->assertSame(1500.0, FleetFunctions::GetFleetRoom([201 => 1]));
+    }
+
+    public function testGetFleetRoomIsZeroForEmptyFleet(): void
+    {
+        $GLOBALS['USER'] = ['factor' => ['ShipStorage' => 0]];
+        $this->assertEquals(0, FleetFunctions::GetFleetRoom([]));
+    }
+
+    // -------------------------------------------------------------------------
+    // getExpeditionLimit
+    // -------------------------------------------------------------------------
+
+    public function testGetExpeditionLimitBasedOnAstrophysicsLevel(): void
+    {
+        // floor(sqrt(level)) + bonus; level=9 → floor(3.0) + 0 = 3.0
+        $GLOBALS['resource'][124] = 124;
+        $USER = [124 => 9, 'factor' => ['Expedition' => 0]];
+        $this->assertEquals(3, FleetFunctions::getExpeditionLimit($USER));
+    }
+
+    public function testGetExpeditionLimitAddsBonus(): void
+    {
+        $GLOBALS['resource'][124] = 124;
+        $USER = [124 => 4, 'factor' => ['Expedition' => 2]];
+        // floor(sqrt(4)) + 2 = 2.0 + 2 = 4.0
+        $this->assertEquals(4, FleetFunctions::getExpeditionLimit($USER));
+    }
+
+    // -------------------------------------------------------------------------
+    // GetFleetMaxSpeed — empty fleet edge case
+    // -------------------------------------------------------------------------
+
+    public function testGetFleetMaxSpeedReturnsZeroForEmptyFleet(): void
+    {
+        $this->assertSame(0, FleetFunctions::GetFleetMaxSpeed([], []));
+    }
 }

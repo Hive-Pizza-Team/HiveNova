@@ -105,4 +105,86 @@ class PlayerUtilTest extends TestCase
         $this->assertFalse((bool) PlayerUtil::isNameValid('user/path'));
         $this->assertFalse((bool) PlayerUtil::isNameValid('user!'));
     }
+
+    // -------------------------------------------------------------------------
+    // cryptPassword
+    // -------------------------------------------------------------------------
+
+    public function testCryptPasswordReturnsBcryptHash(): void
+    {
+        $hash = PlayerUtil::cryptPassword('secret');
+        $this->assertStringStartsWith('$2y$', $hash);
+    }
+
+    public function testCryptPasswordVerifiesWithOriginalPassword(): void
+    {
+        $hash = PlayerUtil::cryptPassword('mypassword');
+        $this->assertTrue(password_verify('mypassword', $hash));
+    }
+
+    public function testCryptPasswordWrongPasswordFails(): void
+    {
+        $hash = PlayerUtil::cryptPassword('correct');
+        $this->assertFalse(password_verify('wrong', $hash));
+    }
+
+    public function testCryptPasswordProducesDifferentHashEachCall(): void
+    {
+        // bcrypt salts are random — two hashes of the same input must differ
+        $this->assertNotSame(
+            PlayerUtil::cryptPassword('same'),
+            PlayerUtil::cryptPassword('same')
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // getPlayerAvatarURL
+    // -------------------------------------------------------------------------
+
+    public function testGetPlayerAvatarURLReturnsHiveUrlWhenAccountMatches(): void
+    {
+        $user = ['username' => 'alice', 'hive_account' => 'alice'];
+        $this->assertStringContainsString('images.hive.blog/u/alice/avatar', PlayerUtil::getPlayerAvatarURL($user));
+    }
+
+    public function testGetPlayerAvatarURLReturnsFallbackImageWhenNoAccount(): void
+    {
+        $user = ['username' => 'alice', 'hive_account' => ''];
+        $this->assertSame('styles/resource/images/user.png', PlayerUtil::getPlayerAvatarURL($user));
+    }
+
+    public function testGetPlayerAvatarURLReturnsFallbackWhenAccountMismatch(): void
+    {
+        $user = ['username' => 'alice', 'hive_account' => 'bob'];
+        $this->assertSame('styles/resource/images/user.png', PlayerUtil::getPlayerAvatarURL($user));
+    }
+
+    public function testGetPlayerAvatarURLIsCaseInsensitiveForUsername(): void
+    {
+        // username is lowercased before comparison
+        $user = ['username' => 'Alice', 'hive_account' => 'alice'];
+        $this->assertStringContainsString('images.hive.blog/u/alice/avatar', PlayerUtil::getPlayerAvatarURL($user));
+    }
+
+    // -------------------------------------------------------------------------
+    // getPlayerBadges
+    // -------------------------------------------------------------------------
+
+    public function testGetPlayerBadgesReturnsHiveLinkWhenAccountMatches(): void
+    {
+        $user = ['username' => 'alice', 'hive_account' => 'alice'];
+        $this->assertStringContainsString('peakd.com/@alice', PlayerUtil::getPlayerBadges($user));
+    }
+
+    public function testGetPlayerBadgesReturnsLinkIconWhenAccountDiffersButNotEmpty(): void
+    {
+        $user = ['username' => 'alice', 'hive_account' => 'other'];
+        $this->assertSame('🔗', PlayerUtil::getPlayerBadges($user));
+    }
+
+    public function testGetPlayerBadgesReturnsBrokenChainWhenNoHiveAccount(): void
+    {
+        $user = ['username' => 'alice', 'hive_account' => ''];
+        $this->assertSame('⛓️‍💥', PlayerUtil::getPlayerBadges($user));
+    }
 }

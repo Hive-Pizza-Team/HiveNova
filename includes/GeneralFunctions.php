@@ -532,7 +532,9 @@ function exceptionHandler($exception)
 		E_USER_ERROR		=> 'USER ERROR',
 		E_USER_WARNING		=> 'USER WARNING',
 		E_USER_NOTICE		=> 'USER NOTICE',
-		E_RECOVERABLE_ERROR	=> 'RECOVERABLE ERROR'
+		E_RECOVERABLE_ERROR	=> 'RECOVERABLE ERROR',
+		E_DEPRECATED		=> 'DEPRECATED',
+		E_USER_DEPRECATED	=> 'USER DEPRECATED',
 	);
 
 	if (file_exists(ROOT_PATH . 'install/VERSION')) {
@@ -658,6 +660,11 @@ function exceptionHandler($exception)
 function errorHandler($errno, $errstr, $errfile, $errline)
 {
 	if (!($errno & error_reporting())) {
+		return false;
+	}
+
+	// Deprecation notices should never be fatal — just skip them
+	if ($errno === E_DEPRECATED || $errno === E_USER_DEPRECATED) {
 		return false;
 	}
 

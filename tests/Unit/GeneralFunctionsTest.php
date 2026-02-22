@@ -183,4 +183,86 @@ class GeneralFunctionsTest extends TestCase
         $this->assertStringContainsString('line1', $result);
         $this->assertStringContainsString('line2', $result);
     }
+
+    // -------------------------------------------------------------------------
+    // pretty_number
+    // -------------------------------------------------------------------------
+
+    public function testPrettyNumberFormatsThousandsSeparator(): void
+    {
+        // 1234567 → '1.234.567' (German dot-separator)
+        $this->assertSame('1.234.567', pretty_number(1234567));
+    }
+
+    public function testPrettyNumberWithDecimalsUsesComma(): void
+    {
+        // 1234.5 with 2 decimals → '1.234,50'
+        $this->assertSame('1.234,50', pretty_number(1234.5, 2));
+    }
+
+    public function testPrettyNumberZero(): void
+    {
+        $this->assertSame('0', pretty_number(0));
+    }
+
+    // -------------------------------------------------------------------------
+    // BuildPlanetAddressLink
+    // -------------------------------------------------------------------------
+
+    public function testBuildPlanetAddressLinkContainsCoordinates(): void
+    {
+        $planet = ['galaxy' => 3, 'system' => 200, 'planet' => 9];
+        $link   = BuildPlanetAddressLink($planet);
+        $this->assertStringContainsString('[3:200:9]', $link);
+        $this->assertStringContainsString('galaxy=3', $link);
+        $this->assertStringContainsString('system=200', $link);
+    }
+
+    public function testBuildPlanetAddressLinkIsAnchorTag(): void
+    {
+        $planet = ['galaxy' => 1, 'system' => 1, 'planet' => 1];
+        $link   = BuildPlanetAddressLink($planet);
+        $this->assertStringStartsWith('<a ', $link);
+        $this->assertStringContainsString('</a>', $link);
+    }
+
+    // -------------------------------------------------------------------------
+    // pretty_time
+    // -------------------------------------------------------------------------
+
+    protected function setUp(): void
+    {
+        // pretty_time() reads $LNG global for unit labels
+        $GLOBALS['LNG'] = [
+            'short_day'    => 'd',
+            'short_hour'   => 'h',
+            'short_minute' => 'm',
+            'short_second' => 's',
+        ];
+    }
+
+    public function testPrettyTimeFormatsHoursMinutesSeconds(): void
+    {
+        // 1h 2m 3s = 3723s, no days
+        $this->assertSame('01h 02m 03s', pretty_time(3723));
+    }
+
+    public function testPrettyTimeShowsDayWhenAbove86400Seconds(): void
+    {
+        // 1 day exactly = 86400s
+        $result = pretty_time(86400);
+        $this->assertStringContainsString('1d', $result);
+    }
+
+    public function testPrettyTimeZeroSecondsShowsZeros(): void
+    {
+        $this->assertSame('00h 00m 00s', pretty_time(0));
+    }
+
+    public function testPrettyTimeDoesNotShowDayForUnder86400(): void
+    {
+        // 23h 59m 59s = 86399s — no day prefix
+        $result = pretty_time(86399);
+        $this->assertStringNotContainsString('d ', $result);
+    }
 }

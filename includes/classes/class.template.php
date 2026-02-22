@@ -29,6 +29,7 @@ class template extends Smarty
 
 	private function smartySettings()
 	{
+		$this->muteUndefinedOrNullWarnings();
 		$this->setForceCompile(false);
 		$this->setMergeCompiledIncludes(true);
 		$this->setCompileCheck(true);#Set false for production!
