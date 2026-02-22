@@ -264,6 +264,15 @@ class ShowResearchPage extends AbstractGamePage
 			$USER['b_tech']				= $BuildEndTime;
 			$USER['b_tech_id']			= $elementId;
 			$USER['b_tech_planet']		= $PLANET['id'];
+
+			// Database::get()->insert('INSERT INTO %%LOG_RESEARCH%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
+			// 	'owner_id'	=> $USER['id'],
+			// 	'planet_id'	=> $PLANET['id'],
+			// 	'universe'	=> $USER['universe'],
+			// 	'element_id'=> $elementId,
+			// 	'queued_at'	=> TIMESTAMP,
+			// ));
+
 		} else {
 			$addLevel = 0;
 			foreach($CurrentQueue as $QueueSubArray)
@@ -286,6 +295,14 @@ class ShowResearchPage extends AbstractGamePage
 			$BuildEndTime				= $CurrentQueue[$ActualCount - 1][3] + $elementTime;
 			$CurrentQueue[]				= array($elementId, $BuildLevel, $elementTime, $BuildEndTime, $PLANET['id']);
 			$USER['b_tech_queue']		= serialize($CurrentQueue);
+
+			// Database::get()->insert('INSERT INTO %%LOG_RESEARCH%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
+			// 	'owner_id'	=> $USER['id'],
+			// 	'planet_id'	=> $PLANET['id'],
+			// 	'universe'	=> $USER['universe'],
+			// 	'element_id'=> $elementId,
+			// 	'queued_at'	=> TIMESTAMP,
+			// ));
 		}
 		return true;
 	}

@@ -185,7 +185,7 @@ abstract class AbstractGamePage
 		if(isset($USER['timezone'])) {
 			try {
 				$dateTimeUser	= new DateTime("now", new DateTimeZone($USER['timezone']));
-			} catch (Exception $e) {
+			} catch (Exception) {
 				$dateTimeUser	= $dateTimeServer;
 			}
 		} else {
@@ -207,7 +207,7 @@ abstract class AbstractGamePage
 			'VERSION'			=> $config->VERSION,
 			'date'				=> explode("|", date('Y\|n\|j\|G\|i\|s\|Z', TIMESTAMP)),
 			'isPlayerCardActive' => isModuleAvailable(MODULE_PLAYERCARD),
-			'REV'				=> substr($config->VERSION, -4),
+			'REV'				=> substr((string) $config->VERSION, -4),
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'queryString'		=> $this->getQueryString(),
 			'themeSettings'		=> $THEME->getStyleSettings(),

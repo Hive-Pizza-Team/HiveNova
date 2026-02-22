@@ -76,7 +76,7 @@ class ShowVertifyPage extends AbstractLoginPage
 			try {
 				Mail::send($userData['email'], $userData['userName'], $MailSubject, $MailContent);
 			}
-			catch (Exception $e)
+			catch (Exception)
 			{
 				// This mail is wayne.
 			}

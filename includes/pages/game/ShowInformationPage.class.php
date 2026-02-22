@@ -168,17 +168,11 @@ class ShowInformationPage extends AbstractGamePage
 		
 		$sql = "SELECT id, name, galaxy, `system`, planet, last_jump_time, ".$resource[43]." FROM %%PLANETS%% WHERE id != :planetID AND id_owner = :userID AND planet_type = '3' AND ".$resource[43]." > 0 ORDER BY ";
 
-		switch($sort) {
-			case 1:
-				$sql .= 'galaxy '.$order.', `system` '.$order.', planet '.$order.', planet_type '.$order;
-				break;
-			case 2:
-				$sql .= 'name '.$order;
-				break;
-			default:
-				$sql .= 'id '.$order;
-				break;
-		}
+		match ($sort) {
+            1 => $sql .= 'galaxy '.$order.', `system` '.$order.', planet '.$order.', planet_type '.$order,
+            2 => $sql .= 'name '.$order,
+            default => $sql .= 'id '.$order,
+        };
 
 		
 		$moonResult = $db->select($sql, array(
@@ -334,7 +328,7 @@ class ShowInformationPage extends AbstractGamePage
 			$gateData	= array(
 				'nextTime'	=> _date($LNG['php_tdformat'], $nextTime, $USER['timezone']),
 				'restTime'	=> max(0, $nextTime - TIMESTAMP),
-				'startLink'	=> $PLANET['name'].' '.strip_tags(BuildPlanetAddressLink($PLANET)),
+				'startLink'	=> $PLANET['name'].' '.strip_tags((string) BuildPlanetAddressLink($PLANET)),
 				'gateList' 	=> $this->getTargetGates(),
 				'fleetList'	=> $this->getAvailableFleets(),
 			);

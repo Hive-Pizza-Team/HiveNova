@@ -235,7 +235,7 @@ class ShowMessagesPage extends AbstractGamePage
                     $this->redirectTo($redirectUrl);
                 }
 
-                $messageIDs	= array_filter($messageIDs, 'is_numeric');
+                $messageIDs	= array_filter($messageIDs, is_numeric(...));
 
                 if(empty($messageIDs))
                 {
@@ -283,7 +283,7 @@ class ShowMessagesPage extends AbstractGamePage
                     $this->redirectTo($redirectUrl);
                 }
 
-                $messageIDs	= array_filter($messageIDs, 'is_numeric');
+                $messageIDs	= array_filter($messageIDs, is_numeric(...));
 
                 if(empty($messageIDs))
                 {
@@ -309,7 +309,7 @@ class ShowMessagesPage extends AbstractGamePage
                     $this->redirectTo($redirectUrl);
                 }
 
-                $messageIDs	= array_filter($messageIDs, 'is_numeric');
+                $messageIDs	= array_filter($messageIDs, is_numeric(...));
 
                 if(empty($messageIDs))
                 {

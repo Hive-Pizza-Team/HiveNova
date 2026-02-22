@@ -59,7 +59,7 @@ class ShowIndexPage extends AbstractLoginPage
 			'verkey'			=> $verkey,
 			'descHeader'			=> sprintf($LNG['loginWelcome'], $config->game_name),
 			'descText'				=> sprintf($LNG['loginServerDesc'], $config->game_name),
-            'gameInformations'      => explode("\n", $LNG['gameInformations']),
+            'gameInformations'      => explode("\n", (string) $LNG['gameInformations']),
 			'loginInfo'				=> sprintf($LNG['loginInfo'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>')
 		));
 

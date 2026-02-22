@@ -170,8 +170,8 @@ function locale_date_format($format, $time, $LNG = NULL)
 	$months		= date('n', $time) - 1;
 
 	$format     = str_replace(array('D', 'M'), array('$D$', '$M$'), $format);
-	$format		= str_replace('$D$', addcslashes($LNG['week_day'][$weekDay], 'A..z'), $format);
-	$format		= str_replace('$M$', addcslashes($LNG['months'][$months], 'A..z'), $format);
+	$format		= str_replace('$D$', addcslashes((string) $LNG['week_day'][$weekDay], 'A..z'), $format);
+	$format		= str_replace('$M$', addcslashes((string) $LNG['months'][$months], 'A..z'), $format);
 
 	return $format;
 }
@@ -196,7 +196,7 @@ function _date($format, $time = null, $toTimeZone = null, $LNG = NULL)
 		$time	-= $date->getOffset();
 		try {
 			$date->setTimezone(new DateTimeZone($toTimeZone));
-		} catch (Exception $e) {
+		} catch (Exception) {
 		}
 		$time	+= $date->getOffset();
 	}
@@ -219,7 +219,7 @@ function ValidateAddress($address)
 	}
 }
 
-function message($mes, $dest = "", $time = "3", $topnav = false)
+function message($mes, $dest = "", $time = "3", $topnav = false): never
 {
 	require_once('includes/classes/class.template.php');
 	$template = new template();
@@ -311,7 +311,7 @@ function makebr($text)
 	// Danke an Meikel
 
 	$BR = "<br>\n";
-	return (version_compare(PHP_VERSION, "5.3.0", ">=")) ? nl2br($text, false) : strtr($text, array("\r\n" => $BR, "\r" => $BR, "\n" => $BR));
+	return (version_compare(PHP_VERSION, "5.3.0", ">=")) ? nl2br((string) $text, false) : strtr($text, array("\r\n" => $BR, "\r" => $BR, "\n" => $BR));
 }
 
 function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
@@ -377,7 +377,7 @@ function floatToString($number, $Pro = 0, $output = false)
 function isModuleAvailable($ID)
 {
 	global $USER;
-	$modules	= explode(';', Config::get()->moduls);
+	$modules	= explode(';', (string) Config::get()->moduls);
 
 	if (!isset($modules[$ID])) {
 		$modules[$ID] = 1;
@@ -437,7 +437,7 @@ function ClearCache()
 	*/
 
 	$config		= Config::get();
-	$version	= explode('.', $config->VERSION);
+	$version	= explode('.', (string) $config->VERSION);
 	$config->VERSION	= $version[0] . '.' . $version[1] . '.' . 'git';
 	$config->save();
 }
@@ -486,7 +486,7 @@ function isInactive($USER) {
 }
 
 
-function clearGIF()
+function clearGIF(): never
 {
 	header('Cache-Control: no-cache');
 	header('Content-type: image/gif');
@@ -532,7 +532,6 @@ function exceptionHandler($exception)
 		E_USER_ERROR		=> 'USER ERROR',
 		E_USER_WARNING		=> 'USER WARNING',
 		E_USER_NOTICE		=> 'USER NOTICE',
-		E_STRICT			=> 'STRICT NOTICE',
 		E_RECOVERABLE_ERROR	=> 'RECOVERABLE ERROR'
 	);
 
@@ -548,7 +547,7 @@ function exceptionHandler($exception)
 			$config		= Config::get();
 			$gameName	= $config->game_name;
 			$VERSION	= $config->VERSION;
-		} catch (ErrorException $e) {
+		} catch (ErrorException) {
 		}
 	}
 
@@ -616,7 +615,7 @@ function exceptionHandler($exception)
 			<b>PHP-Version: </b>' . PHP_VERSION . '<br>
 			<b>PHP-API: </b>' . php_sapi_name() . '<br>
 			<b>2Moons Version: </b>' . $VERSION . '<br>
-			<b>Debug Backtrace:</b><br>' . makebr(htmlspecialchars($exception->getTraceAsString())) . '
+			<b>Debug Backtrace:</b><br>' . makebr(htmlspecialchars((string) $exception->getTraceAsString())) . '
 		</td>
 	</tr>
 </table>
@@ -625,7 +624,7 @@ function exceptionHandler($exception)
 
 	echo str_replace(array('\\', ROOT_PATH, substr(ROOT_PATH, 0, 15)), array('/', '/', 'FILEPATH '), ob_get_clean());
 
-	$errorText	= date("[d-M-Y H:i:s]", TIMESTAMP) . ' ' . $errorType[$errno] . ': "' . strip_tags($exception->getMessage()) . "\"\r\n";
+	$errorText	= date("[d-M-Y H:i:s]", TIMESTAMP) . ' ' . $errorType[$errno] . ': "' . strip_tags((string) $exception->getMessage()) . "\"\r\n";
 	$errorText	.= 'File: ' . $exception->getFile() . ' | Line: ' . $exception->getLine() . "\r\n";
 	$errorText	.= 'URL: ' . PROTOCOL . HTTP_HOST . $_SERVER['REQUEST_URI'] . ' | Version: ' . $VERSION . "\r\n";
 	$errorText	.= "Stack trace:\r\n";

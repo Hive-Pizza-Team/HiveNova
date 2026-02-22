@@ -89,7 +89,7 @@ function ShowUniversePage() {
 					if(count(Universe::availableUniverses()) == 2)
 					{
 						// Hack The Session
-						setcookie(session_name(), session_id(), SESSION_LIFETIME, HTTP_BASE, NULL, HTTPS, true);
+						setcookie(session_name(), session_id(), SESSION_LIFETIME, HTTP_BASE, '', HTTPS, true);
 						HTTP::redirectTo("../admin.php?reload=r");
 					}
 				}
@@ -154,7 +154,7 @@ function ShowUniversePage() {
 				if($universeCount === 1)
 				{
 					// Hack The Session
-					setcookie(session_name(), session_id(), SESSION_LIFETIME, HTTP_ROOT.'uni'.$USER['universe'].'/', NULL, HTTPS, true);
+					setcookie(session_name(), session_id(), SESSION_LIFETIME, HTTP_ROOT.'uni'.$USER['universe'].'/', '', HTTPS, true);
 					HTTP::redirectTo("uni".$USER['universe']."/admin.php?reload=r");
 				}
 			break;

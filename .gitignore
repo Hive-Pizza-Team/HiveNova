@@ -1,3 +1,5 @@
+.phpunit.result.cache
+throwaway
 .DS_Store
 cache
 vendor

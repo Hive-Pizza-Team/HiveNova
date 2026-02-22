@@ -18,6 +18,10 @@
 class Theme
 {
 	static public $Themes;
+	public $skininfo   = [];
+	public $skin       = '';
+	public $template   = '';
+	public $customtpls = [];
 	private $THEMESETTINGS;
 	
 	function __construct()

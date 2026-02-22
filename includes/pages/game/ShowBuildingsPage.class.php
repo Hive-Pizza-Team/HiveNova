@@ -181,7 +181,15 @@ class ShowBuildingsPage extends AbstractGamePage
 			
 			$PLANET['b_building_id']	= serialize(array(array($Element, $BuildLevel, $elementTime, $BuildEndTime, $BuildMode)));
 			$PLANET['b_building']		= $BuildEndTime;
-			
+
+			// Database::get()->insert('INSERT INTO %%LOG_BUILDINGS%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
+			// 	'owner_id'	=> $USER['id'],
+			// 	'planet_id'	=> $PLANET['id'],
+			// 	'universe'	=> $PLANET['universe'],
+			// 	'element_id'=> $Element,
+			// 	'queued_at'	=> TIMESTAMP,
+			// ));
+
 		} else {
 			$addLevel = 0;
 			foreach($CurrentQueue as $QueueSubArray)
@@ -206,7 +214,15 @@ class ShowBuildingsPage extends AbstractGamePage
 			$elementTime    			= BuildFunctions::getBuildingTime($USER, $PLANET, $Element, NULL, !$AddMode, $BuildLevel);
 			$BuildEndTime				= $CurrentQueue[$ActualCount - 1][3] + $elementTime;
 			$CurrentQueue[]				= array($Element, $BuildLevel, $elementTime, $BuildEndTime, $BuildMode);
-			$PLANET['b_building_id']	= serialize($CurrentQueue);		
+			$PLANET['b_building_id']	= serialize($CurrentQueue);
+
+			// Database::get()->insert('INSERT INTO %%LOG_BUILDINGS%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
+			// 	'owner_id'	=> $USER['id'],
+			// 	'planet_id'	=> $PLANET['id'],
+			// 	'universe'	=> $PLANET['universe'],
+			// 	'element_id'=> $Element,
+			// 	'queued_at'	=> TIMESTAMP,
+			// ));
 		}
 
 	}

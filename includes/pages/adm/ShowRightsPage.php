@@ -41,7 +41,7 @@ function ShowRightsPage()
 				}
 				
 				if($_POST['action'] == 'send') {
-					$GLOBALS['DATABASE']->query("UPDATE ".USERS." SET `rights` = '".serialize(array_map('intval', $_POST['rights']))."' WHERE `id` = '".$id."';");
+					$GLOBALS['DATABASE']->query("UPDATE ".USERS." SET `rights` = '".serialize(array_map(intval(...), $_POST['rights']))."' WHERE `id` = '".$id."';");
 				}
 				
 				$Rights	= $GLOBALS['DATABASE']->getFirstRow("SELECT rights FROM ".USERS." WHERE `id` = '".$id."';");
@@ -49,7 +49,7 @@ function ShowRightsPage()
 					$Rights['rights']	= array();
 				}
 				
-				$Files	= array_map('prepare', array_diff(scandir('includes/pages/adm/'), array('.', '..', '.svn', 'index.html', '.htaccess', 'ShowIndexPage.php', 'ShowOverviewPage.php', 'ShowMenuPage.php', 'ShowTopnavPage.php')));
+				$Files	= array_map(prepare(...), array_diff(scandir('includes/pages/adm/'), array('.', '..', '.svn', 'index.html', '.htaccess', 'ShowIndexPage.php', 'ShowOverviewPage.php', 'ShowMenuPage.php', 'ShowTopnavPage.php')));
 				
 				$template->assign_vars(array(	
 					'Files'						=> $Files, 

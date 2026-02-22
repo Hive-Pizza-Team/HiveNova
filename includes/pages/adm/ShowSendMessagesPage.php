@@ -24,21 +24,12 @@ function ShowSendMessagesPage() {
 	$ACTION	= HTTP::_GP('action', '');
 	if ($ACTION == 'send')
 	{
-		switch($USER['authlevel'])
-		{
-			case AUTH_MOD:
-				$class = 'mod';
-			break;
-			case AUTH_OPS:
-				$class = 'ops';
-			break;
-			case AUTH_ADM:
-				$class = 'admin';
-			break;
-			default:
-				$class = '';
-			break;
-		}
+		$class = match ($USER['authlevel']) {
+            AUTH_MOD => 'mod',
+            AUTH_OPS => 'ops',
+            AUTH_ADM => 'admin',
+            default => '',
+        };
 
 		$Subject	= HTTP::_GP('subject', '', true);
 		$Message 	= HTTP::_GP('text', '', true);
@@ -73,7 +64,7 @@ function ShowSendMessagesPage() {
 					);
 				}
 				
-				Mail::multiSend($userList, strip_tags($Subject));
+				Mail::multiSend($userList, strip_tags((string) $Subject));
 			}
 			exit($LNG['ma_message_sended']);
 		} else {

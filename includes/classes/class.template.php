@@ -15,8 +15,6 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-require('includes/libs/Smarty/Smarty.class.php');
-		
 class template extends Smarty
 {
 	protected $window	= 'full';
@@ -31,8 +29,6 @@ class template extends Smarty
 
 	private function smartySettings()
 	{
-		$this->php_handling = Smarty::PHP_REMOVE;
-
 		$this->setForceCompile(false);
 		$this->setMergeCompiledIncludes(true);
 		$this->setCompileCheck(true);#Set false for production!
@@ -41,6 +37,7 @@ class template extends Smarty
 		$this->setCompileDir(is_writable(CACHE_PATH) ? CACHE_PATH : $this->getTempPath());
 		$this->setCacheDir($this->getCompileDir().'templates');
 		$this->setTemplateDir('styles/templates/');
+		$this->addPluginsDir(ROOT_PATH . 'includes/smarty-plugins/');
 	}
 
 	private function getTempPath()
@@ -59,7 +56,7 @@ class template extends Smarty
 
 	public function loadscript($script)
 	{
-		$this->jsscript[]			= substr($script, 0, -3);
+		$this->jsscript[]			= substr((string) $script, 0, -3);
 	}
 
 	public function execscript($script)
@@ -75,7 +72,7 @@ class template extends Smarty
 		if(isset($USER['timezone'])) {
 			try {
 				$dateTimeUser	= new DateTime("now", new DateTimeZone($USER['timezone']));
-			} catch (Exception $e) {
+			} catch (Exception) {
 				$dateTimeUser	= $dateTimeServer;
 			}
 		} else {
@@ -89,7 +86,7 @@ class template extends Smarty
 			'title'				=> $config->game_name.' - '.$LNG['adm_cp_title'],
 			'fcm_info'			=> $LNG['fcm_info'],
             'lang'    			=> $LNG->getLanguage(),
-			'REV'				=> substr($config->VERSION, -4),
+			'REV'				=> substr((string) $config->VERSION, -4),
 			'date'				=> explode("|", date('Y\|n\|j\|G\|i\|s\|Z', TIMESTAMP)),
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'VERSION'			=> $config->VERSION,
@@ -130,7 +127,8 @@ class template extends Smarty
 		parent::display($file);
 	}
 	
-	public function display($file = NULL, $cache_id = NULL, $compile_id = NULL, $parent = NULL)
+	#[\Override]
+    public function display($file = NULL, $cache_id = NULL, $compile_id = NULL, $parent = NULL)
 	{
 		global $LNG;
 		$this->compile_id	= $LNG->getLanguage();
@@ -174,6 +172,7 @@ class template extends Smarty
     * Workaround  for new Smarty Method to add custom props...
     */
 
+    #[\Override]
     public function __get($name)
     {
         $allowed = array(
@@ -191,6 +190,7 @@ class template extends Smarty
         }
     }
 	
+    #[\Override]
     public function __set($name, $value)
     {
         $allowed = array(

@@ -37,8 +37,8 @@ function ShowMessageListPage()
 	$categories	= $LNG['mg_type'];
 	unset($categories[999]);
 	
-	$dateStart	= array_filter($dateStart, 'is_numeric');
-	$dateEnd	= array_filter($dateEnd, 'is_numeric');
+	$dateStart	= array_filter($dateStart, is_numeric(...));
+	$dateEnd	= array_filter($dateEnd, is_numeric(...));
 	
 	$useDateStart	= count($dateStart) == 3;
 	$useDateEnd		= count($dateEnd) == 3;

@@ -31,7 +31,7 @@ class ShowFleetDealerPage extends AbstractGamePage
 		
 		$shipID			= HTTP::_GP('shipID', 0);
 		$Count			= max(0, round(HTTP::_GP('count', 0.0)));
-		$allowedShipIDs	= explode(',', Config::get()->trade_allowed_ships);
+		$allowedShipIDs	= explode(',', (string) Config::get()->trade_allowed_ships);
 		
 		if(!empty($shipID) && !empty($Count) && in_array($shipID, $allowedShipIDs) && $PLANET[$resource[$shipID]] >= $Count)
 		{
@@ -70,7 +70,7 @@ class ShowFleetDealerPage extends AbstractGamePage
 		
 		$Cost		= array();
 		
-		$allowedShipIDs	= explode(',', Config::get()->trade_allowed_ships);
+		$allowedShipIDs	= explode(',', (string) Config::get()->trade_allowed_ships);
 		
 		foreach($allowedShipIDs as $shipID)
 		{

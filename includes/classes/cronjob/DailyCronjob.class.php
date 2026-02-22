@@ -32,12 +32,12 @@ class DailyCronJob implements CronjobTask
 		$sql			= "SHOW TABLE STATUS FROM `".DB_NAME."`;";
 		$sqlTableRaw	= Database::get()->nativeQuery($sql);
 
-		$prefixCounts	= strlen(DB_PREFIX);
+		$prefixCounts	= strlen((string) DB_PREFIX);
 		$dbTables		= array();
 
 		foreach($sqlTableRaw as $table)
 		{
-			if (DB_PREFIX == substr($table['Name'], 0, $prefixCounts)) {
+			if (DB_PREFIX == substr((string) $table['Name'], 0, $prefixCounts)) {
 				$dbTables[] = $table['Name'];
 			}
 		}

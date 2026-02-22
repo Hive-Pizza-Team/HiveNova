@@ -95,21 +95,12 @@ function ShowSearchPage()
 
     $SpecialSpecify	= "";
 	
-	switch($SearchMethod)
-	{
-		case 'exacto':
-			$SpecifyWhere	= "= '".$GLOBALS['DATABASE']->sql_escape($SearchKey)."'";
-		break;
-		case 'last':
-			$SpecifyWhere	= "LIKE '".$GLOBALS['DATABASE']->sql_escape($SearchKey, true)."%'";
-		break;
-		case 'first':
-			$SpecifyWhere	= "LIKE '%".$GLOBALS['DATABASE']->sql_escape($SearchKey, true)."'";
-		break;
-		default:
-			$SpecifyWhere	= "LIKE '%".$GLOBALS['DATABASE']->sql_escape($SearchKey, true)."%'";
-		break;
-	};
+	$SpecifyWhere = match ($SearchMethod) {
+        'exacto' => "= '".$GLOBALS['DATABASE']->sql_escape($SearchKey)."'",
+        'last' => "LIKE '".$GLOBALS['DATABASE']->sql_escape($SearchKey, true)."%'",
+        'first' => "LIKE '%".$GLOBALS['DATABASE']->sql_escape($SearchKey, true)."'",
+        default => "LIKE '%".$GLOBALS['DATABASE']->sql_escape($SearchKey, true)."%'",
+    };;
 
 	if (!empty($SearchFile))
 	{

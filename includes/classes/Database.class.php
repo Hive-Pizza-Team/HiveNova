@@ -140,7 +140,7 @@ class Database
 
 	protected function getQueryType($qry)
 	{
-		if(!preg_match('!^(\S+)!', $qry, $match))
+		if(!preg_match('!^(\S+)!', (string) $qry, $match))
         {
             throw new Exception("Invalid query $qry!");
         }

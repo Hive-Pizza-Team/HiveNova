@@ -59,7 +59,7 @@ function ShowFlyingFleetPage()
 	
 	while($fleetRow = $GLOBALS['DATABASE']->fetch_array($fleetResult)) {
 		$shipList		= array();
-		$shipArray		= array_filter(explode(';', $fleetRow['fleet_array']));
+		$shipArray		= array_filter(explode(';', (string) $fleetRow['fleet_array']));
 		foreach($shipArray as $ship) {
 			$shipDetail		= explode(',', $ship);
 			$shipList[$shipDetail[0]]	= $shipDetail[1];

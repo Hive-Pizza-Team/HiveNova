@@ -22,7 +22,7 @@ function ShowModulePage()
 	global $LNG;
 
 	$config	= Config::get(Universe::getEmulated());
-	$module	= explode(';', $config->moduls);
+	$module	= explode(';', (string) $config->moduls);
 
 	if(isset($_GET['mode'])) {
 		$module[HTTP::_GP('id', 0)]	= ($_GET['mode'] == 'aktiv') ? 1 : 0;

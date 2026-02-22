@@ -227,10 +227,10 @@ class GalaxyRows
 		
         $this->galaxyData[$this->galaxyRow['planet']]['user']	= array(
 			'id'			=> $this->galaxyRow['userid'],
-			'username'		=> htmlspecialchars($this->galaxyRow['username'], ENT_QUOTES, "UTF-8"),
+			'username'		=> htmlspecialchars((string) $this->galaxyRow['username'], ENT_QUOTES, "UTF-8"),
 			'rank'			=> $this->galaxyRow['total_rank'],
 			'points'		=> pretty_number($this->galaxyRow['total_points']),
-			'playerrank'	=> isModuleAvailable(25)?sprintf($LNG['gl_in_the_rank'], htmlspecialchars($this->galaxyRow['username'],ENT_QUOTES,"UTF-8"), $this->galaxyRow['total_rank']):htmlspecialchars($this->galaxyRow['username'],ENT_QUOTES,"UTF-8"),
+			'playerrank'	=> isModuleAvailable(25)?sprintf($LNG['gl_in_the_rank'], htmlspecialchars((string) $this->galaxyRow['username'],ENT_QUOTES,"UTF-8"), $this->galaxyRow['total_rank']):htmlspecialchars((string) $this->galaxyRow['username'],ENT_QUOTES,"UTF-8"),
 			'class'			=> $Class,
 			'isBuddy'		=> $this->galaxyRow['buddy'] == 0,
 		);
@@ -269,7 +269,7 @@ class GalaxyRows
 			
 			$this->galaxyData[$this->galaxyRow['planet']]['alliance']	= array(
 				'id'		=> $this->galaxyRow['allyid'],
-				'name'		=> htmlspecialchars($this->galaxyRow['ally_name'], ENT_QUOTES, "UTF-8"),
+				'name'		=> htmlspecialchars((string) $this->galaxyRow['ally_name'], ENT_QUOTES, "UTF-8"),
 				'member'	=> sprintf(($this->galaxyRow['ally_members'] == 1) ? $LNG['gl_member_add'] : $LNG['gl_member'], $this->galaxyRow['ally_members']),
 				'web'		=> $this->galaxyRow['ally_web'],
 				'tag'		=> $this->galaxyRow['ally_tag'],
@@ -299,7 +299,7 @@ class GalaxyRows
 		} else {
 			$this->galaxyData[$this->galaxyRow['planet']]['moon']	= array(
 				'id'		=> $this->galaxyRow['m_id'],
-				'name'		=> htmlspecialchars($this->galaxyRow['m_name'], ENT_QUOTES, "UTF-8"),
+				'name'		=> htmlspecialchars((string) $this->galaxyRow['m_name'], ENT_QUOTES, "UTF-8"),
 				'temp_min'	=> $this->galaxyRow['m_temp_min'], 
 				'diameter'	=> $this->galaxyRow['m_diameter'],
 			);
@@ -310,7 +310,7 @@ class GalaxyRows
 	{
 		$this->galaxyData[$this->galaxyRow['planet']]['planet']	= array(
 			'id'			=> $this->galaxyRow['id'],
-			'name'			=> htmlspecialchars($this->galaxyRow['name'], ENT_QUOTES, "UTF-8"),
+			'name'			=> htmlspecialchars((string) $this->galaxyRow['name'], ENT_QUOTES, "UTF-8"),
 			'image'			=> $this->galaxyRow['image'],
 			'phalanx'		=> isModuleAvailable(MODULE_PHALANX) && ShowPhalanxPage::allowPhalanx($this->galaxyRow['galaxy'], $this->galaxyRow['system']),
 		);

@@ -42,7 +42,7 @@ class HTTP {
 
 	static public function sendCookie($name, $value = "", $toTime = NULL)
 	{
-		setcookie($name, $value, $toTime);
+		setcookie($name, (string) $value, $toTime);
 	}
 	
 	static public function _GP($name, $default, $multibyte = false, $highnum = false)

@@ -103,7 +103,7 @@ abstract class AbstractLoginPage
 			'lang'					=> $LNG->getLanguage(),
 			'UNI'					=> Universe::current(),
 			'VERSION'				=> $config->VERSION,
-			'REV'					=> substr($config->VERSION, -4),
+			'REV'					=> substr((string) $config->VERSION, -4),
 			'languages'				=> Language::getAllowedLangs(false),
 		));
 	}

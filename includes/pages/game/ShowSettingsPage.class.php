@@ -60,7 +60,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'email'				=> $USER['email'],
 				'permaEmail'		=> $USER['email_2'],
 				'hiveAccount'		=> $USER['hive_account'],
-				'isHiveKeychainAct' => (substr_compare($USER['email'], '@hive.blog', -strlen('@hive.blog')) === 0),
+				'isHiveKeychainAct' => (str_ends_with((string) $USER['email'], '@hive.blog')),
 				'disableDepositButton' => ($USER['universe'] === "1"),
 				'userLang'			=> $USER['lang'],
 				'theme'				=> $USER['dpath'],
@@ -299,7 +299,7 @@ class ShowSettingsPage extends AbstractGamePage
 			}
 		}
 		
-		if (!empty($newpassword) && !empty($password) && password_verify($password, $USER['password']) && $newpassword == $newpassword2)
+		if (!empty($newpassword) && !empty($password) && password_verify((string) $password, (string) $USER['password']) && $newpassword == $newpassword2)
 		{
 			$newpass 	 = PlayerUtil::cryptPassword($newpassword);
 			$sql = "UPDATE %%USERS%% SET password = :newpass WHERE id = :userID;";
@@ -312,7 +312,7 @@ class ShowSettingsPage extends AbstractGamePage
 
 		if (!empty($email) && $email != $USER['email'])
 		{
-			if (!password_verify($password, $USER['password'])) {
+			if (!password_verify((string) $password, (string) $USER['password'])) {
 				$this->printMessage($LNG['op_need_pass_mail'], array(array(
 					'label'	=> $LNG['sys_back'],
 					'url'	=> 'game.php?page=settings'

@@ -64,7 +64,7 @@ class ShowLoginPage extends AbstractLoginPage
 
 			if (PlayerUtil::isHiveAccountValid($loginData['hive_account']) && PlayerUtil::isHiveSignValid($loginData['hive_account'],$password)) {
 				$verify = "true";
-			} else if (password_verify($password, $loginData['password'])) {
+			} else if (password_verify((string) $password, (string) $loginData['password'])) {
 				$verify = "true";
 			}
 

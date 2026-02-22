@@ -129,6 +129,14 @@ class ShowShipyardPage extends AbstractGamePage
 			
 			$BuildArray[]			= array($Element, $Count);
 			$PLANET['b_hangar_id']	= serialize($BuildArray);
+
+			// Database::get()->insert('INSERT INTO %%LOG_BUILDINGS%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
+			// 	'owner_id'	=> $USER['id'],
+			// 	'planet_id'	=> $PLANET['id'],
+			// 	'universe'	=> $PLANET['universe'],
+			// 	'element_id'=> $Element,
+			// 	'queued_at'	=> TIMESTAMP,
+			// ));
 		}
 	}
 	
@@ -262,7 +270,7 @@ class ShowShipyardPage extends AbstractGamePage
 			'elementList'	=> $elementList,
 			'NotBuilding'	=> $NotBuilding,
 			'BuildList'		=> $buildList,
-			'maxlength'		=> strlen(Config::get()->max_fleet_per_build),
+			'maxlength'		=> strlen((string) Config::get()->max_fleet_per_build),
 			'mode'			=> $mode,
 			'messages'		=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], pretty_number($Messages))): false,
 			'SolarEnergy'		=> $SolarEnergy,

@@ -91,7 +91,7 @@ class MissionCaseColonisation extends MissionFunctions implements Mission
 						if ($this->_fleet['fleet_amount'] == 1) {
 							$this->KillFleet();
 						} else {
-							$CurrentFleet = explode(";", $this->_fleet['fleet_array']);
+							$CurrentFleet = explode(";", (string) $this->_fleet['fleet_array']);
 							$NewFleet     = '';
 							foreach ($CurrentFleet as $Group)
 							{

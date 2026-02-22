@@ -27,8 +27,6 @@ class ShowChangelogPage extends AbstractGamePage
 	
 	function show() 
 	{
-        include ROOT_PATH.'includes/libs/Parsedown/Parsedown.php';
-
         $parsedown = new Parsedown();
 
 		$this->assign(array(

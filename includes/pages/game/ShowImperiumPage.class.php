@@ -35,18 +35,11 @@ class ShowImperiumPage extends AbstractGamePage
 		
 		$sql = "SELECT * FROM %%PLANETS%% WHERE id_owner = :userID AND destruyed = '0' ORDER BY ";
 
-		switch($USER['planet_sort'])
-		{
-			case 2:
-				$sql .= 'name '.$order;
-				break;
-			case 1:
-				$sql .= 'galaxy '.$order.', `system` '.$order.', planet '.$order.', planet_type '.$order;
-				break;
-			default:
-				$sql .= 'id '.$order;
-				break;
-		}
+		match ($USER['planet_sort']) {
+            2 => $sql .= 'name '.$order,
+            1 => $sql .= 'galaxy '.$order.', `system` '.$order.', planet '.$order.', planet_type '.$order,
+            default => $sql .= 'id '.$order,
+        };
 
         $PlanetsRAW = $db->select($sql, array(
             ':userID'   => $USER['id']

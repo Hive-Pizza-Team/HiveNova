@@ -45,7 +45,7 @@ function ShowLoginPage()
 	if(isset($_REQUEST['admin_pw']))
 	{
 
-		if(password_verify($_REQUEST['admin_pw'], $USER['password'])) {
+		if(password_verify((string) $_REQUEST['admin_pw'], (string) $USER['password'])) {
 			$session->adminAccess	= 1;
 			HTTP::redirectTo('admin.php');
 		}

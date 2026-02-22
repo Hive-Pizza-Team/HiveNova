@@ -61,21 +61,12 @@ class FleetFunctions
 		}
 
 
-		switch($techSpeed)
-		{
-			case 1:
-				$speed	= $base_speed * (1 + (0.1 * $Player['combustion_tech']));
-			break;
-			case 2:
-				$speed	= $base_speed * (1 + (0.2 * $Player['impulse_motor_tech']));
-			break;
-			case 3:
-				$speed	= $base_speed * (1 + (0.3 * $Player['hyperspace_motor_tech']));
-			break;
-			default:
-				$speed	= 0;
-			break;
-		}
+		$speed = match ($techSpeed) {
+            1 => $base_speed * (1 + (0.1 * $Player['combustion_tech'])),
+            2 => $base_speed * (1 + (0.2 * $Player['impulse_motor_tech'])),
+            3 => $base_speed * (1 + (0.3 * $Player['hyperspace_motor_tech'])),
+            default => 0,
+        };
 
 		return $speed;
 	}
@@ -235,7 +226,7 @@ class FleetFunctions
 
 	public static function unserialize($fleetAmount)
 	{
-		$fleetTyps		= explode(';', $fleetAmount);
+		$fleetTyps		= explode(';', (string) $fleetAmount);
 
 		$fleetAmount	= array();
 

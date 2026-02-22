@@ -16,7 +16,6 @@
  */
 class Config
 {
-	protected $configData = array();
 	protected $updateRecords = array();
 	protected static $instances = array();
 
@@ -84,10 +83,9 @@ class Config
 		}
 	}
 
-	public function __construct($configData)
-	{
-		$this->configData = $configData;
-	}
+	public function __construct(protected $configData)
+    {
+    }
 
 	public function __get($key)
 	{
@@ -158,7 +156,7 @@ class Config
 		return true;
 	}
 
-	static function getAll()
+	static function getAll(): never
 	{
 		throw new Exception("Config::getAll is deprecated!");
 	}

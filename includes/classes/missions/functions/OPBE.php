@@ -112,7 +112,7 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
 
     /********** BATTLE ELABORATION **********/
     $opbe = new Battle($attackerGroupObj, $defenderGroupObj);
-    $startBattle = DebugManager::runDebugged(array($opbe, 'startBattle'), $errorHandler, $exceptionHandler);
+    $startBattle = DebugManager::runDebugged($opbe->startBattle(...), $errorHandler, $exceptionHandler);
     $startBattle();
     $report = $opbe->getReport();
 

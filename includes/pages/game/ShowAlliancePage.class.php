@@ -151,7 +151,7 @@ class ShowAlliancePage extends AbstractGamePage
 		$this->assign(array(
 			'diplomaticData'				=> $diplomaticmaticData,
 			'statisticData'					=> $statisticData,
-			'ally_description' 				=> nl2br($this->allianceData['ally_description']),
+			'ally_description' 				=> nl2br((string) $this->allianceData['ally_description']),
 			'ally_id'	 					=> $this->allianceData['id'],
 			'ally_image' 					=> $this->allianceData['ally_image'],
 			'ally_web'						=> $this->allianceData['ally_web'],
@@ -587,7 +587,7 @@ class ShowAlliancePage extends AbstractGamePage
 			'ally_max_members'	 		=> $this->allianceData['ally_max_members'],
 			'ally_name'					=> $this->allianceData['ally_name'],
 			'ally_image'				=> $this->allianceData['ally_image'],
-			'ally_description'			=> nl2br($this->allianceData['ally_description']),
+			'ally_description'			=> nl2br((string) $this->allianceData['ally_description']),
 			'ally_text' 				=> $this->allianceData['ally_text'],
 			'rankName'					=> $rankName,
 			'requests'					=> sprintf($LNG['al_new_requests'], $ApplyCount),
@@ -637,7 +637,7 @@ class ShowAlliancePage extends AbstractGamePage
 				':userId'    => $USER['id'],
 				':statType'    => 1
 			));
-		} catch (Exception $e) {
+		} catch (Exception) {
 			$USER['total_points'] = 0;
 		}
 
@@ -781,7 +781,7 @@ class ShowAlliancePage extends AbstractGamePage
 		global $LNG;
 
 		$action		= HTTP::_GP('action', 'overview');
-		$methodName	= 'admin' . ucwords($action);
+		$methodName	= 'admin' . ucwords((string) $action);
 
 		if (!is_callable(array($this, $methodName))) {
 			ShowErrorPage::printError($LNG['page_doesnt_exist']);
@@ -903,17 +903,11 @@ class ShowAlliancePage extends AbstractGamePage
 				':text'						=> $text
 			));
 		} else if (isset($this->allianceData)) {
-			switch ($textMode) {
-				case 'internal':
-					$text	= $this->allianceData['ally_text'];
-					break;
-				case 'apply':
-					$text	= $this->allianceData['ally_request'];
-					break;
-				default:
-					$text	= $this->allianceData['ally_description'];
-					break;
-			}
+			$text = match ($textMode) {
+                'internal' => $this->allianceData['ally_text'],
+                'apply' => $this->allianceData['ally_request'],
+                default => $this->allianceData['ally_description'],
+            };
 		} else {
 			// should not be here. allianceData is null
 			return;
@@ -943,7 +937,7 @@ class ShowAlliancePage extends AbstractGamePage
 			'ally_owner_range'			=> $this->allianceData['ally_owner_range'],
 			'ally_stats_data'			=> $this->allianceData['ally_stats'],
 			'ally_diplo_data'			=> $this->allianceData['ally_diplo'],
-			'ally_events'				=> explode(',', $this->allianceData['ally_events']),
+			'ally_events'				=> explode(',', (string) $this->allianceData['ally_events']),
 			'available_events'			=> $available_events,
 		));
 
@@ -1398,7 +1392,7 @@ class ShowAlliancePage extends AbstractGamePage
 				':userId'    => $USER['id'],
 				':statType'    => 1
 			));
-		} catch (Exception $e) {
+		} catch (Exception) {
 			$USER['total_points'] = 0;
 		}
 
@@ -1711,9 +1705,9 @@ class ShowAlliancePage extends AbstractGamePage
 		$level	= HTTP::_GP('level', 0);
 		$text	= HTTP::_GP('text', '', true);
 
-		if(strlen($text) > 255) {
+		if(strlen((string) $text) > 255) {
 			// accept_text max len = 255
-			$text = substr($text, 0, 255);
+			$text = substr((string) $text, 0, 255);
 		}
 
 		if ($level == 5) {

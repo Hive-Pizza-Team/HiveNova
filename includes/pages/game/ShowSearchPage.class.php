@@ -175,7 +175,7 @@ class ShowSearchPage extends AbstractGamePage
 		
 		$searchList	= array();
 		
-		$seachModes	= explode('|', $seachMode);
+		$seachModes	= explode('|', (string) $seachMode);
 		
 		if(empty($searchText)) {
 			$this->sendJSON(array());

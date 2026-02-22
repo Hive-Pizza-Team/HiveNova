@@ -356,15 +356,15 @@ class Session
 	
 	private function compareIpAddress($ip1, $ip2, $blockCount)
 	{
-		if (strpos($ip2, ':') !== false && strpos($ip1, ':') !== false)
+		if (str_contains((string) $ip2, ':') && str_contains((string) $ip1, ':'))
 		{
 			$s_ip = $this->short_ipv6($ip1, $blockCount);
 			$u_ip = $this->short_ipv6($ip2, $blockCount);
 		}
 		else
 		{
-			$s_ip = implode('.', array_slice(explode('.', $ip1), 0, $blockCount));
-			$u_ip = implode('.', array_slice(explode('.', $ip2), 0, $blockCount));
+			$s_ip = implode('.', array_slice(explode('.', (string) $ip1), 0, $blockCount));
+			$u_ip = implode('.', array_slice(explode('.', (string) $ip2), 0, $blockCount));
 		}
 		
 		return ($s_ip == $u_ip);
@@ -377,7 +377,7 @@ class Session
 			return '';
 		}
 
-		$blocks = substr_count($ip, ':') + 1;
+		$blocks = substr_count((string) $ip, ':') + 1;
 		if ($blocks < 9)
 		{
 			$ip = str_replace('::', ':' . str_repeat('0000:', 9 - $blocks), $ip);
@@ -388,7 +388,7 @@ class Session
 		}
 		if ($length < 4)
 		{
-			$ip = implode(':', array_slice(explode(':', $ip), 0, 1 + $length));
+			$ip = implode(':', array_slice(explode(':', (string) $ip), 0, 1 + $length));
 		}
 
 		return $ip;

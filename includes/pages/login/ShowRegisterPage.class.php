@@ -152,7 +152,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			$errors[]	= $LNG['registerErrorUsernameChar'];
 		}
 
-		if(strlen($password) < 6) {
+		if(strlen((string) $password) < 6) {
 			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], 6);
 		}
 			
@@ -256,8 +256,6 @@ class ShowRegisterPage extends AbstractLoginPage
 		
 		if ($config->capaktiv === '1')
 		{
-            require('includes/libs/reCAPTCHA/autoload.php');
-
             $recaptcha = new \ReCaptcha\ReCaptcha($config->capprivate);
             $resp = $recaptcha->verify(HTTP::_GP('g-recaptcha-response', ''), Session::getClientIp());
             if (!$resp->isSuccess())

@@ -109,7 +109,7 @@ class Cronjob
 			return false;
 		}
 
-		return strtotime($lastTime);
+		return strtotime((string) $lastTime);
 	}
 	
 	static function reCalculateCronjobs($cronjobID = NULL)

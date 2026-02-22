@@ -50,14 +50,14 @@ function ShowDumpPage()
 
 			$dumpData		= array();
 
-			$prefixCounts	= strlen(DB_PREFIX);
+			$prefixCounts	= strlen((string) DB_PREFIX);
 
 			$dumpData['sqlTables']	= array();
 			$sqlTableRaw			= $GLOBALS['DATABASE']->query("SHOW TABLE STATUS FROM `".DB_NAME."`;");
 
 			while($table = $GLOBALS['DATABASE']->fetchArray($sqlTableRaw))
 			{
-				if(DB_PREFIX == substr($table['Name'], 0, $prefixCounts) || $table['Name'] === 'transactions')
+				if(DB_PREFIX == substr((string) $table['Name'], 0, $prefixCounts) || $table['Name'] === 'transactions')
 				{
 					$dumpData['sqlTables'][]	= $table['Name'];
 				}

@@ -38,26 +38,14 @@ function ShowLog()
 	#
 	# TODO: LOG Search
 	
-	switch ($table) {
-		case 'planet':
-			ShowLogPlanetsList();
-		break;
-		case 'player':
-			ShowLogPlayersList();
-		break;
-		case 'settings':
-			ShowLogSettingsList();
-		break;
-		case 'present':
-			ShowLogPresent();
-		break;
-		case 'detail':
-			ShowLogDetail();
-		break;
-		default:
-			ShowLogOverview();
-		break;
-	}
+	match ($table) {
+        'planet' => ShowLogPlanetsList(),
+        'player' => ShowLogPlayersList(),
+        'settings' => ShowLogSettingsList(),
+        'present' => ShowLogPresent(),
+        'detail' => ShowLogDetail(),
+        default => ShowLogOverview(),
+    };
 }
 
 function ShowLogOverview() {

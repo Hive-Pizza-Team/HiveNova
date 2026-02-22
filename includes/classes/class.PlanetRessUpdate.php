@@ -32,6 +32,8 @@ class ResourceUpdate
 	private $PLANET			= array();
 	private $USER			= array();
 	private $Builded		= array();
+	private $Build			= true;
+	private $Tech			= true;
 
 	function __construct($Build = true, $Tech = true)
 	{

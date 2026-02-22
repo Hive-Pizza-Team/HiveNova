@@ -52,7 +52,7 @@ class SQLDumper
             $passwordArgument = "--password='".escapeshellarg($database['userpw'])."'";
         }
 
-		$dbTables	= array_map('escapeshellarg', $dbTables);
+		$dbTables	= array_map(escapeshellarg(...), $dbTables);
 		$sqlDump	= shell_exec("mysqldump --host=".escapeshellarg($database['host'])." --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' ".$passwordArgument." --no-tablespaces --no-create-db --order-by-primary --add-drop-table --comments --complete-insert --hex-blob ".escapeshellarg($database['databasename'])." ".implode(' ', $dbTables)." 2>&1 1> ".$filePath);
 		if(strlen($sqlDump) !== 0) #mysqldump error
 		{
@@ -140,7 +140,7 @@ LOCK TABLES `{$dbTable}` WRITE;
 				$columnNames[]	= $columnData['Field'];
 				foreach($integerTypes as $type)
 				{
-					if(strpos($columnData['Type'], $type.'(') !== false)
+					if(str_contains((string) $columnData['Type'], $type.'('))
 					{
 						$numColumns[]	= $columnData['Field'];
 						break;
@@ -218,7 +218,7 @@ UNLOCK TABLES;
 		{
 			$database	= array();
 			require 'includes/config.php';
-			$sqlDump	= shell_exec("mysql --host='".escapeshellarg($database['host'])."' --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' --password='".escapeshellarg($database['userpw'])."' '".escapeshellarg($database['databasename'])."' < ".escapeshellarg($filePath)." 2>&1 1> /dev/null");
+			$sqlDump	= shell_exec("mysql --host='".escapeshellarg($database['host'])."' --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' --password='".escapeshellarg($database['userpw'])."' '".escapeshellarg($database['databasename'])."' < ".escapeshellarg((string) $filePath)." 2>&1 1> /dev/null");
 			if(strlen($sqlDump) !== 0) #mysql error
 			{
 				throw new Exception($sqlDump);
