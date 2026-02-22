@@ -229,6 +229,15 @@ class Fire
     }
     public function getShotsFiredByAllToDefenderType(ShipType $shipType_D, $real = false)
     {
+        if ($real)
+        {
+            // Must compute floor(total_shots * type_count / total_count) in one step.
+            // Doing floor(floor(shots/total) * count) loses precision when shots < total
+            // (e.g. 100 shots vs 6050 ships gives floor(0) * count = 0, all shots lost).
+            $num = new Number($this->getAttackerTotalShots() * $shipType_D->getCount());
+            $denum = new Number($this->defenderFleet->getTotalCount());
+            return Math::divide($num, $denum, $real);
+        }
         $first = $this->getShotsFiredByAllToOne();
         $second = new Number($shipType_D->getCount());
         return Math::multiple($first, $second, $real);
