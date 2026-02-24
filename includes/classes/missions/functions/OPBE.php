@@ -77,7 +77,7 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
     {
         $player = $attacker['player'];
         //techs + bonus. Note that the bonus is divided by the factor because the result sum will be multiplied by the same inside OPBE
-        list($attTech,$armorTech,$shieldTech) = getTechsFromArray($player);
+        list($attTech,$shieldTech,$armorTech) = getTechsFromArray($player);
         //--
         $attackerPlayerObj = $attackerGroupObj->createPlayerIfNotExist($player['id'], array(), $attTech, $shieldTech, $armorTech);
         $attackerFleetObj = new Fleet($fleetID);
@@ -96,7 +96,7 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
     {
         $player = $defender['player'];
         //techs + bonus. Note that the bonus is divided by the factor because the result sum will be multiplied by the same inside OPBE
-        list($attTech,$armorTech,$shieldTech) = getTechsFromArray($player);
+        list($attTech,$shieldTech,$armorTech) = getTechsFromArray($player);
         //--
         $defenderPlayerObj = $defenderGroupObj->createPlayerIfNotExist($player['id'], array(), $attTech, $shieldTech, $armorTech);
         $defenderFleetObj = getFleet($fleetID);
@@ -239,7 +239,7 @@ function updatePlayers(PlayerGroup $playerGroup, &$players)
                     {
                         $shipType = $fleet->getShipType($idShipType);
                         //used to show life,power and shield of each ships in the report
-                        $plyArray[$idFleet][$idShipType] = array('def' => $shipType->getShield() * $shipType->getCount(),'shield' => $shipType->getHull() * $shipType->getCount(),'att' => $shipType->getPower() * $shipType->getCount());
+                        $plyArray[$idFleet][$idShipType] = array('att' => $shipType->getPower() * $shipType->getCount(),'shield' => $shipType->getShield() * $shipType->getCount(),'def' => $shipType->getHull() * $shipType->getCount());
                         $players[$idFleet]['unit'][$idShipType] = $shipType->getCount();
                     }
                     else //all ships of this type were destroyed
@@ -321,20 +321,25 @@ function getTechsFromArray($player)
     $attTech = $player['military_tech'] + $player['factor']['Attack'] / WEAPONS_TECH_INCREMENT_FACTOR;
     $shieldTech = $player['shield_tech'] + $player['factor']['Shield'] / SHIELDS_TECH_INCREMENT_FACTOR;
     $armorTech = $player['defence_tech'] + $player['factor']['Defensive'] / ARMOUR_TECH_INCREMENT_FACTOR;
-    return array($attTech,$armorTech,$shieldTech);
+    
+    return array(
+        $attTech,
+        $shieldTech,
+        $armorTech);
 }
 
 function getTechsFromArrayForReport($player)
 {
-    list($attTech, $armorTech, $shieldTech) = getTechsFromArray($player);
+    list($attTech, $shieldTech, $armorTech) = getTechsFromArray($player);
+    
     $attTech = 1 + $attTech * WEAPONS_TECH_INCREMENT_FACTOR;
-    $armorTech = 1 + $armorTech * ARMOUR_TECH_INCREMENT_FACTOR;
     $shieldTech = 1 + $shieldTech * SHIELDS_TECH_INCREMENT_FACTOR;
+    $armorTech = 1 + $armorTech * ARMOUR_TECH_INCREMENT_FACTOR;
     
     return array(
         $attTech,
-        $armorTech,
-        $shieldTech);
+        $shieldTech,
+        $armorTech);
 }
 
 ?>
