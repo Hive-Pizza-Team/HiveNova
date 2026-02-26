@@ -237,10 +237,11 @@ function pretty_time($seconds)
 {
 	global $LNG;
 
-	$day	= floor($seconds / 86400);
-	$hour	= floor($seconds / 3600 % 24);
-	$minute	= floor($seconds / 60 % 60);
-	$second	= floor($seconds % 60);
+	$seconds = (int) $seconds;
+	$day	= (int) ($seconds / 86400);
+	$hour	= (int) ($seconds / 3600) % 24;
+	$minute	= (int) ($seconds / 60) % 60;
+	$second	= $seconds % 60;
 
 	$time  = '';
 

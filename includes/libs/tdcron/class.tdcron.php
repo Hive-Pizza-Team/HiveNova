@@ -321,11 +321,8 @@
 
 		static private function getTimestamp($timestamp = null) {
 
-			if (is_null($timestamp)) {
-				$arr	= explode(',', strftime('%M,%H,%d,%m,%w,%Y', time()));
-			} else {
-				$arr	= explode(',', strftime('%M,%H,%d,%m,%w,%Y', $timestamp));
-			}
+			$ts  = is_null($timestamp) ? time() : $timestamp;
+			$arr = explode(',', date('i,H,d,m,w,Y', $ts));
 
 			// Remove leading zeros (or we'll get in trouble ;-)
 

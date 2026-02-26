@@ -39,6 +39,7 @@ class template extends Smarty
 		$this->setCacheDir($this->getCompileDir().'templates');
 		$this->setTemplateDir('styles/templates/');
 		$this->addPluginsDir(ROOT_PATH . 'includes/smarty-plugins/');
+		$this->registerPlugin('modifier', 'array_key_first', 'array_key_first');
 	}
 
 	private function getTempPath()

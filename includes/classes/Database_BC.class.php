@@ -58,6 +58,7 @@ class Database_BC extends mysqli
 	 *
 	 * @return resource	Results of the query
 	 */
+	#[\ReturnTypeWillChange]
 	public function query($resource, $resultmode = NULL)
 	{
 		if($result = parent::query($resource))
@@ -241,6 +242,7 @@ class Database_BC extends mysqli
         return;
 	}
 	
+	#[\ReturnTypeWillChange]
 	public function multi_query($resource)
 	{
 		if(parent::multi_query($resource))
