@@ -348,6 +348,11 @@ function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 	);
 }
 
+function safe_unserialize(?string $data): mixed
+{
+	return isset($data[0]) ? unserialize($data) : false;
+}
+
 function shortly_number($number, $decial = NULL)
 {
 	$negate	= $number < 0 ? -1 : 1;

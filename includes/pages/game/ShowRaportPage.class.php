@@ -111,7 +111,7 @@ class ShowRaportPage extends AbstractGamePage
 		return;
 		}
 		
-		$combatReport			= unserialize($reportData['raport']);
+		$combatReport			= safe_unserialize($reportData['raport']);
 		$combatReport['time']	= _date($LNG['php_tdformat'], $combatReport['time'], $USER['timezone']);
 		$combatReport			= $this->BCWrapperPreRev2321($combatReport);
 		
@@ -154,7 +154,7 @@ class ShowRaportPage extends AbstractGamePage
 		return;
 		}
 
-		$combatReport			= unserialize($reportData['raport']);
+		$combatReport			= safe_unserialize($reportData['raport']);
 		if($isAttacker && !$isDefender && $combatReport['result'] == 'r' && count($combatReport['rounds']) <= 2) {
 			$this->printMessage($LNG['sys_raport_lost_contact']);
 		}

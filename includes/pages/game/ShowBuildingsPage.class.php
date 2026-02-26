@@ -27,7 +27,7 @@ class ShowBuildingsPage extends AbstractGamePage
 	private function CancelBuildingFromQueue()
 	{
 		global $PLANET, $USER, $resource;
-		$CurrentQueue  = unserialize($PLANET['b_building_id']);
+		$CurrentQueue  = safe_unserialize($PLANET['b_building_id']);
 		if (empty($CurrentQueue))
 		{
 			$PLANET['b_building_id']	= '';
@@ -82,7 +82,7 @@ class ShowBuildingsPage extends AbstractGamePage
             return false;
         }
 
-		$CurrentQueue  = unserialize($PLANET['b_building_id']);
+		$CurrentQueue  = safe_unserialize($PLANET['b_building_id']);
 		$ActualCount   = count($CurrentQueue);
 		if($ActualCount <= 1) {
 			return $this->CancelBuildingFromQueue();
@@ -131,7 +131,7 @@ class ShowBuildingsPage extends AbstractGamePage
 		)
 			return;
 		
-		$CurrentQueue  		= unserialize($PLANET['b_building_id']);
+		$CurrentQueue  		= safe_unserialize($PLANET['b_building_id']);
 		$DemolishedQueue = 0;
 				
 		if (!empty($CurrentQueue)) {
@@ -237,7 +237,7 @@ class ShowBuildingsPage extends AbstractGamePage
 		if ($PLANET['b_building'] == 0 || $PLANET['b_building_id'] == "")
 			return array('queue' => $scriptData, 'quickinfo' => $quickinfo);
 		
-		$buildQueue		= unserialize($PLANET['b_building_id']);
+		$buildQueue		= safe_unserialize($PLANET['b_building_id']);
 		
 		foreach($buildQueue as $BuildArray) {
 			if ($BuildArray[3] < TIMESTAMP)

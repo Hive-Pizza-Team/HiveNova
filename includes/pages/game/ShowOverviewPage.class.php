@@ -92,7 +92,7 @@ class ShowOverviewPage extends AbstractGamePage
 				continue;
 
 			if (!empty($CPLANET['b_building']) && $CPLANET['b_building'] > TIMESTAMP) {
-				$Queue				= unserialize($CPLANET['b_building_id']);
+				$Queue				= safe_unserialize($CPLANET['b_building_id']);
 				$BuildPlanet		= $LNG['tech'][$Queue[0][0]]." (".$Queue[0][1].")<br><span style=\"color:#7F7F7F;\">(".pretty_time($Queue[0][3] - TIMESTAMP).")</span>";
 			} else {
 				$BuildPlanet     = $LNG['ov_free'];
@@ -114,7 +114,7 @@ class ShowOverviewPage extends AbstractGamePage
         }
 			
 		if ($PLANET['b_building'] - TIMESTAMP > 0) {
-			$Queue			= unserialize($PLANET['b_building_id']);
+			$Queue			= safe_unserialize($PLANET['b_building_id']);
 			$buildInfo['buildings']	= array(
 				'id'		=> $Queue[0][0],
 				'level'		=> $Queue[0][1],
@@ -128,7 +128,7 @@ class ShowOverviewPage extends AbstractGamePage
 		}
 		
 		if (!empty($PLANET['b_hangar_id'])) {
-			$Queue	= unserialize($PLANET['b_hangar_id']);
+			$Queue	= safe_unserialize($PLANET['b_hangar_id']);
 			$time	= BuildFunctions::getBuildingTime($USER, $PLANET, $Queue[0][0]) * $Queue[0][1];
 			$buildInfo['fleet']	= array(
 				'id'		=> $Queue[0][0],
@@ -143,7 +143,7 @@ class ShowOverviewPage extends AbstractGamePage
 		}
 		
 		if ($USER['b_tech'] - TIMESTAMP > 0) {
-			$Queue			= unserialize($USER['b_tech_queue']);
+			$Queue			= safe_unserialize($USER['b_tech_queue']);
 			$buildInfo['tech']	= array(
 				'id'		=> $Queue[0][0],
 				'level'		=> $Queue[0][1],
@@ -312,7 +312,7 @@ class ShowOverviewPage extends AbstractGamePage
             ), 'state');
 			
 		if ($USER['b_tech_planet'] == $PLANET['id'] && !empty($USER['b_tech_queue'])) {
-			$TechQueue = unserialize($USER['b_tech_queue']);
+			$TechQueue = safe_unserialize($USER['b_tech_queue']);
 			$NewCurrentQueue = array();
 			foreach($TechQueue as $ID => $ListIDArray) {
 				if ($ListIDArray[4] == $PLANET['id']) {

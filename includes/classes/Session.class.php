@@ -138,7 +138,7 @@ class Session
 			session_start();
 			if(isset($_SESSION['obj']))
 			{
-				self::$obj	= unserialize($_SESSION['obj']);
+				self::$obj	= safe_unserialize($_SESSION['obj']);
 				register_shutdown_function(array(self::$obj, 'save'));
 			}
 			else

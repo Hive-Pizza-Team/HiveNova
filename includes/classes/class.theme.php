@@ -93,7 +93,7 @@ class Theme
 		{
 			if(file_exists(ROOT_PATH.'cache/cache.themes.php'))
 			{
-				self::$Themes	= unserialize(file_get_contents(ROOT_PATH.'cache/cache.themes.php'));
+				self::$Themes	= safe_unserialize(file_get_contents(ROOT_PATH.'cache/cache.themes.php'));
 			} else {
 				$Skins	= array_diff(scandir(ROOT_PATH.'styles/theme/'), array('..', '.', '.svn', '.htaccess', 'index.htm'));
 				$Themes	= array();

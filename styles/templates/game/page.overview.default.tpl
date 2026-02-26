@@ -84,7 +84,7 @@ $("#tn3").hide();
 	{foreach $fleets as $index => $fleet}
 
 
-		<li style=" padding: 3px; "><span id="fleettime_{$index}" class="fleets" data-fleet-end-time="{$fleet.returntime|default:''}" data-fleet-time="{$fleet.resttime|default:''}">{pretty_fly_time({$fleet.resttime|default:0})}
+		<li style=" padding: 3px; "><span id="fleettime_{$index}" class="fleets" data-fleet-end-time="{$fleet.returntime|default:''}" data-fleet-time="{$fleet.resttime|default:''}">{$fleet.resttime|default:0|pretty_fly_time}
 		</span> <td id="fleettime_{$index}">{$fleet.text|default:''}</td></li>
 	
 	{/foreach}

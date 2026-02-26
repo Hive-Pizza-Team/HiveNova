@@ -51,7 +51,7 @@ function ShowRightsPage()
 					"SELECT rights FROM %%USERS%% WHERE `id` = :id;",
 					[':id' => $id]
 				);
-				if(($Rights['rights'] = unserialize($Rights['rights'])) === false) {
+				if(($Rights['rights'] = safe_unserialize($Rights['rights'])) === false) {
 					$Rights['rights']	= array();
 				}
 

@@ -30,7 +30,7 @@ class ShowShipyardPage extends AbstractGamePage
 	private function CancelAuftr() 
 	{
 		global $USER, $PLANET, $resource;
-		$ElementQueue = unserialize($PLANET['b_hangar_id']);
+		$ElementQueue = safe_unserialize($PLANET['b_hangar_id']);
 		
 		$CancelArray	= HTTP::_GP('auftr', array());
 		
@@ -94,7 +94,7 @@ class ShowShipyardPage extends AbstractGamePage
 			$Count 			= max(min($Count, Config::get()->max_fleet_per_build), 0);
 			$Count 			= min($Count, $MaxElements);
 			
-			$BuildArray    	= !empty($PLANET['b_hangar_id']) ? unserialize($PLANET['b_hangar_id']) : array();
+			$BuildArray    	= !empty($PLANET['b_hangar_id']) ? safe_unserialize($PLANET['b_hangar_id']) : array();
 			if (in_array($Element, $reslist['missile']))
 			{
 				$MaxMissiles		= BuildFunctions::getMaxConstructibleRockets($USER, $PLANET, $Missiles);
@@ -156,7 +156,7 @@ class ShowShipyardPage extends AbstractGamePage
 		$NotBuilding = true;
 		if (!empty($PLANET['b_building_id']))
 		{
-			$CurrentQueue 	= unserialize($PLANET['b_building_id']);
+			$CurrentQueue 	= safe_unserialize($PLANET['b_building_id']);
 			foreach($CurrentQueue as $ElementArray)
 			{
 				if($ElementArray[0] == 21 || $ElementArray[0] == 15) {
@@ -166,7 +166,7 @@ class ShowShipyardPage extends AbstractGamePage
 			}
 		}
 		
-		$ElementQueue 	= unserialize($PLANET['b_hangar_id']);
+		$ElementQueue 	= safe_unserialize($PLANET['b_hangar_id']);
 		if(empty($ElementQueue))
 			$Count	= 0;
 		else
@@ -192,7 +192,7 @@ class ShowShipyardPage extends AbstractGamePage
 		}
 		
 		$elementInQueue	= array();
-		$ElementQueue 	= unserialize($PLANET['b_hangar_id']);
+		$ElementQueue 	= safe_unserialize($PLANET['b_hangar_id']);
 		$buildList		= array();
 		$elementList	= array();
 

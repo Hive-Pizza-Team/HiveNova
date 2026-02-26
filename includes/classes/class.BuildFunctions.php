@@ -241,7 +241,7 @@ class BuildFunctions
             }
         }
 
-        $BuildArray  	  	= !empty($PLANET['b_hangar_id']) ? unserialize($PLANET['b_hangar_id']) : array();
+        $BuildArray  	  	= !empty($PLANET['b_hangar_id']) ? safe_unserialize($PLANET['b_hangar_id']) : array();
         $MaxMissiles   		= $PLANET[$resource[44]] * 10 * max(Config::get()->silo_factor, 1);
 
         foreach($BuildArray as $ElementArray) {
