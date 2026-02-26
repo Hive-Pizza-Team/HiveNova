@@ -108,7 +108,7 @@
 	</tr>
 	{/foreach}
 	<tr style="height:20px;">
-	{if count($FleetsOnPlanet) == 0}
+	{if $FleetsOnPlanet|count == 0}
 	<td colspan="4">{$LNG.fl_no_ships}</td>
 	{else}
 	<td colspan="2"><a href="javascript:noShips();">{$LNG.fl_remove_all_ships}</a></td>

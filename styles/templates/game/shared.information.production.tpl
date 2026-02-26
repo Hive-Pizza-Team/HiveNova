@@ -1,4 +1,4 @@
-{$count = count($productionTable.usedResource)}
+{$count = $productionTable.usedResource|count}
 
 <table>
 	<tbody>

@@ -58,7 +58,21 @@ class ShowImperiumPage extends AbstractGamePage
 			unset($CPLANET);
 		}
 
-        $planetList	= array();
+        $planetList	= array(
+			'image'          => array(),
+			'name'           => array(),
+			'coords'         => array(),
+			'field'          => array(),
+			'energy_used'    => array(),
+			'resource'       => array(),
+			'resourcePerHour'=> array(),
+			'planet_type'    => array(),
+			'build'          => array(),
+			'fleet'          => array(),
+			'defense'        => array(),
+			'missiles'       => array(),
+			'tech'           => array(),
+		);
 	$config		= Config::get($USER['universe']);
 		foreach($PLANETS as $Planet)
 		{

@@ -25,7 +25,7 @@
                     <td><a href="#" onclick="return Dialog.Playercard({$userID},'{$memberListRow.username}');">{$memberListRow.username}</a> {if !empty($memberListRow.class)}{foreach $memberListRow.class as $class}{if !$class@first}&nbsp;{/if}<span class="galaxy-short-{$class} galaxy-short">{$ShortStatus.$class}</span>{/foreach}{/if}</td>
                     <td><a href="#" onclick="return Dialog.PM({$userID});"><img src="{$dpath}img/m.gif" border="0" title="{$LNG.write_message}"></a></td>
                     <td>{if $memberListRow.rankID == -1}{$founder}{elseif !empty($rankSelectList)}{html_options class="rankSelect" name="rank[{$userID}]" options=$rankSelectList selected=$memberListRow.rankID}{else}{$rankList[$memberListRow.rankID]}{/if}</td>
-                    <td><span title="{$memberListRow.points|number}">{shortly_number($memberListRow.points)}</span></td>
+                    <td><span title="{$memberListRow.points|number}">{$memberListRow.points|shortly_number}</span></td>
                     <td><a href="game.php?page=galaxy&amp;galaxy={$memberListRow.galaxy}&amp;system={$memberListRow.system}">[{$memberListRow.galaxy}:{$memberListRow.system}:{$memberListRow.planet}]</a></td>
                     <td>{$memberListRow.register_time}</td>
                     <td>{if $rights.ONLINESTATE}{if $memberListRow.onlinetimesec < 4}<span style="color:lime">{$memberListRow.onlinetime}</span>{elseif $memberListRow.onlinetimesec >= 4 && $memberListRow.onlinetimesec <= 15}<span style="color:yellow">{$memberListRow.onlinetime}</span>{else}<span style="color:red">{$memberListRow.onlinetime}</span>{/if}{else}-{/if}</td>

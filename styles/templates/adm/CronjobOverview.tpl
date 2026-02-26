@@ -25,7 +25,7 @@
 	<td>{if $CronjobInfo.month == '*'}{$CronjobInfo.month}{else}{foreach item=month from=$CronjobInfo.month}{$LNG.months.{$month-1}}{/foreach}{/if}</td>
 	<td>{if $CronjobInfo.dow == '*'}{$CronjobInfo.dow}{else}{foreach item=d from=$CronjobInfo.dow}{$LNG.week_day.{$d}} {/foreach}{/if}</td>
 	<td>{$CronjobInfo.class}</td>
-	<td>{if $CronjobInfo.isActive}{date($LNG.php_tdformat, $CronjobInfo.nextTime)}{else}-{/if}</td>
+	<td>{if $CronjobInfo.isActive}{$CronjobInfo.nextTime|php_date:$LNG.php_tdformat}{else}-{/if}</td>
 	<td><a href="admin.php?page=cronjob&amp;action=enable&amp;id={$CronjobInfo.id}&amp;enable={if $CronjobInfo.isActive}0" style="color:lime">{$LNG.cronjob_inactive}{else}1" style="color:red">{$LNG.cronjob_active}{/if}</a></td>
 	<td><a href="admin.php?page=cronjob&amp;id={$CronjobInfo.id}&amp;action={if $CronjobInfo.lock}unlock" style="color:red">{$LNG.cronjob_is_lock}{else}lock" style="color:lime">{$LNG.cronjob_is_unlock}{/if}</a></td>
 	<td><a href="admin.php?page=cronjob&amp;action=detail&amp;id={$CronjobInfo.id}"><img src="./styles/resource/images/admin/GO.png"></a></td>

@@ -100,13 +100,13 @@
 		<td>{$LNG.pl_totalfight}</td><td>{$totalfight|number}</td>
 	</tr>
 	<tr>
-		<td>{$LNG.pl_fightwon}</td><td>{$fightwon|number} {if $totalfight}({round($fightwon / $totalfight * 100, 2)}%){/if}</td>
+		<td>{$LNG.pl_fightwon}</td><td>{$fightwon|number} {if $totalfight}({$_v=$fightwon/$totalfight*100}{$_v|round:2}%){/if}</td>
 	</tr>
-	<tr>	
-		<td>{$LNG.pl_fightlose}</td><td>{$fightlose|number} {if $totalfight}({round($fightlose / $totalfight * 100, 2)}%){/if}</td>
+	<tr>
+		<td>{$LNG.pl_fightlose}</td><td>{$fightlose|number} {if $totalfight}({$_v=$fightlose/$totalfight*100}{$_v|round:2}%){/if}</td>
 	</tr>
-	<tr>	
-		<td>{$LNG.pl_fightdraw}</td><td>{$fightdraw|number} {if $totalfight}({round($fightdraw / $totalfight * 100, 2)}%){/if}</td>
+	<tr>
+		<td>{$LNG.pl_fightdraw}</td><td>{$fightdraw|number} {if $totalfight}({$_v=$fightdraw/$totalfight*100}{$_v|round:2}%){/if}</td>
 	</tr>
 	<tr>
 		<td>{$LNG.pl_unitsshot}</td><td>{$unitsshot}</td>

@@ -41,6 +41,16 @@ class template extends Smarty
 		$this->addPluginsDir(ROOT_PATH . 'includes/smarty-plugins/');
 		$this->registerPlugin('modifier', 'array_key_first', 'array_key_first');
 		$this->registerPlugin('modifier', 'isModuleAvailable', 'isModuleAvailable');
+		$this->registerPlugin('modifier', 'shortly_number', 'shortly_number');
+		$this->registerPlugin('modifier', 'array_sum',  'array_sum');
+		$this->registerPlugin('modifier', 'abs',        'abs');
+		$this->registerPlugin('modifier', 'floatval',   'floatval');
+		$this->registerPlugin('modifier', 'round',      'round');
+		$this->registerPlugin('modifier', 'strip_tags', 'strip_tags');
+		$this->registerPlugin('modifier', 'count',      'count');
+		$this->registerPlugin('modifier', 'sprintf',    'sprintf');
+		$this->registerPlugin('modifier', 'in_array',   'in_array');
+		$this->registerPlugin('modifier', 'php_date',   function($ts, $fmt) { return date($fmt, $ts); });
 	}
 
 	private function getTempPath()
