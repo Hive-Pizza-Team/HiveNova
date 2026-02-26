@@ -262,9 +262,10 @@ function pretty_time($seconds)
 
 function pretty_fly_time($seconds)
 {
-	$hour	= floor($seconds / 3600);
-	$minute	= floor($seconds / 60 % 60);
-	$second	= floor($seconds % 60);
+	$seconds = (int) $seconds;
+	$hour	= intdiv($seconds, 3600);
+	$minute	= intdiv($seconds, 60) % 60;
+	$second	= $seconds % 60;
 
 	return sprintf('%02d:%02d:%02d', $hour, $minute, $second);
 }
