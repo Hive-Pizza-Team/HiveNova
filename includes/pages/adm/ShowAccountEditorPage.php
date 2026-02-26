@@ -408,7 +408,7 @@ function ShowAccountEditorPage()
 				$email_2	= HTTP::_GP('email_2', '');				
 				$vacation	= HTTP::_GP('vacation', '');				
 				
-				$before = $GLOBALS['DATABASE']->getFirstRow("SELECT `username`,`email`,`email_2`,`password`,`urlaubs_modus`,`urlaubs_until` FROM ".USERS." WHERE `id` = '". HTTP::_GP('id', 0) ."';");
+				$before = $GLOBALS['DATABASE']->getFirstRow("SELECT `username`,`email`,`email_2`,`password`,`urlaubs_modus`,`urlaubs_until`,`universe` FROM ".USERS." WHERE `id` = '". HTTP::_GP('id', 0) ."';");
 				$after = array();
 				
 				$PersonalQuery    =    "UPDATE ".USERS." SET ";

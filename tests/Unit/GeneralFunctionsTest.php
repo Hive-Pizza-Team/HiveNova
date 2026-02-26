@@ -10,6 +10,43 @@ use PHPUnit\Framework\TestCase;
 class GeneralFunctionsTest extends TestCase
 {
     // -------------------------------------------------------------------------
+    // safe_unserialize
+    // -------------------------------------------------------------------------
+
+    public function testSafeUnserializeNullReturnsFalse(): void
+    {
+        $this->assertFalse(safe_unserialize(null));
+    }
+
+    public function testSafeUnserializeEmptyStringReturnsFalse(): void
+    {
+        $this->assertFalse(safe_unserialize(''));
+    }
+
+    public function testSafeUnserializeValidArrayRoundtrips(): void
+    {
+        $data = ['foo' => 'bar', 'n' => 42];
+        $this->assertSame($data, safe_unserialize(serialize($data)));
+    }
+
+    public function testSafeUnserializeValidStringRoundtrips(): void
+    {
+        $this->assertSame('hello', safe_unserialize(serialize('hello')));
+    }
+
+    public function testSafeUnserializeValidIntRoundtrips(): void
+    {
+        $this->assertSame(123, safe_unserialize(serialize(123)));
+    }
+
+    public function testSafeUnserializeCorruptDataReturnsFalse(): void
+    {
+        // Suppress the E_NOTICE that unserialize() emits for malformed input
+        $result = @safe_unserialize('not:valid:serialized:data');
+        $this->assertFalse($result);
+    }
+
+    // -------------------------------------------------------------------------
     // floatToString
     // -------------------------------------------------------------------------
 
