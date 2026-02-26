@@ -119,7 +119,7 @@ class Database implements DatabaseInterface
 				}
 				else
 				{
-					$stmt->bindValue($param, (int) $value, PDO::PARAM_STR);
+					$stmt->bindValue($param, $value, PDO::PARAM_STR);
 				}
 			}
 		}
@@ -128,7 +128,8 @@ class Database implements DatabaseInterface
 			$success = (count($params) !== 0 && !isset($params[':limit']) && !isset($params[':offset'])) ? $stmt->execute($params) : $stmt->execute();
 		}
 		catch (PDOException $e) {
-			throw new Exception($e->getMessage()."<br>\r\n<br>\r\nQuery-Code:".str_replace(array_keys($params), array_values($params), $qry));
+			error_log('DB error: ' . $e->getMessage() . ' | Query: ' . str_replace(array_keys($params), array_values($params), $qry));
+			throw new Exception('A database error occurred. Please try again later.');
 		}
 
 		$this->queryCounter++;
@@ -215,41 +216,11 @@ class Database implements DatabaseInterface
 	}
 
 	/**
-	 * Lists column values of a table
-	 * with desired key from the
-	 * database as an array.
+	 * Execute a raw SQL string via PDO::exec().
 	 *
-	 * @param  string 		$table
-	 * @param  string 		$column
-	 * @param  string|null 	$key
-	 * @return array
+	 * @internal Only use for fully static, trusted SQL strings (migrations,
+	 *           schema changes, OPTIMIZE TABLE). Never pass user-supplied data.
 	 */
-	public function lists($table, $column, $key = null)
-	{
-		$selects = implode(', ', is_null($key) ? array($column) : array($column, $key));
-
-		$qry = "SELECT {$selects} FROM %%{$table}%%;";
-		$stmt = $this->_query($qry, array(), 'select');
-
-		$results = array();
-		if (is_null($key))
-		{
-			while ($row = $stmt->fetch(PDO::FETCH_ASSOC))
-			{
-				$results[] = $row[$column];
-			}
-		}
-		else
-		{
-			while ($row = $stmt->fetch(PDO::FETCH_ASSOC))
-			{
-				$results[$row[$key]] = $row[$column];
-			}
-		}
-
-		return $results;
-	}
-
 	public function query($qry)
 	{
 		$this->lastInsertId = false;
@@ -258,6 +229,12 @@ class Database implements DatabaseInterface
 		$this->queryCounter++;
 	}
 
+	/**
+	 * Execute a raw SQL string via PDO::query() with table-name substitution.
+	 *
+	 * @internal Only use for fully static, trusted SQL strings (SHOW STATUS,
+	 *           SHOW COLUMNS, stat-builder INSERTs). Never pass user-supplied data.
+	 */
 	public function nativeQuery($qry)
 	{
 		$this->lastInsertId = false;
@@ -287,5 +264,22 @@ class Database implements DatabaseInterface
 	public function quote($str)
 	{
 		return $this->dbHandle->quote($str);
+	}
+
+	public function beginTransaction(): void
+	{
+		$this->dbHandle->beginTransaction();
+	}
+
+	public function commit(): void
+	{
+		$this->dbHandle->commit();
+	}
+
+	public function rollback(): void
+	{
+		if ($this->dbHandle->inTransaction()) {
+			$this->dbHandle->rollBack();
+		}
 	}
 }

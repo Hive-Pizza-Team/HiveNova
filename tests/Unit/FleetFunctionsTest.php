@@ -229,4 +229,100 @@ class FleetFunctionsTest extends TestCase
     {
         $this->assertSame(0, FleetFunctions::GetFleetMaxSpeed([], []));
     }
+
+    // -------------------------------------------------------------------------
+    // GetFleetMaxSpeed — slowest ship wins
+    // -------------------------------------------------------------------------
+
+    public function testGetFleetMaxSpeedReturnsFastestShipWhenAlone(): void
+    {
+        // Light Fighter (202): tech=1 (combustion), base=12500, combustion_tech=0
+        // speed = 12500 * (1 + 0.1 * 0) = 12500
+        $GLOBALS['pricelist'][202]['speed'] = 12500;
+        $GLOBALS['pricelist'][202]['tech']  = 1;
+
+        $player = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+        $speed  = FleetFunctions::GetFleetMaxSpeed([202 => 5], $player);
+
+        $this->assertEquals(12500.0, $speed);
+    }
+
+    public function testGetFleetMaxSpeedPicksSlowerShipWhenMixed(): void
+    {
+        // LF (202): speed 12500; Bomber (210): speed 4000 (impulse, tech=2)
+        $GLOBALS['pricelist'][202]['speed'] = 12500;
+        $GLOBALS['pricelist'][202]['tech']  = 1;
+        $GLOBALS['pricelist'][210]['speed'] = 4000;
+        $GLOBALS['pricelist'][210]['tech']  = 2;
+
+        $player = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+        $speed  = FleetFunctions::GetFleetMaxSpeed([202 => 3, 210 => 1], $player);
+
+        $this->assertEquals(4000.0, $speed, 'Fleet speed is capped by the slowest ship');
+    }
+
+    public function testGetFleetMaxSpeedIncreasesWithCombustionTech(): void
+    {
+        // LF with combustion_tech=5: 12500 * (1 + 0.1*5) = 12500 * 1.5 = 18750
+        $GLOBALS['pricelist'][202]['speed'] = 12500;
+        $GLOBALS['pricelist'][202]['tech']  = 1;
+
+        $player_t0 = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+        $player_t5 = ['combustion_tech' => 5, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+
+        $speed0 = FleetFunctions::GetFleetMaxSpeed([202 => 1], $player_t0);
+        $speed5 = FleetFunctions::GetFleetMaxSpeed([202 => 1], $player_t5);
+
+        $this->assertGreaterThan($speed0, $speed5, 'Higher combustion tech must increase LF speed');
+        $this->assertEquals(18750.0, $speed5);
+    }
+
+    // -------------------------------------------------------------------------
+    // GetFleetConsumption
+    // -------------------------------------------------------------------------
+
+    public function testGetFleetConsumptionIsPositive(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']       = 12500;
+        $GLOBALS['pricelist'][202]['tech']        = 1;
+        $GLOBALS['pricelist'][202]['consumption'] = 20;
+
+        $player = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+
+        // duration=3600s, distance=5000, GameSpeed=1
+        $consumption = FleetFunctions::GetFleetConsumption([202 => 1], 3600, 5000, $player, 1);
+
+        $this->assertGreaterThan(0, $consumption, 'Consumption must be positive');
+    }
+
+    public function testGetFleetConsumptionIncreasesWithDistance(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']       = 12500;
+        $GLOBALS['pricelist'][202]['tech']        = 1;
+        $GLOBALS['pricelist'][202]['consumption'] = 20;
+
+        $player = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+
+        $near = FleetFunctions::GetFleetConsumption([202 => 1], 3600, 1000, $player, 1);
+        $far  = FleetFunctions::GetFleetConsumption([202 => 1], 3600, 5000, $player, 1);
+
+        $this->assertGreaterThan($near, $far, 'Longer distance must cost more deuterium');
+    }
+
+    public function testGetFleetConsumptionScalesWithShipCount(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']       = 12500;
+        $GLOBALS['pricelist'][202]['tech']        = 1;
+        $GLOBALS['pricelist'][202]['consumption'] = 20;
+
+        $player = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+
+        $one  = FleetFunctions::GetFleetConsumption([202 => 1], 3600, 5000, $player, 1);
+        $ten  = FleetFunctions::GetFleetConsumption([202 => 10], 3600, 5000, $player, 1);
+
+        // 10 ships should consume roughly 10× as much as 1 ship
+        $this->assertGreaterThan($one, $ten);
+        // Allow for rounding (the +1 baseline) but ratio should be close to 10
+        $this->assertEqualsWithDelta(10 * ($one - 1) + 1, $ten, 2.0, '10 ships consume ~10× a single ship');
+    }
 }

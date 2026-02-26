@@ -443,52 +443,88 @@ class ShowFleetStep3Page extends AbstractGamePage
 			}
 		}
 
-		$PLANET[$resource[901]]	-= $fleetResource[901];
-		$PLANET[$resource[902]]	-= $fleetResource[902];
-		$PLANET[$resource[903]]	-= $fleetResource[903] + $consumption;
-
 		$fleetStartTime		= $duration + TIMESTAMP;
 		$timeDifference		= round(max(0, $fleetStartTime - $ACSTime));
 
-		if($fleetGroup != 0)
-		{
-			if($timeDifference != 0)
-			{
-				FleetFunctions::setACSTime($timeDifference, $fleetGroup);
+		$db->beginTransaction();
+		try {
+			$lockedPlanet = $db->selectSingle(
+				'SELECT metal, crystal, deuterium FROM %%PLANETS%% WHERE id = :id FOR UPDATE',
+				[':id' => $PLANET['id']]
+			);
+			$deutNeeded = $fleetResource[903] + $consumption;
+			if ($lockedPlanet[$resource[901]] < $fleetResource[901] ||
+				$lockedPlanet[$resource[902]] < $fleetResource[902] ||
+				$lockedPlanet[$resource[903]] < $deutNeeded) {
+				$db->rollback();
+				$this->printMessage($LNG['fl_not_enough_resource'], array(array(
+					'label'	=> $LNG['sys_back'],
+					'url'	=> 'game.php?page=fleetTable'
+				)));
 			}
-			else
+
+			$db->update(
+				'UPDATE %%PLANETS%% SET
+				metal     = metal     - :metal,
+				crystal   = crystal   - :crystal,
+				deuterium = deuterium - :deuterium
+				WHERE id = :planetId',
+				array(
+					':metal'     => $fleetResource[901],
+					':crystal'   => $fleetResource[902],
+					':deuterium' => $fleetResource[903] + $consumption,
+					':planetId'  => $PLANET['id'],
+				)
+			);
+
+			if($fleetGroup != 0)
 			{
-				$fleetStartTime		= $ACSTime;
+				if($timeDifference != 0)
+				{
+					FleetFunctions::setACSTime($timeDifference, $fleetGroup);
+				}
+				else
+				{
+					$fleetStartTime		= $ACSTime;
+				}
 			}
-		}
 
-		$fleetStayTime		= $fleetStartTime + $StayDuration;
-		$fleetEndTime		= $fleetStayTime + $duration;
+			$fleetStayTime		= $fleetStartTime + $StayDuration;
+			$fleetEndTime		= $fleetStayTime + $duration;
 
-		$fleet_id = FleetFunctions::sendFleet($fleetArray, $targetMission, $USER['id'], $PLANET['id'], $PLANET['galaxy'],
-			$PLANET['system'], $PLANET['planet'], $PLANET['planet_type'], $targetPlanetData['id_owner'],
-			$targetPlanetData['id'], $targetGalaxy, $targetSystem, $targetPlanet, $targetType, $fleetResource,
-			$fleetStartTime, $fleetStayTime, $fleetEndTime, $fleetGroup, 0);
+			$fleet_id = FleetFunctions::sendFleet($fleetArray, $targetMission, $USER['id'], $PLANET['id'], $PLANET['galaxy'],
+				$PLANET['system'], $PLANET['planet'], $PLANET['planet_type'], $targetPlanetData['id_owner'],
+				$targetPlanetData['id'], $targetGalaxy, $targetSystem, $targetPlanet, $targetType, $fleetResource,
+				$fleetStartTime, $fleetStayTime, $fleetEndTime, $fleetGroup, 0);
 
-
-		if($targetMission == 16) {
-			$sql	= 'INSERT INTO %%TRADES%% SET
-				transaction_type			= :transaction,
-				seller_fleet_id				= :sellerFleet,
-				filter_visibility			= :visibility,
-				filter_flighttime			= :flightTime,
-				ex_resource_type			= :resType,
-				ex_resource_amount		= :resAmount;';
+			if($targetMission == 16) {
+				$sql = 'INSERT INTO %%TRADES%% SET
+					transaction_type	= :transaction,
+					seller_fleet_id		= :sellerFleet,
+					filter_visibility	= :visibility,
+					filter_flighttime	= :flightTime,
+					ex_resource_type	= :resType,
+					ex_resource_amount	= :resAmount;';
 
 				$db->insert($sql, array(
-					':transaction'			=> $markettype,
-					':sellerFleet'			=> $fleet_id,
-					':resType'					=> $WantedResourceType,
-					':resAmount'				=> $WantedResourceAmount,
-					':flightTime'				=> $maxFlightTime * 3600,
-					':visibility'				=> $visibility
+					':transaction'	=> $markettype,
+					':sellerFleet'	=> $fleet_id,
+					':resType'		=> $WantedResourceType,
+					':resAmount'	=> $WantedResourceAmount,
+					':flightTime'	=> $maxFlightTime * 3600,
+					':visibility'	=> $visibility
 				));
+			}
+
+			$db->commit();
+		} catch (Exception $e) {
+			$db->rollback();
+			throw $e;
 		}
+
+		$PLANET[$resource[901]] -= $fleetResource[901];
+		$PLANET[$resource[902]] -= $fleetResource[902];
+		$PLANET[$resource[903]] -= $fleetResource[903] + $consumption;
 
 		foreach ($fleetArray as $Ship => $Count)
 		{

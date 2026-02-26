@@ -140,7 +140,7 @@ class ShowMarketPlacePage extends AbstractGamePage
 
 		if($fleetResult[0]['filter_visibility'] != 0 && $USER['id'] != $fleetResult[0]['id']) {
 			//Check packts
-			$sql = "SELECT * FROM %%DIPLO%% WHERE (owner_1 = :ow AND owner_2 = :ow2) OR (owner_2 = :ow AND owner_1 = :ow2) AND accept = 1;";
+			$sql = "SELECT * FROM %%DIPLO%% WHERE ((owner_1 = :ow AND owner_2 = :ow2) OR (owner_2 = :ow AND owner_1 = :ow2)) AND accept = 1;";
 			$res = $db->select($sql, array(
 				':ow' => $USER['ally_id'],
 				':ow2' => $fleetResult[0]['ally_id'],
