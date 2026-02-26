@@ -182,6 +182,8 @@ function _date($format, $time = null, $toTimeZone = null, $LNG = NULL)
 		$time	= TIMESTAMP;
 	}
 
+	$time = (int) $time;
+
 	if (isset($toTimeZone)) {
 		$date = new DateTime();
 		if (method_exists($date, 'setTimestamp')) {	// PHP > 5.3			

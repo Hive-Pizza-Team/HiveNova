@@ -53,6 +53,7 @@ class ResourceUpdate
 	{
 		$this->USER		= $USER;
 		$this->PLANET	= $PLANET;
+		$this->config	= Config::get($USER['universe']);
 	}
 
 	public function getData()
