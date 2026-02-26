@@ -117,12 +117,12 @@ class BuildFunctions
 
     public static function isTechnologieAccessible($USER, $PLANET, $Element)
     {
-        global $requeriments, $resource;
+        global $requirements, $resource;
 
-        if(!isset($requeriments[$Element]))
+        if(!isset($requirements[$Element]))
             return true;
 
-        foreach($requeriments[$Element] as $ReqElement => $EleLevel)
+        foreach($requirements[$Element] as $ReqElement => $EleLevel)
         {
             if (
                 (isset($USER[$resource[$ReqElement]]) && $USER[$resource[$ReqElement]] < $EleLevel) ||
@@ -136,7 +136,7 @@ class BuildFunctions
 
     public static function getBuildingTime($USER, $PLANET, $Element, $elementPrice = NULL, $forDestroy = false, $forLevel = NULL)
     {
-        global $resource, $reslist, $requeriments;
+        global $resource, $reslist, $requirements;
         $config	= Config::get($USER['universe']);
 
         $time   = 0;
@@ -171,7 +171,7 @@ class BuildFunctions
                 $Level = 0;
                 foreach($PLANET[$resource[31].'_inter'] as $Levels)
                 {
-                    if(!isset($requeriments[$Element][31]) || $Levels >= $requeriments[$Element][31])
+                    if(!isset($requirements[$Element][31]) || $Levels >= $requirements[$Element][31])
                         $Level += $Levels;
                 }
             }
