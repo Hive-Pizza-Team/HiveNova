@@ -637,6 +637,21 @@ $LNG['mu_giveaway'] = 'Giveaways';
 $LNG['mu_disclaimer'] = 'Impressum-Einstellungen';
 $LNG['mu_dump'] = 'Datenbank-Backup';
 
+$LNG['mu_transactions'] = 'Transaktionen';
+
+$LNG['tx_id'] = 'ID';
+$LNG['tx_timestamp'] = 'Zeitstempel';
+$LNG['tx_user'] = 'Benutzer';
+$LNG['tx_amount_spent'] = 'Ausgegeben';
+$LNG['tx_amount_received'] = 'Erhalten';
+$LNG['tx_item'] = 'Artikel-ID';
+$LNG['tx_memo'] = 'Notiz';
+$LNG['tx_total'] = 'Gesamt';
+$LNG['tx_no_results'] = 'Keine Transaktionen gefunden.';
+$LNG['tx_search'] = 'Suchen';
+$LNG['tx_search_placeholder'] = 'Benutzername oder Notiz...';
+$LNG['tx_clear'] = 'Zurücksetzen';
+
 
 $LNG['vt_error'] = 'HashFile ist nicht verfügbar! - Update durchführen!';
 $LNG['vt_fail'] = 'Geänderte Dateien';

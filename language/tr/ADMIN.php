@@ -153,6 +153,21 @@ $LNG['mu_giveaway']					= 'Genel Hediye/Evrene Dağıt';
 $LNG['mu_disclamer']				= 'Iletişim Ayarları';
 $LNG['mu_dump']						= 'Veritabanı Yedekle';
 
+$LNG['mu_transactions'] = 'İşlemler';
+
+$LNG['tx_id'] = 'ID';
+$LNG['tx_timestamp'] = 'Zaman Damgası';
+$LNG['tx_user'] = 'Kullanıcı';
+$LNG['tx_amount_spent'] = 'Harcanan';
+$LNG['tx_amount_received'] = 'Alınan';
+$LNG['tx_item'] = 'Öğe ID';
+$LNG['tx_memo'] = 'Not';
+$LNG['tx_total'] = 'Toplam';
+$LNG['tx_no_results'] = 'İşlem bulunamadı.';
+$LNG['tx_search'] = 'Ara';
+$LNG['tx_search_placeholder'] = 'Kullanıcı adı veya not...';
+$LNG['tx_clear'] = 'Temizle';
+
 $LNG['vt_error']					= 'Hasfile dosyası yok! - Güncelle!';
 $LNG['vt_fail']						= 'Değişen Dosyalar';
 $LNG['vt_info']						= 'Bu listedeki dosyalar güncellenmiş ve orijinalinden farkı olan dosyalardır.<br>Eger siz bir değişiklik yapmadıysanız mutlaka orijinali ile değiştirin.';

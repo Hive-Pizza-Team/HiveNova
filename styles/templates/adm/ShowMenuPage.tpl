@@ -36,6 +36,7 @@
 		{if allowedTo('ShowMultiIPPage')}<li><a href="?page=multiips" target="Hauptframe">{$LNG.mu_multiip_page}</a></li>{/if}
 		<li><a href="javascript:void(0);"><span style="color:lime">{$LNG.mu_tools}</span></a></li>
 		{if allowedTo('ShowLogPage')}<li><a href="?page=log" target="Hauptframe">{$LNG.mu_logs}</a></li>{/if}
+		{if allowedTo('ShowTransactionsPage')}<li><a href="?page=transactions" target="Hauptframe">{$LNG.mu_transactions}</a></li>{/if}
 		{if allowedTo('ShowSendMessagesPage')}<li><a href="?page=globalmessage" target="Hauptframe">{$LNG.mu_global_message}</a></li>{/if}
 		{if allowedTo('ShowPassEncripterPage')}<li><a href="?page=password" target="Hauptframe">{$LNG.mu_md5_encripter}</a></li>{/if}
 		{if allowedTo('ShowStatUpdatePage')}<li><a href="?page=statsupdate" target="Hauptframe" onClick=" return confirm('{$LNG.mu_mpu_confirmation}');">{$LNG.mu_manual_points_update}</a></li>{/if}
