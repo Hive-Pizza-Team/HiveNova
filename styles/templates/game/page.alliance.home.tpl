@@ -25,7 +25,7 @@
 		<td>{$LNG.al_rank}</td>
 		<td>{$rankName}{if $rights.ADMIN} (<a href="?page=alliance&amp;mode=admin">{$LNG.al_manage_alliance}</a>){/if}</td>
 	</tr>
-    {if isModuleAvailable($smarty.const.MODULE_CHAT)}
+    {if $smarty.const.MODULE_CHAT|isModuleAvailable}
 	<tr>
 		<td colspan="2"><a href="#" onclick="return Dialog.AllianceChat();">{$LNG.al_goto_chat}</a></td>
 	</tr>

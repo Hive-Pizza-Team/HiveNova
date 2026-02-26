@@ -62,13 +62,13 @@ $("#tn3").hide();
 			<a style="color:lime">{$usersOnline}</a> {$LNG.ov_players}
 		
 			<a style="color:lime">{$fleetsOnline}</a> {$LNG.ov_moving_fleets}
-<br>{$LNG.ov_points} {$rankInfo}
+<br>{$LNG.ov_points} {$rankInfo|default:''}
 {if $is_news}
 
                 <div class="hidden-div" id="hidden-div">
 
          
-                 {$LNG.ov_news}:&nbsp;{$news} </br><span style="display:block; margin-top:10px;"><button id="chkbtn2">Hide News</button></span>
+                 {$LNG.ov_news}:&nbsp;{$news|default:''} </br><span style="display:block; margin-top:10px;"><button id="chkbtn2">Hide News</button></span>
  
                 </div>
                 <span style="display:block; margin-top:10px;"><button id="chkbtn">Check News</button></span>
@@ -84,8 +84,8 @@ $("#tn3").hide();
 	{foreach $fleets as $index => $fleet}
 
 
-		<li style=" padding: 3px; "><span id="fleettime_{$index}" class="fleets" data-fleet-end-time="{$fleet.returntime}" data-fleet-time="{$fleet.resttime}">{pretty_fly_time({$fleet.resttime})}
-		</span> <td id="fleettime_{$index}">{$fleet.text}</td></li> 
+		<li style=" padding: 3px; "><span id="fleettime_{$index}" class="fleets" data-fleet-end-time="{$fleet.returntime|default:''}" data-fleet-time="{$fleet.resttime|default:''}">{pretty_fly_time({$fleet.resttime|default:0})}
+		</span> <td id="fleettime_{$index}">{$fleet.text|default:''}</td></li>
 	
 	{/foreach}
 </ul>
@@ -121,7 +121,7 @@ $("#tn3").hide();
 		
 			{foreach $AllPlanets as $PlanetRow}
 			{if ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW) === 1}{/if}
-			<div class="planetl"><a href="game.php?page=overview&amp;cp={$PlanetRow.id}" title="{$PlanetRow.name}"><img style="margin: 5px;" src="{$dpath}planeten/{$PlanetRow.image}.jpg" width="100" height="100" alt="{$PlanetRow.name}"></a><br>{$PlanetRow.name}<br>{$PlanetRow.build}<br></div>
+			<div class="planetl"><a href="game.php?page=overview&amp;cp={$PlanetRow.id}" title="{$PlanetRow.name}"><img style="margin: 5px;" src="{$dpath}planeten/{$PlanetRow.image}.jpg" width="100" height="100" alt="{$PlanetRow.name}"></a><br>{$PlanetRow.name}<br>{$PlanetRow.build|default:''}<br></div>
 			{if $PlanetRow@last && $PlanetRow@total > 1 && ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW) !== 0}
 			{$to = $themeSettings.PLANET_ROWS_ON_OVERVIEW - ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW)}
 			{for $foo=1 to $to}
