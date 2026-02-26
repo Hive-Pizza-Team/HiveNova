@@ -21,10 +21,11 @@ function ShowBanPage()
 {
 	global $LNG, $USER;
 	
-	$ORDER = $_GET['order'] == 'id' ? "id" : "username";
+	$ORDER = ($_GET['order'] ?? '') == 'id' ? "id" : "username";
 
-	if ($_GET['view'] == 'bana')
-		$WHEREBANA	= "AND `bana` = '1'";
+	$WHEREBANA = '';
+	if (($_GET['view'] ?? '') == 'bana')
+		$WHEREBANA = "AND `bana` = '1'";
 
 	$UserList		= $GLOBALS['DATABASE']->query("SELECT `username`, `id`, `bana` FROM ".USERS." WHERE `id` != 1 AND `authlevel` <= '".$USER['authlevel']."' AND `universe` = '".Universe::getEmulated()."' ".$WHEREBANA." ORDER BY ".$ORDER." ASC;");
 
@@ -39,7 +40,7 @@ function ShowBanPage()
 
 	$GLOBALS['DATABASE']->free_result($UserList);
 	
-	$ORDER2 = $_GET['order2'] == 'id' ? "id" : "username";
+	$ORDER2 = ($_GET['order2'] ?? '') == 'id' ? "id" : "username";
 		
 	$Banneds		=0;
 	$UserListBan	= $GLOBALS['DATABASE']->query("SELECT `username`, `id` FROM ".USERS." WHERE `bana` = '1' AND `universe` = '".Universe::getEmulated()."' ORDER BY ".$ORDER2." ASC;");

@@ -20,7 +20,7 @@ if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FI
 function ShowNewsPage(){
 	global $LNG, $USER;
 
-	if($_POST['action'] == 'send') {
+	if(($_POST['action'] ?? '') == 'send') {
 		$edit_id 	= HTTP::_GP('id', 0);
 		$title 		= HTTP::_GP('title', '', true);
 		$text 		= HTTP::_GP('text', '', true);
@@ -36,7 +36,7 @@ function ShowNewsPage(){
 				[':title' => $title, ':text' => $text, ':date' => TIMESTAMP, ':id' => $edit_id]
 			);
 		}
-	} elseif($_POST['action'] == 'delete' && isset($_POST['id'])) {
+	} elseif(($_POST['action'] ?? '') == 'delete' && isset($_POST['id'])) {
 		Database::get()->delete(
 			"DELETE FROM %%NEWS%% WHERE `id` = :id;",
 			[':id' => HTTP::_GP('id', 0)]
@@ -59,7 +59,7 @@ function ShowNewsPage(){
 	$template	= new template();
 
 
-	if($_GET['action'] == 'edit' && isset($_GET['id'])) {
+	if(($_GET['action'] ?? '') == 'edit' && isset($_GET['id'])) {
 		$News = Database::get()->selectSingle(
 			"SELECT id, title, text FROM %%NEWS%% WHERE id = :id;",
 			[':id' => HTTP::_GP('id', 0)]
@@ -71,7 +71,7 @@ function ShowNewsPage(){
 			'news_title'	=> $News['title'],
 			'news_text'		=> $News['text'],
 		));
-	} elseif($_GET['action'] == 'create') {
+	} elseif(($_GET['action'] ?? '') == 'create') {
 		$template->assign_vars(array(
 			'mode'			=> 2,
 			'nws_head'		=> $LNG['nws_head_create'],

@@ -22,7 +22,7 @@ function ShowSearchPage()
 	global $LNG, $USER;
 	
 	if(!isset($_POST['delete'])) { $_POST['delete']=''; }
-	if ($_GET['delete'] == 'user') {
+	if (($_GET['delete'] ?? '') == 'user') {
         PlayerUtil::deletePlayer((int) $_POST['user']);
         message($LNG['se_delete_succes_p'], '?page=search&search=users&minimize=on', 2);
 	} elseif ($_POST['delete'] == 'planet'){
@@ -101,6 +101,11 @@ function ShowSearchPage()
         'first' => "LIKE '%".$GLOBALS['DATABASE']->sql_escape($SearchKey, true)."'",
         default => "LIKE '%".$GLOBALS['DATABASE']->sql_escape($SearchKey, true)."%'",
     };;
+
+	$RESULT      = ['LIST' => '', 'PAGES' => ''];
+	$Order       = '';
+	$OrderBY     = '';
+	$OrderBYParse = [];
 
 	if (!empty($SearchFile))
 	{
@@ -330,6 +335,7 @@ function MyCrazyLittleSearch($SpecifyItems, $WhereItem, $SpecifyWhere, $SpecialS
 						&key_acc=".$_GET['key_acc']."
 						&limit=".$Limit;
 						 
+		$Search['PAGES'] = '';
 		if($NumberOfPages > 1)
 		{
 			$BeforePage	= ($Page - 1);
@@ -451,6 +457,7 @@ function MyCrazyLittleSearch($SpecifyItems, $WhereItem, $SpecifyWhere, $SpecialS
 		$Result['LIST']	 = "<br><table border='0px' style='background:url(images/Adm/blank.gif);' width='90%'>";
 		$Result['LIST']	.= "<tr><td style='color:#00CC33;border: 2px red solid;' height='25px'><font color=red>".$LNG['se_no_data']."</font></td></tr>";
 		$Result['LIST']	.= "</table>";
+		$Result['PAGES']  = '';
 		return $Result;
 	}
 }
