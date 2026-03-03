@@ -9,7 +9,7 @@
 	<div class="contentbox">
 				<h1>{$LNG.loginHeader} {$LNG.loginHiveAccount}</h1>
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
-					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$universeSelect|array_key_first}</select>
+						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$universeSelect|array_key_first}</select>
 					<input name="username" id="username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
 					<input name="password" id="password" type="hidden">
 					<input name="hiveAccount" id="hiveAccount" type="hidden">
@@ -21,13 +21,13 @@
 				<h1>{$LNG.loginHeader} {$LNG.loginPassword}</h1>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<div class="row">
-						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$universeSelect|array_key_first}</select>
+					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$universeSelect|array_key_first}</select>
 						<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}">
 						<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
-						{if $verkey["capaktiv"]==1}
+						{if ($verkey|default:[])["capaktiv"]==1}
 							<script src='https://www.google.com/recaptcha/api.js'></script>
 							<script>function onSubmit() { document.getElementById("login").submit(); } </script>
-							<input class="g-recaptcha" data-sitekey="{$verkey["cappublic"]}" data-callback="onSubmit" type="submit" value="{$LNG.loginButton}">
+							<input class="g-recaptcha" data-sitekey="{$verkey|default:[]["cappublic"]}" data-callback="onSubmit" type="submit" value="{$LNG.loginButton}">
 						{else}
 							<input type="submit" value="{$LNG.loginButton}">
 						{/if}
@@ -35,7 +35,7 @@
 				</form>
 				<br>
 				<span class="small">{$loginInfo}</span>
-				{if $facebookEnable}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
+				{if $facebookEnable|default:false}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
 			</div>
 			<div class="contentbox">
 				<h1>{$LNG.buttonRegister} First</h1>
@@ -81,5 +81,5 @@
 </section>
 {/block}
 {block name="script" append}
-<script>{if $code}alert({$code|json});{/if}</script>
+<script>{if $code}alert({$code|default:0|json});{/if}</script>
 {/block}

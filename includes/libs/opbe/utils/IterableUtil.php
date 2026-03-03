@@ -31,7 +31,7 @@ class IterableUtil implements Iterator
 
     /* Iterator functions */
 
-    public function rewind()
+    public function rewind(): void
     {
         reset($this->array);
     }

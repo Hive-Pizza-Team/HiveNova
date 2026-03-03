@@ -276,7 +276,7 @@
 
 											// WIN! :-) We found a valid date...
 
-											$rtime			= explode(',', strftime('%M,%H,%d,%m,%w,%Y', mktime($rtime[IDX_HOUR], $rtime[IDX_MINUTE], 0, $nmonth, $nday, $nyear)));
+											$rtime			= explode(',', date('i,H,d,m,w,Y', mktime($rtime[IDX_HOUR], $rtime[IDX_MINUTE], 0, $nmonth, $nday, $nyear)));
 
 											return mktime($rtime[1], $rtime[0], 0, $rtime[3], $rtime[2], $rtime[5]);
 
