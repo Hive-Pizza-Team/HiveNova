@@ -5,5 +5,5 @@
  */
 function smarty_modifiercompiler_htmlspecialchars($params, $compiler)
 {
-    return 'htmlspecialchars(' . $params[0] . ')';
+    return 'htmlspecialchars((string) ' . $params[0] . ')';
 }
