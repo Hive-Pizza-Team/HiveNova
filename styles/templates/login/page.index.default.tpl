@@ -24,10 +24,11 @@
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$universeSelect|array_key_first}</select>
 						<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}">
 						<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
-						{if ($verkey|default:[])["capaktiv"]==1}
-							<script src='https://www.google.com/recaptcha/api.js'></script>
-							<script>function onSubmit() { document.getElementById("login").submit(); } </script>
-							<input class="g-recaptcha" data-sitekey="{$verkey|default:[]["cappublic"]}" data-callback="onSubmit" type="submit" value="{$LNG.loginButton}">
+					{$verkeySafe = $verkey|default:[]}
+					{if $verkeySafe.capaktiv == 1}
+						<script src='https://www.google.com/recaptcha/api.js'></script>
+						<script>function onSubmit() { document.getElementById("login").submit(); } </script>
+						<input class="g-recaptcha" data-sitekey="{$verkeySafe.cappublic}" data-callback="onSubmit" type="submit" value="{$LNG.loginButton}">
 						{else}
 							<input type="submit" value="{$LNG.loginButton}">
 						{/if}
