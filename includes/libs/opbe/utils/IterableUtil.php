@@ -36,22 +36,22 @@ class IterableUtil implements Iterator
         reset($this->array);
     }
 
-    public function current()
+    public function current(): mixed
     {
         return current($this->array);
     }
 
-    public function key()
+    public function key(): mixed
     {
         return key($this->array);
     }
 
-    public function next()
+    public function next(): void
     {
-        return next($this->array);
+        next($this->array);
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return $this->current() !== false;
     }
