@@ -15,5 +15,4 @@ jobs:
           configuration: "phpunit.xml"
           php_version: "8.3"
           php_extensions: "xdebug gmp"
-          coverage: "xdebug"
           coverage_clover: "coverage/clover.xml"
