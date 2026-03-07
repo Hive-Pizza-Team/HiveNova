@@ -60,7 +60,7 @@
 			<td>{$LNG.op_timezone}</td>
 			<td>{html_options name=timezone options=$Selectors.timezones selected=$timezone}</td>
 		</tr>
-		{if count($Selectors.lang) > 1}
+		{if $Selectors.lang|count > 1}
 		<tr>
 			<td>{$LNG.op_lang}</td>
 			<td>{html_options name=language options=$Selectors.lang selected=$userLang}</td>
@@ -76,7 +76,7 @@
 				{html_options name=planetOrder options=$Selectors.SortUpDown selected=$planetOrder}
 			</td>
 		</tr>
-		{if count($Selectors.Skins) > 1}
+		{if $Selectors.Skins|count > 1}
 		<tr>
 			<td>{$LNG.op_skin_example}</td>
 			<td>{html_options options=$Selectors.Skins selected=$theme name="theme" id="theme"}</td>
@@ -136,7 +136,7 @@
 			<td><a title="{$LNG.op_dlte_account_descrip}">{$LNG.op_dlte_account}</a></td>
 			<td><input name="delete" type="checkbox" value="1" {if $delete > 0}checked="checked"{/if}></td>
 		</tr>
-		{if isModuleAvailable($smarty.const.MODULE_BANNER)}
+		{if $smarty.const.MODULE_BANNER|isModuleAvailable}
 		<tr>
 			<th colspan="3">{$LNG.ov_userbanner}</th>
 		</tr>

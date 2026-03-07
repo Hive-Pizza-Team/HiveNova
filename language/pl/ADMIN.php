@@ -631,6 +631,21 @@ $LNG['mu_giveaway']					= 'Bonusy';
 $LNG['mu_disclaimer']				= 'Ustawienia prawne';
 $LNG['mu_dump']						= 'Baza danych - Kopia';
 
+$LNG['mu_transactions'] = 'Transakcje';
+
+$LNG['tx_id'] = 'ID';
+$LNG['tx_timestamp'] = 'Czas';
+$LNG['tx_user'] = 'Użytkownik';
+$LNG['tx_amount_spent'] = 'Wydano';
+$LNG['tx_amount_received'] = 'Otrzymano';
+$LNG['tx_item'] = 'ID przedmiotu';
+$LNG['tx_memo'] = 'Notatka';
+$LNG['tx_total'] = 'Łącznie';
+$LNG['tx_no_results'] = 'Nie znaleziono transakcji.';
+$LNG['tx_search'] = 'Szukaj';
+$LNG['tx_search_placeholder'] = 'Nazwa użytkownika lub notatka...';
+$LNG['tx_clear'] = 'Wyczyść';
+
 
 $LNG['vt_error']					= 'Błąd plików - wymagana aktualizacja!';
 $LNG['vt_fail']						= 'Zmienione Pliki';

@@ -43,7 +43,7 @@ function ShowInformationPage()
 	
 	try {
 		$dateTimeZonePHP	= new DateTimeZone(ini_get('date.timezone'));
-	} catch (Exception $e) {
+	} catch (Exception) {
 		$dateTimeZonePHP	= new DateTimeZone(date_default_timezone_get());
 	}
 	

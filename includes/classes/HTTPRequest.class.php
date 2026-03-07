@@ -17,14 +17,12 @@
 
 class HTTPRequest
 {
-	private $url		= NULL;
 	private $content	= NULL;
 	private $ch			= NULL;
 
-	public function __construct($url = NULL)
-	{
-		$this->url = $url;
-	}
+	public function __construct(private $url = NULL)
+    {
+    }
 
 	public function send()
 	{

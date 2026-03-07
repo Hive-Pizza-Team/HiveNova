@@ -54,6 +54,7 @@ class MissionCaseSpy extends MissionFunctions implements Mission
 		$targetUser['factor']	= getFactors($targetUser, 'basic', $this->_fleet['fleet_start_time']);
 
 		$planetUpdater 						= new ResourceUpdate();
+		$planetUpdater->setResourceData($resource, $reslist);
 		list($targetUser, $targetPlanet)	= $planetUpdater->CalcResource($targetUser, $targetPlanet, true, $this->_fleet['fleet_start_time']);
 
 		$sql	= 'SELECT * FROM %%FLEETS%%

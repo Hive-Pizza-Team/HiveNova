@@ -35,18 +35,11 @@ class ShowImperiumPage extends AbstractGamePage
 		
 		$sql = "SELECT * FROM %%PLANETS%% WHERE id_owner = :userID AND destruyed = '0' ORDER BY ";
 
-		switch($USER['planet_sort'])
-		{
-			case 2:
-				$sql .= 'name '.$order;
-				break;
-			case 1:
-				$sql .= 'galaxy '.$order.', `system` '.$order.', planet '.$order.', planet_type '.$order;
-				break;
-			default:
-				$sql .= 'id '.$order;
-				break;
-		}
+		match ($USER['planet_sort']) {
+            2 => $sql .= 'name '.$order,
+            1 => $sql .= 'galaxy '.$order.', `system` '.$order.', planet '.$order.', planet_type '.$order,
+            default => $sql .= 'id '.$order,
+        };
 
         $PlanetsRAW = $db->select($sql, array(
             ':userID'   => $USER['id']
@@ -55,7 +48,8 @@ class ShowImperiumPage extends AbstractGamePage
         $PLANETS	= array();
 		
 		$PlanetRess	= new ResourceUpdate();
-		
+		$PlanetRess->setResourceData($resource, $reslist);
+
 		foreach ($PlanetsRAW as $CPLANET)
 		{
             list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, true);
@@ -64,7 +58,21 @@ class ShowImperiumPage extends AbstractGamePage
 			unset($CPLANET);
 		}
 
-        $planetList	= array();
+        $planetList	= array(
+			'image'          => array(),
+			'name'           => array(),
+			'coords'         => array(),
+			'field'          => array(),
+			'energy_used'    => array(),
+			'resource'       => array(),
+			'resourcePerHour'=> array(),
+			'planet_type'    => array(),
+			'build'          => array(),
+			'fleet'          => array(),
+			'defense'        => array(),
+			'missiles'       => array(),
+			'tech'           => array(),
+		);
 	$config		= Config::get($USER['universe']);
 		foreach($PLANETS as $Planet)
 		{

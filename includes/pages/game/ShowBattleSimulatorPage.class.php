@@ -74,7 +74,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					}
 				}
 				
-				$attacker['unit'] 	= array_map('intval', $BattleSlot[0]);
+				$attacker['unit'] 	= array_map(intval(...), $BattleSlot[0]);
 				
 				$attackers[]	= $attacker;
 			}
@@ -117,7 +117,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					}
 				}
 				
-				$defender['unit'] 	= array_map('intval', $BattleSlot[1]);
+				$defender['unit'] 	= array_map(intval(...), $BattleSlot[1]);
 				$defenders[]	= $defender;
 			}
 		}

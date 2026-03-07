@@ -27,7 +27,7 @@ class ShowBuildingsPage extends AbstractGamePage
 	private function CancelBuildingFromQueue()
 	{
 		global $PLANET, $USER, $resource;
-		$CurrentQueue  = unserialize($PLANET['b_building_id']);
+		$CurrentQueue  = safe_unserialize($PLANET['b_building_id']);
 		if (empty($CurrentQueue))
 		{
 			$PLANET['b_building_id']	= '';
@@ -82,7 +82,7 @@ class ShowBuildingsPage extends AbstractGamePage
             return false;
         }
 
-		$CurrentQueue  = unserialize($PLANET['b_building_id']);
+		$CurrentQueue  = safe_unserialize($PLANET['b_building_id']);
 		$ActualCount   = count($CurrentQueue);
 		if($ActualCount <= 1) {
 			return $this->CancelBuildingFromQueue();
@@ -131,7 +131,7 @@ class ShowBuildingsPage extends AbstractGamePage
 		)
 			return;
 		
-		$CurrentQueue  		= unserialize($PLANET['b_building_id']);
+		$CurrentQueue  		= safe_unserialize($PLANET['b_building_id']);
 		$DemolishedQueue = 0;
 				
 		if (!empty($CurrentQueue)) {
@@ -181,7 +181,15 @@ class ShowBuildingsPage extends AbstractGamePage
 			
 			$PLANET['b_building_id']	= serialize(array(array($Element, $BuildLevel, $elementTime, $BuildEndTime, $BuildMode)));
 			$PLANET['b_building']		= $BuildEndTime;
-			
+
+			// Database::get()->insert('INSERT INTO %%LOG_BUILDINGS%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
+			// 	'owner_id'	=> $USER['id'],
+			// 	'planet_id'	=> $PLANET['id'],
+			// 	'universe'	=> $PLANET['universe'],
+			// 	'element_id'=> $Element,
+			// 	'queued_at'	=> TIMESTAMP,
+			// ));
+
 		} else {
 			$addLevel = 0;
 			foreach($CurrentQueue as $QueueSubArray)
@@ -206,7 +214,15 @@ class ShowBuildingsPage extends AbstractGamePage
 			$elementTime    			= BuildFunctions::getBuildingTime($USER, $PLANET, $Element, NULL, !$AddMode, $BuildLevel);
 			$BuildEndTime				= $CurrentQueue[$ActualCount - 1][3] + $elementTime;
 			$CurrentQueue[]				= array($Element, $BuildLevel, $elementTime, $BuildEndTime, $BuildMode);
-			$PLANET['b_building_id']	= serialize($CurrentQueue);		
+			$PLANET['b_building_id']	= serialize($CurrentQueue);
+
+			// Database::get()->insert('INSERT INTO %%LOG_BUILDINGS%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
+			// 	'owner_id'	=> $USER['id'],
+			// 	'planet_id'	=> $PLANET['id'],
+			// 	'universe'	=> $PLANET['universe'],
+			// 	'element_id'=> $Element,
+			// 	'queued_at'	=> TIMESTAMP,
+			// ));
 		}
 
 	}
@@ -221,7 +237,7 @@ class ShowBuildingsPage extends AbstractGamePage
 		if ($PLANET['b_building'] == 0 || $PLANET['b_building_id'] == "")
 			return array('queue' => $scriptData, 'quickinfo' => $quickinfo);
 		
-		$buildQueue		= unserialize($PLANET['b_building_id']);
+		$buildQueue		= safe_unserialize($PLANET['b_building_id']);
 		
 		foreach($buildQueue as $BuildArray) {
 			if ($BuildArray[3] < TIMESTAMP)

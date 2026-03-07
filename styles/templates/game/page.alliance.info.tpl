@@ -7,17 +7,17 @@
 {if $ally_image}
 <tr>
 	<td colspan="2">
-		<img style="max-width: 1024px;" src="{$ally_image}" alt="{$ally_tag}">
+		<img style="max-width: 1024px;" src="{$ally_image|htmlspecialchars}" alt="{$ally_tag|htmlspecialchars}">
 	</td>
 </tr>
 {/if}
 <tr>
 	<td style="width:50%">{$LNG.al_ally_info_tag}</td>
-	<td style="width:50%">{$ally_tag}</td>
+	<td style="width:50%">{$ally_tag|htmlspecialchars}</td>
 </tr>
 <tr>
 	<td>{$LNG.al_ally_info_name}</td>
-	<td>{$ally_name}</td>
+	<td>{$ally_name|htmlspecialchars}</td>
 </tr>
 <tr>
 	<td>{$LNG.al_ally_info_members}</td>
@@ -39,7 +39,7 @@
 {if $ally_web}
 <tr>
 	<td>{$LNG.al_web_text}</td>
-	<td><a href="{$ally_web}">{$ally_web}</a></td>
+	<td><a href="{$ally_web|htmlspecialchars}">{$ally_web|htmlspecialchars}</a></td>
 </tr>
 {/if}
 {if $diplomaticData}
@@ -68,13 +68,13 @@
 	<td>{$LNG.pl_totalfight}</td><td>{$statisticData.totalfight|number}</td>
 </tr>
 <tr>
-	<td>{$LNG.pl_fightwon}</td><td>{$statisticData.fightwon|number}{if $statisticData.totalfight} ({round($statisticData.fightwon / $statisticData.totalfight * 100, 2)}%){/if}</td>
+	<td>{$LNG.pl_fightwon}</td><td>{$statisticData.fightwon|number}{if $statisticData.totalfight} ({$_v=$statisticData.fightwon/$statisticData.totalfight*100}{$_v|round:2}%){/if}</td>
 </tr>
-<tr>	
-	<td>{$LNG.pl_fightlose}</td><td>{$statisticData.fightlose|number}{if $statisticData.totalfight} ({round($statisticData.fightlose / $statisticData.totalfight * 100, 2)}%){/if}</td>
+<tr>
+	<td>{$LNG.pl_fightlose}</td><td>{$statisticData.fightlose|number}{if $statisticData.totalfight} ({$_v=$statisticData.fightlose/$statisticData.totalfight*100}{$_v|round:2}%){/if}</td>
 </tr>
-<tr>	
-	<td>{$LNG.pl_fightdraw}</td><td>{$statisticData.fightdraw|number}{if $statisticData.totalfight} ({round($statisticData.fightdraw / $statisticData.totalfight * 100, 2)}%){/if}</td>
+<tr>
+	<td>{$LNG.pl_fightdraw}</td><td>{$statisticData.fightdraw|number}{if $statisticData.totalfight} ({$_v=$statisticData.fightdraw/$statisticData.totalfight*100}{$_v|round:2}%){/if}</td>
 </tr>
 <tr>
 	<td>{$LNG.pl_unitsshot}</td><td>{$statisticData.unitsshot}</td>

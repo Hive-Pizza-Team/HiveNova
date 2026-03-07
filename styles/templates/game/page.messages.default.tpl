@@ -58,7 +58,7 @@
 		<td>{$Message.from}</td>
 		<td>{$Message.subject}
 		{if $Message.type == 1 && $MessID != 999}
-		<a href="#" onclick="return Dialog.PM({$Message.sender}, Message.CreateAnswer('{$Message.subject}'));" title="{$LNG.mg_answer_to} {strip_tags($Message.from)}"><img src="{$dpath}img/m.gif" border="0"></a>
+		<a href="#" onclick="return Dialog.PM({$Message.sender}, Message.CreateAnswer('{$Message.subject}'));" title="{$LNG.mg_answer_to} {$Message.from|strip_tags}"><img src="{$dpath}img/m.gif" border="0"></a>
 		{/if}
 		{if $MessID != 999}<a href="#" onclick="Message.delMessage({$Message.id});return false;"><img src="{$dpath}img/deletemsg.png"></a>{/if}
 		</td>

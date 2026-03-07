@@ -9,7 +9,7 @@
 <input type="hidden" value="{$referralData.id}" name="referralID">
 	<div class="rowForm">
 		<label for="universe">{$LNG.universe}</label>
-		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=array_key_first($universeSelect)}</select>
+		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$universeSelect|array_key_first}</select>
 		{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
 	</div>
 	{if !empty($externalAuth.account)}
@@ -57,7 +57,7 @@
 		{if !empty($error.emailReplay)}<span class="error errorEmailReplay"></span>{/if}
 		<span class="inputDesc">{$LNG.registerEmailReplayDesc}</span>
 	</div>
-	{if count($languages) > 1}
+	{if $languages|count > 1}
 	<div class="rowForm">
 		<label for="language">{$LNG.registerLanguage}</label>
 		<select name="lang" id="language">{html_options options=$languages selected=$lang}</select>
@@ -103,7 +103,7 @@
 	<input type="hidden" value="{$referralData.id}" name="referralID">
 	<div class="rowForm">
 		<label for="universe">{$LNG.universe}</label>
-		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=array_key_first($universeSelect)}</select>
+		<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$universeSelect|array_key_first}</select>
 		{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
 	</div>
 	<div class="rowForm">
@@ -116,7 +116,7 @@
 	<input type="hidden" class="input" name="email" id="email"></input>
 	<input type="hidden" class="input" name="emailReplay" id="emailReplay"></input>
 
-	{if count($languages) > 1}
+	{if $languages|count > 1}
 	<div class="rowForm">
 		<label for="language">{$LNG.registerLanguage}</label>
 		<select name="lang" id="language">{html_options options=$languages selected=$lang}</select>

@@ -58,6 +58,7 @@ class Database_BC extends mysqli
 	 *
 	 * @return resource	Results of the query
 	 */
+	#[\ReturnTypeWillChange]
 	public function query($resource, $resultmode = NULL)
 	{
 		if($result = parent::query($resource))
@@ -119,7 +120,7 @@ class Database_BC extends mysqli
 		while($Data	= $result->fetch_array(MYSQLI_ASSOC)) {
 			foreach($Data as $Key => $Store) {
 				if(in_array($Key, $encode))
-					$Data[$Key]	= base64_encode($Store);
+					$Data[$Key]	= base64_encode((string) $Store);
 			}
 			$Return[]	= $Data;
 		}
@@ -205,7 +206,7 @@ class Database_BC extends mysqli
 	
 	public function str_correction($str)
 	{
-		return stripcslashes($str);
+		return stripcslashes((string) $str);
 	}
 
 	/**
@@ -241,6 +242,7 @@ class Database_BC extends mysqli
         return;
 	}
 	
+	#[\ReturnTypeWillChange]
 	public function multi_query($resource)
 	{
 		if(parent::multi_query($resource))

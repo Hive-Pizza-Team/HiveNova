@@ -175,7 +175,7 @@
 					// a little odd but thats the easiest way of adding/substracting a day without
 					// screwing up the date. Just trust me on that one ;-)
 
-					$rtime			= explode(',', strftime('%M,%H,%d,%m,%w,%Y', mktime($rtime[IDX_HOUR], $rtime[IDX_MINUTE], 0, $rtime[IDX_MONTH], $rtime[IDX_DAY], $rtime[IDX_YEAR]) + ((($next) ? 1 : -1) * 86400)));
+					$rtime			= explode(',', date('i,H,d,m,w,Y', mktime($rtime[IDX_HOUR], $rtime[IDX_MINUTE], 0, $rtime[IDX_MONTH], $rtime[IDX_DAY], $rtime[IDX_YEAR]) + ((($next) ? 1 : -1) * 86400)));
 
 				} else {
 
@@ -196,7 +196,7 @@
 							$nminute	= reset($cron[IDX_MINUTE]);
 							$nhour		= reset($cron[IDX_HOUR]);
 
-							$rtime		= explode(',', strftime('%M,%H,%d,%m,%w,%Y', mktime($nhour, $nminute, 0, $rtime[IDX_MONTH], $rtime[IDX_DAY], $rtime[IDX_YEAR]) + ((($next) ? 1 : -1) * 86400)));
+							$rtime		= explode(',', date('i,H,d,m,w,Y', mktime($nhour, $nminute, 0, $rtime[IDX_MONTH], $rtime[IDX_DAY], $rtime[IDX_YEAR]) + ((($next) ? 1 : -1) * 86400)));
 
 						} else {
 
@@ -276,7 +276,7 @@
 
 											// WIN! :-) We found a valid date...
 
-											$rtime			= explode(',', strftime('%M,%H,%d,%m,%w,%Y', mktime($rtime[IDX_HOUR], $rtime[IDX_MINUTE], 0, $nmonth, $nday, $nyear)));
+											$rtime			= explode(',', date('i,H,d,m,w,Y', mktime($rtime[IDX_HOUR], $rtime[IDX_MINUTE], 0, $nmonth, $nday, $nyear)));
 
 											return mktime($rtime[1], $rtime[0], 0, $rtime[3], $rtime[2], $rtime[5]);
 
@@ -321,11 +321,8 @@
 
 		static private function getTimestamp($timestamp = null) {
 
-			if (is_null($timestamp)) {
-				$arr	= explode(',', strftime('%M,%H,%d,%m,%w,%Y', time()));
-			} else {
-				$arr	= explode(',', strftime('%M,%H,%d,%m,%w,%Y', $timestamp));
-			}
+			$ts  = is_null($timestamp) ? time() : $timestamp;
+			$arr = explode(',', date('i,H,d,m,w,Y', $ts));
 
 			// Remove leading zeros (or we'll get in trouble ;-)
 

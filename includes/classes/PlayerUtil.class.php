@@ -25,7 +25,7 @@ class PlayerUtil
 {
 	static public function cryptPassword($password)
 	{
-		return password_hash($password, PASSWORD_BCRYPT, ['cost' => 13]);
+		return password_hash((string) $password, PASSWORD_BCRYPT, ['cost' => 13]);
 	}
 
 	static public function isPositionFree($universe, $galaxy, $system, $position, $type = 1)
@@ -53,18 +53,18 @@ class PlayerUtil
 	static public function isNameValid($name)
 	{
 		if(UTF8_SUPPORT) {
-			return preg_match('/^[\p{L}\p{N}_\-. ]*$/u', $name);
+			return preg_match('/^[\p{L}\p{N}_\-. ]*$/u', (string) $name);
 		} else {
-			return preg_match('/^[A-z0-9_\-. ]*$/', $name);
+			return preg_match('/^[A-z0-9_\-. ]*$/', (string) $name);
 		}
 	}
 
 	static public function isHiveAccountValid($hiveaccount)
 	{
-		if (is_null($hiveaccount) || strlen($hiveaccount) == 0 || strlen($hiveaccount) > 16) {
+		if (is_null($hiveaccount) || strlen($hiveaccount) == 0 || strlen((string) $hiveaccount) > 16) {
 			return false;
 		}
-		return preg_match('/^[a-z][-a-z0-9]+[a-z0-9](\.[a-z][-a-z0-9]+[a-z0-9])*$/', $hiveaccount);
+		return preg_match('/^[a-z][-a-z0-9]+[a-z0-9](\.[a-z][-a-z0-9]+[a-z0-9])*$/', (string) $hiveaccount);
 	}
 
 	static public function isHiveSignValid($hiveaccount, $signedblob)
@@ -109,7 +109,7 @@ class PlayerUtil
 	}
 
 	static public function isHiveAccountExists($hiveaccount) {
-		$hiveaccount = strtolower($hiveaccount); // force lower case
+		$hiveaccount = strtolower((string) $hiveaccount); // force lower case
 
 		// verify account
 		if (!PlayerUtil::isHiveAccountValid($hiveaccount)) {
@@ -129,7 +129,7 @@ class PlayerUtil
 	}
 
 	static public function getPlayerAvatarURL($USER){
-		$usernameLower = strtolower($USER['username']);
+		$usernameLower = strtolower((string) $USER['username']);
 		if (PlayerUtil::isHiveAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
 			return 'https://images.hive.blog/u/'.$usernameLower.'/avatar';
 		}
@@ -138,7 +138,7 @@ class PlayerUtil
 	}
 
 	static public function getPlayerBadges($USER){
-		$usernameLower = strtolower($USER['username']);
+		$usernameLower = strtolower((string) $USER['username']);
 		if (PlayerUtil::isHiveAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
 			return '<a href="https://peakd.com/@'.$USER['hive_account'].'" target="_blank">♦️</a>';
 		}

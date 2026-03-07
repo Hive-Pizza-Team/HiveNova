@@ -30,12 +30,12 @@ if (function_exists('mb_internal_encoding')) {
 }
 
 ignore_user_abort(true);
-error_reporting(E_ALL & ~E_STRICT);
+error_reporting(E_ALL);
 
 // If date.timezone is invalid
 date_default_timezone_set(@date_default_timezone_get());
 
-ini_set('display_errors', 1);
+ini_set('display_errors', getenv('APP_ENV') === 'development' ? 1 : 0);
 header('Content-Type: text/html; charset=UTF-8');
 define('TIMESTAMP',	time());
 	
@@ -45,11 +45,12 @@ ini_set('log_errors', 'On');
 ini_set('error_log', 'includes/error.log');
 
 require 'includes/GeneralFunctions.php';
-set_exception_handler('exceptionHandler');
-set_error_handler('errorHandler');
+set_exception_handler(exceptionHandler(...));
+set_error_handler(errorHandler(...));
 
 require 'includes/classes/ArrayUtil.class.php';
 require 'includes/classes/Cache.class.php';
+require 'includes/classes/DatabaseInterface.php';
 require 'includes/classes/Database.class.php';
 require 'includes/classes/Config.class.php';
 require 'includes/classes/class.FleetFunctions.php';
@@ -102,7 +103,7 @@ if(defined('DATABASE_VERSION') && DATABASE_VERSION === 'OLD')
 	
 	foreach($dbTableNames as $dbAlias => $dbName)
 	{
-		define(substr($dbAlias, 2, -2), $dbName);
+		define(substr((string) $dbAlias, 2, -2), $dbName);
 	}	
 }
 
@@ -214,7 +215,7 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	{
 		error_reporting(E_ERROR | E_WARNING | E_PARSE);
 		
-		$USER['rights']		= unserialize($USER['rights']);
+		$USER['rights']		= safe_unserialize($USER['rights']);
 		$LNG->includeData(array('ADMIN', 'CUSTOM'));
 	}
 }

@@ -13,7 +13,7 @@
 					<td class="transparent left"><p>{$LNG.longDescription.$elementID}</p>
 					{if !empty($Bonus)}<p>
 					<b>{$LNG.in_bonus}</b><br>
-					{foreach $Bonus as $BonusName => $elementBouns}{if $elementBouns[0] < 0}-{else}+{/if}{if $elementBouns[1] == 0}{abs($elementBouns[0] * 100)}%{else}{floatval($elementBouns[0])}{/if} {$LNG.bonus.$BonusName}<br>{/foreach}
+					{foreach $Bonus as $BonusName => $elementBouns}{if $elementBouns[0] < 0}-{else}+{/if}{if $elementBouns[1] == 0}{$_v=$elementBouns[0]*100}{$_v|abs}%{else}{$elementBouns[0]|floatval}{/if} {$LNG.bonus.$BonusName}<br>{/foreach}
 					</p>{/if}	
 					{if !empty($FleetInfo)}
 					{if !empty($FleetInfo.rapidfire.to)}<p>

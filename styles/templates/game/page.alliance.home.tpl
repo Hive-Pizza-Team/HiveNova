@@ -6,16 +6,16 @@
 	</tr>
 	{if $ally_image}
 	<tr>
-		<td colspan="2"><img style="max-width: 1024px;" src="{$ally_image}"></td>
+		<td colspan="2"><img style="max-width: 1024px;" src="{$ally_image|htmlspecialchars}"></td>
 	</tr>
 	{/if}
 	<tr>
 		<td style="width:50%">{$LNG.al_ally_info_tag}</td>
-		<td style="width:50%">{$ally_tag}</td>
+		<td style="width:50%">{$ally_tag|htmlspecialchars}</td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_ally_info_name}</td>
-		<td>{$ally_name}</td>
+		<td>{$ally_name|htmlspecialchars}</td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_ally_info_members}</td>
@@ -25,7 +25,7 @@
 		<td>{$LNG.al_rank}</td>
 		<td>{$rankName}{if $rights.ADMIN} (<a href="?page=alliance&amp;mode=admin">{$LNG.al_manage_alliance}</a>){/if}</td>
 	</tr>
-    {if isModuleAvailable($smarty.const.MODULE_CHAT)}
+    {if $smarty.const.MODULE_CHAT|isModuleAvailable}
 	<tr>
 		<td colspan="2"><a href="#" onclick="return Dialog.AllianceChat();">{$LNG.al_goto_chat}</a></td>
 	</tr>
@@ -68,7 +68,7 @@
 	{if $ally_web}
 	<tr>
 		<td>{$LNG.al_web_text}</td>
-		<td><a href="{$ally_web}">{$ally_web}</a></td>
+		<td><a href="{$ally_web|htmlspecialchars}">{$ally_web|htmlspecialchars}</a></td>
 	</tr>
 	{/if}
 	<tr>
@@ -100,13 +100,13 @@
 		<td>{$LNG.pl_totalfight}</td><td>{$totalfight|number}</td>
 	</tr>
 	<tr>
-		<td>{$LNG.pl_fightwon}</td><td>{$fightwon|number} {if $totalfight}({round($fightwon / $totalfight * 100, 2)}%){/if}</td>
+		<td>{$LNG.pl_fightwon}</td><td>{$fightwon|number} {if $totalfight}({$_v=$fightwon/$totalfight*100}{$_v|round:2}%){/if}</td>
 	</tr>
-	<tr>	
-		<td>{$LNG.pl_fightlose}</td><td>{$fightlose|number} {if $totalfight}({round($fightlose / $totalfight * 100, 2)}%){/if}</td>
+	<tr>
+		<td>{$LNG.pl_fightlose}</td><td>{$fightlose|number} {if $totalfight}({$_v=$fightlose/$totalfight*100}{$_v|round:2}%){/if}</td>
 	</tr>
-	<tr>	
-		<td>{$LNG.pl_fightdraw}</td><td>{$fightdraw|number} {if $totalfight}({round($fightdraw / $totalfight * 100, 2)}%){/if}</td>
+	<tr>
+		<td>{$LNG.pl_fightdraw}</td><td>{$fightdraw|number} {if $totalfight}({$_v=$fightdraw/$totalfight*100}{$_v|round:2}%){/if}</td>
 	</tr>
 	<tr>
 		<td>{$LNG.pl_unitsshot}</td><td>{$unitsshot}</td>

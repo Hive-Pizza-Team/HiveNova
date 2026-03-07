@@ -20,7 +20,7 @@ class VarsBuildCache implements BuildCache
 	function buildCache()
 	{
 		$resource		= array();
-		$requeriments	= array();
+		$requirements	= array();
 		$pricelist		= array();
 		$CombatCaps		= array();
 		$reslist		= array();
@@ -45,7 +45,7 @@ class VarsBuildCache implements BuildCache
 		$reqResult		= $db->nativeQuery('SELECT * FROM %%VARS_REQUIRE%%;');
 		foreach($reqResult as $reqRow)
 		{
-			$requeriments[$reqRow['elementID']][$reqRow['requireID']]	= $reqRow['requireLevel'];
+			$requirements[$reqRow['elementID']][$reqRow['requireID']]	= $reqRow['requireLevel'];
 		}
 
 		$varsResult		= $db->nativeQuery('SELECT * FROM %%VARS%%;');
@@ -129,7 +129,7 @@ class VarsBuildCache implements BuildCache
 			switch($varsRow['class']) {
 				case 0: 
 					$reslist['build'][]	= $varsRow['elementID'];
-					$tmp	= explode(',', $varsRow['onPlanetType']);
+					$tmp	= explode(',', (string) $varsRow['onPlanetType']);
 					foreach($tmp as $type) 
 						$reslist['allow'][$type][]	= $varsRow['elementID'];
 				break;
@@ -166,7 +166,7 @@ class VarsBuildCache implements BuildCache
 			'CombatCaps'	=> $CombatCaps,
 			'resource'		=> $resource,
 			'pricelist'		=> $pricelist,
-			'requeriments'	=> $requeriments,
+			'requirements'	=> $requirements,
 		);
 	}
 }

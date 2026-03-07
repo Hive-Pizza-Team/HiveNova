@@ -642,6 +642,20 @@ $LNG['mu_logs'] = 'Admin Log';
 $LNG['mu_giveaway'] = 'Giveaways';
 $LNG['mu_disclaimer'] = 'Contact settings';
 $LNG['mu_dump'] = 'Database Backup';
+$LNG['mu_transactions'] = 'Transactions';
+
+$LNG['tx_id']                  = 'ID';
+$LNG['tx_timestamp']           = 'Timestamp';
+$LNG['tx_user']                = 'User';
+$LNG['tx_amount_spent']        = 'Spent';
+$LNG['tx_amount_received']     = 'Received';
+$LNG['tx_item']                = 'Item ID';
+$LNG['tx_memo']                = 'Memo';
+$LNG['tx_total']               = 'Total';
+$LNG['tx_no_results']          = 'No transactions found.';
+$LNG['tx_search']              = 'Search';
+$LNG['tx_search_placeholder']  = 'Username or memo...';
+$LNG['tx_clear']               = 'Clear';
 
 $LNG['vt_error'] = 'Hashfile is not available! - Run Update!';
 $LNG['vt_fail'] = 'Changed Files';

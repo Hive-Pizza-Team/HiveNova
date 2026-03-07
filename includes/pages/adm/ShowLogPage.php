@@ -38,26 +38,14 @@ function ShowLog()
 	#
 	# TODO: LOG Search
 	
-	switch ($table) {
-		case 'planet':
-			ShowLogPlanetsList();
-		break;
-		case 'player':
-			ShowLogPlayersList();
-		break;
-		case 'settings':
-			ShowLogSettingsList();
-		break;
-		case 'present':
-			ShowLogPresent();
-		break;
-		case 'detail':
-			ShowLogDetail();
-		break;
-		default:
-			ShowLogOverview();
-		break;
-	}
+	match ($table) {
+        'planet' => ShowLogPlanetsList(),
+        'player' => ShowLogPlayersList(),
+        'settings' => ShowLogSettingsList(),
+        'present' => ShowLogPresent(),
+        'detail' => ShowLogDetail(),
+        default => ShowLogOverview(),
+    };
 }
 
 function ShowLogOverview() {
@@ -71,7 +59,7 @@ function ShowLogDetail() {
 	$logid = HTTP::_GP('id', 0);
 	$result   	= $GLOBALS['DATABASE']->getFirstRow("SELECT l.*, u_a.username as admin_username FROM ".LOG." as l LEFT JOIN ".USERS." as u_a ON  u_a.id = l.admin  WHERE l.id = ".$logid."");
 	
-	$data = unserialize($result['data']);
+	$data = safe_unserialize($result['data']);
 	$conf_before	= array();
 	$conf_after		= array();
 	foreach ($data[0] as $key => $i) {

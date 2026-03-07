@@ -111,7 +111,7 @@ class ShowRaportPage extends AbstractGamePage
 		return;
 		}
 		
-		$combatReport			= unserialize($reportData['raport']);
+		$combatReport			= safe_unserialize($reportData['raport']);
 		$combatReport['time']	= _date($LNG['php_tdformat'], $combatReport['time'], $USER['timezone']);
 		$combatReport			= $this->BCWrapperPreRev2321($combatReport);
 		
@@ -146,15 +146,15 @@ class ShowRaportPage extends AbstractGamePage
 		}
 		
 		// empty is BC for pre r2484
-		$isAttacker = empty($reportData['attacker']) || in_array($USER['id'], explode(",", $reportData['attacker']));
-		$isDefender = empty($reportData['defender']) || in_array($USER['id'], explode(",", $reportData['defender']));
+		$isAttacker = empty($reportData['attacker']) || in_array($USER['id'], explode(",", (string) $reportData['attacker']));
+		$isDefender = empty($reportData['defender']) || in_array($USER['id'], explode(",", (string) $reportData['defender']));
 
 		if(empty($reportData)) {
 			$this->printMessage($LNG['sys_raport_not_found']);
 		return;
 		}
 
-		$combatReport			= unserialize($reportData['raport']);
+		$combatReport			= safe_unserialize($reportData['raport']);
 		if($isAttacker && !$isDefender && $combatReport['result'] == 'r' && count($combatReport['rounds']) <= 2) {
 			$this->printMessage($LNG['sys_raport_lost_contact']);
 		}

@@ -19,7 +19,7 @@ if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FI
 
 function ShowVertify() 
 {
-	$EXT		= explode("|", HTTP::_GP("ext", ""));
+	$EXT		= explode("|", (string) HTTP::_GP("ext", ""));
 	$action 	= HTTP::_GP("action", "");
 	$file	 	= HTTP::_GP("file", "");
 	$template	= new template();
@@ -36,7 +36,7 @@ function ShowVertify()
 			curl_setopt($ch, CURLOPT_CRLF, true);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			$FILE		= curl_exec($ch);
-			$SVNHASH	= crc32(preg_replace(array("/(\r\n)|(\r)/", '/(\\/\\*[\\d\\D]*?\\*\\/)/', '/\$I'.'d[^\$]+\$/'), array("\n", '', ''), $FILE));
+			$SVNHASH	= crc32((string) preg_replace(array("/(\r\n)|(\r)/", '/(\\/\\*[\\d\\D]*?\\*\\/)/', '/\$I'.'d[^\$]+\$/'), array("\n", '', ''), $FILE));
 			
 			if(curl_getinfo($ch, CURLINFO_HTTP_CODE) == 404) {
 				echo 4;
@@ -50,7 +50,7 @@ function ShowVertify()
 			
 			curl_close($ch);
 			$FILE2	= file_get_contents(ROOT_PATH.$file);
-			$LOCALHASH	= crc32(preg_replace(array("/(\r\n)|(\r)/", '/(\\/\\*[\\d\\D]*?\\*\\/)/', '/\$I'.'d[^\$]+\$/'), array("\n", '', ''), $FILE2));
+			$LOCALHASH	= crc32((string) preg_replace(array("/(\r\n)|(\r)/", '/(\\/\\*[\\d\\D]*?\\*\\/)/', '/\$I'.'d[^\$]+\$/'), array("\n", '', ''), $FILE2));
 			if($SVNHASH == $LOCALHASH) {
 				echo 1;
 				exit;
@@ -95,7 +95,7 @@ function dir_tree($dir, $EXT, $subDir = true) {
 					{
 						foreach($EXT as $FILEXT)
 						{
-							if(preg_match("/\.".preg_quote($FILEXT)."$/i", $current_file))
+							if(preg_match("/\.".preg_quote((string) $FILEXT)."$/i", $current_file))
 							{
 								$path[]	= str_replace(ROOT_PATH, '', str_replace('\\', '/', $current_file));
 								break;
