@@ -449,8 +449,13 @@ function ClearCache()
 	*/
 
 	$config		= Config::get();
-	$version	= explode('.', (string) $config->VERSION);
-	$config->VERSION	= $version[0] . '.' . $version[1] . '.' . 'git';
+	$versionFile = ROOT_PATH . 'install/VERSION';
+	if (file_exists($versionFile)) {
+		$config->VERSION = trim(file_get_contents($versionFile));
+	} else {
+		$version	= explode('.', (string) $config->VERSION);
+		$config->VERSION	= $version[0] . '.' . $version[1];
+	}
 	$config->save();
 }
 
