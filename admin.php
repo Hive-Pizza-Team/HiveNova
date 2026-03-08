@@ -178,6 +178,10 @@ switch($page)
 		include_once('includes/pages/adm/ShowMultiIPPage.php');
 		ShowMultiIPPage();
 	break;
+	case 'botdetect':
+		include_once('includes/pages/adm/ShowBotDetectionPage.php');
+		ShowBotDetectionPage();
+	break;
 	case 'log':
 		include_once('includes/pages/adm/ShowLogPage.php');
 		ShowLog();

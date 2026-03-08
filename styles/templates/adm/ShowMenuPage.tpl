@@ -34,6 +34,7 @@
 		{if allowedTo('ShowAccountDataPage')}<li><a href="?page=accountdata" target="Hauptframe">{$LNG.mu_info_account_page}</a></li>{/if}
 		{if allowedTo('ShowSearchPage')}<li><a href="?page=search" target="Hauptframe">{$LNG.mu_search_page}</a></li>{/if}
 		{if allowedTo('ShowMultiIPPage')}<li><a href="?page=multiips" target="Hauptframe">{$LNG.mu_multiip_page}</a></li>{/if}
+		{if allowedTo('ShowBotDetectionPage')}<li><a href="?page=botdetect" target="Hauptframe">{$LNG.mu_botdetect_page}</a></li>{/if}
 		<li><a href="javascript:void(0);"><span style="color:lime">{$LNG.mu_tools}</span></a></li>
 		{if allowedTo('ShowLogPage')}<li><a href="?page=log" target="Hauptframe">{$LNG.mu_logs}</a></li>{/if}
 		{if allowedTo('ShowTransactionsPage')}<li><a href="?page=transactions" target="Hauptframe">{$LNG.mu_transactions}</a></li>{/if}

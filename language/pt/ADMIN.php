@@ -1306,6 +1306,8 @@ $LNG['cronName_inactive']		= 'Excluir inativo';
 $LNG['cronName_teamspeak']		= 'Teamspeak data';
 $LNG['cronName_tracking']		= 'Estatísticas Globais';
 $LNG['cronName_databasedump']	= 'Backup de Base de Dados';
+$LNG['cronName_pushing'] = 'Detecção de Pushing';
+$LNG['cronName_botdetect'] = 'Detecção de Bots';
 
 $LNG['cronjob_id']					= 'ID';
 $LNG['cronjob_name']				= 'Nome';

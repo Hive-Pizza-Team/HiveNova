@@ -632,7 +632,8 @@ $LNG['mu_game_info'] 				= 'Information';
 $LNG['mu_vaild_users']				= 'Activité Utilisateur';
 $LNG['mu_news']						= 'Actualités';
 $LNG['mu_multiip_page']				= 'MultiIP'; 
-$LNG['mu_clear_cache']				= 'Vider le Cache';
+
+$LNG['mu_botdetect_page'] = 'Détection de Bots';$LNG['mu_clear_cache']				= 'Vider le Cache';
 $LNG['mu_vertify']					= 'Vérifiez le contenu du jeu'; 
 $LNG['mu_cronjob']					= 'Cronjobs'; 
 $LNG['mu_logs']						= 'Admin-Log';
@@ -1296,6 +1297,8 @@ $LNG['cronName_inactive']		= 'Supprimer inactive';
 $LNG['cronName_teamspeak']		= 'Teamspeak mise à jour de données';
 $LNG['cronName_tracking']		= 'Envoyer des statistiques globaux du serveur';
 $LNG['cronName_databasedump']	= 'Backup de base de données';
+$LNG['cronName_pushing'] = 'Détection de Pushing';
+$LNG['cronName_botdetect'] = 'Détection de Bots';
 
 $LNG['cronjob_id']					= 'ID';
 $LNG['cronjob_name']				= 'Nom';

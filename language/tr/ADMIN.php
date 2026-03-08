@@ -145,7 +145,8 @@ $LNG['mu_game_info']                    = 'Bilgi';
 $LNG['mu_vaild_users']				    = 'Oyuncu aktiviteleri';
 $LNG['mu_news']					        = 'Haberler';
 $LNG['mu_multiip_page']					= 'Multi IPs';
-$LNG['mu_clear_cache']					= 'Belleği Temizle';
+
+$LNG['mu_botdetect_page'] = 'Bot Tespiti';$LNG['mu_clear_cache']					= 'Belleği Temizle';
 $LNG['mu_vertify']				     	= 'Oyun Indexini Kontrol et';
 $LNG['mu_cronjob']					= 'Zamanlanmış Görevler';
 $LNG['mu_logs']						= 'Admin Log';
@@ -530,6 +531,8 @@ $LNG['cronName_inactive']		= 'Inaktifleri Sil';
 $LNG['cronName_teamspeak']		= 'Teamspeak guncelleme';
 $LNG['cronName_tracking']		= 'Global Server Istatistik Guncellemesi';
 $LNG['cronName_databasedump']	= 'Database backup';
+$LNG['cronName_pushing'] = 'Pushing Tespiti';
+$LNG['cronName_botdetect'] = 'Bot Tespiti';
 
 $LNG['cronjob_id']					= 'ID';
 $LNG['cronjob_name']				= 'Isim';
