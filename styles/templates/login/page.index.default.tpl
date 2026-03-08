@@ -1,9 +1,9 @@
 {block name="title" prepend}{$LNG.siteTitleIndex}{/block}
 {block name="content"}
-<section>
+<section class="hero-section">
 	<h1>{$descHeader}</h1>
-	<p class="desc">{$descText}</p>
-	<p class="desc"><ul id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul></p>
+	<p class="hero-tagline">{$descText}</p>
+	<ul id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul>
 </section>
 <section>
 	<div class="reg-tabs-wrapper">
@@ -55,6 +55,15 @@
 			</div>
 		</div>
 
+		<div id="uni-stats" class="uni-stats">
+			{foreach $universeStats as $uniId => $stats}
+			<div class="uni-stats-row" data-uni="{$uniId}">
+				<span class="uni-stat-item">&#9992;&nbsp; {$stats.fleets} fleets flying</span>
+				<span class="uni-stat-item">&#128100;&nbsp; {$stats.players} players</span>
+			</div>
+			{/foreach}
+		</div>
+
 		<div class="contentbox">
 			<h2>{$LNG.buttonRegister} First</h2>
 			<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
@@ -100,6 +109,31 @@
 {block name="script" append}
 <script>{if $code}alert({$code|default:0|json});{/if}</script>
 <link rel="stylesheet" type="text/css" href="styles/resource/css/login/register.css?v={$REV}">
+<style>
+.uni-stats {
+	width: 300px;
+	margin: 0 auto 12px;
+	text-align: center;
+}
+.uni-stats-row {
+	display: none;
+	gap: 20px;
+	justify-content: center;
+	flex-wrap: wrap;
+	padding: 8px 12px;
+	background: rgba(5, 20, 35, 0.7);
+	border: 1px solid rgba(255,255,255,0.1);
+	border-radius: 8px;
+}
+.uni-stats-row.active {
+	display: flex;
+}
+.uni-stat-item {
+	color: #aac4dd;
+	font-size: 12px;
+	letter-spacing: 0.3px;
+}
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	var btns = document.querySelectorAll('.reg-tab-btn');
@@ -119,6 +153,32 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	});
 
+	// Universe stats strip
+	function showUniStats(uniId) {
+		document.querySelectorAll('#uni-stats .uni-stats-row').forEach(function(row) {
+			row.classList.toggle('active', row.getAttribute('data-uni') == uniId);
+		});
+	}
+
+	// Sync both universe selects and stats strip
+	function getActiveUniSelect() {
+		var activePanel = document.querySelector('.reg-tab-panel.active');
+		return activePanel ? activePanel.querySelector('.changeAction') : null;
+	}
+
+	document.querySelectorAll('.changeAction').forEach(function(sel) {
+		sel.addEventListener('change', function() {
+			// Mirror value to the other select
+			var val = this.value;
+			document.querySelectorAll('.changeAction').forEach(function(s) { s.value = val; });
+			showUniStats(val);
+		});
+	});
+
+	// Init stats for current universe
+	var initSel = getActiveUniSelect();
+	if (initSel) showUniStats(initSel.value);
+
 	// If Hive Keychain is available, select that tab by default
 	// Extensions inject after DOMContentLoaded, so we wait briefly
 	setTimeout(function() {
@@ -126,6 +186,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			var keychainBtn = document.querySelector('.reg-tab-btn[data-tab="login-hive"]');
 			if (keychainBtn) keychainBtn.click();
 		}
+		// Re-sync stats after possible tab switch
+		var sel = getActiveUniSelect();
+		if (sel) showUniStats(sel.value);
 	}, 300);
 });
 </script>
