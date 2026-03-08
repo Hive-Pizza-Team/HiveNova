@@ -85,6 +85,7 @@ $LNG['hiveAccount']                 = 'Cuenta Hive';
 $LNG['registerTabEmail']			= 'Correo electrónico';
 $LNG['registerTabHive']				= 'Hive Keychain';
 $LNG['registerHiveKeychainInfo']	= 'Inicia sesión con tu cuenta de Hive usando la extensión de navegador Keychain. Sin contraseña — tu identidad se verifica en la cadena de bloques.';
+$LNG['footerPoweredBy']				= 'Desarrollado por';
 
 $LNG['registerBack']				= 'Atrás';
 $LNG['registerNext']				= 'Siguiente';

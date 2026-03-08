@@ -87,6 +87,7 @@ $LNG['hiveAccount']                 = 'Hive Hesabı';
 $LNG['registerTabEmail']			= 'E-posta';
 $LNG['registerTabHive']				= 'Hive Keychain';
 $LNG['registerHiveKeychainInfo']	= 'Hive hesabınızla Keychain tarayıcı uzantısı aracılığıyla giriş yapın. Şifre gerekmez — kimliğiniz zincir üzerinde doğrulanır.';
+$LNG['footerPoweredBy']				= 'Destekleyen';
 
 $LNG['registerBack']				= 'Geri';
 $LNG['registerNext']				= 'Ileri';
