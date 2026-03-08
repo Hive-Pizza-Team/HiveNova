@@ -80,7 +80,10 @@ $LNG['registerCaptchaDesc']         = 'Пожалуйста, введите ни
 $LNG['registerCaptchaReload']       = 'Обновить код.';
 $LNG['registerRules']               = 'Правила';
 $LNG['registerRulesDesc']           = 'Я согласен и принимаю %s.';
-$LNG['hiveAccount']                 = 'Аккаунт улья';
+$LNG['hiveAccount']                 = 'Аккаунт Hive';
+$LNG['registerTabEmail']            = 'Эл. почта';
+$LNG['registerTabHive']             = 'Hive Keychain';
+$LNG['registerHiveKeychainInfo']    = 'Войдите с помощью аккаунта Hive через расширение Keychain. Пароль не нужен — ваша личность подтверждается в блокчейне.';
 
 $LNG['registerBack']                = 'Назад';
 $LNG['registerNext']                = 'Далее';

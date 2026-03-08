@@ -83,6 +83,9 @@ $LNG['registerCaptchaReload']		= 'Recarregar Captcha.';
 $LNG['registerRules']				= 'Regras';
 $LNG['registerRulesDesc']			= 'Concordo com o %s';
 $LNG['hiveAccount']                 = 'Conta Hive';
+$LNG['registerTabEmail']			= 'E-mail';
+$LNG['registerTabHive']				= 'Hive Keychain';
+$LNG['registerHiveKeychainInfo']	= 'Inicie sessão com a sua conta Hive usando a extensão Keychain. Sem palavra-passe — a sua identidade é verificada na blockchain.';
 
 $LNG['registerBack']				= 'Voltar';
 $LNG['registerNext']				= 'Próximo';

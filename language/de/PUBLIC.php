@@ -79,6 +79,9 @@ $LNG['registerCaptchaReload']		= 'Captcha neuladen.';
 $LNG['registerRules']				= 'Regeln';
 $LNG['registerRulesDesc']			= 'Ich bin mit den %s einverstanden.';
 $LNG['hiveAccount']                 = 'Hive-Konto';
+$LNG['registerTabEmail']			= 'E-Mail';
+$LNG['registerTabHive']				= 'Hive Keychain';
+$LNG['registerHiveKeychainInfo']	= 'Melde dich mit deinem Hive-Konto über die Keychain-Browsererweiterung an. Kein Passwort erforderlich — deine Identität wird on-chain verifiziert.';
 
 $LNG['registerBack']				= 'Zurück';
 $LNG['registerNext']				= 'Weiter';

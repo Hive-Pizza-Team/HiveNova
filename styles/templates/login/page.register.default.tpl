@@ -1,15 +1,13 @@
 
 {block name="title" prepend}{$LNG.siteTitleRegister}{/block}
 {block name="content"}
-<h1>{$LNG.siteTitleRegister}</h1>
-
 <div class="reg-tabs-wrapper">
 	<div class="reg-tab-nav" role="tablist">
 		<button class="reg-tab-btn active" data-tab="reg-email" role="tab" aria-selected="true" aria-controls="reg-email">
-			&#9993;&nbsp; Email
+			&#9993;&nbsp; {$LNG.registerTabEmail}
 		</button>
 		<button class="reg-tab-btn" data-tab="reg-hive" role="tab" aria-selected="false" aria-controls="reg-hive">
-			<img src="https://hive.io/favicon.ico" alt="" class="reg-tab-icon"> Hive Keychain
+			<img src="https://hive.io/favicon.ico" alt="" class="reg-tab-icon"> {$LNG.registerTabHive}
 		</button>
 	</div>
 
@@ -112,7 +110,7 @@
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
 		<input type="hidden" value="{$referralData.id}" name="referralID">
 			<div class="rowForm reg-hive-info">
-				<p>Sign in with your Hive account using the Keychain browser extension. No password needed &mdash; your identity is verified on-chain.</p>
+				<p>{$LNG.registerHiveKeychainInfo}</p>
 			</div>
 			<div class="rowForm">
 				<label for="reg-hive-universe">{$LNG.universe}</label>
