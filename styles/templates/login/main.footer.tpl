@@ -20,7 +20,7 @@ var LoginConfig = {
 };
 </script>
 {if $analyticsEnable}
-<script type="text/javascript" src="http://www.google-analytics.com/ga.js"></script>
+<script type="text/javascript" src="https://www.google-analytics.com/ga.js"></script>
 <script type="text/javascript">
 try{
 var pageTracker = _gat._getTracker("{$analyticsUID}");
