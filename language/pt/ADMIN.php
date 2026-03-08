@@ -646,6 +646,27 @@ $LNG['mu_disclaimer']				= 'Configurações de contato';
 $LNG['mu_dump']						= 'Backup da Base de Dados';
 
 $LNG['mu_transactions'] = 'Transações';
+$LNG['mu_build_log'] = 'Registro de Construção';
+
+$LNG['bl_type']               = 'Tipo';
+$LNG['bl_element']            = 'Elemento';
+$LNG['bl_user']               = 'Usuário';
+$LNG['bl_planet']             = 'ID do Planeta';
+$LNG['bl_universe']           = 'Universo';
+$LNG['bl_count']              = 'Quantidade';
+$LNG['bl_metal']              = 'Metal';
+$LNG['bl_crystal']            = 'Cristal';
+$LNG['bl_deuterium']          = 'Deutério';
+$LNG['bl_queued_at']          = 'Enfileirado em';
+$LNG['bl_total']              = 'Total';
+$LNG['bl_no_results']         = 'Nenhuma entrada encontrada.';
+$LNG['bl_search']             = 'Pesquisar';
+$LNG['bl_search_placeholder'] = 'Nome de usuário...';
+$LNG['bl_clear']              = 'Limpar';
+$LNG['bl_type_all']           = 'Todos';
+$LNG['bl_type_buildings']     = 'Edifícios';
+$LNG['bl_type_research']      = 'Pesquisa';
+$LNG['bl_type_shipyard']      = 'Estaleiro';
 
 $LNG['tx_id'] = 'ID';
 $LNG['tx_timestamp'] = 'Data/Hora';

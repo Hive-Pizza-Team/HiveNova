@@ -41,7 +41,7 @@ class FleetFunctionsTest extends TestCase
         $this->assertTrue(FleetFunctions::CheckUserSpeed($speed));
     }
 
-    public function validSpeedProvider(): array
+    public static function validSpeedProvider(): array
     {
         return array_map(fn($s) => [$s], range(1, 10));
     }
@@ -52,7 +52,7 @@ class FleetFunctionsTest extends TestCase
         $this->assertFalse(FleetFunctions::CheckUserSpeed($speed));
     }
 
-    public function invalidSpeedProvider(): array
+    public static function invalidSpeedProvider(): array
     {
         return [
             'zero'         => [0],

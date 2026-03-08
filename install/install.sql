@@ -1403,3 +1403,25 @@ CREATE TABLE `%PREFIX%dm_transactions` (
   `memo` varchar(1024) DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `%PREFIX%log_buildings` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) unsigned NOT NULL,
+  `planet_id` int(11) unsigned NOT NULL,
+  `universe` tinyint(3) unsigned NOT NULL,
+  `element_id` smallint(5) unsigned NOT NULL,
+  `queued_at` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `owner_time` (`owner_id`, `queued_at`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `%PREFIX%log_research` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) unsigned NOT NULL,
+  `planet_id` int(11) unsigned NOT NULL,
+  `universe` tinyint(3) unsigned NOT NULL,
+  `element_id` smallint(5) unsigned NOT NULL,
+  `queued_at` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `owner_time` (`owner_id`, `queued_at`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
