@@ -18,6 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
 			document.getElementById(target).classList.add('active');
 		});
 	});
+
+	// If Hive Keychain is available, select that tab by default
+	// Extensions inject after DOMContentLoaded, so we wait briefly
+	setTimeout(function() {
+		if (typeof hive_keychain !== 'undefined') {
+			var keychainBtn = document.querySelector('.reg-tab-btn[data-tab="reg-hive"]');
+			if (keychainBtn) keychainBtn.click();
+		}
+	}, 300);
 });
 
 
