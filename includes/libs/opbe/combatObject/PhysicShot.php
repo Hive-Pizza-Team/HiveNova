@@ -30,6 +30,7 @@
 class PhysicShot
 {
     private $shipType;
+    private $fighters;
     private $damage;
     private $count;
 
