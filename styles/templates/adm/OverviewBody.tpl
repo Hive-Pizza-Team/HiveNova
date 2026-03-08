@@ -23,6 +23,14 @@
 			</td>
 		</tr>
 		<tr>
+			<th colspan="2">Quick Links</th>
+		</tr>
+		<tr>
+			<td colspan="2" style="padding:6px;">
+				<a href="admin.php?page=botdetect" target="Hauptframe">Bot Detection</a>
+			</td>
+		</tr>
+		<tr>
 			<th colspan="2">{$LNG.ow_support}</th>
 		</tr>
 		<tr>

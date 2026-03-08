@@ -635,6 +635,7 @@ $LNG['mu_game_info'] = 'Information';
 $LNG['mu_vaild_users'] = 'User activity';
 $LNG['mu_news'] = 'News';
 $LNG['mu_multiip_page'] = 'Multiple IPs';
+$LNG['mu_botdetect_page'] = 'Bot Detection';
 $LNG['mu_clear_cache'] = 'Clear Cache';
 $LNG['mu_vertify'] = 'Check Game content';
 $LNG['mu_cronjob'] = 'Cronjobs';

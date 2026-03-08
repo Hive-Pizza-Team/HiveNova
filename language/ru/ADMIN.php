@@ -574,6 +574,7 @@ $LNG['mu_game_info']                   = 'Информация';
 $LNG['mu_vaild_users']                 = 'Активация игроков';
 $LNG['mu_news']                        = 'Новости';
 $LNG['mu_multiip_page']                = 'Мультиаккаунты';
+$LNG['mu_botdetect_page'] = 'Обнаружение Ботов';
 $LNG['mu_clear_cache']				   = 'Очистить кэш';
 $LNG['mu_vertify']                     = 'Сверить хэши файлов';
 $LNG['mu_cronjob']                     = 'Планировщик задач';

@@ -623,7 +623,8 @@ $LNG['mu_game_info'] 				= 'Informacje';
 $LNG['mu_vaild_users']				= 'Aktywni użytkownicy'; 
 $LNG['mu_news']						= 'Nowości'; 
 $LNG['mu_multiip_page']				= 'MultiIP'; 
-$LNG['mu_clear_cache']				= 'Usuń cache'; 
+
+$LNG['mu_botdetect_page'] = 'Wykrywanie Bot�w';$LNG['mu_clear_cache']				= 'Usuń cache'; 
 $LNG['mu_vertify']					= 'Sprawdź pliki gry!';
 $LNG['mu_cronjob']					= 'Cronjobs'; 
 $LNG['mu_logs']						= 'Admin-Log';

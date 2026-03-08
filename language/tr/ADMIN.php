@@ -145,7 +145,8 @@ $LNG['mu_game_info']                    = 'Bilgi';
 $LNG['mu_vaild_users']				    = 'Oyuncu aktiviteleri';
 $LNG['mu_news']					        = 'Haberler';
 $LNG['mu_multiip_page']					= 'Multi IPs';
-$LNG['mu_clear_cache']					= 'Belleği Temizle';
+
+$LNG['mu_botdetect_page'] = 'Bot Tespiti';$LNG['mu_clear_cache']					= 'Belleği Temizle';
 $LNG['mu_vertify']				     	= 'Oyun Indexini Kontrol et';
 $LNG['mu_cronjob']					= 'Zamanlanmış Görevler';
 $LNG['mu_logs']						= 'Admin Log';
