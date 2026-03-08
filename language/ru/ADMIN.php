@@ -583,6 +583,27 @@ $LNG['mu_disclaimer']                  = 'Контакты';
 $LNG['mu_dump']                        = 'Резервное копирование БД';
 
 $LNG['mu_transactions'] = 'Транзакции';
+$LNG['mu_build_log'] = 'Журнал строительства';
+
+$LNG['bl_type']               = 'Тип';
+$LNG['bl_element']            = 'Элемент';
+$LNG['bl_user']               = 'Пользователь';
+$LNG['bl_planet']             = 'ID планеты';
+$LNG['bl_universe']           = 'Вселенная';
+$LNG['bl_count']              = 'Количество';
+$LNG['bl_metal']              = 'Металл';
+$LNG['bl_crystal']            = 'Кристалл';
+$LNG['bl_deuterium']          = 'Дейтерий';
+$LNG['bl_queued_at']          = 'В очереди с';
+$LNG['bl_total']              = 'Всего';
+$LNG['bl_no_results']         = 'Записи не найдены.';
+$LNG['bl_search']             = 'Поиск';
+$LNG['bl_search_placeholder'] = 'Имя пользователя...';
+$LNG['bl_clear']              = 'Очистить';
+$LNG['bl_type_all']           = 'Все';
+$LNG['bl_type_buildings']     = 'Здания';
+$LNG['bl_type_research']      = 'Исследования';
+$LNG['bl_type_shipyard']      = 'Верфь';
 
 $LNG['tx_id'] = 'ID';
 $LNG['tx_timestamp'] = 'Дата/Время';

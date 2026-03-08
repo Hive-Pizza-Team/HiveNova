@@ -62,6 +62,21 @@ class CleanerCronjob implements CronjobTask
 			':time'	=> $del_before
 		));
 
+		$sql	= 'DELETE FROM %%LOG_BUILDINGS%% WHERE `queued_at` < :time;';
+		Database::get()->delete($sql, array(
+			':time'	=> $del_before
+		));
+
+		$sql	= 'DELETE FROM %%LOG_RESEARCH%% WHERE `queued_at` < :time;';
+		Database::get()->delete($sql, array(
+			':time'	=> $del_before
+		));
+
+		$sql	= 'DELETE FROM %%LOG_SHIPYARD%% WHERE `queued_at` < :time;';
+		Database::get()->delete($sql, array(
+			':time'	=> $del_before
+		));
+
 		$sql	= 'UPDATE %%USERS%% SET `email_2` = `email` WHERE `setmail` < :time;';
 		Database::get()->update($sql, array(
 			':time'	=> TIMESTAMP

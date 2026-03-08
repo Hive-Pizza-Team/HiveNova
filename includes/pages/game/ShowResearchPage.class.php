@@ -265,13 +265,16 @@ class ShowResearchPage extends AbstractGamePage
 			$USER['b_tech_id']			= $elementId;
 			$USER['b_tech_planet']		= $PLANET['id'];
 
-			// Database::get()->insert('INSERT INTO %%LOG_RESEARCH%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
-			// 	'owner_id'	=> $USER['id'],
-			// 	'planet_id'	=> $PLANET['id'],
-			// 	'universe'	=> $USER['universe'],
-			// 	'element_id'=> $elementId,
-			// 	'queued_at'	=> TIMESTAMP,
-			// ));
+			Database::get()->insert('INSERT INTO %%LOG_RESEARCH%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, metal = :metal, crystal = :crystal, deuterium = :deuterium, queued_at = :queued_at', array(
+				'owner_id'	 => $USER['id'],
+				'planet_id'	 => $PLANET['id'],
+				'universe'	 => $USER['universe'],
+				'element_id' => $elementId,
+				'metal'		 => (int) ($costResources[901] ?? 0),
+				'crystal'	 => (int) ($costResources[902] ?? 0),
+				'deuterium'	 => (int) ($costResources[903] ?? 0),
+				'queued_at'	 => TIMESTAMP,
+			));
 
 		} else {
 			$addLevel = 0;
@@ -296,13 +299,17 @@ class ShowResearchPage extends AbstractGamePage
 			$CurrentQueue[]				= array($elementId, $BuildLevel, $elementTime, $BuildEndTime, $PLANET['id']);
 			$USER['b_tech_queue']		= serialize($CurrentQueue);
 
-			// Database::get()->insert('INSERT INTO %%LOG_RESEARCH%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
-			// 	'owner_id'	=> $USER['id'],
-			// 	'planet_id'	=> $PLANET['id'],
-			// 	'universe'	=> $USER['universe'],
-			// 	'element_id'=> $elementId,
-			// 	'queued_at'	=> TIMESTAMP,
-			// ));
+			$queueCost = BuildFunctions::getElementPrice($USER, $PLANET, $elementId, !$AddMode, $BuildLevel);
+			Database::get()->insert('INSERT INTO %%LOG_RESEARCH%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, metal = :metal, crystal = :crystal, deuterium = :deuterium, queued_at = :queued_at', array(
+				'owner_id'	 => $USER['id'],
+				'planet_id'	 => $PLANET['id'],
+				'universe'	 => $USER['universe'],
+				'element_id' => $elementId,
+				'metal'		 => (int) ($queueCost[901] ?? 0),
+				'crystal'	 => (int) ($queueCost[902] ?? 0),
+				'deuterium'	 => (int) ($queueCost[903] ?? 0),
+				'queued_at'	 => TIMESTAMP,
+			));
 		}
 		return true;
 	}

@@ -206,6 +206,10 @@ switch($page)
 		include_once('includes/pages/adm/ShowTransactionsPage.php');
 		ShowTransactionsPage();
 	break;
+	case 'buildlog':
+		include_once('includes/pages/adm/ShowBuildLogPage.php');
+		ShowBuildLogPage();
+	break;
 	default:
 		include_once('includes/pages/adm/ShowIndexPage.php');
 		ShowIndexPage();

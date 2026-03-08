@@ -14,7 +14,7 @@ class PlayerUtilTest extends TestCase
         $this->assertNotFalse(PlayerUtil::isHiveAccountValid($account), "Expected '$account' to be valid");
     }
 
-    public function validHiveAccountProvider(): array
+    public static function validHiveAccountProvider(): array
     {
         return [
             'simple lowercase'        => ['tor'],
@@ -32,7 +32,7 @@ class PlayerUtilTest extends TestCase
         $this->assertFalse((bool) PlayerUtil::isHiveAccountValid($account), "Expected '$account' to be invalid");
     }
 
-    public function invalidHiveAccountProvider(): array
+    public static function invalidHiveAccountProvider(): array
     {
         return [
             'null value'              => [null],
@@ -57,7 +57,7 @@ class PlayerUtilTest extends TestCase
         $this->assertNotFalse(PlayerUtil::isMailValid($email), "Expected '$email' to be valid");
     }
 
-    public function validEmailProvider(): array
+    public static function validEmailProvider(): array
     {
         return [
             'simple'           => ['user@example.com'],
@@ -74,7 +74,7 @@ class PlayerUtilTest extends TestCase
         $this->assertFalse(PlayerUtil::isMailValid($email), "Expected '$email' to be invalid");
     }
 
-    public function invalidEmailProvider(): array
+    public static function invalidEmailProvider(): array
     {
         return [
             'missing @'        => ['userexample.com'],

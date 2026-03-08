@@ -61,4 +61,31 @@ class CleanerCronjobTest extends TestCase
             'Message cleanup by message_time must be active'
         );
     }
+
+    public function testLogBuildingsCleanupIsActive(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/DELETE FROM %%LOG_BUILDINGS%%[^;]+queued_at[^;]+:time/s',
+            $this->source,
+            'LOG_BUILDINGS cleanup must be active and bounded by queued_at / :time'
+        );
+    }
+
+    public function testLogResearchCleanupIsActive(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/DELETE FROM %%LOG_RESEARCH%%[^;]+queued_at[^;]+:time/s',
+            $this->source,
+            'LOG_RESEARCH cleanup must be active and bounded by queued_at / :time'
+        );
+    }
+
+    public function testLogShipyardCleanupIsActive(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/DELETE FROM %%LOG_SHIPYARD%%[^;]+queued_at[^;]+:time/s',
+            $this->source,
+            'LOG_SHIPYARD cleanup must be active and bounded by queued_at / :time'
+        );
+    }
 }

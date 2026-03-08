@@ -154,6 +154,27 @@ $LNG['mu_disclamer']				= 'Iletişim Ayarları';
 $LNG['mu_dump']						= 'Veritabanı Yedekle';
 
 $LNG['mu_transactions'] = 'İşlemler';
+$LNG['mu_build_log'] = 'İnşaat Günlüğü';
+
+$LNG['bl_type']               = 'Tür';
+$LNG['bl_element']            = 'Element';
+$LNG['bl_user']               = 'Kullanıcı';
+$LNG['bl_planet']             = 'Gezegen ID';
+$LNG['bl_universe']           = 'Evren';
+$LNG['bl_count']              = 'Adet';
+$LNG['bl_metal']              = 'Metal';
+$LNG['bl_crystal']            = 'Kristal';
+$LNG['bl_deuterium']          = 'Döteryum';
+$LNG['bl_queued_at']          = 'Sıraya Alındı';
+$LNG['bl_total']              = 'Toplam';
+$LNG['bl_no_results']         = 'Kayıt bulunamadı.';
+$LNG['bl_search']             = 'Ara';
+$LNG['bl_search_placeholder'] = 'Kullanıcı adı...';
+$LNG['bl_clear']              = 'Temizle';
+$LNG['bl_type_all']           = 'Tümü';
+$LNG['bl_type_buildings']     = 'Binalar';
+$LNG['bl_type_research']      = 'Araştırma';
+$LNG['bl_type_shipyard']      = 'Tersane';
 
 $LNG['tx_id'] = 'ID';
 $LNG['tx_timestamp'] = 'Zaman Damgası';

@@ -130,13 +130,17 @@ class ShowShipyardPage extends AbstractGamePage
 			$BuildArray[]			= array($Element, $Count);
 			$PLANET['b_hangar_id']	= serialize($BuildArray);
 
-			// Database::get()->insert('INSERT INTO %%LOG_BUILDINGS%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
-			// 	'owner_id'	=> $USER['id'],
-			// 	'planet_id'	=> $PLANET['id'],
-			// 	'universe'	=> $PLANET['universe'],
-			// 	'element_id'=> $Element,
-			// 	'queued_at'	=> TIMESTAMP,
-			// ));
+			Database::get()->insert('INSERT INTO %%LOG_SHIPYARD%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, count = :count, metal = :metal, crystal = :crystal, deuterium = :deuterium, queued_at = :queued_at', array(
+				'owner_id'	 => $USER['id'],
+				'planet_id'	 => $PLANET['id'],
+				'universe'	 => $PLANET['universe'],
+				'element_id' => $Element,
+				'count'		 => (int) $Count,
+				'metal'		 => (int) ($costResources[901] ?? 0),
+				'crystal'	 => (int) ($costResources[902] ?? 0),
+				'deuterium'	 => (int) ($costResources[903] ?? 0),
+				'queued_at'	 => TIMESTAMP,
+			));
 		}
 	}
 	
