@@ -1273,6 +1273,8 @@ $LNG['cronName_inactive'] = 'Delete inactive';
 $LNG['cronName_teamspeak'] = 'Teamspeak data update';
 $LNG['cronName_tracking'] = 'Send global server statistics';
 $LNG['cronName_databasedump'] = 'Database backup';
+$LNG['cronName_pushing'] = 'Pushing Detection';
+$LNG['cronName_botdetect'] = 'Bot Detection';
 
 $LNG['cronjob_id'] = 'ID';
 $LNG['cronjob_name'] = 'Name';

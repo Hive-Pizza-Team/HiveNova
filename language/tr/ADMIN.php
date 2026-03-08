@@ -531,6 +531,8 @@ $LNG['cronName_inactive']		= 'Inaktifleri Sil';
 $LNG['cronName_teamspeak']		= 'Teamspeak guncelleme';
 $LNG['cronName_tracking']		= 'Global Server Istatistik Guncellemesi';
 $LNG['cronName_databasedump']	= 'Database backup';
+$LNG['cronName_pushing'] = 'Pushing Tespiti';
+$LNG['cronName_botdetect'] = 'Bot Tespiti';
 
 $LNG['cronjob_id']					= 'ID';
 $LNG['cronjob_name']				= 'Isim';

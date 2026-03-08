@@ -1260,6 +1260,8 @@ $LNG['cronName_inactive']		= 'Usuń nie aktywnych';
 $LNG['cronName_teamspeak']		= 'Aktualizacja ustawień Teamspeak';
 $LNG['cronName_tracking']		= 'Wyślij statystyki na główny serwer.';
 $LNG['cronName_databasedump']	= 'Backup bazy danych';
+$LNG['cronName_pushing'] = 'Wykrywanie Pushingu';
+$LNG['cronName_botdetect'] = 'Wykrywanie Botów';
 
 
 $LNG['cronjob_id']					= 'ID';
