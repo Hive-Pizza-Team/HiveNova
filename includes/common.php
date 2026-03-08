@@ -148,6 +148,7 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	));
 	
 	if(!$session->isValidSession() && isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)>=2 && MODE === 'INGAME') {
+	$USER = [];
 	$USER['lang']='en';
 	$USER['bana']=0;
 	$USER['timezone']="Europe/Berlin";
@@ -200,7 +201,20 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 			
 			if(empty($PLANET))
 			{
-				throw new Exception("Main Planet does not exist!");
+				$sql	= "SELECT id FROM %%PLANETS%% WHERE id_owner = :userId AND destruyed = 0 ORDER BY id ASC LIMIT 1;";
+				$fallback = $db->selectSingle($sql, array(':userId' => $USER['id']), 'id');
+				if(empty($fallback))
+				{
+					ShowErrorPage::printError("Main Planet does not exist!", false);
+				}
+				$session->planetId	= $fallback;
+				$USER['id_planet']	= $fallback;
+				$db->update("UPDATE %%USERS%% SET id_planet = :planetId WHERE id = :userId;", array(
+					':planetId'	=> $fallback,
+					':userId'	=> $USER['id'],
+				));
+				$sql	= "SELECT * FROM %%PLANETS%% WHERE id = :planetId;";
+				$PLANET	= $db->selectSingle($sql, array(':planetId' => $fallback));
 			}
 			else
 			{

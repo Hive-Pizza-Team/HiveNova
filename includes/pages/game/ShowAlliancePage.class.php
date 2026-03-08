@@ -590,7 +590,7 @@ class ShowAlliancePage extends AbstractGamePage
 			'ally_description'			=> nl2br(htmlspecialchars((string) $this->allianceData['ally_description'])),
 			'ally_text' 				=> nl2br(htmlspecialchars((string) $this->allianceData['ally_text'])),
 			'rankName'					=> $rankName,
-			'requests'					=> sprintf($LNG['al_new_requests'], $ApplyCount),
+			'requests'					=> sprintf($LNG['al_new_requests'], (int) $ApplyCount),
 			'applyCount'				=> $ApplyCount,
 			'totalfight'				=> $statisticResult['wons'] + $statisticResult['loos'] + $statisticResult['draws'],
 			'fightwon'					=> $statisticResult['wons'],
