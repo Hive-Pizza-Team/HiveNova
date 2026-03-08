@@ -4,10 +4,10 @@
 <div class="reg-tabs-wrapper">
 	<div class="reg-tab-nav" role="tablist">
 		<button class="reg-tab-btn active" data-tab="reg-email" role="tab" aria-selected="true" aria-controls="reg-email">
-			&#9993;&nbsp; {$LNG.registerTabEmail}
+			&#9993;&nbsp; {$registerTabEmail}
 		</button>
 		<button class="reg-tab-btn" data-tab="reg-hive" role="tab" aria-selected="false" aria-controls="reg-hive">
-			<img src="https://hive.io/favicon.ico" alt="" class="reg-tab-icon"> {$LNG.registerTabHive}
+			<img src="https://hive.io/favicon.ico" alt="" class="reg-tab-icon"> {$registerTabHive}
 		</button>
 	</div>
 
@@ -110,7 +110,7 @@
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
 		<input type="hidden" value="{$referralData.id}" name="referralID">
 			<div class="rowForm reg-hive-info">
-				<p>{$LNG.registerHiveKeychainInfo}</p>
+				<p>{$registerHiveKeychainInfo}</p>
 			</div>
 			<div class="rowForm">
 				<label for="reg-hive-universe">{$LNG.universe}</label>

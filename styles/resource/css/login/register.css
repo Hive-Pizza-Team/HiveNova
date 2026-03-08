@@ -9,19 +9,22 @@
 
 .reg-tab-nav {
     display: flex;
-    border-bottom: 2px solid #E31337;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 10px;
 }
 
 .reg-tab-btn {
     flex: 1;
-    padding: 11px 16px;
-    background: #111827;
-    color: #888;
-    border: 1px solid transparent;
-    border-bottom: none;
+    max-width: 220px;
+    padding: 10px 16px;
+    background: rgba(5, 20, 35, 0.85);
+    color: #aac4dd;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
     cursor: pointer;
     font-family: verdana, sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
     letter-spacing: 0.4px;
     text-transform: uppercase;
@@ -29,17 +32,16 @@
     outline: none;
 }
 
-.reg-tab-btn:first-child {
-    border-radius: 6px 0 0 0;
-}
-
-.reg-tab-btn:last-child {
-    border-radius: 0 6px 0 0;
-}
-
 .reg-tab-btn:hover {
     color: #fff;
-    background: #1a2535;
+    background: rgba(5, 20, 35, 0.95);
+    border-color: rgba(255,255,255,0.25);
+}
+
+.reg-tab-btn.active {
+    color: #fff;
+    background: rgba(5, 20, 35, 0.95);
+    border-color: #E31337;
 }
 
 .reg-tab-icon {
@@ -50,37 +52,34 @@
     margin-bottom: 1px;
 }
 
-.reg-tab-btn.active {
-    color: #fff;
-    background: #1b4c6ec4;
-    border-color: #E31337;
-    border-bottom-color: #1b4c6ec4;
-    position: relative;
-    top: 2px;
-    z-index: 1;
-}
-
 /* ── Tab panels ──────────────────────────────── */
 
 .reg-tab-panel {
     display: none;
-    background: #1b4c6ec4;
-    border-radius: 0 0 8px 8px;
-    padding: 6px 0 24px;
 }
 
 .reg-tab-panel.active {
     display: block;
 }
 
+/* ── Form panel (matches .contentbox) ───────── */
+
+.reg-tab-panel form {
+    background: rgba(27, 76, 110, 0.77);
+    border-radius: 8px;
+    padding: 16px 20px 20px;
+    margin: 0 auto;
+    max-width: 460px;
+}
+
 /* ── Hive info blurb ─────────────────────────── */
 
 .reg-hive-info p {
-    margin: 8px 0 4px;
-    color: #aac4dd;
-    font-size: 11px;
+    margin: 0 0 10px;
+    color: #c8dcea;
+    font-size: 12px;
     font-style: italic;
-    line-height: 16px;
+    line-height: 18px;
 }
 
 /* ── Hive submit button accent ───────────────── */
@@ -102,15 +101,15 @@
 .rowForm {
     display: block;
     text-align: left;
-    padding: 5px 30px;
-}
-
-.rowForm:first-child {
-    padding-top: 15px;
+    padding: 4px 0;
+    overflow: hidden;
 }
 
 .rowForm select {
-    width: 262px;
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 4px;
 }
 
 .rowForm #reg-email-rules,
@@ -122,21 +121,34 @@
 .rowForm input[type="text"],
 .rowForm input[type="password"],
 .rowForm input[type="email"] {
-    width: 250px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    margin-bottom: 4px;
+}
+
+.rowForm input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 6px;
+    cursor: pointer;
 }
 
 .rowForm label {
     display: block;
-    float: left;
-    width: 140px;
-    margin: 6px 0 7px;
-    text-align: left;
+    margin: 6px 0 3px;
+    font-weight: bold;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #e0eaf3;
 }
 
 .rowForm span.text {
     display: block;
     margin: 6px 0 7px;
-    text-align: left;
+    color: #e0eaf3;
 }
 
 .rowForm .fbname {
@@ -155,10 +167,7 @@
 .rowForm .inputDesc {
     display: block;
     font-size: 11px;
-    padding: 1px 0 0 2px;
+    color: #a8c4d8;
+    padding: 2px 0 4px;
     overflow: hidden;
-}
-
-.rowForm label+.inputDesc {
-    padding-top: 5px;
 }
