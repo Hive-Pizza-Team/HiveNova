@@ -588,6 +588,33 @@ footer {
     margin-bottom: 40px;
 }
 
+.footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11px;
+    opacity: 0.75;
+}
+
+.footer-sep {
+    color: #666;
+}
+
+.footer-powered {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.footer-hive-logo {
+    height: 18px;
+    width: auto;
+    vertical-align: middle;
+    opacity: 0.85;
+}
+
 /** FORM **/
 
 .formRow {

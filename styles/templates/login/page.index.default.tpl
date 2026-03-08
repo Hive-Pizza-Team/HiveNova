@@ -7,7 +7,7 @@
 </section>
 <section>
 	<div class="contentbox">
-				<h1>{$LNG.loginHeader} {$LNG.loginHiveAccount}</h1>
+				<h2>{$LNG.loginHeader} {$LNG.loginHiveAccount}</h2>
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
 						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$universeSelect|array_key_first}</select>
 					<input name="username" id="username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
@@ -18,7 +18,7 @@
 				<br>
 				<span class="small">{$loginInfo}</span>
 	</div><div class="contentbox">
-				<h1>{$LNG.loginHeader} {$LNG.loginPassword}</h1>	
+				<h2>{$LNG.loginHeader} {$LNG.loginPassword}</h2>	
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<div class="row">
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$universeSelect|array_key_first}</select>
@@ -36,10 +36,10 @@
 				</form>
 				<br>
 				<span class="small">{$loginInfo}</span>
-				{if $facebookEnable|default:false}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt=""></a>{/if}
+				{if $facebookEnable|default:false}<a href="#" data-href="index.php?page=externalAuth&method=facebook" class="fb_login"><img src="styles/resource/images/facebook/fb-connect-large.png" alt="Log in with Facebook"></a>{/if}
 			</div>
 			<div class="contentbox">
-				<h1>{$LNG.buttonRegister} First</h1>
+				<h2>{$LNG.buttonRegister} First</h2>
 				<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
 			</div>
 			
