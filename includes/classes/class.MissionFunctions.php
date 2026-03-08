@@ -115,18 +115,20 @@ class MissionFunctions
 				':planetId' => $param[':planetId'])
 			, 'id_owner');
 
-			# log the dm transaction
-			$sql    = 'INSERT INTO %%DM_TRANSACTIONS%% SET
-						timestamp = NOW(),
-						user_id = :user_id,
-						amount_received = :amount_received,
-						memo = :memo;';
+			if (!empty($userID)) {
+				# log the dm transaction
+				$sql    = 'INSERT INTO %%DM_TRANSACTIONS%% SET
+							timestamp = NOW(),
+							user_id = :user_id,
+							amount_received = :amount_received,
+							memo = :memo;';
 
-			Database::get()->insert($sql, array(
-				'user_id'		=> $userID,
-				'amount_received'	=> $param[':darkmatter'],
-				'memo' => 'expedition'
-			));
+				Database::get()->insert($sql, array(
+					':user_id'         => $userID,
+					':amount_received' => $param[':darkmatter'],
+					':memo'            => 'expedition'
+				));
+			}
 		}
 
 		$this->KillFleet();

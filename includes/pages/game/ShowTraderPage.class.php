@@ -186,9 +186,9 @@ class ShowTraderPage extends AbstractGamePage
 			memo = :memo;';
 
 			Database::get()->insert($sql, array(
-				'user_id'		=> $USER['id'],
-				'amount_spent'	=> Config::get()->darkmatter_cost_trader,
-				'memo' => 'trader'
+				':user_id'     => $USER['id'],
+				':amount_spent' => Config::get()->darkmatter_cost_trader,
+				':memo'        => 'trader'
 			));
 		}
 		
