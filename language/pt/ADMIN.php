@@ -645,6 +645,21 @@ $LNG['mu_cronjob']					= 'Cronjobs';
 $LNG['mu_disclaimer']				= 'Configurações de contato';
 $LNG['mu_dump']						= 'Backup da Base de Dados';
 
+$LNG['mu_transactions'] = 'Transações';
+
+$LNG['tx_id'] = 'ID';
+$LNG['tx_timestamp'] = 'Data/Hora';
+$LNG['tx_user'] = 'Usuário';
+$LNG['tx_amount_spent'] = 'Gasto';
+$LNG['tx_amount_received'] = 'Recebido';
+$LNG['tx_item'] = 'ID do item';
+$LNG['tx_memo'] = 'Nota';
+$LNG['tx_total'] = 'Total';
+$LNG['tx_no_results'] = 'Nenhuma transação encontrada.';
+$LNG['tx_search'] = 'Pesquisar';
+$LNG['tx_search_placeholder'] = 'Nome de usuário ou nota...';
+$LNG['tx_clear'] = 'Limpar';
+
 $LNG['vt_error']					= 'Hashfile não está disponível! - Executar Atualização!';
 $LNG['vt_fail']						= 'Arquivos Alterados';
 $LNG['vt_info']						= 'Esta lista contém os arquivos que foram modificados e não corresponde ao original.<br>Se não mudaste mesmo o jogo, deves substituir os arquivos com os originais.';

@@ -30,7 +30,7 @@
 	</tr>
 	<tr>
 		<td colspan="3">
-			<textarea name="text" id="text" cols="70" rows="15">{$text}</textarea>
+			<textarea name="text" id="text" cols="70" rows="15">{$text|htmlspecialchars}</textarea>
 		</td>
 	</tr>
 	<tr>
@@ -46,23 +46,23 @@
 	</tr>
 	<tr>
 		<td>{$LNG.al_tag}</td>
-		<td><input type="text" name="ally_tag" value="{$ally_tag}" size="8" maxlength="8" required></td>
+		<td><input type="text" name="ally_tag" value="{$ally_tag|htmlspecialchars}" size="8" maxlength="8" required></td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_name}</td>
-		<td><input type="text" name="ally_name" value="{$ally_name}" size="20" maxlength="30" required></td>
+		<td><input type="text" name="ally_name" value="{$ally_name|htmlspecialchars}" size="20" maxlength="30" required></td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_manage_founder_rank}</td>
-		<td><input type="text" name="owner_range" value="{$ally_owner_range}" size="30"></td>
+		<td><input type="text" name="owner_range" value="{$ally_owner_range|htmlspecialchars}" size="30"></td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_web_site}</td>
-		<td><input type="text" name="web" value="{$ally_web}" size="70"></td>
+		<td><input type="text" name="web" value="{$ally_web|htmlspecialchars}" size="70"></td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_manage_image}</td>
-		<td><input type="text" name="image" value="{$ally_image}" size="70"></td>
+		<td><input type="text" name="image" value="{$ally_image|htmlspecialchars}" size="70"></td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_view_stats}</td>

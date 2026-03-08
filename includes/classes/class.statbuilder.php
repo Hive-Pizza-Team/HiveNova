@@ -98,7 +98,7 @@ class statbuilder
 		$SQLFleets		= $database->select('SELECT fleet_array, fleet_owner FROM %%FLEETS%%;');
 		foreach($SQLFleets as $CurFleets)
 		{
-			$FleetRec   	= explode(";", $CurFleets['fleet_array']);
+			$FleetRec   	= explode(";", (string) $CurFleets['fleet_array']);
 			
 			if(!is_array($FleetRec)) continue;
 				
@@ -166,7 +166,7 @@ class statbuilder
 	
 	private function SaveDataIntoDB($Data)
 	{
-		$queries	= explode(';', $Data);
+		$queries	= explode(';', (string) $Data);
 		$queries	= array_filter($queries);
 		foreach($queries as $query)
 		{

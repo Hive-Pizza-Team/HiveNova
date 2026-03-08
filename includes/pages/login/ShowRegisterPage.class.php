@@ -17,8 +17,9 @@
 
 class ShowRegisterPage extends AbstractLoginPage
 {
-	function __construct() 
+	function __construct()
 	{
+		$this->defaultWindow = 'light';
 		parent::__construct();
 	}
 	
@@ -92,8 +93,11 @@ class ShowRegisterPage extends AbstractLoginPage
 			'accountName'		=> $accountName,
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,
-			'registerPasswordDesc'	=> sprintf($LNG['registerPasswordDesc'], 6),
-			'registerRulesDesc'	=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>')
+			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], 6),
+			'registerRulesDesc'			=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
+			'registerTabEmail'			=> $LNG['registerTabEmail'],
+			'registerTabHive'			=> $LNG['registerTabHive'],
+			'registerHiveKeychainInfo'	=> $LNG['registerHiveKeychainInfo'],
 		));
 		
 		$this->display('page.register.default.tpl');
@@ -152,7 +156,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			$errors[]	= $LNG['registerErrorUsernameChar'];
 		}
 
-		if(strlen($password) < 6) {
+		if(strlen((string) $password) < 6) {
 			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], 6);
 		}
 			
@@ -256,8 +260,6 @@ class ShowRegisterPage extends AbstractLoginPage
 		
 		if ($config->capaktiv === '1')
 		{
-            require('includes/libs/reCAPTCHA/autoload.php');
-
             $recaptcha = new \ReCaptcha\ReCaptcha($config->capprivate);
             $resp = $recaptcha->verify(HTTP::_GP('g-recaptcha-response', ''), Session::getClientIp());
             if (!$resp->isSuccess())

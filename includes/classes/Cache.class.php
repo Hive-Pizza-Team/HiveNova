@@ -73,7 +73,7 @@ class Cache
 		if($cacheData === false)
 			return false;
 			
-		$cacheData	= unserialize($cacheData);
+		$cacheData	= safe_unserialize($cacheData);
 		if($cacheData === false)
 			return false;
 		

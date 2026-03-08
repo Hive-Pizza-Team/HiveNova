@@ -1,0 +1,20 @@
+name: CI
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: php-actions/composer@v6
+        with:
+          php_version: "8.3"
+          php_extensions: "gmp"
+      - uses: php-actions/phpunit@v4
+        env:
+          XDEBUG_MODE: coverage
+        with:
+          configuration: "phpunit.xml"
+          php_version: "8.3"
+          php_extensions: "xdebug gmp"
+          coverage_clover: "coverage/clover.xml"

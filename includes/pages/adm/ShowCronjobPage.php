@@ -19,7 +19,7 @@ if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FI
 
 function getCronjobTimes($row,$max)
 {
-	$arr = explode(',',$row);
+	$arr = explode(',',(string) $row);
 	if (count($arr) > 1)
 		return $arr;
 	
@@ -36,7 +36,7 @@ function checkPostData($column,$max)
 		return '*';
 	
 	$post = HTTP::_GP($column, array());
-	$post = array_filter($post, 'is_numeric');
+	$post = array_filter($post, is_numeric(...));
 	if (empty($post))
 		return false;
 	
@@ -58,30 +58,15 @@ function ShowCronjob()
 {
     $cronId = HTTP::_GP('id', 0);
 
-    switch (HTTP::_GP('action', 'overview')) {
-        case 'edit':
-		    ShowCronjobEdit($cronId);
-        break;
-        case 'delete':
-		    ShowCronjobDelete($cronId);
-        break;
-        case 'lock':
-		    ShowCronjobLock($cronId);
-        break;
-        case 'unlock':
-		    ShowCronjobUnlock($cronId);
-        break;
-        case 'detail':
-		    ShowCronjobDetail($cronId);
-        break;
-        case 'enable':
-		    ShowCronjobEnable($cronId);
-        break;
-        case 'overview':
-        default:
-		    ShowCronjobOverview();
-        break;
-    }
+    match (HTTP::_GP('action', 'overview')) {
+        'edit' => ShowCronjobEdit($cronId),
+        'delete' => ShowCronjobDelete($cronId),
+        'lock' => ShowCronjobLock($cronId),
+        'unlock' => ShowCronjobUnlock($cronId),
+        'detail' => ShowCronjobDetail($cronId),
+        'enable' => ShowCronjobEnable($cronId),
+        default => ShowCronjobOverview(),
+    };
 }
 
 function ShowCronjobEdit($post_id)

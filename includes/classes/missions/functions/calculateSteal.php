@@ -86,16 +86,19 @@ function calculateSteal($attackFleets, $defenderPlanet, $simulate = false)
 	foreach($SortFleets as $FleetID => $Capacity)
 	{
 		$slotFactor	= $Capacity / $AllCapacity;
-		
-		$sql	= "UPDATE %%FLEETS%% SET
-		`fleet_resource_metal` = `fleet_resource_metal` + '".($stealResource[$firstResource] * $slotFactor)."',
-		`fleet_resource_crystal` = `fleet_resource_crystal` + '".($stealResource[$secondResource] * $slotFactor)."',
-		`fleet_resource_deuterium` = `fleet_resource_deuterium` + '".($stealResource[$thirdResource] * $slotFactor)."'
+
+		$sql = "UPDATE %%FLEETS%% SET
+		`fleet_resource_metal`      = `fleet_resource_metal`      + :metal,
+		`fleet_resource_crystal`    = `fleet_resource_crystal`    + :crystal,
+		`fleet_resource_deuterium`  = `fleet_resource_deuterium`  + :deuterium
 		WHERE fleet_id = :fleetId;";
 
 		$db->update($sql, array(
-			':fleetId'	=> $FleetID,
-	  	));
+			':metal'      => $stealResource[$firstResource]  * $slotFactor,
+			':crystal'    => $stealResource[$secondResource] * $slotFactor,
+			':deuterium'  => $stealResource[$thirdResource]  * $slotFactor,
+			':fleetId'    => $FleetID,
+		));
 	}
 	
 	return $stealResource;

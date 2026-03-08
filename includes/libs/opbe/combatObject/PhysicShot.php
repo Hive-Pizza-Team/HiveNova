@@ -30,6 +30,7 @@
 class PhysicShot
 {
     private $shipType;
+    private $fighters;
     private $damage;
     private $count;
 
@@ -59,7 +60,7 @@ class PhysicShot
 
 
         $count_battle = min($count, 100);
-        $damage = rand($damage - (1/$count_battle * $damage), $damage + (1/$count_battle * $damage));
+        $damage = rand((int)($damage - (1/$count_battle * $damage)), (int)($damage + (1/$count_battle * $damage)));
 
         if($GLOBALS['round']==1) { $damage = $damage*1.20; }
         else if($GLOBALS['round']==2) {}

@@ -1,6 +1,6 @@
 {block name="title" prepend}{$LNG.lm_alliance}{/block}
 {block name="content"}
-{$countRank = count($availableRanks)}
+{$countRank = $availableRanks|count}
 <form action="game.php?page=alliance&amp;mode=admin&amp;action=permissionsSend" method="post">
 <input type="hidden" value="1" name="send">
 	<table>

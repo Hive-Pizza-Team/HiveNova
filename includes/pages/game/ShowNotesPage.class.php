@@ -45,7 +45,7 @@ class ShowNotesPage extends AbstractGamePage
 			$notesList[$notesRow['id']]	= array(
 				'time'		=> _date($LNG['php_tdformat'], $notesRow['time'], $USER['timezone']),
 				'title'		=> $notesRow['title'],
-				'size'		=> strlen($notesRow['text']),
+				'size'		=> strlen((string) $notesRow['text']),
 				'priority'	=> $notesRow['priority'],
 			);
 		}
@@ -131,7 +131,7 @@ class ShowNotesPage extends AbstractGamePage
 
 		$deleteIds	= HTTP::_GP('delmes', array());
 		$deleteIds	= array_keys($deleteIds);
-		$deleteIds	= array_filter($deleteIds, 'is_numeric');
+		$deleteIds	= array_filter($deleteIds, is_numeric(...));
 
 		if(!empty($deleteIds))
 		{

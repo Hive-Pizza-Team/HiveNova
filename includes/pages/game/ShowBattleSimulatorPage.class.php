@@ -36,7 +36,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		$elements	= array(0, 0);
 		foreach($BattleArray as $BattleSlotID => $BattleSlot)
 		{
-			if(isset($BattleSlot[0]) && (array_sum($BattleSlot[0]) > 0 || $BattleSlotID == 0))
+			if(isset($BattleSlot[0]) && (array_sum(array_map('intval', $BattleSlot[0])) > 0 || $BattleSlotID == 0))
 			{
 				$attacker	= array();
 				$attacker['fleetDetail'] 		= array(
@@ -74,12 +74,12 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					}
 				}
 				
-				$attacker['unit'] 	= array_map('intval', $BattleSlot[0]);
+				$attacker['unit'] 	= array_map(intval(...), $BattleSlot[0]);
 				
 				$attackers[]	= $attacker;
 			}
 				
-			if(isset($BattleSlot[1]) && (array_sum($BattleSlot[1]) > 0 || $BattleSlotID == 0))
+			if(isset($BattleSlot[1]) && (array_sum(array_map('intval', $BattleSlot[1])) > 0 || $BattleSlotID == 0))
 			{
 				$defender	= array();
 				$defender['fleetDetail'] 		= array(
@@ -117,7 +117,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					}
 				}
 				
-				$defender['unit'] 	= array_map('intval', $BattleSlot[1]);
+				$defender['unit'] 	= array_map(intval(...), $BattleSlot[1]);
 				$defenders[]	= $defender;
 			}
 		}

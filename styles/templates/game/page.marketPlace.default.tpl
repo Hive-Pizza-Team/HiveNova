@@ -115,7 +115,7 @@
 		<td class="resource_deuterium">{$FlyingFleetRow.fleet_resource_deuterium|number}</td>
 		<td class="total_value"></td>
 		<td class="ratio"></td>
-		<td data-time="{$FlyingFleetRow.end}">{pretty_fly_time({$FlyingFleetRow.end})}</td>
+		<td data-time="{$FlyingFleetRow.end}">{$FlyingFleetRow.end|pretty_fly_time}</td>
 		<td class="no-background no-border">
 			{if $FlyingFleetRow.fleet_wanted_resource_id == 1}
 			<img src="./styles/theme/nova/images/metal.gif"/>
@@ -127,9 +127,9 @@
 		</td>
 		<td class="wanted-resource-{$FlyingFleetRow.fleet_wanted_resource_id}">{$FlyingFleetRow.fleet_wanted_resource}</td>
 		<td class="wanted-resource-amount">{$FlyingFleetRow.fleet_wanted_resource_amount|number}</td>
-		<td>{pretty_fly_time({$FlyingFleetRow.from_duration})}</td>
-		<td class="LC" style="display: none;">{pretty_fly_time({$FlyingFleetRow.to_lc_duration})}</td>
-		<td class="HC">{pretty_fly_time({$FlyingFleetRow.to_hc_duration})}</td>
+		<td>{$FlyingFleetRow.from_duration|pretty_fly_time}</td>
+		<td class="LC" style="display: none;">{$FlyingFleetRow.to_lc_duration|pretty_fly_time}</td>
+		<td class="HC">{$FlyingFleetRow.to_hc_duration|pretty_fly_time}</td>
 		<td>
 			{if $FlyingFleetRow.possible_to_buy == true}
 			<form class="market_form" action="game.php?page=marketPlace&amp;action=buy" method="post">
@@ -209,7 +209,7 @@
 		<td>{$smarty.foreach.FlyingFleets.iteration}</td>
 		<td class="table_username">{$FlyingFleetRow.username}</td>
 		<td>{$FlyingFleetRow.fleet}</td>
-		<td data-time="{$FlyingFleetRow.end}">{pretty_fly_time({$FlyingFleetRow.end})}</td>
+		<td data-time="{$FlyingFleetRow.end}">{$FlyingFleetRow.end|pretty_fly_time}</td>
 		<td class="no-background no-border">
 			{if $FlyingFleetRow.fleet_wanted_resource_id == 1}
 			<img src="./styles/theme/nova/images/metal.gif"/>
@@ -221,9 +221,9 @@
 		</td>
 		<td class="wanted-resource-{$FlyingFleetRow.fleet_wanted_resource_id}">{$FlyingFleetRow.fleet_wanted_resource}</td>
 		<td class="wanted-resource-amount">{$FlyingFleetRow.fleet_wanted_resource_amount|number}</td>
-		<td>{pretty_fly_time({$FlyingFleetRow.from_duration})}</td>
-		<td class="LC" style="display: none;">{pretty_fly_time({$FlyingFleetRow.to_lc_duration})}</td>
-		<td class="HC">{pretty_fly_time({$FlyingFleetRow.to_hc_duration})}</td>
+		<td>{$FlyingFleetRow.from_duration|pretty_fly_time}</td>
+		<td class="LC" style="display: none;">{$FlyingFleetRow.to_lc_duration|pretty_fly_time}</td>
+		<td class="HC">{$FlyingFleetRow.to_hc_duration|pretty_fly_time}</td>
 		<td>
 			{if $FlyingFleetRow.possible_to_buy == true}
 			<form class="market_form" action="game.php?page=marketPlace&amp;action=buy" method="post">

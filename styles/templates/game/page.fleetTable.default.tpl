@@ -40,7 +40,7 @@
 	{else}
 	<td{if $FlyingFleetRow.state != 0} style="color:lime"{/if}>{$FlyingFleetRow.endTime}</td>
 	{/if}
-	<td id="fleettime_{$smarty.foreach.FlyingFleets.iteration}" class="fleets" data-fleet-end-time="{$FlyingFleetRow.returntime}" data-fleet-time="{$FlyingFleetRow.resttime}">{pretty_fly_time({$FlyingFleetRow.resttime})}</td>
+	<td id="fleettime_{$smarty.foreach.FlyingFleets.iteration}" class="fleets" data-fleet-end-time="{$FlyingFleetRow.returntime}" data-fleet-time="{$FlyingFleetRow.resttime}">{$FlyingFleetRow.resttime|pretty_fly_time}</td>
 	<td>
 	{if !$isVacation && $FlyingFleetRow.state != 1 && $FlyingFleetRow.no_returnable != 1}
 		<form action="game.php?page=fleetTable&amp;action=sendfleetback" method="post">
@@ -108,7 +108,7 @@
 	</tr>
 	{/foreach}
 	<tr style="height:20px;">
-	{if count($FleetsOnPlanet) == 0}
+	{if $FleetsOnPlanet|count == 0}
 	<td colspan="4">{$LNG.fl_no_ships}</td>
 	{else}
 	<td colspan="2"><a href="javascript:noShips();">{$LNG.fl_remove_all_ships}</a></td>

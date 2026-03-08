@@ -29,6 +29,7 @@
 class ShipsCleaner
 {
     private $shipType;
+    private $fighters;
     private $lastShipHit;
     private $lastShots;
 

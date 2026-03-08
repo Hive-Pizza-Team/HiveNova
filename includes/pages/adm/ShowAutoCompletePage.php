@@ -30,9 +30,9 @@ function ShowAutoCompletePage()
 		exit;
 	}
 	
-	if(substr($searchText, 0, 1) === '#')
+	if(str_starts_with((string) $searchText, '#'))
 	{
-		$where = 'id = '.((int) substr($searchText, 1));
+		$where = 'id = '.((int) substr((string) $searchText, 1));
 		$orderBy = ' ORDER BY id ASC';
 	}
 	else

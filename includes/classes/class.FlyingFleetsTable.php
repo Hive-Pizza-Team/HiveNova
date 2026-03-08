@@ -40,7 +40,7 @@ class FlyingFleetsTable
 	}
 
 	public function setMissions($missions) {
-		$this->missions = implode(',', array_filter(explode(',', $missions), 'is_numeric'));
+		$this->missions = implode(',', array_filter(explode(',', $missions), is_numeric(...)));
 	}
 
 	private function getFleets($acsID = false) {
@@ -120,7 +120,7 @@ class FlyingFleetsTable
 		$Time	= 0;
 		$Rest	= 0;
 
-		if ($FleetState == 0 && $this->IsPhalanx && $fleetRow['fleet_group'] != 0 && (strpos((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 'page=phalanx') !== false))
+		if ($FleetState == 0 && $this->IsPhalanx && $fleetRow['fleet_group'] != 0 && (str_contains((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", 'page=phalanx')))
 		{
 			// Rebuilt the code above to eliminate possible errors with ACS without Phalanx.
 			$acsResult		= $this->getFleets($fleetRow['fleet_group']);
@@ -296,7 +296,7 @@ class FlyingFleetsTable
 		global $LNG, $USER, $resource;
 		$SpyTech		= $USER[$resource[106]];
 		$Owner			= $fleetRow['fleet_owner'] == $this->userId;
-		$FleetRec		= explode(';', $fleetRow['fleet_array']);
+		$FleetRec		= explode(';', (string) $fleetRow['fleet_array']);
 		$FleetPopup		= '<a href="#" data-tooltip-content="<table style=\'width:200px\'>';
 		$textForBlind	= '';
 		if ($this->IsPhalanx || $SpyTech >= 4 || $Owner)

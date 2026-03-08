@@ -640,6 +640,21 @@ $LNG['mu_giveaway']					= 'Giveaways';
 $LNG['mu_disclaimer']				= 'Paramétres de contact';
 $LNG['mu_dump']						= 'Database Backup';
 
+$LNG['mu_transactions'] = 'Transactions';
+
+$LNG['tx_id'] = 'ID';
+$LNG['tx_timestamp'] = 'Horodatage';
+$LNG['tx_user'] = 'Utilisateur';
+$LNG['tx_amount_spent'] = 'Dépensé';
+$LNG['tx_amount_received'] = 'Reçu';
+$LNG['tx_item'] = 'ID article';
+$LNG['tx_memo'] = 'Mémo';
+$LNG['tx_total'] = 'Total';
+$LNG['tx_no_results'] = 'Aucune transaction trouvée.';
+$LNG['tx_search'] = 'Chercher';
+$LNG['tx_search_placeholder'] = 'Nom d\'utilisateur ou mémo...';
+$LNG['tx_clear'] = 'Effacer';
+
 $LNG['vt_error']					= 'Le Hash du fichier n\'est pas disponible ! Effectuer une mise à jour';
 $LNG['vt_fail']						= 'Fichiers modifiès';
 $LNG['vt_info']						= 'Cette liste contient les fichiers qui ont été modifier, et ne pas correspondre à l\'original.<br>Si vous n\'avez pas changé le jeu lui-même, remplacez les fichiers avec les originaux.';

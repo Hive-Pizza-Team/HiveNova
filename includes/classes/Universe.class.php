@@ -114,7 +114,7 @@ class Universe {
 			{
 				if(UNIS_WILDCAST)
 				{
-					$temp = explode('.', $_SERVER['HTTP_HOST']);
+					$temp = explode('.', (string) $_SERVER['HTTP_HOST']);
 					$temp = substr($temp[0], 3);
 					if(is_numeric($temp))
 					{

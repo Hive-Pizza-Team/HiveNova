@@ -30,7 +30,7 @@ class ShowShipyardPage extends AbstractGamePage
 	private function CancelAuftr() 
 	{
 		global $USER, $PLANET, $resource;
-		$ElementQueue = unserialize($PLANET['b_hangar_id']);
+		$ElementQueue = safe_unserialize($PLANET['b_hangar_id']);
 		
 		$CancelArray	= HTTP::_GP('auftr', array());
 		
@@ -94,7 +94,7 @@ class ShowShipyardPage extends AbstractGamePage
 			$Count 			= max(min($Count, Config::get()->max_fleet_per_build), 0);
 			$Count 			= min($Count, $MaxElements);
 			
-			$BuildArray    	= !empty($PLANET['b_hangar_id']) ? unserialize($PLANET['b_hangar_id']) : array();
+			$BuildArray    	= !empty($PLANET['b_hangar_id']) ? safe_unserialize($PLANET['b_hangar_id']) : array();
 			if (in_array($Element, $reslist['missile']))
 			{
 				$MaxMissiles		= BuildFunctions::getMaxConstructibleRockets($USER, $PLANET, $Missiles);
@@ -129,6 +129,14 @@ class ShowShipyardPage extends AbstractGamePage
 			
 			$BuildArray[]			= array($Element, $Count);
 			$PLANET['b_hangar_id']	= serialize($BuildArray);
+
+			// Database::get()->insert('INSERT INTO %%LOG_BUILDINGS%% SET owner_id = :owner_id, planet_id = :planet_id, universe = :universe, element_id = :element_id, queued_at = :queued_at', array(
+			// 	'owner_id'	=> $USER['id'],
+			// 	'planet_id'	=> $PLANET['id'],
+			// 	'universe'	=> $PLANET['universe'],
+			// 	'element_id'=> $Element,
+			// 	'queued_at'	=> TIMESTAMP,
+			// ));
 		}
 	}
 	
@@ -148,7 +156,7 @@ class ShowShipyardPage extends AbstractGamePage
 		$NotBuilding = true;
 		if (!empty($PLANET['b_building_id']))
 		{
-			$CurrentQueue 	= unserialize($PLANET['b_building_id']);
+			$CurrentQueue 	= safe_unserialize($PLANET['b_building_id']);
 			foreach($CurrentQueue as $ElementArray)
 			{
 				if($ElementArray[0] == 21 || $ElementArray[0] == 15) {
@@ -158,7 +166,7 @@ class ShowShipyardPage extends AbstractGamePage
 			}
 		}
 		
-		$ElementQueue 	= unserialize($PLANET['b_hangar_id']);
+		$ElementQueue 	= safe_unserialize($PLANET['b_hangar_id']);
 		if(empty($ElementQueue))
 			$Count	= 0;
 		else
@@ -184,7 +192,7 @@ class ShowShipyardPage extends AbstractGamePage
 		}
 		
 		$elementInQueue	= array();
-		$ElementQueue 	= unserialize($PLANET['b_hangar_id']);
+		$ElementQueue 	= safe_unserialize($PLANET['b_hangar_id']);
 		$buildList		= array();
 		$elementList	= array();
 
@@ -262,7 +270,7 @@ class ShowShipyardPage extends AbstractGamePage
 			'elementList'	=> $elementList,
 			'NotBuilding'	=> $NotBuilding,
 			'BuildList'		=> $buildList,
-			'maxlength'		=> strlen(Config::get()->max_fleet_per_build),
+			'maxlength'		=> strlen((string) Config::get()->max_fleet_per_build),
 			'mode'			=> $mode,
 			'messages'		=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], pretty_number($Messages))): false,
 			'SolarEnergy'		=> $SolarEnergy,

@@ -11,7 +11,7 @@
 	</tr>
 	{foreach $multiGroups as $IP => $Users}
 	<tr>
-		<td rowspan="{count($Users)}">{$IP}</td>
+		<td rowspan="{$Users|count}">{$IP}</td>
 		{foreach $Users as $ID => $User}
 		<td class="left" style="padding:3px;">{$ID}</td>
 		<td class="left" style="padding:3px;"><a href="admin.php?page=accountdata&id_u={$ID}">{$User.username} (?)</a></td>

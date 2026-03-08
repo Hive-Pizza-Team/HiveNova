@@ -117,7 +117,7 @@ class ShowStatisticsPage extends AbstractGamePage
                         ':userId'    => $USER['id'],
                         ':statType'    => 1
                     ));
-                } catch (Exception $e) {
+                } catch (Exception) {
                     $USER['total_points'] = 0;
                 }
 

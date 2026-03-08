@@ -63,15 +63,15 @@
 	</tr>
 	<tr style="height:20px;">
 		<td>
-			<a href="javascript:setTarget({$galaxy},{$system},14,1);updateVars();">{$LNG.type_mission_15}[{$galaxy}:{$system}:14]</a>
+			<a href="javascript:setTarget({$galaxy},{$system},{$max_planets + 1},1);updateVars();">{$LNG.type_mission_15}[{$galaxy}:{$system}:{$max_planets + 1}]</a>
 		</td>
 		<td>
-			<a href="javascript:setTarget({$galaxy},{$system},15,1);updateVars();">{$LNG.type_mission_16}[{$galaxy}:{$system}:15]</a>
+			<a href="javascript:setTarget({$galaxy},{$system},{$max_planets + 2},1);updateVars();">{$LNG.type_mission_16}[{$galaxy}:{$system}:{$max_planets + 2}]</a>
 		</td>
 	</tr>
 </table>
 
-	{if isModuleAvailable($smarty.const.MODULE_SHORTCUTS)}
+	{if $smarty.const.MODULE_SHORTCUTS|isModuleAvailable}
 	<table class="table519 shortcut" style="table-layout: fixed;">
 		<tr style="height:20px;">
 			<th colspan="{$themeSettings.SHORTCUT_ROWS_ON_FLEET1}">{$LNG.fl_shortcut} (<a href="#" onclick="EditShortcuts();return false" class="shortcut-link-edit shortcut-link">{$LNG.fl_shortcut_edition}</a><a href="#" onclick="SaveShortcuts();return false" class="shortcut-edit">{$LNG.fl_shortcut_save}</a>)</th>

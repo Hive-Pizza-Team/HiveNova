@@ -135,7 +135,7 @@
 <br><br>
 {if $Raport.result == "a"}
 {$LNG.sys_attacker_won}<br>
-{$LNG.sys_stealed_ressources} {foreach $Raport.steal as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == count($Raport.steal)} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach}
+{$LNG.sys_stealed_ressources} {foreach $Raport.steal as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.steal|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach}
 {elseif $Raport.result == "r"}
 {$LNG.sys_defender_won}
 {else}
@@ -144,7 +144,7 @@
 <br><br>
 {$LNG.sys_attacker_lostunits} {$Raport['units'][0]|number} {$LNG.sys_units}<br>
 {$LNG.sys_defender_lostunits} {$Raport['units'][1]|number} {$LNG.sys_units}<br>
-{$LNG.debree_field_1} {foreach $Raport.debris as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == count($Raport.debris)} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach} {$LNG.debree_field_2}<br><br>
+{$LNG.debree_field_1} {foreach $Raport.debris as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.debris|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach} {$LNG.debree_field_2}<br><br>
 {if $Raport.mode == 1}
 	{* Destruction *}
 	{if $Raport.moon.moonDestroySuccess == -1}
@@ -152,7 +152,7 @@
 		{$LNG.sys_destruc_stop}<br>
 	{else}
 		{* Attack win *}
-		{sprintf($LNG.sys_destruc_lune, "{$Raport.moon.moonDestroyChance}")}<br>{$LNG.sys_destruc_mess1}
+		{$LNG.sys_destruc_lune|sprintf:$Raport.moon.moonDestroyChance}<br>{$LNG.sys_destruc_mess1}
 		{if $Raport.moon.moonDestroySuccess == 1}
 			{* Destroy success *}
 			{$LNG.sys_destruc_reussi}
@@ -161,7 +161,7 @@
 			{$LNG.sys_destruc_null}			
 		{/if}
 		<br>
-		{sprintf($LNG.sys_destruc_rip, "{$Raport.moon.fleetDestroyChance}")}
+		{$LNG.sys_destruc_rip|sprintf:$Raport.moon.fleetDestroyChance}
 		{if $Raport.moon.fleetDestroySuccess == 1}
 			{* Fleet destroyed *}
 			<br>{$LNG.sys_destruc_echec}
@@ -173,10 +173,10 @@
 	{if !empty($Raport.moon.moonName)}
 		{if isset($Info)}
 			{* Moon created (HoF Mode) *}
-			{sprintf($LNG.sys_moonbuilt, "{$Raport.moon.moonName}", "XX", "XX", "XX")}
+			{$LNG.sys_moonbuilt|sprintf:$Raport.moon.moonName:"XX":"XX":"XX"}
 		{else}
 			{* Moon created *}
-			{sprintf($LNG.sys_moonbuilt, "{$Raport.moon.moonName}", "{$Raport.koords[0]}", "{$Raport.koords[1]}", "{$Raport.koords[2]}")}
+			{$LNG.sys_moonbuilt|sprintf:$Raport.moon.moonName:$Raport.koords[0]:$Raport.koords[1]:$Raport.koords[2]}
 		{/if}
 	{/if}
 {/if}

@@ -23,24 +23,35 @@ class ShowIndexPage extends AbstractLoginPage
 		$this->setWindow('light');
 	}
 	
-	function show() 
+	function show()
 	{
 		global $LNG;
-		
+
 		$referralID		= HTTP::_GP('ref', 0);
 		if(!empty($referralID))
 		{
 			$this->redirectTo('index.php?page=register&referralID='.$referralID);
 		}
-	
+
 		$universeSelect	= array();
-		
+		$universeStats	= array();
+
+		$db = Database::get();
+
 		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
-			$config = Config::get($uniId);
-			$universeSelect[$uniId]	= $config->uni_name.($config->game_disable == 0 ? $LNG['uni_closed'] : '');
+			$uniConfig = Config::get($uniId);
+			$universeSelect[$uniId]	= $uniConfig->uni_name.($uniConfig->game_disable == 0 ? $LNG['uni_closed'] : '');
+
+			$sql = 'SELECT COUNT(*) as cnt FROM %%FLEETS%% WHERE fleet_universe = :uniId;';
+			$fleetCount = $db->selectSingle($sql, array(':uniId' => $uniId), 'cnt');
+
+			$universeStats[$uniId] = array(
+				'players' => (int) $uniConfig->users_amount,
+				'fleets'  => (int) $fleetCount,
+			);
 		}
-		
+
 		$Code	= HTTP::_GP('code', 0);
 		$loginErrorMessage	= '';
 		if(isset($LNG['login_error_'.$Code]))
@@ -48,18 +59,18 @@ class ShowIndexPage extends AbstractLoginPage
 			$loginErrorMessage	= $LNG['login_error_'.$Code];
 		}
 
-		$db = Database::get();
 		$sql = "SELECT capaktiv, cappublic, capprivate FROM uni1_config";
 		$verkey = $db->selectSingle($sql);
 
 		$config				= Config::get();
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
+			'universeStats'			=> $universeStats,
 			'code'					=> $loginErrorMessage,
 			'verkey'			=> $verkey,
 			'descHeader'			=> sprintf($LNG['loginWelcome'], $config->game_name),
 			'descText'				=> sprintf($LNG['loginServerDesc'], $config->game_name),
-            'gameInformations'      => explode("\n", $LNG['gameInformations']),
+            'gameInformations'      => array_filter(explode("\n", (string) $LNG['gameInformations']), 'strlen'),
 			'loginInfo'				=> sprintf($LNG['loginInfo'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>')
 		));
 

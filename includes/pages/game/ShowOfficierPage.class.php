@@ -59,9 +59,9 @@ class ShowOfficierPage extends AbstractGamePage
 					item_purchased_id = :item_purchased_id;';
 
 		Database::get()->insert($sql, array(
-			'user_id'		=> $USER['id'],
-			'amount_spent'	=> $costResources[921],
-			'item_purchased_id' => $Element
+			':user_id'           => $USER['id'],
+			':amount_spent'      => $costResources[921],
+			':item_purchased_id' => $Element
 		));
 	}
 
@@ -101,12 +101,12 @@ class ShowOfficierPage extends AbstractGamePage
 			item_purchased_id = :item_purchased_id;';
 
 		Database::get()->insert($sql, array(
-			'user_id'		=> $USER['id'],
-			'amount_spent'	=> $costResources[921],
-			'item_purchased_id' => $Element
+			':user_id'           => $USER['id'],
+			':amount_spent'      => $costResources[921],
+			':item_purchased_id' => $Element
 		));
 	}
-	
+
 	public function show()
 	{
 		global $USER, $PLANET, $resource, $reslist, $LNG, $pricelist;
