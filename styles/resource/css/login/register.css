@@ -1,3 +1,104 @@
+/* ── Tab wrapper ─────────────────────────────── */
+
+.reg-tabs-wrapper {
+    max-width: 520px;
+    margin: 0 auto 30px;
+}
+
+/* ── Tab navigation ──────────────────────────── */
+
+.reg-tab-nav {
+    display: flex;
+    border-bottom: 2px solid #E31337;
+}
+
+.reg-tab-btn {
+    flex: 1;
+    padding: 11px 16px;
+    background: #111827;
+    color: #888;
+    border: 1px solid transparent;
+    border-bottom: none;
+    cursor: pointer;
+    font-family: verdana, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    outline: none;
+}
+
+.reg-tab-btn:first-child {
+    border-radius: 6px 0 0 0;
+}
+
+.reg-tab-btn:last-child {
+    border-radius: 0 6px 0 0;
+}
+
+.reg-tab-btn:hover {
+    color: #fff;
+    background: #1a2535;
+}
+
+.reg-tab-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    margin-right: 4px;
+    margin-bottom: 1px;
+}
+
+.reg-tab-btn.active {
+    color: #fff;
+    background: #1b4c6ec4;
+    border-color: #E31337;
+    border-bottom-color: #1b4c6ec4;
+    position: relative;
+    top: 2px;
+    z-index: 1;
+}
+
+/* ── Tab panels ──────────────────────────────── */
+
+.reg-tab-panel {
+    display: none;
+    background: #1b4c6ec4;
+    border-radius: 0 0 8px 8px;
+    padding: 6px 0 24px;
+}
+
+.reg-tab-panel.active {
+    display: block;
+}
+
+/* ── Hive info blurb ─────────────────────────── */
+
+.reg-hive-info p {
+    margin: 8px 0 4px;
+    color: #aac4dd;
+    font-size: 11px;
+    font-style: italic;
+    line-height: 16px;
+}
+
+/* ── Hive submit button accent ───────────────── */
+
+.reg-hive-submit {
+    background-color: #E31337 !important;
+    color: #fff !important;
+    border-color: #E31337 !important;
+    font-weight: bold;
+}
+
+.reg-hive-submit:hover {
+    background-color: #c01030 !important;
+    border-color: #c01030 !important;
+}
+
+/* ── Form rows ───────────────────────────────── */
+
 .rowForm {
     display: block;
     text-align: left;
@@ -12,7 +113,8 @@
     width: 262px;
 }
 
-.rowForm #rules {
+.rowForm #reg-email-rules,
+.rowForm #reg-hive-rules {
     margin: 7px 0 2px 0;
     padding: 0;
 }
@@ -59,30 +161,4 @@
 
 .rowForm label+.inputDesc {
     padding-top: 5px;
-}
-
-#recaptcha_image>img {
-    background: #FFF;
-    color: #FFF;
-    border: 2px solid #9EB4CB;
-}
-
-#recaptcha_image {
-    float: left;
-    padding: 10px 2px;
-}
-
-#recaptcha_input_wrap {
-    clear: both;
-    width: 436px;
-}
-
-#recaptcha_response_field {
-    float: left;
-    display: block;
-    margin-left: 141px;
-}
-
-.captchaButtons {
-    font-size: 11px;
 }
