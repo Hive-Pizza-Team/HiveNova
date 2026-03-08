@@ -55,6 +55,23 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 - Set write privileges to dirs: `cache/`, `includes/`
 - Run wizard: `127.0.0.1/install/install.php`
 
+### Database migrations
+
+After pulling new code, apply any pending schema changes with the CLI migration tool:
+
+```bash
+# Check current version and list pending migrations
+php migrate.php status
+
+# Apply all pending migrations
+php migrate.php run
+
+# Preview SQL that would be executed (no changes made)
+php migrate.php run --dry-run
+```
+
+Run from the project root. The tool requires `includes/config.php` to exist (created by the web installer).
+
 ### If you run HiveNova on NGINX - Read nginx.md file!
 
 ## Screenshots

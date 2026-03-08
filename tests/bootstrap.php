@@ -40,6 +40,7 @@ require_once __DIR__ . '/../includes/classes/Config.class.php';
 require_once __DIR__ . '/../includes/classes/class.PlanetRessUpdate.php';
 
 // Additional testable source files
+require_once __DIR__ . '/../includes/classes/Migrator.php';
 require_once __DIR__ . '/../includes/classes/class.BuildFunctions.php';
 require_once __DIR__ . '/../includes/classes/missions/functions/calculateSteal.php';
 require_once __DIR__ . '/../includes/classes/missions/functions/calculateMIPAttack.php';
