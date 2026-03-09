@@ -164,3 +164,4 @@ $LNG['disclamerLabelAddress']		= 'Game Address:';
 $LNG['disclamerLabelPhone']			= 'Telephone Nr.:';
 $LNG['disclamerLabelMail']			= 'Support Adress:';
 $LNG['disclamerLabelNotice']		= 'More information';
+$LNG['loginHiveAccount'] = 'Hive Account';

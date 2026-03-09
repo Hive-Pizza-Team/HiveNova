@@ -239,3 +239,13 @@ $LNG['type_planet_3']  					= 'Mond';
 
 $LNG['sys_transfer_mess_owner'] = $LNG['sys_tran_mess_owner'];
 $LNG['sys_transfer_mess_user'] = $LNG['sys_tran_mess_user'];
+$LNG['sys_expe_found_ress_logbook_2'] = 'Entry from the first officers log book: If only we had a few cargo ships more! Now we\'ll have to leave loads of resources behind.';
+$LNG['sys_expe_found_ress_logbook_4'] = 'Entry from the first officers logbook: Even when we transformed the cafeteria and all the lounges into storages we still can\'t transport all the resources we found.';
+$LNG['sys_expe_depleted_min_2'] = 'Entry from the communications officers logbook: We found debris of ancient space ships. We are not the first ones here.';
+$LNG['sys_expe_depleted_min_3'] = 'Logbook addition of the communication officer: We nearly had a collision with another expedition fleet. I did not believe that there would be others around here.';
+$LNG['sys_expe_depleted_med_2'] = 'Entry from the communications officers logbook: We established friendly radio contact with some other expeditions in this sector.';
+$LNG['sys_expe_depleted_med_3'] = 'Entry from the communications officers logbook: We celebrated the expeditions fulfillment with the crew members of another expedition fleet which where on their way in the same sector. They have nothing new to report.';
+$LNG['sys_expe_depleted_max_2'] = 'Entry from the communication officers logbook: If it goes on like this we\'ll have to place navigation buoys to handle all this traffic.';
+$LNG['sys_expe_depleted_max_3'] = 'Logbook entry of the communication officer: Maybe it would be more useful to open a souvenir store here than sending yet another expedition.';
+$LNG['type_mission_16'] = 'Trade';
+$LNG['type_mission_17'] = 'Transfer';
