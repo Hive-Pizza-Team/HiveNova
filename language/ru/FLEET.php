@@ -239,6 +239,3 @@ $LNG['type_planet_3']                = 'Луна';
 
 $LNG['sys_transfer_mess_owner'] = $LNG['sys_tran_mess_owner'];
 $LNG['sys_transfer_mess_user'] = $LNG['sys_tran_mess_user'];
-$LNG['sys_trade_mess_back'] = 'One of your trading fleets returns to the planet %s %s without success.';
-$LNG['type_mission_16'] = 'Trade';
-$LNG['type_mission_17'] = 'Transfer';

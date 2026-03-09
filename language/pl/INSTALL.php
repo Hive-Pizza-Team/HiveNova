@@ -114,6 +114,3 @@ $LNG['step6_info_additional']	= 'Po kliknięciu zostaniesz przeniesiony na stron
 
 $LNG['sql_close_reason']		= 'Gra chwilowo zamknięta';
 $LNG['sql_welcome']				= 'Serdecznie witamy na 2Moons v';
-$LNG['reg_pdo_active'] = 'Support &raquo;PDO&laquo; Extension';
-$LNG['reg_pdo_desc'] = '<strong>Prerequisite</strong> — You need to provide support for PDO in PHP.';
-$LNG['step8_need_fields'] = 'You must fill in all fields.';
