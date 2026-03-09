@@ -535,8 +535,24 @@ th a,.res_current{
     max-width: 175px;
 }
 
+.attack-notification {
+    margin: 0 0 0 744px;
+    position: fixed;
+    background-color: #c0392bc4;
+    padding: 8px;
+    text-align: center;
+    top: 155px;
+    border-radius: 15px 0px 15px 15px;
+    height: fit-content;
+    max-width: 175px;
+}
+
 @media screen and (min-width: 700px) and (max-width: 1600px) {
 .message {
+right: 10.5%;
+margin: 0;
+}
+.attack-notification {
 right: 10.5%;
 margin: 0;
 }
@@ -544,6 +560,14 @@ margin: 0;
 @media screen and (max-width: 699px) {
 .message {
 	bottom: 0;
+	width: 100%;
+	max-width: unset;
+	border-radius: 15px 15px 0 0;
+	top: unset;
+	margin: 0;
+	}
+.attack-notification {
+	bottom: 45px;
 	width: 100%;
 	max-width: unset;
 	border-radius: 15px 15px 0 0;

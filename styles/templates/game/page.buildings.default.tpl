@@ -3,7 +3,9 @@
 
 		{if $messages}
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
-	
+	{/if}
+	{if $incoming_attack}
+	<div class="attack-notification"><a href="?page=overview">{$incoming_attack}</a></div>
 	{/if}
 {if !empty($Queue)}
 <div id="buildlist" class="infos1">

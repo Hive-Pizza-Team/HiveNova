@@ -45,7 +45,9 @@ $("#tn3").hide();
 <div>
 	{if $messages}
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
-	
+	{/if}
+	{if $incoming_attack}
+	<div class="attack-notification"><a href="?page=overview">{$incoming_attack}</a></div>
 	{/if}
 <div class="infos">
 <div class="planeto"><a href="#" onclick="return Dialog.PlanetAction();" title="{$LNG.ov_planetmenu}">{$LNG["type_planet_{$planet_type}"]} {$planetname}</a> ({$username})</div>

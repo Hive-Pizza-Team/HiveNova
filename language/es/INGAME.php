@@ -111,6 +111,7 @@ $LNG['ov_wrong_pass']						= 'Contraseña incorrecta. Intentalo de nuevo!';
 $LNG['ov_wrong_name']						= 'Nombre incorrecta. Intentalo de nuevo!';
 $LNG['ov_have_new_message']					= 'Tienes 1 mensaje nuevo';
 $LNG['ov_have_new_messages']				= 'Tienes %d mensajes nuevos';
+$LNG['ov_under_attack']					= '¡Estás siendo atacado!';
 $LNG['ov_planetmenu']						= 'Cambiar Nombre/Eliminar';
 $LNG['ov_free']								= 'Libre';
 $LNG['ov_news']								= 'Novedades';

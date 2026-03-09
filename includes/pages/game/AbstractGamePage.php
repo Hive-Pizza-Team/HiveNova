@@ -163,9 +163,19 @@ abstract class AbstractGamePage
 			$commitShort = substr($commit, 0, 7);
 		}
 
+		$incomingAttacks = Database::get()->selectSingle(
+			'SELECT COUNT(*) as cnt FROM %%FLEETS%%
+			WHERE fleet_target_owner = :userId
+			AND fleet_owner != :userId
+			AND fleet_mission IN (1, 2, 9)
+			AND fleet_mess = 0',
+			array(':userId' => $USER['id'])
+		)['cnt'];
+
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
 			'new_message' 		=> $USER['messages'],
+			'incoming_attack'	=> $incomingAttacks > 0 ? $LNG['ov_under_attack'] : false,
 			'commit'			=> $commit,
 			'commitShort'		=> $commitShort,
 			'vacation'			=> $USER['urlaubs_modus'] ? _date($LNG['php_tdformat'], $USER['urlaubs_until'], $USER['timezone']) : false,

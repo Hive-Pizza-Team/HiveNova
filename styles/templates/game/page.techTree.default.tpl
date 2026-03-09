@@ -12,7 +12,9 @@
 </style>
 {if $messages}
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
-	
+	{/if}
+	{if $incoming_attack}
+	<div class="attack-notification"><a href="?page=overview">{$incoming_attack}</a></div>
 	{/if}
 <div>
 <div class="infos"> 
