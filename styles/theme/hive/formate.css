@@ -451,7 +451,7 @@ header td,
 }
 
 .msg-table {
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .msg-action-bar {
@@ -470,7 +470,7 @@ header td,
 }
 
 .msg-action-col {
-  width: 40px;
+  width: 1px;
   text-align: center !important;
 }
 
