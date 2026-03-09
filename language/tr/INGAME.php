@@ -385,6 +385,7 @@ $LNG['fl_own_planet_error']					= 'Hata! Filoyu göndereceğin gezegeni tekrar s
 $LNG['bd_dismantle']						= 'Yıkmak';
 $LNG['bd_interrupt']						= 'Durdur';
 $LNG['bd_cancel']							= 'Iptal Et';
+$LNG['bd_queue_total']							= 'Kuyruk biter';
 $LNG['bd_working']							= 'Çalışıyor';
 $LNG['bd_build']							= 'Binayi Inşa Et';
 $LNG['bd_build_next_level']					= 'Kademe Yükselt ';

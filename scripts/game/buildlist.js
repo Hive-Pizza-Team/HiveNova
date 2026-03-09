@@ -19,6 +19,26 @@ function Buildlist() {
 	document.title = GetRestTimeFormat(rest) + ' - ' + buildname + ' - ' + Gamename;
 	
 	$('#time').text(GetRestTimeFormat(rest));
+
+	$('.timer').each(function() {
+		var endTs = $(this).data('time');
+		var remaining = Math.floor(endTs - serverTime.getTime() / 1000);
+		if (remaining <= 0) {
+			$(this).text(Ready);
+		} else {
+			$(this).text(GetRestTimeFormat(remaining));
+		}
+	});
+
+	var timers = $('.timer');
+	if (timers.length > 1) {
+		var firstEndTs = $(timers[0]).data('time');
+		var lastEndTs  = $(timers[timers.length - 1]).data('time');
+		var totalInitial  = resttime + (lastEndTs - firstEndTs);
+		var elapsed       = Math.round((serverTime.getTime() - startTime) / 1000);
+		var totalRemaining = Math.max(0, totalInitial - elapsed);
+		$('#total-queue-time').text(totalRemaining > 0 ? GetRestTimeFormat(totalRemaining) : Ready);
+	}
 }
 
 $(document).ready(function() {
