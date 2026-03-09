@@ -5,7 +5,10 @@
 		<th>{$LNG.fcm_info}</th>
 	</tr>
 	<tr>
-		<td><p>{$message|default:''}</p>{if !empty($redirectButtons)}<p>{foreach $redirectButtons as $button}<a href="{$button.url|default:''}"><button>{$button.label|default:''}</button></a>{/foreach}</p>{/if}</td>
+		<td class="error-message">
+			<p>{$message|default:''}</p>
+			{if !empty($redirectButtons)}<p>{foreach $redirectButtons as $button}<a href="{$button.url|default:''}"><button>{$button.label|default:''}</button></a>{/foreach}</p>{/if}
+		</td>
 	</tr>
 </table>
 {/block}
