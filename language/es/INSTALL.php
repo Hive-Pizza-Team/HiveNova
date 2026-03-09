@@ -118,6 +118,6 @@ $LNG['sql_close_reason'] = 'El juego está actualmente cerrado';
 $LNG['sql_welcome'] = 'Bienvenido a ';
 
 // Translated into Spanish by Scofield06 . All rights reversed (C) 2011
-$LNG['reg_pdo_active'] = 'Support &raquo;PDO&laquo; Extension';
-$LNG['reg_pdo_desc'] = '<strong>Prerequisite</strong> — You need to provide support for PDO in PHP.';
-$LNG['step8_need_fields'] = 'You must fill in all fields.';
+$LNG['reg_pdo_active'] = 'Soporte de la extensión »PDO«';
+$LNG['reg_pdo_desc'] = '<strong>Requisito previo</strong> — Necesitas soporte para PDO en PHP.';
+$LNG['step8_need_fields'] = 'Debes completar todos los campos.';

@@ -169,4 +169,4 @@ $LNG['disclamerLabelNotice']		= 'Ayrıntılı bilgi';
 
  //Giris Sayfasi
  $LNG['Browser']				= 'Önerilen browser.';
-$LNG['loginHiveAccount'] = 'Hive Account';
+$LNG['loginHiveAccount'] = 'Hive Hesabı';

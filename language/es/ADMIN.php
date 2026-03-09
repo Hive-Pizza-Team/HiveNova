@@ -1398,4 +1398,4 @@ $LNG['admin_se_dm_energie'] = 'Mejora de energía';
 $LNG['admin_se_dm_fleettime'] = 'Mejora de flota';
 $LNG['admin_se_cost'] = 'Costo (pizzabits)';
 $LNG['admin_se_power'] = 'Poder (% bonificación por nivel)';
-$LNG['mu_botdetect_page'] = 'Bot Detection';
+$LNG['mu_botdetect_page'] = 'Detección de Bots';

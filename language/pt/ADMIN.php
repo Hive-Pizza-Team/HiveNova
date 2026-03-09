@@ -460,13 +460,13 @@ $LNG['se_smtp_user']                    = 'SMTP Username:';
 $LNG['se_smtp_pass']                    = 'SMTP Password:';
 $LNG['se_smtp_sendmail']				= 'SMTP Remetente:';
 $LNG['se_smtp_sendmail_info']          	= 'Ponha aqui o endereço de email de retorno. Não necessita de ser o mesmo de envio.';                                  
-$LNG['se_ftp']							= 'Configurações de FTP';
-$LNG['se_ftp_info']                     = 'Sistema de updates automaticos via FTP! Este sistema actuliza os ficheiros consuante o que ouver de novo, mas atenção se tiveres modificações essas iram ser removidas.';
-$LNG['se_ftp_host']                     = 'FTP Servidor (Exemplo: ftp://o jogo ou http://o jogo):';
-$LNG['se_ftp_user']                     = 'FTP Utilizador: (Utilizador do Host)';
-$LNG['se_ftp_pass']                     = 'FTP Password: (Password) do Host';
-$LNG['se_ftp_dir']                      = 'FTP Game path: (Onde está guardado o jogo)';
-$LNG['se_ftp_dir_info']                 = 'Aqui inseres o caminho para a tua pasta de jogo deverá começar com uma barra e acabar com uma barra!<br>Exemplo: /httpdocs/';
+$LNG['se_ftp'] = 'Configuração FTP';
+$LNG['se_ftp_info'] = 'O sistema se atualiza via FTP! Este sistema atualiza os arquivos do sistema, mas atenção - se você tiver modificações, elas serão removidas.';
+$LNG['se_ftp_host'] = 'Servidor FTP (Ex: ftp://servidor ou http://servidor):';
+$LNG['se_ftp_user'] = 'Usuário FTP: (usuário do host)';
+$LNG['se_ftp_pass'] = 'Senha FTP: (senha do host)';
+$LNG['se_ftp_dir'] = 'Caminho do jogo FTP: (onde o jogo está salvo)';
+$LNG['se_ftp_dir_info'] = 'Aqui insira o caminho para a pasta do seu jogo, deve começar com uma barra e terminar com uma barra!<br>Exemplo: /httpdocs/';
 $LNG['se_google']                       = 'Google Analítico - Configurações';
 $LNG['se_google_info']                  = 'Google Analitico é a solução para web sites que lhe permite adquirir conhecimentos valiosos sobre o tráfego do seu site e do impacto das suas estratégias de marketing. Graças ao poderoso, flexível e características user-friendly prog agora podes acessar aos teus dados em novas formas de analisar e mostrar. Com o Google Analitico podes projetar a tua publicidade segmentada, fortes campanhas de marketing e desenvolvimento de sites com altas taxas de conversão.';
 $LNG['se_google_active']                = 'Ativar/desativar?';
@@ -526,10 +526,10 @@ $LNG['se_buildlist']                    = 'Lista de Construcção';
 $LNG['se_timzone']                      = 'Fuso horário do Universo';
 $LNG['se_max_dm_missions']				= 'Máximo de missões paralelas de DM';
 $LNG['se_alliance_create_min_points']   = 'Número mínimo de pontos, para formar uma aliança';
-$LNG['se_disclaimerAddress']				= 'Endereço';
-$LNG['se_disclaimerPhone']				= 'Número de telefone';
-$LNG['se_disclaimerMail']				= 'Endereço de e-mail';
-$LNG['se_disclaimerNotice']				= 'Mais informações';
+$LNG['se_disclaimerAddress'] = 'Endereço';
+$LNG['se_disclaimerPhone'] = 'Número de telefone';
+$LNG['se_disclaimerMail'] = 'Endereço de e-mail';
+$LNG['se_disclaimerNotice'] = 'Mais informações';
 
 //###########################################################//
 
@@ -999,11 +999,11 @@ $LNG['po_add_moon']					= 'Adicionar lua';
 
 // Suporte
 
-$LNG['sp_admin_answer']                 = 'Resposta de %s a %s<br><br><font color="red">%s</font>';
-$LNG['sp_answer_message_title']         = 'Support Ticket #%d';
-$LNG['sp_answer_message']               = 'Tens uma resposta ao teu ticket numero: #%d!';
-$LNG['sp_admin_closed']                 = 'O %s fechou o Ticket a %s';
-$LNG['sp_admin_open']                   = 'O %s reabriu o Ticket a %s';
+$LNG['sp_admin_answer'] = 'Resposta de %s para %s<br><br><font color="red">%s</font>';
+$LNG['sp_answer_message_title'] = 'Ticket de Suporte #%d';
+$LNG['sp_answer_message'] = 'Você tem uma resposta ao seu ticket número: #%d!';
+$LNG['sp_admin_closed'] = '%s fechou o Ticket para %s';
+$LNG['sp_admin_open'] = '%s reabriu o Ticket para %s';
 
 
 // Editor Rápido
@@ -1268,34 +1268,34 @@ $LNG['ga_no_inactives']					= 'Apenas jogadores ATIVOS<br>Não será oferecido a
 
 // Old SupportTicket Keys
 
-$LNG['supp_header'] 						= 'Sistema de Suporte';
-$LNG['supp_header_g'] 						= 'Tickets fechado';
-$LNG['ticket_id'] 							= '#ID de Suporte';
-$LNG['subject'] 							= 'Assunto';
-$LNG['status'] 								= 'Estado';
-$LNG['ticket_posted'] 						= 'Ticket de';
-$LNG['ticket_new'] 							= 'Novo Ticket';
-$LNG['input_text']	 						= 'Descrição:';
-$LNG['answer_new'] 							= 'Deixar resposta:';
-$LNG['text'] 								= 'Detalhes';
-$LNG['message_a'] 							= 'Estado da mensagem:';
-$LNG['sendit_a'] 							= 'O envio da mensagem foi inserido.';
-$LNG['message_t'] 							= 'Estado dos Ticket:';
-$LNG['supp_send'] 							= 'Enviar';
-$LNG['sendit_t'] 							= 'O Ticket foi enviado.';
-$LNG['close_t'] 							= 'O Ticket foi fechado.';
-$LNG['sendit_error'] 						= 'Erro:';
-$LNG['sendit_error_msg'] 					= 'Esqueceste de inserir algo!';
-$LNG['supp_admin_system'] 					= 'Painel de Administração de Suporte';
-$LNG['close_ticket'] 						= 'Ticket Fechado';
-$LNG['open_ticket'] 						= 'Ticket Aberto';
-$LNG['player'] 								= 'Jogador';
-$LNG['supp_ticket_close']					= 'Ticket fechado';
-$LNG['supp_close'] 							= 'Fechado';
-$LNG['supp_open'] 							= 'Aberto';
-$LNG['supp_admin_answer'] 					= 'Resposta do Administrador';
-$LNG['supp_player_write'] 					= '%s escrito em %s';
-$LNG['supp_player_answer'] 					= 'Resposta de Jogador';
+$LNG['supp_header'] = 'Sistema de suporte';
+$LNG['supp_header_g'] = 'Tickets fechados';
+$LNG['ticket_id'] = 'ID de suporte';
+$LNG['subject'] = 'Assunto';
+$LNG['status'] = 'Status';
+$LNG['ticket_posted'] = 'Ticket de';
+$LNG['ticket_new'] = 'Novo Ticket';
+$LNG['input_text'] = 'Descrição:';
+$LNG['answer_new'] = 'Deixar resposta:';
+$LNG['text'] = 'Detalhes';
+$LNG['message_a'] = 'Status da mensagem:';
+$LNG['sendit_a'] = 'Envio de mensagem inserido.';
+$LNG['message_t'] = 'Status do Ticket:';
+$LNG['supp_send'] = 'Enviar';
+$LNG['sendit_t'] = 'O Ticket foi enviado.';
+$LNG['close_t'] = 'O Ticket foi fechado.';
+$LNG['sendit_error'] = 'Erro:';
+$LNG['sendit_error_msg'] = 'Esqueceu de inserir algo!';
+$LNG['supp_admin_system'] = 'Painel de administração de suporte';
+$LNG['close_ticket'] = 'Ticket fechado';
+$LNG['open_ticket'] = 'Abrir Ticket';
+$LNG['player'] = 'Jogador';
+$LNG['supp_ticket_close'] = 'Ticket encerrado';
+$LNG['supp_close'] = 'Fechado';
+$LNG['supp_open'] = 'Aberto';
+$LNG['supp_admin_answer'] = 'Resposta do administrador';
+$LNG['supp_player_write'] = '%s escreveu em %s';
+$LNG['supp_player_answer'] = 'Resposta do jogador';
 
 //Cronjobs
 $LNG['cronName_referral']		= 'Referral Bonus';
@@ -1421,11 +1421,11 @@ $LNG['admin_se_dm_energie'] = 'Atualizaçõ de Energia';
 $LNG['admin_se_dm_fleettime'] = 'Atualização da frota';
 $LNG['admin_se_cost'] = 'Custo (Pizzabits)';
 $LNG['admin_se_power'] = 'Poder (% bônus por nível)';
-$LNG['ml_deleted'] = 'Message deleted';
-$LNG['se_storage_producion_speed'] = 'Resource storage multiplicator';
-$LNG['se_messages'] = 'Messages';
-$LNG['se_message_delete_behavior'] = 'Message delete behavior';
-$LNG['se_message_delete_behavior_0'] = 'Delete messages directly';
-$LNG['se_message_delete_behavior_1'] = 'Delete messages after some time';
-$LNG['se_message_delete_days'] = 'Purge delete messages after x days.';
-$LNG['mu_botdetect_page'] = 'Bot Detection';
+$LNG['ml_deleted'] = 'Mensagem excluída';
+$LNG['se_storage_producion_speed'] = 'Multiplicador de armazenamento de recursos';
+$LNG['se_messages'] = 'Mensagens';
+$LNG['se_message_delete_behavior'] = 'Comportamento de exclusão de mensagens';
+$LNG['se_message_delete_behavior_0'] = 'Excluir mensagens diretamente';
+$LNG['se_message_delete_behavior_1'] = 'Excluir mensagens após algum tempo';
+$LNG['se_message_delete_days'] = 'Limpar mensagens excluídas após x dias.';
+$LNG['mu_botdetect_page'] = 'Detecção de Bots';

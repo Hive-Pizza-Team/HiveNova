@@ -151,4 +151,4 @@ $LNG['disclamerLabelMail']			= 'Email support:';
 $LNG['disclamerLabelNotice']		= 'Plus d\'informations';
 
 
-$LNG['loginHiveAccount'] = 'Hive Account';
+$LNG['loginHiveAccount'] = 'Compte Hive';
