@@ -41,7 +41,7 @@
 	{/foreach}
 
 	{if $Queue|count > 1}
-	<div class="bulida">
+	<div class="queue-total">
 		{$LNG.bd_queue_total}: <span id="total-queue-time"></span>
 	</div>
 	{/if}
