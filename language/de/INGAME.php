@@ -1211,4 +1211,15 @@ $LNG['lo_continue']						= 'Klicken Sie hier, um nicht zu warten';
 
 
 // Translated into German by Jan . All rights reversed (C) 2011
-
+$LNG['type_mission_16'] = 'Handel';
+$LNG['type_mission_17'] = 'Übertrag';
+$LNG['gl_trade_space'] = 'Handelszone';
+$LNG['fl_transfer_alert_message'] = 'Warnung! Die Flottenherrschaft wird auf den Zielspieler übertragen!';
+$LNG['fl_system_places'] = 'Spezielle Orte';
+$LNG['fl_no_noresource_exchange'] = 'Keine Rohstoffe im Tauschfeld';
+$LNG['fl_market_type'] = 'Markttyp';
+$LNG['fl_mt_fleet'] = 'Flottenmarkt';
+$LNG['fl_mt_resources'] = 'Rohstoffmarkt';
+$LNG['fl_stronger_techs'] = 'Dein Angriff/Verteidigung/Schild ist zu niedrig.';
+$LNG['market_fleet'] = 'Flotte';
+$LNG['market_buyable_no_tech'] = 'Zu schwach';

@@ -1,7 +1,16 @@
 name: CI
-on: [push]
+on:
+  push:
+  pull_request:
 
 jobs:
+  language-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate language files
+        run: php .github/scripts/check-language-files.php
+
   test:
     runs-on: ubuntu-latest
     steps:
