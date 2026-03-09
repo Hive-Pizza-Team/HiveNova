@@ -223,3 +223,7 @@ $LNG['type_planet_3']   					= 'Lune';
 
 $LNG['sys_transfer_mess_owner'] = $LNG['sys_tran_mess_owner'];
 $LNG['sys_transfer_mess_user'] = $LNG['sys_tran_mess_user'];
+$LNG['sys_trade_mess_back'] = 'L\'une de vos flottes commerciales retourne vers la planète %s %s sans succès.';
+$LNG['sys_lost'] = 'Pertes';
+$LNG['type_mission_16'] = 'Commerce';
+$LNG['type_mission_17'] = 'Transfert';

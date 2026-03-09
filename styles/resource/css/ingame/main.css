@@ -45,7 +45,9 @@ logo .fixed {
 
 logo a img {
     width: 180px;
-    height: 98px;
+    height: auto;
+    max-height: 100px;
+    object-fit: contain;
 }
 
 header {
