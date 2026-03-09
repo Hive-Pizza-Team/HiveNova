@@ -239,3 +239,13 @@ $LNG['type_planet_3']  					= 'Mond';
 
 $LNG['sys_transfer_mess_owner'] = $LNG['sys_tran_mess_owner'];
 $LNG['sys_transfer_mess_user'] = $LNG['sys_tran_mess_user'];
+$LNG['sys_expe_found_ress_logbook_2'] = 'Eintrag aus dem Offizierstagebuch: Hätten wir doch nur noch ein paar Frachter gehabt! Jetzt müssen wir viele Rohstoffe hier zurücklassen.';
+$LNG['sys_expe_found_ress_logbook_4'] = 'Eintrag aus dem Offizierstagebuch: Selbst wenn wir die Kantine und alle Aufenthaltsräume in Lagerhäuser umgewandelt hätten, konnten wir nicht alle gefundenen Rohstoffe transportieren.';
+$LNG['sys_expe_depleted_min_2'] = 'Eintrag aus dem Offizierstagebuch: Wir fanden Trümmer antiker Raumschiffe. Wir sind nicht die ersten hier.';
+$LNG['sys_expe_depleted_min_3'] = 'Offizierstagebuch-Eintrag: Wir hätten fast mit einer anderen Expeditionsflotte kollidiert. Ich hätte nicht gedacht, dass es hier noch andere gibt.';
+$LNG['sys_expe_depleted_med_2'] = 'Eintrag aus dem Offizierstagebuch: Wir haben freundlichen Funkverkehr mit anderen Expeditionen in diesem Sektor aufgebaut.';
+$LNG['sys_expe_depleted_med_3'] = 'Eintrag aus dem Offizierstagebuch: Wir feierten die Vollendung der Expedition mit der Besatzung einer anderen Flotte, die in denselben Sektor unterwegs war. Sie hatten nichts Neues zu berichten.';
+$LNG['sys_expe_depleted_max_2'] = 'Eintrag aus dem Offizierstagebuch: Wenn das so weitergeht, müssen wir Navigationsbeunen platzieren, um den ganzen Verkehr zu bewältigen.';
+$LNG['sys_expe_depleted_max_3'] = 'Offizierstagebuch-Eintrag: Vielleicht wäre es sinnvoller, hier einen Souvenirshop zu eröffnen als noch eine Expedition zu schicken.';
+$LNG['type_mission_16'] = 'Handel';
+$LNG['type_mission_17'] = 'Übertrag';

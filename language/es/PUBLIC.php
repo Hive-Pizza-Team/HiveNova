@@ -60,7 +60,7 @@ $LNG['loginButton']					= 'Iniciar sesión';
 $LNG['loginInfo']					= 'Al iniciar sesión acepto las %s.';
 $LNG['loginWelcome']				= 'Bienvenido a %s';
 $LNG['loginServerDesc']				= '%s es un juego de estrategia espacial en tiempo real.';
-$LNG['loginHiveAccount']			= 'Cuenta Hive';
+$LNG['loginHiveAccount'] = 'Cuenta Hive';
 
 // Register
 $LNG['registerFacebookAccount']		= 'Cuenta Facebook';

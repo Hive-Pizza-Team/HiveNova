@@ -415,13 +415,13 @@ $LNG['se_smtp_user']					= 'SMTP Username:';
 $LNG['se_smtp_pass']					= 'SMTP Passwort:';
 $LNG['se_smtp_sendmail']				= 'Adres zwrotny:';
 $LNG['se_smtp_sendmail_info']			= 'Adres zwrotny powinien być inny niż adres użyty podczas instalacji';
-$LNG['se_ftp']							= 'Konfiguracja FTP';
-$LNG['se_ftp_info']						= '2Moons zawiera system aktualizacji po ftp, do tego celu musisz podać dane serwera ftp.<br>Jeśli nie będziesz go używał, zostaw to pole puste.';
-$LNG['se_ftp_host']						= 'FTP Host:';
-$LNG['se_ftp_user']						= 'FTP User:';
-$LNG['se_ftp_pass']						= 'FTP Passwort:';
-$LNG['se_ftp_dir']						= 'FTP ścieżka do plików serwera';
-$LNG['se_ftp_dir_info']					= 'Tutaj podajesz ścieżkę do plików serwera bez końcowego slasha, czyli <br>Przykład: /httpdocs';
+$LNG['se_ftp'] = 'Konfiguracja FTP';
+$LNG['se_ftp_info'] = 'System aktualizuje się przez FTP! Ten system aktualizuje pliki, ale uwaga - jeśli masz modyfikacje, zostaną usunięte.';
+$LNG['se_ftp_host'] = 'Serwer FTP (np. ftp://serwer lub http://serwer):';
+$LNG['se_ftp_user'] = 'Użytkownik FTP: (użytkownik hosta)';
+$LNG['se_ftp_pass'] = 'Hasło FTP: (hasło hosta)';
+$LNG['se_ftp_dir'] = 'Ścieżka gry FTP: (gdzie zapisana jest gra)';
+$LNG['se_ftp_dir_info'] = 'Tutaj wpisz ścieżkę do folderu gry, powinna zaczynać się od ukośnika i kończyć ukośnikiem!<br>Przykład: /httpdocs/';
 $LNG['se_google']						= 'Google Analytics - Konfiguracja';
 $LNG['se_google_info']					= 'Służy do analizy ruchu na twój serwer, daje wgląd w statystyki aktywności i skuteczności promocji w Google.';
 $LNG['se_google_active']				= 'Aktywuj?';
@@ -512,10 +512,10 @@ $LNG['se_silo_factor_info']				= 'Przelicznik wielkości silosów';
 $LNG['se_timzone']						= 'Strefa czasowa universum';
 $LNG['se_max_dm_missions']				= 'Max. Czarna materia podczas misji szukaj Czarnej materii';
 $LNG['se_alliance_create_min_points']   = 'Ilość punktów potrzebna do założenia sojuszu';
-$LNG['se_disclaimerAddress']				= 'Adres';
-$LNG['se_disclaimerPhone']				= 'Telefon';
-$LNG['se_disclaimerMail']				= 'e-mail Adres';
-$LNG['se_disclaimerNotice']				= 'Więcej';
+$LNG['se_disclaimerAddress'] = 'Adres';
+$LNG['se_disclaimerPhone'] = 'Numer telefonu';
+$LNG['se_disclaimerMail'] = 'Adres e-mail';
+$LNG['se_disclaimerNotice'] = 'Więcej informacji';
 //###########################################################//
 
 
@@ -624,7 +624,7 @@ $LNG['mu_vaild_users']				= 'Aktywni użytkownicy';
 $LNG['mu_news']						= 'Nowości'; 
 $LNG['mu_multiip_page']				= 'MultiIP'; 
 
-$LNG['mu_botdetect_page'] = 'Wykrywanie Bot�w';$LNG['mu_clear_cache']				= 'Usuń cache'; 
+$LNG['mu_botdetect_page'] = 'Wykrywanie Botów';
 $LNG['mu_vertify']					= 'Sprawdź pliki gry!';
 $LNG['mu_cronjob']					= 'Cronjobs'; 
 $LNG['mu_logs']						= 'Admin-Log';
@@ -991,11 +991,11 @@ $LNG['po_add_moon']					= 'Dodaj księżyc';
 
 // Support
 
-$LNG['sp_admin_answer']				= '%s (Admin) odpowiedział o %s<br><br><font color="red">%s</font>';
-$LNG['sp_answer_message_title']		= 'Wiadomość pomocy technicznej #%d';
-$LNG['sp_answer_message']			= 'Na twoją wiadomość #%d jest odpowiedź!';
-$LNG['sp_admin_closed']				= '%s (Admin) wiadomość o %s zamknął!';
-$LNG['sp_admin_open']				= '%s (Admin) wiadomość o %s otworzył!';
+$LNG['sp_admin_answer'] = 'Odpowiedź %s do %s<br><br><font color="red">%s</font>';
+$LNG['sp_answer_message_title'] = 'Zgłoszenie wsparcia #%d';
+$LNG['sp_answer_message'] = 'Masz odpowiedź na swoje zgłoszenie numer: #%d!';
+$LNG['sp_admin_closed'] = '%s zamknął(a) zgłoszenie do %s';
+$LNG['sp_admin_open'] = '%s ponownie otworzył(a) zgłoszenie do %s';
 
 
 // QuickEditor
@@ -1318,35 +1318,35 @@ $LNG['ga_homecoordinates']				= 'Tylko koordynaty planety domowej';
 $LNG['ga_no_inactives']					= 'Wyklucz nie aktywnych';
 
 // Old SupportTicket Keys
-$LNG['supp_header'] 						= 'Pomoc techniczna';
-$LNG['supp_header_g'] 						= 'Zamknięte wiadomości';
+$LNG['supp_header'] = 'System wsparcia';
+$LNG['supp_header_g'] = 'Zamknięte zgłoszenia';
 
-$LNG['ticket_id'] 							= '#Ticket-ID';
-$LNG['subject'] 							= 'Temat';
-$LNG['status'] 								= 'Status';
-$LNG['ticket_posted'] 						= 'Wiadomość od';
-$LNG['ticket_new'] 							= 'Utwórz nową wiadomość';
-$LNG['input_text']	 						= 'Opis:';
-$LNG['answer_new'] 							= 'Odpowiedz:';
-$LNG['text'] 								= 'Szczegóły';
-$LNG['message_a'] 							= 'Status wiadomości:';
-$LNG['sendit_a'] 							= 'Wiadomość dodano.';
-$LNG['message_t'] 							= 'Status wiadomości:';
-$LNG['supp_send'] 							= 'Wyślij';
-$LNG['sendit_t'] 							= 'Wiadomość wysłana.';
-$LNG['close_t'] 							= 'Wiadomość zamknięta.';
-$LNG['sendit_error'] 						= 'Błąd:';
-$LNG['sendit_error_msg'] 					= 'Zapomniałeś czegoś dodać!';
-$LNG['supp_admin_system'] 					= 'Pomoc techniczna - Adminpanel';
-$LNG['close_ticket'] 						= 'Zamknij wiadomość';
-$LNG['open_ticket'] 						= 'Otwórz wiadomość';
-$LNG['player'] 								= 'Nazwa gracza';
-$LNG['supp_ticket_close']					= 'Wiadomość zamknięta';
-$LNG['supp_close'] 							= 'Zamknięte';
-$LNG['supp_open'] 							= 'Otwórz';
-$LNG['supp_admin_answer'] 					= 'Admin- Odpowiedź';
-$LNG['supp_player_write'] 					= '%s napisał o %s';
-$LNG['supp_player_answer'] 					= 'Odpowiedź gracza';
+$LNG['ticket_id'] = 'ID wsparcia';
+$LNG['subject'] = 'Temat';
+$LNG['status'] = 'Status';
+$LNG['ticket_posted'] = 'Zgłoszenie od';
+$LNG['ticket_new'] = 'Nowe zgłoszenie';
+$LNG['input_text'] = 'Opis:';
+$LNG['answer_new'] = 'Zostaw odpowiedź:';
+$LNG['text'] = 'Szczegóły';
+$LNG['message_a'] = 'Status wiadomości:';
+$LNG['sendit_a'] = 'Wiadomość została wysłana.';
+$LNG['message_t'] = 'Status zgłoszenia:';
+$LNG['supp_send'] = 'Wyślij';
+$LNG['sendit_t'] = 'Zgłoszenie zostało wysłane.';
+$LNG['close_t'] = 'Zgłoszenie zostało zamknięte.';
+$LNG['sendit_error'] = 'Błąd:';
+$LNG['sendit_error_msg'] = 'Zapomniałeś coś wpisać!';
+$LNG['supp_admin_system'] = 'Panel administracyjny wsparcia';
+$LNG['close_ticket'] = 'Zamknięte zgłoszenie';
+$LNG['open_ticket'] = 'Otwórz zgłoszenie';
+$LNG['player'] = 'Gracz';
+$LNG['supp_ticket_close'] = 'Zgłoszenie zamknięte';
+$LNG['supp_close'] = 'Zamknięte';
+$LNG['supp_open'] = 'Otwarte';
+$LNG['supp_admin_answer'] = 'Odpowiedź administratora';
+$LNG['supp_player_write'] = '%s napisał(a) %s';
+$LNG['supp_player_answer'] = 'Odpowiedź gracza';
 
 // SQL-Dumper
 
@@ -1427,3 +1427,12 @@ $LNG['admin_se_dm_energie'] = 'Uaktualnienie Energetyczne';
 $LNG['admin_se_dm_fleettime'] = 'Uaktualnienie floty';
 $LNG['admin_se_cost'] = 'Cena (Pizzabits)';
 $LNG['admin_se_power'] = 'Siła (% premia po poziomie)';
+$LNG['ml_deleted'] = 'Wiadomość usunięta';
+$LNG['se_storage_producion_speed'] = 'Mnożnik magazynu zasobów';
+$LNG['se_messages'] = 'Wiadomości';
+$LNG['se_message_delete_behavior'] = 'Zachowanie przy usuwaniu wiadomości';
+$LNG['se_message_delete_behavior_0'] = 'Usuń wiadomości bezpośrednio';
+$LNG['se_message_delete_behavior_1'] = 'Usuń wiadomości po pewnym czasie';
+$LNG['se_message_delete_days'] = 'Wyczyść usunięte wiadomości po x dniach.';
+$LNG['qe_name'] = 'Name';
+$LNG['mu_clear_cache'] = 'Wyczyść pamięć podręczną';

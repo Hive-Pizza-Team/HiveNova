@@ -363,6 +363,97 @@ div#disclamer a {
 	background-color:#212428;
 }
 
+/* Messages Page */
+.msg-loading {
+	display: none;
+}
+
+.msg-cat-cell {
+	word-wrap: break-word;
+	padding: 5px 8px !important;
+}
+
+.msg-cat-link {
+	font-weight: 700;
+}
+
+.msg-cat-link:hover {
+	text-decoration: underline;
+	color: #ffd600 !important;
+}
+
+.msg-cat-counts {
+	font-size: 11px;
+	opacity: 0.75;
+}
+
+.msg-table {
+	table-layout: fixed;
+}
+
+.msg-action-bar {
+	text-align: left !important;
+	padding: 5px 8px !important;
+}
+
+.msg-action-bar select {
+	margin-right: 6px;
+}
+
+.msg-col-header td {
+	font-weight: 700;
+	background: rgba(30, 42, 60, 0.9) !important;
+	border-bottom: 1px solid #333;
+}
+
+.msg-action-col {
+	width: 40px;
+	text-align: center !important;
+}
+
+.msg-date-col {
+	width: 130px;
+	white-space: nowrap;
+}
+
+.msg-from-col {
+	width: 160px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.msg-subject-col {
+	text-align: left !important;
+}
+
+.msg-body-cell {
+	text-align: left !important;
+	padding: 6px 10px !important;
+	word-break: break-word;
+}
+
+.msg-pagination-row td {
+	background: rgba(20, 25, 35, 0.6) !important;
+	padding: 4px 8px !important;
+}
+
+.msg-icon-btn {
+	margin-left: 8px;
+	opacity: 0.5;
+	transition: opacity 0.15s, color 0.15s;
+	vertical-align: middle;
+}
+
+.msg-icon-btn:hover {
+	opacity: 1;
+	color: #ffd600 !important;
+}
+
+.msg-delete-btn:hover {
+	color: #ff4a4a !important;
+}
+
 a {
 	text-decoration:none
 }

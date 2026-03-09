@@ -174,7 +174,7 @@ $LNG['sys_irak_def'] 					  	= '%d twoich rakiet zostało zestrzelonych.';
 $LNG['sys_irak_mess']						= 'Międzyplanetarne rakiety  (%d) z %s na planetę %s <br><br>';
 $LNG['sys_gain'] 				  			= 'Zysk';
 $LNG['sys_fleet_won'] 						= 'Jedna z twoich flot powróciła z ataku na %s %s. Zdobyłeś %s %s, %s %s i %s %s ';
-$LNG['sys_lost']							= 'Straty';
+$LNG['sys_lost'] = 'Straty';
 $LNG['sys_debris'] 							= 'Wielkość pola zniszczeń';
 $LNG['sys_destruc_title']       		   	= 'Następujące floty z misją zniszcz księżyc:';
 $LNG['sys_mess_destruc_report']  		  	= 'Raport: Zniszczenie księżyca';
@@ -218,3 +218,24 @@ $LNG['sys_transfer_mess_user'] = $LNG['sys_tran_mess_user'];
 
 // Translated into Polish by Sirgomo . All rights reversed (C) 2012
 // Edited by TheRavikin. All rights resteemed (C) 2018
+$LNG['sys_expe_found_ress_logbook_1'] = 'Wpis z dziennika pierwszego oficera: Użyliśmy całego wolnego miejsca, ale wciąż nie mogliśmy zabrać wszystkich znalezionych zasobów.';
+$LNG['sys_expe_found_ress_logbook_2'] = 'Wpis z dziennika pierwszego oficera: Gdybyśmy tylko mieli kilka statków transportowych więcej! Teraz będziemy musieli zostawić wiele zasobów.';
+$LNG['sys_expe_found_ress_logbook_3'] = 'Wpis z dziennika pierwszego oficera: Wyrzuciliśmy już wszystko, czego nie potrzebowaliśmy, ale wciąż nie możemy zabrać wszystkich znalezionych zasobów.';
+$LNG['sys_expe_found_ress_logbook_4'] = 'Wpis z dziennika pierwszego oficera: Nawet gdy zamieniliśmy stołówkę i wszystkie sale wypoczynkowe w magazyny, wciąż nie możemy transportować wszystkich znalezionych zasobów.';
+$LNG['sys_expe_found_ships_logbook_1'] = 'Wpis z dziennika oficera maszynowego: Gdybyśmy przywieźli więcej statków, łatwo byłoby zabrać kilka z tych pięknych maszyn!';
+$LNG['sys_expe_found_ships_logbook_2'] = 'Wpis z dziennika oficera maszynowego: Niestety nie mieliśmy pojemności, aby przywieźć wszystkie odkryte statki.';
+$LNG['sys_expe_found_ships_logbook_3'] = 'Wpis z dziennika oficera maszynowego: Niestety nie mamy wystarczającej pojemności, aby przywieźć wszystkie znalezione statki.';
+$LNG['sys_expe_depleted_not_1'] = 'Wpis z dziennika oficera łączności: Wygląda na to, że ta część wszechświata nie była jeszcze odkryta.';
+$LNG['sys_expe_depleted_not_2'] = 'Wpis z dziennika oficera łączności: Wspaniale jest być pierwszymi, którzy podróżują przez niezbadany sektor.';
+$LNG['sys_expe_depleted_min_1'] = 'Wpis z dziennika oficera łączności: Wygląda na to, że żaden człowiek nie był wcześniej w tej części galaktyki.';
+$LNG['sys_expe_depleted_min_2'] = 'Wpis z dziennika oficera łączności: Znaleźliśmy szczątki starożytnych statków kosmicznych. Nie jesteśmy pierwsi tutaj.';
+$LNG['sys_expe_depleted_min_3'] = 'Wpis z dziennika oficera łączności: Prawie zderzyliśmy się z inną flotą ekspedycyjną. Nie myślałem, że będą tu inni.';
+$LNG['sys_expe_depleted_med_1'] = 'Wpis z dziennika oficera łączności: Znaleźliśmy dowody wskazujące na obecność wielu flot ekspedycyjnych w tym obszarze. Wracamy do domu.';
+$LNG['sys_expe_depleted_med_2'] = 'Wpis z dziennika oficera łączności: Nawiązaliśmy przyjazny kontakt radiowy z innymi ekspedycjami w tym sektorze.';
+$LNG['sys_expe_depleted_med_3'] = 'Wpis z dziennika oficera łączności: Świętowaliśmy wypełnienie ekspedycji z załogą innej floty, która podróżowała w tym samym sektorze. Nie mieli nic nowego do zgłoszenia.';
+$LNG['sys_expe_depleted_max_1'] = 'Wpis z dziennika oficera łączności: Gdybyśmy poczuli się zagrożeni, moglibyśmy wrócić z wszystkimi innymi ekspedycjami latającymi tutaj.';
+$LNG['sys_expe_depleted_max_2'] = 'Wpis z dziennika oficera łączności: Jeśli tak dalej pójdzie, będziemy musieli umieścić boje nawigacyjne, aby obsłużyć cały ten ruch.';
+$LNG['sys_expe_depleted_max_3'] = 'Wpis z dziennika oficera łączności: Może bardziej przydatne byłoby otwarcie sklepu z pamiątkami tutaj niż wysyłanie kolejnej ekspedycji.';
+$LNG['sys_trade_mess_back'] = 'Jedna z twoich flot handlowych wraca na planetę %s %s bez powodzenia.';
+$LNG['type_mission_16'] = 'Handel';
+$LNG['type_mission_17'] = 'Transfer';
