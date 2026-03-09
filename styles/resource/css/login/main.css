@@ -710,6 +710,19 @@ footer {
     text-align: left;
 }
 
+.error-message {
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.error-message p {
+    margin: 0 0 16px;
+}
+
+.error-message p:last-child {
+    margin-bottom: 0;
+}
+
 .table519 {
     /* min-width:519px !important; */
     /* width:519px !important */
