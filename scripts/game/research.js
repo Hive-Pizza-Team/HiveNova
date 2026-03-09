@@ -30,10 +30,13 @@ function Buildlist() {
 		}
 	});
 
-	var lastTimer = $('.timer:last');
-	if (lastTimer.length) {
-		var totalEndTs = lastTimer.data('time');
-		var totalRemaining = Math.floor(totalEndTs - serverTime.getTime() / 1000);
+	var timers = $('.timer');
+	if (timers.length > 1) {
+		var firstEndTs = $(timers[0]).data('time');
+		var lastEndTs  = $(timers[timers.length - 1]).data('time');
+		var totalInitial  = resttime + (lastEndTs - firstEndTs);
+		var elapsed       = Math.round((serverTime.getTime() - startTime) / 1000);
+		var totalRemaining = Math.max(0, totalInitial - elapsed);
 		$('#total-queue-time').text(totalRemaining > 0 ? GetRestTimeFormat(totalRemaining) : Ready);
 	}
 }
