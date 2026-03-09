@@ -29,6 +29,13 @@ function Buildlist() {
 			$(this).text(GetRestTimeFormat(remaining));
 		}
 	});
+
+	var lastTimer = $('.timer:last');
+	if (lastTimer.length) {
+		var totalEndTs = lastTimer.data('time');
+		var totalRemaining = Math.floor(totalEndTs - serverTime.getTime() / 1000);
+		$('#total-queue-time').text(totalRemaining > 0 ? GetRestTimeFormat(totalRemaining) : Ready);
+	}
 }
 
 $(document).ready(function() {

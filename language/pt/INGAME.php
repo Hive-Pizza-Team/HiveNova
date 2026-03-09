@@ -377,6 +377,7 @@ $LNG['fl_own_planet_error']					= 'Error! Again select the planet from which you
 $LNG['bd_dismantle']						= 'Demolir';
 $LNG['bd_interrupt']						= 'Cancelar';
 $LNG['bd_cancel']							= 'Cancelar';
+$LNG['bd_queue_total']							= 'Fila limpa em';
 $LNG['bd_working']							= 'Ocupado';
 $LNG['bd_build']							= 'Construir';
 $LNG['bd_build_next_level']					= 'Construir para o proximo nível ';

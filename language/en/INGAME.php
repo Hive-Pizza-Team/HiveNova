@@ -400,6 +400,7 @@ $LNG['fl_stronger_techs'] = 'Your attack/defensive/shield are too low.';
 $LNG['bd_dismantle']						= 'Demolish';
 $LNG['bd_interrupt']						= 'Cancel';
 $LNG['bd_cancel']							= 'Cancel';
+$LNG['bd_queue_total']						= 'Queue clears in';
 $LNG['bd_working']							= 'Busy';
 $LNG['bd_build']							= 'Build';
 $LNG['bd_build_next_level']					= 'Upgrade ';
