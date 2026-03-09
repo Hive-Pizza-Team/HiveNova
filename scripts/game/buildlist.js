@@ -30,8 +30,8 @@ function Buildlist() {
 		}
 	});
 
-	var timers = $('.timer');
-	if (timers.length > 1) {
+	if ($('#total-queue-time').length) {
+		var timers = $('.timer');
 		var firstEndTs = $(timers[0]).data('time');
 		var lastEndTs  = $(timers[timers.length - 1]).data('time');
 		var totalInitial  = resttime + (lastEndTs - firstEndTs);
