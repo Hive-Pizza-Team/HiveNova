@@ -74,8 +74,7 @@ class PushingDetectionCronjob implements CronjobTask
 			}
 
 			$text = "Suspicious attack patterns have been detected in this universe:\n"
-				. implode("\n", $lines) . "\n"
-				. "This is against the rules. Offending accounts may be banned.";
+				. implode("\n", $lines) . "\n";
 
 			$playerSql = 'SELECT id FROM %%USERS%% WHERE universe = :universe AND authlevel = :authlevel;';
 			$players   = Database::get()->select($playerSql, array(
