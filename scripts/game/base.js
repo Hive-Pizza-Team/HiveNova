@@ -27,6 +27,10 @@ function NumberGetHumanReadable(value, dec) {
 	{
 		value	= removeE(Math.floor(value));
 	}
+	var pref = (typeof numberFormat !== 'undefined') ? numberFormat : 'auto';
+	if (pref !== 'eu') {
+		return new Intl.NumberFormat(undefined, { maximumFractionDigits: dec, minimumFractionDigits: dec }).format(parseFloat(value));
+	}
 	return number_format(value, dec);
 }
 
@@ -65,6 +69,28 @@ function removeE(Number) {
 	else 
 		return parseFloat(Number).toPrecision(e + 1);
 }
+
+(function() {
+    function localizeNumbers() {
+        var pref = (typeof numberFormat !== 'undefined') ? numberFormat : 'auto';
+        if (pref === 'eu') return;
+
+        var formatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 20 });
+
+        $('.ln').each(function() {
+            var raw = $(this).data('n');
+            if (raw !== undefined && raw !== '') {
+                var num = parseFloat(raw);
+                if (!isNaN(num)) {
+                    $(this).text(formatter.format(num));
+                }
+            }
+        });
+    }
+
+    $(document).ready(localizeNumbers);
+    $(document).ajaxComplete(localizeNumbers);
+})();
 
 function getFormatedDate(timestamp, format) {
 	var currTime = new Date();

@@ -906,6 +906,9 @@ $LNG['op_dst_mode_sel'][1]                = 'Да';
 $LNG['op_dst_mode_sel'][2]                = 'Автоматически';
 $LNG['op_timezone']                       = 'Часовой пояс';
 $LNG['op_block_pm']                       = 'Отключить получение сообщений от игроков';
+$LNG['number_format_label']               = 'Формат чисел';
+$LNG['number_format_auto']                = 'По умолчанию браузера (напр. 1 234 567)';
+$LNG['number_format_eu']                  = 'Европейский (напр. 1.234.567)';
 
 // Заблокированные
 $LNG['bn_no_players_banned']              = 'Нет заблокированных игроков';

@@ -957,6 +957,9 @@ $LNG['op_dst_mode_sel'][1]					= 'No';
 $LNG['op_dst_mode_sel'][2]					= 'Automatic';
 $LNG['op_timezone']							= 'Time zone';
 $LNG['op_block_pm']							= 'Block private messages';
+$LNG['number_format_label']					= 'Number format';
+$LNG['number_format_auto']					= 'Browser default (e.g. 1,234,567)';
+$LNG['number_format_eu']					= 'European (e.g. 1.234.567)';
 
 //----------------------------------------------------------------------------//
 // Lista de Jogadores Banidos

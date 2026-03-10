@@ -77,6 +77,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'galaxyMissle' 		=> $USER['settings_mis'],
 				'galaxyMessage' 	=> $USER['settings_wri'],
 				'blockPM' 			=> $USER['settings_blockPM'],
+				'numberFormat'		=> $USER['number_format'] ?? 'auto',
 				'userid'		 	=> $USER['id'],
 				'ref_active'		=> Config::get()->ref_active,
 				'SELF_URL'          => PROTOCOL.HTTP_HOST.HTTP_ROOT
@@ -445,7 +446,8 @@ class ShowSettingsPage extends AbstractGamePage
 		authattack				= :adminProtection,
 		lang					= :language,
 		hof						= :queueMessages,
-		spyMessagesMode			= :spyMessagesMode
+		spyMessagesMode			= :spyMessagesMode,
+		number_format			= :numberFormat
 		WHERE id = :userID;";
 		$db->update($sql, array(
 			':theme'			=> $theme,
@@ -463,6 +465,7 @@ class ShowSettingsPage extends AbstractGamePage
 			':language'			=> $language,
 			':queueMessages'	=> $queueMessages,
 			':spyMessagesMode'	=> $spyMessagesMode,
+			':numberFormat'		=> in_array(HTTP::_GP('number_format', ''), ['auto', 'eu']) ? HTTP::_GP('number_format', '') : 'auto',
 			':userID'			=> $USER['id']
 		));
 		

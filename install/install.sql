@@ -832,6 +832,7 @@ CREATE TABLE `%PREFIX%users` (
   `banaday` int(11) NOT NULL DEFAULT '0',
   `hof` tinyint(1) NOT NULL DEFAULT '1',
   `spyMessagesMode` tinyint(1) NOT NULL DEFAULT '0',
+  `number_format` varchar(4) NOT NULL DEFAULT 'auto',
   `wons` int(11) unsigned NOT NULL DEFAULT '0',
   `loos` int(11) unsigned NOT NULL DEFAULT '0',
   `draws` int(11) unsigned NOT NULL DEFAULT '0',
