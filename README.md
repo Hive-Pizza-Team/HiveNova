@@ -14,48 +14,102 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 
 ![badge_powered-by-hive_dark](https://github.com/user-attachments/assets/803e396c-f165-40de-936c-03dd624153ad)
 
+## Tech Stack
+
+- **PHP 8.3**, **Smarty 4.5** templates, **MySQL** (utf8mb4 charset), **PDO**
+- Hive blockchain integration via [`mahdiyari/hive-php`](https://github.com/mahdiyari/hive-php)
+- **PHPMailer**, **Google reCAPTCHA**, **Parsedown**
+- Testing: **PHPUnit 10.5** (`./vendor/bin/phpunit`)
+
+## Architecture Overview
+
+**Entry points** — each bootstraps via `includes/common.php`:
+
+| File | MODE constant | Purpose |
+|------|--------------|---------|
+| `index.php` | `LOGIN` | Login, registration, landing |
+| `game.php` | `INGAME` | All in-game pages |
+| `admin.php` | `ADMIN` | Administration panel |
+| `cronjob.php` | `CRON` | Background cron jobs |
+
+**Page routing** — pages are loaded dynamically:
+- Game pages: `includes/pages/game/Show{Name}Page.class.php`
+- Admin pages: `includes/pages/adm/{Name}.php`
+
+**Templates** — Smarty engine; source templates in `styles/templates/`, compiled cache in `cache/`.
+Four themes: `hive` (default), `nova`, `gow`, `EpicBlueXIII`.
+
+**Database** — `Database` class (PDO wrapper). Table name constants defined in `includes/dbtables.php`.
+
+**Authority levels**: `AUTH_USR=0`, `AUTH_MOD=1`, `AUTH_OPS=2`, `AUTH_ADM=3`
+
+**Configuration**:
+- `includes/constants.php` — 240+ game constants
+- `includes/config.php` — DB credentials; created by the web installer, not in git
+
+**Cron job system** — classes in `includes/classes/cronjob/`, one class per job, implementing `CronjobTask`. Jobs are registered in the `uni1_cronjobs` DB table.
+
 ## Repository Structure
 
-- [cache] - temporary cached server .tpl webpages
-- [chat] - AJAX ingame client-side chat
-- [includes]
-  - game engine
-  - configuration
-  - administration
-  - database scheme
+- `cache/` — temporary compiled Smarty templates
+- `chat/` — AJAX in-game client-side chat
+- `includes/`
+  - game engine, configuration, administration
+  - database schema (`dbtables.php`, `constants.php`)
   - external libraries
-  - webpages functionality
-- [install]
-  - first installation
-  - database creation
-- [language] - translations: DE, EN, ES, FR, PL, PT, RU, TR
-- [licenses] - open source license schemes
-- [scripts] - client-side web browser .js scripts
-- [styles] 
-  - webpages .css templates
-  - webpages .tpl templates
-  - fonts
-  - images
-- [tests]
+  - page controllers (`includes/pages/`)
+  - cron job classes (`includes/classes/cronjob/`)
+- `install/` — web installer, DB creation, migration SQL files
+- `language/` — translations: DE, EN, ES, FR, PL, PT, RU, TR
+- `licenses/` — open-source license files
+- `scripts/` — client-side JavaScript
+- `styles/` — CSS, Smarty `.tpl` templates, fonts, images
+- `tests/` — PHPUnit test suite
 
+## Key Development Patterns
 
-## Roadmap
+**Add a game page:**
+Create `includes/pages/game/Show{Name}Page.class.php` extending `AbstractPage`.
 
-* Hive Keychain
-* Hive-Engine
-* Discord
-  
+**Add an admin page:**
+Create `includes/pages/adm/{Name}.php`.
 
-## Local installation
+**Add a cron job:**
+Create a class in `includes/classes/cronjob/` implementing `CronjobTask`, then register it in the `uni1_cronjobs` DB table.
+
+**DB migrations:**
+Add `install/migrations/migration_N.sql` and bump `install/VERSION`.
+
+## Local Installation
 
 - Clone the repo
-- Install components: `apt install apache2 php7.3 php7.3-gd php7.3-fpm php7.3-mysql php7.3-curl php-ds libapache2-mod mysql-server`
+- Install components: `apt install apache2 php8.3 php8.3-gd php8.3-fpm php8.3-mysql php8.3-curl php-ds libapache2-mod mysql-server`
+- Install PHP dependencies: `composer install`
 - Set php.ini config value: `pdo_mysql.default_charset = utf8mb4`
 - Setup mysql: `create user USER identified by PASSWORD; create database DB; grant all privileges on DB.* to USER;`
 - Set write privileges to dirs: `cache/`, `includes/`
 - Run wizard: `127.0.0.1/install/install.php`
 
-### Database migrations
+For quick local development without Apache/NGINX, you can use PHP's built-in server:
+
+```bash
+php -S localhost:8000
+```
+
+### Testing
+
+```bash
+./vendor/bin/phpunit
+```
+
+### CI
+
+GitHub Actions runs on every push and pull request (`.github/workflows/ci.yaml`):
+
+- **language-check** — validates language files via `.github/scripts/check-language-files.php`
+- **test** — runs PHPUnit on PHP 8.3 with xdebug coverage
+
+### Database Migrations
 
 After pulling new code, apply any pending schema changes with the CLI migration tool:
 
