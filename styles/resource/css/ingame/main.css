@@ -10,7 +10,7 @@
     display: grid;
     /* width: 100vw;
 	height: 100vh; */
-    grid-template-columns: 180px 2fr 350px 0.5fr;
+    grid-template-columns: 1fr 180px 2fr 350px 0.5fr;
     grid-template-rows: 100px 1fr auto;
 }
 
@@ -29,7 +29,7 @@ top .fixed {
 }
 
 logo {
-    grid-column: 1;
+    grid-column: 2;
     grid-row: 1;
 }
 
@@ -37,7 +37,6 @@ logo .fixed {
     display: flex;
     justify-content: center;
     position: fixed;
-    left: 0;
     width: 180px;
     height: 100px;
     z-index: 2;
@@ -51,7 +50,7 @@ logo a img {
 }
 
 header {
-    grid-column: 2/4;
+    grid-column: 3/5;
 }
 
 header .fixed {
@@ -68,7 +67,7 @@ header .fixed {
 }
 
 menu {
-    grid-column: 1;
+    grid-column: 2;
     font-size: 14px;
     margin: 0px;
     z-index: 1;
@@ -77,7 +76,6 @@ menu {
 menu .fixed {
     list-style: none;
     position: fixed;
-    left: 0;
     top: 100px;
     width: 180px;
 }
@@ -99,7 +97,7 @@ menu li:hover>a {
 }
 
 content {
-    grid-column: 2/4;
+    grid-column: 3/5;
     max-width: 950px;
     min-height: 700px;
     /* overflow: auto; */
@@ -107,7 +105,7 @@ content {
 }
 
 aside {
-    grid-column: 3
+    grid-column: 4
 }
 
 aside .fixed {
