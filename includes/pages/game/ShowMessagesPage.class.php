@@ -342,8 +342,6 @@ class ShowMessagesPage extends AbstractGamePage
 		$text		= HTTP::_GP('text', '', true);
 		$senderName	= $USER['username'].' ['.$USER['galaxy'].':'.$USER['system'].':'.$USER['planet'].']';
 
-		$text		= makebr($text);
-
 		$session	= Session::load();
 
         if (empty($receiverID) || empty($text) || !isset($session->messageToken) || $session->messageToken != md5($USER['id'].'|'.$receiverID))
@@ -530,7 +528,7 @@ class ShowMessagesPage extends AbstractGamePage
                 'sender'	=> $MessageRow['message_sender'],
                 'type'		=> $MessageRow['message_type'],
                 'unread'	=> $MessageRow['message_unread'],
-                'text'		=> $MessageRow['message_text'],
+                'text'		=> in_array($MessageRow['message_type'], [1, 50]) ? nl2br($MessageRow['message_text']) : $MessageRow['message_text'],
             );
         }
 
