@@ -102,12 +102,21 @@ php -S localhost:8000
 ./vendor/bin/phpunit
 ```
 
+For black-box smoke testing (logs in and hits all game pages):
+
+```bash
+php tests/smoke.php                                        # local dev defaults
+php tests/smoke.php https://staging.moon.hive.pizza admin s3cr3t  # remote host
+SMOKE_BASE_URL=https://staging.moon.hive.pizza php tests/smoke.php # via env var
+```
+
 ### CI
 
 GitHub Actions runs on every push and pull request (`.github/workflows/ci.yaml`):
 
-- **language-check** — validates language files via `.github/scripts/check-language-files.php`
-- **test** — runs PHPUnit on PHP 8.3 with xdebug coverage
+- **language-check** — validates that all language files are syntactically valid PHP and that every key present in the English reference file exists in each translation
+- **test** — runs the PHPUnit unit test suite on PHP 8.3 with xdebug coverage; generates a Clover coverage report
+- **smoke** — spins up a MySQL 8 service container, installs the game via `tests/ci-install.php`, starts the PHP built-in server, then runs `tests/smoke.php` which logs in as the test admin and issues an HTTP request to every game page, failing on any PHP error or unexpected redirect
 
 ### Database Migrations
 
