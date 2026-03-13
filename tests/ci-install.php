@@ -70,6 +70,13 @@ $pdo = new PDO(
 );
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+// dbtables.php defines DB_PREFIX, DB_VERSION_REQUIRED, and the table-name
+// constants. Normally loaded inside Database::__construct(), but we use a
+// raw PDO so we must require it directly.
+$database = [];
+require ROOT_PATH . 'includes/config.php';
+require ROOT_PATH . 'includes/dbtables.php';
+
 try {
 // Now it is safe to produce output.
 echo "=== HiveNova CI Installer ===\n";
