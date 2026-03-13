@@ -1,0 +1,148 @@
+<?php
+/**
+ * CI Installer — programmatically installs HiveNova for smoke testing.
+ *
+ * Replicates what the web wizard does in steps 4, 6, and 8:
+ *   1. Write includes/config.php from env vars
+ *   2. Execute install/install.sql against the DB
+ *   3. Create the admin/test user via PlayerUtil::createPlayer
+ *   4. Apply any pending DB migrations
+ *
+ * Required env vars:
+ *   DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
+ *   ADMIN_NAME, ADMIN_PASSWORD, ADMIN_MAIL
+ */
+
+if (php_sapi_name() !== 'cli') {
+    die("This script must be run from the command line.\n");
+}
+
+define('ROOT_PATH', str_replace('\\', '/', dirname(dirname(__FILE__))) . '/');
+chdir(ROOT_PATH);
+set_include_path(ROOT_PATH);
+
+// --- 1. Read env vars ---
+$dbHost   = getenv('DB_HOST')       ?: '127.0.0.1';
+$dbPort   = getenv('DB_PORT')       ?: '3306';
+$dbUser   = getenv('DB_USER')       ?: '';
+$dbPass   = getenv('DB_PASSWORD')   ?: '';
+$dbName   = getenv('DB_NAME')       ?: '';
+$adminName = getenv('ADMIN_NAME')   ?: '';
+$adminPass = getenv('ADMIN_PASSWORD') ?: '';
+$adminMail = getenv('ADMIN_MAIL')   ?: '';
+
+foreach (['DB_USER' => $dbUser, 'DB_NAME' => $dbName, 'ADMIN_NAME' => $adminName,
+          'ADMIN_PASSWORD' => $adminPass, 'ADMIN_MAIL' => $adminMail] as $var => $val) {
+    if ($val === '') {
+        die("Error: environment variable $var is required.\n");
+    }
+}
+
+echo "=== HiveNova CI Installer ===\n";
+echo "DB   : $dbUser@$dbHost:$dbPort/$dbName\n";
+echo "Admin: $adminName <$adminMail>\n\n";
+
+// --- 2. Write includes/config.php ---
+echo "[ 1/4 ] Writing includes/config.php ... ";
+$blowfish = substr(str_shuffle('./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 22);
+$configContent = sprintf(
+    file_get_contents(ROOT_PATH . 'includes/config.sample.php'),
+    $dbHost, $dbPort, $dbUser, $dbPass, $dbName, 'uni1_', $blowfish
+);
+if (file_put_contents(ROOT_PATH . 'includes/config.php', $configContent) === false) {
+    die("FAILED (cannot write includes/config.php)\n");
+}
+echo "OK\n";
+
+// --- Bootstrap the game framework (like install/index.php does) ---
+define('MODE', 'INSTALL');
+require ROOT_PATH . 'includes/common.php';
+
+// --- 3. Execute install.sql ---
+echo "[ 2/4 ] Executing install/install.sql ... ";
+
+$installSQL     = file_get_contents(ROOT_PATH . 'install/install.sql');
+$installVersion = trim(file_get_contents(ROOT_PATH . 'install/VERSION'));
+$installRevision = 0;
+
+preg_match('!\$' . 'Id: install.sql ([0-9]+)!', $installSQL, $match);
+$versionParts = explode('.', $installVersion);
+if (isset($match[1])) {
+    $installRevision   = (int)$match[1];
+    $versionParts[2]   = $installRevision;
+} else {
+    $installRevision = (int)($versionParts[2] ?? 0);
+}
+$installVersion = implode('.', $versionParts);
+
+$db = Database::get();
+$db->query(str_replace(
+    ['%PREFIX%', '%VERSION%', '%REVISION%', '%DB_VERSION%'],
+    [DB_PREFIX, $installVersion, $installRevision, DB_VERSION_REQUIRED],
+    $installSQL
+));
+
+// Set basic config values (mirrors install/index.php step 6)
+$config = Config::get(Universe::current());
+$config->timezone           = @date_default_timezone_get();
+$config->lang               = 'en';
+$config->OverviewNewsText   = 'Welcome to HiveNova ' . $installVersion;
+$config->uni_name           = 'Universe ' . Universe::current();
+$config->close_reason       = 'Maintenance';
+$config->moduls             = implode(';', array_fill(0, MODULE_AMOUNT - 1, 1));
+$config->save();
+
+echo "OK\n";
+
+// --- 4. Create admin user ---
+echo "[ 3/4 ] Creating admin user '$adminName' ... ";
+
+require ROOT_PATH . 'includes/vars.php';
+$hashPassword = PlayerUtil::cryptPassword($adminPass);
+PlayerUtil::createPlayer(
+    Universe::current(),
+    $adminName,
+    $hashPassword,
+    $adminMail,
+    '',      // hiveaccount
+    'en',    // language
+    1,       // galaxy
+    1,       // system
+    2,       // position
+    null,    // referrer
+    AUTH_ADM // authority
+);
+echo "OK\n";
+
+// --- 5. Apply pending migrations ---
+echo "[ 4/4 ] Running migrations ... ";
+
+require ROOT_PATH . 'includes/classes/Migrator.php';
+
+$pdo = new PDO(
+    "mysql:host={$dbHost};port={$dbPort};dbname={$dbName}",
+    $dbUser,
+    $dbPass,
+    [PDO::MYSQL_ATTR_INIT_COMMAND => "SET CHARACTER SET utf8mb4, NAMES utf8mb4, sql_mode = 'STRICT_ALL_TABLES'"]
+);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+$migrator       = new Migrator($pdo, ROOT_PATH . 'install/migrations', DB_PREFIX, DB_VERSION_REQUIRED);
+$currentVersion = $migrator->getCurrentVersion();
+$pending        = $migrator->getPendingMigrations($currentVersion);
+
+if (empty($pending)) {
+    echo "already up to date (v{$currentVersion})\n";
+} else {
+    foreach ($pending as $m) {
+        match ($m['extension']) {
+            'sql' => $migrator->applySqlMigration($m),
+            'php' => $migrator->applyPhpMigration($m),
+        };
+    }
+    $migrator->updateVersion();
+    echo "applied " . count($pending) . " migration(s), now v" . DB_VERSION_REQUIRED . "\n";
+}
+
+echo "\n=== Install complete ===\n";
+exit(0);
