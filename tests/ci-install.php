@@ -107,8 +107,8 @@ $installSQL = str_replace(
     $installSQL
 );
 
-// Split on ";\n" (same strategy as Migrator::parseSql) and execute individually.
-$statements = array_filter(array_map('trim', explode(";\n", $installSQL)));
+// Split on ";" (same strategy as Migrator::parseSql) and execute individually.
+$statements = array_filter(array_map('trim', explode(';', $installSQL)));
 foreach ($statements as $stmt) {
     try {
         $pdo->exec($stmt);

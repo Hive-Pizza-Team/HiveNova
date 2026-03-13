@@ -76,10 +76,9 @@ class PushingDetectionCronjob implements CronjobTask
 			$text = "Suspicious attack patterns have been detected in this universe:\n"
 				. implode("\n", $lines) . "\n";
 
-			$playerSql = 'SELECT id FROM %%USERS%% WHERE universe = :universe AND authlevel = :authlevel;';
+			$playerSql = 'SELECT id FROM %%USERS%% WHERE universe = :universe;';
 			$players   = Database::get()->select($playerSql, array(
 				':universe'  => $uni,
-				':authlevel' => AUTH_USR,
 			));
 
 			foreach ($players as $player)

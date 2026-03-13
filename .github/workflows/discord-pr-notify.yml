@@ -11,18 +11,20 @@ jobs:
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_USER: ${{ github.event.pull_request.user.login }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          REPO: ${{ github.repository }}
         run: |
+          payload=$(jq -n \
+            --arg title "$PR_TITLE" \
+            --arg url "$PR_URL" \
+            --arg desc "New pull request opened by **${PR_USER}**" \
+            --arg branch "${PR_HEAD} → ${PR_BASE}" \
+            --arg repo "$REPO" \
+            '{embeds:[{title:$title,url:$url,description:$desc,color:5814783,fields:[{name:"Branch",value:$branch,inline:true},{name:"Repo",value:$repo,inline:true}]}]}')
           curl -s -X POST "$DISCORD_WEBHOOK" \
             -H "Content-Type: application/json" \
-            -d '{
-              "embeds": [{
-                "title": "'"${{ github.event.pull_request.title }}"'",
-                "url": "'"${{ github.event.pull_request.html_url }}"'",
-                "description": "New pull request opened by **'"${{ github.event.pull_request.user.login }}"'**",
-                "color": 5814783,
-                "fields": [
-                  {"name": "Branch", "value": "'"${{ github.event.pull_request.head.ref }}"' → '"${{ github.event.pull_request.base.ref }}"'", "inline": true},
-                  {"name": "Repo", "value": "'"${{ github.repository }}"'", "inline": true}
-                ]
-              }]
-            }'
+            -d "$payload"
