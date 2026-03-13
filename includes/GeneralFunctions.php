@@ -297,7 +297,7 @@ function pretty_number($n, $dec = 0)
 	$formatted = number_format(floatToString($n, $dec), $dec, ',', '.');
 	if (isset($GLOBALS['userNumberFormat']) && $GLOBALS['userNumberFormat'] !== 'eu') {
 		$raw = $dec > 0 ? floatToString($n, $dec) : intval($n);
-		return '<span class="ln" data-n="' . $raw . '">' . $formatted . '</span>';
+		return "<span class='ln' data-n='" . $raw . "'>" . $formatted . '</span>';
 	}
 	return $formatted;
 }

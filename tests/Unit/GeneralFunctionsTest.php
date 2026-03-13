@@ -297,8 +297,8 @@ class GeneralFunctionsTest extends TestCase
     {
         $GLOBALS['userNumberFormat'] = 'auto';
         $result = pretty_number(1234567);
-        $this->assertStringContainsString('<span class="ln"', $result);
-        $this->assertStringContainsString('data-n="1234567"', $result);
+        $this->assertStringContainsString("<span class='ln'", $result);
+        $this->assertStringContainsString("data-n='1234567'", $result);
         $this->assertStringContainsString('1.234.567', $result);
     }
 
@@ -306,7 +306,7 @@ class GeneralFunctionsTest extends TestCase
     {
         $GLOBALS['userNumberFormat'] = 'auto';
         $result = pretty_number(0);
-        $this->assertStringContainsString('data-n="0"', $result);
+        $this->assertStringContainsString("data-n='0'", $result);
     }
 
     public function testPrettyNumberWithNoGlobalReturnsPlainEuText(): void
