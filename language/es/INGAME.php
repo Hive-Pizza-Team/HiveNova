@@ -927,6 +927,9 @@ $LNG['op_dst_mode_sel'][1]					= 'Si';
 $LNG['op_dst_mode_sel'][2]					= 'Automatico';
 $LNG['op_timezone']							= 'Zona Horaria';
 $LNG['op_block_pm']							= 'Mensajes privados bloqueados';
+$LNG['number_format_label']					= 'Formato de número';
+$LNG['number_format_auto']					= 'Predeterminado del navegador (ej. 1.234.567)';
+$LNG['number_format_eu']					= 'Europeo (ej. 1.234.567)';
 
 //----------------------------------------------------------------------------//
 //BANNED

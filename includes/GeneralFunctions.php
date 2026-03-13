@@ -287,9 +287,19 @@ function BuildPlanetAddressLink($CurrentPlanet)
 	return '<a href="game.php?page=galaxy&amp;galaxy=' . $CurrentPlanet['galaxy'] . '&amp;system=' . $CurrentPlanet['system'] . '">[' . $CurrentPlanet['galaxy'] . ':' . $CurrentPlanet['system'] . ':' . $CurrentPlanet['planet'] . ']</a>';
 }
 
-function pretty_number($n, $dec = 0)
+function pretty_number_plain($n, $dec = 0)
 {
 	return number_format(floatToString($n, $dec), $dec, ',', '.');
+}
+
+function pretty_number($n, $dec = 0)
+{
+	$formatted = number_format(floatToString($n, $dec), $dec, ',', '.');
+	if (isset($GLOBALS['userNumberFormat']) && $GLOBALS['userNumberFormat'] !== 'eu') {
+		$raw = $dec > 0 ? floatToString($n, $dec) : intval($n);
+		return '<span class="ln" data-n="' . $raw . '">' . $formatted . '</span>';
+	}
+	return $formatted;
 }
 
 function GetUserByID($userId, $GetInfo = "*")

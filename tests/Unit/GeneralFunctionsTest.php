@@ -278,6 +278,50 @@ class GeneralFunctionsTest extends TestCase
         ];
     }
 
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['userNumberFormat']);
+    }
+
+    // -------------------------------------------------------------------------
+    // pretty_number — localization span output
+    // -------------------------------------------------------------------------
+
+    public function testPrettyNumberWithEuFormatReturnsPlainText(): void
+    {
+        $GLOBALS['userNumberFormat'] = 'eu';
+        $this->assertSame('1.234.567', pretty_number(1234567));
+    }
+
+    public function testPrettyNumberWithAutoFormatReturnsSpanWithDataN(): void
+    {
+        $GLOBALS['userNumberFormat'] = 'auto';
+        $result = pretty_number(1234567);
+        $this->assertStringContainsString('<span class="ln"', $result);
+        $this->assertStringContainsString('data-n="1234567"', $result);
+        $this->assertStringContainsString('1.234.567', $result);
+    }
+
+    public function testPrettyNumberWithAutoFormatZero(): void
+    {
+        $GLOBALS['userNumberFormat'] = 'auto';
+        $result = pretty_number(0);
+        $this->assertStringContainsString('data-n="0"', $result);
+    }
+
+    public function testPrettyNumberWithNoGlobalReturnsPlainEuText(): void
+    {
+        unset($GLOBALS['userNumberFormat']);
+        $this->assertSame('1.234.567', pretty_number(1234567));
+    }
+
+    public function testPrettyNumberEuPreservesExistingTestCases(): void
+    {
+        $GLOBALS['userNumberFormat'] = 'eu';
+        $this->assertSame('0', pretty_number(0));
+        $this->assertSame('1.234,50', pretty_number(1234.5, 2));
+    }
+
     public function testPrettyTimeFormatsHoursMinutesSeconds(): void
     {
         // 1h 2m 3s = 3723s, no days

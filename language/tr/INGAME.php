@@ -950,6 +950,9 @@ $LNG['op_dst_mode_sel'][1]					= 'Hayır';
 $LNG['op_dst_mode_sel'][2]					= 'Otomatik';
 $LNG['op_timezone']							= 'Zaman Dilimi';
 $LNG['op_block_pm']							= 'Özel mesajları blokla';
+$LNG['number_format_label']					= 'Sayı formatı';
+$LNG['number_format_auto']					= 'Tarayıcı varsayılanı (örn. 1.234.567)';
+$LNG['number_format_eu']					= 'Avrupa (örn. 1.234.567)';
 
 //----------------------------------------------------------------------------//
 // BAN LISTESI

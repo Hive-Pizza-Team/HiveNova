@@ -67,6 +67,15 @@
 		</tr>
 		{/if}
 		<tr>
+			<td>{$LNG.number_format_label}</td>
+			<td>
+				<select name="number_format">
+					<option value="auto"{if $numberFormat == 'auto'} selected{/if}>{$LNG.number_format_auto}</option>
+					<option value="eu"{if $numberFormat == 'eu'} selected{/if}>{$LNG.number_format_eu}</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td>{$LNG.op_sort_planets_by}</td>
 			<td>{html_options name=planetSort options=$Selectors.Sort selected=$planetSort}</td>
 		</tr>

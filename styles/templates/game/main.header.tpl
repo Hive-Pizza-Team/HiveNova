@@ -38,6 +38,7 @@
 	var tdformat	= "{$LNG.js_tdformat}";
 	var queryString	= "{$queryString|escape:'javascript'}";
 	var isPlayerCardActive	= "{$isPlayerCardActive|json}";
+	var numberFormat	= "{$USER.number_format|default:'auto'}";
 	var relativeTime = Math.floor(Date.now() / 1000);
 
 	setInterval(function() {
