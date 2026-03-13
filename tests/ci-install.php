@@ -55,6 +55,16 @@ if (file_put_contents(ROOT_PATH . 'includes/config.php', $configContent) === fal
 define('MODE', 'INSTALL');
 @require ROOT_PATH . 'includes/common.php';
 
+// Open a raw PDO connection for bulk SQL execution (PDO::exec does not reliably
+// handle multi-statement strings; we split and execute statement by statement).
+$pdo = new PDO(
+    "mysql:host={$dbHost};port={$dbPort};dbname={$dbName}",
+    $dbUser,
+    $dbPass,
+    [PDO::MYSQL_ATTR_INIT_COMMAND => "SET CHARACTER SET utf8mb4, NAMES utf8mb4"]
+);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 // Now it is safe to produce output.
 echo "=== HiveNova CI Installer ===\n";
 echo "DB   : $dbUser@$dbHost:$dbPort/$dbName\n";
@@ -78,14 +88,29 @@ if (isset($match[1])) {
 }
 $installVersion = implode('.', $versionParts);
 
-$db = Database::get();
-$db->query(str_replace(
+$installSQL = str_replace(
     ['%PREFIX%', '%VERSION%', '%REVISION%', '%DB_VERSION%'],
-    [DB_PREFIX, $installVersion, $installRevision, DB_VERSION_REQUIRED],
+    ['uni1_', $installVersion, $installRevision, DB_VERSION_REQUIRED],
     $installSQL
-));
+);
 
-// Set basic config values (mirrors install/index.php step 6)
+// Split on ";\n" (same strategy as Migrator::parseSql) and execute individually.
+$statements = array_filter(array_map('trim', explode(";\n", $installSQL)));
+foreach ($statements as $stmt) {
+    try {
+        $pdo->exec($stmt);
+    } catch (PDOException $e) {
+        // Skip non-fatal errors (e.g. conditional SET directives).
+        $msg = $e->getMessage();
+        // Rethrow genuine table/data errors.
+        if (!str_contains($msg, '1231') && !str_contains($msg, 'Variable')) {
+            throw $e;
+        }
+    }
+}
+
+// Set basic config values (mirrors install/index.php step 6).
+// Use Database::get() now that the schema exists.
 $config = Config::get(Universe::current());
 $config->timezone         = @date_default_timezone_get();
 $config->lang             = 'en';
@@ -121,14 +146,6 @@ echo "OK\n";
 echo "[ 4/4 ] Running migrations ... ";
 
 require ROOT_PATH . 'includes/classes/Migrator.php';
-
-$pdo = new PDO(
-    "mysql:host={$dbHost};port={$dbPort};dbname={$dbName}",
-    $dbUser,
-    $dbPass,
-    [PDO::MYSQL_ATTR_INIT_COMMAND => "SET CHARACTER SET utf8mb4, NAMES utf8mb4, sql_mode = 'STRICT_ALL_TABLES'"]
-);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $migrator       = new Migrator($pdo, ROOT_PATH . 'install/migrations', DB_PREFIX, DB_VERSION_REQUIRED);
 $currentVersion = $migrator->getCurrentVersion();

@@ -1,15 +1,26 @@
 <?php
 
 /**
- * Smoke test: logs into the local dev instance and hits all game pages,
+ * Smoke test: logs into a HiveNova instance and hits all game pages,
  * reporting HTTP status and any PHP errors/warnings found in the response.
  *
- * Usage: php throwaway/smoke.php
+ * Usage:
+ *   php tests/smoke.php [base-url] [username] [password]
+ *
+ * Arguments override env vars (SMOKE_BASE_URL, ADMIN_NAME, ADMIN_PASSWORD),
+ * which in turn override the built-in local-dev defaults.
+ *
+ * Examples:
+ *   php tests/smoke.php                                      # local dev
+ *   php tests/smoke.php https://staging.moon.hive.pizza admin s3cr3t
+ *   SMOKE_BASE_URL=https://staging.moon.hive.pizza php tests/smoke.php
  */
 
-$baseUrl  = getenv('SMOKE_BASE_URL') ?: 'http://localhost:8000';
-$username = getenv('ADMIN_NAME')     ?: 'spacepizzadev';
-$password = getenv('ADMIN_PASSWORD') ?: '2hBR2wC0BcS^A%vsLvw9XgXy5$aBF*';
+$baseUrl  = $argv[1] ?? getenv('SMOKE_BASE_URL') ?: 'http://localhost:8000';
+$username = $argv[2] ?? getenv('ADMIN_NAME')     ?: 'spacepizzadev';
+$password = $argv[3] ?? getenv('ADMIN_PASSWORD') ?: '2hBR2wC0BcS^A%vsLvw9XgXy5$aBF*';
+
+$baseUrl = rtrim($baseUrl, '/');
 $cookieFile = tempnam(sys_get_temp_dir(), 'smoke_cookies_');
 
 // Pages to test — derived from Show{Name}Page.class.php files.

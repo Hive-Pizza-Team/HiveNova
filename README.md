@@ -102,10 +102,12 @@ php -S localhost:8000
 ./vendor/bin/phpunit
 ```
 
-For black-box smoke testing against a running local instance (logs in and hits all game pages):
+For black-box smoke testing (logs in and hits all game pages):
 
 ```bash
-php tests/smoke.php
+php tests/smoke.php                                        # local dev defaults
+php tests/smoke.php https://staging.moon.hive.pizza admin s3cr3t  # remote host
+SMOKE_BASE_URL=https://staging.moon.hive.pizza php tests/smoke.php # via env var
 ```
 
 ### CI
