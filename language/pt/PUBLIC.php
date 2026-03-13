@@ -52,7 +52,7 @@ $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Perdeste a Password?';
 
 // Start
-$LNG['gameInformations']			= "Um jogo de estratégia em tempo real.\nJogo com centenas de imperadores.\nNenhum download, requer apenas um navegador padrão.\nInscrição gratuita";
+$LNG['gameInformations']			= "Compatível com dispositivos móveis\nJoga em qualquer navegador\nSem instalação necessária\nFaz alianças com amigos e inimigos\nDomina o universo\nGanha adrenalina, coleciona crânios\n";
 
 // Login
 $LNG['loginHeader']					= 'Login';
@@ -61,7 +61,8 @@ $LNG['loginPassword']				= 'Password';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'Com o login eu aceito os %s.';
 $LNG['loginWelcome']				= 'Bem-vindo ao %s';
-$LNG['loginServerDesc']				= '%s é um jogo de estratégia espacial com milhares de jogadores a jogar juntos <strong>ao mesmo tempo</strong> a tentar ser o melhor do Universo. Tudo que precisas para o jogo é um navegador padrão.';
+$LNG['loginServerDesc']				= '%s é um jogo de estratégia espacial em tempo real.';
+$LNG['loginHiveAccount']			= 'Conta Hive';
 
 // Register
 $LNG['registerFacebookAccount']		= 'Conta de Facebook';
@@ -94,7 +95,7 @@ $LNG['registerNext']				= 'Próximo';
 $LNG['registerErrorUniClosed']		= 'O registro é fechado neste universo!';
 $LNG['registerErrorUsernameEmpty']	= 'Deves digitar um username!';
 $LNG['registerErrorUsernameChar']	= 'O Username deve consistir em números, letras, espaços, _, -, . apenas!';
-$LNG['registerErrorUsernameExist']	= 'O Username já está em uso!';
+$LNG['registerErrorUsernameExist']	= 'O Username já está em uso! Se és o titular desta conta Hive, tenta registar com o Keychain.';
 $LNG['registerErrorPasswordLength']	= 'A Password deve ter pelo menos %s caracteres!';
 $LNG['registerErrorPasswordSame']	= 'Inseriste 2 Passwords diferentes!';
 $LNG['registerErrorMailEmpty']		= 'Deves especificar um endereço de email!';
@@ -106,62 +107,61 @@ $LNG['registerErrorCaptcha']		= 'O código de segurança está errado!';
 $LNG['registerErrorHiveAccountInvalid']	= 'É necessário introduzir uma conta Hive válida!';
 $LNG['registerErrorHiveAccountExist']	= 'A conta Hive já está registada!';
 
-$LNG['registerMailVertifyTitle']	= 'Aktivierung der Registrierung auf der Website: %s';
-$LNG['registerMailVertifyError']	= 'Fehler beim Versenden der Mail: %s';
+$LNG['registerMailVertifyTitle']	= 'Registo bem-sucedido no jogo: %s';
+$LNG['registerMailVertifyError']	= 'Falha ao enviar o email: %s';
 
-$LNG['registerMailCompleteTitle']	= 'Welcome to %s!';
+$LNG['registerMailCompleteTitle']	= 'Bem-vindo ao %s!';
 
-$LNG['registerSendComplete']		= 'Thank you for the registration. You must check your email (Attention with the SPAM) with further information.';
+$LNG['registerSendComplete']		= 'Obrigado pelo registo. Verifica o teu email (atenção ao SPAM) para mais informações.';
 
-$LNG['registerWelcomePMSenderName']	= 'Administrator';
-$LNG['registerWelcomePMSubject']	= 'Welcome';
-$LNG['registerWelcomePMText']		= 'Welcome to %s! First build a solar power plant,because energy is needed for the production of raw materials. To build one, left click in the menu on "buildings". Then build the 4th Building from the top. </br> When you have energy, you can begin to build mines. Go to buildings on the menu and build a ore extractor, followed by a silicon refiner. </br></br>In order to be able to build ships you need to have a shipyard. To see what is needed to unlock that building you can take a look at "Technologies" at the left menu.</br>If you more questions you can look at the beginnersguide, our forum or open a support ticket. </br></br> The team wishes you much fun exploring the universe!';
+$LNG['registerWelcomePMSenderName']	= 'Administrador';
+$LNG['registerWelcomePMSubject']	= 'Bem-vindo';
+$LNG['registerWelcomePMText']		= 'Bem-vindo ao %s! Primeiro constrói uma central elétrica solar, pois a energia é necessária para a produção de matérias-primas. Para construir uma, clica no menu em "edifícios". Depois constrói o 4.º edifício a partir do topo. </br> Quando tiveres energia, podes começar a construir minas. Vai a edifícios no menu e constrói um extrator de minério, seguido de uma refinaria de silício. </br></br>Para conseguires construir naves precisas de um estaleiro. Para veres o que é necessário para desbloquear esse edifício, podes consultar "Tecnologias" no menu da esquerda.</br>Se tiveres mais perguntas, podes consultar um post de tutorial, o nosso Discord ou encontrar uma aliança. </br></br> A equipa deseja-te muita diversão a explorar o universo!';
 
 //Vertify
 
-$LNG['vertifyNoUserFound']			= 'Invalid Request!';
-$LNG['vertifyAdminMessage']			= 'The username "%s" has enabled!';
+$LNG['vertifyNoUserFound']			= 'Pedido inválido!';
+$LNG['vertifyAdminMessage']			= 'O utilizador "%s" foi ativado!';
 
 
 //lostpassword
-$LNG['passwordInfo']				= 'If you have forgotten your password, you must specify the user name and the E-Mail address that you have entered in your account.';
+$LNG['passwordInfo']				= 'Se esqueceste a tua palavra-passe, deves indicar o nome de utilizador e o endereço de E-Mail que introduziste na tua conta.';
 $LNG['passwordUsername']			= 'Username';
 $LNG['passwordMail']				= 'E-Mail';
-$LNG['passwordCaptcha']				= 'Security code';
-$LNG['passwordSubmit']				= 'Submit';
-$LNG['passwordErrorUsernameEmpty']	= 'You have no specified the Username!';
-$LNG['passwordErrorMailEmpty']		= 'You have specified an unknown email address!';
-$LNG['passwordErrorUnknown']		= 'It could not be found with the account data.';
-$LNG['passwordErrorOnePerDay']		= 'Password for this user account in the last 24 hours previously requested. You can only request the password for this user account in  next 24 hours. ';
+$LNG['passwordCaptcha']				= 'Código de segurança';
+$LNG['passwordSubmit']				= 'Enviar';
+$LNG['passwordErrorUsernameEmpty']	= 'Não especificaste o Username!';
+$LNG['passwordErrorMailEmpty']		= 'Especificaste um endereço de email desconhecido!';
+$LNG['passwordErrorUnknown']		= 'Não foi possível corresponder com os dados da conta.';
+$LNG['passwordErrorOnePerDay']		= 'Limite de redefinição de palavra-passe atingido. Só podes solicitar a redefinição uma vez a cada 24 horas.';
 
-$LNG['passwordValidMailTitle']		= 'Forgot my password on the website: %s';
-$LNG['passwordValidMailSend']		= 'You will receive an email shortly with further information.';
+$LNG['passwordValidMailTitle']		= 'Esqueci a minha palavra-passe no jogo: %s';
+$LNG['passwordValidMailSend']		= 'Receberás em breve um email com mais informações.';
 
-$LNG['passwordValidInValid']		= 'Invalid Request!';
-$LNG['passwordChangedMailSend']		= 'You will receive an email shortly with your new password.';
-$LNG['passwordChangedMailTitle']	= 'New password on the website: %s';
+$LNG['passwordValidInValid']		= 'Pedido inválido!';
+$LNG['passwordChangedMailSend']		= 'Receberás em breve um email com a tua nova palavra-passe.';
+$LNG['passwordChangedMailTitle']	= 'Nova palavra-passe no jogo: %s';
 
-$LNG['passwordBack']				= 'Back';
-$LNG['passwordNext']				= 'Next';
+$LNG['passwordBack']				= 'Voltar';
+$LNG['passwordNext']				= 'Próximo';
 
 //case default
 
-$LNG['login_error_1']				= 'Wrong username/password! Make sure you register first!';
-$LNG['login_error_2']				= 'Someone has logged in from a different PC in your account, or your IP is different!';
-$LNG['login_error_3']				= 'Your session has expired!';
-$LNG['login_error_4']				= 'There was an error in external authorization, please try again!';
+$LNG['login_error_1']				= 'Username/palavra-passe incorretos! Certifica-te de que estás registado!';
+$LNG['login_error_2']				= 'Alguém iniciou sessão na tua conta a partir de um PC diferente, ou o teu IP mudou!';
+$LNG['login_error_3']				= 'A tua sessão expirou!';
+$LNG['login_error_4']				= 'Ocorreu um erro na autorização externa, por favor tenta novamente!';
 
 //Rules
-$LNG['rulesHeader']					= 'Rules';
+$LNG['rulesHeader']					= 'Regras';
 
 //NEWS
-$LNG['news_overview']				= 'News';
-$LNG['news_from']					= 'On %s bt %s';
-$LNG['news_does_not_exist']			= 'No news available!';
+$LNG['news_overview']				= 'Notícias';
+$LNG['news_from']					= 'Em %s por %s';
+$LNG['news_does_not_exist']			= 'Sem notícias disponíveis!';
 
 //Impressum
-$LNG['disclamerLabelAddress']		= 'Game Address:';
-$LNG['disclamerLabelPhone']			= 'Telephone Nr.:';
-$LNG['disclamerLabelMail']			= 'Support Adress:';
-$LNG['disclamerLabelNotice']		= 'More information';
-$LNG['loginHiveAccount'] = 'Conta Hive';
+$LNG['disclamerLabelAddress']		= 'Endereço do Jogo:';
+$LNG['disclamerLabelPhone']			= 'Telefone Nr.:';
+$LNG['disclamerLabelMail']			= 'Email de Suporte:';
+$LNG['disclamerLabelNotice']		= 'Mais informações';
