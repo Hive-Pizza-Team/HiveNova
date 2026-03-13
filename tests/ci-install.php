@@ -55,6 +55,11 @@ if (file_put_contents(ROOT_PATH . 'includes/config.php', $configContent) === fal
 define('MODE', 'INSTALL');
 @require ROOT_PATH . 'includes/common.php';
 
+// common.php installs a custom exception handler that outputs HTML and hides
+// the real error message. Restore the default so failures are visible in CI.
+restore_exception_handler();
+restore_error_handler();
+
 // Open a raw PDO connection for bulk SQL execution (PDO::exec does not reliably
 // handle multi-statement strings; we split and execute statement by statement).
 $pdo = new PDO(
@@ -65,6 +70,7 @@ $pdo = new PDO(
 );
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+try {
 // Now it is safe to produce output.
 echo "=== HiveNova CI Installer ===\n";
 echo "DB   : $dbUser@$dbHost:$dbPort/$dbName\n";
@@ -165,4 +171,10 @@ if (empty($pending)) {
 }
 
 echo "\n=== Install complete ===\n";
+
+} catch (Throwable $e) {
+    fwrite(STDERR, "\nFATAL: " . get_class($e) . ': ' . $e->getMessage() . "\n");
+    fwrite(STDERR, $e->getFile() . ':' . $e->getLine() . "\n");
+    exit(1);
+}
 exit(0);
