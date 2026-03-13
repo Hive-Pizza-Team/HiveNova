@@ -1,6 +1,7 @@
-﻿<h2>A instalação não pode ser feita!</h2>
-<p>Para ativar o instalador, o ficheiro ENABLE_INSTALL_TOOL deve ser criado.</p>
+<h1>A Ferramenta de Instalação está bloqueada</h1>
+<p>Para ativar a Ferramenta de Instalação, o ficheiro ENABLE_INSTALL_TOOL deve ser criado.</p>
 <ul>
-    <li>Na directória "includes/" , poderás por o ficheiro ENABLE_INSTALL_TOOL. O nome do ficheiro deve estar em maiusculas e o seu conteúdo é nulo</li>
+    <li>Na pasta includes/, cria um ficheiro com o nome ENABLE_INSTALL_TOOL. O nome do ficheiro é sensível a maiúsculas e minúsculas, mas o ficheiro em si pode ser simplesmente um ficheiro vazio.</li>
 </ul>
-<p>Por causa de segurança, é recomendável eliminar o ficheiro para evitar novas instalações. De outro modo, se o ficheiro estiver presente, uma nova instalação poderá ser feita!</p>
+<p>Por razões de segurança, é altamente recomendável que renomeies ou elimines o ficheiro após a conclusão da operação.</p>
+<p>Como medida de segurança adicional, se o ficheiro tiver mais de uma hora, o 2Moons irá eliminá-lo automaticamente.</p>

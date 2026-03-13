@@ -1,7 +1,8 @@
-﻿Olá {USERNAME},
+Olá {USERNAME},
 
-Já não juntas-te com os teus oficiais desde {LASTDATE}!
+Não iniciaste sessão desde {LASTDATE} em {GAMENAME}. Se ainda queres permanecer membro da nossa comunidade, por favor inicia sessão com os teus dados, caso contrário a tua conta será eliminada.
 
-Se esqueceste da tua password, vai a {HTTPPATH} e clica em "Esqueci me da Password". Deverás receber um email em instantes.
+Se esqueceste a tua palavra-passe, vai a {HTTPPATH} e clica em "Esqueci a palavra-passe". Receberás um email com a tua nova palavra-passe em poucos minutos.
 
-{GAMENAME} Team
+Cumprimentos,
+Equipa {GAMENAME}

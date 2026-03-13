@@ -1,53 +1,41 @@
 <ul id="rules">
 	<li>
-		<h1>1. Contas</h1>
-		<p>Cada jogador apenas pode possuir uma conta por universo, mais do que uma ser· considerada multi-conta e as contas envolvidas ser„o sancionadas com o bloqueamento, e considerado uma infraÁ„o muito grave.</p>
-		<p>Quando o jogador normal ou ocasionalmente jogar a partir de um IP p˙blico (cyber-cafÈ, universidades, escolas, etc), um operador de jogo do universo em causa deve ser obrigatoriamente notificado. </p>
+		<h1>1. Contas e Jogo</h1>
+		<p>N√£o conseguimos monitorizar quantas contas cada jogador utiliza, pelo que ser√° permitido a todos os jogadores jogar com tantas contas de jogo quantas acharem divertidas. O tempo e aten√ß√£o humanos s√£o os limites reais, n√£o as "contas".
+<br /></p>
+<br /><p>Apoiamos um "esp√≠rito de jogo" justo e divertido. Por isso, qualquer automa√ß√£o desenvolvida (ou seja, "botting") deve ser divulgada √† equipa para que possamos disponibilizar ferramentas semelhantes a todos os jogadores.
+
+</p>
+
+		<h1>2. N√£o Empurres "Para Cima"</h1>
+		<p>No esp√≠rito do jogo justo e divertido, encorajamos todas as formas de trabalho em equipa, especialmente para fora e para baixo em pontos, e isto inclui recursos do jogo. Tentaremos criar condi√ß√µes de jogo que apoiem este tipo de trabalho em equipa - e evitar condi√ß√µes de jogo que apoiem estrat√©gias de bola de neve. Os pontos do jogador no topo determinar√£o os limites do empurr√£o, e geralmente deve ser encorajado que jogadores com menos pontos do que o jogador do topo fa√ßam tudo o que acharem divertido para "recuperar".
+
+<br />N√£o conseguimos monitorizar ou avaliar transa√ß√µes externas de natureza tang√≠vel ou intang√≠vel, pelo que os jogadores podem oferecer, trocar, negociar ou comprar ativos do jogo fora do jogo.
+</p>
 	</li>
 	<li>
-		<h1>2. Multi-Contas</h1>
-		<p>Cada jogador apenas pode possuir uma conta por universo, mais do que uma ser· considerada multi-conta e as contas envolvidas ser„o sancionadas com o bloqueamento tempor·rio ou permanete.</p>
-		<p>Se contas de propriet·rios diferentes s„o normal, ocasional ou permanentemente jogadas a partir do mesmo IP, um Admin de jogo do universo em causa deve ser obrigatoriamente notificado.</p>
+		<h1>3. Bashing</h1>
+		<p>N√£o √© permitido atacar qualquer planeta ou lua de um jogador mais de 6 vezes num per√≠odo de 24 horas.
+O bashing s√≥ √© permitido quando a tua Alian√ßa est√° em guerra com outra Alian√ßa. A guerra deve ser anunciada no f√≥rum e ambos os l√≠deres devem concordar com os termos.
+A regra de bashing aplica-se apenas a utilizadores ativos e exclui ataques de m√≠sseis e miss√µes de espionagem.</p>
 	</li>
 	<li>
-		<h1>3. Pushing</h1>
-		<p>N„o È permitido o favorecimento atravÈs de recursos de uma conta com mais pontos por uma conta mais fraca.</p>
+		<h1>4. Explora√ß√£o de Bugs</h1>
+		<p>Usar um bug para proveito de algu√©m, intencionalmente ou n√£o reportar um bug intencionalmente, √© estritamente proibido.</p>
 	</li>
 	<li>
-		<h1>4. Bashing</h1>
-		<p>Mais de 6 ataques em 24 horas, ao mesmo planeta de um jogador activo, È considerado Bashing, e por isso n„o È permitido. Em caso de denucio dever· ser entregue provas de concretas de tais acontecimentos.</p>
-		<p>As luas s„o consideradas planetas independentes.</p>
-		<p>Ataques com MÌsseis Interplanet·rios, ataques onde a frota atacante È completamente destruÌda ou ataques com frota composta sÛ com sondas de espionagem, n„o s„o considerados para a regra de bashing.</p>
-		<p>Devido ao risco de DestruiÁ„o de Lua este tipo de miss„o n„o È considerado para a regra do bashing.</p>
-		<p>Frotas compostas por 1 ou v·rias sondas de espionagem mais outro tipo de naves em miss„o Espiar com o intuito de atacar devido · contra-espionagem e provocar dano na conta do defensor È considerado para a regra do Bashing.</p>
+		<h1>5. Conte√∫do Proibido</h1>
+		<p>Insinuar que vais localizar e prejudicar outro jogador √© proibido.
+<br />Tamb√©m spam, envio em massa de mensagens e publicidade de jogos/produtos externos n√£o s√£o permitidos.</p>
 	</li>
 	<li>
-		<h1>5. Bugusing</h1>
-		<p>N„o È permitido ser favorecido atravÈs do uso de bugs e/ou erros de programaÁ„o e ainda de scripts.</p>
-		<p>Se um bug for identificado por um usu·rio, este dever· report·-lo o mais rapidamente possÌvel, atravÈs do suporte do jogo ou no fÛrum de Bugs, ou por email.</p>
-		<p>… proibido manter a verificaÁ„o de IP desligada se esta n„o tiver sido autorizada por o Adminstrador de Jogo.</p>
-	</li>
-	<li>
-		<h1>6. LÌnguagem e Atitudes</h1>
-		<p>O jogo tem multiplas linguas, mas È permitido o uso do PortuguÍs. No entanto, qualquer pessoa, de qualquer nacionalidade, pode jogar no jogo, quer atravÈs de mensagens internas com outros jogadores ou informaÁ„o nas p·ginas de alianÁas.</p>
-		<p>Da mesma maneira, spam, nomes ou mensagens no jogo de conte˙do obsceno, insultuoso, racista, xenÛfobo, nazista ou terrorista conduzem ‡ exclus„o do jogo.</p>
-	</li>
-	<li>
-		<h1>7. Sprache im Spiel</h1>
-		<p>In allen entsprechenden Universen ist Deutsch/Englisch die offizielle Sprache im Spiel. Verstˆﬂe kˆnnen mit einer Sperrung des Accounts geahndet werden. Fremdsprachliche Ingame- Nachrichten/ Allypages kˆnnen unter Vorbehalt zu einer Sperrung des Accounts f¸hren.</p>
-	</li>
-	<li>
-		<h1>8. AmeaÁas/Insultos</h1>
-		<p>AmeaÁas ‡ vida real ou insinuaÁıes sobre medidas de coaÁ„o a um jogador ser„o sancionadas com o bloqueamento permanente do infractor.</p>
-	</li>
-	<li>
-		<h1>9. Spam e Erotismo<h1>
-		<p>Envio contÌnuo de sondas e mensagens sem informaÁ„o relevante ser„o consideradas spam.</p>
-		<p>TambÈm o envio de mensagens com car·cter publicit·rio de outros jogos ou sites de Internet que n„o sejam relacionados com o jogo em si, poderam ser alvo de aviso ou em caso extremos de bloqueamento.</p>
-		<p>Qualquer mensagem, de car·cter ofensivo com um conte˙do inaceit·vel que possa ferir a integridade individual de cada um, È estritamente proibida. Todos os jogadores devem respeitar os seus oponentes/amigos.</p>
-	</li>
-	<li>
-		<h1>10. Regras</h1>
-		<p>As regras podem mudar, e cada usu·rio È obrigado a constantemente verificar se ouve alteraÁ„o neste mesmo sÌtio!</p>
+		<h1>6. Guerras</h1>
+		<p>Ap√≥s os L√≠deres das alian√ßas concordarem com a guerra, esta √© oficialmente declarada. E continuar√° at√© uma das alian√ßas a cancelar. Para cancelar oficialmente a guerra, precisam de cancelar o pacto de guerra dentro do jogo e anunci√°-lo na thread que iniciaram inicialmente.
+Enquanto a guerra estiver ativa, a regra de bashing entre as alian√ßas envolvidas n√£o se aplica. Ou seja, quaisquer membros pertencentes √†s alian√ßas em guerra podem ser atacados um n√∫mero infinito de vezes sem puni√ß√£o.
+Se uma das alian√ßas desistir e cancelar a guerra, a regra de bashing voltar√° a ser aplicada, e qualquer membro que a violar ap√≥s o fim da guerra ser√° punido com um ban de 1 dia, ou mais se o grau de ataque for extremamente elevado.
+<br />
+Se a alian√ßa oposta tiver uma frota em voo e a guerra for cancelada antes da sua chegada, eles N√ÉO ser√£o punidos por esse ataque. Mas qualquer frota enviada ap√≥s o cancelamento da guerra contar√° para a regra de bashing.
+<br /><br />Para Novas Guerras, um dos l√≠deres precisa de criar uma nova thread na sec√ß√£o de guerra/diplomacia.
+A√≠ podem definir quaisquer regras ou termos espec√≠ficos que desejem para a guerra. Quaisquer regras estabelecidas e acordadas pela alian√ßa oposta devem ser seguidas e n√£o devem contradizer quaisquer regras aqui definidas.</p>
 	</li>
 </ul>
