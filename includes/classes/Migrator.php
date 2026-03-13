@@ -69,7 +69,7 @@ class Migrator
     public function parseSql(string $sql): array
     {
         $sql = str_replace('%PREFIX%', $this->prefix, $sql);
-        return array_values(array_filter(array_map('trim', explode(";\n", $sql))));
+        return array_values(array_filter(array_map('trim', explode(";\n", $sql . "\n"))));
     }
 
     /**
