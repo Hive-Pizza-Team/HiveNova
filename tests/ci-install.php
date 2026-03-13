@@ -117,7 +117,6 @@ foreach ($statements as $stmt) {
         $msg = $e->getMessage();
         // Rethrow genuine table/data errors.
         if (!str_contains($msg, '1231') && !str_contains($msg, 'Variable')) {
-            fwrite(STDERR, "\nFailed statement:\n---\n" . substr($stmt, 0, 500) . "\n---\n");
             throw $e;
         }
     }

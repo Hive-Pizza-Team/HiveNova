@@ -655,7 +655,7 @@ CREATE TABLE `%PREFIX%records` (
   `userID` int(10) unsigned NOT NULL,
   `elementID` smallint(5) unsigned NOT NULL,
   `level` bigint(20) unsigned NOT NULL,
-  `universe` tinyint(3) unsigned NOT NULL,
+  `universe` tinyint(3) unsigned NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%session` (
