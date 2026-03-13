@@ -109,4 +109,76 @@ class LanguageTest extends TestCase
         // Bootstrap defines MODE='INSTALL', DEFAULT_LANG='en'
         $this->assertSame('en', $this->lng->getLanguage());
     }
+
+    // -------------------------------------------------------------------------
+    // offsetSet with null offset (append)
+    // -------------------------------------------------------------------------
+
+    public function testOffsetSetWithNullOffsetAppendsValue(): void
+    {
+        $this->lng[] = 'appended';
+        // Value was appended; check it exists somewhere in a fresh loop
+        $this->assertSame('appended', $this->lng[0]);
+    }
+
+    // -------------------------------------------------------------------------
+    // addData edge cases
+    // -------------------------------------------------------------------------
+
+    public function testAddDataWithEmptyArrayLeavesDataUnchanged(): void
+    {
+        $before = $this->lng['greeting'];
+        $this->lng->addData([]);
+        $this->assertSame($before, $this->lng['greeting']);
+    }
+
+    public function testAddDataCanAddNumericKeys(): void
+    {
+        $this->lng->addData([42 => 'forty-two']);
+        $this->assertSame('forty-two', $this->lng[42]);
+    }
+
+    public function testMultipleAddDataCallsAccumulate(): void
+    {
+        $this->lng->addData(['key1' => 'val1']);
+        $this->lng->addData(['key2' => 'val2']);
+        $this->assertSame('val1', $this->lng['key1']);
+        $this->assertSame('val2', $this->lng['key2']);
+        // Original data still intact
+        $this->assertSame('Hello', $this->lng['greeting']);
+    }
+
+    // -------------------------------------------------------------------------
+    // getTemplate — missing file returns sentinel string
+    // -------------------------------------------------------------------------
+
+    public function testGetTemplateReturnsSentinelForMissingTemplate(): void
+    {
+        $result = $this->lng->getTemplate('nonexistent_template_xyz');
+        $this->assertStringContainsString('nonexistent_template_xyz', $result);
+        $this->assertStringContainsString('not found', $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // offsetGet fallback mirrors key name
+    // -------------------------------------------------------------------------
+
+    public function testOffsetGetFallbackReturnsSameKeyForAnyMissingKey(): void
+    {
+        $this->assertSame('some_random_key_abc', $this->lng['some_random_key_abc']);
+        $this->assertSame('another_missing', $this->lng['another_missing']);
+    }
+
+    // -------------------------------------------------------------------------
+    // Round-trip: set then unset then check missing fallback
+    // -------------------------------------------------------------------------
+
+    public function testAfterUnsetOffsetGetReturnsFallback(): void
+    {
+        $this->lng['temp'] = 'value';
+        $this->assertSame('value', $this->lng['temp']);
+        unset($this->lng['temp']);
+        // After unset, offsetGet should return key name as fallback
+        $this->assertSame('temp', $this->lng['temp']);
+    }
 }

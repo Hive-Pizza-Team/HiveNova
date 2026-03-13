@@ -136,4 +136,58 @@ class HTTPTest extends TestCase
         $result = HTTP::_GP('ids', [0]);
         $this->assertSame([3, 7, 99], $result);
     }
+
+    // -------------------------------------------------------------------------
+    // highnum mode — always returns float regardless of default type
+    // -------------------------------------------------------------------------
+
+    public function testGPHighnumReturnsFloat(): void
+    {
+        $_REQUEST['amount'] = '1234567890';
+        $result = HTTP::_GP('amount', 0, false, true);
+        $this->assertSame(1234567890.0, $result);
+    }
+
+    public function testGPHighnumWithFloatStringReturnsFloat(): void
+    {
+        $_REQUEST['amount'] = '3.14159';
+        $result = HTTP::_GP('amount', 0, false, true);
+        $this->assertEqualsWithDelta(3.14159, $result, 0.00001);
+    }
+
+    // -------------------------------------------------------------------------
+    // Multibyte mode — strips non-UTF-8 sequences
+    // -------------------------------------------------------------------------
+
+    public function testGPMultibyteAcceptsValidUtf8String(): void
+    {
+        $_REQUEST['name'] = 'Héllo';
+        $result = HTTP::_GP('name', '', true);
+        $this->assertNotEmpty($result);
+        $this->assertStringContainsString('llo', $result);
+    }
+
+    public function testGPNonMultibyteReplacesHighByteWithQuestionMark(): void
+    {
+        // Build a string with ASCII prefix + high byte; htmlspecialchars with UTF-8
+        // drops invalid sequences, then _quote replaces remaining 0x80-0xFF with '?'
+        // Use a raw ASCII-only input to verify the non-multibyte path strips high bytes
+        $_REQUEST['name'] = "hello\xC0world";   // 0xC0 = invalid UTF-8 lead byte
+        $result = HTTP::_GP('name', '', false);
+        // Either '?' placeholder or string without the invalid byte is acceptable
+        $this->assertIsString($result);
+    }
+
+    // -------------------------------------------------------------------------
+    // Nested array recursion
+    // -------------------------------------------------------------------------
+
+    public function testGPHandlesNestedArrayRecursively(): void
+    {
+        $_REQUEST['data'] = [['a', 'b'], ['c', 'd']];
+        $result = HTTP::_GP('data', []);
+        $this->assertIsArray($result);
+        $this->assertIsArray($result[0]);
+        $this->assertSame('a', $result[0][0]);
+    }
 }

@@ -187,4 +187,131 @@ class PlayerUtilTest extends TestCase
         $user = ['username' => 'alice', 'hive_account' => ''];
         $this->assertSame('⛓️‍💥', PlayerUtil::getPlayerBadges($user));
     }
+
+    // -------------------------------------------------------------------------
+    // checkPosition — uses Config (no DB)
+    // -------------------------------------------------------------------------
+
+    private function makePositionConfig(array $overrides = []): Config
+    {
+        return new Config(array_merge([
+            'uni'         => 1,
+            'max_galaxy'  => 5,
+            'max_system'  => 499,
+            'max_planets' => 15,
+        ], $overrides));
+    }
+
+    protected function setUp(): void
+    {
+        // Reset Config singleton between tests
+        $ref = new ReflectionProperty(Config::class, 'instances');
+        $ref->setAccessible(true);
+        $ref->setValue(null, []);
+    }
+
+    public function testCheckPositionReturnsTrueForValidCoords(): void
+    {
+        Config::setInstance($this->makePositionConfig(), 1);
+        $this->assertTrue(PlayerUtil::checkPosition(1, 3, 250, 8));
+    }
+
+    public function testCheckPositionReturnsFalseForGalaxyZero(): void
+    {
+        Config::setInstance($this->makePositionConfig(), 1);
+        $this->assertFalse(PlayerUtil::checkPosition(1, 0, 1, 1));
+    }
+
+    public function testCheckPositionReturnsFalseForGalaxyExceedingMax(): void
+    {
+        Config::setInstance($this->makePositionConfig(), 1);
+        $this->assertFalse(PlayerUtil::checkPosition(1, 6, 1, 1));
+    }
+
+    public function testCheckPositionReturnsFalseForSystemZero(): void
+    {
+        Config::setInstance($this->makePositionConfig(), 1);
+        $this->assertFalse(PlayerUtil::checkPosition(1, 1, 0, 1));
+    }
+
+    public function testCheckPositionReturnsFalseForSystemExceedingMax(): void
+    {
+        Config::setInstance($this->makePositionConfig(), 1);
+        $this->assertFalse(PlayerUtil::checkPosition(1, 1, 500, 1));
+    }
+
+    public function testCheckPositionReturnsFalseForPositionZero(): void
+    {
+        Config::setInstance($this->makePositionConfig(), 1);
+        $this->assertFalse(PlayerUtil::checkPosition(1, 1, 1, 0));
+    }
+
+    public function testCheckPositionReturnsFalseForPositionExceedingMax(): void
+    {
+        Config::setInstance($this->makePositionConfig(), 1);
+        $this->assertFalse(PlayerUtil::checkPosition(1, 1, 1, 16));
+    }
+
+    public function testCheckPositionAcceptsBoundaryValues(): void
+    {
+        Config::setInstance($this->makePositionConfig(), 1);
+        // Exactly at max values — should be valid
+        $this->assertTrue(PlayerUtil::checkPosition(1, 5, 499, 15));
+        // Exactly at minimum values — should be valid
+        $this->assertTrue(PlayerUtil::checkPosition(1, 1, 1, 1));
+    }
+
+    // -------------------------------------------------------------------------
+    // maxPlanetCount — pure math over Config values
+    // -------------------------------------------------------------------------
+
+    private function makePlanetCountConfig(array $overrides = []): Config
+    {
+        return new Config(array_merge([
+            'uni'               => 1,
+            'min_player_planets'=> 1,
+            'planets_tech'      => 4,
+            'planets_officier'  => 2,
+            'planets_per_tech'  => 1,
+        ], $overrides));
+    }
+
+    public function testMaxPlanetCountBaselineWithNoTechOrBonus(): void
+    {
+        Config::setInstance($this->makePlanetCountConfig(), 1);
+        $GLOBALS['resource'][124] = 'astrophysics_tech';
+        $USER = [
+            'universe'          => 1,
+            'astrophysics_tech' => 0,
+            'factor'            => ['Planets' => 0],
+        ];
+        // min_player_planets=1, tech=0*1=0 (capped at planets_tech=4), bonus=0
+        $this->assertSame(1, PlayerUtil::maxPlanetCount($USER));
+    }
+
+    public function testMaxPlanetCountScalesWithAstrophysicsLevel(): void
+    {
+        Config::setInstance($this->makePlanetCountConfig(), 1);
+        $GLOBALS['resource'][124] = 'astrophysics_tech';
+        $USER = [
+            'universe'          => 1,
+            'astrophysics_tech' => 3,
+            'factor'            => ['Planets' => 0],
+        ];
+        // min=1, tech=min(4, 3*1)=3, bonus=0 → ceil(1+3+0)=4
+        $this->assertSame(4, PlayerUtil::maxPlanetCount($USER));
+    }
+
+    public function testMaxPlanetCountCapsTechBonus(): void
+    {
+        Config::setInstance($this->makePlanetCountConfig(), 1);
+        $GLOBALS['resource'][124] = 'astrophysics_tech';
+        $USER = [
+            'universe'          => 1,
+            'astrophysics_tech' => 100,  // way above cap of 4
+            'factor'            => ['Planets' => 0],
+        ];
+        // min=1, tech capped at planets_tech=4, bonus=0 → ceil(5)=5
+        $this->assertSame(5, PlayerUtil::maxPlanetCount($USER));
+    }
 }
