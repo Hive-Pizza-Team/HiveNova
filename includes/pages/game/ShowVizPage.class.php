@@ -60,7 +60,10 @@ class ShowVizPage extends AbstractGamePage
         $fleetsJson = json_encode($fleetData);
 
         $this->assign(array(
-            'fleetsJson'                => $fleetsJson
+            'fleetsJson'  => $fleetsJson,
+            'maxGalaxy'   => (int) $config->max_galaxy,
+            'maxSystem'   => (int) $config->max_system,
+            'maxPlanets'  => (int) $config->max_planets,
         ));
 
         $this->display('page.viz.default.tpl');

@@ -3,7 +3,7 @@
 <div id="threejs-container">
 <style>
         body { margin: 0; }
-        #threejs-container { width: 100%; height: 100vh; }
+        #threejs-container { width: 100%; height: 100vh; height: 100dvh; touch-action: none; }
 </style>
 
 <script src="scripts/threejs/three.min.js"></script>
@@ -12,149 +12,112 @@
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
-    const width = document.getElementById('threejs-container').offsetWidth;
-    const height = document.getElementById('threejs-container').offsetHeight;
-    renderer.setSize(width, height);
+    const container = document.getElementById('threejs-container');
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(container.offsetWidth, container.offsetHeight);
+    container.appendChild(renderer.domElement);
 
-    document.getElementById('threejs-container').appendChild(renderer.domElement);
+    const maxGalaxy  = {$maxGalaxy};
+    const maxSystem  = {$maxSystem};
+    const maxPlanets = {$maxPlanets};
 
-    // Triangle group positions
-    const circleGroups = [
-        { x: 0, y: 20 },    // Top center
-        { x: -45, y: -20 }, // Bottom left
-        { x: 45, y: -20 }   // Bottom right
-    ];
-
-    const numCirclesPerGroup = 300;
-    const pointsPerCircle = 15;
-
-    // Adjusted camera to fit all groups
-    const camera = new THREE.OrthographicCamera(-80, 80, 60, -60, 0.1, 100);
-    camera.position.z = 100;
-
-    // Create static points visualization
-    const geometry = new THREE.BufferGeometry();
-    const positions = [];
-    const colors = [];
-
-    circleGroups.forEach((offset, groupIndex) => {
-        for (let i = 0; i < numCirclesPerGroup; i++) {
-            const radius = (i + 1) * 0.1;
-            const color = new THREE.Color().setHSL(
-                (groupIndex * numCirclesPerGroup + i) / (numCirclesPerGroup * 3),
-                1, 0.5
-            );
-
-            for (let j = 0; j < pointsPerCircle; j++) {
-                const angle = (j / pointsPerCircle) * 2 * Math.PI;
-                const x = offset.x + radius * Math.cos(angle);
-                const y = offset.y + radius * Math.sin(angle);
-                positions.push(x, y, 0);
-                colors.push(color.r, color.g, color.b);
-            }
-        }
-    });
-
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-
-    const pointMaterial = new THREE.PointsMaterial({
-        size: 0.2,
-        vertexColors: true
-    });
-
-    const points = new THREE.Points(geometry, pointMaterial);
-    scene.add(points);
-
-    // Store moving objects
-    const movingObjects = [];
-
-    // Create sprite for each fleet
-    function createMovingObject(start, end, duration = 5, color = 0xff0000) {
-
-        const spriteMaterial = new THREE.SpriteMaterial({ color });
-        const sprite = new THREE.Sprite(spriteMaterial);
-        sprite.scale.set(1.0, 1.0, 1);
-        scene.add(sprite);
-
-        movingObjects.push({
-            sprite,
-            start,
-            end,
-            duration,
-            startTime: Date.now()
+    // Build galaxy centre positions arranged in a circle
+    const layoutRadius = Math.max(30, maxGalaxy * 8);
+    const circleGroups = [];
+    for (let i = 0; i < maxGalaxy; i++) {
+        const angle = (i / maxGalaxy) * 2 * Math.PI - Math.PI / 2;
+        circleGroups.push({
+            x: layoutRadius * Math.cos(angle),
+            y: layoutRadius * Math.sin(angle)
         });
     }
 
-    const data = {$fleetsJson};
+    const vizRadius = layoutRadius + maxSystem * 0.1 + 5;
+    const camera = new THREE.OrthographicCamera(-vizRadius, vizRadius, vizRadius * 0.75, -vizRadius * 0.75, 0.1, 100);
+    camera.position.z = 100;
 
-    // Clear existing objects
-    movingObjects.forEach(obj => scene.remove(obj.sprite));
-    movingObjects.length = 0;
+    // Build static background points using pre-allocated typed arrays
+    const totalPoints = maxGalaxy * maxSystem * maxPlanets;
+    const positions = new Float32Array(totalPoints * 3);
+    const colors    = new Float32Array(totalPoints * 3);
+    const tmpColor  = new THREE.Color();
+    let idx = 0;
 
-    data.forEach(row => {
-        row.startGroup  = parseInt(row.startGroup);
-        row.startCircle = parseInt(row.startCircle);
-        row.startPoint = parseInt(row.startPoint);
-        row.endGroup  = parseInt(row.endGroup);
-        row.endCircle = parseInt(row.endCircle);
-        row.endPoint = parseInt(row.endPoint);
-        row.duration = parseFloat(row.duration);
+    for (let g = 0; g < maxGalaxy; g++) {
+        const offset = circleGroups[g];
+        for (let i = 0; i < maxSystem; i++) {
+            const radius = (i + 1) * 0.1;
+            tmpColor.setHSL((g * maxSystem + i) / (maxSystem * maxGalaxy), 1, 0.5);
+            const cr = tmpColor.r, cg = tmpColor.g, cb = tmpColor.b;
+            for (let j = 0; j < maxPlanets; j++) {
+                const angle = (j / maxPlanets) * 2 * Math.PI;
+                positions[idx]     = offset.x + radius * Math.cos(angle);
+                positions[idx + 1] = offset.y + radius * Math.sin(angle);
+                positions[idx + 2] = 0;
+                colors[idx]     = cr;
+                colors[idx + 1] = cg;
+                colors[idx + 2] = cb;
+                idx += 3;
+            }
+        }
+    }
 
-        const startGroup = circleGroups[row.startGroup - 1];
-        const endGroup = circleGroups[row.endGroup - 1];
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('color',    new THREE.Float32BufferAttribute(colors, 3));
+    scene.add(new THREE.Points(geometry, new THREE.PointsMaterial({ size: 0.2 * window.devicePixelRatio, vertexColors: true })));
 
-        const startRadius = (row.startCircle + 1) * 0.1;
-        const startAngle = (row.startPoint / pointsPerCircle) * 2 * Math.PI;
+    // Fleet sprites
+    const movingObjects = [];
 
-        const endRadius = (row.endCircle + 1) * 0.1;
-        const endAngle = (row.endPoint / pointsPerCircle) * 2 * Math.PI;
+    function createMovingObject(start, end, duration, color) {
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ color }));
+        scene.add(sprite);
+        movingObjects.push({ sprite, start, end, duration, startTime: Date.now() });
+    }
 
-        const start = new THREE.Vector3(
-            startGroup.x + startRadius * Math.cos(startAngle),
-            startGroup.y + startRadius * Math.sin(startAngle),
-            0
-        );
+    const TWO_PI = 2 * Math.PI;
+    {$fleetsJson}.forEach(row => {
+        const startGroup = circleGroups[parseInt(row.startGroup) - 1];
+        const endGroup   = circleGroups[parseInt(row.endGroup)   - 1];
+        if (!startGroup || !endGroup) return; // skip out-of-range galaxies
 
-        const end = new THREE.Vector3(
-            endGroup.x + endRadius * Math.cos(endAngle),
-            endGroup.y + endRadius * Math.sin(endAngle),
-            0
-        );
+        const startCircle = parseInt(row.startCircle);
+        const endCircle   = parseInt(row.endCircle);
+        const startPoint  = parseInt(row.startPoint);
+        const endPoint    = parseInt(row.endPoint);
+
+        const startRadius = (startCircle + 1) * 0.1;
+        const startAngle  = (startPoint / maxPlanets) * TWO_PI;
+        const endRadius   = (endCircle   + 1) * 0.1;
+        const endAngle    = (endPoint    / maxPlanets) * TWO_PI;
 
         createMovingObject(
-            start,
-            end,
-            row.duration,
-            row.color ? parseInt(row.color.replace('#', '0x'), 16) : 0xff0000
+            new THREE.Vector3(startGroup.x + startRadius * Math.cos(startAngle), startGroup.y + startRadius * Math.sin(startAngle), 0),
+            new THREE.Vector3(endGroup.x   + endRadius   * Math.cos(endAngle),   endGroup.y   + endRadius   * Math.sin(endAngle),   0),
+            parseFloat(row.duration) || 5,
+            row.color ? parseInt(row.color.replace('#', ''), 16) : 0xff0000
         );
     });
 
-    // Set black background
     renderer.setClearColor(0x000000, 0.5);
 
-    // Animation loop
     function animate() {
         requestAnimationFrame(animate);
         const now = Date.now();
-
-        movingObjects.forEach(obj => {
-            const elapsed = (now - obj.startTime) / 1000; // Convert to seconds
-            const t = (elapsed % obj.duration) / obj.duration;
-            obj.sprite.position.copy(obj.start.clone().lerp(obj.end, t));
-        });
-
+        for (let i = 0; i < movingObjects.length; i++) {
+            const obj = movingObjects[i];
+            const t = ((now - obj.startTime) / 1000 % obj.duration) / obj.duration;
+            obj.sprite.position.lerpVectors(obj.start, obj.end, t);
+        }
         renderer.render(scene, camera);
     }
 
     animate();
 
-    // Responsive resizing
     window.addEventListener('resize', () => {
-        camera.left = -80 * window.innerWidth/window.innerHeight;
-        camera.right = 80 * window.innerWidth/window.innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
     });
 </script>
 {/block}
