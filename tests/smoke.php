@@ -147,9 +147,9 @@ echo "[ LOGIN ] POST $baseUrl/game.php?page=login ... ";
 ], $cookieFile);
 
 // After login we expect to land on overview or similar — check we're not still on login
-if (stripos($body, 'logout') !== false || stripos($body, 'overview') !== false || stripos($body, 'ingame') !== false) {
+if (stripos($body, 'logout') !== false || stripos($body, 'page=logout') !== false) {
     echo "OK (logged in)\n\n";
-} elseif (stripos($body, 'invalid') !== false || stripos($body, 'wrong') !== false || stripos($body, 'password') !== false) {
+} elseif ($status >= 400 || stripos($body, 'invalid') !== false || stripos($body, 'wrong') !== false || stripos($body, 'password') !== false) {
     echo "FAILED (bad credentials?)\n";
     exit(1);
 } else {

@@ -56,12 +56,9 @@ jobs:
           extensions: pdo_mysql, gd, gmp
       - run: composer install --no-interaction --prefer-dist
       - run: php tests/ci-install.php
+      - run: mkdir -p cache/sessions cache/templates
       - run: php -S localhost:8000 &> /tmp/php-server.log & sleep 2
-      - name: Debug - fetch overview page directly
-        run: |
-          curl -sc /tmp/ci_cookies.txt -d "username=$ADMIN_NAME&password=$ADMIN_PASSWORD" \
-            "http://localhost:8000/game.php?page=login" -o /dev/null
-          echo "=== overview body ===" && \
-            curl -sb /tmp/ci_cookies.txt "http://localhost:8000/game.php?page=overview"
-          echo "=== php server log ===" && cat /tmp/php-server.log
       - run: php tests/smoke.php
+      - name: Dump PHP server log on failure
+        if: failure()
+        run: cat /tmp/php-server.log
