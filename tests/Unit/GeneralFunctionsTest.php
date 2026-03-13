@@ -309,6 +309,26 @@ class GeneralFunctionsTest extends TestCase
         $this->assertStringContainsString("data-n='0'", $result);
     }
 
+    /**
+     * The fleet "max" link JS reads data-n directly as a form input value.
+     * Verify data-n contains a plain numeric string with no HTML or formatting
+     * characters, so it can be used as-is in an <input> without injecting markup.
+     */
+    public function testPrettyNumberDataNIsPlainNumeric(): void
+    {
+        $GLOBALS['userNumberFormat'] = 'auto';
+
+        foreach ([0, 1, 42, 1234567, 9999999] as $n) {
+            $result = pretty_number($n);
+            // Extract data-n value
+            preg_match("/data-n='([^']*)'/", $result, $m);
+            $this->assertNotEmpty($m, "data-n attribute missing for n=$n");
+            $dataN = $m[1];
+            $this->assertMatchesRegularExpression('/^\d+$/', $dataN,
+                "data-n must be a plain integer for n=$n, got: $dataN");
+        }
+    }
+
     public function testPrettyNumberWithNoGlobalReturnsPlainEuText(): void
     {
         unset($GLOBALS['userNumberFormat']);

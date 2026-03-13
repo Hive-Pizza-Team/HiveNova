@@ -152,8 +152,10 @@ function calculateTransportCapacity() {
 
 function maxShip(id) {
 	if (document.getElementsByName(id)[0]) {
-		var amount = document.getElementById(id + "_value").innerHTML;
-		document.getElementsByName(id)[0].value = amount.replace(/\./g, "");
+		var elem = document.getElementById(id + "_value");
+		var span = elem.querySelector('[data-n]');
+		var amount = span ? span.getAttribute('data-n') : elem.textContent.replace(/\./g, "");
+		document.getElementsByName(id)[0].value = amount;
 	}
 }
 
