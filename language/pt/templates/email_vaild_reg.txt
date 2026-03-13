@@ -1,18 +1,25 @@
 Olá {USERNAME},
 
 
-Obrigada por registares em {GAMENAME}
+Obrigado por te registares em {GAMENAME}
 
-Para completar o seu registo por favor clique no seguinte link:
+Antes de podermos ativar a tua conta, é necessário mais um passo.
+Por favor tem em atenção que este passo é obrigatório para te tornares um
+utilizador registado. Tens de clicar no link abaixo apenas uma vez para
+verificares a tua identidade.
+
+Para completares o teu registo, por favor clica no seguinte link de ativação:
 
 {VERTIFYURL}
 
-Dados de Login:
+Os teus dados de acesso:
 
-Username : {USERNAME}
-Password : {PASSWORD}
+Nome de utilizador : {USERNAME}
+Palavra-passe : {PASSWORD}
 
-Se houver problemas em ativar a conta por favor contacte:
+Se tiveres algum problema com o registo automático,
+por favor contacta o administrador através do seguinte email:
 {GAMEMAIL}
 
-{GAMENAME} Team
+Cumprimentos,
+Equipa {GAMENAME}

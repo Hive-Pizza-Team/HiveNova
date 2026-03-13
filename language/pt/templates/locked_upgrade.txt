@@ -1,0 +1,6 @@
+<h2>Atualização da base de dados necessária!</h2>
+<p>A base de dados requer uma atualização.</p>
+<p>Para ativar o processo de atualização, o ficheiro ENABLE_INSTALL_TOOL deve ser criado.</p>
+<ul>
+    <li>Na pasta includes/, cria um ficheiro com o nome ENABLE_INSTALL_TOOL. O nome do ficheiro é sensível a maiúsculas e minúsculas. O ficheiro em si pode ser simplesmente um ficheiro vazio.</li>
+</ul>

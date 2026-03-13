@@ -1,8 +1,10 @@
 Olá {USERNAME},
 
-Obrigada por te juntares a um novo universo em {GAMENAME}
 
-Esperamos que te divirtas e conquistas os teus objetivos connosco!
-Não te esquecas de visitares a comunidade para teres proveito do jogo.
+Obrigado por te registares em {GAMENAME}
 
-Bom jogo, a equipa de {GAMENAME}
+Ficamos muito contentes que tenhas decidido fazer parte da nossa comunidade
+e esperamos que te divirtas!
+
+Cumprimentos,
+{GAMENAME} - Equipa
