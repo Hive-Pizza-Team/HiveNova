@@ -22,9 +22,9 @@
 $LNG['ub_points']		= 'Pontos';
 $LNG['ub_fleets']		= 'Frota';
 $LNG['ub_researh']		= 'Pesquisas';
-$LNG['ub_buildings']	= 'Edificios';
+$LNG['ub_buildings']	= 'Edifícios';
 $LNG['ub_defenses']		= 'Defesas';
 
 $LNG['ub_fights']		= 'Batalhas';
-$LNG['ub_quote']		= 'Quote';
+$LNG['ub_quote']		= 'Citação';
 $LNG['ub_rank']			= 'Posição';
