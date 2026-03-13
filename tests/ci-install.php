@@ -22,14 +22,14 @@ chdir(ROOT_PATH);
 set_include_path(ROOT_PATH);
 
 // --- 1. Read env vars ---
-$dbHost   = getenv('DB_HOST')       ?: '127.0.0.1';
-$dbPort   = getenv('DB_PORT')       ?: '3306';
-$dbUser   = getenv('DB_USER')       ?: '';
-$dbPass   = getenv('DB_PASSWORD')   ?: '';
-$dbName   = getenv('DB_NAME')       ?: '';
-$adminName = getenv('ADMIN_NAME')   ?: '';
+$dbHost    = getenv('DB_HOST')        ?: '127.0.0.1';
+$dbPort    = getenv('DB_PORT')        ?: '3306';
+$dbUser    = getenv('DB_USER')        ?: '';
+$dbPass    = getenv('DB_PASSWORD')    ?: '';
+$dbName    = getenv('DB_NAME')        ?: '';
+$adminName = getenv('ADMIN_NAME')     ?: '';
 $adminPass = getenv('ADMIN_PASSWORD') ?: '';
-$adminMail = getenv('ADMIN_MAIL')   ?: '';
+$adminMail = getenv('ADMIN_MAIL')     ?: '';
 
 foreach (['DB_USER' => $dbUser, 'DB_NAME' => $dbName, 'ADMIN_NAME' => $adminName,
           'ADMIN_PASSWORD' => $adminPass, 'ADMIN_MAIL' => $adminMail] as $var => $val) {
@@ -38,41 +38,41 @@ foreach (['DB_USER' => $dbUser, 'DB_NAME' => $dbName, 'ADMIN_NAME' => $adminName
     }
 }
 
-echo "=== HiveNova CI Installer ===\n";
-echo "DB   : $dbUser@$dbHost:$dbPort/$dbName\n";
-echo "Admin: $adminName <$adminMail>\n\n";
-
 // --- 2. Write includes/config.php ---
-echo "[ 1/4 ] Writing includes/config.php ... ";
+// Must happen before bootstrapping so common.php can connect to the DB.
 $blowfish = substr(str_shuffle('./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 22);
 $configContent = sprintf(
     file_get_contents(ROOT_PATH . 'includes/config.sample.php'),
     $dbHost, $dbPort, $dbUser, $dbPass, $dbName, 'uni1_', $blowfish
 );
 if (file_put_contents(ROOT_PATH . 'includes/config.php', $configContent) === false) {
-    die("FAILED (cannot write includes/config.php)\n");
+    die("Error: cannot write includes/config.php\n");
 }
-echo "OK\n";
 
-// --- Bootstrap the game framework (like install/index.php does) ---
-// Buffer output so that common.php can still send headers without warnings.
-ob_start();
+// --- Bootstrap the game framework ---
+// common.php calls header() internally; suppress any header-related warnings
+// by bootstrapping before any output has been sent, and silencing with @.
 define('MODE', 'INSTALL');
-require ROOT_PATH . 'includes/common.php';
-ob_end_clean();
+@require ROOT_PATH . 'includes/common.php';
+
+// Now it is safe to produce output.
+echo "=== HiveNova CI Installer ===\n";
+echo "DB   : $dbUser@$dbHost:$dbPort/$dbName\n";
+echo "Admin: $adminName <$adminMail>\n\n";
+echo "[ 1/4 ] Writing includes/config.php ... OK\n";
 
 // --- 3. Execute install.sql ---
 echo "[ 2/4 ] Executing install/install.sql ... ";
 
-$installSQL     = file_get_contents(ROOT_PATH . 'install/install.sql');
-$installVersion = trim(file_get_contents(ROOT_PATH . 'install/VERSION'));
+$installSQL      = file_get_contents(ROOT_PATH . 'install/install.sql');
+$installVersion  = trim(file_get_contents(ROOT_PATH . 'install/VERSION'));
 $installRevision = 0;
 
 preg_match('!\$' . 'Id: install.sql ([0-9]+)!', $installSQL, $match);
 $versionParts = explode('.', $installVersion);
 if (isset($match[1])) {
-    $installRevision   = (int)$match[1];
-    $versionParts[2]   = $installRevision;
+    $installRevision = (int)$match[1];
+    $versionParts[2] = $installRevision;
 } else {
     $installRevision = (int)($versionParts[2] ?? 0);
 }
@@ -87,12 +87,12 @@ $db->query(str_replace(
 
 // Set basic config values (mirrors install/index.php step 6)
 $config = Config::get(Universe::current());
-$config->timezone           = @date_default_timezone_get();
-$config->lang               = 'en';
-$config->OverviewNewsText   = 'Welcome to HiveNova ' . $installVersion;
-$config->uni_name           = 'Universe ' . Universe::current();
-$config->close_reason       = 'Maintenance';
-$config->moduls             = implode(';', array_fill(0, MODULE_AMOUNT - 1, 1));
+$config->timezone         = @date_default_timezone_get();
+$config->lang             = 'en';
+$config->OverviewNewsText = 'Welcome to HiveNova ' . $installVersion;
+$config->uni_name         = 'Universe ' . Universe::current();
+$config->close_reason     = 'Maintenance';
+$config->moduls           = implode(';', array_fill(0, MODULE_AMOUNT - 1, 1));
 $config->save();
 
 echo "OK\n";
@@ -107,13 +107,13 @@ PlayerUtil::createPlayer(
     $adminName,
     $hashPassword,
     $adminMail,
-    '',      // hiveaccount
-    'en',    // language
-    1,       // galaxy
-    1,       // system
-    2,       // position
-    null,    // referrer
-    AUTH_ADM // authority
+    '',       // hiveaccount
+    'en',     // language
+    1,        // galaxy
+    1,        // system
+    2,        // position
+    null,     // referrer
+    AUTH_ADM  // authority
 );
 echo "OK\n";
 
