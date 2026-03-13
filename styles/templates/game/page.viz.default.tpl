@@ -3,7 +3,7 @@
 <div id="threejs-container">
 <style>
         body { margin: 0; }
-        #threejs-container { width: 100%; height: 100vh; height: 100dvh; touch-action: none; }
+        #threejs-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; }
 </style>
 
 <script src="scripts/threejs/three.min.js"></script>
@@ -116,8 +116,14 @@
     animate();
 
     window.addEventListener('resize', () => {
+        const w = container.offsetWidth, h = container.offsetHeight;
+        const aspect = w / h;
+        camera.left   = -vizRadius;
+        camera.right  =  vizRadius;
+        camera.top    =  vizRadius / aspect;
+        camera.bottom = -vizRadius / aspect;
         camera.updateProjectionMatrix();
-        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        renderer.setSize(w, h);
     });
 </script>
 {/block}
