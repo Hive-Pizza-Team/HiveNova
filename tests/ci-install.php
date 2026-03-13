@@ -55,8 +55,11 @@ if (file_put_contents(ROOT_PATH . 'includes/config.php', $configContent) === fal
 echo "OK\n";
 
 // --- Bootstrap the game framework (like install/index.php does) ---
+// Buffer output so that common.php can still send headers without warnings.
+ob_start();
 define('MODE', 'INSTALL');
 require ROOT_PATH . 'includes/common.php';
+ob_end_clean();
 
 // --- 3. Execute install.sql ---
 echo "[ 2/4 ] Executing install/install.sql ... ";
