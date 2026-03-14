@@ -5,6 +5,9 @@ namespace HiveNova\Core;
 use HiveNova\Core\Database;
 use HiveNova\Core\Language;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Repository\PlanetRepository;
+use HiveNova\Repository\UserRepository;
 
 /**
  *  2Moons 
@@ -174,6 +177,21 @@ class MissionFunctions
 		));
 	}
 	
+	function getPlanetName(int $planetId): string
+	{
+		return PlanetRepository::getPlanetName($planetId) ?? '';
+	}
+
+	function getUser(int $userId): array
+	{
+		return UserRepository::getUserById($userId) ?? [];
+	}
+
+	function sendArrivalMessage(int $receiverId, string $subject, string $body): void
+	{
+		PlayerUtil::sendMessage($receiverId, 0, '', 5, $subject, $body, TIMESTAMP);
+	}
+
 	function getLanguage($language = NULL, $userID = NULL)
 	{
 		if(is_null($language) && !is_null($userID))

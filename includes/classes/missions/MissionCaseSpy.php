@@ -9,6 +9,7 @@ use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
 use HiveNova\Core\Template as template;
+use HiveNova\Repository\PlanetRepository;
 
 /**
  *  2Moons 
@@ -39,24 +40,11 @@ class MissionCaseSpy extends MissionFunctions implements Mission
 
 		$db				= Database::get();
 
-		$sql			= 'SELECT * FROM %%USERS%% WHERE id = :userId;';
-		$senderUser		= $db->selectSingle($sql, array(
-			':userId'	=> $this->_fleet['fleet_owner']
-		));
+		$senderUser		= $this->getUser((int) $this->_fleet['fleet_owner']);
+		$targetUser		= $this->getUser((int) $this->_fleet['fleet_target_owner']);
+		$targetPlanet	= PlanetRepository::getPlanetById((int) $this->_fleet['fleet_end_id']);
 
-		$targetUser		= $db->selectSingle($sql, array(
-			':userId'	=> $this->_fleet['fleet_target_owner']
-		));
-
-		$sql			= 'SELECT * FROM %%PLANETS%% WHERE id = :planetId;';
-		$targetPlanet	= $db->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_end_id']
-		));
-
-		$sql				= 'SELECT name FROM %%PLANETS%% WHERE id = :planetId;';
-		$senderPlanetName	= $db->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_start_id']
-		), 'name');
+		$senderPlanetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_start_id']);
 
 		$LNG			= $this->getLanguage($senderUser['lang']);
 

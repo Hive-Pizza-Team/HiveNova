@@ -2,7 +2,6 @@
 
 namespace HiveNova\Mission;
 
-use HiveNova\Core\Database;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
@@ -31,10 +30,7 @@ class MissionCaseStay extends MissionFunctions implements Mission
 	
 	function TargetEvent()
 	{
-		$sql				= 'SELECT * FROM %%USERS%% WHERE id = :userId;';
-		$senderUser			= Database::get()->selectSingle($sql, array(
-			':userId'	=> $this->_fleet['fleet_owner']
-		));
+		$senderUser			= $this->getUser((int) $this->_fleet['fleet_owner']);
 
 		$senderUser['factor']	= getFactors($senderUser, 'basic', $this->_fleet['fleet_start_time']);
 		

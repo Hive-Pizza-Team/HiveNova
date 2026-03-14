@@ -2,10 +2,10 @@
 
 namespace HiveNova\Mission;
 
-use HiveNova\Core\Database;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Repository\PlanetRepository;
 
 class MissionCaseTransfer extends MissionFunctions implements Mission
 {
@@ -16,15 +16,8 @@ class MissionCaseTransfer extends MissionFunctions implements Mission
 
 	function TargetEvent()
 	{
-		$sql = 'SELECT name FROM %%PLANETS%% WHERE `id` = :planetId;';
-
-		$startPlanetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_start_id']
-		), 'name');
-
-		$targetPlanetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_end_id']
-		), 'name');
+		$startPlanetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_start_id']);
+		$targetPlanetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_end_id']);
 
 		$LNG			= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
 

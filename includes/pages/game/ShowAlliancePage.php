@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\AllianceService;
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
@@ -306,18 +307,11 @@ class ShowAlliancePage extends AbstractGamePage
 				return;
 			}
 
-			$sql = "INSERT INTO %%ALLIANCE_REQUEST%% SET
-                allianceId	= :allianceId,
-                text		= :text,
-                time		= :time,
-                userId		= :userId;";
-
-			$db->insert($sql, array(
-				':allianceId'	=> $allianceId,
-				':text'			=> $text,
-				':time'			=> TIMESTAMP,
-				':userId'		=> $USER['id']
-			));
+			try {
+				AllianceService::applyToAlliance($allianceId, $USER['id'], Universe::current(), $text);
+			} catch (\RuntimeException $e) {
+				$this->redirectToHome();
+			}
 
 			$this->printMessage($LNG['al_request_confirmation_message'], array(array(
 				'label'	=> $LNG['sys_forward'],
@@ -466,49 +460,20 @@ class ShowAlliancePage extends AbstractGamePage
 			)));
 		}
 
-		$db		= Database::get();
-
-		$sql	= 'SELECT COUNT(*) as count FROM %%ALLIANCE%% WHERE ally_universe = :universe
-        AND (ally_tag = :allianceTag OR ally_name = :allianceName);';
-
-		$allianceCount = $db->selectSingle($sql, array(
-			':universe'	=> Universe::current(),
-			':allianceTag' => $allianceTag,
-			':allianceName' => $allianceName
-		), 'count');
-
-		if ($allianceCount != 0) {
+		try {
+			AllianceService::createAlliance(
+				$USER['id'],
+				Universe::current(),
+				$allianceTag,
+				$allianceName,
+				$LNG['al_default_leader_name']
+			);
+		} catch (\RuntimeException $e) {
 			$this->printMessage(sprintf($LNG['al_already_exists'], $allianceName), array(array(
 				'label'	=> $LNG['sys_back'],
 				'url'	=> '?page=alliance&mode=create'
 			)));
 		}
-
-		$sql	= "INSERT INTO %%ALLIANCE%% SET ally_name = :allianceName, ally_tag = :allianceTag, ally_owner = :userId,
-        ally_owner_range = :allianceOwnerRange, ally_members = 1, ally_register_time = :time, ally_universe = :universe;";
-		$db->insert($sql, array(
-			':allianceName'			=> $allianceName,
-			':allianceTag'			=> $allianceTag,
-			':userId'			    => $USER['id'],
-			':allianceOwnerRange'	=> $LNG['al_default_leader_name'],
-			':time'                 => TIMESTAMP,
-			':universe'             => Universe::current(),
-		));
-
-		$allianceId = $db->lastInsertId();
-
-		$sql	= "UPDATE %%USERS%% SET ally_id	= :allianceId, ally_rank_id	= 0, ally_register_time = :time WHERE id = :userId;";
-		$db->update($sql, array(
-			':allianceId'	=> $allianceId,
-			':time'			=> TIMESTAMP,
-			':userId'       => $USER['id']
-		));
-
-		$sql	= "UPDATE %%STATPOINTS%% SET id_ally = :allianceId WHERE id_owner = :userId;";
-		$db->update($sql, array(
-			':allianceId'	=> $allianceId,
-			':userId'       => $USER['id']
-		));
 
 		$this->printMessage(sprintf($LNG['al_created'], $allianceName . ' [' . $allianceTag . ']'), array(array(
 			'label'	=> $LNG['sys_forward'],
@@ -698,22 +663,11 @@ class ShowAlliancePage extends AbstractGamePage
 	{
 		global $USER;
 
-		$db = Database::get();
-
-		$sql	= "UPDATE %%USERS%% SET ally_id = 0, ally_register_time = 0, ally_register_time = 5 WHERE id = :UserID;";
-		$db->update($sql, array(
-			':UserID'			=> $USER['id']
-		));
-
-		$sql	= "UPDATE %%STATPOINTS%% SET id_ally = 0 WHERE id_owner = :UserID AND stat_type = 1;";
-		$db->update($sql, array(
-			':UserID'			=> $USER['id']
-		));
-
-		$sql	= "UPDATE %%ALLIANCE%% SET ally_members = (SELECT COUNT(*) FROM %%USERS%% WHERE ally_id = :AllianceID) WHERE id = :AllianceID;";
-		$db->update($sql, array(
-			':AllianceID'			=> $this->allianceData['id']
-		));
+		try {
+			AllianceService::leaveAlliance($USER['id'], $this->allianceData['id']);
+		} catch (\RuntimeException $e) {
+			// Leader tried to leave without dissolving — redirect silently
+		}
 
 		$this->redirectTo('game.php?page=alliance');
 	}
@@ -961,38 +915,10 @@ class ShowAlliancePage extends AbstractGamePage
 	    }
 
 		global $USER;
-		if ($this->allianceData['ally_owner'] == $USER['id']) {
-			$db = Database::get();
-
-			$sql = "UPDATE %%USERS%% SET ally_id = '0' WHERE ally_id = :AllianceID;";
-			$db->update($sql, array(
-				':AllianceID'	=> $this->allianceData['id']
-			));
-
-			$sql = "UPDATE %%STATPOINTS%% SET id_ally = '0' WHERE id_ally = :AllianceID;";
-			$db->update($sql, array(
-				':AllianceID'	=> $this->allianceData['id']
-			));
-
-			$sql = "DELETE FROM %%STATPOINTS%% WHERE id_owner = :AllianceID AND stat_type = 2;";
-			$db->delete($sql, array(
-				':AllianceID'	=> $this->allianceData['id']
-			));
-
-			$sql = "DELETE FROM %%ALLIANCE%% WHERE id = :AllianceID;";
-			$db->delete($sql, array(
-				':AllianceID'	=> $this->allianceData['id']
-			));
-
-			$sql = "DELETE FROM %%ALLIANCE_REQUEST%% WHERE allianceId = :AllianceID;";
-			$db->delete($sql, array(
-				':AllianceID'	=> $this->allianceData['id']
-			));
-
-			$sql = "DELETE FROM %%DIPLO%% WHERE owner_1 = :AllianceID OR owner_2 = :AllianceID;";
-			$db->delete($sql, array(
-				':AllianceID'	=> $this->allianceData['id']
-			));
+		try {
+			AllianceService::dissolveAlliance($this->allianceData['id'], $USER['id']);
+		} catch (\RuntimeException $e) {
+			// User is not the leader or has no alliance — just redirect silently
 		}
 
 		$this->redirectToHome();
@@ -1198,28 +1124,11 @@ class ShowAlliancePage extends AbstractGamePage
 		// only if alliance request still exist
 		if ($userId) {
 			if ($answer == 'yes') {
-				$sql = "DELETE FROM %%ALLIANCE_REQUEST%% WHERE applyID = :applyID";
-				$db->delete($sql, array(
-					':applyID'	=> $applyID
-				));
-
-				$sql = "UPDATE %%USERS%% SET ally_id = :allianceId, ally_register_time = :time, ally_rank_id = 0 WHERE id = :userId;";
-				$db->update($sql, array(
-					':allianceId'	=> $this->allianceData['id'],
-					':time'         => TIMESTAMP,
-					':userId'       => $userId
-				));
-
-				$sql = "UPDATE %%STATPOINTS%% SET id_ally = :allianceId WHERE id_owner = :userId AND stat_type = 1;";
-				$db->update($sql, array(
-					':allianceId'	=> $this->allianceData['id'],
-					':userId'       => $userId
-				));
-
-				$sql = "UPDATE %%ALLIANCE%% SET ally_members = (SELECT COUNT(*) FROM %%USERS%% WHERE ally_id = :allianceId) WHERE id = :allianceId;";
-				$db->update($sql, array(
-					':allianceId'	=> $this->allianceData['id'],
-				));
+				try {
+					AllianceService::acceptMember($applyID, $this->allianceData['id']);
+				} catch (\RuntimeException $e) {
+					$this->redirectTo('game.php?page=alliance&mode=admin&action=mangeApply');
+				}
 
 				$text		= $LNG['al_hi_the_alliance'] . $this->allianceData['ally_name'] . $LNG['al_has_accepted'] . $text;
 				$subject	= $LNG['al_you_was_acceted'] . $this->allianceData['ally_name'];
@@ -1505,39 +1414,19 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminMembersKick()
 	{
+		global $USER;
+
 		if (!$this->rights['KICK']) {
 			$this->redirectToHome();
 		}
 
-		$db = Database::get();
+		$id = HTTP::_GP('id', 0);
 
-		$id	= HTTP::_GP('id', 0);
-
-		$sql = "SELECT ally_id FROM %%USERS%% WHERE id = :id;";
-		$kickUserAllianceId = $db->selectSingle($sql, array(
-			':id'	=> $id
-		), 'ally_id');
-
-		# Check, if user is in alliance, see #205
-		if (empty($kickUserAllianceId) || $kickUserAllianceId != $this->allianceData['id']) {
+		try {
+			AllianceService::kickMember($id, $this->allianceData['id'], $USER['id']);
+		} catch (\RuntimeException $e) {
 			$this->redirectToHome();
 		}
-
-		$sql = "UPDATE %%USERS%% SET ally_id = 0, ally_register_time = 0, ally_rank_id = 0 WHERE id = :id;";
-		$db->update($sql, array(
-			':id'	=> $id
-		));
-
-		$sql = "UPDATE %%STATPOINTS%% SET id_ally = 0 WHERE id_owner = :id AND stat_type = 1;";
-		$db->update($sql, array(
-			':id'	=> $id
-		));
-
-		$sql = "UPDATE %%ALLIANCE%% SET ally_members = (SELECT COUNT(*) FROM %%USERS%% WHERE ally_id = :allianceId) WHERE id = :allianceId;";
-		$db->update($sql, array(
-			':id'	        => $id,
-			':allianceId'   => $this->allianceData['id']
-		));
 
 		$this->redirectTo('game.php?page=alliance&mode=admin&action=members');
 	}

@@ -8,6 +8,7 @@ use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
+use HiveNova\Repository\PlanetRepository;
 
 /**
  *  2Moons 
@@ -78,10 +79,7 @@ HTML;
 		//Minize HTML
 		$messageHTML	= str_replace(array("\n", "\t", "\r"), "", $messageHTML);
 
-		$sql			= "SELECT * FROM %%PLANETS%% WHERE id = :planetId;";
-		$targetPlanet 	= $db->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_end_id']
-		));
+		$targetPlanet 	= PlanetRepository::getPlanetById((int) $this->_fleet['fleet_end_id']);
 
 		// return fleet if target planet deleted
 		if($targetPlanet == false)
@@ -91,10 +89,7 @@ HTML;
 			return;
 		}
 
-		$sql			= "SELECT * FROM %%USERS%% WHERE id = :userId;";
-		$targetUser		= $db->selectSingle($sql, array(
-			':userId'	=> $targetPlanet['id_owner']
-		));
+		$targetUser		= $this->getUser((int) $targetPlanet['id_owner']);
 		$targetUser['factor']	= getFactors($targetUser, 'basic', $this->_fleet['fleet_start_time']);
 
 		$planetUpdater	= new ResourceUpdate();
@@ -128,10 +123,7 @@ HTML;
 		
 		foreach($incomingFleets as $fleetID => $fleetDetail)
 		{
-			$sql	= "SELECT * FROM %%USERS%% WHERE id = :userId;";
-			$fleetAttack[$fleetID]['player']	= $db->selectSingle($sql, array(
-				':userId'	=> $fleetDetail['fleet_owner']
-			));
+			$fleetAttack[$fleetID]['player']	= $this->getUser((int) $fleetDetail['fleet_owner']);
 
 			$fleetAttack[$fleetID]['player']['factor']	= getFactors($fleetAttack[$fleetID]['player'], 'attack', $this->_fleet['fleet_start_time']);
 			$fleetAttack[$fleetID]['fleetDetail']		= $fleetDetail;
@@ -156,10 +148,7 @@ HTML;
 		{
 			$fleetID	= $fleetDetail['fleet_id'];
 
-			$sql	= "SELECT * FROM %%USERS%% WHERE id = :userId;";
-			$fleetDefend[$fleetID]['player']			= $db->selectSingle($sql, array(
-				':userId'	=> $fleetDetail['fleet_owner']
-			));
+			$fleetDefend[$fleetID]['player']			= $this->getUser((int) $fleetDetail['fleet_owner']);
 
 			$fleetDefend[$fleetID]['player']['factor']	= getFactors($fleetDefend[$fleetID]['player'], 'attack', $this->_fleet['fleet_start_time']);
 			$fleetDefend[$fleetID]['fleetDetail']		= $fleetDetail;
@@ -610,10 +599,7 @@ HTML;
 		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
 
 
-		$sql		= 'SELECT name FROM %%PLANETS%% WHERE id = :planetId;';
-		$planetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_end_id'],
-		), 'name');
+		$planetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_end_id']);
 
 		$Message	= sprintf(
 			$LNG['sys_fleet_won'],

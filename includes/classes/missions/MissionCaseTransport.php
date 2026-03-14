@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Log;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Repository\PlanetRepository;
 
 /**
  *  2Moons 
@@ -30,15 +31,8 @@ class MissionCaseTransport extends MissionFunctions implements Mission
 
 	function TargetEvent()
 	{
-		$sql = 'SELECT name FROM %%PLANETS%% WHERE `id` = :planetId;';
-
-		$startPlanetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_start_id']
-		), 'name');
-
-		$targetPlanetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_end_id']
-		), 'name');
+		$startPlanetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_start_id']);
+		$targetPlanetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_end_id']);
 
 		$LNG			= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
 
@@ -152,10 +146,7 @@ class MissionCaseTransport extends MissionFunctions implements Mission
 	function ReturnEvent()
 	{
 		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
-		$sql		= 'SELECT name FROM %%PLANETS%% WHERE id = :planetId;';
-		$planetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_start_id'],
-		), 'name');
+		$planetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_start_id']);
 
 		$Message	= sprintf($LNG['sys_tran_mess_back'], $planetName, GetStartAddressLink($this->_fleet, ''));
 

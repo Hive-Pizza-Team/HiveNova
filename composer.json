@@ -50,7 +50,8 @@
             "HiveNova\\Mission\\": "includes/classes/missions/",
             "HiveNova\\Auth\\": "includes/classes/extauth/",
             "HiveNova\\Page\\Game\\": "includes/pages/game/",
-            "HiveNova\\Page\\Login\\": "includes/pages/login/"
+            "HiveNova\\Page\\Login\\": "includes/pages/login/",
+            "HiveNova\\Repository\\": "includes/classes/repository/"
         }
     },
     "minimum-stability": "stable",

@@ -7,6 +7,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Repository\BuddyRepository;
 
 /**
  *  2Moons 
@@ -46,19 +47,12 @@ class ShowBuddyListPage extends AbstractGamePage
 			$this->printMessage($LNG['bu_cannot_request_yourself']);
 		}
 		
-		$db = Database::get();
-
-        $sql = "SELECT COUNT(*) as count FROM %%BUDDY%% WHERE (sender = :userID AND owner = :friendID) OR (owner = :userID AND sender = :friendID);";
-        $exists = $db->selectSingle($sql, array(
-            ':userID'	=> $USER['id'],
-            ':friendID'  => $id
-        ), 'count');
-
-		if($exists != 0)
-		{
+		if (BuddyRepository::isBuddy((int) $USER['id'], (int) $id)) {
 			$this->printMessage($LNG['bu_request_exists']);
 		}
-		
+
+		$db = Database::get();
+
 		$sql = "SELECT username, galaxy, `system`, planet FROM %%USERS%% WHERE id = :friendID;";
         $userData = $db->selectSingle($sql, array(
             ':friendID'  => $id
@@ -93,14 +87,7 @@ class ShowBuddyListPage extends AbstractGamePage
 
         $db = Database::get();
 
-        $sql = "SELECT COUNT(*) as count FROM %%BUDDY%% WHERE (sender = :userID AND owner = :friendID) OR (owner = :userID AND sender = :friendID);";
-        $exists = $db->selectSingle($sql, array(
-            ':userID'	=> $USER['id'],
-            ':friendID'  => $id
-        ), 'count');
-
-        if($exists != 0)
-		{
+        if (BuddyRepository::isBuddy((int) $USER['id'], (int) $id)) {
 			$this->printMessage($LNG['bu_request_exists']);
 		}
 
@@ -215,13 +202,7 @@ class ShowBuddyListPage extends AbstractGamePage
 	{
 		global $USER;
 		
-		$db = Database::get();
-        $sql = "SELECT a.sender, a.id as buddyid, b.id, b.username, b.onlinetime, b.galaxy, b.system, b.planet, b.ally_id, c.ally_name, d.text
-		FROM (%%BUDDY%% as a, %%USERS%% as b) LEFT JOIN %%ALLIANCE%% as c ON c.id = b.ally_id LEFT JOIN %%BUDDY_REQUEST%% as d ON a.id = d.id
-		WHERE (a.sender = ".$USER['id']." AND a.owner = b.id) OR (a.owner = :userID AND a.sender = b.id);";
-        $BuddyListResult = $db->select($sql, array(
-            'userID'    => $USER['id']
-        ));
+        $BuddyListResult = BuddyRepository::getBuddyList((int) $USER['id']);
 
         $myRequestList		= array();
 		$otherRequestList	= array();

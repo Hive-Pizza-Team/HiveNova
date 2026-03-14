@@ -5,6 +5,7 @@ namespace HiveNova\Mission;
 use HiveNova\Core\Database;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Repository\PlanetRepository;
 
 /**
  *  2Moons 
@@ -146,10 +147,7 @@ class MissionCaseMIP extends MissionFunctions implements Mission
 			}
 		}
 
-		$sql		= 'SELECT name FROM %%PLANETS%% WHERE id = :planetId;';
-		$planetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_start_id'],
-		), 'name');
+		$planetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_start_id']);
 
 		$ownerLink			= $planetName . " " . GetStartAddressLink($this->_fleet);
 		$targetLink 		= $targetData['name'] . " " . GetTargetAddressLink($this->_fleet);

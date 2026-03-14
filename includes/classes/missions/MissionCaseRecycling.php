@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Repository\PlanetRepository;
 
 /**
  *  2Moons 
@@ -54,10 +55,7 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 
 		if(!empty($targetData['total']))
 		{
-			$sql				= 'SELECT * FROM %%USERS%% WHERE id = :userId;';
-			$targetUser			= Database::get()->selectSingle($sql, array(
-				':userId'	=> $this->_fleet['fleet_owner']
-			));
+			$targetUser			= $this->getUser((int) $this->_fleet['fleet_owner']);
 
 			$targetUserFactors	= getFactors($targetUser);
 			$shipStorageFactor	= 1 + $targetUserFactors['ShipStorage'];
@@ -137,10 +135,7 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 	{
 		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
 
-		$sql		= 'SELECT name FROM %%PLANETS%% WHERE id = :planetId;';
-		$planetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_start_id'],
-		), 'name');
+		$planetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_start_id']);
 	
 		$Message	= sprintf($LNG['sys_tran_mess_owner'],
 			$planetName, GetStartAddressLink($this->_fleet, ''),

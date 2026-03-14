@@ -2,9 +2,9 @@
 
 namespace HiveNova\Mission;
 
-use HiveNova\Core\Database;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Repository\PlanetRepository;
 
 /**
  *  2Moons / Steemnova
@@ -39,10 +39,7 @@ class MissionCaseTrade extends MissionFunctions implements Mission
 	function ReturnEvent()
 	{
 		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
-		$sql		= 'SELECT name FROM %%PLANETS%% WHERE id = :planetId;';
-		$planetName	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_start_id'],
-		), 'name');
+		$planetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_start_id']);
 
 		$Message	= sprintf($LNG['sys_trade_mess_back'], $planetName, GetStartAddressLink($this->_fleet, ''));
 

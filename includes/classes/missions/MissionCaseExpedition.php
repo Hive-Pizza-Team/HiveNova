@@ -482,11 +482,7 @@ HTML;
 
 			$targetFleetData	= array_filter($targetFleetData);
 
-			$sql = 'SELECT * FROM %%USERS%% WHERE id = :userId;';
-
-			$senderData	= Database::get()->selectSingle($sql, array(
-				':userId'	=> $this->_fleet['fleet_owner']
-			));
+			$senderData	= $this->getUser((int) $this->_fleet['fleet_owner']);
 
 			$targetData	= array(
 				'id'			=> 0,

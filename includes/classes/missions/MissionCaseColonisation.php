@@ -32,11 +32,7 @@ class MissionCaseColonisation extends MissionFunctions implements Mission
 	{
 		$db		= Database::get();
 
-		$sql	= 'SELECT * FROM %%USERS%% WHERE `id` = :userId;';
-
-		$senderUser		= $db->selectSingle($sql, array(
-			':userId'	=> $this->_fleet['fleet_owner'],
-		));
+		$senderUser		= $this->getUser((int) $this->_fleet['fleet_owner']);
 
 		$senderUser['factor']	= getFactors($senderUser, 'basic', $this->_fleet['fleet_start_time']);
 
