@@ -367,7 +367,7 @@ $LNG['fl_no_hold_depot']					= 'En el destino, no hay depósito de la alianza.';
 $LNG['fl_not_enough_deuterium']				= 'No hay suficiente Deuterio.';
 $LNG['fl_not_enough_space']					= 'No tienes suficiente espacio de carga disponible.';
 $LNG['fl_hold_time_not_exists']				= 'El tiempo de espera no es válido.';
-$LNG['fl_own_planet_error']					= 'Error! Again select the planet from which you want to send the fleet.';
+$LNG['fl_own_planet_error']					= '¡Error! Selecciona nuevamente el planeta desde el cual deseas enviar la flota.';
 
 //----------------------------------------------------------------------------//
 //BUILDINGS - RESEARCH - SHIPYARD - DEFENSES
@@ -550,7 +550,7 @@ $LNG['mg_answer_to']						= 'Responder a:';
 $LNG['mg_write_mail_to_ops']				= 'Escribe un E-mail a';
 $LNG['mg_page']								= 'Página';
 $LNG['mg_receiver_block_pm']				= 'El destinatario ha bloqueado los Mensajes Privados.';
-$LNG['mg_deleted']					= 'The message has been deleted.';
+$LNG['mg_deleted']					= 'El mensaje ha sido eliminado.';
 
 //----------------------------------------------------------------------------//
 //ALLIANCE
@@ -762,7 +762,7 @@ $LNG['al_rank_desc']['DIPLOMATIC']			= 'Puede gestionar la Diplomacia';
 $LNG['al_rank_desc']['RANKS']				= 'Puede administrar los Rangos';
 $LNG['al_rank_desc']['MANAGEUSERS']			= 'Puede gestionar a los miembros';
 $LNG['al_rank_desc']['EVENTS']				= 'Puede ver los eventos';
-$LNG['al_new_apply']                      	= 'Your alliance has received a new application from - <a href="#" onclick="return Dialog.Playercard(%s, \'%s\');">%s</a>';
+$LNG['al_new_apply']                      	= 'Tu alianza ha recibido una nueva solicitud de - <a href="#" onclick="return Dialog.Playercard(%s, \'%s\');">%s</a>';
 
 //----------------------------------------------------------------------------//
 //BUDDY
