@@ -1,5 +1,13 @@
 # HiveNova - Space empire building browser game
 
+[![CI](https://github.com/Hive-Pizza-Team/HiveNova/actions/workflows/ci.yaml/badge.svg)](https://github.com/Hive-Pizza-Team/HiveNova/actions/workflows/ci.yaml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)](https://php.net)
+[![GitHub stars](https://img.shields.io/github/stars/Hive-Pizza-Team/HiveNova?style=social)](https://github.com/Hive-Pizza-Team/HiveNova/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Hive-Pizza-Team/HiveNova?style=social)](https://github.com/Hive-Pizza-Team/HiveNova/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/Hive-Pizza-Team/HiveNova)](https://github.com/Hive-Pizza-Team/HiveNova/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/Hive-Pizza-Team/HiveNova)](https://github.com/Hive-Pizza-Team/HiveNova/commits)
+
 ![MOON_Discord_Event_Banner](https://github.com/user-attachments/assets/96607107-b195-4164-9537-241430acc86e)
 
 Play the game at https://moon.hive.pizza
@@ -13,7 +21,6 @@ The open-source game framework is based on [2Moons](https://gitter.im/2MoonsGame
 Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.com/Hive-Pizza-Team/HiveNova) repository. It is a fork of [jkroepke/2Moons](https://github.com/jkroepke/2Moons) and SteemNova 2 (https://github.com/steemnova/steemnova) for Hive community purposes. HiveNova repository is the core of the game code.
 
 ![badge_powered-by-hive_dark](https://github.com/user-attachments/assets/803e396c-f165-40de-936c-03dd624153ad)
-[![CI](https://github.com/Hive-Pizza-Team/HiveNova/actions/workflows/ci.yaml/badge.svg)](https://github.com/Hive-Pizza-Team/HiveNova/actions/workflows/ci.yaml)
 
 ## Tech Stack
 
