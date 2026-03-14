@@ -2,8 +2,9 @@
 
 namespace HiveNova\Mission;
 
-use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\Database;
+use HiveNova\Core\MissionFunctions;
+use HiveNova\Core\PlayerUtil;
 
 /**
  *  2Moons / Steemnova

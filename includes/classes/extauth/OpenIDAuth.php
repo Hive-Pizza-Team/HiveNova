@@ -2,6 +2,10 @@
 
 namespace HiveNova\Auth;
 
+use HiveNova\Core\Database;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Universe;
+
 /**
  *  2Moons 
  *   by Jan-Otto Kröpke 2009-2016
