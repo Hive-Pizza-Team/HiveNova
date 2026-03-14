@@ -2,6 +2,8 @@
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Universe;
 
 use PHPUnit\Framework\TestCase;
 

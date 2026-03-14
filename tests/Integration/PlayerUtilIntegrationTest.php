@@ -2,6 +2,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Universe;
 use HiveNova\Core\Database;
 
 class PlayerUtilIntegrationTest extends IntegrationTestCase
