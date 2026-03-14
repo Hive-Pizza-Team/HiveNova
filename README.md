@@ -13,6 +13,7 @@ The open-source game framework is based on [2Moons](https://gitter.im/2MoonsGame
 Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.com/Hive-Pizza-Team/HiveNova) repository. It is a fork of [jkroepke/2Moons](https://github.com/jkroepke/2Moons) and SteemNova 2 (https://github.com/steemnova/steemnova) for Hive community purposes. HiveNova repository is the core of the game code.
 
 ![badge_powered-by-hive_dark](https://github.com/user-attachments/assets/803e396c-f165-40de-936c-03dd624153ad)
+[![CI](https://github.com/Hive-Pizza-Team/HiveNova/actions/workflows/ci.yaml/badge.svg)](https://github.com/Hive-Pizza-Team/HiveNova/actions/workflows/ci.yaml)
 
 ## Tech Stack
 
