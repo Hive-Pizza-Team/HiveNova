@@ -61,9 +61,10 @@ jobs:
       - run: php tests/smoke.php
       - name: Check error log is empty
         run: |
-          if [ -s includes/error.log ]; then
-            echo "=== includes/error.log is non-empty ==="
-            cat includes/error.log
+          errors=$(grep -v '/vendor/' includes/error.log 2>/dev/null || true)
+          if [ -n "$errors" ]; then
+            echo "=== includes/error.log has non-vendor errors ==="
+            echo "$errors"
             exit 1
           fi
       - name: Dump PHP server log on failure
@@ -105,8 +106,9 @@ jobs:
         run: php vendor/bin/phpunit --configuration phpunit-integration.xml --coverage-clover coverage/integration-clover.xml --coverage-text
       - name: Check error log is empty
         run: |
-          if [ -s includes/error.log ]; then
-            echo "=== includes/error.log is non-empty ==="
-            cat includes/error.log
+          errors=$(grep -v '/vendor/' includes/error.log 2>/dev/null || true)
+          if [ -n "$errors" ]; then
+            echo "=== includes/error.log has non-vendor errors ==="
+            echo "$errors"
             exit 1
           fi

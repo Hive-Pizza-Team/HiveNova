@@ -106,16 +106,22 @@ php -S localhost:8000
 
 ### Testing
 
+Run the full CI pipeline locally before pushing:
+
 ```bash
-./vendor/bin/phpunit
+./tests/run-ci-local.sh               # unit tests + language check + smoke test
+./tests/run-ci-local.sh --integration # also run integration tests (requires MySQL)
 ```
 
-For black-box smoke testing (logs in and hits all game pages):
+This mirrors what GitHub Actions runs, including checking that `includes/error.log` is empty after the smoke test. Requires the local dev server to be running on `:8000`.
+
+Individual test commands:
 
 ```bash
-php tests/smoke.php                                        # local dev defaults
+php vendor/bin/phpunit                  # unit tests
+php tests/smoke.php                     # smoke test (local dev defaults)
+php .github/scripts/check-language-files.php  # language key validation
 php tests/smoke.php https://staging.moon.hive.pizza admin s3cr3t  # remote host
-SMOKE_BASE_URL=https://staging.moon.hive.pizza php tests/smoke.php # via env var
 ```
 
 ### CI
