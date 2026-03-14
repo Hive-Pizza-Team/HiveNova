@@ -983,7 +983,7 @@ CREATE TABLE `%PREFIX%vars_rapidfire` (
   KEY `rapidfireID` (`rapidfireID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-CREATE TABLE `%PREFIX%vars_requriements` (
+CREATE TABLE `%PREFIX%vars_requirements` (
   `elementID` int(11) NOT NULL,
   `requireID` int(11) NOT NULL,
   `requireLevel` int(11) NOT NULL,
@@ -1204,7 +1204,7 @@ INSERT INTO `%PREFIX%vars_rapidfire` (`elementID`, `rapidfireID`, `shoots`) VALU
 (220, 210, 5),
 (220, 212, 5);
 
-INSERT INTO `%PREFIX%vars_requriements` (`elementID`, `requireID`, `requireLevel`) VALUES
+INSERT INTO `%PREFIX%vars_requirements` (`elementID`, `requireID`, `requireLevel`) VALUES
 (6, 14, 20),
 (6, 31, 22),
 (6, 15, 4),
