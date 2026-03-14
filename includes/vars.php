@@ -17,7 +17,7 @@
 
 // VARS DB -> SCRIPT WRAPPER
 
-$cache	= Cache::get();
+$cache	= \HiveNova\Core\Cache::get();
 $cache->add('vars', 'HiveNova\\Core\\Cache\\VarsBuildCache');
 extract($cache->getData('vars'));
 

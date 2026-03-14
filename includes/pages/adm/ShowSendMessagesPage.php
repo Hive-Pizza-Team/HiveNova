@@ -38,7 +38,6 @@ function ShowSendMessagesPage() {
 
 		if (!empty($Message) && !empty($Subject))
 		{
-			require 'includes/classes/BBCode.class.php';
 			if($Mode == 0 || $Mode == 2) {
 				$From    	= '<span class="'.$class.'">'.$LNG['user_level_'.$USER['authlevel']].' '.$USER['username'].'</span>';
 				$pmSubject 	= '<span class="'.$class.'">'.$Subject.'</span>';
@@ -52,7 +51,6 @@ function ShowSendMessagesPage() {
 			}
 
 			if($Mode == 1 || $Mode == 2) {
-				require 'includes/classes/Mail.class.php';
 				$userList	= array();
 				
 				$USERS		= $GLOBALS['DATABASE']->query("SELECT `email`, `username` FROM ".USERS." WHERE `universe` = '".Universe::getEmulated()."'".(!empty($Lang) ? " AND `lang` = '".$GLOBALS['DATABASE']->sql_escape($Lang)."'": "").";");

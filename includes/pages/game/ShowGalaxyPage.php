@@ -23,7 +23,6 @@ use HiveNova\Core\FleetFunctions;
  * @link https://github.com/jkroepke/2Moons
  */
 
-require_once('includes/classes/class.GalaxyRows.php');
 
 class ShowGalaxyPage extends AbstractGamePage
 {

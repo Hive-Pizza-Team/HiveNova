@@ -343,7 +343,7 @@ CREATE TABLE `%PREFIX%cronjobs` (
   `dom` varchar(32) NOT NULL,
   `month` varchar(32) NOT NULL,
   `dow` varchar(32) NOT NULL,
-  `class` varchar(32) NOT NULL,
+  `class` varchar(128) NOT NULL,
   `nextTime` int(11) DEFAULT NULL,
   `lock` varchar(32) DEFAULT NULL,
   UNIQUE KEY `cronjobID` (`cronjobID`),

@@ -24,8 +24,8 @@ require 'includes/common.php';
 
 use HiveNova\Page\Login\ShowErrorPage;
 
-$page 		= HTTP::_GP('page', 'index');
-$mode 		= HTTP::_GP('mode', 'show');
+$page 		= \HiveNova\Core\HTTP::_GP('page', 'index');
+$mode 		= \HiveNova\Core\HTTP::_GP('mode', 'show');
 $page		= str_replace(array('_', '\\', '/', '.', "\0"), '', $page);
 $pageClass	= 'Show'.ucfirst($page).'Page';
 

@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\FlyingFleetHandler;
+use HiveNova\Core\FlyingFleetsTable;
 
 /**
  *  2Moons
@@ -574,7 +575,6 @@ class ShowAlliancePage extends AbstractGamePage
 			));
 
 
-			require_once('includes/classes/class.FlyingFleetsTable.php');
 			$FlyingFleetsTable = new FlyingFleetsTable;
 
 			$this->tplObj->loadscript('overview.js');
@@ -924,7 +924,6 @@ class ShowAlliancePage extends AbstractGamePage
 			return;
 		}
 
-		require_once 'includes/classes/class.FlyingFleetHandler.php';
 
 		$available_events = array();
 

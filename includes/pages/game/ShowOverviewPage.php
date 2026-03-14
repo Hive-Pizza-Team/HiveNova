@@ -9,9 +9,8 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\FlyingFleetsTable;
 use HiveNova\Core\PlayerUtil;
-
-use HiveNova\Core\Cache;
 
 /**
  *  2Moons 
@@ -80,7 +79,6 @@ class ShowOverviewPage extends AbstractGamePage
 
 	private function GetFleets() {
 		global $USER, $PLANET;
-		require 'includes/classes/class.FlyingFleetsTable.php';
 		$fleetTableObj = new FlyingFleetsTable;
 		$fleetTableObj->setUser($USER['id']);
 		$fleetTableObj->setPlanet($PLANET['id']);

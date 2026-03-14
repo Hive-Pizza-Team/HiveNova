@@ -18,13 +18,13 @@
 function getFactors($USER, $Type = 'basic', $TIME = NULL)
 {
 	global $resource, $pricelist, $reslist;
-	$config	= Config::get($USER['universe']);
+	$config	= \HiveNova\Core\Config::get($USER['universe']);
 
 	if (empty($TIME))
 		$TIME	= TIMESTAMP;
 
-	$bonusList	= BuildFunctions::getBonusList();
-	$factor		= ArrayUtil::combineArrayWithSingleElement($bonusList, 0);
+	$bonusList	= \HiveNova\Core\BuildFunctions::getBonusList();
+	$factor		= \HiveNova\Core\ArrayUtil::combineArrayWithSingleElement($bonusList, 0);
 
 	foreach ($reslist['bonus'] as $elementID) {
 		$bonus = $pricelist[$elementID]['bonus'];
@@ -94,12 +94,12 @@ function userStatus($data, $noobprotection = false)
 function getLanguage($language = NULL, $userID = NULL)
 {
 	if (is_null($language) && !is_null($userID)) {
-		$language	= Database::get()->selectSingle('SELECT lang FROM %%USERS%% WHERE id = :id;', array(
+		$language	= \HiveNova\Core\Database::get()->selectSingle('SELECT lang FROM %%USERS%% WHERE id = :id;', array(
 			':id' => $userID
 		))['lang'];
 	}
 
-	$LNG		= new Language($language);
+	$LNG		= new \HiveNova\Core\Language($language);
 	$LNG->includeData(array('L18N', 'FLEET', 'TECH', 'CUSTOM', 'INGAME'));
 	return $LNG;
 }
@@ -126,7 +126,7 @@ function getPlanets($USER)
 			break;
 	}
 
-	$planetsResult = Database::get()->select($sql, array(
+	$planetsResult = \HiveNova\Core\Database::get()->select($sql, array(
 		':userId'		=> $USER['id'],
 		':destruyed'	=> 0
 	));
@@ -312,7 +312,7 @@ function GetUserByID($userId, $GetInfo = "*")
 
 	$sql = 'SELECT ' . $GetOnSelect . ' FROM %%USERS%% WHERE id = :userId';
 
-	$User = Database::get()->selectSingle($sql, array(
+	$User = \HiveNova\Core\Database::get()->selectSingle($sql, array(
 		':userId'	=> $userId
 	));
 
@@ -330,7 +330,7 @@ function makebr($text)
 
 function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 {
-	$config	= Config::get();
+	$config	= \HiveNova\Core\Config::get();
 	if (
 		$config->noobprotection == 0
 		|| $config->noobprotectiontime == 0
@@ -399,7 +399,7 @@ function floatToString($number, $Pro = 0, $output = false)
 function isModuleAvailable($ID)
 {
 	global $USER;
-	$modules	= explode(';', (string) Config::get()->moduls);
+	$modules	= explode(';', (string) \HiveNova\Core\Config::get()->moduls);
 
 	if (!isset($modules[$ID])) {
 		$modules[$ID] = 1;
@@ -430,7 +430,7 @@ function ClearCache()
 	\HiveNova\Core\Cronjob::reCalculateCronjobs();
 
 	$sql	= 'UPDATE %%PLANETS%% SET eco_hash = :ecoHash;';
-	Database::get()->update($sql, array(
+	\HiveNova\Core\Database::get()->update($sql, array(
 		':ecoHash'	=> ''
 	));
 	clearstatcache();
@@ -458,7 +458,7 @@ function ClearCache()
 	$config->VERSION	= $version[0].'.'.$version[1].'.'.$REV;
 	*/
 
-	$config		= Config::get();
+	$config		= \HiveNova\Core\Config::get();
 	$versionFile = ROOT_PATH . 'install/VERSION';
 	if (file_exists($versionFile)) {
 		$config->VERSION = trim(file_get_contents($versionFile));
@@ -573,7 +573,7 @@ function exceptionHandler($exception)
 
 	if (MODE !== 'INSTALL') {
 		try {
-			$config		= Config::get();
+			$config		= \HiveNova\Core\Config::get();
 			$gameName	= $config->game_name;
 			$VERSION	= $config->VERSION;
 		} catch (ErrorException) {

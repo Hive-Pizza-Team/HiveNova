@@ -115,7 +115,7 @@ function detectErrors(string $body): array {
     if (preg_match('/\b(Fatal error|Parse error):/i', $body)) {
         $issues[] = 'PHP Fatal/Parse error (plain)';
     }
-    if (preg_match('/\b(Warning|Notice):/i', $body)) {
+    if (preg_match('/\bPHP (Warning|Notice):/i', $body) || preg_match('/(Warning|Notice): \S+::/i', $body)) {
         $issues[] = 'PHP Warning/Notice (plain)';
     }
     // Uncaught exceptions
@@ -140,8 +140,8 @@ echo "Base URL : $baseUrl\n";
 echo "User     : $username\n\n";
 
 // --- Login ---
-echo "[ LOGIN ] POST $baseUrl/game.php?page=login ... ";
-[,$body,] = curl_post("$baseUrl/game.php?page=login", [
+echo "[ LOGIN ] POST $baseUrl/index.php?page=login ... ";
+[$status,$body,] = curl_post("$baseUrl/index.php?page=login", [
     'username' => $username,
     'password' => $password,
 ], $cookieFile);
@@ -167,7 +167,8 @@ foreach ($pages as $page) {
 
     // Check for redirect to login (session lost / page not found redirect)
     $redirectedToLogin = (stripos($body, 'action="game.php?page=login"') !== false
-        || stripos($body, 'name="username"') !== false);
+        || (preg_match('/action=["\'][^"\']*page=login/i', $body)
+            && stripos($body, 'name="username"') !== false));
 
     $label = str_pad($page, $colW);
 

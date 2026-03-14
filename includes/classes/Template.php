@@ -6,6 +6,7 @@ use HiveNova\Core\Config;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use Smarty;
 
 /**
  *  2Moons 

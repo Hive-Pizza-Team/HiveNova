@@ -272,7 +272,7 @@ class BuildFunctions
 
         foreach(self::$bonusList as $bonus)
         {
-            $temp	= (float) $pricelist[$Element]['bonus'][$bonus][0];
+            $temp	= (float) ($pricelist[$Element]['bonus'][$bonus][0] ?? 0);
             if(empty($temp))
             {
                 continue;

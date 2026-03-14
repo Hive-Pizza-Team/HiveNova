@@ -2,6 +2,8 @@
 
 namespace HiveNova\Page\Game;
 
+use Parsedown;
+
 /**
  *  2Moons 
  *   by Jan-Otto Kröpke 2009-2016

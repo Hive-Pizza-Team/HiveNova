@@ -25,8 +25,8 @@ require 'includes/common.php';
 
 use HiveNova\Page\Game\ShowErrorPage;
 
-$page 		= HTTP::_GP('page', 'overview');
-$mode 		= HTTP::_GP('mode', 'show');
+$page 		= \HiveNova\Core\HTTP::_GP('page', 'overview');
+$mode 		= \HiveNova\Core\HTTP::_GP('mode', 'show');
 $page		= str_replace(array('_', '\\', '/', '.', "\0"), '', $page);
 $pageClass	= 'Show'.ucwords($page).'Page';
 

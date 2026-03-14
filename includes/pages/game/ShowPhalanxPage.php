@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\FlyingFleetsTable;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 
@@ -95,7 +96,6 @@ class ShowPhalanxPage extends AbstractGamePage
 			$this->printMessage($LNG['px_out_of_range']);
 		}
 		
-		require 'includes/classes/class.FlyingFleetsTable.php';
 
 		$fleetTableObj = new FlyingFleetsTable;
 		$fleetTableObj->setPhalanxMode();
