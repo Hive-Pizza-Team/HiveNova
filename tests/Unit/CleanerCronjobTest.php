@@ -1,5 +1,7 @@
 <?php
 
+use HiveNova\Core\Cronjob;
+
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,7 +17,7 @@ class CleanerCronjobTest extends TestCase
 
     protected function setUp(): void
     {
-        $file = __DIR__ . '/../../includes/classes/cronjob/CleanerCronjob.class.php';
+        $file = __DIR__ . '/../../includes/classes/cronjob/CleanerCronjob.php';
         $this->source = file_get_contents($file);
     }
 

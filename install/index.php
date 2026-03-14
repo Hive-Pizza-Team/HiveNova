@@ -164,8 +164,8 @@ switch ($mode) {
 
 		$fileName = '2MoonsBackup_' . date('Y_m_d_H_i_s', TIMESTAMP) . '.sql';
 		$filePath = 'includes/backups/' . $fileName;
-		require 'includes/classes/SQLDumper.class.php';
-		$dump = new SQLDumper;
+		
+		$dump = new \HiveNova\Core\SQLDumper;
 		$dump->dumpTablesToFile($dbTables, $filePath);
 
         try {

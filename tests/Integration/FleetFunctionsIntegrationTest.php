@@ -1,5 +1,9 @@
 <?php
 
+use HiveNova\Core\Config;
+use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\Database;
+
 class FleetFunctionsIntegrationTest extends IntegrationTestCase
 {
     private static int $userId = 0;

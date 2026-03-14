@@ -23,7 +23,7 @@ $password = $argv[3] ?? getenv('ADMIN_PASSWORD') ?: '2hBR2wC0BcS^A%vsLvw9XgXy5$a
 $baseUrl = rtrim($baseUrl, '/');
 $cookieFile = tempnam(sys_get_temp_dir(), 'smoke_cookies_');
 
-// Pages to test — derived from Show{Name}Page.class.php files.
+// Pages to test — derived from Show{Name}Page.php files.
 // Skipping pages that require POST/special state or are AJAX-only:
 //   FleetAjax (AJAX), FleetStep2/3 (multi-step form), FleetMissile (POST),
 //   Logout (would end the session), PlayerCard (needs id param)

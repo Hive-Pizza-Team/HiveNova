@@ -42,6 +42,17 @@
         "phpunit/phpunit": "^10.5",
         "rector/rector": "^2.0"
     },
+    "autoload": {
+        "psr-4": {
+            "HiveNova\\Core\\": "includes/classes/",
+            "HiveNova\\Core\\Cache\\": "includes/classes/cache/builder/",
+            "HiveNova\\Cronjob\\": "includes/classes/cronjob/",
+            "HiveNova\\Mission\\": "includes/classes/missions/",
+            "HiveNova\\Auth\\": "includes/classes/extauth/",
+            "HiveNova\\Page\\Game\\": "includes/pages/game/",
+            "HiveNova\\Page\\Login\\": "includes/pages/login/"
+        }
+    },
     "minimum-stability": "stable",
     "config": {
         "platform": {

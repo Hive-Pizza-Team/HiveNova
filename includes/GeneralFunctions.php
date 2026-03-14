@@ -223,8 +223,8 @@ function ValidateAddress($address)
 
 function message($mes, $dest = "", $time = "3", $topnav = false): never
 {
-	require_once('includes/classes/class.template.php');
-	$template = new template();
+	
+	$template = new \HiveNova\Core\Template();
 	$template->message($mes, $dest, $time, !$topnav);
 	exit;
 }
@@ -422,12 +422,12 @@ function ClearCache()
 	}
 
 
-	$template = new template();
+	$template = new \HiveNova\Core\Template();
 	$template->clearAllCache();
 
 
-	require_once 'includes/classes/Cronjob.class.php';
-	Cronjob::reCalculateCronjobs();
+	
+	\HiveNova\Core\Cronjob::reCalculateCronjobs();
 
 	$sql	= 'UPDATE %%PLANETS%% SET eco_hash = :ecoHash;';
 	Database::get()->update($sql, array(
@@ -534,11 +534,11 @@ function exceptionHandler($exception)
 	/** @var $exception ErrorException|Exception */
 
 	if (!headers_sent()) {
-		if (!class_exists('HTTP', false)) {
-			require_once('includes/classes/HTTP.class.php');
+		if (!class_exists('\HiveNova\Core\HTTP', false)) {
+			
 		}
 
-		HTTP::sendHeader('HTTP/1.1 503 Service Unavailable');
+		\HiveNova\Core\HTTP::sendHeader('HTTP/1.1 503 Service Unavailable');
 	}
 
 	if (method_exists($exception, 'getSeverity')) {
@@ -672,8 +672,8 @@ function exceptionHandler($exception)
 		$ErrSource = 1;
 		$ErrName = 'System';
 	}
-	require 'includes/classes/class.SupportTickets.php';
-	$ticketObj	= new SupportTickets;
+	
+	$ticketObj	= new \HiveNova\Core\SupportTickets;
 	$ticketID	= $ticketObj->createTicket($ErrSource, '1', $errorType[$errno]);
 	$ticketObj->createAnswer($ticketID, $ErrSource, $ErrName, $errorType[$errno], $errorText, 0);
 }

@@ -1,5 +1,9 @@
 <?php
 
+use HiveNova\Core\Config;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Database;
+
 class PlayerUtilIntegrationTest extends IntegrationTestCase
 {
     // Use galaxy 3 to avoid colliding with the ci-install admin at 1:1:2

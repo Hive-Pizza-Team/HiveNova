@@ -995,15 +995,15 @@ INSERT INTO `%PREFIX%config` (`uni`, `VERSION`, `uni_name`, `game_name`, `close_
 (1, '%VERSION%', '', 'Moon', '', '', '', '', '', '', '');
 
 INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`, `dom`, `month`, `dow`, `class`, `nextTime`, `lock`) VALUES
-(NULL, 'referral', 1, '0,30', '*', '*', '*', '*', 'ReferralCronjob', 0, NULL),
-(NULL, 'statistic', 1, '0,30', '*', '*', '*', '*', 'StatisticCronjob', 0, NULL),
-(NULL, 'daily', 1, '25', '2', '*', '*', '*', 'DailyCronjob', 0, NULL),
-(NULL, 'cleaner', 1, '45', '2', '*', '*', '6', 'CleanerCronjob', 0, NULL),
-(NULL, 'inactive', 1, '30', '1', '*', '*', '0,3,6', 'InactiveMailCronjob', 0, NULL),
-(NULL, 'teamspeak', 0, '*/3', '*', '*', '*', '*', 'TeamSpeakCronjob', 0, NULL),
-(NULL, 'databasedump', 1, '30', '1', '*', '*', '1', 'DumpCronjob', 0, NULL),
-(NULL, 'tracking', 1, FLOOR(RAND() * 60), FLOOR(RAND() * 24), '*', '*', '0', 'TrackingCronjob', 0, NULL),
-(NULL, 'pushing', 1, '0', '0', '*', '*', '0', 'PushingDetectionCronjob', 0, NULL);
+(NULL, 'referral', 1, '0,30', '*', '*', '*', '*', 'HiveNova\\Cronjob\\ReferralCronjob', 0, NULL),
+(NULL, 'statistic', 1, '0,30', '*', '*', '*', '*', 'HiveNova\\Cronjob\\StatisticCronjob', 0, NULL),
+(NULL, 'daily', 1, '25', '2', '*', '*', '*', 'HiveNova\\Cronjob\\DailyCronjob', 0, NULL),
+(NULL, 'cleaner', 1, '45', '2', '*', '*', '6', 'HiveNova\\Cronjob\\CleanerCronjob', 0, NULL),
+(NULL, 'inactive', 1, '30', '1', '*', '*', '0,3,6', 'HiveNova\\Cronjob\\InactiveMailCronjob', 0, NULL),
+(NULL, 'teamspeak', 0, '*/3', '*', '*', '*', '*', 'HiveNova\\Cronjob\\TeamSpeakCronjob', 0, NULL),
+(NULL, 'databasedump', 1, '30', '1', '*', '*', '1', 'HiveNova\\Cronjob\\DumpCronjob', 0, NULL),
+(NULL, 'tracking', 1, FLOOR(RAND() * 60), FLOOR(RAND() * 24), '*', '*', '0', 'HiveNova\\Cronjob\\TrackingCronjob', 0, NULL),
+(NULL, 'pushing', 1, '0', '0', '*', '*', '0', 'HiveNova\\Cronjob\\PushingDetectionCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);

@@ -1,5 +1,8 @@
 <?php
 
+use HiveNova\Core\Database;
+use HiveNova\Core\Config;
+
 use PHPUnit\Framework\TestCase;
 
 abstract class IntegrationTestCase extends TestCase

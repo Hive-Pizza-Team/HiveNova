@@ -1,5 +1,7 @@
 <?php
 
+use HiveNova\Core\MissionFunctions;
+
 use PHPUnit\Framework\TestCase;
 
 /**

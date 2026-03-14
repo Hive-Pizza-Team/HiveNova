@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  2Moons 
+ *  2Moons
  *   by Jan-Otto Kröpke 2009-2016
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,6 +14,17 @@
  * @version 1.8.0
  * @link https://github.com/jkroepke/2Moons
  */
+
+use HiveNova\Core\Cache;
+use HiveNova\Core\Config;
+use HiveNova\Core\Database;
+use HiveNova\Core\DatabaseBC;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Language;
+use HiveNova\Core\Session;
+use HiveNova\Core\Theme;
+use HiveNova\Core\Universe;
+use HiveNova\Page\Game\ShowErrorPage;
 
 if (isset($_POST['GLOBALS']) || isset($_GET['GLOBALS'])) {
 	exit('You cannot set the GLOBALS-array from outside the script.');
@@ -38,7 +49,7 @@ date_default_timezone_set(@date_default_timezone_get());
 ini_set('display_errors', getenv('APP_ENV') === 'development' ? 1 : 0);
 header('Content-Type: text/html; charset=UTF-8');
 define('TIMESTAMP',	time());
-	
+
 require 'includes/constants.php';
 
 ini_set('log_errors', 'On');
@@ -47,21 +58,6 @@ ini_set('error_log', 'includes/error.log');
 require 'includes/GeneralFunctions.php';
 set_exception_handler(exceptionHandler(...));
 set_error_handler(errorHandler(...));
-
-require 'includes/classes/ArrayUtil.class.php';
-require 'includes/classes/Cache.class.php';
-require 'includes/classes/DatabaseInterface.php';
-require 'includes/classes/Database.class.php';
-require 'includes/classes/Config.class.php';
-require 'includes/classes/class.FleetFunctions.php';
-require 'includes/classes/HTTP.class.php';
-require 'includes/classes/Language.class.php';
-require 'includes/classes/PlayerUtil.class.php';
-require 'includes/classes/Session.class.php';
-require 'includes/classes/Universe.class.php';
-
-require 'includes/classes/class.theme.php';
-require 'includes/classes/class.template.php';
 
 // Say Browsers to Allow ThirdParty Cookies (Thanks to morktadela)
 HTTP::sendHeader('P3P', 'CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
@@ -95,16 +91,15 @@ if ($dbNeedsUpgrade) {
 if(defined('DATABASE_VERSION') && DATABASE_VERSION === 'OLD')
 {
 	/* For our old Admin panel */
-	require 'includes/classes/Database_BC.class.php';
-	$DATABASE	= new Database_BC();
-	
+	$DATABASE	= new DatabaseBC();
+
 	$dbTableNames	= Database::get()->getDbTableNames();
 	$dbTableNames	= array_combine($dbTableNames['keys'], $dbTableNames['names']);
-	
+
 	foreach($dbTableNames as $dbAlias => $dbName)
 	{
 		define(substr((string) $dbAlias, 2, -2), $dbName);
-	}	
+	}
 }
 
 $config = Config::get();
@@ -114,7 +109,7 @@ date_default_timezone_set($config->timezone);
 if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 {
 	$session	= Session::load();
-	
+
 	if(!(!$session->isValidSession() && isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)>=2 && MODE === 'INGAME'))
 	if(!$session->isValidSession())
 	{
@@ -123,30 +118,28 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	}
 
 	require 'includes/vars.php';
-	require 'includes/classes/class.BuildFunctions.php';
-	require 'includes/classes/class.PlanetRessUpdate.php';
-	
+
 	if(!AJAX_REQUEST && MODE === 'INGAME' && isModuleAvailable(MODULE_FLEET_EVENTS)) {
 		require('includes/FleetHandler.php');
 	}
-	
+
 	$db		= Database::get();
 
 
-	$sql	= "SELECT 
+	$sql	= "SELECT
 	user.*,
 	COUNT(message.message_id) as messages
 	FROM %%USERS%% as user
 	LEFT JOIN %%MESSAGES%% as message ON message.message_owner = user.id AND message.message_unread = :unread
 	WHERE user.id = :userId
 	GROUP BY message.message_owner;";
-	
+
 
 	$USER	= $db->selectSingle($sql, array(
 		':unread'	=> 1,
 		':userId'	=> $session->userId
 	));
-	
+
 	if(!$session->isValidSession() && isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)>=2 && MODE === 'INGAME') {
 	$USER = [];
 	$USER['lang']='en';
@@ -168,7 +161,7 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	$LNG->includeData(array('L18N', 'INGAME', 'TECH', 'CUSTOM'));
 	if(!empty($USER['dpath'])) { $THEME->setUserTheme($USER['dpath']); }
 	$GLOBALS['userNumberFormat'] = $USER['number_format'] ?? 'auto';
-	
+
 	if($config->game_disable == 0 && $USER['authlevel'] == AUTH_USR) {
 		ShowErrorPage::printError($LNG['sys_closed_game'].'<br><br>'.$config->close_reason, false);
 	}
@@ -199,7 +192,7 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 			$PLANET	= $db->selectSingle($sql, array(
 				':planetId'	=> $USER['id_planet'],
 			));
-			
+
 			if(empty($PLANET))
 			{
 				$sql	= "SELECT id FROM %%PLANETS%% WHERE id_owner = :userId AND destruyed = 0 ORDER BY id ASC LIMIT 1;";
@@ -222,14 +215,14 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 				$session->planetId = $USER['id_planet'];
 			}
 		}
-		
+
 		$USER['factor']		= getFactors($USER);
 		$USER['PLANETS']	= getPlanets($USER);
 	}
 	elseif (MODE === 'ADMIN')
 	{
 		error_reporting(E_ERROR | E_WARNING | E_PARSE);
-		
+
 		$USER['rights']		= safe_unserialize($USER['rights']);
 		$LNG->includeData(array('ADMIN', 'CUSTOM'));
 	}

@@ -1,5 +1,10 @@
 <?php
 
+use HiveNova\Core\Config;
+use HiveNova\Core\ResourceUpdate;
+use HiveNova\Core\Database;
+use HiveNova\Core\Cache;
+
 class ResourceUpdateIntegrationTest extends IntegrationTestCase
 {
     private static int $userId   = 0;
@@ -34,7 +39,7 @@ class ResourceUpdateIntegrationTest extends IntegrationTestCase
         // We cannot rely on the global $reslist from bootstrap because PHPUnit
         // may have re-scoped it or vars.php's extract() may have been lost.
         $cache = Cache::get();
-        $cache->add('vars', 'VarsBuildCache');
+        $cache->add('vars', 'HiveNova\\Core\\Cache\\VarsBuildCache');
         $vars = $cache->getData('vars');
 
         // ReBuildCache uses global $ProdGrid; ensure it is populated
