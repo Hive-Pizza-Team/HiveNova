@@ -24,17 +24,17 @@ $LNG['loading']								= 'Cargando ...';
 
 $LNG['invalid_action']						= 'Acción no valida!';
 
-$LNG['type_mission_1']  					= 'Atacar';
+$LNG['type_mission_1']  					= 'Ataque';
 $LNG['type_mission_2']  					= 'Ataque grupal';
-$LNG['type_mission_3']  					= 'Transportar';
-$LNG['type_mission_4']  					= 'Desplegar';
-$LNG['type_mission_5']  					= 'Mantener posición';
-$LNG['type_mission_6']  					= 'Espiar';
-$LNG['type_mission_7']  					= 'Colonizar';
-$LNG['type_mission_8']  					= 'Reciclar';
-$LNG['type_mission_9']  					= 'Destruir';
+$LNG['type_mission_3']  					= 'Transporte';
+$LNG['type_mission_4']  					= 'Estacionamiento';
+$LNG['type_mission_5']  					= 'Retención';
+$LNG['type_mission_6']  					= 'Espionaje';
+$LNG['type_mission_7']  					= 'Colonización';
+$LNG['type_mission_8']  					= 'Reciclaje';
+$LNG['type_mission_9']  					= 'Destrucción';
 $LNG['type_mission_10']  					= 'Ataque con Misiles';
-$LNG['type_mission_11']  					= 'Investigación DM';
+$LNG['type_mission_11']  					= 'Investigación Pizzabits';
 $LNG['type_mission_15'] 					= 'Expedición';
 
 $LNG['type_planet_1']  					= 'Planeta';
