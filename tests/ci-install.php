@@ -124,11 +124,11 @@ foreach ($statements as $stmt) {
 
 // Set basic config values (mirrors install/index.php step 6).
 // Use Database::get() now that the schema exists.
-$config = \HiveNova\Core\Config::get(Universe::current());
+$config = \HiveNova\Core\Config::get(\HiveNova\Core\Universe::current());
 $config->timezone         = @date_default_timezone_get();
 $config->lang             = 'en';
 $config->OverviewNewsText = 'Welcome to HiveNova ' . $installVersion;
-$config->uni_name         = 'Universe ' . Universe::current();
+$config->uni_name         = 'Universe ' . \HiveNova\Core\Universe::current();
 $config->close_reason     = 'Maintenance';
 $config->moduls           = implode(';', array_fill(0, MODULE_AMOUNT - 1, 1));
 $config->save();
@@ -141,7 +141,7 @@ echo "[ 3/4 ] Creating admin user '$adminName' ... ";
 require ROOT_PATH . 'includes/vars.php';
 $hashPassword = \HiveNova\Core\PlayerUtil::cryptPassword($adminPass);
 \HiveNova\Core\PlayerUtil::createPlayer(
-    Universe::current(),
+    \HiveNova\Core\Universe::current(),
     $adminName,
     $hashPassword,
     $adminMail,
