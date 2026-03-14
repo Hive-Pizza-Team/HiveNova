@@ -22,11 +22,11 @@ chdir(ROOT_PATH);
 
 require 'includes/common.php';
 $THEME->setUserTheme('gow');
-$LNG = new Language;
+$LNG = new \HiveNova\Core\Language;
 $LNG->getUserAgentLanguage();
 $LNG->includeData(array('L18N', 'INGAME', 'INSTALL', 'CUSTOM'));
 
-$mode = HTTP::_GP('mode', '');
+$mode = \HiveNova\Core\HTTP::_GP('mode', '');
 
 $template = new template();
 $template->setCaching(false);
@@ -66,7 +66,7 @@ if (!is_file($enableInstallToolFile)) {
     $template->message($message, false, 0, true);
 	exit;
 }
-$language = HTTP::_GP('lang', '');
+$language = \HiveNova\Core\HTTP::_GP('lang', '');
 
 if (!empty($language) && in_array($language, $LNG->getAllowedLangs())) {
 	setcookie('lang', $language);
@@ -106,7 +106,7 @@ switch ($mode) {
         try {
             $sql    = "SELECT dbVersion FROM %%SYSTEM%%;";
 
-            $dbVersion  = Database::get()->selectSingle($sql, array(), 'dbVersion');
+            $dbVersion  = \HiveNova\Core\Database::get()->selectSingle($sql, array(), 'dbVersion');
         } catch (Exception $e) {
             $dbVersion  = 0;
         }
@@ -145,7 +145,7 @@ switch ($mode) {
 		require 'includes/config.php';
 
 		// Create a Backup
-        $sqlTableRaw  = Database::get()->nativeQuery("SHOW TABLE STATUS FROM `" . DB_NAME . "`;");
+        $sqlTableRaw  = \HiveNova\Core\Database::get()->nativeQuery("SHOW TABLE STATUS FROM `" . DB_NAME . "`;");
 		$prefixCounts = strlen(DB_PREFIX);
 		$dbTables     = array();
 		foreach($sqlTableRaw as $table)
@@ -164,14 +164,14 @@ switch ($mode) {
 
 		$fileName = '2MoonsBackup_' . date('Y_m_d_H_i_s', TIMESTAMP) . '.sql';
 		$filePath = 'includes/backups/' . $fileName;
-		require 'includes/classes/SQLDumper.class.php';
-		$dump = new SQLDumper;
+		
+		$dump = new \HiveNova\Core\SQLDumper;
 		$dump->dumpTablesToFile($dbTables, $filePath);
 
         try {
             $sql	= "SELECT dbVersion FROM %%SYSTEM%%;";
 
-            $dbVersion	= Database::get()->selectSingle($sql, array(), 'dbVersion');
+            $dbVersion	= \HiveNova\Core\Database::get()->selectSingle($sql, array(), 'dbVersion');
         } catch (Exception $e) {
             $dbVersion  = 0;
         }
@@ -229,7 +229,7 @@ switch ($mode) {
                         {
 							try {
 								// alter table IF NOT EXISTS
-								Database::get()->nativeQuery(trim($query));
+								\HiveNova\Core\Database::get()->nativeQuery(trim($query));
 							}
 							catch (Exception $e) {
 								error_log('Query: [' . $query . '] failed. Error: ' . $e->getMessage() . '. Skipped');
@@ -253,7 +253,7 @@ switch ($mode) {
         $revision = end($fileList);
         $revision = $revision['fileRevision'];
 
-        Database::get()->update("UPDATE %%SYSTEM%% SET dbVersion = " . DB_VERSION_REQUIRED . ";");
+        \HiveNova\Core\Database::get()->update("UPDATE %%SYSTEM%% SET dbVersion = " . DB_VERSION_REQUIRED . ";");
 
         ClearCache();
 
@@ -266,12 +266,12 @@ switch ($mode) {
         unlink($enableInstallToolFile);
 		break;
 	case 'install':
-		$step = HTTP::_GP('step', 0);
+		$step = \HiveNova\Core\HTTP::_GP('step', 0);
 		switch ($step) {
 			case 1:
 				if (isset($_POST['post'])) {
 					if (isset($_POST['accept'])) {
-						HTTP::redirectTo('index.php?mode=install&step=2');
+						\HiveNova\Core\HTTP::redirectTo('index.php?mode=install&step=2');
 					}
 					else {
 						$template->assign(array(
@@ -400,12 +400,12 @@ switch ($mode) {
 				$template->show('ins_form.tpl');
 				break;
 			case 4:
-				$host   = HTTP::_GP('host', '');
-				$port   = HTTP::_GP('port', 3306);
-				$user   = HTTP::_GP('user', '', true);
-				$userpw = HTTP::_GP('passwort', '', true);
-				$dbname = HTTP::_GP('dbname', '', true);
-				$prefix = HTTP::_GP('prefix', 'uni1_');
+				$host   = \HiveNova\Core\HTTP::_GP('host', '');
+				$port   = \HiveNova\Core\HTTP::_GP('port', 3306);
+				$user   = \HiveNova\Core\HTTP::_GP('user', '', true);
+				$userpw = \HiveNova\Core\HTTP::_GP('passwort', '', true);
+				$dbname = \HiveNova\Core\HTTP::_GP('dbname', '', true);
+				$prefix = \HiveNova\Core\HTTP::_GP('prefix', 'uni1_');
 				$template->assign(array(
 					'host'   => $host,
 					'port'   => $port,
@@ -465,7 +465,7 @@ switch ($mode) {
 				$blowfish = substr(str_shuffle('./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 22);
 				file_put_contents(ROOT_PATH . 'includes/config.php', sprintf(file_get_contents('includes/config.sample.php'), $host, $port, $user, $userpw, $dbname, $prefix, $blowfish));
 				try {
-					Database::get();
+					\HiveNova\Core\Database::get();
 				}
 				catch (Exception $e) {
 					$template->assign(array(
@@ -487,7 +487,7 @@ switch ($mode) {
 				$template->show('ins_step5.tpl');
 				break;
 			case 6:
-				$db = Database::get();
+				$db = \HiveNova\Core\Database::get();
 				$installSQL      = file_get_contents('install/install.sql');
 				$installVersion  = file_get_contents('install/VERSION');
 				$installRevision = 0;
@@ -518,11 +518,11 @@ switch ($mode) {
                         DB_VERSION_REQUIRED
 					), $installSQL));
 
-					$config = Config::get(Universe::current());
+					$config = \HiveNova\Core\Config::get(\HiveNova\Core\Universe::current());
 					$config->timezone			= @date_default_timezone_get();
 					$config->lang	 			= $LNG->getLanguage();
 					$config->OverviewNewsText	= $LNG['sql_welcome'] . $installVersion;
-					$config->uni_name			= $LNG['fcm_universe'] . ' ' . Universe::current();
+					$config->uni_name			= $LNG['fcm_universe'] . ' ' . \HiveNova\Core\Universe::current();
 					$config->close_reason		= $LNG['sql_close_reason'];
 					$config->moduls				= implode(';', array_fill(0, MODULE_AMOUNT - 1, 1));
 
@@ -530,7 +530,7 @@ switch ($mode) {
 
 					$config->save();
 
-					HTTP::redirectTo('index.php?mode=install&step=7');
+					\HiveNova\Core\HTTP::redirectTo('index.php?mode=install&step=7');
 				}
 				catch (Exception $e) {
 					require 'includes/config.php';
@@ -558,14 +558,14 @@ switch ($mode) {
 				$template->show('ins_acc.tpl');
 				break;
 			case 8:
-				$username	= HTTP::_GP('username', '', UTF8_SUPPORT);
-				$password	= HTTP::_GP('password', '', true);
-				$mail		= HTTP::_GP('email', '');
+				$username	= \HiveNova\Core\HTTP::_GP('username', '', UTF8_SUPPORT);
+				$password	= \HiveNova\Core\HTTP::_GP('password', '', true);
+				$mail		= \HiveNova\Core\HTTP::_GP('email', '');
 				// Get Salt.
 				require 'includes/config.php';
 				require 'includes/vars.php';
 
-				$hashPassword = PlayerUtil::cryptPassword($password);
+				$hashPassword = \HiveNova\Core\PlayerUtil::cryptPassword($password);
 
 				if (empty($username) || empty($password) || empty($mail)) {
 					$template->assign(array(
@@ -577,7 +577,7 @@ switch ($mode) {
 					exit;
 				}
 
-				list($userId, $planetId) = PlayerUtil::createPlayer(Universe::current(), $username, $hashPassword, $mail, '', $LNG->getLanguage(), 1, 1, 2, NULL, AUTH_ADM);
+				list($userId, $planetId) = \HiveNova\Core\PlayerUtil::createPlayer(\HiveNova\Core\Universe::current(), $username, $hashPassword, $mail, '', $LNG->getLanguage(), 1, 1, 2, NULL, AUTH_ADM);
 
 				$session	= Session::create();
 				$session->userId		= $userId;

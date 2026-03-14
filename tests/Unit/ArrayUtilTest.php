@@ -1,5 +1,7 @@
 <?php
 
+use HiveNova\Core\ArrayUtil;
+
 use PHPUnit\Framework\TestCase;
 
 class ArrayUtilTest extends TestCase

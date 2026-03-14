@@ -1,5 +1,7 @@
 <?php
 
+namespace HiveNova\Core;
+
 interface DatabaseInterface
 {
 	public function select($qry, array $params = array());

@@ -1,5 +1,7 @@
 <?php
 
+use HiveNova\Core\PlayerUtil;
+
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,7 +18,7 @@ class BotDetectionCronjobTest extends TestCase
     protected function setUp(): void
     {
         $this->source = file_get_contents(
-            __DIR__ . '/../../includes/classes/cronjob/BotDetectionCronjob.class.php'
+            __DIR__ . '/../../includes/classes/cronjob/BotDetectionCronjob.php'
         );
     }
 

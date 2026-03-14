@@ -22,17 +22,17 @@ define('ROOT_PATH', str_replace('\\', '/',dirname(__FILE__)).'/');
 set_include_path(ROOT_PATH.'includes/libs/BBCodeParser2/'.':'.ROOT_PATH.':'.get_include_path());
 require_once('HTML/BBCodeParser2.php');
 
-require 'includes/pages/game/AbstractGamePage.class.php';
-require 'includes/pages/game/ShowErrorPage.class.php';
+
+
 require 'includes/common.php';
-require 'includes/classes/class.Log.php';
+
 
 if ($USER['authlevel'] == AUTH_USR)
 {
-	HTTP::redirectTo('game.php');
+	\HiveNova\Core\HTTP::redirectTo('game.php');
 }
 
-$session	= Session::create();
+$session	= \HiveNova\Core\Session::create();
 if($session->adminAccess != 1)
 {
 	include_once('includes/pages/adm/ShowLoginPage.php');
@@ -40,14 +40,14 @@ if($session->adminAccess != 1)
 	exit;
 }
 
-$uni	= HTTP::_GP('uni', 0);
+$uni	= \HiveNova\Core\HTTP::_GP('uni', 0);
 
 if($USER['authlevel'] == AUTH_ADM && !empty($uni))
 {
-	Universe::setEmulated($uni);
+	\HiveNova\Core\Universe::setEmulated($uni);
 }
 
-$page	= HTTP::_GP('page', '');
+$page	= \HiveNova\Core\HTTP::_GP('page', '');
 switch($page)
 {
 	case 'logout':

@@ -1,5 +1,8 @@
 <?php
 
+use HiveNova\Core\Config;
+use HiveNova\Core\Universe;
+
 use PHPUnit\Framework\TestCase;
 
 class ConfigTest extends TestCase

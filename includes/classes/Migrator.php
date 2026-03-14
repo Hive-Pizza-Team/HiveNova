@@ -1,5 +1,11 @@
 <?php
 
+namespace HiveNova\Core;
+
+use PDO;
+use PDOException;
+use DirectoryIterator;
+
 /**
  * Handles discovery and application of SQL/PHP database migrations.
  */

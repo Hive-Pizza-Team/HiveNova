@@ -7,6 +7,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/Hive-Pizza-Team/HiveNova?style=social)](https://github.com/Hive-Pizza-Team/HiveNova/network/members)
 [![GitHub issues](https://img.shields.io/github/issues/Hive-Pizza-Team/HiveNova)](https://github.com/Hive-Pizza-Team/HiveNova/issues)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Hive-Pizza-Team/HiveNova)](https://github.com/Hive-Pizza-Team/HiveNova/commits)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/BWqmGbtuDn)
 
 ![MOON_Discord_Event_Banner](https://github.com/user-attachments/assets/96607107-b195-4164-9537-241430acc86e)
 
@@ -106,16 +107,22 @@ php -S localhost:8000
 
 ### Testing
 
+Run the full CI pipeline locally before pushing:
+
 ```bash
-./vendor/bin/phpunit
+./tests/run-ci-local.sh               # unit tests + language check + smoke test
+./tests/run-ci-local.sh --integration # also run integration tests (requires MySQL)
 ```
 
-For black-box smoke testing (logs in and hits all game pages):
+This mirrors what GitHub Actions runs, including checking that `includes/error.log` is empty after the smoke test. Requires the local dev server to be running on `:8000`.
+
+Individual test commands:
 
 ```bash
-php tests/smoke.php                                        # local dev defaults
+php vendor/bin/phpunit                  # unit tests
+php tests/smoke.php                     # smoke test (local dev defaults)
+php .github/scripts/check-language-files.php  # language key validation
 php tests/smoke.php https://staging.moon.hive.pizza admin s3cr3t  # remote host
-SMOKE_BASE_URL=https://staging.moon.hive.pizza php tests/smoke.php # via env var
 ```
 
 ### CI

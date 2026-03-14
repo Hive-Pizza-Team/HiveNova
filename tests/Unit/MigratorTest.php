@@ -1,5 +1,7 @@
 <?php
 
+use HiveNova\Core\Migrator;
+
 use PHPUnit\Framework\TestCase;
 
 /**

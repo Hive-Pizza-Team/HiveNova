@@ -1,5 +1,8 @@
 <?php
 
+use HiveNova\Core\Config;
+use HiveNova\Core\FleetFunctions;
+
 use PHPUnit\Framework\TestCase;
 
 class FleetFunctionsTest extends TestCase
