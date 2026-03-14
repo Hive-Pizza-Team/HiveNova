@@ -15,9 +15,9 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-define('DB_VERSION_REQUIRED', 15);
-define('DB_NAME'			, $database['databasename']);
-define('DB_PREFIX'			, $database['tableprefix']);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 15);
+defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
+defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
 // Data Tabells
 $dbTableNames	= array(
