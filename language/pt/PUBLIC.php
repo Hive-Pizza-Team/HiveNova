@@ -49,7 +49,7 @@ $LNG['uni_closed']					= ' (fechado)';
 $LNG['buttonRegister']				= 'Regista Agora!';
 $LNG['buttonRegisterHive']			= 'Registar no Hive!';
 $LNG['buttonScreenshot']			= 'Screenshots';
-$LNG['buttonLostPassword']			= 'Perdeste a Password?';
+$LNG['buttonLostPassword']			= 'Perdeste a Senha?';
 
 // Start
 $LNG['gameInformations']			= "Compatível com dispositivos móveis\nJoga em qualquer navegador\nSem instalação necessária\nFaz alianças com amigos e inimigos\nDomina o universo\nGanha adrenalina, coleciona crânios\n";
@@ -57,7 +57,7 @@ $LNG['gameInformations']			= "Compatível com dispositivos móveis\nJoga em qual
 // Login
 $LNG['loginHeader']					= 'Login';
 $LNG['loginUsername']				= 'Username';
-$LNG['loginPassword']				= 'Password';
+$LNG['loginPassword']				= 'Senha';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'Com o login eu aceito os %s.';
 $LNG['loginWelcome']				= 'Bem-vindo ao %s';
@@ -68,14 +68,14 @@ $LNG['loginHiveAccount']			= 'Conta Hive';
 $LNG['registerFacebookAccount']		= 'Conta de Facebook';
 $LNG['registerUsername']			= 'Username';
 $LNG['registerUsernameDesc']		= 'O Username deve ser no mínimo 3 e máximo de 25 caracteres e pontos e pode consistir em números, letras, sublinhados e espaços';
-$LNG['registerPassword']			= 'Password';
-$LNG['registerPasswordDesc']		= 'A Password deve ter pelo menos %s caracteres.';
-$LNG['registerPasswordReplay']		= 'Repetir Password';
-$LNG['registerPasswordReplayDesc']	= 'Por favor, digita a mesma password.';
+$LNG['registerPassword']			= 'Senha';
+$LNG['registerPasswordDesc']		= 'A Senha deve ter pelo menos %s caracteres.';
+$LNG['registerPasswordReplay']		= 'Repetir Senha';
+$LNG['registerPasswordReplayDesc']	= 'Por favor, digita a mesma senha.';
 $LNG['registerEmail']				= 'E-mail';
-$LNG['registerEmailDesc']			= 'Por favor, digita o teu endereço de E-Mail!';
+$LNG['registerEmailDesc']			= 'Por favor, digita o seu endereço de E-Mail!';
 $LNG['registerEmailReplay']			= 'Repetir E-Mail';
-$LNG['registerEmailReplayDesc']		= 'Por favor, insere o teu endereço de e-mail mais uma vez!';
+$LNG['registerEmailReplayDesc']		= 'Por favor, insere o seu endereço de e-mail mais uma vez!';
 $LNG['registerLanguage']			= 'Língua';
 $LNG['registerReferral']			= 'Anunciado por:';
 $LNG['registerCaptcha']				= 'Código de segurança';
@@ -96,13 +96,13 @@ $LNG['registerErrorUniClosed']		= 'O registro é fechado neste universo!';
 $LNG['registerErrorUsernameEmpty']	= 'Deves digitar um username!';
 $LNG['registerErrorUsernameChar']	= 'O Username deve consistir em números, letras, espaços, _, -, . apenas!';
 $LNG['registerErrorUsernameExist']	= 'O Username já está em uso! Se és o titular desta conta Hive, tenta registar com o Keychain.';
-$LNG['registerErrorPasswordLength']	= 'A Password deve ter pelo menos %s caracteres!';
+$LNG['registerErrorPasswordLength']	= 'A Senha deve ter pelo menos %s caracteres!';
 $LNG['registerErrorPasswordSame']	= 'Inseriste 2 Passwords diferentes!';
 $LNG['registerErrorMailEmpty']		= 'Deves especificar um endereço de email!';
 $LNG['registerErrorMailInvalid']	= 'Endereço de E-Mail inválido!';
 $LNG['registerErrorMailSame']		= 'Inseriste 2 endereços de email diferentes!';
 $LNG['registerErrorMailExist']		= 'O endereço de E-Mail já está registado!';
-$LNG['registerErrorRules']			= 'Tens que aceitar as regras!';
+$LNG['registerErrorRules']			= 'Tem que aceitar as regras!';
 $LNG['registerErrorCaptcha']		= 'O código de segurança está errado!';
 $LNG['registerErrorHiveAccountInvalid']	= 'É necessário introduzir uma conta Hive válida!';
 $LNG['registerErrorHiveAccountExist']	= 'A conta Hive já está registada!';
@@ -112,11 +112,11 @@ $LNG['registerMailVertifyError']	= 'Falha ao enviar o email: %s';
 
 $LNG['registerMailCompleteTitle']	= 'Bem-vindo ao %s!';
 
-$LNG['registerSendComplete']		= 'Obrigado pelo registo. Verifica o teu email (atenção ao SPAM) para mais informações.';
+$LNG['registerSendComplete']		= 'Obrigado pelo registo. Verifica o seu email (atenção ao SPAM) para mais informações.';
 
 $LNG['registerWelcomePMSenderName']	= 'Administrador';
 $LNG['registerWelcomePMSubject']	= 'Bem-vindo';
-$LNG['registerWelcomePMText']		= 'Bem-vindo ao %s! Primeiro constrói uma central elétrica solar, pois a energia é necessária para a produção de matérias-primas. Para construir uma, clica no menu em "edifícios". Depois constrói o 4.º edifício a partir do topo. </br> Quando tiveres energia, podes começar a construir minas. Vai a edifícios no menu e constrói um extrator de minério, seguido de uma refinaria de silício. </br></br>Para conseguires construir naves precisas de um estaleiro. Para veres o que é necessário para desbloquear esse edifício, podes consultar "Tecnologias" no menu da esquerda.</br>Se tiveres mais perguntas, podes consultar um post de tutorial, o nosso Discord ou encontrar uma aliança. </br></br> A equipa deseja-te muita diversão a explorar o universo!';
+$LNG['registerWelcomePMText']		= 'Bem-vindo ao %s! Primeiro constrói uma central elétrica solar, pois a energia é necessária para a produção de matérias-primas. Para construir uma, clica no menu em "edifícios". Depois constrói o 4.º edifício a partir do topo. </br> Quando tiveres energia, pode começar a construir minas. Vai a edifícios no menu e constrói um extrator de minério, seguido de uma refinaria de silício. </br></br>Para conseguires construir naves precisas de um estaleiro. Para veres o que é necessário para desbloquear esse edifício, pode consultar "Tecnologias" no menu da esquerda.</br>Se tiveres mais perguntas, pode consultar um post de tutorial, o nosso Discord ou encontrar uma aliança. </br></br> A equipa deseja-te muita diversão a explorar o universo!';
 
 //Vertify
 
@@ -125,7 +125,7 @@ $LNG['vertifyAdminMessage']			= 'O utilizador "%s" foi ativado!';
 
 
 //lostpassword
-$LNG['passwordInfo']				= 'Se esqueceste a tua palavra-passe, deves indicar o nome de utilizador e o endereço de E-Mail que introduziste na tua conta.';
+$LNG['passwordInfo']				= 'Se esqueceste a sua palavra-passe, deves indicar o nome de utilizador e o endereço de E-Mail que introduziste na sua conta.';
 $LNG['passwordUsername']			= 'Username';
 $LNG['passwordMail']				= 'E-Mail';
 $LNG['passwordCaptcha']				= 'Código de segurança';
@@ -133,13 +133,13 @@ $LNG['passwordSubmit']				= 'Enviar';
 $LNG['passwordErrorUsernameEmpty']	= 'Não especificaste o Username!';
 $LNG['passwordErrorMailEmpty']		= 'Especificaste um endereço de email desconhecido!';
 $LNG['passwordErrorUnknown']		= 'Não foi possível corresponder com os dados da conta.';
-$LNG['passwordErrorOnePerDay']		= 'Limite de redefinição de palavra-passe atingido. Só podes solicitar a redefinição uma vez a cada 24 horas.';
+$LNG['passwordErrorOnePerDay']		= 'Limite de redefinição de palavra-passe atingido. Só pode solicitar a redefinição uma vez a cada 24 horas.';
 
 $LNG['passwordValidMailTitle']		= 'Esqueci a minha palavra-passe no jogo: %s';
 $LNG['passwordValidMailSend']		= 'Receberás em breve um email com mais informações.';
 
 $LNG['passwordValidInValid']		= 'Pedido inválido!';
-$LNG['passwordChangedMailSend']		= 'Receberás em breve um email com a tua nova palavra-passe.';
+$LNG['passwordChangedMailSend']		= 'Receberás em breve um email com a sua nova palavra-passe.';
 $LNG['passwordChangedMailTitle']	= 'Nova palavra-passe no jogo: %s';
 
 $LNG['passwordBack']				= 'Voltar';
@@ -147,9 +147,9 @@ $LNG['passwordNext']				= 'Próximo';
 
 //case default
 
-$LNG['login_error_1']				= 'Username/palavra-passe incorretos! Certifica-te de que estás registado!';
-$LNG['login_error_2']				= 'Alguém iniciou sessão na tua conta a partir de um PC diferente, ou o teu IP mudou!';
-$LNG['login_error_3']				= 'A tua sessão expirou!';
+$LNG['login_error_1']				= 'Username/palavra-passe incorretos! Certifica-te de que está registado!';
+$LNG['login_error_2']				= 'Alguém iniciou sessão na sua conta a partir de um PC diferente, ou o seu IP mudou!';
+$LNG['login_error_3']				= 'A sua sessão expirou!';
 $LNG['login_error_4']				= 'Ocorreu um erro na autorização externa, por favor tenta novamente!';
 
 //Rules

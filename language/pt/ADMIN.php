@@ -25,11 +25,11 @@
 //---------------	Geral	------------------------// 
 $LNG['adm_login']			= 'Login';
 $LNG['adm_username']		= 'Username';
-$LNG['adm_password']		= 'Password';
+$LNG['adm_password']		= 'Senha';
 $LNG['adm_absenden']		= 'Entrar';
-$LNG['adm_password_info']	= 'Escreve a tua senha para poderes entrar';
-$LNG['adm_bad_password']	= 'Password errada!';
-$LNG['404_page']			= 'Não tens permissões para aceder a esta página';
+$LNG['adm_password_info']	= 'Escreve a sua senha para poderes entrar';
+$LNG['adm_bad_password']	= 'Senha errada!';
+$LNG['404_page']			= 'Não tem permissões para aceder a esta página';
 $LNG['adm_cp_title']		= 'Painel de Administração';
 $LNG['adm_cp_index']		= 'Inicio';
 $LNG['mu_moderation_page']	= 'Permissões';
@@ -39,7 +39,7 @@ $LNG['adm_cp_logout']		= 'Voltar ao jogo';
 //	Miscelâneo
 $LNG['ad_number']			= 'ID';
 $LNG['ad_max']				= '(max. %d)';
-$LNG['only_numbers']		= 'Só podes inserir numeros!';
+$LNG['only_numbers']		= 'Só pode inserir numeros!';
 $LNG['select_option']		= 'Escolhe a opção...';
 
 // 	Rank
@@ -116,7 +116,7 @@ $LNG['officiers_title']	= 'Oficiais';
 
 //---------------	Editor	------------------------//
 // Menu
-$LNG['ad_forgiven_id']			= 'Tens que inserir um ID!';
+$LNG['ad_forgiven_id']			= 'Tem que inserir um ID!';
 $LNG['ad_back_to_menu']			= 'Regressar ao menu inicial';
 $LNG['ad_editor_title']			= 'Editor de contas';
 $LNG['ad_editor_buildings']		= 'Edifícios';
@@ -175,7 +175,7 @@ $LNG['ad_personal_title']		= 'Persnoalizar Dados Pessoais';
 $LNG['ad_personal_name']		= 'Username';
 $LNG['ad_personal_email']		= 'E-mail';
 $LNG['ad_personal_email2']		= 'E-mail (Inserir novamente)';
-$LNG['ad_personal_pass']		= 'Password';
+$LNG['ad_personal_pass']		= 'Senha';
 $LNG['ad_personal_succes']		= 'Configurações armazenadas';
 $LNG['ad_personal_vacat']		= 'Modo de férias';
 
@@ -261,7 +261,7 @@ $LNG['bo_unban']				= 'Desbloquear';
 
 //---------------	Encriptador de MD5	------------------------//
 $LNG['et_md5_encripter']	= 'Encriptador de MD5';
-$LNG['et_pass']				= 'Entrada de Password desejada';
+$LNG['et_pass']				= 'Entrada de Senha desejada';
 $LNG['et_result']			= 'Resultado de encriptação';
 $LNG['et_encript']			= 'Gerar código';
 //###########################################################//
@@ -310,7 +310,7 @@ $LNG['ml_deleted']				= 'A mensagem foi apagada.';
 
 
 //---------------	Mensagem Global	------------------------//
-$LNG['ma_message_sended']				= 'A tua mensagem foi enviada!';
+$LNG['ma_message_sended']				= 'A sua mensagem foi enviada!';
 $LNG['ma_subject_needed']				= 'Deves adicionar o assunto!';
 $LNG['ma_send_global_message']			= 'Enviar mensagem global';
 $LNG['ma_subject']						= 'Assunto';
@@ -330,12 +330,12 @@ $LNG['ow_overview']					= 'Controlo';
 $LNG['ow_support']					= 'Suporte';
 $LNG['ow_credits']					= 'Creditos';
 $LNG['ow_forum']					= 'Forum';
-$LNG['ow_proyect_leader']			= 'Lider de Projecto';
+$LNG['ow_proyect_leader']			= 'Lider de Projeto';
 $LNG['ow_translator']				= 'Tradutores';
 $LNG['ow_special_thanks']			= 'Obrigado especial';
 $LNG['ow_file_detected']			= 'Foi encontrado o arquivo %s. Por motivos de segurança, apagar ou renomear.';
 $LNG['ow_config_file_writable']		= 'O ficheiro config.php pode ser escrito, editado ou apagado! É recomendado por em modo 440 (leitura somente).';
-$LNG['ow_database_errors']			= 'Tens erros na tua base de dados. <a href="ErrorPage.php">Mostrar Erros</a>';
+$LNG['ow_database_errors']			= 'Tem erros na sua base de dados. <a href="ErrorPage.php">Mostrar Erros</a>';
 $LNG['ow_smtp_errors']				= 'Verifica as configurações de SMTP! - Neste momento nenhum email pode ser enviado!';
 $LNG['ow_dir_not_writable']			= '/%s dir não pode ser escrito!';
 $LNG['ow_none']						= 'Sem Avisos';
@@ -458,7 +458,7 @@ $LNG['se_smtp_ssl_info']                = 'Aqui poderás escolher que tipo de li
 $LNG['se_smtp_port']                    = 'SMTP Porta:';
 $LNG['se_smtp_port_info']               = 'Inserir aqui a porta do seu servidor SMTP.Normalmente a porta é 25';
 $LNG['se_smtp_user']                    = 'SMTP Username:';
-$LNG['se_smtp_pass']                    = 'SMTP Password:';
+$LNG['se_smtp_pass']                    = 'SMTP Senha:';
 $LNG['se_smtp_sendmail']				= 'SMTP Remetente:';
 $LNG['se_smtp_sendmail_info']          	= 'Ponha aqui o endereço de email de retorno. Não necessita de ser o mesmo de envio.';                                  
 $LNG['se_ftp'] = 'Configuração FTP';
@@ -469,10 +469,10 @@ $LNG['se_ftp_pass'] = 'Senha FTP: (senha do host)';
 $LNG['se_ftp_dir'] = 'Caminho do jogo FTP: (onde o jogo está salvo)';
 $LNG['se_ftp_dir_info'] = 'Aqui insira o caminho para a pasta do seu jogo, deve começar com uma barra e terminar com uma barra!<br>Exemplo: /httpdocs/';
 $LNG['se_google']                       = 'Google Analítico - Configurações';
-$LNG['se_google_info']                  = 'Google Analitico é a solução para web sites que lhe permite adquirir conhecimentos valiosos sobre o tráfego do seu site e do impacto das suas estratégias de marketing. Graças ao poderoso, flexível e características user-friendly prog agora podes acessar aos teus dados em novas formas de analisar e mostrar. Com o Google Analitico podes projetar a tua publicidade segmentada, fortes campanhas de marketing e desenvolvimento de sites com altas taxas de conversão.';
+$LNG['se_google_info']                  = 'Google Analitico é a solução para web sites que lhe permite adquirir conhecimentos valiosos sobre o tráfego do seu site e do impacto das suas estratégias de marketing. Graças ao poderoso, flexível e características user-friendly prog agora pode acessar aos seus dados em novas formas de analisar e mostrar. Com o Google Analitico pode projetar a sua publicidade segmentada, fortes campanhas de marketing e desenvolvimento de sites com altas taxas de conversão.';
 $LNG['se_google_active']                = 'Ativar/desativar?';
 $LNG['se_google_key']                   = 'Chave do Google Analítico';
-$LNG['se_google_key_info']              = 'Identificar a chave analítica para teu site. Isso sempre começa com UA-00000000-0';
+$LNG['se_google_key_info']              = 'Identificar a chave analítica para seu site. Isso sempre começa com UA-00000000-0';
 $LNG['se_ttf_file']                     = 'Pfad do ficheiro TTF';
 $LNG['se_ttf_file_info']                = 'O TTF é necessária para exibir o banner estatísticas cirílico ou chinês';
 $LNG['se_deuterium_cost_galaxy']		= 'Custo de Urânio';
@@ -550,9 +550,9 @@ $LNG['ad_authlevel_title']              = 'Autoridades';
 $LNG['ad_authlevel_name']               = 'Nome';
 $LNG['ad_authlevel_auth']               = 'Autoridade';
 $LNG['ad_authlevel_succes']             = 'Status alterado com sucesso';
-$LNG['ad_authlevel_error']              = 'Já tens essa autoridade!';
+$LNG['ad_authlevel_error']              = 'Já tem essa autoridade!';
 $LNG['ad_authlevel_error_2']            = 'Insira um único usuário!';
-$LNG['ad_authlevel_error_3']            = 'Não podes alterar a posição ao criador do jogo!';
+$LNG['ad_authlevel_error_3']            = 'Não pode alterar a posição ao criador do jogo!';
 $LNG['ad_authlevel_insert_id']          = 'Inserir ID manualmente (opcional)';
 $LNG['ad_authlevel_aa']                 = '[Ver Administradores]';
 $LNG['ad_authlevel_oo']                 = '[Ver Operadores]';
@@ -595,7 +595,7 @@ $LNG['sb_sql_counts']			        = 'SQL Querys: %d';
 
 
 //---------------	Lista de jogadores	------------------------//
-$LNG['ul_sure_you_want_dlte']		= 'Tens a certeza que pretendes remover?';
+$LNG['ul_sure_you_want_dlte']		= 'Tem a certeza que pretendes remover?';
 //###########################################################//
 
 
@@ -623,7 +623,7 @@ $LNG['mu_tools'] 						= 'Ferramentas';
 $LNG['mu_md5_encripter'] 				= 'Encriptador MD5';
 $LNG['mu_optimize_db'] 					= 'Verificar Base de Dados';
 $LNG['mu_manual_points_update'] 		= 'Atualização de pontos manual';
-$LNG['mu_mpu_confirmation'] 			= 'O atualizador de pontos é automatico, isso permite ver o que é que o teu servidor esta atualmente a fazer (Como memoria consumida , SQL , etc.)';
+$LNG['mu_mpu_confirmation'] 			= 'O atualizador de pontos é automatico, isso permite ver o que é que o seu servidor esta atualmente a fazer (Como memoria consumida , SQL , etc.)';
 $LNG['mu_search_page'] 					= 'Procura Avançada';
 $LNG['mu_info_account_page']	 		= 'Informações de Contas';
 $LNG['mu_planets_options'] 				= 'Opções de Planetas';
@@ -709,7 +709,7 @@ $LNG['re_reset_universe'] 				= 'Reiniciar o Universo';
 $LNG['re_player_and_planets']			= 'Jogadores e Planetas';
 $LNG['re_reset_player']					= 'Apagar TODOS os Jogador';
 $LNG['re_reset_planets']				= 'Apagar TODOS os Planetas';
-$LNG['re_reset_universe_confirmation'] 	= 'Ao clicar em OK, a base de dados será toda limpa (Excepto tabelas). Ao fazer esta opção, não existe retorno, a não ser com um backup da base de dados!';
+$LNG['re_reset_universe_confirmation'] 	= 'Ao clicar em OK, a base de dados será toda limpa (Exceto tabelas). Ao fazer esta opção, não existe retorno, a não ser com um backup da base de dados!';
 $LNG['re_defenses_and_ships'] 			= 'Defesa e Estaleiro';
 $LNG['re_defenses'] 					= 'Reiniciar Defesas';
 $LNG['re_ships'] 						= 'Reiniciar Frotas';
@@ -969,7 +969,7 @@ $LNG['new_add_user']		= 'Adicionar novos jogadores';
 $LNG['new_range']			= 'Rank';
 $LNG['new_coord']			= 'Coordenadas';
 $LNG['new_email']			= 'E-Mail';
-$LNG['new_pass']			= 'Password';
+$LNG['new_pass']			= 'Senha';
 $LNG['new_name']			= 'Nome';
 
 //	Planetas
@@ -1029,7 +1029,7 @@ $LNG['qe_edit_player_sucess']			= 'Jogador %s (ID: %d) editado com sucesso!';
 $LNG['qe_info']							= 'Informação';
 $LNG['qe_owner']						= 'Dono';
 $LNG['qe_fields']						= 'Campos';
-$LNG['qe_password']						= 'Password';
+$LNG['qe_password']						= 'Senha';
 $LNG['qe_coords']						= 'Coordenadas';
 $LNG['qe_hpcoords']						= 'HP-Coordenadas';
 $LNG['qe_temp']							= 'Temperatura';
@@ -1060,7 +1060,7 @@ $LNG['fb_settings']                     = 'Configurações da conexão pelo Face
 $LNG['fb_active']                       = 'Facebook Connect ativo?';
 $LNG['fb_api_key']                      = 'Chave do Facebook API';
 $LNG['fb_secrectkey']                   = 'Chave do Facebook Secret';
-$LNG['fb_info']                         = 'Com o Facebook Connect os usuários podem que estão conectados ao Facebook, com o meu log in, clique ou registre-se. <br><br>Para usar este sistema, deves ser registrado com Faceebok. Além disso, você deve criar um aplicativo. Registar <a href="http://www.facebook.com/developers/">http://www.facebook.com/developers/</a> Como conectar URL tens de ativar o sistema e por as duas chaves.<br><br><font color="red">Para o envio de E-Mails deves ter o sistema de envio ativo! (SMTP Settings)</font>';
+$LNG['fb_info']                         = 'Com o Facebook Connect os usuários podem que estão conectados ao Facebook, com o meu log in, clique ou registre-se. <br><br>Para usar este sistema, deves ser registrado com Faceebok. Além disso, você deve criar um aplicativo. Registar <a href="http://www.facebook.com/developers/">http://www.facebook.com/developers/</a> Como conectar URL tem de ativar o sistema e por as duas chaves.<br><br><font color="red">Para o envio de E-Mails deves ter o sistema de envio ativo! (SMTP Settings)</font>';
 $LNG['fb_curl_yes']						= '<span style="color:green">O cURL esta instalado no Servidor!</span>';
 $LNG['fb_curl_no']						= '<span style="color:red">Extenção cURL não esta instalado!, o FaceBook requer que você instale para que ele funcione!</span>';
 
@@ -1149,10 +1149,10 @@ $LNG['mvc_desc']						= 'Descrição';
 // Página de Universo
 $LNG['uvs_id']							= 'ID do Universo';
 $LNG['uvs_name']						= 'Nome';
-$LNG['uvs_speeds']						= 'Factores de Velocidade (J/F/R/E)'; // (Game/Fleet/Resource/Expedition)
-$LNG['uvs_speeds_full']					= 'Factores de Velocidade (Jogo/Fleet/Recursos/Expedição)';
+$LNG['uvs_speeds']						= 'Fatores de Velocidade (J/F/R/E)'; // (Game/Fleet/Resource/Expedition)
+$LNG['uvs_speeds_full']					= 'Fatores de Velocidade (Jogo/Fleet/Recursos/Expedição)';
 $LNG['uvs_players']						= 'Jogadores';
-$LNG['uvs_inactive']					= 'Inactivo';
+$LNG['uvs_inactive']					= 'Inativo';
 $LNG['uvs_open']						= 'Estado';
 $LNG['uvs_export']						= 'Exportar';
 $LNG['uvs_delete']						= 'Excluir';
@@ -1165,10 +1165,10 @@ $LNG['uvs_upload']						= 'Upload';
 $LNG['uvs_error']						= 'Falha ao importar o arquivo';
 
 
-// Página de actualização
+// Página de atualização
 $LNG['up_weiter']						= 'Seguinte';
-$LNG['up_kein_update']					= 'Não existe nova actualização';
-$LNG['up_ok_update']					= 'Actualizado';
+$LNG['up_kein_update']					= 'Não existe nova atualização';
+$LNG['up_ok_update']					= 'Atualizado';
 $LNG['up_error_update']					= 'Erro - Não é possível fazer o upload do ficheiro';
 $LNG['up_delete_file']					= 'Removido com sucesso';
 $LNG['up_error_delete_file']			= 'Erro - Não foi possivel excluir o ficheiro';
@@ -1218,7 +1218,7 @@ $LNG['ap_ip']							= 'IP';
 $LNG['ap_aktivieren']					= 'Ativar';
 $LNG['ap_status']						= 'Estado';
 $LNG['ap_del']							= 'Excluir';
-$LNG['ap_sicher']						= 'Tens a certeza de';
+$LNG['ap_sicher']						= 'Tem a certeza de';
 $LNG['ap_entfernen']					= 'deseja remover';
 $LNG['ap_insgesamt']					= 'Geral';
 $LNG['ap_nicht_aktivierte']				= 'Não foi ativado pelo usuário';
