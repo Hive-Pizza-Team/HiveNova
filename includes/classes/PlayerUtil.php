@@ -370,7 +370,7 @@ class PlayerUtil
 
 		if(empty($name))
 		{
-			$name	= $isHome ? $LNG['fcm_mainplanet'] : $LNG['fcp_colony'];
+			$name	= $isHome ? ($LNG['fcm_mainplanet'] ?? 'Home Planet') : ($LNG['fcp_colony'] ?? 'Colony');
 		}
 
 		$params	= array(

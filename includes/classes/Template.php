@@ -58,6 +58,7 @@ class Template extends Smarty
 		$this->registerPlugin('modifier', 'count',      'count');
 		$this->registerPlugin('modifier', 'sprintf',    'sprintf');
 		$this->registerPlugin('modifier', 'in_array',        'in_array');
+		$this->registerPlugin('modifier', 'is_numeric',      'is_numeric');
 		$this->registerPlugin('modifier', 'pretty_fly_time', 'pretty_fly_time');
 		$this->registerPlugin('modifier', 'php_date',   function($ts, $fmt) { return date($fmt, $ts); });
 	}
