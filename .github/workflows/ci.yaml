@@ -59,6 +59,13 @@ jobs:
       - run: mkdir -p cache/sessions cache/templates
       - run: php -S localhost:8000 &> /tmp/php-server.log & sleep 2
       - run: php tests/smoke.php
+      - name: Check error log is empty
+        run: |
+          if [ -s includes/error.log ]; then
+            echo "=== includes/error.log is non-empty ==="
+            cat includes/error.log
+            exit 1
+          fi
       - name: Dump PHP server log on failure
         if: failure()
         run: cat /tmp/php-server.log
@@ -96,3 +103,10 @@ jobs:
         env:
           XDEBUG_MODE: coverage
         run: php vendor/bin/phpunit --configuration phpunit-integration.xml --coverage-clover coverage/integration-clover.xml --coverage-text
+      - name: Check error log is empty
+        run: |
+          if [ -s includes/error.log ]; then
+            echo "=== includes/error.log is non-empty ==="
+            cat includes/error.log
+            exit 1
+          fi

@@ -20,7 +20,7 @@ restore_error_handler();
 require_once __DIR__ . '/fixtures/game_data.php';
 
 // Additional classes needed by integration tests
-require_once ROOT_PATH . 'includes/classes/class.PlanetRessUpdate.php';
+require_once ROOT_PATH . 'includes/classes/ResourceUpdate.php';
 
 // Load full $reslist / $resource / $pricelist / $ProdGrid from the live DB
 // (vars.php uses Cache::get() which requires a running DB connection)
