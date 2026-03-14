@@ -276,7 +276,7 @@ class ShowShipyardPage extends AbstractGamePage
 			'BuildList'		=> $buildList,
 			'maxlength'		=> strlen((string) Config::get()->max_fleet_per_build),
 			'mode'			=> $mode,
-			'messages'		=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], pretty_number($Messages))): false,
+			'messages'		=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)): false,
 			'SolarEnergy'		=> $SolarEnergy,
 		));
 
