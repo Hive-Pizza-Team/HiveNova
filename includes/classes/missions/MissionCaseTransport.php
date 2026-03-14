@@ -4,6 +4,7 @@ namespace HiveNova\Mission;
 
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\Database;
+use HiveNova\Core\Log;
 
 /**
  *  2Moons 
