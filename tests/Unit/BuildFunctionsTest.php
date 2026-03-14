@@ -192,4 +192,154 @@ class BuildFunctionsTest extends TestCase
 
 		$this->assertGreaterThanOrEqual(9999, $time);
 	}
+
+	// -----------------------------------------------------------------------
+	// getBonusList
+	// -----------------------------------------------------------------------
+
+	public function testGetBonusListReturnsArray(): void
+	{
+		$list = BuildFunctions::getBonusList();
+		$this->assertIsArray($list);
+		$this->assertNotEmpty($list);
+	}
+
+	public function testGetBonusListContainsKnownKeys(): void
+	{
+		$list = BuildFunctions::getBonusList();
+		$this->assertContains('Attack', $list);
+		$this->assertContains('FlyTime', $list);
+		$this->assertContains('FleetSlots', $list);
+		$this->assertContains('Resource', $list);
+		$this->assertContains('Energy', $list);
+	}
+
+	public function testGetBonusListHasExpectedCount(): void
+	{
+		$this->assertCount(18, BuildFunctions::getBonusList());
+	}
+
+	// -----------------------------------------------------------------------
+	// getRestPrice
+	// -----------------------------------------------------------------------
+
+	public function testGetRestPriceReturnsZerosWhenPlanetHasEnoughResources(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		// metal_mine => 1 so getElementPrice can compute the level-1 cost
+		$planet = $this->makePlanet(['metal_mine' => 1, 'metal' => 100000, 'crystal' => 100000]);
+
+		// Metal mine level 1 costs 60 metal + 15 crystal → planet has plenty
+		$rest = BuildFunctions::getRestPrice($user, $planet, 1);
+
+		$this->assertSame(0.0, (float) $rest[901], 'No metal shortfall when planet is rich');
+		$this->assertSame(0.0, (float) $rest[902], 'No crystal shortfall when planet is rich');
+	}
+
+	public function testGetRestPriceReturnsShortfallWhenPlanetLacksResources(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		// metal_mine => 1 so getElementPrice can resolve level; metal/crystal = 0
+		$planet = $this->makePlanet(['metal_mine' => 1, 'metal' => 0, 'crystal' => 0]);
+
+		// Metal mine level 1 costs 60 metal + 15 crystal → planet has none
+		$rest = BuildFunctions::getRestPrice($user, $planet, 1);
+
+		$this->assertGreaterThan(0, $rest[901], 'Shortfall in metal expected');
+		$this->assertGreaterThan(0, $rest[902], 'Shortfall in crystal expected');
+	}
+
+	public function testGetRestPriceWithPrecomputedPrice(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		$planet = $this->makePlanet(['metal' => 500, 'crystal' => 5]);
+
+		// Supply element price directly: need 200 metal, 100 crystal
+		$rest = BuildFunctions::getRestPrice($user, $planet, 1, [901 => 200, 902 => 100]);
+
+		$this->assertSame(0.0, (float) $rest[901], 'Planet has 500 metal, price 200 → no shortfall');
+		$this->assertSame(95.0, (float) $rest[902], 'Planet has 5 crystal, price 100 → shortfall 95');
+	}
+
+	// -----------------------------------------------------------------------
+	// isElementBuyable
+	// -----------------------------------------------------------------------
+
+	public function testIsElementBuyableReturnsTrueWhenAffordable(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		$planet = $this->makePlanet(['metal_mine' => 1, 'metal' => 100000, 'crystal' => 100000]);
+
+		$this->assertTrue(BuildFunctions::isElementBuyable($user, $planet, 1));
+	}
+
+	public function testIsElementBuyableReturnsFalseWhenNotAffordable(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		$planet = $this->makePlanet(['metal_mine' => 1, 'metal' => 0, 'crystal' => 0]);
+
+		$this->assertFalse(BuildFunctions::isElementBuyable($user, $planet, 1));
+	}
+
+	public function testIsElementBuyableReturnsFalseWhenOnlyOneResourceMissing(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		// Metal mine costs 60 metal + 15 crystal at level 1
+		// Planet has metal but no crystal
+		$planet = $this->makePlanet(['metal_mine' => 1, 'metal' => 1000, 'crystal' => 0]);
+
+		$this->assertFalse(BuildFunctions::isElementBuyable($user, $planet, 1));
+	}
+
+	// -----------------------------------------------------------------------
+	// getMaxConstructibleElements
+	// -----------------------------------------------------------------------
+
+	public function testGetMaxConstructibleElementsLimitedBySmallestResource(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		// Pre-supply price array for LF: 3000 metal, 1000 crystal per unit
+		// Planet: 12000 metal → 4 LF; 2000 crystal → 2 LF; min = 2
+		$planet = $this->makePlanet(['metal' => 12000, 'crystal' => 2000]);
+
+		$max = BuildFunctions::getMaxConstructibleElements(
+			$user, $planet, 202, [901 => 3000, 902 => 1000]
+		);
+
+		$this->assertEquals(2, $max);
+	}
+
+	public function testGetMaxConstructibleElementsEqualLimits(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		// 9000 metal / 3000 = 3, 3000 crystal / 1000 = 3 → both limits equal 3
+		$planet = $this->makePlanet(['metal' => 9000, 'crystal' => 3000]);
+
+		$max = BuildFunctions::getMaxConstructibleElements(
+			$user, $planet, 202, [901 => 3000, 902 => 1000]
+		);
+
+		$this->assertEquals(3, $max);
+	}
+
+	public function testGetMaxConstructibleElementsZeroWhenCannotAffordOne(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		$planet = $this->makePlanet(['metal' => 0, 'crystal' => 0]);
+
+		$max = BuildFunctions::getMaxConstructibleElements(
+			$user, $planet, 202, [901 => 3000, 902 => 1000]
+		);
+
+		$this->assertEquals(0, $max);
+	}
 }

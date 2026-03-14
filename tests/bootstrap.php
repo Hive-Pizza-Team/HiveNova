@@ -10,6 +10,7 @@ if (!defined('DEFAULT_LANG'))  define('DEFAULT_LANG',   'en');
 if (!defined('MIN_FLEET_TIME')) define('MIN_FLEET_TIME', 10);
 if (!defined('INACTIVE'))      define('INACTIVE',       7 * 86400);
 if (!defined('INACTIVE_LONG')) define('INACTIVE_LONG',  28 * 86400);
+if (!defined('ROOT_UNI'))      define('ROOT_UNI',        1);
 
 // Pure utility classes — no DB or global state required
 require_once __DIR__ . '/../includes/classes/ArrayUtil.class.php';
@@ -36,12 +37,14 @@ require_once __DIR__ . '/fixtures/game_data.php';
 // Testable infrastructure classes
 require_once __DIR__ . '/../includes/classes/DatabaseInterface.php';
 require_once __DIR__ . '/../includes/classes/Database.class.php';
+require_once __DIR__ . '/../includes/classes/Universe.class.php';
 require_once __DIR__ . '/../includes/classes/Config.class.php';
 require_once __DIR__ . '/../includes/classes/class.PlanetRessUpdate.php';
 
 // Additional testable source files
 require_once __DIR__ . '/../includes/classes/Migrator.php';
 require_once __DIR__ . '/../includes/classes/class.BuildFunctions.php';
+require_once __DIR__ . '/../includes/classes/class.MissionFunctions.php';
 require_once __DIR__ . '/../includes/classes/missions/functions/calculateSteal.php';
 require_once __DIR__ . '/../includes/classes/missions/functions/calculateMIPAttack.php';
 

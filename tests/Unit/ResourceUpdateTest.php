@@ -231,6 +231,92 @@ class ResourceUpdateTest extends TestCase
 		$this->assertEquals(500, $returned['metal'], 'Vacation mode must leave metal unchanged');
 	}
 
+	public function testCrystalAccumulatesIndependentlyOfMetal(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_perhour'   => 0,      // no metal production
+			'crystal_perhour' => 7200,   // 7200 crystal/h
+		]);
+
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+		$eco->UpdateResource($planet['last_update'] + 3600, true);
+		[, $updated] = $eco->getData();
+
+		$this->assertEquals(0.0, $updated['metal'],   'Metal must stay zero with no production');
+		$this->assertEquals(7200.0, $updated['crystal'], '1 h of 7200/h = 7200 crystal');
+	}
+
+	public function testProductionAddsToExistingResourceAmount(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal'         => 5000,
+			'metal_perhour' => 3600,
+		]);
+
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+		$eco->UpdateResource($planet['last_update'] + 3600, true);
+		[, $updated] = $eco->getData();
+
+		// Started with 5000, produced 3600 in 1 h → 8600
+		$this->assertEquals(8600.0, $updated['metal']);
+	}
+
+	public function testZeroProductionRateLeavesResourceUnchanged(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet(['metal' => 1234, 'metal_perhour' => 0]);
+
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+		$eco->UpdateResource($planet['last_update'] + 3600, true);
+		[, $updated] = $eco->getData();
+
+		$this->assertEquals(1234.0, $updated['metal']);
+	}
+
+	public function testDeuteriumAccumulatesOverTwoHours(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet(['deuterium_perhour' => 1800]);
+
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+		$eco->UpdateResource($planet['last_update'] + 7200, true);
+		[, $updated] = $eco->getData();
+
+		$this->assertEquals(3600.0, $updated['deuterium'], '2 h × 1800/h = 3600');
+	}
+
+	public function testResourceCannotGoBelowZeroWithNegativeProduction(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal'         => 100,
+			'metal_perhour' => -7200,  // drains 7200/h but only 100 present
+		]);
+
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+		$eco->UpdateResource($planet['last_update'] + 3600, true);
+		[, $updated] = $eco->getData();
+
+		$this->assertGreaterThanOrEqual(0.0, $updated['metal'], 'Metal must not go negative');
+	}
+
 	public function testHashChangesWhenBuildingLevelChanges(): void
 	{
 		$resource = $this->makeResource();
@@ -253,5 +339,126 @@ class ResourceUpdateTest extends TestCase
 		$hash2 = $eco->CreateHash();
 
 		$this->assertNotEquals($hash1, $hash2, 'Hash must differ when a building level changes');
+	}
+
+	// -----------------------------------------------------------------------
+	// ReBuildCache path (HASH=false forces ReBuildCache to run)
+	// -----------------------------------------------------------------------
+
+	/**
+	 * Build an eco object with data set but NO hash stamped, so that calling
+	 * UpdateResource(time, false) forces ReBuildCache to execute.
+	 */
+	private function makeEcoWithForcedRebuild(array $user, array $planet, array $resource, array $reslist, Config $config): ResourceUpdate
+	{
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+		return $eco;
+	}
+
+	public function testReBuildCacheRunsWhenHashIsFalse(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet(['metal' => 5000]);
+
+		$eco = $this->makeEcoWithForcedRebuild($user, $planet, $resource, $reslist, $config);
+
+		// HASH=false → ReBuildCache is called unconditionally; with empty prod,
+		// per-hour values are reset to 0 but no exception should be thrown
+		$eco->UpdateResource($planet['last_update'] + 3600, false);
+		[, $updated] = $eco->getData();
+
+		// With prod=[], ReBuildCache sets per-hour to 0, and metal stays at 5000
+		// (ExecCalc: 0 production added, pre-existing metal unchanged)
+		$this->assertEquals(5000.0, $updated['metal']);
+	}
+
+	public function testReBuildCacheSetsPerHourToZeroWithEmptyProdGrid(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();   // prod => []
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet();
+
+		$eco = $this->makeEcoWithForcedRebuild($user, $planet, $resource, $reslist, $config);
+		$eco->UpdateResource($planet['last_update'] + 7200, false);
+		[, $updated] = $eco->getData();
+
+		// No production buildings → per-hour values should be 0
+		$this->assertEquals(0.0, $updated['metal_perhour']);
+		$this->assertEquals(0.0, $updated['crystal_perhour']);
+		$this->assertEquals(0.0, $updated['deuterium_perhour']);
+	}
+
+	public function testReBuildCacheMoonPlanetSkipsMineIncome(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig(['metal_basic_income' => 100]);
+		$user     = $this->makeUser();
+		// planet_type=3 is a moon; basic income should be zeroed out
+		$planet   = $this->makePlanet(['planet_type' => 3]);
+
+		$eco = $this->makeEcoWithForcedRebuild($user, $planet, $resource, $reslist, $config);
+		$eco->UpdateResource($planet['last_update'] + 3600, false);
+		[, $updated] = $eco->getData();
+
+		// For moons, metal_basic_income is set to 0 in ReBuildCache
+		$this->assertEquals(0.0, $updated['metal'], 'Moon must not receive basic metal income');
+	}
+
+	public function testUpdateResourceWithHashFalseDoesNotChangePlanetWithNoTime(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet(['metal' => 9999]);
+
+		$eco = $this->makeEcoWithForcedRebuild($user, $planet, $resource, $reslist, $config);
+
+		// Same timestamp → ProductionTime=0 → UpdateResource is a no-op
+		$eco->UpdateResource($planet['last_update'], false);
+		[, $updated] = $eco->getData();
+
+		$this->assertEquals(9999.0, $updated['metal']);
+	}
+
+	public function testGetProdWithoutElementReturnsPrefixedString(): void
+	{
+		$result = ResourceUpdate::getProd('20 * $BuildLevel', false);
+		$this->assertSame('return 20 * $BuildLevel;', $result);
+	}
+
+	public function testGetProdEmptyStringWithoutElement(): void
+	{
+		$result = ResourceUpdate::getProd('0', false);
+		$this->assertSame('return 0;', $result);
+	}
+
+	public function testReturnVarsReturnsArrayWhenNotGlobalMode(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet(['metal' => 42]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		// CalcResource with explicit $USER/$PLANET sets isGlobalMode=false
+		// ReturnVars() should return [USER, PLANET] array
+		$result = $eco->CalcResource($user, $planet, false, $planet['last_update']);
+		$this->assertIsArray($result);
+		$this->assertCount(2, $result);
 	}
 }

@@ -62,3 +62,37 @@ jobs:
       - name: Dump PHP server log on failure
         if: failure()
         run: cat /tmp/php-server.log
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: hivenova
+        ports: ["3306:3306"]
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: hivenova
+      ADMIN_NAME: smoketest
+      ADMIN_PASSWORD: smoketest123
+      ADMIN_MAIL: smoke@test.local
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo_mysql, gd, gmp, xdebug
+      - run: composer install --no-interaction --prefer-dist
+      - run: php tests/ci-install.php
+      - run: mkdir -p cache/sessions cache/templates
+      - name: Run integration tests with coverage
+        env:
+          XDEBUG_MODE: coverage
+        run: php vendor/bin/phpunit --configuration phpunit-integration.xml --coverage-clover coverage/integration-clover.xml --coverage-text

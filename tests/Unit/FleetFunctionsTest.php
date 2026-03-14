@@ -325,4 +325,132 @@ class FleetFunctionsTest extends TestCase
         // Allow for rounding (the +1 baseline) but ratio should be close to 10
         $this->assertEqualsWithDelta(10 * ($one - 1) + 1, $ten, 2.0, '10 ships consume ~10× a single ship');
     }
+
+    // -------------------------------------------------------------------------
+    // GetGameSpeedFactor
+    // -------------------------------------------------------------------------
+
+    private function setConfigForFleet(int $fleetSpeed): void
+    {
+        $ref = new ReflectionProperty(Config::class, 'instances');
+        $ref->setAccessible(true);
+        $ref->setValue(null, []);
+        Config::setInstance(new Config(['fleet_speed' => $fleetSpeed]), 1);
+    }
+
+    public function testGetGameSpeedFactorWithSpeedOf2500(): void
+    {
+        $this->setConfigForFleet(2500);
+        // fleet_speed=2500 → 2500/2500 = 1.0
+        $this->assertEqualsWithDelta(1.0, FleetFunctions::GetGameSpeedFactor(), 0.0001);
+    }
+
+    public function testGetGameSpeedFactorWithSpeedOf5000(): void
+    {
+        $this->setConfigForFleet(5000);
+        // fleet_speed=5000 → 5000/2500 = 2.0
+        $this->assertEqualsWithDelta(2.0, FleetFunctions::GetGameSpeedFactor(), 0.0001);
+    }
+
+    public function testGetGameSpeedFactorWithSpeedOf1250(): void
+    {
+        $this->setConfigForFleet(1250);
+        // fleet_speed=1250 → 1250/2500 = 0.5
+        $this->assertEqualsWithDelta(0.5, FleetFunctions::GetGameSpeedFactor(), 0.0001);
+    }
+
+    // -------------------------------------------------------------------------
+    // GetMIPDuration
+    // -------------------------------------------------------------------------
+
+    public function testGetMIPDurationSameSystemReturnsMinimum(): void
+    {
+        $this->setConfigForFleet(2500);
+        // distance=0 → duration = round((30 + 60*0) / 1.0) = 30; max(30, MIN_FLEET_TIME=10) = 30
+        $duration = FleetFunctions::GetMIPDuration(5, 5);
+        $this->assertEquals(30, $duration);
+    }
+
+    public function testGetMIPDurationAdjacentSystemsIsGreaterThanSameSystem(): void
+    {
+        $this->setConfigForFleet(2500);
+        $same     = FleetFunctions::GetMIPDuration(5, 5);
+        $adjacent = FleetFunctions::GetMIPDuration(5, 6);
+        $this->assertGreaterThan($same, $adjacent);
+    }
+
+    public function testGetMIPDurationScalesWithDistance(): void
+    {
+        $this->setConfigForFleet(2500);
+        // distance=10 → (30 + 600) / 1.0 = 630
+        $duration = FleetFunctions::GetMIPDuration(1, 11);
+        $this->assertEquals(630, $duration);
+    }
+
+    public function testGetMIPDurationHigherSpeedFactorReducesDuration(): void
+    {
+        $this->setConfigForFleet(2500);  // factor = 1.0
+        $slow = FleetFunctions::GetMIPDuration(1, 6);  // distance=5
+
+        $this->setConfigForFleet(5000);  // factor = 2.0
+        $fast = FleetFunctions::GetMIPDuration(1, 6);
+
+        $this->assertLessThan($slow, $fast, 'Higher speed factor must reduce MIP duration');
+    }
+
+    public function testGetMIPDurationNeverBelowMinFleetTime(): void
+    {
+        // With very high speed factor, duration is still >= MIN_FLEET_TIME
+        $this->setConfigForFleet(250000);
+        $duration = FleetFunctions::GetMIPDuration(5, 5);
+        $this->assertGreaterThanOrEqual(MIN_FLEET_TIME, $duration);
+    }
+
+    // -------------------------------------------------------------------------
+    // GetACSDuration — empty acsId short-circuit
+    // -------------------------------------------------------------------------
+
+    public function testGetACSDurationReturnsZeroForEmptyAcsId(): void
+    {
+        // Empty acsId → returns 0 immediately without DB call
+        $this->assertSame(0, FleetFunctions::GetACSDuration(null));
+        $this->assertSame(0, FleetFunctions::GetACSDuration(0));
+        $this->assertSame(0, FleetFunctions::GetACSDuration(''));
+    }
+
+    // -------------------------------------------------------------------------
+    // setACSTime — empty acsId throws
+    // -------------------------------------------------------------------------
+
+    public function testSetACSTimeThrowsWhenAcsIdIsEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        FleetFunctions::setACSTime(100, null);
+    }
+
+    public function testSetACSTimeThrowsWhenAcsIdIsZero(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        FleetFunctions::setACSTime(100, 0);
+    }
+
+    // -------------------------------------------------------------------------
+    // GetFleetMaxSpeed with impulse tech upgrade (LF switches to impulse)
+    // -------------------------------------------------------------------------
+
+    public function testGetFleetMaxSpeedLFSwitchesToImpulseWhenTechMet(): void
+    {
+        // When impulse_motor_tech >= 5, LF switches to impulse drive (tech=2)
+        // base_speed becomes speed2 and factor = impulse
+        $GLOBALS['pricelist'][202]['speed']  = 12500;
+        $GLOBALS['pricelist'][202]['speed2'] = 17500;
+        $GLOBALS['pricelist'][202]['tech']   = 1;  // normally combustion
+
+        $player_upgrade = ['combustion_tech' => 5, 'impulse_motor_tech' => 5, 'hyperspace_motor_tech' => 0];
+        $speed_upgrade  = FleetFunctions::GetFleetMaxSpeed([202 => 1], $player_upgrade);
+
+        // LF with impulse_motor_tech >= 5: base_speed=speed2=17500, but techSpeed stays 1 (combustion)
+        // speed = 17500 * (1 + 0.1 * combustion_tech) = 17500 * 1.5 = 26250
+        $this->assertEquals(26250.0, $speed_upgrade);
+    }
 }

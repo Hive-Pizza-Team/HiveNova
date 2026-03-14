@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/integration-bootstrap.php" colors="true"
+         cacheDirectory=".phpunit.cache">
+  <testsuites>
+    <testsuite name="Integration">
+      <directory>tests/Integration</directory>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <directory suffix=".php">includes/classes</directory>
+    </include>
+  </source>
+</phpunit>
