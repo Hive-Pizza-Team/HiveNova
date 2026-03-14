@@ -124,7 +124,7 @@ foreach ($statements as $stmt) {
 
 // Set basic config values (mirrors install/index.php step 6).
 // Use Database::get() now that the schema exists.
-$config = Config::get(Universe::current());
+$config = \HiveNova\Core\Config::get(Universe::current());
 $config->timezone         = @date_default_timezone_get();
 $config->lang             = 'en';
 $config->OverviewNewsText = 'Welcome to HiveNova ' . $installVersion;
@@ -139,8 +139,8 @@ echo "OK\n";
 echo "[ 3/4 ] Creating admin user '$adminName' ... ";
 
 require ROOT_PATH . 'includes/vars.php';
-$hashPassword = PlayerUtil::cryptPassword($adminPass);
-PlayerUtil::createPlayer(
+$hashPassword = \HiveNova\Core\PlayerUtil::cryptPassword($adminPass);
+\HiveNova\Core\PlayerUtil::createPlayer(
     Universe::current(),
     $adminName,
     $hashPassword,
@@ -158,9 +158,7 @@ echo "OK\n";
 // --- 5. Apply pending migrations ---
 echo "[ 4/4 ] Running migrations ... ";
 
-require ROOT_PATH . 'includes/classes/Migrator.php';
-
-$migrator       = new Migrator($pdo, ROOT_PATH . 'install/migrations', DB_PREFIX, DB_VERSION_REQUIRED);
+$migrator       = new \HiveNova\Core\Migrator($pdo, ROOT_PATH . 'install/migrations', DB_PREFIX, DB_VERSION_REQUIRED);
 $currentVersion = $migrator->getCurrentVersion();
 $pending        = $migrator->getPendingMigrations($currentVersion);
 
