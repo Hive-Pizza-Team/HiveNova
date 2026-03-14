@@ -4,6 +4,9 @@ namespace HiveNova\Core;
 
 use Exception;
 
+require_once __DIR__ . '/../libs/tdcron/class.tdcron.entry.php';
+require_once __DIR__ . '/../libs/tdcron/class.tdcron.php';
+
 /**
  *  2Moons 
  *   by Jan-Otto Kröpke 2009-2016
