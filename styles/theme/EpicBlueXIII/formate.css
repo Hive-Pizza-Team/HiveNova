@@ -16,6 +16,29 @@
                                   ���������������������������������������������������������
 */
 
+:root {
+    --color-accent:          #415680;
+    --color-accent-hover:    #CDD7F8;
+    --color-bg-surface:      #344566;
+    --color-bg-surface-dark: #2d3a55;
+    --color-text:            #E6EBFB;
+    --color-text-bright:     #FFF;
+    --color-border:          #415680;
+    --color-th-bg:           #344566;
+    --color-menu-bg:         #344566;
+    --color-card-header-bg:  #344566;
+    --color-success:         #00FF00;
+    --color-danger:          #FF0000;
+    --color-warning:         #FF8040;
+    --color-notice:          #FFFF00;
+    --color-res-name:        #E6EBFB;
+    --color-ally-member:     #99FF66;
+    --color-ally-friend:     #99FFFF;
+    --color-ally-nap:        #aa99ff;
+    --color-ally-trade:      #ffec99;
+    --color-ally-enemy:      #FF0000;
+}
+
 .,
 #,
 td,
@@ -51,7 +74,7 @@ table table td {
 }
 
 body {
-    color: #E6EBFB;
+    color: var(--color-text);
     margin-top: 1px;
     margin-left: 1px;
     background: #344055;
@@ -98,7 +121,7 @@ td.v,
 textarea,
 p td,
 table.s th img {
-    border: 1px #415680 solid;
+    border: 1px var(--color-border) solid;
     font-size: 11px;
     font-family: Tahoma, sans-serif;
 }
@@ -123,7 +146,7 @@ td.v,
 td.s,
 .style td,
 p td {
-    background-color: #344566;
+    background-color: var(--color-bg-surface);
 }
 
 th {
@@ -258,21 +281,21 @@ div.z {
 }
 
 a {
-    color: #E6EBFB;
+    color: var(--color-text);
     text-decoration: none;
     font-weight: bold;
 }
 
 a.s {
-    color: #E6EBFB;
+    color: var(--color-text);
 }
 
 a.t {
-    color: #E6EBFB;
+    color: var(--color-text);
 }
 
 a:hover {
-    color: #CDD7F8;
+    color: var(--color-accent-hover);
     text-decoration: underline;
 }
 
@@ -324,8 +347,7 @@ a:hover {
 h1 {
     font-size: 11px;
     font-family: Tahoma, sans-serif;
-    border-bottom: 0px #344566;
-    solid;
+    border-bottom: 0px solid var(--color-bg-surface);
     width: 98%;
     text-align: right;
 }

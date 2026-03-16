@@ -1,8 +1,31 @@
-/* 
+/*
 $background: #040E1E url('/images/background.jpg');
 $foreground: #f0f0f8;
-$ui-background: #E31337; 
+$ui-background: #E31337;
 */
+
+:root {
+    --color-accent:          #E31337;
+    --color-accent-hover:    #E31337;
+    --color-bg-surface:      rgba(33, 37, 41, 0.95);
+    --color-bg-surface-dark: #212428;
+    --color-text:            #f0f0f8;
+    --color-text-bright:     #FFF;
+    --color-border:          #000;
+    --color-th-bg:           url("img/bkd_title.png");
+    --color-menu-bg:         rgba(33, 37, 41, 0.95);
+    --color-card-header-bg:  #252831;
+    --color-success:         #00FF00;
+    --color-danger:          #E31337;
+    --color-warning:         #FF8040;
+    --color-notice:          #FFFF00;
+    --color-res-name:        #E31337;
+    --color-ally-member:     #99FF66;
+    --color-ally-friend:     #99FFFF;
+    --color-ally-nap:        #aa99ff;
+    --color-ally-trade:      #ffec99;
+    --color-ally-enemy:      #E31337;
+}
 
 html {
   background: url("img/bkd_page.jpg") no-repeat fixed center center #0d0d0d;
@@ -39,7 +62,7 @@ select,
 option,
 textarea,
 .ui-widget-content {
-  background: #212529;
+  background: var(--color-bg-surface);
   padding: 2px;
 }
 
@@ -83,18 +106,17 @@ textarea,
 #userpic,
 input,
 button {
-  border: 1px solid #E31337;
+  border: 1px solid var(--color-accent);
 }
 
 button.selected {
-  border: 1px solid #E31337;
+  border: 1px solid var(--color-accent);
 }
 
 td,
 .tip {
   text-align: center;
-  background: #212529;
-  background: rgba(33, 37, 41, 0.95);
+  background: var(--color-bg-surface);
 }
 
 input,
@@ -116,7 +138,7 @@ th,
 }
 
 .trade-enemy>.table_username {
-  color: #E31337;
+  color: var(--color-danger);
 }
 
 .trade-ally>.table_username {
@@ -166,11 +188,11 @@ select {
 /*Global Messgae */
 
 .admin {
-  color: #E31337;
+  color: var(--color-danger);
 }
 
 .mod {
-  color: #f0f0f8;
+  color: var(--color-text);
 }
 
 .ops {
@@ -179,12 +201,12 @@ select {
 
 .messages_body .admin {
   font-weight: 700;
-  color: #E31337;
+  color: var(--color-danger);
 }
 
 .messages_body .mod {
   font-weight: 700;
-  color: #f0f0f8;
+  color: var(--color-text);
 }
 
 .messages_body .ops {
@@ -193,36 +215,36 @@ select {
 }
 
 .res_max {
-  color: #0F0
+  color: var(--color-success);
 }
 
 .res_name {
-  color: #E31337;
-  font-weight: 700
+  color: var(--color-res-name);
+  font-weight: 700;
 }
 
 .galaxy-alliance-member {
-  color: #99FF66;
+  color: var(--color-ally-member);
 }
 
 .galaxy-alliance-friend {
-  color: #99FFFF;
+  color: var(--color-ally-friend);
 }
 
 .galaxy-alliance-nap {
-  color: #aa99ff;
+  color: var(--color-ally-nap);
 }
 
 .galaxy-alliance-trade {
-  color: #ffec99;
+  color: var(--color-ally-trade);
 }
 
 .galaxy-alliance-enemy {
-  color: #E31337;
+  color: var(--color-ally-enemy);
 }
 
 .galaxy-alliance-own {
-  color: #E31337
+  color: var(--color-accent);
 }
 
 .galaxy-short-noob,
@@ -232,7 +254,7 @@ select {
 
 .galaxy-short-strong,
 .galaxy-username-strong {
-  color: #E31337
+  color: var(--color-danger);
 }
 
 .galaxy-short-vacation,
@@ -252,7 +274,7 @@ select {
 
 .galaxy-short-banned,
 .galaxy-username-banned {
-  color: #E31337;
+  color: var(--color-danger);
 }
 
 .ownattack {
@@ -296,11 +318,11 @@ select {
 }
 
 .warning {
-  color: #FF8040
+  color: var(--color-warning);
 }
 
 .notice {
-  color: #FF0
+  color: var(--color-notice);
 }
 
 .return {
@@ -313,12 +335,12 @@ select {
 .harvest,
 .transport,
 .success {
-  color: #0F0
+  color: var(--color-success);
 }
 
 .noresources,
 .noressources {
-  color: #E31337
+  color: var(--color-danger);
 }
 
 .owntransport {
@@ -338,7 +360,7 @@ select {
 .build_submit {
   background: none repeat scroll 0 0 transparent;
   border: 0 none;
-  color: #0F0;
+  color: var(--color-success);
   font-size: medium;
 }
 
@@ -349,18 +371,16 @@ select {
 /** LOGO **/
 
 .logo .fixed {
-  background: #212529;
-  background: rgba(33, 37, 41, 0.95);
-  border-bottom: 1px solid black;
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
 /** HEADER **/
 
 header .fixed {
-  background: #212529;
-  background: rgba(33, 37, 41, 0.95);
-  /* border: 1px solid black; */
-  border-bottom: 1px solid black;
+  background: var(--color-bg-surface);
+  /* border: 1px solid var(--color-border); */
+  border-bottom: 1px solid var(--color-border);
 }
 
 #resourcesdiv {
@@ -377,11 +397,11 @@ header .fixed {
 
 menu a {
   text-align: center;
-  background: #212529;
+  background: var(--color-menu-bg);
 }
 
 menu a:hover {
-  color: #212529;
+  color: var(--color-bg-surface);
   font-weight: bold;
 }
 
@@ -423,7 +443,7 @@ header td,
 
 .mes_unread td {
   font-weight: 700;
-  background-color: #212428;
+  background-color: var(--color-bg-surface-dark);
 }
 
 /* Messages Page */
@@ -529,7 +549,7 @@ th a,
 .res_current_max,
 .attack,
 .error {
-  color: #E31337
+  color: var(--color-danger);
 }
 
 #fleetstatustable td {
@@ -539,11 +559,11 @@ th a,
 }
 
 .raportWin {
-  color: lime;
+  color: var(--color-success);
 }
 
 .raportLose {
-  color: red;
+  color: var(--color-danger);
 }
 
 .ui-progressbar-value {
@@ -553,8 +573,8 @@ th a,
 }
 
 .spyRaportContainerHead {
-  background: #212428;
-  color: white;
+  background: var(--color-bg-surface-dark);
+  color: var(--color-text-bright);
   font-weight: 700;
   text-align: left;
   margin: 3px 0;
@@ -782,9 +802,8 @@ th a,
 }
 
 .buildn a:hover {
-  color: #E31337;
+  color: var(--color-accent);
   font-weight: bold;
-
 }
 
 .techb {
@@ -842,7 +861,7 @@ th a,
 
 
 input:hover {
-  color: #E31337;
+  color: var(--color-accent);
 }
 
 .ui-autocomplete,
@@ -859,7 +878,7 @@ input:hover {
 
 .ui-state-default {
   border: 1px solid #000 !important;
-  background: #212529 !important;
+  background: var(--color-bg-surface) !important;
 }
 
 .ui-state-default>a {
@@ -910,7 +929,7 @@ input:hover {
 .card-header,
 .card-footer,
 .spyReportCat {
-  background-color: #252831;
+  background-color: var(--color-card-header-bg);
 }
 
 .card-header {

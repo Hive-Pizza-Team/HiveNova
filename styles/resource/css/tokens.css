@@ -1,0 +1,77 @@
+/**
+ * HiveNova CSS Design Tokens
+ *
+ * This file declares all CSS custom properties (tokens) that every theme MUST provide.
+ * The fallback values here match the default "hive" theme so things degrade gracefully
+ * when a theme is partial or tokens.css loads before formate.css.
+ *
+ * Load order in main.header.tpl:
+ *   1. boilerplate.css
+ *   2. ingame/main.css   ← uses var() references defined here
+ *   3. tokens.css        ← declares :root fallback values
+ *   4. formate.css       ← overrides :root values for the active theme
+ *
+ * Because CSS custom properties cascade globally on :root, ingame/main.css can safely
+ * reference var(--color-accent) even though formate.css loads after it.
+ *
+ * ── TOKEN VOCABULARY ─────────────────────────────────────────────────────────────────
+ *
+ * --color-accent          Primary interactive color: links, borders, active buttons
+ * --color-accent-hover    Lighter/alt accent for hover states
+ * --color-bg-surface      Table cells, inputs, card body backgrounds
+ * --color-bg-surface-dark Slightly darker variant for headers/sub-areas
+ * --color-text            Default body text color
+ * --color-text-bright     White or near-white, used on dark backgrounds
+ * --color-border          Default border color
+ * --color-th-bg           Table header background (may be a url() image)
+ * --color-menu-bg         Sidebar menu item background
+ * --color-card-header-bg  .card-header / .card .title background
+ *
+ * --color-success         Fleet/colony/ally success states (green)
+ * --color-danger          Error, noresources, attack, enemy states (red)
+ * --color-warning         .warning class (orange)
+ * --color-notice          .notice class (yellow)
+ * --color-res-name        Resource label (.res_name) — often same as accent
+ *
+ * --color-ally-member     Galaxy alliance-member highlight
+ * --color-ally-friend     Galaxy alliance-friend highlight
+ * --color-ally-nap        Galaxy NAP-alliance highlight
+ * --color-ally-trade      Galaxy trade-alliance highlight
+ * --color-ally-enemy      Galaxy enemy-alliance highlight
+ */
+
+:root {
+    /* Accent */
+    --color-accent:          #E31337;
+    --color-accent-hover:    #E31337;
+
+    /* Backgrounds */
+    --color-bg-surface:      rgba(33, 37, 41, 0.95);
+    --color-bg-surface-dark: #212428;
+
+    /* Text */
+    --color-text:            #f0f0f8;
+    --color-text-bright:     #FFF;
+
+    /* Borders */
+    --color-border:          #000;
+
+    /* Structural */
+    --color-th-bg:           url("../theme/hive/img/bkd_title.png");
+    --color-menu-bg:         rgba(33, 37, 41, 0.95);
+    --color-card-header-bg:  #252831;
+
+    /* Semantic status */
+    --color-success:         #00FF00;
+    --color-danger:          #E31337;
+    --color-warning:         #FF8040;
+    --color-notice:          #FFFF00;
+    --color-res-name:        #E31337;
+
+    /* Alliance relations */
+    --color-ally-member:     #99FF66;
+    --color-ally-friend:     #99FFFF;
+    --color-ally-nap:        #aa99ff;
+    --color-ally-trade:      #ffec99;
+    --color-ally-enemy:      #E31337;
+}
