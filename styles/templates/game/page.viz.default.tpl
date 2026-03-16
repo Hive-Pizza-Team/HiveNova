@@ -238,6 +238,8 @@
 
     animate();
 
+    setInterval(() => location.reload(), 60000);
+
     window.addEventListener('resize', () => {
         positionContainer();
         updateCamera();
