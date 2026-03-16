@@ -28,7 +28,7 @@ class ShowVizPage extends AbstractGamePage
 
         // startGroup,startCircle,startPoint,endGroup,endCircle,endPoint,duration,color
         $fleetData = Database::get()->select(
-            'SELECT fleet_start_galaxy as startGroup, 
+            'SELECT fleet_start_galaxy as startGroup,
             CASE
                 WHEN fleet_start_system < 6 THEN fleet_start_system + FLOOR(RAND() * 6)
                 WHEN fleet_start_system > :maxSystem - 6 THEN fleet_start_system - FLOOR(RAND() * 6)
@@ -45,8 +45,10 @@ class ShowVizPage extends AbstractGamePage
             END AS endCircle,
 
             fleet_end_planet as endPoint,
-            (fleet_end_time - fleet_start_time)/100 as duration
-			FROM %%FLEETS%%
+            (fleet_end_time - fleet_start_time)/100 as duration,
+            fleet_mission as mission,
+            GREATEST(1, LEAST(5, CEIL(LOG10(GREATEST(fleet_amount, 1) + 1)))) AS sizeClass
+            FROM %%FLEETS%%
             WHERE fleet_universe = :fleet_universe
             ORDER BY fleet_id
             LIMIT 100',
