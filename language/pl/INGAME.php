@@ -65,6 +65,7 @@ $LNG['tn_delete_mode']						= 'Twoje konto zostanie automatycznie usunięte %s '
 //LEFT MENU
 $LNG['lm_overview']							= 'Podgląd';
 $LNG['lm_galaxy']							= 'Galaktyka';
+$LNG['lm_viz']								= 'Mapa';
 $LNG['lm_empire']							= 'Imperium';
 $LNG['lm_fleet']							= 'Flota';
 $LNG['lm_buildings']						= 'Budynki';

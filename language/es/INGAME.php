@@ -63,6 +63,7 @@ $LNG['tn_delete_mode']						= 'Tu cuenta se encuentra en modo de eliminación. L
 //LEFT MENU
 $LNG['lm_overview']						    = 'Visión general';
 $LNG['lm_galaxy']							= 'Galaxia';
+$LNG['lm_viz']								= 'Mapa';
 $LNG['lm_empire']							= 'Imperio';
 $LNG['lm_fleet']							= 'Base de la Flota';
 $LNG['lm_buildings']						= 'Edificios';
