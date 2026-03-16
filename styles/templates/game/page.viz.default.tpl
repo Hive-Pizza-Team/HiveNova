@@ -3,16 +3,35 @@
 <div id="threejs-container">
 <style>
         body { margin: 0; }
-        #threejs-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; }
+        #threejs-container { position: fixed; touch-action: none; }
 </style>
 
 <script src="scripts/threejs/three.min.js"></script>
 
 <script>
+    const container = document.getElementById('threejs-container');
+
+    function positionContainer() {
+        const menuFixed = document.querySelector('menu .fixed');
+        if (window.innerWidth <= 699 || !menuFixed) {
+            // Mobile: full viewport, nav is not fixed/overlapping
+            Object.assign(container.style, { top: '0', left: '0', width: '100vw', height: '100vh' });
+        } else {
+            const left = Math.round(menuFixed.getBoundingClientRect().right);
+            const top = 100;
+            Object.assign(container.style, {
+                top:    top + 'px',
+                left:   left + 'px',
+                width:  (window.innerWidth  - left) + 'px',
+                height: (window.innerHeight - top)  + 'px',
+            });
+        }
+    }
+    positionContainer();
+
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
-    const container = document.getElementById('threejs-container');
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.offsetWidth, container.offsetHeight);
     container.appendChild(renderer.domElement);
@@ -33,8 +52,16 @@
     }
 
     const vizRadius = layoutRadius + maxSystem * 0.1 + 5;
-    const camera = new THREE.OrthographicCamera(-vizRadius, vizRadius, vizRadius * 0.75, -vizRadius * 0.75, 0.1, 100);
+    const camera = new THREE.OrthographicCamera(-vizRadius, vizRadius, vizRadius, -vizRadius, 0.1, 100);
     camera.position.z = 100;
+
+    function updateCamera() {
+        const aspect = container.offsetWidth / container.offsetHeight;
+        camera.top    =  vizRadius / aspect;
+        camera.bottom = -vizRadius / aspect;
+        camera.updateProjectionMatrix();
+    }
+    updateCamera();
 
     // Build static background points using pre-allocated typed arrays
     const totalPoints = maxGalaxy * maxSystem * maxPlanets;
@@ -66,6 +93,38 @@
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.setAttribute('color',    new THREE.Float32BufferAttribute(colors, 3));
     scene.add(new THREE.Points(geometry, new THREE.PointsMaterial({ size: 0.2 * window.devicePixelRatio, vertexColors: true })));
+
+    // Galaxy label overlay
+    const labelCanvas = document.createElement('canvas');
+    labelCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+    container.appendChild(labelCanvas);
+    const labelCtx = labelCanvas.getContext('2d');
+
+    const tmpVec = new THREE.Vector3();
+
+    function drawLabels() {
+        const w = container.offsetWidth, h = container.offsetHeight;
+        const dpr = window.devicePixelRatio;
+        labelCanvas.width  = w * dpr;
+        labelCanvas.height = h * dpr;
+        labelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        labelCtx.font = 'bold 12px sans-serif';
+        labelCtx.textAlign = 'center';
+        labelCtx.textBaseline = 'middle';
+        for (let g = 0; g < maxGalaxy; g++) {
+            tmpVec.set(circleGroups[g].x, circleGroups[g].y, 0).project(camera);
+            const sx = (tmpVec.x + 1) / 2 * w;
+            const sy = (1 - tmpVec.y) / 2 * h;
+            const label = 'G' + (g + 1);
+            const tw = labelCtx.measureText(label).width;
+            labelCtx.fillStyle = 'rgba(0,0,0,0.55)';
+            labelCtx.fillRect(sx - tw / 2 - 3, sy - 8, tw + 6, 16);
+            labelCtx.fillStyle = '#ffffff';
+            labelCtx.fillText(label, sx, sy);
+        }
+    }
+
+    drawLabels();
 
     // Fleet sprites
     const movingObjects = [];
@@ -116,14 +175,10 @@
     animate();
 
     window.addEventListener('resize', () => {
-        const w = container.offsetWidth, h = container.offsetHeight;
-        const aspect = w / h;
-        camera.left   = -vizRadius;
-        camera.right  =  vizRadius;
-        camera.top    =  vizRadius / aspect;
-        camera.bottom = -vizRadius / aspect;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
+        positionContainer();
+        updateCamera();
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        drawLabels();
     });
 </script>
 {/block}
