@@ -70,6 +70,7 @@ $LNG['tn_delete_mode']						= 'Hesabnız Silme Modunda Silineceği Tarih :';
 $LNG['lm_changelog']						= 'Değişiklikler';
 $LNG['lm_overview']							= 'Genel Görünüm';
 $LNG['lm_galaxy']							= 'Galaksi';
+$LNG['lm_viz']								= 'Harita';
 $LNG['lm_empire']							= 'Imparatorluk';
 $LNG['lm_fleet']							= 'Filolar';
 $LNG['lm_buildings']						= 'Binalar';

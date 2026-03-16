@@ -7,6 +7,7 @@
     {if $smarty.const.MODULE_RESEARCH|isModuleAvailable}<li><a href="game.php?page=research">{$LNG.lm_research}</a></li>{/if}
     {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetTable">{$LNG.lm_fleet}</a></li>{/if}
     {if $smarty.const.MODULE_GALAXY|isModuleAvailable}<li><a href="game.php?page=galaxy">{$LNG.lm_galaxy}</a></li>{/if}
+    <li><a href="game.php?page=viz">{$LNG.lm_viz}</a></li>
     {if $smarty.const.MODULE_IMPERIUM|isModuleAvailable}<li><a href="game.php?page=imperium">{$LNG.lm_empire}</a></li>{/if}
     {if $smarty.const.MODULE_MESSAGES|isModuleAvailable}<li><a href="game.php?page=messages">{$LNG.lm_messages}{nocache}{if $new_message > 0}<span id="newmes"> (<span id="newmesnum">{$new_message}</span>)</span>{/if}{/nocache}</a></li>{/if}
     {if $smarty.const.MODULE_TECHTREE|isModuleAvailable}<li><a href="game.php?page=techtree">{$LNG.lm_technology}</a></li>{/if}

@@ -73,6 +73,7 @@ $LNG['tn_delete_mode']						= 'The account at %s will be deleted!';
 $LNG['lm_changelog']						= 'Changelog';
 $LNG['lm_overview']							= 'Overview';
 $LNG['lm_galaxy']							= 'Galaxy';
+$LNG['lm_viz']								= 'Map';
 $LNG['lm_empire']							= 'Empire';
 $LNG['lm_fleet']							= 'Fleet';
 $LNG['lm_buildings']						= 'Buildings';
