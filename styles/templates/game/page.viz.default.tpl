@@ -55,10 +55,18 @@
     const camera = new THREE.OrthographicCamera(-vizRadius, vizRadius, vizRadius, -vizRadius, 0.1, 100);
     camera.position.z = 100;
 
+    let zoomLevel = 1.0;
+    let panX = 0, panY = 0;
+
     function updateCamera() {
         const aspect = container.offsetWidth / container.offsetHeight;
-        camera.top    =  vizRadius / aspect;
-        camera.bottom = -vizRadius / aspect;
+        const r = vizRadius / zoomLevel;
+        camera.left   = -r;
+        camera.right  =  r;
+        camera.top    =  r / aspect;
+        camera.bottom = -r / aspect;
+        camera.position.x = panX;
+        camera.position.y = panY;
         camera.updateProjectionMatrix();
     }
     updateCamera();
@@ -237,6 +245,75 @@
     }
 
     animate();
+
+    container.style.cursor = 'grab';
+
+    function worldPerPixel() {
+        return (2 * vizRadius / zoomLevel) / container.offsetWidth;
+    }
+
+    // Zoom — mouse wheel
+    container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        zoomLevel *= e.deltaY < 0 ? 1.15 : 1 / 1.15;
+        zoomLevel = Math.max(0.3, Math.min(10, zoomLevel));
+        updateCamera();
+        drawLabels();
+    }, { passive: false });
+
+    // Pan — mouse drag
+    let isDragging = false, lastMouse = { x: 0, y: 0 };
+    container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastMouse = { x: e.clientX, y: e.clientY };
+        container.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        panX -= (e.clientX - lastMouse.x) * worldPerPixel();
+        panY += (e.clientY - lastMouse.y) * worldPerPixel();
+        lastMouse = { x: e.clientX, y: e.clientY };
+        updateCamera();
+        drawLabels();
+    });
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        container.style.cursor = 'grab';
+    });
+
+    // Zoom + pan — touch
+    let lastPinchDist = null, lastTouch = null;
+    container.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            lastPinchDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY);
+            lastTouch = null;
+        } else if (e.touches.length === 1) {
+            lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+    }, { passive: true });
+    container.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY);
+            if (lastPinchDist) {
+                zoomLevel *= dist / lastPinchDist;
+                zoomLevel = Math.max(0.3, Math.min(10, zoomLevel));
+            }
+            lastPinchDist = dist;
+            updateCamera();
+            drawLabels();
+        } else if (e.touches.length === 1 && lastTouch) {
+            panX -= (e.touches[0].clientX - lastTouch.x) * worldPerPixel();
+            panY += (e.touches[0].clientY - lastTouch.y) * worldPerPixel();
+            lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            updateCamera();
+            drawLabels();
+        }
+    }, { passive: true });
+    container.addEventListener('touchend', () => { lastPinchDist = null; lastTouch = null; });
 
     setInterval(() => location.reload(), 60000);
 
