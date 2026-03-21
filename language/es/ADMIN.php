@@ -548,7 +548,7 @@ $LNG['ff_starttime'] = "Inicio";
 $LNG['ff_ships'] = "Naves";
 $LNG['ff_startuser'] = "Remitente";
 $LNG['ff_startplanet'] = "Planeta remitente";
-$LNG['ff_arrivaltime'] = "Tiempo de inicio";
+$LNG['ff_arrivaltime'] = "Tiempo de llegada";
 $LNG['ff_targetuser'] = "Destinatario";
 $LNG['ff_targetplanet'] = "Planeta destinatario";
 $LNG['ff_endtime'] = "Tiempo de fin";
@@ -1096,15 +1096,15 @@ $LNG['mod_change_deactive'] = 'Desactivado';
 
 $LNG['nws_news'] = 'Noticias';
 $LNG['nws_head_create'] = 'Crear noticia';
-$LNG['nws_head_edit'] = 'Trabajando %s en noticias';
+$LNG['nws_head_edit'] = 'Editando noticia: %s';
 $LNG['nws_id'] = 'ID';
 $LNG['nws_title'] = 'Título';
 $LNG['nws_date'] = 'Fecha';
 $LNG['nws_from'] = 'De';
 $LNG['nws_del'] = 'Eliminar';
-$LNG['nws_confirm'] = '¿Estás seguro de que quieres eliminar %s el mensaje?';
+$LNG['nws_confirm'] = '¿Estás seguro de que quieres eliminar el mensaje: %s?';
 $LNG['nws_create'] = 'Creando noticia';
-$LNG['nws_total'] = 'Total %d noticias disponibles';
+$LNG['nws_total'] = 'Total: %d noticias disponibles';
 $LNG['nws_content'] = 'Contenido';
 
 // Control de MODs
@@ -1252,7 +1252,7 @@ $LNG['cronjob_hours'] = 'Hora';
 $LNG['cronjob_dom'] = 'Día';
 $LNG['cronjob_month'] = 'Mes';
 $LNG['cronjob_dow'] = 'Día de la semana';
-$LNG['cronjob_class'] = 'clase';
+$LNG['cronjob_class'] = 'Clase';
 $LNG['cronjob_nextTime'] = 'Próxima vez';
 $LNG['cronjob_inActive'] = 'Activo';
 $LNG['cronjob_lock'] = 'bloqueado';

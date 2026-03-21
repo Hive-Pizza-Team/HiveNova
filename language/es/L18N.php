@@ -19,7 +19,7 @@ setlocale(LC_NUMERIC, 'C');
 
 //SERVER GENERALS
 $LNG['dir']         	= 'ltr';
-$LNG['week_day']	= array('Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado');
+$LNG['week_day']	= array('Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado');
 $LNG['months']		= array('Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
 $LNG['js_tdformat']	= '[D] [d] de [M] [H]:[i]:[s]';
 $LNG['php_timeformat']	= 'H:i:s';
