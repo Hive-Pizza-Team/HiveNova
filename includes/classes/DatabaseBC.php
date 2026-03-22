@@ -20,7 +20,7 @@ use mysqli;
  * @link https://github.com/jkroepke/2Moons
  */
  
-class Database_BC extends mysqli
+class DatabaseBC extends mysqli
 {
 	protected $exception;
 
