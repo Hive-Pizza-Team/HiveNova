@@ -15,6 +15,13 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Config;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Log;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Universe;
+
+
 # Actions not logged: Planet-Edit, Alliance-Edit 
 
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");

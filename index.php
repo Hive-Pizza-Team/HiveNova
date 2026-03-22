@@ -23,6 +23,8 @@ require 'includes/common.php';
 /** @var $LNG Language */
 
 use HiveNova\Page\Login\ShowErrorPage;
+use HiveNova\Core\Language;
+
 
 $page 		= \HiveNova\Core\HTTP::_GP('page', 'index');
 $mode 		= \HiveNova\Core\HTTP::_GP('mode', 'show');

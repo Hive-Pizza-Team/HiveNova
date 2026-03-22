@@ -15,6 +15,9 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Database;
+
+
 function calculateSteal($attackFleets, $defenderPlanet, $simulate = false)
 {	
 	// See: http://www.owiki.de/Beute

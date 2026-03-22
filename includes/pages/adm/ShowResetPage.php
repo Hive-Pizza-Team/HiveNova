@@ -15,6 +15,10 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Config;
+use HiveNova\Core\Universe;
+
+
 if ($USER['id'] != ROOT_USER || $_GET['sid'] != session_id()) exit;
 
 function ShowResetPage()

@@ -1,5 +1,7 @@
 <?php
 
+
+use HiveNova\Core\HTTP;
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 function ShowBuildLogPage()

@@ -14,6 +14,14 @@
  * @version 1.8.0
  * @link https://github.com/jkroepke/2Moons
  */
+
+use HiveNova\Core\Config;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Language;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Session;
+use HiveNova\Core\Universe;
+
  
 if ($USER['authlevel'] != AUTH_ADM || $_GET['sid'] != session_id())
 {

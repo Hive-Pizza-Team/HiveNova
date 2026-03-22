@@ -15,6 +15,10 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Config;
+use HiveNova\Core\Universe;
+
+
 function ShowTopnavPage()
 {
 	global $LNG, $USER;

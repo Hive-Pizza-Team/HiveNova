@@ -15,6 +15,10 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Cache;
+use HiveNova\Core\HTTP;
+
+
 function getFactors($USER, $Type = 'basic', $TIME = NULL)
 {
 	global $resource, $pricelist, $reslist;

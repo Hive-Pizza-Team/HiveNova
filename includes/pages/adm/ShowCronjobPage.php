@@ -15,6 +15,9 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\HTTP;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) exit;
 
 function getCronjobTimes($row,$max)

@@ -15,6 +15,9 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Cache;
+
+
 define('MODE', 'CRON');
 define('ROOT_PATH', str_replace('\\', '/',dirname(__FILE__)).'/');
 set_include_path(ROOT_PATH);

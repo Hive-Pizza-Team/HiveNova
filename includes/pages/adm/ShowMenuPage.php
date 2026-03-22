@@ -15,6 +15,9 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Universe;
+
+
 function ShowMenuPage()
 {
 	global $USER;

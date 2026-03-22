@@ -15,6 +15,9 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Session;
+
+
 if ($USER['authlevel'] == AUTH_USR)
 {
     throw new PagePermissionException("Permission error!");

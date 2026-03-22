@@ -24,6 +24,8 @@ require 'includes/common.php';
 /** @var $LNG Language */
 
 use HiveNova\Page\Game\ShowErrorPage;
+use HiveNova\Core\Language;
+
 
 $page 		= \HiveNova\Core\HTTP::_GP('page', 'overview');
 $mode 		= \HiveNova\Core\HTTP::_GP('mode', 'show');

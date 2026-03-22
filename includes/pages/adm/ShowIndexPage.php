@@ -15,6 +15,9 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Config;
+
+
 function ShowIndexPage()
 {
 	global $LNG;

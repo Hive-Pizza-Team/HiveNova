@@ -14,6 +14,13 @@
  * @link https://github.com/steemnova/steemnova
  */
 
+use HiveNova\Core\Config;
+use HiveNova\Core\Database;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Universe;
+
+
 require 'includes/libs/steemconnect/steemconnect.php';
 
 class SteemconnectAuth implements externalAuth
