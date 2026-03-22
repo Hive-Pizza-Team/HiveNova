@@ -69,7 +69,7 @@ class Template extends Smarty
 		$this->setCaching(Smarty::CACHING_OFF);
 
 		require_once 'includes/libs/wcf/BasicFileUtil.class.php';
-		return BasicFileUtil::getTempFolder();
+		return \BasicFileUtil::getTempFolder();
 	}
 		
 	public function assign_vars($var, $nocache = true) 

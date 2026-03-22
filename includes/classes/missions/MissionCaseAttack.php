@@ -9,6 +9,7 @@ use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
 use HiveNova\Repository\PlanetRepository;
+use OutOfRangeException;
 
 /**
  *  2Moons 

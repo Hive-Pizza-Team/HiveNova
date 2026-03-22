@@ -4,6 +4,7 @@ namespace HiveNova\Core;
 
 use Exception;
 use PDO;
+use PDOException;
 /**
  *  2Moons
  *   by Jan-Otto Kröpke 2009-2016

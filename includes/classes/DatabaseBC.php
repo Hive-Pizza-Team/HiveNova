@@ -3,6 +3,7 @@
 namespace HiveNova\Core;
 
 use Exception;
+use mysqli;
 
 /**
  *  2Moons 
