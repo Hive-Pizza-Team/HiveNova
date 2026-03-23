@@ -17,6 +17,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\Template;
 
 
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
@@ -26,7 +27,7 @@ function ShowVertify()
 	$EXT		= explode("|", (string) HTTP::_GP("ext", ""));
 	$action 	= HTTP::_GP("action", "");
 	$file	 	= HTTP::_GP("file", "");
-	$template	= new template();
+	$template	= new Template();
 	
 	switch($action) {
 		case 'check':

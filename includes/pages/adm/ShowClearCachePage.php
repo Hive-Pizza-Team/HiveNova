@@ -15,12 +15,15 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Template;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 function ShowClearCachePage()
 {
 	global $LNG;
 	ClearCache();
-	$template = new template();
+	$template = new Template();
 	$template->message($LNG['cc_cache_clear']);
 }

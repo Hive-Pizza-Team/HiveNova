@@ -20,6 +20,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
 
 
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
@@ -29,7 +30,7 @@ function ShowCreatorPage()
 {
 	global $LNG, $USER;
 
-	$template	= new template();
+	$template	= new Template();
 
 	if(empty($_GET['mode'])) { $_GET['mode'] = $_GET['page']; }
 	switch ($_GET['mode'])

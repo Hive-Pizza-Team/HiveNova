@@ -18,6 +18,7 @@
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
 
 
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__)) || $_GET['sid'] != session_id()) exit;
@@ -29,7 +30,7 @@ function ShowRightsPage()
 	{
 		case 'rights':
 
-			$template	= new template();
+			$template	= new Template();
 			$template->loadscript('filterlist.js');
 
 			if ($_POST)
@@ -122,7 +123,7 @@ function ShowRightsPage()
 			$template->show('ModerrationRightsPage.tpl');
 		break;
 		case 'users':
-			$template	= new template();
+			$template	= new Template();
 			$template->loadscript('filterlist.js');
 
 			if ($_POST)

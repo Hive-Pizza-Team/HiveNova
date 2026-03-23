@@ -17,6 +17,7 @@
 
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
 
 
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
@@ -49,7 +50,7 @@ function ShowMultiIPPage()
 		$IPs[$Data['user_lastip']][$Data['id']]	= $Data;
 	}
 	
-	$template	= new template();
+	$template	= new Template();
 	$template->assign_vars(array(
 		'multiGroups'	=> $IPs,
 	));

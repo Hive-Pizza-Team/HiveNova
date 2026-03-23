@@ -20,6 +20,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Mail;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
 
 
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
@@ -85,7 +86,7 @@ function ShowSendMessagesPage() {
 		unset($sendModes[2]);
 	}
 	
-	$template	= new template();
+	$template	= new Template();
 	$template->assign_vars(array(
 		'langSelector' => array_merge(array('' => $LNG['ma_all']), $LNG->getAllowedLangs(false)),
 		'modes' => $sendModes,

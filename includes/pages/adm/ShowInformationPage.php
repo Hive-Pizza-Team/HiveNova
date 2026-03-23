@@ -17,6 +17,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
+use HiveNova\Core\Template;
 
 
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
@@ -59,7 +60,7 @@ function ShowInformationPage()
 
     $dbVersion	= Database::get()->selectSingle($sql, array(), 'dbVersion');
 
-	$template	= new template();
+	$template	= new Template();
 	$template->assign_vars(array(
 		'info_information'	=> sprintf($LNG['info_information'], 'https://github.com/Hive-Pizza-Team/HiveNova/issues'),
 		'info'				=> $_SERVER['SERVER_SOFTWARE'],

@@ -18,13 +18,14 @@
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Log;
 use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
 
  
  if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 function ShowGiveaway()
 {
 	global $LNG, $resource, $reslist;
-	$template	= new template();	
+	$template	= new Template();	
 	$action	= HTTP::_GP('action', '');
 	if ($_POST && $action == 'send') {
 		$planet			= HTTP::_GP('planet', 0);

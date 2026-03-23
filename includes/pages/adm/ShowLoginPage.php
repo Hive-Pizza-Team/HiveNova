@@ -17,6 +17,7 @@
 
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
+use HiveNova\Core\Template;
 
 
 if ($USER['authlevel'] == AUTH_USR)
@@ -56,7 +57,7 @@ function ShowLoginPage()
 
 	}
 
-	$template	= new template();
+	$template	= new Template();
 
 	require 'includes/libs/steemconnect/steemconnect.php';
 	$steemconnectUrl = Steemconnect::getAdminUrl();

@@ -74,6 +74,10 @@ if(!file_exists('includes/config.php') || filesize('includes/config.php') === 0)
 	HTTP::redirectTo('install/index.php');
 }
 
+// Let connection errors surface as real errors rather than silently redirecting to installer.
+// Only PDOException thrown during the query (e.g. missing table) is treated as needing upgrade.
+Database::get();
+
 try {
     $sql	= "SELECT dbVersion FROM %%SYSTEM%%;";
 

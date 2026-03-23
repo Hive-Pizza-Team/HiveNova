@@ -18,6 +18,7 @@
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
 
 
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
@@ -84,7 +85,7 @@ function ShowSearchPage()
 			'500'	=> '500',	
 		)
 	);
-	$template	= new template();
+	$template	= new Template();
 
 	
 	

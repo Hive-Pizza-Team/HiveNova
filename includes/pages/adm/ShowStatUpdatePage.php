@@ -15,6 +15,9 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Template;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 function ShowStatUpdatePage() {
@@ -27,6 +30,6 @@ function ShowStatUpdatePage() {
 	$stats_end_time	= sprintf($LNG['sb_stats_update'], $result['totaltime']);
 	$stats_sql		= sprintf($LNG['sb_sql_counts'], $result['sql_count']);
 
-	$template = new template();
+	$template = new Template();
 	$template->message($LNG['sb_stats_updated'].$stats_end_time.$memory_i.$memory_e.$memory_p.$stats_sql, false, 0, true);
 }
