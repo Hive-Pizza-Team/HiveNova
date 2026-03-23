@@ -20,7 +20,7 @@ class UserRepository
     {
         $db = Database::get();
         $row = $db->selectSingle(
-            'SELECT user.*, stat.stat_points
+            'SELECT user.*, stat.total_points
              FROM %%USERS%% as user
              LEFT JOIN %%STATPOINTS%% as stat ON stat.id_owner = user.id AND stat.stat_type = 1
              WHERE user.id = :id;',
