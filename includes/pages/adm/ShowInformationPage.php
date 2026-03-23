@@ -74,7 +74,7 @@ function ShowInformationPage()
 		'json'				=> function_exists('json_encode') ? 'Ja' : 'Nein',
 		'bcmath'			=> extension_loaded('bcmath') ? 'Ja' : 'Nein',
 		'curl'				=> extension_loaded('curl') ? 'Ja' : 'Nein',
-		'browser'			=> $_SERVER['HTTP_USER_AGENT'],
+		'browser'			=> $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
 		'safemode'			=> ini_get('safe_mode') ? 'Ja' : 'Nein',
 		'memory'			=> ini_get('memory_limit'),
 		'suhosin'			=> ini_get('suhosin.request.max_value_length') ? 'Ja' : 'Nein',

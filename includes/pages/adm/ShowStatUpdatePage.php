@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\StatBuilder;
 use HiveNova\Core\Template;
 
 
@@ -22,7 +23,7 @@ if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FI
 
 function ShowStatUpdatePage() {
 	global $LNG;
-	$stat			= new statbuilder();
+	$stat			= new StatBuilder();
 	$result			= $stat->MakeStats();
 	$memory_p		= str_replace(array("%p", "%m"), $result['memory_peak'], $LNG['sb_top_memory']);
 	$memory_e		= str_replace(array("%e", "%m"), $result['end_memory'], $LNG['sb_final_memory']);

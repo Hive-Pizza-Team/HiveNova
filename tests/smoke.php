@@ -133,6 +133,11 @@ function detectErrors(string $body): array {
         || preg_match('/<b>Message: <\/b>.+<br>/i', $body)) {
         $issues[] = 'Application error page';
     }
+    // Installer page — common.php redirects here when DB is unavailable or upgrade needed
+    if (stripos($body, 'id="stepintro"') !== false
+        || preg_match('/<title>[^<]*Installer/i', $body)) {
+        $issues[] = 'Redirected to installer (DB unavailable or upgrade required)';
+    }
     return $issues;
 }
 
@@ -199,6 +204,15 @@ foreach ($pages as $page) {
     }
 }
 
+// Extract session ID from cookie jar to supply as ?sid= for CSRF-protected admin pages
+$sid = '';
+foreach (file($cookieFile) ?: [] as $line) {
+    if (preg_match('/\b(?:PHPSESSID|2Moons)\b.*\s(\S+)\s*$/', $line, $m)) {
+        $sid = trim($m[1]);
+        break;
+    }
+}
+
 // --- Admin panel ---
 $adminPages = [
     '',             // default → ShowIndexPage
@@ -262,7 +276,7 @@ if ($adminLoggedIn) {
 
 $adminColW = max(array_map('strlen', array_map(fn($p) => $p ?: '(index)', $adminPages)) ?: [7]) + 2;
 foreach ($adminPages as $page) {
-    $url   = "$baseUrl/admin.php" . ($page !== '' ? "?page=$page" : '');
+    $url   = "$baseUrl/admin.php" . ($page !== '' ? "?page=$page" : '') . ($sid !== '' ? ($page !== '' ? '&' : '?') . "sid=$sid" : '');
     $label = str_pad($page ?: '(index)', $adminColW);
     [$status, $body, $curlErr] = curl_get($url, $cookieFile);
 

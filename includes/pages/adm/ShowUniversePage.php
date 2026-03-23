@@ -24,7 +24,7 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
  
-if ($USER['authlevel'] != AUTH_ADM || $_GET['sid'] != session_id())
+if ($USER['authlevel'] != AUTH_ADM || ($_GET['sid'] ?? '') != session_id())
 {
 	throw new Exception("Permission error!");
 }

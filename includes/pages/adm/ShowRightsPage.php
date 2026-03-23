@@ -21,7 +21,7 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
 
-if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__)) || $_GET['sid'] != session_id()) exit;
+if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__)) || ($_GET['sid'] ?? '') != session_id()) exit;
 function ShowRightsPage()
 {
 	global $LNG, $USER;

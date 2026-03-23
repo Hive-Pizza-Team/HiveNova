@@ -139,7 +139,7 @@ class Cronjob
 		foreach($cronjobResult as $cronjobRow)
 		{
 			$cronTabString	= implode(' ', array($cronjobRow['min'], $cronjobRow['hours'], $cronjobRow['dom'], $cronjobRow['month'], $cronjobRow['dow']));
-			$nextTime		= tdCron::getNextOccurrence($cronTabString, TIMESTAMP + 60);
+			$nextTime		= \tdCron::getNextOccurrence($cronTabString, TIMESTAMP + 60);
 
 			$db->update($sql, array(
 				':nextTime'		=> $nextTime,
