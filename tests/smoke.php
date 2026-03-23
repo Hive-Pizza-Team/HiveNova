@@ -126,6 +126,13 @@ function detectErrors(string $body): array {
     if (stripos($body, 'Stack trace') !== false) {
         $issues[] = 'Stack trace';
     }
+    // HiveNova custom exception handler page (exceptionHandler in GeneralFunctions.php)
+    // This page may return HTTP 200 if headers were already sent when the exception occurred
+    if (stripos($body, '<th>Unknown error</th>') !== false
+        || stripos($body, '<b>Debug Backtrace:</b>') !== false
+        || preg_match('/<b>Message: <\/b>.+<br>/i', $body)) {
+        $issues[] = 'Application error page';
+    }
     return $issues;
 }
 
