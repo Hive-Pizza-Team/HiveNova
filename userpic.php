@@ -26,6 +26,8 @@ if(!extension_loaded('gd')) {
 require 'includes/common.php';
 
 use HiveNova\Core\HTTP;
+use HiveNova\Core\Language;
+use HiveNova\Core\StatBanner;
 
 $id = HTTP::_GP('id', 0);
 
@@ -37,7 +39,7 @@ $LNG = new Language;
 $LNG->getUserAgentLanguage();
 $LNG->includeData(array('L18N', 'BANNER', 'CUSTOM'));
 
-require 'includes/classes/class.StatBanner.php';
+require 'includes/classes/StatBanner.php';
 
 $banner = new StatBanner();
 $Data	= $banner->GetData($id);
