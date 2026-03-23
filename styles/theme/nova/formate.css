@@ -1,8 +1,31 @@
-/* 
+/*
 $background: #040E1E url('/images/background.jpg');
-$foreground: #E6EBFB;
-$ui-background: #344566; 
+$foreground: #fff;
+$ui-background: #1b4c6e;
 */
+
+:root {
+    --color-accent:          #ffd600;
+    --color-accent-hover:    #2cbbf7;
+    --color-bg-surface:      rgba(13, 16, 20, 0.95);
+    --color-bg-surface-dark: #212428;
+    --color-text:            #FFF;
+    --color-text-bright:     #FFF;
+    --color-border:          #000;
+    --color-th-bg:           url("img/bkd_title.png");
+    --color-menu-bg:         #1d5888cf;
+    --color-card-header-bg:  #252831;
+    --color-success:         #00FF00;
+    --color-danger:          #FF0000;
+    --color-warning:         #FF8040;
+    --color-notice:          #FFFF00;
+    --color-res-name:        #FF0000;
+    --color-ally-member:     #99FF66;
+    --color-ally-friend:     #99FFFF;
+    --color-ally-nap:        #aa99ff;
+    --color-ally-trade:      #ffec99;
+    --color-ally-enemy:      #FF0000;
+}
 
 html {
 }
@@ -21,7 +44,7 @@ body,input,select,button,textarea,a,td,th,tr,table,a:visited{
 }
 
 body.mceContentBody,input,button,select,option,textarea, .ui-widget-content{
-	background: #1b4c6e;
+	background: var(--color-bg-surface);
     padding: 2px;
 }
 
@@ -48,10 +71,9 @@ input[type="radio"] {
 }
 
 a:hover {
-	color:#ffd600;
-	text-decoration:none
-font-weight:bold;
-
+	color: var(--color-accent-hover);
+	text-decoration: none;
+	font-weight: bold;
 }
 
 table,td,th {
@@ -63,7 +85,7 @@ table table,img {
 }
 
 input, select, textarea, #userpic, input, button{
-	border:1px solid #ffeec0;
+	border:1px solid var(--color-accent);
 }
 
 button.selected{
@@ -76,8 +98,7 @@ td, th input, .tip {
 
 td, .tip {
 	text-align:center;
-	background: #0D1014;
-	background: rgba(13, 16, 20, 0.95);
+	background: var(--color-bg-surface);
 }
 
 input,button {
@@ -98,7 +119,7 @@ th, .ui-widget-header {
 }
 
 .trade-enemy > .table_username{
-	color:#F00;
+	color: var(--color-danger);
 }
 
 .trade-ally  > .table_username{
@@ -140,47 +161,47 @@ select {
 /*Global Messgae */
 
 .admin {
-	color:red;
+	color: var(--color-danger);
 }
 .mod {
-	color:yellow;
+	color: #FFFF00;
 }
 .ops {
-	color:skyblue;
+	color: #87CEEB;
 }
 
 .messages_body .admin {
 	font-weight:700;
-	color:red;
+	color: var(--color-danger);
 }
 .messages_body .mod {
 	font-weight:700;
-	color:yellow;
+	color: #FFFF00;
 }
 .messages_body .ops {
 	font-weight:700;
-	color:skyblue;
+	color: #87CEEB;
 }
 
 .res_max {
-	color:#0F0
+	color: var(--color-success);
 }
 
 .res_name {
-	color:red;
-	font-weight:700
+	color: var(--color-res-name);
+	font-weight: 700;
 }
 
 .galaxy-alliance-member {
-	color:#99FF66;
+	color: var(--color-ally-member);
 }
 
 .galaxy-alliance-friend {
-	color:#99FFFF;
+	color: var(--color-ally-friend);
 }
 
 .galaxy-alliance-enemy {
-	color:#FF0000;
+	color: var(--color-ally-enemy);
 }
 
 .galaxy-short-noob,
@@ -249,11 +270,11 @@ select {
 }
 
 .warning {
-	color:#FF8040
+	color: var(--color-warning);
 }
 
 .notice {
-	color:#FF0
+	color: var(--color-notice);
 }
 
 .return {
@@ -261,7 +282,7 @@ select {
 }
 
 .allymember,.colony,.deploy,.harvest,.transport,.success {
-	color:lime
+	color: var(--color-success);
 }
 
 .owntransport {
@@ -279,8 +300,8 @@ select {
 .build_submit {
     background: none repeat scroll 0 0 transparent;
     border: 0 none;
-    color: lime;
-font-size: medium;
+    color: var(--color-success);
+    font-size: medium;
 }
 .onlist{
     color: #DDD;
@@ -289,18 +310,16 @@ font-size: medium;
 /** LOGO **/
 
 .logo .fixed {
-	background: #0D1014;
-	background: rgba(13, 16, 20, 0.95);
-	border-bottom: 1px solid black;
+	background: var(--color-bg-surface);
+	border-bottom: 1px solid var(--color-border);
 }
 
 /** HEADER **/
 
 header .fixed {
-	background: #0D1014;
-	background: rgba(13, 16, 20, 0.95);
-	/* border: 1px solid black; */
-	border-bottom: 1px solid black;
+	background: var(--color-bg-surface);
+	/* border: 1px solid var(--color-border); */
+	border-bottom: 1px solid var(--color-border);
 }
 
 #resourcesdiv{
@@ -317,13 +336,12 @@ header .fixed {
 
 menu a {
 	text-align: center;
-	background: #1d5888cf;
-    
+	background: var(--color-menu-bg);
 }
 
 menu a:hover {
-  color: #2cbbf7;
-font-weight:bold;
+	color: var(--color-accent-hover);
+	font-weight: bold;
 }
 
 div#disclamer a {
@@ -360,7 +378,7 @@ div#disclamer a {
 
 .mes_unread td {
 	font-weight:700;
-	background-color:#212428;
+	background-color: var(--color-bg-surface-dark);
 }
 
 /* Messages Page */
@@ -463,7 +481,7 @@ th a,.res_current{
 }
 
 .res_current_max,.attack,.federation,.error {
-	color:red
+	color: var(--color-danger);
 }
 
 #fleetstatustable td{
@@ -473,11 +491,11 @@ th a,.res_current{
 }
 
 .raportWin {
-	color:lime;
+	color: var(--color-success);
 }
 
 .raportLose {
-	color:red;
+	color: var(--color-danger);
 }
 
 .ui-progressbar-value {
@@ -487,8 +505,8 @@ th a,.res_current{
 }
 
 .spyRaportContainerHead {
-	background: #212428;
-	color: white;
+	background: var(--color-bg-surface-dark);
+	color: var(--color-text-bright);
 	font-weight: 700;
 	text-align: left;
 	margin: 3px 0;
@@ -710,9 +728,8 @@ height: 133px;
 }
 
 .buildn a:hover {
-	color: #2cbbf7;
-	font-weight:bold;
-
+	color: var(--color-accent-hover);
+	font-weight: bold;
 }
 
 .techb {
@@ -768,7 +785,8 @@ width: 100%;
 
 
 input:hover {
-    color: #2cbbf7;}
+    color: var(--color-accent-hover);
+}
 
 .ui-autocomplete, .ui-state-hover, .ui-state-default, .ui-tabs-nav, .ui-tabs, .ui-progressbar, .ui-progressbar-value {
 	-webkit-border-radius:0;
@@ -778,7 +796,7 @@ input:hover {
 
 .ui-state-default{
 	border:1px solid #000 !important;
-	background: #0D1014 !important;
+	background: var(--color-bg-surface) !important;
 }
 .ui-state-default > a{
 	cursor:pointer !important;
@@ -799,11 +817,13 @@ input:hover {
 }
 
 @media screen and (max-width: 520px) {
-   div .buildb {border: none;
+    div .buildb {
+        border: none;
     }
-div .bulida {border: none;
-    }}
+    div .bulida {
+        border: none;
     }
+}
 
 .card {
 	background-color: rgba(5, 5, 5, 0.5) !important;
@@ -817,7 +837,7 @@ div .bulida {border: none;
 	border-left: 0;
 }
 .card-header, .card-footer, .spyReportCat {
-	background-color: #252831;
+	background-color: var(--color-card-header-bg);
 }
 
 .card-header {

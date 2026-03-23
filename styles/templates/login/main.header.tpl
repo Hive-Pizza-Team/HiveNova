@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="robots" content="index, follow">
+	<link rel="stylesheet" type="text/css" href="styles/resource/css/tokens.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/theme/{$dpath|default:'nova'}/formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/main.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/base/jquery.fancybox.css?v={$REV}">

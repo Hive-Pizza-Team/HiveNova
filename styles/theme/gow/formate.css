@@ -1,10 +1,30 @@
 /** Edit Color here **/
-* #.ui-widget-header {
-    background-color: #D20000;
+
+:root {
+    --color-accent:          #D20000;
+    --color-accent-hover:    #FF0000;
+    --color-bg-surface:      rgba(13, 16, 20, 0.95);
+    --color-bg-surface-dark: #212428;
+    --color-text:            #DDD;
+    --color-text-bright:     #FFF;
+    --color-border:          #000;
+    --color-th-bg:           url("img/bkd_title.png");
+    --color-menu-bg:         rgba(13, 16, 20, 0.95);
+    --color-card-header-bg:  #212428;
+    --color-success:         #00FF00;
+    --color-danger:          #FF0000;
+    --color-warning:         #FF8040;
+    --color-notice:          #FFFF00;
+    --color-res-name:        #D20000;
+    --color-ally-member:     #99FF66;
+    --color-ally-friend:     #99FFFF;
+    --color-ally-nap:        #aa99ff;
+    --color-ally-trade:      #ffec99;
+    --color-ally-enemy:      #FF0000;
 }
 
 .res_name {
-    color: #D20000;
+    color: var(--color-res-name);
 }
 
 body {
@@ -32,7 +52,7 @@ select,
 option,
 textarea,
 .ui-widget-content {
-    background: #0D1014;
+    background: var(--color-bg-surface);
 }
 
 input[type="radio"] {
@@ -47,8 +67,8 @@ input[type="radio"] {
 }
 
 a:hover {
-    color: red;
-    text-decoration: none
+    color: var(--color-accent-hover);
+    text-decoration: none;
 }
 
 table,
@@ -68,7 +88,7 @@ textarea,
 #userpic,
 input,
 button {
-    border: 1px solid #1C1F23;
+    border: 1px solid var(--color-accent);
 }
 
 td,
@@ -80,8 +100,7 @@ th input,
 td,
 .tip {
     text-align: center;
-    background: #0D1014;
-    background: rgba(13, 16, 20, 0.95);
+    background: var(--color-bg-surface);
 }
 
 input,
@@ -119,51 +138,51 @@ select {
 /*Global Messgae */
 
 .admin {
-    color: red;
+    color: var(--color-danger);
 }
 
 .mod {
-    color: yellow;
+    color: #FFFF00;
 }
 
 .ops {
-    color: skyblue;
+    color: #87CEEB;
 }
 
 .messages_body .admin {
     font-weight: 700;
-    color: red;
+    color: var(--color-danger);
 }
 
 .messages_body .mod {
     font-weight: 700;
-    color: yellow;
+    color: #FFFF00;
 }
 
 .messages_body .ops {
     font-weight: 700;
-    color: skyblue;
+    color: #87CEEB;
 }
 
 .res_max {
-    color: #0F0
+    color: var(--color-success);
 }
 
 .res_name {
-    color: red;
-    font-weight: 700
+    color: var(--color-res-name);
+    font-weight: 700;
 }
 
 .galaxy-alliance-member {
-    color: #99FF66;
+    color: var(--color-ally-member);
 }
 
 .galaxy-alliance-friend {
-    color: #99FFFF;
+    color: var(--color-ally-friend);
 }
 
 .galaxy-alliance-enemy {
-    color: #FF0000;
+    color: var(--color-ally-enemy);
 }
 
 .galaxy-short-noob,
@@ -232,11 +251,11 @@ select {
 }
 
 .warning {
-    color: #FF8040
+    color: var(--color-warning);
 }
 
 .notice {
-    color: #FF0
+    color: var(--color-notice);
 }
 
 .return {
@@ -249,7 +268,7 @@ select {
 .harvest,
 .transport,
 .success {
-    color: lime
+    color: var(--color-success);
 }
 
 .owntransport {
@@ -269,7 +288,7 @@ select {
 .build_submit {
     background: none repeat scroll 0 0 transparent;
     border: 0 none;
-    color: lime;
+    color: var(--color-success);
 }
 
 .onlist {
@@ -279,9 +298,8 @@ select {
 /** HEADER **/
 
 #header {
-    background: #0D1014;
-    background: rgba(13, 16, 20, 0.95);
-    border: 1px solid black;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
 }
 
 #resourcesdiv {
@@ -291,13 +309,12 @@ select {
 /** MENU **/
 
 #menu a {
-    background: #0D1014;
-    background: rgba(13, 16, 20, 0.95);
-    border-top: 1px solid black;
+    background: var(--color-menu-bg);
+    border-top: 1px solid var(--color-border);
 }
 
 #menu a:hover {
-    background: #212428;
+    background: var(--color-bg-surface-dark);
 }
 
 .menu-head a {
@@ -379,7 +396,7 @@ th a,
 .attack,
 .federation,
 .error {
-    color: red
+    color: var(--color-danger);
 }
 
 #fleetstatustable td {
@@ -389,11 +406,11 @@ th a,
 }
 
 .raportWin {
-    color: lime;
+    color: var(--color-success);
 }
 
 .raportLose {
-    color: red;
+    color: var(--color-danger);
 }
 
 .ui-progressbar-value {
@@ -403,8 +420,8 @@ th a,
 }
 
 .spyRaportContainerHead {
-    background: #212428;
-    color: white;
+    background: var(--color-bg-surface-dark);
+    color: var(--color-text-bright);
     font-weight: 700;
     text-align: left;
     margin: 3px 0;
@@ -433,7 +450,7 @@ th a,
 
 .ui-state-default {
     border: 1px solid #000 !important;
-    background: #0D1014 !important;
+    background: var(--color-bg-surface) !important;
 }
 
 .ui-state-default>a {
@@ -443,7 +460,7 @@ th a,
 .ui-state-hover,
 .ui-progressbar {
     border: 1px solid #000 !important;
-    background: #212428 !important;
+    background: var(--color-bg-surface-dark) !important;
 }
 
 .ui-tabs-nav {
