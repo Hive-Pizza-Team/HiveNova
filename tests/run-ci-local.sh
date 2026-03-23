@@ -50,6 +50,7 @@ check_error_log() {
 }
 
 run "Language check"   php .github/scripts/check-language-files.php
+run "CSS check"        bash tests/check-css.sh
 run "Unit tests"       php vendor/bin/phpunit --configuration phpunit.xml
 run "Smoke test"       php tests/smoke.php
 run "Error log empty"  check_error_log
