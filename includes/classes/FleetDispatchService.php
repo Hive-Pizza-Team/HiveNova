@@ -155,8 +155,6 @@ class FleetDispatchService
         $stayTime          = $fleetData['stayTime'];
         $availableMissions = $fleetData['availableMissions'];
 
-        $db = Database::get();
-
         // Colonize: target must be empty and must target a planet slot
         if ($mission == 7) {
             if (!empty($targetPlanetData)) {
@@ -246,7 +244,7 @@ class FleetDispatchService
                 $sql = "SELECT COUNT(*) as state FROM %%BUDDY%%
                     WHERE id NOT IN (SELECT id FROM %%BUDDY_REQUEST%% WHERE %%BUDDY_REQUEST%%.id = %%BUDDY%%.id) AND
                     (owner = :ownerID AND sender = :userID) OR (owner = :userID AND sender = :ownerID);";
-                $buddy = $db->selectSingle($sql, [
+                $buddy = Database::get()->selectSingle($sql, [
                     ':ownerID' => $targetPlayerData['id'],
                     ':userID'  => $USER['id'],
                 ], 'state');
