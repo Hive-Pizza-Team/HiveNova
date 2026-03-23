@@ -334,6 +334,8 @@ class FleetFunctions
 			':fleetNoMReturn'  => 0,
 		));
 
+		if(empty($fleetResult)) { return false; }
+
 		if(empty($fleetResult['start_time'])) { $fleetResult['start_time'] = 0; }
 		if(empty($fleetResult['fleet_start_time'])) { $fleetResult['fleet_start_time'] = 0; }
 		if(empty($fleetResult['fleet_mission'])) { $fleetResult['fleet_mission'] = 0; }
