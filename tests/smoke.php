@@ -180,14 +180,26 @@ $fakeSignature = str_repeat('a', 64);
     'password' => $fakeSignature,
 ], tempnam(sys_get_temp_dir(), 'smoke_hive_'));  // throwaway cookie — don't overwrite real session
 $hiveIssues = detectErrors($body);
+$hiveLoginRejected = stripos($body, 'loginError') !== false
+    || stripos($body, 'code=1') !== false
+    || stripos($body, 'page=login') !== false;
+$hiveLoggedIn = stripos($body, 'page=logout') !== false
+    || stripos($body, 'game.php') !== false;
+
 if ($status >= 400) {
     echo "FAIL (HTTP $status — likely class-not-found in Hive integration)\n";
     $fail++;
 } elseif (!empty($hiveIssues)) {
     echo "FAIL (" . implode(', ', $hiveIssues) . ")\n";
     $fail++;
+} elseif ($hiveLoggedIn) {
+    echo "FAIL (fake signature was accepted — authentication bypass!)\n";
+    $fail++;
+} elseif (!$hiveLoginRejected) {
+    echo "WARN (could not confirm login was rejected)\n";
+    $warn++;
 } else {
-    echo "OK\n";
+    echo "OK (login rejected as expected)\n";
     $pass++;
 }
 echo "\n";
