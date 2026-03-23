@@ -93,7 +93,7 @@ $LNG['registerNext']				= 'Siguiente';
 $LNG['registerErrorUniClosed']		= '¡El registro está cerrado en este universo!';
 $LNG['registerErrorUsernameEmpty']	= '¡Debes ingresar un nombre de usuario!';
 $LNG['registerErrorUsernameChar']	= '¡Tu nombre de usuario debe consistir solo en números, letras, espacios, _, -, .!';
-$LNG['registerErrorUsernameExist']	= '¡El nombre de usuario ya está en uso!';
+$LNG['registerErrorUsernameExist']	= '¡El nombre de usuario ya está en uso! Si eres titular de esta cuenta de Hive, intenta registrarte con Keychain.';
 $LNG['registerErrorPasswordLength']	= '¡La contraseña debe tener al menos %s caracteres de longitud!';
 $LNG['registerErrorPasswordSame']	= '¡Las contraseñas no coinciden!';
 $LNG['registerErrorMailEmpty']		= '¡Debes especificar una dirección de correo electrónico!';
@@ -130,7 +130,7 @@ $LNG['passwordCaptcha']				= 'Código de seguridad';
 $LNG['passwordSubmit']				= 'Enviar';
 $LNG['passwordErrorUsernameEmpty']	= '¡No has especificado el nombre de usuario!';
 $LNG['passwordErrorMailEmpty']		= '¡Has especificado una dirección de correo electrónico desconocida!';
-$LNG['passwordErrorUnknown']		= 'No se pudo encontrar con los datos de la cuenta.';
+$LNG['passwordErrorUnknown']		= 'No se pudieron verificar los datos de la cuenta.';
 $LNG['passwordErrorOnePerDay']		= 'Límite de restablecimiento de contraseña para esta cuenta de usuario alcanzado. Solo puedes solicitar el restablecimiento de contraseña una vez cada 24 horas. ';
 
 $LNG['passwordValidMailTitle']		= 'Olvidé mi contraseña en el juego: %s';

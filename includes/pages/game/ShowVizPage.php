@@ -34,7 +34,7 @@ class ShowVizPage extends AbstractGamePage
 
         // startGroup,startCircle,startPoint,endGroup,endCircle,endPoint,duration,color
         $fleetData = Database::get()->select(
-            'SELECT fleet_start_galaxy as startGroup, 
+            'SELECT fleet_start_galaxy as startGroup,
             CASE
                 WHEN fleet_start_system < 6 THEN fleet_start_system + FLOOR(RAND() * 6)
                 WHEN fleet_start_system > :maxSystem - 6 THEN fleet_start_system - FLOOR(RAND() * 6)

@@ -18,7 +18,7 @@
 
 		<div class="reg-tab-panel active" id="login-password" role="tabpanel">
 			<div class="contentbox">
-				<h2>{$LNG.loginHeader} {$LNG.loginPassword}</h2>
+				<h2>{$LNG.loginPassword} {$LNG.loginHeader}</h2>
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 					<div class="row">
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$universeSelect|array_key_first}</select>
@@ -42,7 +42,7 @@
 
 		<div class="reg-tab-panel" id="login-hive" role="tabpanel">
 			<div class="contentbox">
-				<h2>{$LNG.loginHeader} {$LNG.loginHiveAccount}</h2>
+				<h2>{$LNG.loginHiveAccount} {$LNG.loginHeader}</h2>
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
 					<select name="uni" id="loginHive-universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$universeSelect|array_key_first}</select>
 					<input name="username" id="loginHive-username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
@@ -65,7 +65,7 @@
 		</div>
 
 		<div class="contentbox">
-			<h2>{$LNG.buttonRegister} First</h2>
+			<h2>{$LNG.buttonRegister}</h2>
 			<a href="/index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
 		</div>
 	</div>

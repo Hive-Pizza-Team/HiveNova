@@ -68,6 +68,7 @@ $LNG['tn_delete_mode']						= 'A conta às %s será automaticamente apagada!';
 $LNG['lm_changelog']						= 'Changelog';
 $LNG['lm_overview']							= 'Vista Geral';
 $LNG['lm_galaxy']							= 'Galáxia';
+$LNG['lm_viz']								= 'Mapa';
 $LNG['lm_empire']							= 'Império';
 $LNG['lm_fleet']							= 'Frota';
 $LNG['lm_buildings']						= 'Edifícios';

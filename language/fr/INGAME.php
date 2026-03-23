@@ -54,6 +54,7 @@ $LNG['tn_delete_mode']						= 'Votre compte %s va être supprimé !';
 $LNG['lm_changelog']						= 'Changelog';
 $LNG['lm_overview']							= 'Vue Générale';
 $LNG['lm_galaxy']							= 'Galaxie';
+$LNG['lm_viz']								= 'Carte';
 $LNG['lm_empire']							= 'Empire';
 $LNG['lm_fleet']							= 'Flotte';
 $LNG['lm_buildings']						= 'Bâtiments';

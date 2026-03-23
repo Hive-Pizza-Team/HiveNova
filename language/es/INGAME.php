@@ -22,19 +22,19 @@ $LNG['ready']								= 'Listo';
 
 $LNG['loading']								= 'Cargando ...';
 
-$LNG['invalid_action']						= 'Acción no valida!';
+$LNG['invalid_action']						= 'Acción no válida!';
 
-$LNG['type_mission_1']  					= 'Atacar';
+$LNG['type_mission_1']  					= 'Ataque';
 $LNG['type_mission_2']  					= 'Ataque grupal';
-$LNG['type_mission_3']  					= 'Transportar';
-$LNG['type_mission_4']  					= 'Desplegar';
-$LNG['type_mission_5']  					= 'Mantener posición';
-$LNG['type_mission_6']  					= 'Espiar';
-$LNG['type_mission_7']  					= 'Colonizar';
-$LNG['type_mission_8']  					= 'Reciclar';
-$LNG['type_mission_9']  					= 'Destruir';
+$LNG['type_mission_3']  					= 'Transporte';
+$LNG['type_mission_4']  					= 'Estacionamiento';
+$LNG['type_mission_5']  					= 'Retención';
+$LNG['type_mission_6']  					= 'Espionaje';
+$LNG['type_mission_7']  					= 'Colonización';
+$LNG['type_mission_8']  					= 'Reciclaje';
+$LNG['type_mission_9']  					= 'Destrucción';
 $LNG['type_mission_10']  					= 'Ataque con Misiles';
-$LNG['type_mission_11']  					= 'Investigación DM';
+$LNG['type_mission_11']  					= 'Investigación Pizzabits';
 $LNG['type_mission_15'] 					= 'Expedición';
 
 $LNG['type_planet_1']  					= 'Planeta';
@@ -63,10 +63,11 @@ $LNG['tn_delete_mode']						= 'Tu cuenta se encuentra en modo de eliminación. L
 //LEFT MENU
 $LNG['lm_overview']						    = 'Visión general';
 $LNG['lm_galaxy']							= 'Galaxia';
+$LNG['lm_viz']								= 'Mapa';
 $LNG['lm_empire']							= 'Imperio';
 $LNG['lm_fleet']							= 'Base de la Flota';
 $LNG['lm_buildings']						= 'Edificios';
-$LNG['lm_research']						    = 'Investigacion';
+$LNG['lm_research']						    = 'Investigación';
 $LNG['lm_shipshard']						= 'Hangar';
 $LNG['lm_defenses']						    = 'Defensas';
 $LNG['lm_resources']						= 'Recursos';
@@ -206,7 +207,7 @@ $LNG['gl_collect']							= 'Recolectar';
 $LNG['gl_resources']						= 'Recursos';
 $LNG['gl_features']							= 'Características';
 $LNG['gl_diameter']							= 'Diámetro';
-$LNG['gl_temperature']						= 'Temperatur';
+$LNG['gl_temperature']						= 'Temperatura';
 $LNG['gl_phalanx']							= 'Phalanx';
 $LNG['gl_planet_destroyed']					= 'Planeta Destruido';
 $LNG['gl_playercard']						= 'Perfil';
@@ -292,7 +293,7 @@ $LNG['fl_send_fleet']						= 'Enviar flota';
 $LNG['fl_fleet_speed']						= 'Velocidad';
 $LNG['fl_distance']							= 'Distancia';
 $LNG['fl_flying_time']						= 'Tiempo de vuelo (solo ida)';
-$LNG['fl_flying_arrival']					= 'Llagada a destino';
+$LNG['fl_flying_arrival']					= 'Llegada a destino';
 $LNG['fl_flying_return']					= 'Llegada a Origen';
 $LNG['fl_fuel_consumption']					= 'Consumo de combustible';
 $LNG['fl_max_speed']						= 'Velocidad máxima';
@@ -354,7 +355,7 @@ $LNG['fl_no_noresource']					= 'No hay materia prima cargada!';
 $LNG['fl_no_target']						= 'Ningún planeta de destino encontrado';
 $LNG['fl_not_all_ship_avalible']			= 'No todas las naves disponibles.';
 $LNG['fl_no_expedition_slot']				= 'No se puede iniciar más expediciones!';
-$LNG['fl_invalid_mission']					= 'Misión no valida';
+$LNG['fl_invalid_mission']					= 'Misión no válida';
 $LNG['fl_bash_protection']					= 'Bash-protección';
 $LNG['fl_admin_attack']						= 'No puedes atacar a los Administradores';
 $LNG['fl_target_exists']					= 'Planeta de destino existe';
@@ -366,7 +367,7 @@ $LNG['fl_no_hold_depot']					= 'En el destino, no hay depósito de la alianza.';
 $LNG['fl_not_enough_deuterium']				= 'No hay suficiente Deuterio.';
 $LNG['fl_not_enough_space']					= 'No tienes suficiente espacio de carga disponible.';
 $LNG['fl_hold_time_not_exists']				= 'El tiempo de espera no es válido.';
-$LNG['fl_own_planet_error']					= 'Error! Again select the planet from which you want to send the fleet.';
+$LNG['fl_own_planet_error']					= '¡Error! Selecciona nuevamente el planeta desde el cual deseas enviar la flota.';
 
 //----------------------------------------------------------------------------//
 //BUILDINGS - RESEARCH - SHIPYARD - DEFENSES
@@ -498,7 +499,7 @@ $LNG['in_needed']      						= 'Necesita';
 $LNG['in_dest_durati'] 						= 'Duración de destrucción';
 $LNG['in_missilestype'] 					= 'Tipo de misil';
 $LNG['in_missilesamount'] 					= 'Cantidad';
-$LNG['in_engine'] 							= 'Conducir';
+$LNG['in_engine'] 							= 'Motor';
 $LNG['in_bonus'] 							= 'Bonos:';
 
 //----------------------------------------------------------------------------//
@@ -508,7 +509,7 @@ $LNG['mg_type'][1]    						= 'Mensajes de jugadores';
 $LNG['mg_type'][2]    						= 'Mensajes de la alianza';
 $LNG['mg_type'][3]    						= 'Informes de batallas';
 $LNG['mg_type'][4]    						= 'Mensajes del Sistema';
-$LNG['mg_type'][5]    						= 'Informes de tranportes';
+$LNG['mg_type'][5]    						= 'Informes de transportes';
 $LNG['mg_type'][15]   						= 'Informes de expediciones';
 $LNG['mg_type'][50]						    = 'Noticias del Juego';
 $LNG['mg_type'][99]   						= 'Informes de construcciones';
@@ -549,7 +550,7 @@ $LNG['mg_answer_to']						= 'Responder a:';
 $LNG['mg_write_mail_to_ops']				= 'Escribe un E-mail a';
 $LNG['mg_page']								= 'Página';
 $LNG['mg_receiver_block_pm']				= 'El destinatario ha bloqueado los Mensajes Privados.';
-$LNG['mg_deleted']					= 'The message has been deleted.';
+$LNG['mg_deleted']					= 'El mensaje ha sido eliminado.';
 
 //----------------------------------------------------------------------------//
 //ALLIANCE
@@ -592,10 +593,10 @@ $LNG['al_new_member_rank_text']				= 'Nuevo miembro';
 $LNG['al_acept_request']					= 'Aceptar';
 $LNG['al_you_was_acceted']					= 'Fuiste aceptado en ';
 $LNG['al_hi_the_alliance']					= '&#161;Saludos!<br>La alianza <b>';
-$LNG['al_has_accepted']						= '</b> a aceptado tu solicitud.<br>Mensaje del fundador: <br>';
+$LNG['al_has_accepted']						= '</b> ha aceptado tu solicitud.<br>Mensaje del fundador: <br>';
 $LNG['al_decline_request']					= 'Rechazar';
 $LNG['al_you_was_declined']					= 'Fuiste rechazado en ';
-$LNG['al_has_declined']						= '</b> a rechazado tu solicitud.<br>Mensaje del fundador: <br>';
+$LNG['al_has_declined']						= '</b> ha rechazado tu solicitud.<br>Mensaje del fundador: <br>';
 $LNG['al_no_requests']						= 'No hay solicitudes';
 $LNG['al_request_from']						= 'Solicitud de "%s"';
 $LNG['al_no_request_pending']				= 'Hay %d solicitud(es) pendiente(s)';
@@ -761,7 +762,7 @@ $LNG['al_rank_desc']['DIPLOMATIC']			= 'Puede gestionar la Diplomacia';
 $LNG['al_rank_desc']['RANKS']				= 'Puede administrar los Rangos';
 $LNG['al_rank_desc']['MANAGEUSERS']			= 'Puede gestionar a los miembros';
 $LNG['al_rank_desc']['EVENTS']				= 'Puede ver los eventos';
-$LNG['al_new_apply']                      	= 'Your alliance has received a new application from - <a href="#" onclick="return Dialog.Playercard(%s, \'%s\');">%s</a>';
+$LNG['al_new_apply']                      	= 'Tu alianza ha recibido una nueva solicitud de - <a href="#" onclick="return Dialog.Playercard(%s, \'%s\');">%s</a>';
 
 //----------------------------------------------------------------------------//
 //BUDDY
