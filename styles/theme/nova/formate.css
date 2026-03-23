@@ -7,6 +7,7 @@ $ui-background: #1b4c6e;
 :root {
     --color-accent:          #ffd600;
     --color-accent-hover:    #2cbbf7;
+    --color-bg-page:         #040E1E;
     --color-bg-surface:      rgba(13, 16, 20, 0.95);
     --color-bg-surface-dark: #212428;
     --color-text:            #FFF;
@@ -28,6 +29,8 @@ $ui-background: #1b4c6e;
 }
 
 html {
+  background: url("img/bkd_page.jpg") no-repeat fixed center center var(--color-bg-page);
+  background-size: cover;
 }
 
 body {

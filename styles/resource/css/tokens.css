@@ -18,6 +18,7 @@
  *
  * --color-accent          Primary interactive color: links, borders, active buttons
  * --color-accent-hover    Lighter/alt accent for hover states
+ * --color-bg-page         Full-page background fallback color (behind background image)
  * --color-bg-surface      Table cells, inputs, card body backgrounds
  * --color-bg-surface-dark Slightly darker variant for headers/sub-areas
  * --color-text            Default body text color
@@ -46,6 +47,7 @@
     --color-accent-hover:    #E31337;
 
     /* Backgrounds */
+    --color-bg-page:         #0d0d0d;
     --color-bg-surface:      rgba(33, 37, 41, 0.95);
     --color-bg-surface-dark: #212428;
 
