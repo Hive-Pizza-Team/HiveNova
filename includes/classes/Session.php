@@ -318,7 +318,7 @@ class Session
 		$this->data['lastActivity']=time(); } else { if(!isset($_SESSION["obj"])) { return false; } }
 
 		
-		if($this->data['lastActivity'] < TIMESTAMP - SESSION_LIFETIME)
+		if(is_null($this->data) || $this->data['lastActivity'] < TIMESTAMP - SESSION_LIFETIME)
 		{
 			return false;
 		}
