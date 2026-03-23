@@ -340,6 +340,70 @@ foreach ($adminPages as $page) {
     }
 }
 
+// --- Standalone entry points ---
+// These are non-game.php entry points that can silently break after refactors
+// (e.g. missing `use` statements after a namespace migration).
+echo "\n--- Standalone Entry Points ---\n";
+
+// userpic.php: must return an image/gif response, not a PHP crash page.
+// Any valid (or invalid) user id exercises HTTP::_GP() at the top of the file.
+$ch = curl_init("$baseUrl/userpic.php?id=1");
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => false,
+    CURLOPT_COOKIEFILE     => $cookieFile,
+    CURLOPT_COOKIEJAR      => $cookieFile,
+    CURLOPT_TIMEOUT        => 10,
+]);
+$body   = curl_exec($ch);
+$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$ctype  = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?? '';
+curl_close($ch);
+
+$label = str_pad('userpic.php', 20);
+if ($status >= 400) {
+    echo "[ FAIL ] $label HTTP $status\n";
+    $fail++;
+} elseif (strpos($ctype, 'image/') === false) {
+    echo "[ FAIL ] $label Content-Type not image/* (got: $ctype) — likely a crash\n";
+    $fail++;
+} else {
+    echo "[ OK   ] $label HTTP $status (Content-Type: $ctype)\n";
+    $pass++;
+}
+
+// CombatReport.php: must issue a redirect (not crash with class-not-found).
+// When not logged in, common.php redirects to login; when logged in, it redirects
+// to game.php?page=raport. Either way we expect a 3xx with no error body.
+$ch = curl_init("$baseUrl/CombatReport.php?raport=");
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => false,
+    CURLOPT_COOKIEFILE     => $cookieFile,
+    CURLOPT_COOKIEJAR      => $cookieFile,
+    CURLOPT_TIMEOUT        => 10,
+]);
+$body     = curl_exec($ch);
+$status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$redirect = curl_getinfo($ch, CURLINFO_REDIRECT_URL) ?? '';
+curl_close($ch);
+
+$label  = str_pad('CombatReport.php', 20);
+$issues = detectErrors($body);
+if (!empty($issues)) {
+    echo "[ FAIL ] $label " . implode(', ', $issues) . "\n";
+    $fail++;
+} elseif ($status >= 400) {
+    echo "[ FAIL ] $label HTTP $status\n";
+    $fail++;
+} elseif ($status >= 300) {
+    echo "[ OK   ] $label HTTP $status → $redirect\n";
+    $pass++;
+} else {
+    echo "[ WARN ] $label unexpected HTTP $status (expected a redirect)\n";
+    $warn++;
+}
+
 echo "\n=== Results: $pass passed, $warn warnings, $fail failed ===\n";
 
 @unlink($cookieFile);

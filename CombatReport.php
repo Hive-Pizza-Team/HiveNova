@@ -21,4 +21,6 @@ set_include_path(ROOT_PATH);
 
 require 'includes/common.php';
 
+use HiveNova\Core\HTTP;
+
 HTTP::redirectTo('game.php?page=raport&raport='.HTTP::_GP('raport', ''));
