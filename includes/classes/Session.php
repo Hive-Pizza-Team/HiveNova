@@ -143,8 +143,13 @@ class Session
 			session_start();
 			if(isset($_SESSION['obj']))
 			{
-				self::$obj	= safe_unserialize($_SESSION['obj']);
-				register_shutdown_function(array(self::$obj, 'save'));
+				$obj = safe_unserialize($_SESSION['obj']);
+				if ($obj instanceof self) {
+					self::$obj = $obj;
+					register_shutdown_function(array(self::$obj, 'save'));
+				} else {
+					self::create();
+				}
 			}
 			else
 			{
