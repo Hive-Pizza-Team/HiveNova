@@ -15,6 +15,11 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\HTTP;
+use HiveNova\Core\SQLDumper;
+use HiveNova\Core\Template;
+
+
 if ($USER['authlevel'] == AUTH_USR)
 {
 	throw new PagePermissionException("Permission error!");
@@ -29,7 +34,7 @@ function ShowDumpPage()
 		case 'dump':
 			$dbTables	= HTTP::_GP('dbtables', array());
 			if(empty($dbTables)) {
-				$template	= new template();
+				$template	= new Template();
 				$template->message($LNG['du_not_tables_selected']);
 				exit;
 			}
@@ -37,12 +42,11 @@ function ShowDumpPage()
 			$fileName	= '2MoonsBackup_'.date('d_m_Y_H_i_s', TIMESTAMP).'.sql';
 			$filePath	= 'includes/backups/'.$fileName;
 		
-			require 'includes/classes/SQLDumper.class.php';
 		
 			$dump	= new SQLDumper;
 			$dump->dumpTablesToFile($dbTables, $filePath);
 			
-			$template	= new template();
+			$template	= new Template();
 			$template->message(sprintf($LNG['du_success'], 'includes/backups/'.$fileName));
 		break;
 		default:
@@ -63,7 +67,7 @@ function ShowDumpPage()
 				}
 			}
 
-			$template	= new template();
+			$template	= new Template();
 
 			$template->assign_vars(array(	
 				'dumpData'	=> $dumpData,

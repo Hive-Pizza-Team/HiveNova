@@ -61,6 +61,14 @@ jobs:
       - run: mkdir -p cache/sessions cache/templates
       - run: php -S localhost:8000 &> /tmp/php-server.log & sleep 2
       - run: php tests/smoke.php
+      - name: Check error log is empty
+        run: |
+          errors=$(grep -v '/vendor/' includes/error.log 2>/dev/null || true)
+          if [ -n "$errors" ]; then
+            echo "=== includes/error.log has non-vendor errors ==="
+            echo "$errors"
+            exit 1
+          fi
       - name: Dump PHP server log on failure
         if: failure()
         run: cat /tmp/php-server.log
@@ -98,3 +106,11 @@ jobs:
         env:
           XDEBUG_MODE: coverage
         run: php vendor/bin/phpunit --configuration phpunit-integration.xml --coverage-clover coverage/integration-clover.xml --coverage-text
+      - name: Check error log is empty
+        run: |
+          errors=$(grep -v '/vendor/' includes/error.log 2>/dev/null || true)
+          if [ -n "$errors" ]; then
+            echo "=== includes/error.log has non-vendor errors ==="
+            echo "$errors"
+            exit 1
+          fi

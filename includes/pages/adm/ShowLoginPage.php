@@ -15,6 +15,11 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Session;
+use HiveNova\Core\Template;
+
+
 if ($USER['authlevel'] == AUTH_USR)
 {
 	throw new PagePermissionException("Permission error!");
@@ -52,7 +57,7 @@ function ShowLoginPage()
 
 	}
 
-	$template	= new template();
+	$template	= new Template();
 
 	require 'includes/libs/steemconnect/steemconnect.php';
 	$steemconnectUrl = Steemconnect::getAdminUrl();

@@ -15,10 +15,15 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Config;
+use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
+
+
 function ShowTopnavPage()
 {
 	global $LNG, $USER;
-	$template	= new template();
+	$template	= new Template();
 
 	$universeSelect	= array();
 	foreach(Universe::availableUniverses() as $uniId)

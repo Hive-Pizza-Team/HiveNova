@@ -15,12 +15,17 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-if ($USER['id'] != ROOT_USER || $_GET['sid'] != session_id()) exit;
+use HiveNova\Core\Config;
+use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
+
+
+if ($USER['id'] != ROOT_USER || ($_GET['sid'] ?? '') != session_id()) exit;
 
 function ShowResetPage()
 {
 	global $LNG, $reslist, $resource;
-	$template	= new template();
+	$template	= new Template();
 	$config	= Config::get(ROOT_UNI);
 	
 	if ($_POST)

@@ -14,15 +14,24 @@
  * @version 1.8.0
  * @link https://github.com/jkroepke/2Moons
  */
+
+use HiveNova\Core\Config;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Language;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Session;
+use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
+
  
-if ($USER['authlevel'] != AUTH_ADM || $_GET['sid'] != session_id())
+if ($USER['authlevel'] != AUTH_ADM || ($_GET['sid'] ?? '') != session_id())
 {
 	throw new Exception("Permission error!");
 }
 
 function ShowUniversePage() {
 	global $LNG, $USER;
-	$template	= new template();
+	$template	= new Template();
 	
 	$action		= HTTP::_GP('action', '');
 	$universe	= HTTP::_GP('uniID', 0);
@@ -115,7 +124,7 @@ function ShowUniversePage() {
 
 				if($httpCode != 302)
 				{
-					$template = new template();
+					$template = new Template();
 					$template->message(str_replace(
 						array(
 							'{NGINX-CODE}'

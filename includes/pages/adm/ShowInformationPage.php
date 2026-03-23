@@ -15,6 +15,11 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Config;
+use HiveNova\Core\Database;
+use HiveNova\Core\Template;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 function ShowInformationPage()
@@ -55,7 +60,7 @@ function ShowInformationPage()
 
     $dbVersion	= Database::get()->selectSingle($sql, array(), 'dbVersion');
 
-	$template	= new template();
+	$template	= new Template();
 	$template->assign_vars(array(
 		'info_information'	=> sprintf($LNG['info_information'], 'https://github.com/Hive-Pizza-Team/HiveNova/issues'),
 		'info'				=> $_SERVER['SERVER_SOFTWARE'],
@@ -69,7 +74,7 @@ function ShowInformationPage()
 		'json'				=> function_exists('json_encode') ? 'Ja' : 'Nein',
 		'bcmath'			=> extension_loaded('bcmath') ? 'Ja' : 'Nein',
 		'curl'				=> extension_loaded('curl') ? 'Ja' : 'Nein',
-		'browser'			=> $_SERVER['HTTP_USER_AGENT'],
+		'browser'			=> $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
 		'safemode'			=> ini_get('safe_mode') ? 'Ja' : 'Nein',
 		'memory'			=> ini_get('memory_limit'),
 		'suhosin'			=> ini_get('suhosin.request.max_value_length') ? 'Ja' : 'Nein',

@@ -15,13 +15,20 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\BBCode;
+use HiveNova\Core\Database;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 function ShowAccountDataPage()
 {
 	global $USER, $reslist, $resource, $LNG;
 
-	$template 	= new template();
+	$template 	= new Template();
 
 	$id_u	= HTTP::_GP('id_u', 0);
 	if (!empty($id_u))

@@ -1,5 +1,8 @@
 <?php
 
+use HiveNova\Core\Config;
+use HiveNova\Core\PlayerUtil;
+
 use PHPUnit\Framework\TestCase;
 
 class PlayerUtilTest extends TestCase

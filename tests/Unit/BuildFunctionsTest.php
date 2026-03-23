@@ -1,5 +1,8 @@
 <?php
 
+use HiveNova\Core\Config;
+use HiveNova\Core\BuildFunctions;
+
 use PHPUnit\Framework\TestCase;
 
 class BuildFunctionsTest extends TestCase

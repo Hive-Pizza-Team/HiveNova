@@ -15,10 +15,14 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
+
+
 function ShowMenuPage()
 {
 	global $USER;
-	$template	= new template();
+	$template	= new Template();
 	
 	$template->assign_vars(array(	
 		'supportticks'	=> $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".TICKETS." WHERE universe = ".Universe::getEmulated()." AND status = 0;"),

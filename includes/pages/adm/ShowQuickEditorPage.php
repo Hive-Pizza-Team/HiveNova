@@ -15,6 +15,13 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Log;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 function ShowQuickEditorPage()
@@ -113,7 +120,7 @@ function ShowQuickEditorPage()
 				);
 			}
 
-			$template	= new template();
+			$template	= new Template();
 			$template->assign_vars(array(	
 				'build'			=> $build,
 				'fleet'			=> $fleet,
@@ -225,7 +232,7 @@ function ShowQuickEditorPage()
 				);
 			}
 
-			$template	= new template();
+			$template	= new Template();
 			$template->assign_vars(array(	
 				'tech'			=> $tech,
 				'officier'		=> $officier,

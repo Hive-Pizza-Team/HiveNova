@@ -1,5 +1,7 @@
 <?php
 
+
+use HiveNova\Core\Language;
 class LangImplementation implements Lang
 {
     private $lang;

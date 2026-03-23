@@ -15,6 +15,13 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\HTTP;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\SupportTickets;
+use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 		
 class ShowSupportPage
@@ -23,9 +30,8 @@ class ShowSupportPage
 	
 	function __construct() 
 	{
-		require('includes/classes/class.SupportTickets.php');
 		$this->ticketObj	= new SupportTickets;
-		$this->tplObj		= new template();
+		$this->tplObj		= new Template();
 		// 2Moons 1.7TO1.6 PageClass Wrapper
 		$ACTION = HTTP::_GP('mode', 'show');
 		if(is_callable(array($this, $ACTION))) {
@@ -110,7 +116,6 @@ class ShowSupportPage
 
 		$ticket_status		= 0;
 
-		require 'includes/classes/BBCode.class.php';
 
 		while($answerRow = $GLOBALS['DATABASE']->fetch_array($answerResult)) {
 			if (empty($ticket_status))

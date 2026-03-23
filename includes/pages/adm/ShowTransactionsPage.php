@@ -1,5 +1,8 @@
 <?php
 
+
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Template;
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 function ShowTransactionsPage()
@@ -63,7 +66,7 @@ function ShowTransactionsPage()
 		}
 	}
 
-	$template = new template();
+	$template = new Template();
 	$template->assign_vars([
 		'rows'    => $rows,
 		'total'   => $total,

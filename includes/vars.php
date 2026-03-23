@@ -17,8 +17,8 @@
 
 // VARS DB -> SCRIPT WRAPPER
 
-$cache	= Cache::get();
-$cache->add('vars', 'VarsBuildCache');
+$cache	= \HiveNova\Core\Cache::get();
+$cache->add('vars', 'HiveNova\\Core\\Cache\\VarsBuildCache');
 extract($cache->getData('vars'));
 
 $resource[901] = 'metal';

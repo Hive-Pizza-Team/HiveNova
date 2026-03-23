@@ -26,7 +26,9 @@ if (!file_exists('includes/config.php') || filesize('includes/config.php') === 0
 $database = [];
 require 'includes/config.php';
 require 'includes/dbtables.php';
-require 'includes/classes/Migrator.php';
+require 'vendor/autoload.php';
+
+use HiveNova\Core\Migrator;
 
 try {
     $pdo = new PDO(

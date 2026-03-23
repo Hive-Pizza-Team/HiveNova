@@ -1,5 +1,7 @@
 <?php
 
+use HiveNova\Core\Language;
+
 use PHPUnit\Framework\TestCase;
 
 /**

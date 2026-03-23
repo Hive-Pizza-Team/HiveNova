@@ -15,6 +15,14 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Config;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Mail;
+use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Universe;
+use HiveNova\Core\Template;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 
@@ -38,7 +46,6 @@ function ShowSendMessagesPage() {
 
 		if (!empty($Message) && !empty($Subject))
 		{
-			require 'includes/classes/BBCode.class.php';
 			if($Mode == 0 || $Mode == 2) {
 				$From    	= '<span class="'.$class.'">'.$LNG['user_level_'.$USER['authlevel']].' '.$USER['username'].'</span>';
 				$pmSubject 	= '<span class="'.$class.'">'.$Subject.'</span>';
@@ -52,7 +59,6 @@ function ShowSendMessagesPage() {
 			}
 
 			if($Mode == 1 || $Mode == 2) {
-				require 'includes/classes/Mail.class.php';
 				$userList	= array();
 				
 				$USERS		= $GLOBALS['DATABASE']->query("SELECT `email`, `username` FROM ".USERS." WHERE `universe` = '".Universe::getEmulated()."'".(!empty($Lang) ? " AND `lang` = '".$GLOBALS['DATABASE']->sql_escape($Lang)."'": "").";");
@@ -80,7 +86,7 @@ function ShowSendMessagesPage() {
 		unset($sendModes[2]);
 	}
 	
-	$template	= new template();
+	$template	= new Template();
 	$template->assign_vars(array(
 		'langSelector' => array_merge(array('' => $LNG['ma_all']), $LNG->getAllowedLangs(false)),
 		'modes' => $sendModes,

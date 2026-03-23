@@ -1,5 +1,8 @@
 <?php
 
+use HiveNova\Core\Config;
+use HiveNova\Core\ResourceUpdate;
+
 use PHPUnit\Framework\TestCase;
 
 class ResourceUpdateTest extends TestCase

@@ -1,5 +1,8 @@
 <?php
 
+use HiveNova\Core\Database;
+use HiveNova\Core\DatabaseInterface;
+
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -15,6 +15,11 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Database;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\Template;
+
+
 if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
 
 function ShowNewsPage(){
@@ -56,7 +61,7 @@ function ShowNewsPage(){
 		);
 	}
 
-	$template	= new template();
+	$template	= new Template();
 
 
 	if(($_GET['action'] ?? '') == 'edit' && isset($_GET['id'])) {
