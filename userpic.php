@@ -24,6 +24,9 @@ if(!extension_loaded('gd')) {
 }
 
 require 'includes/common.php';
+
+use HiveNova\Core\HTTP;
+
 $id = HTTP::_GP('id', 0);
 
 if(!isModuleAvailable(MODULE_BANNER) || $id == 0) {
