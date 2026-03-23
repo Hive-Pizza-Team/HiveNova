@@ -165,7 +165,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 			':targetSystem' => $targetSystem,
 			':targetPlanet' => $targetPlanet,
 			':targetType'   => ($targetType == 2 ? 1 : $targetType),
-		));
+		)) ?: null;
 
 		// Determine target player data
 		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16) {
