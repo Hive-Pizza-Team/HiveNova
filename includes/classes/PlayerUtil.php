@@ -8,6 +8,7 @@ use HiveNova\Core\Cache;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
 use Exception;
+use Hive\Hive;
 
 /**
  *  2Moons 
@@ -92,7 +93,7 @@ class PlayerUtil
 			return false;
 		}
 
-		$hive = new Hive\Hive();
+		$hive = new Hive();
 
 		// verify signature using hive-php
 		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
@@ -109,7 +110,11 @@ class PlayerUtil
 		}
 
 		$message = hash('sha256', $hiveaccount.' is my account.');
-		$verified = $publicKey->verify($message, $signedblob);
+		try {
+			$verified = $publicKey->verify($message, $signedblob);
+		} catch (\Throwable $e) {
+			return false;
+		}
 		if ($verified) {
 			return true;
 		}
@@ -125,7 +130,7 @@ class PlayerUtil
 			return false;
 		}
 
-		$hive = new Hive\Hive();
+		$hive = new Hive();
 
 		// check existence using hive-php
 		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');

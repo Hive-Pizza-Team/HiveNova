@@ -169,6 +169,29 @@ if (stripos($body, 'logout') !== false || stripos($body, 'page=logout') !== fals
     echo "WARNING (could not confirm login from response body)\n\n";
 }
 
+// --- Hive signature login path ---
+// The dev user has a hive_account set. Sending a 64-char hex password bypasses the
+// strlen < 32 early-return in isHiveSignValid, exercising new Hive() instantiation.
+// A class-not-found error here would return HTTP 503 or an application error page.
+echo "[ HIVE  ] POST $baseUrl/index.php?page=login (Hive signature path) ... ";
+$fakeSignature = str_repeat('a', 64);
+[$status, $body,] = curl_post("$baseUrl/index.php?page=login", [
+    'username' => $username,
+    'password' => $fakeSignature,
+], tempnam(sys_get_temp_dir(), 'smoke_hive_'));  // throwaway cookie — don't overwrite real session
+$hiveIssues = detectErrors($body);
+if ($status >= 400) {
+    echo "FAIL (HTTP $status — likely class-not-found in Hive integration)\n";
+    $fail++;
+} elseif (!empty($hiveIssues)) {
+    echo "FAIL (" . implode(', ', $hiveIssues) . ")\n";
+    $fail++;
+} else {
+    echo "OK\n";
+    $pass++;
+}
+echo "\n";
+
 // --- Hit each page ---
 $colW = max(array_map('strlen', $pages)) + 2;
 foreach ($pages as $page) {
