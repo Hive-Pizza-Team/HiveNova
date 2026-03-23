@@ -196,6 +196,20 @@ HTML;
 		
 		$combatResult 		= calculateAttack($fleetAttack, $fleetDefend, $fleetIntoDebris, $defIntoDebris);
 
+		$fuelConsumption = 0;
+		$gameSpeed = Config::get($this->_fleet['fleet_universe'])->speed;
+		foreach ($incomingFleets as $fleetID => $fleetDetail) {
+			$distance = FleetFunctions::GetTargetDistance(
+				[$fleetDetail['fleet_start_galaxy'], $fleetDetail['fleet_start_system'], $fleetDetail['fleet_start_planet']],
+				[$fleetDetail['fleet_end_galaxy'], $fleetDetail['fleet_end_system'], $fleetDetail['fleet_end_planet']]
+			);
+			$duration = $fleetDetail['fleet_end_time'] - $fleetDetail['fleet_start_time'];
+			$fleetArray = FleetFunctions::unserialize($fleetDetail['fleet_array']);
+			$fuelConsumption += FleetFunctions::GetFleetConsumption(
+				$fleetArray, $duration, $distance, $fleetAttack[$fleetID]['player'], $gameSpeed
+			);
+		}
+
 		foreach ($fleetAttack as $fleetID => $fleetDetail)
 		{
 			$fleetArray = '';
@@ -379,6 +393,7 @@ HTML;
 			'moonDestroySuccess'	=> NULL,
 			'fleetDestroyChance'	=> NULL,
 			'fleetDestroySuccess'	=> NULL,
+			'fuelConsumption'		=> $fuelConsumption,
 		);
 		
 		$randChance	= mt_rand(1, 100);
