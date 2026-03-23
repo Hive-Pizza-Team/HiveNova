@@ -28,7 +28,7 @@ $LNG->includeData(array('L18N', 'INGAME', 'INSTALL', 'CUSTOM'));
 
 $mode = \HiveNova\Core\HTTP::_GP('mode', '');
 
-$template = new template();
+$template = new \HiveNova\Core\Template();
 $template->setCaching(false);
 $template->assign(array(
 	'lang'       => $LNG->getLanguage(),

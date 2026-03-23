@@ -192,6 +192,98 @@ foreach ($pages as $page) {
     }
 }
 
+// --- Admin panel ---
+$adminPages = [
+    '',             // default → ShowIndexPage
+    'infos',
+    'rights',
+    'config',
+    'configuni',
+    'chat',
+    'teamspeak',
+    'facebook',
+    'module',
+    'statsconf',
+    'disclamer',
+    'create',
+    'accounteditor',
+    'active',
+    'bans',
+    'messagelist',
+    'globalmessage',
+    'fleets',
+    'accountdata',
+    'support',
+    'password',
+    'search',
+    'qeditor',
+    'statsupdate',
+    'reset',
+    'news',
+    'topnav',
+    'overview',
+    'menu',
+    'clearcache',
+    'universe',
+    'multiips',
+    'botdetect',
+    'log',
+    'vertify',
+    'cronjob',
+    'giveaway',
+    'autocomplete',
+    'dump',
+    'transactions',
+    'buildlog',
+    // skipping: logout (ends session)
+];
+
+echo "\n--- Admin Panel ---\n";
+echo "[ ADMIN LOGIN ] POST $baseUrl/admin.php ... ";
+[$status, $body,] = curl_post("$baseUrl/admin.php", ['admin_pw' => $password], $cookieFile);
+
+// Logged in = no admin password form present in the response
+$adminLoggedIn = $status === 200 && stripos($body, 'name="admin_pw"') === false;
+
+if ($adminLoggedIn) {
+    echo "OK\n\n";
+} else {
+    echo "FAILED (could not confirm admin login — skipping admin pages)\n";
+    $fail++;
+    $adminPages = [];
+}
+
+$adminColW = max(array_map('strlen', array_map(fn($p) => $p ?: '(index)', $adminPages)) ?: [7]) + 2;
+foreach ($adminPages as $page) {
+    $url   = "$baseUrl/admin.php" . ($page !== '' ? "?page=$page" : '');
+    $label = str_pad($page ?: '(index)', $adminColW);
+    [$status, $body, $curlErr] = curl_get($url, $cookieFile);
+
+    $issues = detectErrors($body);
+
+    $redirectedToAdminLogin = stripos($body, 'admin_pw') !== false
+        && stripos($body, '<input') !== false;
+
+    if ($curlErr) {
+        echo "[ FAIL ] $label curl error: $curlErr\n";
+        $fail++;
+    } elseif ($redirectedToAdminLogin) {
+        echo "[ FAIL ] $label redirected to admin login (session lost)\n";
+        $fail++;
+    } elseif ($status >= 400) {
+        echo "[ FAIL ] $label HTTP $status\n";
+        $fail++;
+    } elseif (!empty($issues)) {
+        foreach ($issues as $issue) {
+            echo "[ WARN ] $label $issue\n";
+        }
+        $warn++;
+    } else {
+        echo "[ OK   ] $label HTTP $status\n";
+        $pass++;
+    }
+}
+
 echo "\n=== Results: $pass passed, $warn warnings, $fail failed ===\n";
 
 @unlink($cookieFile);
