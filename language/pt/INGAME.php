@@ -113,14 +113,9 @@ $LNG['ov_principal_planet_cant_abanone']	= 'Não pode apagar o planeta principal
 $LNG['ov_abandon_planet_not_possible']		= 'O planeta não pode ser apagado, por ter atividades existentes!';
 $LNG['ov_wrong_pass']						= 'Senha incorreta!';
 $LNG['ov_wrong_name']						= 'Nome incorreta!';
-<<<<<<< HEAD
 $LNG['ov_have_new_message']					= 'Possui uma nova mensagem';
 $LNG['ov_have_new_messages']				= 'Possui %d novas mensagens';
-=======
-$LNG['ov_have_new_message']					= 'Possuis uma nova mensagem';
-$LNG['ov_have_new_messages']				= 'Possuis %d novas mensagens';
 $LNG['ov_under_attack']					= 'Você está sendo atacado!';
->>>>>>> 82199d8 (feat: show attack notification popup on all game pages (issue #99))
 $LNG['ov_planetmenu']						= 'Alterar nome ou excluir';
 $LNG['ov_free']								= 'Livre';
 $LNG['ov_news']								= 'Noticias';
