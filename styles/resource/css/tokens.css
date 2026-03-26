@@ -66,6 +66,7 @@
     /* Semantic status */
     --color-success:         #00FF00;
     --color-danger:          #E31337;
+    --color-notification-message-bg: #208c81c4;
     --color-warning:         #FF8040;
     --color-notice:          #FFFF00;
     --color-res-name:        #E31337;

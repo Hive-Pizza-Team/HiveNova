@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
+use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
@@ -172,9 +173,15 @@ abstract class AbstractGamePage
 			array(':userId' => $USER['id'])
 		)['cnt'];
 
+		$messageCount = (int) $USER['messages'];
+		$messageNotice = $messageCount > 0
+			? ($messageCount === 1 ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $messageCount))
+			: false;
+
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
-			'new_message' 		=> $USER['messages'],
+			'new_message' 		=> $messageCount,
+			'messages'			=> $messageNotice,
 			'incoming_attack'	=> $incomingAttacks > 0 ? $LNG['ov_under_attack'] : false,
 			'commit'			=> $commit,
 			'commitShort'		=> $commitShort,

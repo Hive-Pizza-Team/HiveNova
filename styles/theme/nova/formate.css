@@ -538,7 +538,7 @@ th a,.res_current{
 .attack-notification {
     margin: 0 0 0 744px;
     position: fixed;
-    background-color: #c0392bc4;
+    background-color: color-mix(in srgb, var(--color-danger) 77%, transparent);
     padding: 8px;
     text-align: center;
     top: 155px;
