@@ -106,6 +106,7 @@ $LNG['ov_wrong_pass']                     = 'Неправильный парол
 $LNG['ov_wrong_name']                     = 'Неправильный название, попробуйте ввести заново!';
 $LNG['ov_have_new_message']               = 'Новых сообщений: 1';
 $LNG['ov_have_new_messages']              = 'Новых сообщений: %d';
+$LNG['ov_under_attack']					= 'Вас атакуют!';
 $LNG['ov_planetmenu']                     = 'Переименовать/удалить планету';
 $LNG['ov_free']                           = '';
 $LNG['ov_news']                           = 'Новости';

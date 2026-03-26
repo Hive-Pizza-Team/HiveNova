@@ -186,8 +186,6 @@ class ShowOverviewPage extends AbstractGamePage
 			$chatOnline[]	= $chatRow['userName'];
 		}
 
-		$Messages		= $USER['messages'];
-		
 		// Fehler: Wenn Spieler gelöscht werden, werden sie nicht mehr in der Tabelle angezeigt.
 		$sql = "SELECT u.id, u.username, s.total_points FROM %%USERS%% as u
 		LEFT JOIN %%STATPOINTS%% as s ON s.id_owner = u.id AND s.stat_type = '1' WHERE ref_id = :userID;";
@@ -253,7 +251,6 @@ class ShowOverviewPage extends AbstractGamePage
 			'AllPlanets'				=> $AllPlanets,
 			'AdminsOnline'				=> $AdminsOnline,
 			'teamspeakData'				=> $this->GetTeamspeakData(),
-			'messages'					=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)): false,
 			'planet_diameter'			=> pretty_number($PLANET['diameter']),
 			'planet_field_current' 		=> $PLANET['field_current'],
 			'planet_field_max' 			=> CalculateMaxPlanetFields($PLANET),

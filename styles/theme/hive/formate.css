@@ -87,7 +87,6 @@ input[type="radio"] {
 a:hover {
   color: #E31337;
   text-decoration: none;
-  font-weight: bold;
 }
 
 table,
@@ -403,7 +402,6 @@ menu a {
 
 menu a:hover {
   color: var(--color-bg-surface);
-  font-weight: bold;
 }
 
 div#disclamer a {
@@ -590,32 +588,44 @@ th a,
   border-top: 0 none;
 }
 
-.message {
-  margin: 0 0 0 744px;
-  position: fixed;
-  background-color: #208c81c4;
-  padding: 8px;
-  text-align: center;
-  top: 100px;
-  border-radius: 15px 0px 15px 15px;
-  height: fit-content;
-  max-width: 175px;
+content {
+  padding-top: 0;
+  display: flow-root;
 }
 
-@media screen and (min-width: 700px) and (max-width: 1600px) {
-  .message {
-    right: 10.5%;
-    margin: 0;
-  }
+content > .globalWarning {
+  margin-top: 0;
+}
+
+
+.message,
+.attack-notification {
+  display: inline-block;
+  padding: 8px;
+  margin: 0 0 8px;
+  text-align: center;
+  border-radius: 15px 0px 15px 15px;
+}
+
+.message {
+  background-color: var(--color-notification-message-bg);
+}
+
+.attack-notification {
+  background-color: color-mix(in srgb, var(--color-danger) 77%, transparent);
+}
+
+.message a:hover,
+.attack-notification a:hover {
+  color: var(--color-text-bright);
 }
 
 @media screen and (max-width: 699px) {
-  .message {
-    bottom: 0;
+  .message,
+  .attack-notification {
+    display: block;
     width: 100%;
-    max-width: unset;
     border-radius: 15px 15px 0 0;
-    top: unset;
     margin: 0;
   }
 
