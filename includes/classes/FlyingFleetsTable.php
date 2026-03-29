@@ -195,9 +195,10 @@ class FlyingFleetsTable
 	    $GoodMissions	= array(3, 5);
 		$MissionType    = $fleetRow['fleet_mission'];
 
-		$FleetPrefix    = ($Owner == true) ? 'own' : '';
+		$isACSAllyFleet = !$Owner && ($MissionType == 1 || $MissionType == 2) && $Status == FLEET_OUTWARD && $fleetRow['fleet_target_owner'] != $this->userId;
+		$FleetPrefix    = ($Owner || $isACSAllyFleet) ? 'own' : '';
 		$FleetType		= $FleetPrefix.$FleetStyle[$MissionType];
-		$FleetName		= (!$Owner && ($MissionType == 1 || $MissionType == 2) && $Status == FLEET_OUTWARD && $fleetRow['fleet_target_owner'] != $this->userId) ? $LNG['cff_acs_fleet'] : $LNG['ov_fleet'];
+		$FleetName		= $isACSAllyFleet ? $LNG['cff_acs_fleet'] : $LNG['ov_fleet'];
 		$FleetContent   = $this->CreateFleetPopupedFleetLink($fleetRow, $FleetName, $FleetPrefix.$FleetStyle[$MissionType]);
 		$FleetCapacity  = $this->CreateFleetPopupedMissionLink($fleetRow, $LNG['type_mission_'.$MissionType], $FleetPrefix.$FleetStyle[$MissionType]);
 		$FleetStatus    = array(0 => 'flight', 1 => 'return' , 2 => 'holding');
