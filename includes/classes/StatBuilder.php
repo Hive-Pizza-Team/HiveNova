@@ -420,6 +420,7 @@ class StatBuilder
                 $FinalSQL = substr($FinalSQL, 0, -2).';';
                 $this->SaveDataIntoDB($FinalSQL);
                 $FinalSQL = $tableHeader;
+                $i = 0;
 			}
 		}
 
