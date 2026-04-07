@@ -135,7 +135,7 @@
 <br><br>
 {if $Raport.result == "a"}
 {$LNG.sys_attacker_won}<br>
-{$LNG.sys_stealed_ressources} {foreach $Raport.steal as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.steal|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach}
+{if $Raport.stealUnprofitable}<span style="color:var(--color-notice)" title="{$LNG.sys_steal_unprofitable_tooltip}">{/if}{$LNG.sys_stealed_ressources} {foreach $Raport.steal as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.steal|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach}{if $Raport.stealUnprofitable}</span>{/if}
 {elseif $Raport.result == "r"}
 {$LNG.sys_defender_won}
 {else}

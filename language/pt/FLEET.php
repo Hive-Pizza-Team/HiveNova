@@ -53,6 +53,7 @@ $LNG['sys_attacker_won'] 				= "O atacante ganhou a batalha!";
 $LNG['sys_defender_won'] 				= "O defensor ganhou a batalha!";
 $LNG['sys_both_won'] 					= "O combate terminou em empate! Os sobreviventes regressam a casa.";
 $LNG['sys_stealed_ressources'] 			= "Ele roubou";
+$LNG['sys_steal_unprofitable_tooltip']	= "Os recursos capturados valem menos do que o combustível gasto neste ataque";
 $LNG['sys_and']						    = "e";
 $LNG['sys_mess_tower'] 					= "Torre de controle";
 $LNG['sys_mess_attack_report'] 			= "Relatório de Combate";
