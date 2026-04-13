@@ -1,5 +1,6 @@
 .phpunit.cache/
 .claude/
+CLAUDE.md
 .phpunit.result.cache
 throwaway
 .DS_Store
