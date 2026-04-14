@@ -70,11 +70,14 @@ Classify every fleet that touches the destroyed zone:
 | Origin | Destination | Outcome |
 |--------|-------------|---------|
 | Anywhere | In zone | **Lost** — cancel fleet, no refund (there was warning). Ships and cargo are gone. |
-| In zone | Safe | **Survives** — let it complete. Update `fleet_start_*` cosmetically to a null/destroyed marker so return-trip routing isn't broken, but do not cancel. |
+| In zone | Safe | **Force-completed** — destruction shockwave "boosts" the fleet instantly to its destination. |
 | In zone | In zone | **Lost** — same as destination-in-zone case above. |
 
 For **lost** fleets: delete the fleet row (do not return resources or ships).
-For **surviving** fleets: update `fleet_start_id` / `fleet_start_galaxy/system/planet/type` to the player's new home planet (assigned in Step 3), so any return leg has a valid landing point.
+For **force-completed** fleets:
+- Set `fleet_start_galaxy/system/planet/type/id` = `fleet_end_galaxy/system/planet/type/id` so the origin is now the destination (any return leg stays at destination).
+- Set the arrival event time in `%%FLEETS_EVENT%%` to `TIMESTAMP` (now) so the next cron run processes it as already arrived.
+- Do not cancel — cron handles mission completion normally.
 
 ### Step 3 — Identify and (optionally) relocate affected players
 
@@ -160,13 +163,13 @@ Message text should be configurable — either a text area in the admin form or 
 
 ## Decisions (resolved)
 
-1. **Relocation** — Optional per destruction event. If disabled, players simply lose their planets (no relocation). If enabled, admin chooses:
-   - **Exact coordinates** — admin specifies a galaxy:system:slot to place displaced players.
-   - **Random in galaxy** — admin specifies a target galaxy; the tool finds an uninhabited slot at random within it.
+1. **Relocation** — Optional per destruction event. If disabled, players simply lose their planets (the "promote next surviving planet" logic from ShowOverviewPage PR #64 is reused — first non-destroyed planet outside the zone becomes the new main). If enabled, admin chooses:
+   - **Exact coordinates** — admin specifies a target galaxy + system. Each displaced player gets the next free slot in that system. Overflow scan order: target → target+1 → ... → max_system → target-1 → target-2 → ... → 1. If the entire galaxy is full, skip relocation for that player and warn admin.
+   - **Random in galaxy** — admin specifies a target galaxy; the tool finds a random uninhabited slot anywhere within it.
 
 2. **Fleet handling** — Destination determines fate:
    - Fleet heading **to** destroyed zone → **lost** (no refund; there was warning).
-   - Fleet heading **from** destroyed zone to a **safe** destination → **survives**; let it complete normally. Update `fleet_start_*` cosmetically to reflect origin is gone, but do not cancel.
+   - Fleet heading **from** destroyed zone to a **safe** destination → **force-completed**: set `fleet_start_*` = `fleet_end_*` and arrival event time to `TIMESTAMP`. Narrative: destruction shockwave boosts the fleet instantly to its destination. Cron handles mission completion normally; no return leg headache.
    - Fleet heading **from** destroyed zone **to** destroyed zone → **lost** (both endpoints gone).
 
 3. **Debris fields** — Optional per event, **default ON**. When enabled, create debris field entries for destroyed inhabited planets (same resource split as combat debris).
@@ -211,13 +214,13 @@ Message text should be configurable — either a text area in the admin form or 
 - URL slug is `destruction` → maps to `ShowDestructionPage.php` by the admin router.
 
 ### Build order
-1. Nav entry — `ShowMenuPage.tpl` + language key `mu_destruction`
-2. Page skeleton — `ShowDestructionPage.php` with permission check + template render (no DB logic)
-3. Template — `DestructionPage.tpl` with full form UI
-4. Language strings — all 8 language files
-5. Preview logic — count affected planets / players / fleets (read-only queries)
-6. Execute: fleets — classify and process in-flight fleets
-7. Execute: relocate players — optional relocation logic
-8. Execute: delete planets + debris — DELETE with optional debris carry-forward
-9. Execute: notifications — individual messages + optional broadcast
-10. Execute: logging — write mode-5 entry to `%%LOG%%`
+1. ✅ Nav entry — `ShowMenuPage.tpl` + language key `mu_destruction`
+2. ✅ Page skeleton — `ShowDestructionPage.php` with permission check + template render (no DB logic)
+3. ✅ Template — `DestructionPage.tpl` with full form UI
+4. ✅ Language strings — all 8 language files (EN real, DE real, FR Canadian, ES real, PT Brazilian, PL/RU/TR real)
+5. ✅ Preview logic — count affected planets / players / fleets (read-only queries)
+6. ✅ Execute: fleets — classify and process in-flight fleets
+7. ✅ Execute: relocate players — optional relocation logic
+8. ✅ Execute: delete planets + debris — DELETE with optional debris carry-forward
+9. ✅ Execute: notifications — individual messages + optional broadcast
+10. ✅ Execute: logging — write mode-5 entry to `%%LOG%%`
