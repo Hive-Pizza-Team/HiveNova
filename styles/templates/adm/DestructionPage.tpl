@@ -1,4 +1,10 @@
 {include file="overall_header.tpl"}
+
+<div class="table569" style="margin-bottom:16px; padding:12px 16px; border:1px solid var(--color-border, #444); background:var(--color-surface-muted, #1a1a1a);">
+    <strong style="display:block; margin-bottom:6px;">{$LNG.dest_story_title}</strong>
+    <span style="line-height:1.45;">{$LNG.dest_story_body}</span>
+</div>
+
 <script type="text/javascript">
 $(function() {
     function updateModeVisibility() {
@@ -45,7 +51,126 @@ $(function() {
 });
 </script>
 
-<form action="admin.php?page=destruction&sid={$SID}" method="post">
+{if $result !== null}
+<br>
+<table class="table569">
+    <tr>
+        <th colspan="2">{$LNG.dest_result_title}</th>
+    </tr>
+    {if $result.backup_path}
+    <tr>
+        <td colspan="2" style="color:#339966;">{$LNG.dest_backup_saved|sprintf:$result.backup_path}</td>
+    </tr>
+    {/if}
+    <tr>
+        <td>{$LNG.dest_preview_planets}</td>
+        <td>{$result.planets}</td>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_preview_fleets_lost}</td>
+        <td>{$result.fleets_lost}</td>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_preview_fleets_survive}</td>
+        <td>{$result.fleets_survived}</td>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_preview_players}</td>
+        <td>{$result.relocated}</td>
+    </tr>
+    {if $result.skipped > 0}
+    <tr>
+        <td colspan="2" style="color:#cc0000;">
+            {$LNG.dest_result_skipped|sprintf:$result.skipped}
+        </td>
+    </tr>
+    {/if}
+    <tr>
+        <td colspan="2" style="color:#00aa00; font-weight:bold;">{$LNG.dest_result_done}</td>
+    </tr>
+</table>
+<p><a href="admin.php?page=destruction&amp;sid={$SID}">{$LNG.dest_review_done_link}</a></p>
+
+{elseif $reviewStage}
+<br>
+<table class="table569">
+    <tr>
+        <th colspan="2">{$LNG.dest_review_title}</th>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_preview_planets}</td>
+        <td>{$preview.planets}</td>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_preview_players}</td>
+        <td>{$preview.players}</td>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_preview_fleets_lost}</td>
+        <td>{$preview.fleets_lost}</td>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_preview_fleets_survive}</td>
+        <td>{$preview.fleets_survive}</td>
+    </tr>
+</table>
+
+<br>
+<table class="table569">
+    <tr>
+        <th colspan="2">{$LNG.dest_review_sql_title}</th>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <pre style="white-space:pre-wrap; font-size:11px; max-height:280px; overflow:auto;">{foreach from=$sqlPreviewLines item=line}{$line|escape}
+{/foreach}</pre>
+        </td>
+    </tr>
+</table>
+
+<br>
+<form action="admin.php?page=destruction&amp;sid={$SID}" method="post">
+    <input type="hidden" name="action" value="destroy">
+    <input type="hidden" name="review_token" value="{$reviewToken|escape}">
+    <input type="hidden" name="universe" value="{$universe}">
+    <input type="hidden" name="mode" value="{$mode}">
+    <input type="hidden" name="galaxy" value="{$galaxy}">
+    <input type="hidden" name="system" value="{$system}">
+    <input type="hidden" name="relocate" value="{$relocate}">
+    <input type="hidden" name="relocMode" value="{$relocMode}">
+    <input type="hidden" name="relocGal" value="{$relocGal}">
+    <input type="hidden" name="relocSys" value="{$relocSys}">
+    <input type="hidden" name="relocSlot" value="{$relocSlot}">
+    <input type="hidden" name="debris" value="{$debris}">
+    <input type="hidden" name="debris_metal" value="{$debris_metal}">
+    <input type="hidden" name="debris_crystal" value="{$debris_crystal}">
+    <input type="hidden" name="broadcast" value="{$broadcast}">
+    <input type="hidden" name="message" value="{$message|escape:'html'}">
+    <input type="hidden" name="spawn_apply" value="{$spawn_apply}">
+    <input type="hidden" name="spawn_galaxy" value="{$spawn_galaxy}">
+    <input type="hidden" name="spawn_system" value="{$spawn_system}">
+    <input type="hidden" name="spawn_planet" value="{$spawn_planet}">
+    <input type="hidden" name="backup_before" value="0">
+    <table class="table569">
+        <tr>
+            <td>{$LNG.dest_backup_before}</td>
+            <td>
+                <label><input type="checkbox" name="backup_before" value="1" checked> {$LNG.dest_backup_before_label}</label>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="{$LNG.dest_review_execute}" style="background-color:#8b0000; color:#fff; font-weight:bold; padding:8px 22px;">
+                &nbsp;&nbsp;
+                <a href="admin.php?page=destruction&amp;action=cancel_review&amp;sid={$SID}" style="padding:8px 16px;">{$LNG.dest_review_cancel}</a>
+            </td>
+        </tr>
+    </table>
+</form>
+
+{else}
+
+<form action="admin.php?page=destruction&amp;sid={$SID}" method="post">
 <input type="hidden" name="action" value="preview">
 <table class="table569">
     <tr>
@@ -70,6 +195,31 @@ $(function() {
     <tr id="row_system">
         <td>{$LNG.dest_system}</td>
         <td><input type="number" name="system" min="1" value="{$system}"></td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>{$LNG.dest_spawn_section}</strong></td>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_spawn_apply}</td>
+        <td>
+            <input type="hidden" name="spawn_apply" value="0">
+            <input type="checkbox" name="spawn_apply" value="1" id="spawn_apply" {if $spawn_apply}checked{/if} title="{$LNG.dest_spawn_apply|escape:'html'}">
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" valign="top" style="font-size:11px; line-height:1.45; opacity:0.95;">{$LNG.dest_spawn_help}</td>
+    </tr>
+    <tr>
+        <td style="padding-top:8px;"><strong>{$LNG.dest_spawn_coords_heading}</strong></td>
+        <td style="padding-top:8px;"></td>
+    </tr>
+    <tr id="row_spawn_coords">
+        <td>{$LNG.dest_spawn_coords}</td>
+        <td>
+            {$LNG.dest_galaxy}: <input type="number" name="spawn_galaxy" min="1" value="{$spawn_galaxy}" style="width:70px">
+            &nbsp; {$LNG.dest_system}: <input type="number" name="spawn_system" min="1" value="{$spawn_system}" style="width:70px">
+            &nbsp; {$LNG.dest_slot}: <input type="number" name="spawn_planet" min="1" value="{$spawn_planet}" style="width:70px">
+        </td>
     </tr>
     <tr>
         <td>{$LNG.dest_relocate}</td>
@@ -155,8 +305,8 @@ $(function() {
     {else}
     <tr>
         <td colspan="2">
-            <form action="admin.php?page=destruction&sid={$SID}" method="post">
-                <input type="hidden" name="action" value="destroy">
+            <form action="admin.php?page=destruction&amp;sid={$SID}" method="post" style="display:inline;">
+                <input type="hidden" name="action" value="accept_review">
                 <input type="hidden" name="universe" value="{$universe}">
                 <input type="hidden" name="mode" value="{$mode}">
                 <input type="hidden" name="galaxy" value="{$galaxy}">
@@ -171,47 +321,20 @@ $(function() {
                 <input type="hidden" name="debris_crystal" value="{$debris_crystal}">
                 <input type="hidden" name="broadcast" value="{$broadcast}">
                 <input type="hidden" name="message" value="{$message|escape:'html'}">
-                <input type="submit" value="{$LNG.dest_confirm_destroy}" style="background-color:#8b0000; color:#fff; font-weight:bold; padding:6px 18px;">
+                <input type="hidden" name="spawn_apply" value="{$spawn_apply}">
+                <input type="hidden" name="spawn_galaxy" value="{$spawn_galaxy}">
+                <input type="hidden" name="spawn_system" value="{$spawn_system}">
+                <input type="hidden" name="spawn_planet" value="{$spawn_planet}">
+                <input type="submit" value="{$LNG.dest_preview_continue}" style="background-color:#336699; color:#fff; font-weight:bold; padding:6px 18px;">
             </form>
+            &nbsp;&nbsp;
+            <a href="admin.php?page=destruction&amp;action=cancel_preview&amp;sid={$SID}" style="padding:6px 14px;">{$LNG.dest_preview_discard}</a>
         </td>
     </tr>
     {/if}
 </table>
 {/if}
 
-{if $result !== null}
-<br>
-<table class="table569">
-    <tr>
-        <th colspan="2">{$LNG.dest_result_title}</th>
-    </tr>
-    <tr>
-        <td>{$LNG.dest_preview_planets}</td>
-        <td>{$result.planets}</td>
-    </tr>
-    <tr>
-        <td>{$LNG.dest_preview_fleets_lost}</td>
-        <td>{$result.fleets_lost}</td>
-    </tr>
-    <tr>
-        <td>{$LNG.dest_preview_fleets_survive}</td>
-        <td>{$result.fleets_survived}</td>
-    </tr>
-    <tr>
-        <td>{$LNG.dest_preview_players}</td>
-        <td>{$result.relocated}</td>
-    </tr>
-    {if $result.skipped > 0}
-    <tr>
-        <td colspan="2" style="color:#cc0000;">
-            {$LNG.dest_result_skipped|sprintf:$result.skipped}
-        </td>
-    </tr>
-    {/if}
-    <tr>
-        <td colspan="2" style="color:#00aa00; font-weight:bold;">{$LNG.dest_result_done}</td>
-    </tr>
-</table>
 {/if}
 
 {include file="overall_footer.tpl"}

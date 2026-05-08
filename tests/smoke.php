@@ -288,6 +288,7 @@ $adminPages = [
     'cronjob',
     'giveaway',
     'autocomplete',
+    'destruction',
     'dump',
     'transactions',
     'buildlog',

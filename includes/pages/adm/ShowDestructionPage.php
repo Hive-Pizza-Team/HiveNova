@@ -5,10 +5,14 @@ use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Log;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\SQLDumper;
 use HiveNova\Core\Template;
 use HiveNova\Core\Universe;
 
-if ($USER['authlevel'] != AUTH_ADM || ($_GET['sid'] ?? '') != session_id()) {
+/** Session payload key for two-step accept → execute destruction flow */
+const DESTRUCTION_SESSION_KEY = 'destruction_review_v1';
+
+if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) {
     throw new Exception("Permission error!");
 }
 
@@ -232,7 +236,7 @@ function executeFleets(int $universe, string $mode, int $galaxy, int $system): a
 function executePlanets(
     int $universe, string $mode, int $galaxy, int $system,
     int $debris, float $debrisMetal, float $debrisCrystal
-): int {
+): array {
     $db = Database::get();
 
     $zoneWhere = 'universe = :uni AND galaxy = :gal';
@@ -347,7 +351,8 @@ function executeLog(
     int $universe, string $mode, int $galaxy, int $system,
     int $adminId, int $planetCount,
     array $fleetResult, array $relocResult,
-    float $debrisMetal, float $debrisCrystal, int $broadcast
+    float $debrisMetal, float $debrisCrystal, int $broadcast,
+    ?string $backupRelPath = null
 ): void {
     $log           = new Log(5);
     $log->target   = 0;
@@ -364,8 +369,188 @@ function executeLog(
         'debris_metal'    => $debrisMetal,
         'debris_crystal'  => $debrisCrystal,
         'broadcast'       => $broadcast,
+        'backup_file'     => $backupRelPath ?? '',
     ];
     $log->saveTr();
+}
+
+/**
+ * Full backup of game tables (same scope as Admin → Database Backup).
+ *
+ * @return string Relative path under ROOT_PATH for display/logging
+ */
+function runDestructionDatabaseBackup(): string
+{
+    $db        = Database::get();
+    $prefixLen = strlen((string) DB_PREFIX);
+    $rows      = $db->nativeQuery('SHOW TABLE STATUS FROM `' . str_replace('`', '``', DB_NAME) . '`');
+    $tables    = [];
+    foreach ($rows as $table) {
+        $name = (string) ($table['Name'] ?? '');
+        if ($name === 'transactions' || ($prefixLen > 0 && strncmp($name, DB_PREFIX, $prefixLen) === 0)) {
+            $tables[] = $name;
+        }
+    }
+    if ($tables === []) {
+        throw new Exception('No tables matched for backup — aborting destruction.');
+    }
+    $fileName = '2MoonsBackup_destruction_' . date('Y_m_d_H_i_s', TIMESTAMP) . '.sql';
+    $relPath  = 'includes/backups/' . $fileName;
+    $filePath = ROOT_PATH . $relPath;
+
+    $dir = dirname($filePath);
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        throw new Exception('Cannot create backup directory: ' . $dir);
+    }
+
+    $dump = new SQLDumper();
+    $dump->dumpTablesToFile($tables, $filePath);
+
+    return $relPath;
+}
+
+/**
+ * Update %%CONFIG%% registration spiral cursor for new accounts (PlayerUtil::createPlayer auto-placement).
+ */
+function applySpawnCursor(int $universe, int $galaxy, int $system, int $planet): void
+{
+    $cfg = Config::get($universe);
+    if ($galaxy < 1 || $galaxy > (int) $cfg->max_galaxy
+        || $system < 1 || $system > (int) $cfg->max_system
+        || $planet < 1 || $planet > (int) $cfg->max_planets
+    ) {
+        throw new Exception('Spawn coordinates are outside universe bounds.');
+    }
+    if (!PlayerUtil::checkPosition($universe, $galaxy, $system, $planet, 1)) {
+        throw new Exception('Invalid spawn coordinates.');
+    }
+    $cfg->LastSettedGalaxyPos  = $galaxy;
+    $cfg->LastSettedSystemPos = $system;
+    $cfg->LastSettedPlanetPos = $planet;
+    $cfg->save();
+}
+
+/**
+ * Human-readable summary of write operations (actual queries use %%TABLE%% placeholders in Database layer).
+ *
+ * @return list<string>
+ */
+function destructionSqlPreviewLines(
+    int $universe, string $mode, int $galaxy, int $system,
+    int $relocate, bool $spawnApply,
+    int $debris, int $broadcast, float $debrisMetal, float $debrisCrystal
+): array {
+    $pfx = DB_PREFIX;
+    $zoneSql = $mode === 'system'
+        ? sprintf('universe = %d AND galaxy = %d AND `system` = %d', $universe, $galaxy, $system)
+        : sprintf('universe = %d AND galaxy = %d', $universe, $galaxy);
+    $fleetEnd = $mode === 'system'
+        ? sprintf('fleet_universe = %d AND fleet_end_galaxy = %d AND fleet_end_system = %d', $universe, $galaxy, $system)
+        : sprintf('fleet_universe = %d AND fleet_end_galaxy = %d', $universe, $galaxy);
+
+    $lines = [
+        '-- HiveNova destruction — Database layer expands %%TABLE%% to prefixed MySQL tables',
+        sprintf('DELETE `%sfleets` / `%sfleets_event` rows WHERE fleet destination matches zone (%s)', $pfx, $pfx, $fleetEnd),
+        sprintf(
+            'UPDATE `%sfleets` SET fleet_start_* = fleet_end_*, time = :now WHERE origin in zone and destination outside zone (%s …)',
+            $pfx,
+            $pfx
+        ),
+        sprintf(
+            'UPDATE `%susers` / `%splanets` — relocate displaced home planets when relocation rules apply',
+            $pfx,
+            $pfx
+        ),
+    ];
+    if ($relocate) {
+        $lines[] = sprintf(
+            'INSERT INTO `%splanets` + UPDATE `%susers` — PlayerUtil::createPlanet() for each displaced account under relocation',
+            $pfx,
+            $pfx
+        );
+    }
+    if ($debris && ($debrisMetal > 0 || $debrisCrystal > 0)) {
+        $lines[] = sprintf(
+            'UPDATE `%splanets` SET der_metal += %.2f, der_crystal += %.2f WHERE id IN (current homes before zone DELETE)',
+            $pfx,
+            $debrisMetal,
+            $debrisCrystal
+        );
+    }
+    $lines[] = sprintf('DELETE FROM `%splanets` WHERE %s', $pfx, $zoneSql);
+
+    if ($broadcast) {
+        $lines[] = sprintf('INSERT INTO `%smessages` — DM/broadcast to affected players (and universe when enabled)', $pfx);
+    }
+    $lines[] = sprintf('INSERT INTO `%slog` — audit trail mode 5', $pfx);
+    if ($spawnApply) {
+        $lines[] = sprintf(
+            'UPDATE `%sconfig` SET LastSettedGalaxyPos, LastSettedSystemPos, LastSettedPlanetPos WHERE `uni` = %d',
+            $pfx,
+            $universe
+        );
+    }
+
+    return $lines;
+}
+
+/**
+ * Pack POST tuning knobs used by preview / destruction into one array for session round-trip.
+ *
+ * @return array<string, mixed>
+ */
+function destructionPackParams(): array
+{
+    return [
+        'universe'       => HTTP::_GP('universe', 0),
+        'mode'           => HTTP::_GP('mode', 'system'),
+        'galaxy'         => HTTP::_GP('galaxy', 0),
+        'system'         => HTTP::_GP('system', 0),
+        'relocate'       => HTTP::_GP('relocate', 0),
+        'relocMode'      => HTTP::_GP('relocMode', 'random'),
+        'relocGal'       => HTTP::_GP('relocGal', 0),
+        'relocSys'       => HTTP::_GP('relocSys', 0),
+        'relocSlot'      => HTTP::_GP('relocSlot', 0),
+        'debris'         => HTTP::_GP('debris', 1),
+        'debris_metal'   => HTTP::_GP('debris_metal', 1000000),
+        'debris_crystal' => HTTP::_GP('debris_crystal', 0),
+        'broadcast'      => HTTP::_GP('broadcast', 1),
+        'message'        => HTTP::_GP('message', ''),
+        'spawn_apply'    => HTTP::_GP('spawn_apply', 0),
+        'spawn_galaxy'   => HTTP::_GP('spawn_galaxy', 0),
+        'spawn_system'   => HTTP::_GP('spawn_system', 0),
+        'spawn_planet'   => HTTP::_GP('spawn_planet', 0),
+    ];
+}
+
+function destructionUnpackParams(array $p): array
+{
+    return [
+        'universe'       => (int) $p['universe'],
+        'mode'           => (string) $p['mode'],
+        'galaxy'         => (int) $p['galaxy'],
+        'system'         => (int) $p['system'],
+        'relocate'       => (int) $p['relocate'],
+        'relocMode'      => (string) $p['relocMode'],
+        'relocGal'       => (int) $p['relocGal'],
+        'relocSys'       => (int) $p['relocSys'],
+        'relocSlot'      => (int) $p['relocSlot'],
+        'debris'         => (int) $p['debris'],
+        'debris_metal'   => (float) $p['debris_metal'],
+        'debris_crystal' => (float) $p['debris_crystal'],
+        'broadcast'      => (int) $p['broadcast'],
+        'message'        => (string) $p['message'],
+        'spawn_apply'    => (int) $p['spawn_apply'],
+        'spawn_galaxy'   => (int) $p['spawn_galaxy'],
+        'spawn_system'   => (int) $p['spawn_system'],
+        'spawn_planet'   => (int) $p['spawn_planet'],
+    ];
+}
+
+function destructionValidateInputs(array $p): bool
+{
+    return $p['universe'] > 0 && $p['galaxy'] > 0 && ($p['mode'] === 'galaxy' || $p['system'] > 0)
+        && in_array($p['mode'], ['galaxy', 'system'], true);
 }
 
 function destructionPreview(int $universe, string $mode, int $galaxy, int $system): array
@@ -457,89 +642,174 @@ function ShowDestructionPage()
 
     $template = new Template();
 
-    $action    = HTTP::_GP('action', '');
-    $universe  = HTTP::_GP('universe', 0);
-    $mode      = HTTP::_GP('mode', 'system');
-    $galaxy    = HTTP::_GP('galaxy', 0);
-    $system    = HTTP::_GP('system', 0);
-    $relocate  = HTTP::_GP('relocate', 0);
-    $relocMode = HTTP::_GP('relocMode', 'random');
-    $relocGal  = HTTP::_GP('relocGal', 0);
-    $relocSys  = HTTP::_GP('relocSys', 0);
-    $relocSlot = HTTP::_GP('relocSlot', 0);
-    $debris        = HTTP::_GP('debris', 1);
-    $debrisMetal   = HTTP::_GP('debris_metal', 1000000);
-    $debrisCrystal = HTTP::_GP('debris_crystal', 0);
-    $broadcast     = HTTP::_GP('broadcast', 1);
-    $message   = HTTP::_GP('message', '');
+    $action = HTTP::_GP('action', '');
 
-    $preview = null;
-    $result  = null;
-
-    if ($action === 'preview' && $universe > 0 && $galaxy > 0 && ($mode === 'galaxy' || $system > 0)) {
-        $preview = destructionPreview($universe, $mode, $galaxy, $system);
+    if ($action === 'cancel_preview' || $action === 'cancel_review') {
+        unset($_SESSION[DESTRUCTION_SESSION_KEY]);
+        HTTP::redirectTo('admin.php?page=destruction&sid=' . session_id());
     }
 
-    if ($action === 'destroy' && $universe > 0 && $galaxy > 0 && ($mode === 'galaxy' || $system > 0)) {
-        // Step 6 — resolve in-flight fleets
-        $fleetResult = executeFleets($universe, $mode, $galaxy, $system);
+    $packed = destructionPackParams();
+    $p      = destructionUnpackParams($packed);
 
-        // Step 7 — relocate displaced players
-        $relocResult = executeRelocation(
-            $universe, $mode, $galaxy, $system,
-            $relocate, $relocMode, $relocGal, $relocSys
-        );
+    $preview       = null;
+    $result        = null;
+    $reviewStage   = false;
+    $sqlPreviewLines = [];
+    $reviewToken   = '';
+    $backupPath    = null;
 
-        // Step 8 — delete planets and add debris (also collects affected user IDs)
-        $planetResult = executePlanets(
-            $universe, $mode, $galaxy, $system,
-            $debris, (float) $debrisMetal, (float) $debrisCrystal
-        );
-
-        // Step 9 — notify affected players and optionally broadcast
-        executeNotifications(
-            $universe, $mode, $galaxy, $system,
-            $planetResult['affectedUserIds'], $message, $broadcast,
-            $USER['username']
-        );
-
-        // Step 10 — write mode-5 log entry
-        executeLog(
-            $universe, $mode, $galaxy, $system,
-            (int) $USER['id'], $planetResult['count'],
-            $fleetResult, $relocResult,
-            (float) $debrisMetal, (float) $debrisCrystal, $broadcast
-        );
-
-        $result = [
-            'planets'        => $planetResult['count'],
-            'fleets_lost'    => $fleetResult['lost'],
-            'fleets_survived'=> $fleetResult['survived'],
-            'relocated'      => $relocResult['relocated'],
-            'skipped'        => $relocResult['skipped'],
+    // --- Step A: accept preview → execution review (session token + SQL summary) ---
+    if ($action === 'accept_review' && destructionValidateInputs($p)) {
+        $previewTry = destructionPreview($p['universe'], $p['mode'], $p['galaxy'], $p['system']);
+        if ($previewTry['planets'] === 0) {
+            $template->message($LNG['dest_preview_empty'], 'admin.php?page=destruction&sid=' . session_id(), 5, true);
+            exit;
+        }
+        $reviewToken = bin2hex(random_bytes(16));
+        $_SESSION[DESTRUCTION_SESSION_KEY] = [
+            'token'  => $reviewToken,
+            'params' => $packed,
         ];
+        $preview           = $previewTry;
+        $reviewStage       = true;
+        $sqlPreviewLines   = destructionSqlPreviewLines(
+            $p['universe'],
+            $p['mode'],
+            $p['galaxy'],
+            $p['system'],
+            $p['relocate'],
+            (bool) $p['spawn_apply'],
+            $p['debris'],
+            $p['broadcast'],
+            (float) $p['debris_metal'],
+            (float) $p['debris_crystal']
+        );
+    }
+
+    // --- Preview counts only ---
+    if ($action === 'preview' && destructionValidateInputs($p)) {
+        $preview = destructionPreview($p['universe'], $p['mode'], $p['galaxy'], $p['system']);
+    }
+
+    // --- Execute (requires prior accept_review token) ---
+    if ($action === 'destroy') {
+        $reviewTokenPost = HTTP::_GP('review_token', '');
+        $sess            = $_SESSION[DESTRUCTION_SESSION_KEY] ?? null;
+        if (!is_array($sess) || empty($sess['token']) || empty($sess['params'])
+            || !hash_equals((string) $sess['token'], (string) $reviewTokenPost)) {
+            $template->message($LNG['dest_review_expired'], 'admin.php?page=destruction&sid=' . session_id(), 5, true);
+            exit;
+        }
+        unset($_SESSION[DESTRUCTION_SESSION_KEY]);
+
+        $p = destructionUnpackParams($sess['params']);
+        if (!destructionValidateInputs($p)) {
+            $template->message($LNG['dest_review_expired'], 'admin.php?page=destruction&sid=' . session_id(), 5, true);
+            exit;
+        }
+
+        $universe      = $p['universe'];
+        $mode          = $p['mode'];
+        $galaxy        = $p['galaxy'];
+        $system        = $p['system'];
+        $relocate      = $p['relocate'];
+        $relocMode     = $p['relocMode'];
+        $relocGal      = $p['relocGal'];
+        $relocSys      = $p['relocSys'];
+        $debris        = $p['debris'];
+        $debrisMetal   = (float) $p['debris_metal'];
+        $debrisCrystal = (float) $p['debris_crystal'];
+        $broadcast     = $p['broadcast'];
+        $message       = $p['message'];
+
+        $backupBefore = HTTP::_GP('backup_before', 1);
+
+        try {
+            if ($backupBefore) {
+                $backupPath = runDestructionDatabaseBackup();
+            }
+
+            if ($p['spawn_apply']) {
+                if ($p['spawn_galaxy'] < 1 || $p['spawn_system'] < 1 || $p['spawn_planet'] < 1) {
+                    throw new Exception($LNG['dest_spawn_incomplete']);
+                }
+                applySpawnCursor($universe, $p['spawn_galaxy'], $p['spawn_system'], $p['spawn_planet']);
+            }
+
+            $fleetResult = executeFleets($universe, $mode, $galaxy, $system);
+
+            $relocResult = executeRelocation(
+                $universe, $mode, $galaxy, $system,
+                $relocate, $relocMode, $relocGal, $relocSys
+            );
+
+            $planetResult = executePlanets(
+                $universe, $mode, $galaxy, $system,
+                $debris, $debrisMetal, $debrisCrystal
+            );
+
+            executeNotifications(
+                $universe, $mode, $galaxy, $system,
+                $planetResult['affectedUserIds'], $message, $broadcast,
+                $USER['username']
+            );
+
+            executeLog(
+                $universe, $mode, $galaxy, $system,
+                (int) $USER['id'], $planetResult['count'],
+                $fleetResult, $relocResult,
+                $debrisMetal, $debrisCrystal, $broadcast,
+                $backupPath
+            );
+
+            $result = [
+                'planets'         => $planetResult['count'],
+                'fleets_lost'     => $fleetResult['lost'],
+                'fleets_survived' => $fleetResult['survived'],
+                'relocated'       => $relocResult['relocated'],
+                'skipped'         => $relocResult['skipped'],
+                'backup_path'     => $backupPath,
+            ];
+        } catch (Throwable $e) {
+            $template->message(
+                $LNG['dest_exec_failed'] . ': ' . htmlspecialchars($e->getMessage()),
+                'admin.php?page=destruction&sid=' . session_id(),
+                10,
+                true
+            );
+            exit;
+        }
     }
 
     $template->assign_vars([
-        'SID'          => session_id(),
-        'universeList' => Universe::availableUniverses(),
-        'action'       => $action,
-        'universe'     => $universe,
-        'mode'         => $mode,
-        'galaxy'       => $galaxy,
-        'system'       => $system,
-        'relocate'     => $relocate,
-        'relocMode'    => $relocMode,
-        'relocGal'     => $relocGal,
-        'relocSys'     => $relocSys,
-        'relocSlot'    => $relocSlot,
-        'debris'         => $debris,
-        'debris_metal'   => $debrisMetal,
-        'debris_crystal' => $debrisCrystal,
-        'broadcast'      => $broadcast,
-        'message'      => $message,
-        'preview'      => $preview,
-        'result'       => $result,
+        'SID'               => session_id(),
+        'universeList'      => Universe::availableUniverses(),
+        'action'            => $action,
+        'universe'          => $p['universe'],
+        'mode'              => $p['mode'],
+        'galaxy'            => $p['galaxy'],
+        'system'            => $p['system'],
+        'relocate'          => $p['relocate'],
+        'relocMode'         => $p['relocMode'],
+        'relocGal'          => $p['relocGal'],
+        'relocSys'          => $p['relocSys'],
+        'relocSlot'         => $p['relocSlot'],
+        'debris'            => $p['debris'],
+        'debris_metal'      => $p['debris_metal'],
+        'debris_crystal'    => $p['debris_crystal'],
+        'broadcast'         => $p['broadcast'],
+        'message'           => $p['message'],
+        'spawn_apply'       => $p['spawn_apply'],
+        'spawn_galaxy'      => $p['spawn_galaxy'],
+        'spawn_system'      => $p['spawn_system'],
+        'spawn_planet'      => $p['spawn_planet'],
+        'preview'           => $preview,
+        'result'            => $result,
+        'reviewStage'       => $reviewStage,
+        'sqlPreviewLines'   => $sqlPreviewLines,
+        'reviewToken'       => $reviewToken,
+        'backup_default_on' => 1,
     ]);
 
     $template->show('DestructionPage.tpl');

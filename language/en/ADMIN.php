@@ -683,6 +683,27 @@ $LNG['dest_result_title']            = 'Destruction complete';
 $LNG['dest_result_done']             = 'All steps completed successfully. The zone has been destroyed.';
 $LNG['dest_result_skipped']          = 'Warning: %d player(s) could not be relocated and have no planets. Manual follow-up required.';
 
+$LNG['dest_story_title']            = 'MOON Universe 2 storyline';
+$LNG['dest_story_body']             = 'This admin tool was built for the MOON Universe 2 storyline events: galaxy-wide resets, staged destruction, and curated relocations. Always preview impact, review the SQL summary, and keep backups enabled before executing destructive writes.';
+$LNG['dest_preview_continue']       = 'Continue to execution review';
+$LNG['dest_preview_discard']        = 'Discard preview';
+$LNG['dest_review_title']           = 'Execution review — confirm';
+$LNG['dest_review_sql_title']       = 'SQL operations (summary)';
+$LNG['dest_backup_before']          = 'Database backup';
+$LNG['dest_backup_before_label']    = 'Save a full game-database backup before any destructive writes (recommended)';
+$LNG['dest_spawn_section']          = 'New-account spawn cursor';
+$LNG['dest_spawn_apply']            = 'Update universe registration spawn cursor after destruction';
+$LNG['dest_spawn_help']             = 'Sets %%CONFIG%% LastSettedGalaxyPos / LastSettedSystemPos / LastSettedPlanetPos — used when PlayerUtil creates new accounts without explicit coordinates.';
+$LNG['dest_spawn_coords_heading']   = 'New spawn coordinates';
+$LNG['dest_spawn_coords']           = 'Spawn coordinates (G : S : P)';
+$LNG['dest_review_execute']        = 'Execute destruction';
+$LNG['dest_review_cancel']          = 'Cancel';
+$LNG['dest_review_expired']        = 'That confirmation expired or was invalid. Start again from preview.';
+$LNG['dest_backup_saved']           = 'Backup saved to %s';
+$LNG['dest_exec_failed']            = 'Destruction aborted';
+$LNG['dest_spawn_incomplete']       = 'Spawn coordinates required when updating registration spawn cursor.';
+$LNG['dest_review_done_link']       = 'Back to destruction tool';
+
 $LNG['bl_type']               = 'Type';
 $LNG['bl_element']            = 'Element';
 $LNG['bl_user']               = 'User';
