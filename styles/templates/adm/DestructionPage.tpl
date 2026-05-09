@@ -131,7 +131,13 @@ $(function() {
         <td colspan="2" style="color:#00aa00; font-weight:bold;">{$LNG.dest_result_done}</td>
     </tr>
 </table>
-<p><a href="admin.php?page=destruction&amp;sid={$SID}">{$LNG.dest_review_done_link}</a></p>
+<div style="text-align:center; margin:18px 0;">
+<form action="admin.php" method="get" style="display:inline;">
+    <input type="hidden" name="page" value="destruction">
+    <input type="hidden" name="sid" value="{$SID}">
+    <button type="submit" style="padding:8px 22px; background-color:#336699; color:#fff; font-weight:bold; border:0; cursor:pointer;">{$LNG.dest_review_done_link}</button>
+</form>
+</div>
 
 {elseif $reviewStage}
 <br>

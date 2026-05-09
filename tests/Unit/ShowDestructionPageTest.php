@@ -2,7 +2,129 @@
 
 declare(strict_types=1);
 
+use HiveNova\Core\Database;
+use HiveNova\Core\DatabaseInterface;
 use PHPUnit\Framework\TestCase;
+
+/**
+ * Captures SQL + bound params from destruction fleet/planet steps (no PDO).
+ *
+ * @internal
+ */
+final class DestructionPageDatabaseStub implements DatabaseInterface
+{
+    /** @var list<array{qry: string, params: array}> */
+    public array $selects = [];
+
+    /** @var list<array{qry: string, params: array}> */
+    public array $updates = [];
+
+    /** @var list<array{qry: string, params: array}> */
+    public array $deletes = [];
+
+    private int $lastRowCount = 0;
+
+    private int $queryCounter = 0;
+
+    public function select($qry, array $params = []): array
+    {
+        $this->selects[] = ['qry' => $qry, 'params' => $params];
+        ++$this->queryCounter;
+        $this->lastRowCount = 0;
+
+        return [];
+    }
+
+    public function selectSingle($qry, array $params = [], $field = false)
+    {
+        ++$this->queryCounter;
+        $this->lastRowCount = 0;
+
+        return null;
+    }
+
+    public function insert($qry, array $params = [])
+    {
+        ++$this->queryCounter;
+        $this->lastRowCount = 1;
+
+        return true;
+    }
+
+    public function update($qry, array $params = [])
+    {
+        $this->updates[] = ['qry' => $qry, 'params' => $params];
+        ++$this->queryCounter;
+        $this->lastRowCount = 2;
+
+        return true;
+    }
+
+    public function delete($qry, array $params = [])
+    {
+        $this->deletes[] = ['qry' => $qry, 'params' => $params];
+        ++$this->queryCounter;
+        $this->lastRowCount = 3;
+
+        return true;
+    }
+
+    public function replace($qry, array $params = [])
+    {
+        ++$this->queryCounter;
+        $this->lastRowCount = 0;
+
+        return true;
+    }
+
+    public function query($qry)
+    {
+        ++$this->queryCounter;
+    }
+
+    public function nativeQuery($qry)
+    {
+        ++$this->queryCounter;
+
+        return [];
+    }
+
+    public function lastInsertId()
+    {
+        return 0;
+    }
+
+    public function rowCount()
+    {
+        return $this->lastRowCount;
+    }
+
+    public function getQueryCounter()
+    {
+        return $this->queryCounter;
+    }
+
+    public function quote($str)
+    {
+        return "'" . addslashes((string) $str) . "'";
+    }
+
+    public function disconnect()
+    {
+    }
+
+    public function beginTransaction(): void
+    {
+    }
+
+    public function commit(): void
+    {
+    }
+
+    public function rollback(): void
+    {
+    }
+}
 
 /**
  * Admin destruction tool: ensure the page module loads for authorized users
@@ -268,5 +390,128 @@ final class ShowDestructionPageTest extends TestCase
         $this->expectExceptionMessage('Permission error!');
 
         require dirname(__DIR__, 2) . '/includes/pages/adm/ShowDestructionPage.php';
+    }
+
+    /**
+     * Regression: HY093 / native PDO — fleet DELETE must not receive :now; UPDATE must use
+     * unique placeholder names for start vs end galaxy (no duplicate :gal).
+     *
+     * @runInSeparateProcess
+     */
+    public function testExecuteFleetsGalaxyModeDeleteParamsOmitNowAndUpdateUsesSgalEgal(): void
+    {
+        if (!defined('AUTH_ADM')) {
+            define('AUTH_ADM', 3);
+        }
+        if (!defined('AUTH_USR')) {
+            define('AUTH_USR', 0);
+        }
+        if (!defined('TIMESTAMP')) {
+            define('TIMESTAMP', 1_704_067_200);
+        }
+        require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+        require_once dirname(__DIR__, 2) . '/includes/GeneralFunctions.php';
+
+        global $USER;
+        $USER = ['authlevel' => AUTH_ADM, 'rights' => []];
+
+        $stub = new DestructionPageDatabaseStub();
+        Database::setInstance($stub);
+
+        require dirname(__DIR__, 2) . '/includes/pages/adm/ShowDestructionPage.php';
+
+        executeFleets(1, 'galaxy', 2, 99);
+
+        $this->assertCount(1, $stub->deletes);
+        $this->assertCount(1, $stub->updates);
+
+        $delParams = $stub->deletes[0]['params'];
+        $this->assertArrayNotHasKey(':now', $delParams);
+        $this->assertSame([':uni' => 1, ':gal' => 2], $delParams);
+
+        $updParams = $stub->updates[0]['params'];
+        $this->assertArrayHasKey(':now', $updParams);
+        $this->assertSame(TIMESTAMP, $updParams[':now']);
+        $this->assertSame(2, $updParams[':sgal']);
+        $this->assertSame(2, $updParams[':egal']);
+        $this->assertArrayNotHasKey(':gal', $updParams);
+    }
+
+    /**
+     * Regression: fleet UPDATE system mode — :sgal/:ssys vs :egal/:esys pairs; DELETE adds :sys.
+     *
+     * @runInSeparateProcess
+     */
+    public function testExecuteFleetsSystemModeUsesDistinctStartEndBindings(): void
+    {
+        if (!defined('AUTH_ADM')) {
+            define('AUTH_ADM', 3);
+        }
+        if (!defined('AUTH_USR')) {
+            define('AUTH_USR', 0);
+        }
+        if (!defined('TIMESTAMP')) {
+            define('TIMESTAMP', 1_704_067_200);
+        }
+        require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+        require_once dirname(__DIR__, 2) . '/includes/GeneralFunctions.php';
+
+        global $USER;
+        $USER = ['authlevel' => AUTH_ADM, 'rights' => []];
+
+        $stub = new DestructionPageDatabaseStub();
+        Database::setInstance($stub);
+
+        require dirname(__DIR__, 2) . '/includes/pages/adm/ShowDestructionPage.php';
+
+        executeFleets(1, 'system', 2, 5);
+
+        $this->assertSame([':uni' => 1, ':gal' => 2, ':sys' => 5], $stub->deletes[0]['params']);
+
+        $u = $stub->updates[0]['params'];
+        $this->assertSame(5, $u[':ssys']);
+        $this->assertSame(5, $u[':esys']);
+        $this->assertSame(2, $u[':sgal']);
+        $this->assertSame(2, $u[':egal']);
+        $this->assertArrayNotHasKey(':gal', $u);
+    }
+
+    /**
+     * Regression: JOIN users+planets WHERE must use p.galaxy / p.system (users also has galaxy/system).
+     *
+     * @runInSeparateProcess
+     */
+    public function testExecutePlanetsSelectQualifiesPlanetColumnsForJoin(): void
+    {
+        if (!defined('AUTH_ADM')) {
+            define('AUTH_ADM', 3);
+        }
+        if (!defined('AUTH_USR')) {
+            define('AUTH_USR', 0);
+        }
+        require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+        require_once dirname(__DIR__, 2) . '/includes/GeneralFunctions.php';
+
+        global $USER;
+        $USER = ['authlevel' => AUTH_ADM, 'rights' => []];
+
+        $stub = new DestructionPageDatabaseStub();
+        Database::setInstance($stub);
+
+        require dirname(__DIR__, 2) . '/includes/pages/adm/ShowDestructionPage.php';
+
+        executePlanets(1, 'galaxy', 2, 0, 0, 0.0, 0.0);
+
+        $this->assertCount(1, $stub->selects);
+        $joinSql = $stub->selects[0]['qry'];
+        $this->assertStringContainsString('JOIN', $joinSql);
+        $this->assertStringContainsString('p.universe = :uni', $joinSql);
+        $this->assertStringContainsString('p.galaxy = :gal', $joinSql);
+        $this->assertStringNotContainsString('WHERE p.universe = :uni AND galaxy = :gal', $joinSql);
+
+        executePlanets(3, 'system', 2, 7, 0, 0.0, 0.0);
+
+        $joinSql2 = $stub->selects[1]['qry'];
+        $this->assertStringContainsString('p.`system` = :sys', $joinSql2);
     }
 }
