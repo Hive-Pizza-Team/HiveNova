@@ -189,18 +189,33 @@ function executeFleets(int $universe, string $mode, int $galaxy, int $system): a
 {
     $db = Database::get();
 
-    $params = [':uni' => $universe, ':gal' => $galaxy, ':now' => TIMESTAMP];
-
-    $endInZone   = 'fleet_universe = :uni AND fleet_end_galaxy = :gal';
-    $startInZone = 'fleet_universe = :uni AND fleet_start_galaxy = :gal';
+    // Named placeholders must be unique per token (MySQL native PDO). Do not pass
+    // unused keys (e.g. :now on DELETE). Use distinct names for repeated coordinates.
+    $deleteParams = [':uni' => $universe, ':gal' => $galaxy];
+    $endInZone    = 'fleet_universe = :uni AND fleet_end_galaxy = :gal';
 
     if ($mode === 'system') {
-        $params[':sys'] = $system;
-        $endInZone   .= ' AND fleet_end_system = :sys';
-        $startInZone .= ' AND fleet_start_system = :sys';
-        $endNotInZone = 'NOT (fleet_end_galaxy = :gal AND fleet_end_system = :sys)';
+        $deleteParams[':sys'] = $system;
+        $endInZone .= ' AND fleet_end_system = :sys';
+        $startInZone  = 'fleet_universe = :uni AND fleet_start_galaxy = :sgal AND fleet_start_system = :ssys';
+        $endNotInZone = 'NOT (fleet_end_galaxy = :egal AND fleet_end_system = :esys)';
+        $updateParams = [
+            ':uni'  => $universe,
+            ':sgal' => $galaxy,
+            ':ssys' => $system,
+            ':egal' => $galaxy,
+            ':esys' => $system,
+            ':now'  => TIMESTAMP,
+        ];
     } else {
-        $endNotInZone = 'fleet_end_galaxy != :gal';
+        $startInZone  = 'fleet_universe = :uni AND fleet_start_galaxy = :sgal';
+        $endNotInZone = 'fleet_end_galaxy != :egal';
+        $updateParams = [
+            ':uni'  => $universe,
+            ':sgal' => $galaxy,
+            ':egal' => $galaxy,
+            ':now'  => TIMESTAMP,
+        ];
     }
 
     // Lost fleets — destination is in the zone, no refund
@@ -208,13 +223,11 @@ function executeFleets(int $universe, string $mode, int $galaxy, int $system): a
         "DELETE %%FLEETS%%, %%FLEETS_EVENT%%
          FROM %%FLEETS%% LEFT JOIN %%FLEETS_EVENT%% ON fleet_id = fleetID
          WHERE $endInZone",
-        $params
+        $deleteParams
     );
     $lost = (int) $db->rowCount();
 
     // Force-completed fleets — origin in zone, destination safe.
-    // Set start = end (fleet considers destination its new base) and
-    // set event time to now so the next cron run processes arrival.
     $db->update(
         "UPDATE %%FLEETS%%, %%FLEETS_EVENT%%
          SET fleet_start_id     = fleet_end_id,
@@ -226,7 +239,7 @@ function executeFleets(int $universe, string $mode, int $galaxy, int $system): a
          WHERE fleet_id = fleetID
            AND $startInZone
            AND $endNotInZone",
-        $params
+        $updateParams
     );
     $survived = (int) $db->rowCount();
 
@@ -239,12 +252,16 @@ function executePlanets(
 ): array {
     $db = Database::get();
 
-    $zoneWhere = 'universe = :uni AND galaxy = :gal';
-    $params    = [':uni' => $universe, ':gal' => $galaxy];
+    $params          = [':uni' => $universe, ':gal' => $galaxy];
+    // Single-table %%PLANETS%% DELETE — unqualified column names OK.
+    $zoneWhereSingle = 'universe = :uni AND galaxy = :gal';
+    // JOIN with %%USERS%% — every planet column must be qualified (u also has galaxy/system).
+    $zoneWherePlanet = 'p.universe = :uni AND p.galaxy = :gal';
 
     if ($mode === 'system') {
-        $params[':sys'] = $system;
-        $zoneWhere     .= ' AND `system` = :sys';
+        $params[':sys']   = $system;
+        $zoneWhereSingle .= ' AND `system` = :sys';
+        $zoneWherePlanet .= ' AND p.`system` = :sys';
     }
 
     // Fetch affected users before deleting — planets will be gone after the DELETE.
@@ -253,7 +270,7 @@ function executePlanets(
         "SELECT DISTINCT u.id, u.id_planet
          FROM %%USERS%% u
          JOIN %%PLANETS%% p ON p.id_owner = u.id
-         WHERE p.$zoneWhere",
+         WHERE $zoneWherePlanet",
         $params
     );
 
@@ -281,7 +298,7 @@ function executePlanets(
     // Moons (planet_type = 3) share the same coordinates and are caught by the
     // same WHERE clause — no separate DELETE needed.
     $db->delete(
-        "DELETE FROM %%PLANETS%% WHERE $zoneWhere",
+        "DELETE FROM %%PLANETS%% WHERE $zoneWhereSingle",
         $params
     );
 
@@ -652,12 +669,21 @@ function ShowDestructionPage()
     $packed = destructionPackParams();
     $p      = destructionUnpackParams($packed);
 
-    $preview       = null;
-    $result        = null;
-    $reviewStage   = false;
+    $universeList = Universe::availableUniverses();
+    // Single-universe installs: preselect the only universe so preview is one step simpler.
+    if ($action === '' && $p['universe'] < 1 && count($universeList) === 1) {
+        $only               = (int) reset($universeList);
+        $p['universe']      = $only;
+        $packed['universe'] = $only;
+    }
+
+    $preview         = null;
+    $result          = null;
+    $reviewStage     = false;
     $sqlPreviewLines = [];
-    $reviewToken   = '';
-    $backupPath    = null;
+    $reviewToken     = '';
+    $backupPath      = null;
+    $previewError    = null;
 
     // --- Step A: accept preview → execution review (session token + SQL summary) ---
     if ($action === 'accept_review' && destructionValidateInputs($p)) {
@@ -688,8 +714,12 @@ function ShowDestructionPage()
     }
 
     // --- Preview counts only ---
-    if ($action === 'preview' && destructionValidateInputs($p)) {
-        $preview = destructionPreview($p['universe'], $p['mode'], $p['galaxy'], $p['system']);
+    if ($action === 'preview') {
+        if (destructionValidateInputs($p)) {
+            $preview = destructionPreview($p['universe'], $p['mode'], $p['galaxy'], $p['system']);
+        } else {
+            $previewError = $LNG['dest_preview_invalid'];
+        }
     }
 
     // --- Execute (requires prior accept_review token) ---
@@ -784,7 +814,7 @@ function ShowDestructionPage()
 
     $template->assign_vars([
         'SID'               => session_id(),
-        'universeList'      => Universe::availableUniverses(),
+        'universeList'      => $universeList,
         'action'            => $action,
         'universe'          => $p['universe'],
         'mode'              => $p['mode'],
@@ -810,6 +840,7 @@ function ShowDestructionPage()
         'sqlPreviewLines'   => $sqlPreviewLines,
         'reviewToken'       => $reviewToken,
         'backup_default_on' => 1,
+        'preview_error'     => $previewError,
     ]);
 
     $template->show('DestructionPage.tpl');
