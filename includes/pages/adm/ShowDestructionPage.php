@@ -652,12 +652,21 @@ function ShowDestructionPage()
     $packed = destructionPackParams();
     $p      = destructionUnpackParams($packed);
 
-    $preview       = null;
-    $result        = null;
-    $reviewStage   = false;
+    $universeList = Universe::availableUniverses();
+    // Single-universe installs: preselect the only universe so preview is one step simpler.
+    if ($action === '' && $p['universe'] < 1 && count($universeList) === 1) {
+        $only              = (int) reset($universeList);
+        $p['universe']     = $only;
+        $packed['universe'] = $only;
+    }
+
+    $preview         = null;
+    $result          = null;
+    $reviewStage     = false;
     $sqlPreviewLines = [];
-    $reviewToken   = '';
-    $backupPath    = null;
+    $reviewToken     = '';
+    $backupPath      = null;
+    $previewError    = null;
 
     // --- Step A: accept preview → execution review (session token + SQL summary) ---
     if ($action === 'accept_review' && destructionValidateInputs($p)) {
@@ -688,8 +697,12 @@ function ShowDestructionPage()
     }
 
     // --- Preview counts only ---
-    if ($action === 'preview' && destructionValidateInputs($p)) {
-        $preview = destructionPreview($p['universe'], $p['mode'], $p['galaxy'], $p['system']);
+    if ($action === 'preview') {
+        if (destructionValidateInputs($p)) {
+            $preview = destructionPreview($p['universe'], $p['mode'], $p['galaxy'], $p['system']);
+        } else {
+            $previewError = $LNG['dest_preview_invalid'];
+        }
     }
 
     // --- Execute (requires prior accept_review token) ---
@@ -784,7 +797,7 @@ function ShowDestructionPage()
 
     $template->assign_vars([
         'SID'               => session_id(),
-        'universeList'      => Universe::availableUniverses(),
+        'universeList'      => $universeList,
         'action'            => $action,
         'universe'          => $p['universe'],
         'mode'              => $p['mode'],
@@ -810,6 +823,7 @@ function ShowDestructionPage()
         'sqlPreviewLines'   => $sqlPreviewLines,
         'reviewToken'       => $reviewToken,
         'backup_default_on' => 1,
+        'preview_error'     => $previewError,
     ]);
 
     $template->show('DestructionPage.tpl');

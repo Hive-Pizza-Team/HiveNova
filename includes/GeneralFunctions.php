@@ -580,7 +580,9 @@ function exceptionHandler($exception)
 			$config		= \HiveNova\Core\Config::get();
 			$gameName	= $config->game_name;
 			$VERSION	= $config->VERSION;
-		} catch (ErrorException) {
+		} catch (\Throwable) {
+			// Config needs DB; if the original fault is PDO/connection, calling Config again would recurse.
+			// Keep $gameName / $VERSION fallbacks from above.
 		}
 	}
 

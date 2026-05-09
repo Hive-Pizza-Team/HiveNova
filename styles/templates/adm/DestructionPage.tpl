@@ -13,6 +13,18 @@ $(function() {
         } else {
             $('#row_system').hide();
         }
+        updateSystemFieldConstraint();
+    }
+
+    /** System coordinate only required in solar-system mode (hidden in galaxy mode must not block submit). */
+    function updateSystemFieldConstraint() {
+        var systemMode = $('input[name=mode]:checked').val() === 'system';
+        var $sys = $('input[name=system]');
+        if (systemMode) {
+            $sys.attr({ min: 1, required: true });
+        } else {
+            $sys.removeAttr('min').removeAttr('required');
+        }
     }
 
     function updateDebrisVisibility() {
@@ -30,6 +42,7 @@ $(function() {
         } else {
             $('#row_reloc_opts').hide();
         }
+        updateRelocExactConstraints();
     }
 
     function updateRelocModeVisibility() {
@@ -38,16 +51,45 @@ $(function() {
         } else {
             $('#reloc_exact_fields').hide();
         }
+        updateRelocExactConstraints();
+    }
+
+    /** Relocation target numbers only required when relocate + exact; otherwise 0 must be submittable. */
+    function updateRelocExactConstraints() {
+        var relocOn = $('#relocate').prop('checked');
+        var exact = $('input[name=relocMode]:checked').val() === 'exact';
+        var needsExact = relocOn && exact;
+        $('input[name=relocGal], input[name=relocSys], input[name=relocSlot]').each(function() {
+            if (needsExact) {
+                $(this).attr({ min: 1, required: true });
+            } else {
+                $(this).removeAttr('min').removeAttr('required');
+            }
+        });
+    }
+
+    /** Spawn G/S/P only validated in-browser when cursor update is enabled. */
+    function updateSpawnFieldConstraints() {
+        var on = $('#spawn_apply').prop('checked');
+        $('input[name=spawn_galaxy], input[name=spawn_system], input[name=spawn_planet]').each(function() {
+            if (on) {
+                $(this).attr({ min: 1, required: true });
+            } else {
+                $(this).removeAttr('min').removeAttr('required');
+            }
+        });
     }
 
     $('input[name=mode]').on('change', updateModeVisibility);
     $('#relocate').on('change', updateRelocVisibility);
     $('input[name=relocMode]').on('change', updateRelocModeVisibility);
     $('#debris').on('change', updateDebrisVisibility);
+    $('#spawn_apply').on('change', updateSpawnFieldConstraints);
 
     updateModeVisibility();
     updateRelocVisibility();
     updateDebrisVisibility();
+    updateSpawnFieldConstraints();
 });
 </script>
 
@@ -170,7 +212,16 @@ $(function() {
 
 {else}
 
-<form action="admin.php?page=destruction&amp;sid={$SID}" method="post">
+{if $preview_error}
+<br>
+<table class="table569">
+    <tr>
+        <td colspan="2" style="color:#cc0000;">{$preview_error}</td>
+    </tr>
+</table>
+{/if}
+
+<form action="admin.php?page=destruction&amp;sid={$SID}" method="post" id="form_destruction_preview" novalidate>
 <input type="hidden" name="action" value="preview">
 <table class="table569">
     <tr>
@@ -194,7 +245,7 @@ $(function() {
     </tr>
     <tr id="row_system">
         <td>{$LNG.dest_system}</td>
-        <td><input type="number" name="system" min="1" value="{$system}"></td>
+        <td><input type="number" name="system" value="{$system}" step="1"></td>
     </tr>
     <tr>
         <td colspan="2"><strong>{$LNG.dest_spawn_section}</strong></td>
@@ -216,9 +267,9 @@ $(function() {
     <tr id="row_spawn_coords">
         <td>{$LNG.dest_spawn_coords}</td>
         <td>
-            {$LNG.dest_galaxy}: <input type="number" name="spawn_galaxy" min="1" value="{$spawn_galaxy}" style="width:70px">
-            &nbsp; {$LNG.dest_system}: <input type="number" name="spawn_system" min="1" value="{$spawn_system}" style="width:70px">
-            &nbsp; {$LNG.dest_slot}: <input type="number" name="spawn_planet" min="1" value="{$spawn_planet}" style="width:70px">
+            {$LNG.dest_galaxy}: <input type="number" name="spawn_galaxy" value="{$spawn_galaxy}" style="width:70px" step="1">
+            &nbsp; {$LNG.dest_system}: <input type="number" name="spawn_system" value="{$spawn_system}" style="width:70px" step="1">
+            &nbsp; {$LNG.dest_slot}: <input type="number" name="spawn_planet" value="{$spawn_planet}" style="width:70px" step="1">
         </td>
     </tr>
     <tr>
@@ -235,11 +286,11 @@ $(function() {
             <br>
             <label><input type="radio" name="relocMode" value="exact" {if $relocMode === 'exact'}checked{/if}> {$LNG.dest_reloc_exact}</label>
             <div id="reloc_exact_fields" style="margin-top:4px; margin-left:20px;">
-                {$LNG.dest_galaxy}: <input type="number" name="relocGal" min="1" value="{$relocGal}" style="width:60px">
+                {$LNG.dest_galaxy}: <input type="number" name="relocGal" value="{$relocGal}" style="width:60px" step="1">
                 &nbsp;
-                {$LNG.dest_system}: <input type="number" name="relocSys" min="1" value="{$relocSys}" style="width:60px">
+                {$LNG.dest_system}: <input type="number" name="relocSys" value="{$relocSys}" style="width:60px" step="1">
                 &nbsp;
-                {$LNG.dest_slot}: <input type="number" name="relocSlot" min="1" value="{$relocSlot}" style="width:60px">
+                {$LNG.dest_slot}: <input type="number" name="relocSlot" value="{$relocSlot}" style="width:60px" step="1">
             </div>
         </td>
     </tr>

@@ -676,6 +676,7 @@ $LNG['dest_preview_fleets_lost']     = 'Fleets lost (no refund)';
 $LNG['dest_preview_fleets_survive']  = 'Fleets that will survive';
 $LNG['dest_preview_homeless_warning'] = 'Warning: %d player(s) will have no planets after destruction. Enable relocation or ensure they have colonies elsewhere.';
 $LNG['dest_preview_empty']           = 'No planets found in the target zone. Destruction aborted.';
+$LNG['dest_preview_invalid']         = 'Could not run preview: select a universe, set galaxy to at least 1, and in solar system mode set system to at least 1.';
 $LNG['dest_confirm_destroy']         = 'CONFIRM — Destroy now';
 $LNG['dest_msg_subject_system']      = 'Destruction event: %d:%d';
 $LNG['dest_msg_subject_galaxy']      = 'Destruction event: Galaxy %d';
