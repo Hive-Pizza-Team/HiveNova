@@ -279,6 +279,31 @@ $(function() {
         </td>
     </tr>
     <tr>
+        <td colspan="2"><strong>{$LNG.dest_spawn_section}</strong></td>
+    </tr>
+    <tr>
+        <td>{$LNG.dest_spawn_apply}</td>
+        <td>
+            <input type="hidden" name="spawn_apply" value="0">
+            <input type="checkbox" name="spawn_apply" value="1" id="spawn_apply" {if $spawn_apply}checked{/if} title="{$LNG.dest_spawn_apply|escape:'html'}">
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" valign="top" style="font-size:11px; line-height:1.45; opacity:0.95;">{$LNG.dest_spawn_help}</td>
+    </tr>
+    <tr>
+        <td style="padding-top:8px;"><strong>{$LNG.dest_spawn_coords_heading}</strong></td>
+        <td style="padding-top:8px;"></td>
+    </tr>
+    <tr id="row_spawn_coords">
+        <td>{$LNG.dest_spawn_coords}</td>
+        <td>
+            {$LNG.dest_galaxy}: <input type="number" name="spawn_galaxy" min="1" value="{$spawn_galaxy}" style="width:70px">
+            &nbsp; {$LNG.dest_system}: <input type="number" name="spawn_system" min="1" value="{$spawn_system}" style="width:70px">
+            &nbsp; {$LNG.dest_slot}: <input type="number" name="spawn_planet" min="1" value="{$spawn_planet}" style="width:70px">
+        </td>
+    </tr>
+    <tr>
         <td>{$LNG.dest_relocate}</td>
         <td>
             <input type="checkbox" name="relocate" value="1" id="relocate" {if $relocate}checked{/if}>

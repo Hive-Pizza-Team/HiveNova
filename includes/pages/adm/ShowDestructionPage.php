@@ -672,8 +672,8 @@ function ShowDestructionPage()
     $universeList = Universe::availableUniverses();
     // Single-universe installs: preselect the only universe so preview is one step simpler.
     if ($action === '' && $p['universe'] < 1 && count($universeList) === 1) {
-        $only              = (int) reset($universeList);
-        $p['universe']     = $only;
+        $only               = (int) reset($universeList);
+        $p['universe']      = $only;
         $packed['universe'] = $only;
     }
 
