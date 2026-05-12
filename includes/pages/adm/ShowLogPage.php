@@ -15,8 +15,8 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminLogDetailRows;
 use HiveNova\Core\HTTP;
-use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
 
@@ -122,26 +122,7 @@ function ShowLogDetail() {
 		'field_max'		=> $LNG['qe_fields'],
 	);
 	
-	foreach ($conf_before as $key => $val) {
-		if ($key != 'universe') {
-			if(isset($LNG['tech'][$key]))
-				$Element = $LNG['tech'][$key];
-			elseif(isset($LNG['se_'.$key]))
-				$Element = $LNG['se_'.$key];
-			elseif(isset($LNG[$key]))
-				$Element = $LNG[$key];
-			elseif(isset($Wrapper[$key]))
-				$Element = $Wrapper[$key];
-			else
-				$Element = $key;
-			
-			$LogArray[]	= array(
-				'Element'	=> $Element,
-				'old'		=> ($Element == 'urlaubs_until' ? _date($LNG['php_tdformat'], $val) : (is_numeric($val) ? pretty_number($val) : $val)),
-				'new'		=> ($Element == 'urlaubs_until' ? _date($LNG['php_tdformat'], $conf_after[$key]) : (is_numeric($conf_after[$key]) ? pretty_number($conf_after[$key]) : $conf_after[$key])),
-			);
-		}
-	}
+	$LogArray = AdminLogDetailRows::build($conf_before, $conf_after, $Wrapper, $LNG);
 		
 	$template	= new Template();	
 	$template->assign_vars(array(	
