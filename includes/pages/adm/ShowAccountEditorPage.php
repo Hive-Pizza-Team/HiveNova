@@ -47,7 +47,7 @@ function ShowAccountEditorPage()
 				if (!empty($id))
 					$before = $GLOBALS['DATABASE']->getFirstRow("SELECT `metal`,`crystal`,`deuterium`,`universe`  FROM ".PLANETS." WHERE `id` = '". $id ."';");
 				if (!empty($id_dark))
-					$before_dm = $GLOBALS['DATABASE']->getFirstRow("SELECT `darkmatter` FROM ".USERS." WHERE `id` = '". $id_dark ."';");
+					$before_dm = $GLOBALS['DATABASE']->getFirstRow("SELECT `darkmatter`, `universe` FROM ".USERS." WHERE `id` = '". $id_dark ."';");
 				if ($_POST['add'])
 				{
 					if (!empty($id)) {
@@ -96,7 +96,7 @@ function ShowAccountEditorPage()
 				if (!empty($id)) {
 					$LOG = new Log(2);
 					$LOG->target = $id;
-					$LOG->universe = $before_dm['universe'];
+					$LOG->universe = $before['universe'];
 					$LOG->old = $before;
 					$LOG->new = $after;
 					$LOG->save();
