@@ -50,7 +50,7 @@ final class AdminLogDetailRows
     private static function formatValueForColumn(string $key, mixed $raw, array $LNG): string
     {
         if ($key === 'urlaubs_until') {
-            return _date($LNG['php_tdformat'], (int) ($raw ?? 0));
+            return _date($LNG['php_tdformat'], (int) ($raw ?? 0), null, $LNG);
         }
         if ($raw !== null && $raw !== '' && is_numeric($raw)) {
             return pretty_number($raw);

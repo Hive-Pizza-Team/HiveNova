@@ -119,7 +119,7 @@ function ShowMessageListPage()
 			'text'		=> $messageRow['message_text'],
 			'type'		=> $messageRow['message_type'],
 			'deleted'	=> $messageRow['message_deleted'] != NULL,
-			'time'		=> str_replace(' ', '&nbsp;', _date($LNG['php_tdformat'], $messageRow['message_time']), $USER['timezone']),
+			'time'		=> str_replace(' ', '&nbsp;', _date($LNG['php_tdformat'], $messageRow['message_time'], $USER['timezone'])),
 		);
 	}	
 	
