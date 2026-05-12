@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use HiveNova\Core\AdminLogDetailRows;
+use HiveNova\Core\Language;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,6 +17,25 @@ class AdminLogDetailRowsTest extends TestCase
     protected function tearDown(): void
     {
         unset($GLOBALS['userNumberFormat']);
+    }
+
+    public function testBuildAcceptsLanguageInstanceLikeAdminShowLogDetail(): void
+    {
+        $lng = new Language(null);
+        $lng->addData([
+            'php_tdformat' => 'Y-m-d',
+            'tech' => [],
+        ]);
+
+        $before = ['multi' => 3, 'universe' => 1];
+        $after = ['universe' => 1];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('multi', $rows[0]['Element']);
+        $this->assertSame('3', strip_tags($rows[0]['old']));
+        $this->assertSame('', $rows[0]['new']);
     }
 
     public function testMissingAfterKeyProducesEmptyNewValue(): void
