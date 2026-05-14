@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: php-actions/composer@v6
         with:
+          version: "2.9.8"
           php_version: "8.3"
           php_extensions: "gmp"
       - uses: php-actions/phpunit@v4
@@ -56,6 +57,7 @@ jobs:
         with:
           php-version: "8.3"
           extensions: pdo_mysql, gd, gmp
+          tools: composer:2.9.8
       - run: composer install --no-interaction --prefer-dist
       - run: php tests/ci-install.php
       - run: mkdir -p cache/sessions cache/templates
@@ -99,6 +101,7 @@ jobs:
         with:
           php-version: "8.3"
           extensions: pdo_mysql, gd, gmp, xdebug
+          tools: composer:2.9.8
       - run: composer install --no-interaction --prefer-dist
       - run: php tests/ci-install.php
       - run: mkdir -p cache/sessions cache/templates
