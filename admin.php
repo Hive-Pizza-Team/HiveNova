@@ -202,6 +202,10 @@ switch($page)
 		include_once('includes/pages/adm/ShowAutoCompletePage.php');
 		ShowAutoCompletePage();
 	break;
+	case 'destruction':
+		include_once('includes/pages/adm/ShowDestructionPage.php');
+		ShowDestructionPage();
+	break;
 	case 'dump':
 		include_once('includes/pages/adm/ShowDumpPage.php');
 		ShowDumpPage();

@@ -152,7 +152,7 @@ function ShowCreatorPage()
 
 				$moonId	= PlayerUtil::createMoon(Universe::getEmulated(), $MoonPlanet['galaxy'], $MoonPlanet['system'],
 					$MoonPlanet['planet'], $MoonPlanet['id_owner'], 20,
-					(($_POST['diameter_check'] == 'on') ? NULL : $Diameter), $MoonName);
+					((isset($_POST['diameter_check']) && $_POST['diameter_check'] == 'on') ? NULL : $Diameter), $MoonName);
 
 
 
@@ -207,19 +207,16 @@ function ShowCreatorPage()
 					exit;
 				}
 
-				$planetId	= PlayerUtil::createPlanet($Galaxy, $System, $Planet, Universe::getEmulated(), $id, NULL, false, $ISUser['authlevel']);
-						
-				$SQL  = "UPDATE ".PLANETS." SET ";
-				
-				if ($_POST['diameter_check'] != 'on' || $field_max > 0)
-					$SQL .= "field_max = '".$field_max."' ";
-			
-				if (!empty($name))
-					$SQL .= ", name = '".$GLOBALS['DATABASE']->sql_escape($name)."' ";
+				if (!PlayerUtil::isPositionFree(Universe::getEmulated(), $Galaxy, $System, $Planet)) {
+					$template->message($LNG['po_complete_all'], '?page=create&mode=planet', 3, true);
+					exit;
+				}
 
-				$SQL .= "WHERE ";
-				$SQL .= "id = '".$planetId."'";
-				$GLOBALS['DATABASE']->query($SQL);
+				$planetId	= PlayerUtil::createPlanet($Galaxy, $System, $Planet, Universe::getEmulated(), $id, !empty($name) ? $name : NULL, false, $ISUser['authlevel']);
+
+				if ($field_max > 0) {
+					$GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET field_max = '".$field_max."' WHERE id = '".$planetId."';");
+				}
 
 				$template->message($LNG['po_complete_succes'], '?page=create&mode=planet', 3, true);
 				exit;
