@@ -152,7 +152,7 @@ function ShowCreatorPage()
 
 				$moonId	= PlayerUtil::createMoon(Universe::getEmulated(), $MoonPlanet['galaxy'], $MoonPlanet['system'],
 					$MoonPlanet['planet'], $MoonPlanet['id_owner'], 20,
-					(($_POST['diameter_check'] == 'on') ? NULL : $Diameter), $MoonName);
+					((isset($_POST['diameter_check']) && $_POST['diameter_check'] == 'on') ? NULL : $Diameter), $MoonName);
 
 
 
@@ -211,7 +211,7 @@ function ShowCreatorPage()
 						
 				$SQL  = "UPDATE ".PLANETS." SET ";
 				
-				if ($_POST['diameter_check'] != 'on' || $field_max > 0)
+				if ($field_max > 0)
 					$SQL .= "field_max = '".$field_max."' ";
 			
 				if (!empty($name))
