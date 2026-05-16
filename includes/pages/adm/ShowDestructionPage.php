@@ -512,6 +512,27 @@ function destructionSqlPreviewLines(
 }
 
 /**
+ * Lore / narrative message from the destruction form.
+ *
+ * Must not pass through HTTP::_GP string handling: that applies htmlspecialchars(),
+ * and ingame message views escape again in Smarty — apostrophes would show as &#039;.
+ */
+function destructionMessageFromRequest(): string
+{
+    if (!isset($_REQUEST['message'])) {
+        return '';
+    }
+    $var = (string) $_REQUEST['message'];
+    $var = str_replace(["\r\n", "\r", "\0"], ["\n", "\n", ''], $var);
+    $var = trim($var);
+    if ($var !== '' && !preg_match('/^./u', $var)) {
+        return '';
+    }
+
+    return $var;
+}
+
+/**
  * Pack POST tuning knobs used by preview / destruction into one array for session round-trip.
  *
  * @return array<string, mixed>
@@ -532,7 +553,7 @@ function destructionPackParams(): array
         'debris_metal'   => HTTP::_GP('debris_metal', 1000000),
         'debris_crystal' => HTTP::_GP('debris_crystal', 0),
         'broadcast'      => HTTP::_GP('broadcast', 1),
-        'message'        => HTTP::_GP('message', ''),
+        'message'        => destructionMessageFromRequest(),
         'spawn_apply'    => HTTP::_GP('spawn_apply', 0),
         'spawn_galaxy'   => HTTP::_GP('spawn_galaxy', 0),
         'spawn_system'   => HTTP::_GP('spawn_system', 0),
