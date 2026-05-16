@@ -217,24 +217,44 @@ UNLOCK TABLES;
 	
 	public function restoreDatabase($filePath)
 	{
-		// Ugly.
 		$this->setTimelimit();
-		
+
+		if(!is_file($filePath) || !is_readable($filePath))
+		{
+			throw new Exception('Backup file not found or not readable.');
+		}
+
 		if($this->canNative('mysql'))
 		{
 			$database	= array();
 			require 'includes/config.php';
-			$sqlDump	= shell_exec("mysql --host='".escapeshellarg($database['host'])."' --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' --password='".escapeshellarg($database['userpw'])."' '".escapeshellarg($database['databasename'])."' < ".escapeshellarg((string) $filePath)." 2>&1 1> /dev/null");
-			if(strlen($sqlDump) !== 0) #mysql error
+
+			$dbVersion	= Database::get()->selectSingle('SELECT @@version', array(), '@@version');
+			if(version_compare($dbVersion, '5.5') >= 0) {
+				putenv('MYSQL_PWD='.$database['userpw']);
+				$passwordArgument = '';
+			} else {
+				$passwordArgument = "--password='".escapeshellarg($database['userpw'])."'";
+			}
+
+			$sqlDump	= shell_exec("mysql --host=".escapeshellarg($database['host'])." --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' ".$passwordArgument." ".escapeshellarg($database['databasename'])." < ".escapeshellarg((string) $filePath)." 2>&1");
+			if($sqlDump !== null && strlen($sqlDump) !== 0)
 			{
 				throw new Exception($sqlDump);
 			}
 		}
 		else
 		{
-			$backupQuery	= explode(";\r\n", file_get_contents($filePath));
+			$sql		= file_get_contents($filePath);
+			$delimiter	= str_contains($sql, ";\r\n") ? ";\r\n" : ";\n";
+			$backupQuery	= explode($delimiter, $sql);
 			foreach($backupQuery as $query)
 			{
+				$query	= trim($query);
+				if($query === '')
+				{
+					continue;
+				}
 				Database::get()->nativeQuery($query);
 			}
 		}
