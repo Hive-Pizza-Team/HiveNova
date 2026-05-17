@@ -685,13 +685,13 @@ $LNG['dest_result_done']             = 'All steps completed successfully. The zo
 $LNG['dest_result_skipped']          = 'Warning: %d player(s) could not be relocated and have no planets. Manual follow-up required.';
 
 $LNG['dest_story_title']            = 'MOON Universe 2 storyline';
-$LNG['dest_story_body']             = 'This admin tool was built for the MOON Universe 2 storyline events: galaxy-wide resets, staged destruction, and curated relocations. Always preview impact, review the SQL summary, and keep backups enabled before executing destructive writes.';
+$LNG['dest_story_body']             = 'This admin tool was built for the MOON Universe 2 storyline events: galaxy-wide resets, staged destruction, and curated relocations. Always preview impact, review the SQL summary, and confirm the automatic database backup step before executing destructive writes.';
 $LNG['dest_preview_continue']       = 'Continue to execution review';
 $LNG['dest_preview_discard']        = 'Discard preview';
 $LNG['dest_review_title']           = 'Execution review — confirm';
 $LNG['dest_review_sql_title']       = 'SQL operations (summary)';
 $LNG['dest_backup_before']          = 'Database backup';
-$LNG['dest_backup_before_label']    = 'Save a full game-database backup before any destructive writes (recommended)';
+$LNG['dest_backup_before_label']    = 'A full game-database backup runs automatically before any destructive writes (required).';
 $LNG['dest_spawn_section']          = 'New-account spawn cursor';
 $LNG['dest_spawn_apply']            = 'Update universe registration spawn cursor after destruction';
 $LNG['dest_spawn_help']             = 'Sets %%CONFIG%% LastSettedGalaxyPos / LastSettedSystemPos / LastSettedPlanetPos — used when PlayerUtil creates new accounts without explicit coordinates.';
