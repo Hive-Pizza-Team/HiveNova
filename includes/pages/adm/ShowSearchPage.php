@@ -87,9 +87,7 @@ function ShowSearchPage()
 	);
 	$template	= new Template();
 
-	
-	
-	
+	$Minimize = '';
 	if (HTTP::_GP('minimize', '') == 'on')
 	{
 		$Minimize			= "&amp;minimize=on";

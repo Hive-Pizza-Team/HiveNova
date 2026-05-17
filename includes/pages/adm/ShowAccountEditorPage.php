@@ -16,9 +16,11 @@
  */
 
 use HiveNova\Core\Config;
+use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Log;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
@@ -47,7 +49,7 @@ function ShowAccountEditorPage()
 				if (!empty($id))
 					$before = $GLOBALS['DATABASE']->getFirstRow("SELECT `metal`,`crystal`,`deuterium`,`universe`  FROM ".PLANETS." WHERE `id` = '". $id ."';");
 				if (!empty($id_dark))
-					$before_dm = $GLOBALS['DATABASE']->getFirstRow("SELECT `darkmatter` FROM ".USERS." WHERE `id` = '". $id_dark ."';");
+					$before_dm = $GLOBALS['DATABASE']->getFirstRow("SELECT `darkmatter`, `universe` FROM ".USERS." WHERE `id` = '". $id_dark ."';");
 				if ($_POST['add'])
 				{
 					if (!empty($id)) {
@@ -92,11 +94,44 @@ function ShowAccountEditorPage()
 						$after_dm 	= array('darkmatter' => ($before_dm['darkmatter'] - $dark));
 					}
 				}
+
+				if (!empty($id_dark) && (float) $dark != 0.0) {
+					$adminId = (int) Session::load()->userId;
+					$memoSuffix = ' uni='.(int) Universe::getEmulated().' admin='.$adminId;
+					$deltaDm = abs((float) $dark);
+					if ($_POST['add']) {
+						Database::get()->insert(
+							'INSERT INTO %%DM_TRANSACTIONS%% SET
+								timestamp = NOW(),
+								user_id = :user_id,
+								amount_received = :amount_received,
+								memo = :memo;',
+							[
+								':user_id' => $id_dark,
+								':amount_received' => $deltaDm,
+								':memo' => 'account_editor_add'.$memoSuffix,
+							]
+						);
+					} elseif ($_POST['delete']) {
+						Database::get()->insert(
+							'INSERT INTO %%DM_TRANSACTIONS%% SET
+								timestamp = NOW(),
+								user_id = :user_id,
+								amount_spent = :amount_spent,
+								memo = :memo;',
+							[
+								':user_id' => $id_dark,
+								':amount_spent' => $deltaDm,
+								':memo' => 'account_editor_remove'.$memoSuffix,
+							]
+						);
+					}
+				}
 								
 				if (!empty($id)) {
 					$LOG = new Log(2);
 					$LOG->target = $id;
-					$LOG->universe = $before_dm['universe'];
+					$LOG->universe = $before['universe'];
 					$LOG->old = $before;
 					$LOG->new = $after;
 					$LOG->save();

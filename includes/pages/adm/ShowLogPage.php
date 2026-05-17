@@ -15,8 +15,8 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminLogDetailRows;
 use HiveNova\Core\HTTP;
-use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
 
@@ -60,7 +60,7 @@ function ShowLogOverview() {
 }
 
 function ShowLogDetail() {
-	global $LNG;
+	global $LNG, $USER;
 	$logid = HTTP::_GP('id', 0);
 	$result   	= $GLOBALS['DATABASE']->getFirstRow("SELECT l.*, u_a.username as admin_username FROM ".LOG." as l LEFT JOIN ".USERS." as u_a ON  u_a.id = l.admin  WHERE l.id = ".$logid."");
 	
@@ -122,26 +122,7 @@ function ShowLogDetail() {
 		'field_max'		=> $LNG['qe_fields'],
 	);
 	
-	foreach ($conf_before as $key => $val) {
-		if ($key != 'universe') {
-			if(isset($LNG['tech'][$key]))
-				$Element = $LNG['tech'][$key];
-			elseif(isset($LNG['se_'.$key]))
-				$Element = $LNG['se_'.$key];
-			elseif(isset($LNG[$key]))
-				$Element = $LNG[$key];
-			elseif(isset($Wrapper[$key]))
-				$Element = $Wrapper[$key];
-			else
-				$Element = $key;
-			
-			$LogArray[]	= array(
-				'Element'	=> $Element,
-				'old'		=> ($Element == 'urlaubs_until' ? _date($LNG['php_tdformat'], $val) : (is_numeric($val) ? pretty_number($val) : $val)),
-				'new'		=> ($Element == 'urlaubs_until' ? _date($LNG['php_tdformat'], $conf_after[$key]) : (is_numeric($conf_after[$key]) ? pretty_number($conf_after[$key]) : $conf_after[$key])),
-			);
-		}
-	}
+	$LogArray = AdminLogDetailRows::build($conf_before, $conf_after, $Wrapper, $LNG);
 		
 	$template	= new Template();	
 	$template->assign_vars(array(	
@@ -164,7 +145,7 @@ function ShowLogDetail() {
 }
 
 function ShowLogSettingsList() {
-	global $LNG;
+	global $LNG, $USER;
 	$result    = $GLOBALS['DATABASE']->query("SELECT l.id, l.admin, l.time, l.universe, l.target,u_a.username as admin_username FROM ".LOG." as l LEFT JOIN ".USERS." as u_a ON  u_a.id = l.admin WHERE mode = 3 ORDER BY id DESC");
 
 	$template	= new Template();	
@@ -205,7 +186,7 @@ function ShowLogSettingsList() {
 }
 
 function ShowLogPlanetsList() {
-	global $LNG;
+	global $LNG, $USER;
 
 	$result    = $GLOBALS['DATABASE']->query("SELECT DISTINCT l.id, l.admin, l.target, l.time, l.universe,u_t.username as target_username, p.galaxy as target_galaxy, p.system as target_system, p.planet as target_planet,u_a.username as admin_username FROM ".LOG." as l LEFT JOIN ".USERS." as u_a ON  u_a.id = l.admin LEFT JOIN ".PLANETS." as p ON p.id = l.target LEFT JOIN ".USERS." as u_t ON u_t.id = p.id_owner WHERE mode = 2 ORDER BY id DESC");
 
@@ -239,7 +220,7 @@ function ShowLogPlanetsList() {
 }
 
 function ShowLogPlayersList() {
-	global $LNG;
+	global $LNG, $USER;
 
 	$result    = $GLOBALS['DATABASE']->query("SELECT DISTINCT l.id, l.admin, l.target, l.time, l.universe,u_t.username as target_username,u_a.username as admin_username FROM ".LOG." as l LEFT JOIN ".USERS." as u_a ON  u_a.id = l.admin LEFT JOIN ".USERS." as u_t ON u_t.id = l.target WHERE mode = 1 ORDER BY l.id DESC");
 
@@ -272,7 +253,7 @@ function ShowLogPlayersList() {
 }
 
 function ShowLogPresent() {
-	global $LNG;
+	global $LNG, $USER;
 
 	$result    = $GLOBALS['DATABASE']->query("SELECT DISTINCT l.id, l.admin, l.target, l.time, l.universe, u_a.username as admin_username FROM ".LOG." as l LEFT JOIN ".USERS." as u_a ON u_a.id = l.admin WHERE mode = 4 ORDER BY l.id DESC;");
 

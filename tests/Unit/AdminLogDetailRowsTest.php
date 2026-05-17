@@ -1,0 +1,186 @@
+<?php
+
+declare(strict_types=1);
+
+use HiveNova\Core\AdminLogDetailRows;
+use HiveNova\Core\Language;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Regression tests for admin log detail rendering (ShowLogDetail).
+ *
+ * Serialized before/after snapshots can diverge (e.g. config key removed); PHP 8 must not
+ * emit undefined index notices when building the comparison table.
+ */
+class AdminLogDetailRowsTest extends TestCase
+{
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['userNumberFormat']);
+    }
+
+    public function testBuildAcceptsLanguageInstanceLikeAdminShowLogDetail(): void
+    {
+        $lng = new Language(null);
+        $lng->addData([
+            'php_tdformat' => 'Y-m-d',
+            'tech' => [],
+        ]);
+
+        $before = ['multi' => 3, 'universe' => 1];
+        $after = ['universe' => 1];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('multi', $rows[0]['Element']);
+        $this->assertSame('3', strip_tags($rows[0]['old']));
+        $this->assertSame('', $rows[0]['new']);
+    }
+
+    public function testMissingAfterKeyProducesEmptyNewValue(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+        $before = ['multi' => 2, 'universe' => 1];
+        $after = ['universe' => 1];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('multi', $rows[0]['Element']);
+        $this->assertSame('2', strip_tags($rows[0]['old']));
+        $this->assertSame('', $rows[0]['new']);
+    }
+
+    public function testExplicitNullInAfterIsRenderedAsEmptyNew(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+        $before = ['multi' => 1];
+        $after = ['multi' => null];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('', $rows[0]['new']);
+    }
+
+    public function testSkipsUniverseRow(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+        $before = ['universe' => 99, 'metal' => 100];
+        $after = ['universe' => 99, 'metal' => 200];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertStringContainsString('100', strip_tags($rows[0]['old']));
+        $this->assertStringContainsString('200', strip_tags($rows[0]['new']));
+    }
+
+    public function testUsesWrapperLabelWhenPresent(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d', 'tech' => []];
+        $wrapper = ['metal' => 'Metal resource'];
+
+        $rows = AdminLogDetailRows::build(
+            ['metal' => 10],
+            ['metal' => 20],
+            $wrapper,
+            $lng
+        );
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('Metal resource', $rows[0]['Element']);
+    }
+
+    public function testEmptyBeforeReturnsNoRows(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+
+        $rows = AdminLogDetailRows::build([], ['metal' => 5], [], $lng);
+
+        $this->assertSame([], $rows);
+    }
+
+    public function testBeforeWithOnlyUniverseProducesNoRows(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+        $before = ['universe' => 2];
+        $after = ['universe' => 2, 'bonus_only_after' => 'x'];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertSame([], $rows);
+    }
+
+    public function testKeysOnlyPresentInAfterAreNotListed(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+        $before = ['universe' => 1, 'metal' => 100];
+        $after = ['universe' => 1, 'metal' => 100, 'only_after' => 999];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('metal', $rows[0]['Element']);
+    }
+
+    public function testNonScalarValuesRenderAsEmptyStrings(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+        $before = ['nested' => ['a' => 1]];
+        $after = ['nested' => ['b' => 2]];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('', $rows[0]['old']);
+        $this->assertSame('', $rows[0]['new']);
+    }
+
+    public function testEmptyStringUsesScalarBranch(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+        $before = ['note' => ''];
+        $after = ['note' => 'filled'];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('', $rows[0]['old']);
+        $this->assertSame('filled', $rows[0]['new']);
+    }
+
+    public function testNumericStringUsesPrettyNumber(): void
+    {
+        $lng = ['php_tdformat' => 'Y-m-d'];
+        $before = ['n' => '42'];
+        $after = ['n' => '007'];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('42', strip_tags($rows[0]['old']));
+        $this->assertSame('7', strip_tags($rows[0]['new']));
+    }
+
+    public function testUrlaubsUntilColumnUsesDateFormat(): void
+    {
+        // locale_date_format() reads week_day/months even when the pattern has no D/M tokens (PHP evaluates replacements eagerly).
+        $lng = [
+            'php_tdformat' => 'Y-m-d H:i:s',
+            'week_day' => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            'months' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        ];
+        $ts = 946684800;
+        $before = ['urlaubs_until' => $ts];
+        $after = ['urlaubs_until' => $ts + 3600];
+
+        $rows = AdminLogDetailRows::build($before, $after, [], $lng);
+
+        $this->assertCount(1, $rows);
+        $this->assertStringStartsWith('2000-01-01', $rows[0]['old']);
+        $this->assertStringStartsWith('2000-01-01', $rows[0]['new']);
+        $this->assertNotSame($rows[0]['old'], $rows[0]['new']);
+    }
+}
