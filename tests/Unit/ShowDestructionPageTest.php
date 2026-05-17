@@ -167,7 +167,7 @@ final class ShowDestructionPageTest extends TestCase
         $this->assertStringContainsString('cancel_preview', $tpl);
         $this->assertStringContainsString('dest_review_execute', $tpl);
         $this->assertStringContainsString('review_token', $tpl);
-        $this->assertStringContainsString('backup_before', $tpl);
+        $this->assertStringContainsString('dest_backup_before_label', $tpl);
         $this->assertStringContainsString('cancel_review', $tpl);
         $this->assertStringContainsString('dest_backup_saved', $tpl);
     }
@@ -196,6 +196,7 @@ final class ShowDestructionPageTest extends TestCase
         $this->assertStringContainsString('review_token', $src);
         $this->assertStringContainsString('hash_equals', $src);
         $this->assertStringContainsString('runDestructionDatabaseBackup', $src);
+        $this->assertStringNotContainsString("HTTP::_GP('backup_before'", $src);
         $this->assertStringContainsString('applySpawnCursor', $src);
         $this->assertStringContainsString('destructionSqlPreviewLines', $src);
         $this->assertStringContainsString('destructionPackParams', $src);
