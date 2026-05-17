@@ -41,17 +41,23 @@ class ShowPushPage extends AbstractGamePage
 
 		$raw = file_get_contents('php://input');
 		$data = json_decode($raw ?: '', true);
-		if (!is_array($data) || empty($data['endpoint']) || empty($data['keys']['p256dh']) || empty($data['keys']['auth'])) {
+		if (!is_array($data) || !PushNotificationService::isValidSubscription($data)) {
 			HTTP::sendHeader('HTTP/1.1 400 Bad Request');
 			$this->sendJSON(['error' => 'invalid_subscription']);
+			return;
 		}
 
-		PushNotificationService::setUserPreference((int) $USER['id'], true);
-		PushNotificationService::saveSubscription(
+		if (!PushNotificationService::saveSubscription(
 			(int) $USER['id'],
 			$data,
 			$_SERVER['HTTP_USER_AGENT'] ?? null
-		);
+		)) {
+			HTTP::sendHeader('HTTP/1.1 403 Forbidden');
+			$this->sendJSON(['error' => 'subscription_forbidden']);
+			return;
+		}
+
+		PushNotificationService::setUserPreference((int) $USER['id'], true);
 
 		$this->sendJSON(['ok' => true]);
 	}
@@ -62,8 +68,8 @@ class ShowPushPage extends AbstractGamePage
 
 		$raw = file_get_contents('php://input');
 		$data = json_decode($raw ?: '', true);
-		if (!empty($data['endpoint'])) {
-			PushNotificationService::removeSubscription($data['endpoint']);
+		if (!empty($data['endpoint']) && is_string($data['endpoint'])) {
+			PushNotificationService::removeSubscriptionForUser((int) $USER['id'], $data['endpoint']);
 		}
 
 		PushNotificationService::setUserPreference((int) $USER['id'], false);
