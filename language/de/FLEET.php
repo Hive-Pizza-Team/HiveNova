@@ -48,6 +48,7 @@ $LNG['sys_attacker_won'] 					= 'Der Angreifer hat die Schlacht gewonnen!';
 $LNG['sys_defender_won'] 					= 'Der Verteidiger hat die Schlacht gewonnen!';
 $LNG['sys_both_won'] 						= 'Der Kampf endet mit einem Unentschieden!';
 $LNG['sys_stealed_ressources'] 				= 'Er erbeutet';
+$LNG['sys_steal_unprofitable_tooltip']		= 'Die erbeuteten Ressourcen sind weniger wert als der Treibstoff für diesen Angriff';
 $LNG['sys_and']								= 'und';
 $LNG['sys_mess_tower'] 						= 'Flottenhauptquatier';
 $LNG['sys_mess_attack_report'] 				= 'Kampfbericht';
