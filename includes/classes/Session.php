@@ -55,9 +55,17 @@ class Session
 		ini_set('upload_tmp_dir', CACHE_PATH.'sessions');
 		
 		$HTTP_ROOT = MODE === 'INSTALL' ? dirname(HTTP_ROOT) : HTTP_ROOT;
-		
+		$cookiePath = ($HTTP_ROOT !== '' && $HTTP_ROOT !== '/') ? $HTTP_ROOT : '/';
+
 		date_default_timezone_set('UTC');
-		session_set_cookie_params(SESSION_LIFETIME, $HTTP_ROOT, NULL, HTTPS, true);
+		session_set_cookie_params([
+			'lifetime' => SESSION_LIFETIME,
+			'path'     => $cookiePath,
+			'domain'   => '',
+			'secure'   => (bool) HTTPS,
+			'httponly' => true,
+			'samesite' => 'Lax',
+		]);
 		session_cache_limiter('nocache');
 		session_name('2Moons');
 
@@ -151,6 +159,11 @@ class Session
 					self::create();
 				}
 			}
+			elseif ($restored = self::restoreFromDatabase(session_id()))
+			{
+				self::$obj = $restored;
+				register_shutdown_function(array(self::$obj, 'save'));
+			}
 			else
 			{
 				self::create();
@@ -158,6 +171,48 @@ class Session
 		}
 
 		return self::$obj;
+	}
+
+	/**
+	 * Rebuild session state when the PHP session file is gone but the cookie and DB row remain
+	 * (common on iOS PWAs after the app is suspended).
+	 */
+	static private function restoreFromDatabase(string $sessionId): ?self
+	{
+		if ($sessionId === '') {
+			return null;
+		}
+
+		$db = Database::get();
+		$row = $db->selectSingle(
+			'SELECT userID, lastonline FROM %%SESSION%% WHERE sessionID = :sessionId',
+			[':sessionId' => $sessionId]
+		);
+
+		if (empty($row['userID']) || (int) $row['lastonline'] < TIMESTAMP - SESSION_LIFETIME) {
+			return null;
+		}
+
+		$user = $db->selectSingle(
+			'SELECT id, id_planet FROM %%USERS%% WHERE id = :userId',
+			[':userId' => $row['userID']]
+		);
+
+		if (empty($user['id'])) {
+			return null;
+		}
+
+		$obj = new self;
+		$obj->data = [
+			'userId'        => (int) $user['id'],
+			'planetId'      => (int) $user['id_planet'],
+			'adminAccess'   => 0,
+			'lastActivity'  => (int) $row['lastonline'],
+			'sessionId'     => $sessionId,
+			'userIpAddress' => self::getClientIp(),
+		];
+
+		return $obj;
 	}
 
 	/**
@@ -275,15 +330,6 @@ class Session
 				':sessionId'	=> session_id(),
 			)); }
 
-		// Remove old sessions
-		if($created + SESSION_LIFETIME < time()) {
-			$sql	= 'DELETE FROM %%SESSION%% WHERE (userID = :userId AND sessionID = :sessionId);';
-
-		$db->delete($sql, array(
-			':userId'		=> $this->data['userId'],
-			':sessionId'	=> session_id(),
-		));}
-
 		$this->data['lastActivity']  = TIMESTAMP;
 		$this->data['sessionId']	 = session_id();
 		$this->data['userIpAddress'] = $userIpAddress;
@@ -291,9 +337,30 @@ class Session
 
 		$_SESSION['obj']	= serialize($this);
 
+		self::refreshSessionCookie();
+
 		@session_write_close();
 	}
 }
+
+	private static function refreshSessionCookie(): void
+	{
+		$params = session_get_cookie_params();
+		$expires = time() + SESSION_LIFETIME;
+
+		if (PHP_VERSION_ID >= 70300) {
+			setcookie(session_name(), session_id(), [
+				'expires'  => $expires,
+				'path'     => $params['path'] ?: '/',
+				'domain'   => $params['domain'],
+				'secure'   => $params['secure'],
+				'httponly' => $params['httponly'],
+				'samesite' => $params['samesite'] ?? 'Lax',
+			]);
+		} else {
+			setcookie(session_name(), session_id(), $expires, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+		}
+	}
 
 	public function delete()
 	{
@@ -315,7 +382,7 @@ class Session
 		// }
 
 		if(isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)==2 && MODE === 'INGAME') {
-		$this->data['lastActivity']=time(); } else { if(!isset($_SESSION["obj"])) { return false; } }
+		$this->data['lastActivity']=time(); } elseif (!isset($_SESSION['obj']) && empty($this->data['userId'])) { return false; }
 
 		
 		if(is_null($this->data) || $this->data['lastActivity'] < TIMESTAMP - SESSION_LIFETIME)
