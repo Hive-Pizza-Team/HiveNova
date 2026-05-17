@@ -894,6 +894,7 @@ $LNG['op_permanent_email_adress']			= 'Endereço de E-Mail permanente';
 $LNG['op_push_notifications']				= 'Mobile push notifications';
 $LNG['op_push_enable']						= 'Enable attack / fleet alerts';
 $LNG['op_push_disable']						= 'Disable notifications';
+$LNG['op_push_not_configured']				= 'Server push is not configured; your preference is saved for when it is enabled.';
 $LNG['push_hostile_title']					= 'Incoming fleet';
 $LNG['push_hostile_body']					= '%s heading to [%d:%d:%d]';
 $LNG['op_general_settings']					= 'Opções gerais';
