@@ -3,7 +3,7 @@
 <table>
 	<tr>
 		<th colspan="9">
-			<div class="transparent" style="text-align:left;float:left;">{$LNG.fl_fleets} {$activeFleetSlots} / {$maxFleetSlots}</div>
+			<div class="transparent" style="text-align:left;float:left;">{$LNG.fl_fleets} <span id="activeFleetSlots" data-max="{$maxFleetSlots}">{$activeFleetSlots}</span> / {$maxFleetSlots}</div>
 			<div class="transparent" style="text-align:right;float:right;">{$activeExpedition} / {$maxExpedition} {$LNG.fl_expeditions}</div>
 		</th>
 	</tr>
@@ -115,9 +115,9 @@
 	<td colspan="2"><a href="javascript:maxShips();">{$LNG.fl_select_all_ships}</a></td>
 	{/if}
 	</tr>
-	{if $maxFleetSlots != $activeFleetSlots}
-	<tr style="height:20px;"><td colspan="4"><input type="submit" value="{$LNG.fl_continue}"></td>
-	{/if}
+	<tr id="fleetContinueRow" style="height:20px;{if $maxFleetSlots == $activeFleetSlots}display:none;{/if}">
+		<td colspan="4"><input type="submit" value="{$LNG.fl_continue}"></td>
+	</tr>
 </table>
 </form>
 <br>
