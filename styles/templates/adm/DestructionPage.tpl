@@ -198,13 +198,10 @@ $(function() {
     <input type="hidden" name="spawn_galaxy" value="{$spawn_galaxy}">
     <input type="hidden" name="spawn_system" value="{$spawn_system}">
     <input type="hidden" name="spawn_planet" value="{$spawn_planet}">
-    <input type="hidden" name="backup_before" value="0">
     <table class="table569">
         <tr>
             <td>{$LNG.dest_backup_before}</td>
-            <td>
-                <label><input type="checkbox" name="backup_before" value="1" checked> {$LNG.dest_backup_before_label}</label>
-            </td>
+            <td>{$LNG.dest_backup_before_label}</td>
         </tr>
         <tr>
             <td colspan="2">
