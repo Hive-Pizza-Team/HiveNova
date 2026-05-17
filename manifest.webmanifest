@@ -3,6 +3,7 @@
   "short_name": "HiveNova",
   "description": "Space empire browser game",
   "start_url": "/game.php?page=overview",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#1a1a2e",
