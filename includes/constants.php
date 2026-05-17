@@ -144,6 +144,20 @@ define('FLEETLOG_AGE'				, 86400);
 // Show fleet notification popup when under attack (enable_multialert)
 define('ENABLE_MULTIALERT'			, false);
 
+// Web Push (mobile notifications). Keys in includes/push.config.php (installer or manual).
+if (is_readable(__DIR__ . '/push.config.php')) {
+	require __DIR__ . '/push.config.php';
+}
+if (!defined('PUSH_VAPID_PUBLIC')) {
+	define('PUSH_VAPID_PUBLIC', '');
+}
+if (!defined('PUSH_VAPID_PRIVATE')) {
+	define('PUSH_VAPID_PRIVATE', '');
+}
+if (!defined('PUSH_VAPID_SUBJECT')) {
+	define('PUSH_VAPID_SUBJECT', 'mailto:support@hive.pizza');
+}
+
 // =============================================================================
 // COMBAT
 // =============================================================================

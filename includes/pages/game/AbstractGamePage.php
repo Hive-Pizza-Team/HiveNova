@@ -5,6 +5,7 @@ namespace HiveNova\Page\Game;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
+use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
@@ -200,6 +201,8 @@ abstract class AbstractGamePage
 			'hasGate'			=> $PLANET[$resource[43]] > 0,
 			'discordUrl'		=> DISCORD_URL,
 			'badges'            => PlayerUtil::getPlayerBadges($USER),
+			'pushAlerts'		=> PushNotificationService::isEnabledForUser((int) $USER['id']) ? 1 : 0,
+			'pushConfigured'	=> PushNotificationService::isConfigured(),
 		));
 	}
 

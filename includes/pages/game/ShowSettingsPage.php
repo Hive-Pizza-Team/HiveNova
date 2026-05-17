@@ -9,6 +9,7 @@ use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Theme;
+use HiveNova\Core\PushNotificationService;
 
 /**
  *  2Moons 
@@ -88,6 +89,8 @@ class ShowSettingsPage extends AbstractGamePage
 				'galaxyMessage' 	=> $USER['settings_wri'],
 				'blockPM' 			=> $USER['settings_blockPM'],
 				'numberFormat'		=> $USER['number_format'] ?? 'auto',
+				'pushAlerts'		=> PushNotificationService::isEnabledForUser((int) $USER['id']) ? 1 : 0,
+				'pushConfigured'	=> PushNotificationService::isConfigured(),
 				'userid'		 	=> $USER['id'],
 				'ref_active'		=> Config::get()->ref_active,
 				'SELF_URL'          => PROTOCOL.HTTP_HOST.HTTP_ROOT
@@ -247,6 +250,7 @@ class ShowSettingsPage extends AbstractGamePage
 		$galaxyBuddyList	= HTTP::_GP('galaxyBuddyList', 0);	
 		$galaxyMissle		= HTTP::_GP('galaxyMissle', 0);
 		$blockPM			= HTTP::_GP('blockPM', 0);
+		$pushAlerts			= HTTP::_GP('pushAlerts', 0);
 		
 		$vacation			= HTTP::_GP('vacation', 0);	
 		$delete				= HTTP::_GP('delete', 0);
@@ -262,6 +266,10 @@ class ShowSettingsPage extends AbstractGamePage
 		$theme				= array_key_exists($theme, Theme::getAvalibleSkins()) ? $theme : $THEME->getThemeName();
 		
 		$db = Database::get();
+
+		if (PushNotificationService::isConfigured()) {
+			PushNotificationService::setUserPreference((int) $USER['id'], (int) $pushAlerts === 1);
+		}
 		
 		if (!empty($username) && $USER['username'] != $username)
 		{
