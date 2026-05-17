@@ -19,77 +19,141 @@
 		});
 	}
 
+	function fetchStatus() {
+		return fetch('game.php?page=push&mode=status', { credentials: 'same-origin' })
+			.then(function (r) { return r.json(); });
+	}
+
+	function subscribeWithRegistration(reg, publicKey) {
+		return reg.pushManager.getSubscription().then(function (existing) {
+			if (existing) {
+				return existing;
+			}
+			return reg.pushManager.subscribe({
+				userVisibleOnly: true,
+				applicationServerKey: urlBase64ToUint8Array(publicKey)
+			});
+		}).then(function (subscription) {
+			return fetch('game.php?page=push&mode=subscribe', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(subscription.toJSON())
+			});
+		});
+	}
+
 	window.HiveNovaPush = {
-		enable: function () {
+		fetchStatus: fetchStatus,
+
+		enable: function (options) {
+			options = options || {};
 			if (!('Notification' in window) || !('PushManager' in window)) {
 				return Promise.reject(new Error('unsupported'));
 			}
-			return fetch('game.php?page=push&mode=vapidPublicKey', { credentials: 'same-origin' })
-				.then(function (r) { return r.json(); })
-				.then(function (cfg) {
-					if (!cfg.configured || !cfg.publicKey) {
-						throw new Error('not_configured');
+			return fetchStatus().then(function (cfg) {
+				if (!cfg.configured || !cfg.publicKey) {
+					throw new Error('not_configured');
+				}
+				if (!cfg.enabled) {
+					throw new Error('disabled');
+				}
+
+				var permissionPromise;
+				if (options.skipPermissionRequest && Notification.permission === 'granted') {
+					permissionPromise = Promise.resolve('granted');
+				} else if (Notification.permission === 'granted') {
+					permissionPromise = Promise.resolve('granted');
+				} else if (Notification.permission === 'denied') {
+					permissionPromise = Promise.resolve('denied');
+				} else {
+					permissionPromise = Notification.requestPermission();
+				}
+
+				return permissionPromise.then(function (perm) {
+					if (perm !== 'granted') {
+						throw new Error('denied');
 					}
-					return Notification.requestPermission().then(function (perm) {
-						if (perm !== 'granted') {
-							throw new Error('denied');
+					return registerServiceWorker().then(function (reg) {
+						if (!reg) {
+							throw new Error('no_sw');
 						}
-						return registerServiceWorker().then(function (reg) {
-							if (!reg) {
-								throw new Error('no_sw');
-							}
-							return reg.pushManager.subscribe({
-								userVisibleOnly: true,
-								applicationServerKey: urlBase64ToUint8Array(cfg.publicKey)
-							});
-						});
-					}).then(function (subscription) {
-						return fetch('game.php?page=push&mode=subscribe', {
+						return subscribeWithRegistration(reg, cfg.publicKey);
+					});
+				});
+			});
+		},
+
+		disable: function () {
+			return registerServiceWorker().then(function (reg) {
+				var endpoint = null;
+				if (reg && reg.pushManager) {
+					return reg.pushManager.getSubscription().then(function (sub) {
+						if (sub) {
+							endpoint = sub.endpoint;
+							return sub.unsubscribe();
+						}
+					}).then(function () {
+						return fetch('game.php?page=push&mode=unsubscribe', {
 							method: 'POST',
 							credentials: 'same-origin',
 							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify(subscription.toJSON())
+							body: JSON.stringify({ endpoint: endpoint })
 						});
 					});
+				}
+				return fetch('game.php?page=push&mode=unsubscribe', {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({})
 				});
+			});
 		},
-		disable: function () {
-			return registerServiceWorker().then(function (reg) {
-				if (!reg || !reg.pushManager) {
+
+		maybeAutoSubscribe: function () {
+			if (!('Notification' in window) || !('PushManager' in window)) {
+				return Promise.resolve();
+			}
+			if (Notification.permission === 'denied') {
+				return Promise.resolve();
+			}
+			return fetchStatus().then(function (cfg) {
+				if (!cfg.configured || !cfg.enabled) {
 					return;
 				}
-				return reg.pushManager.getSubscription().then(function (sub) {
-					if (!sub) {
+				return HiveNovaPush.enable({
+					skipPermissionRequest: Notification.permission === 'granted'
+				}).catch(function (err) {
+					if (err && err.message === 'denied') {
 						return;
 					}
-					return fetch('game.php?page=push&mode=unsubscribe', {
-						method: 'POST',
-						credentials: 'same-origin',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ endpoint: sub.endpoint })
-					}).then(function () {
-						return sub.unsubscribe();
-					});
+					if (err && err.message === 'not_configured') {
+						return;
+					}
 				});
 			});
 		}
 	};
 
 	$(function () {
-		$('#push-notifications-enable').on('click', function (e) {
-			e.preventDefault();
-			HiveNovaPush.enable().then(function () {
-				alert('Notifications enabled');
-			}).catch(function (err) {
-				if (err && err.message === 'not_configured') {
-					alert('Push notifications are not configured on this server yet.');
-				}
-			});
+		registerServiceWorker().then(function () {
+			HiveNovaPush.maybeAutoSubscribe();
 		});
-		$('#push-notifications-disable').on('click', function (e) {
-			e.preventDefault();
-			HiveNovaPush.disable();
+
+		$('#pushAlerts').on('change', function () {
+			if (!this.checked) {
+				HiveNovaPush.disable();
+			} else {
+				HiveNovaPush.enable().catch(function (err) {
+					if (err && err.message === 'denied') {
+						$('#pushAlerts').prop('checked', false);
+					}
+					if (err && err.message === 'not_configured') {
+						$('#pushAlerts').prop('checked', false);
+					}
+				});
+			}
 		});
-		registerServiceWorker();
 	});
 })();

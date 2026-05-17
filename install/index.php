@@ -530,6 +530,8 @@ switch ($mode) {
 
 					$config->save();
 
+					\HiveNova\Core\PushNotificationService::generateAndWriteConfigFile();
+
 					\HiveNova\Core\HTTP::redirectTo('index.php?mode=install&step=7');
 				}
 				catch (Exception $e) {
@@ -578,6 +580,10 @@ switch ($mode) {
 				}
 
 				list($userId, $planetId) = \HiveNova\Core\PlayerUtil::createPlayer(\HiveNova\Core\Universe::current(), $username, $hashPassword, $mail, '', $LNG->getLanguage(), 1, 1, 2, NULL, AUTH_ADM);
+
+				if (filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+					\HiveNova\Core\PushNotificationService::updateConfigSubject('mailto:' . $mail);
+				}
 
 				$session	= Session::create();
 				$session->userId		= $userId;

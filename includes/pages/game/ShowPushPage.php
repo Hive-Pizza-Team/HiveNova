@@ -16,15 +16,23 @@ class ShowPushPage extends AbstractGamePage
 
 	public function show()
 	{
-		$this->vapidPublicKey();
+		$this->status();
+	}
+
+	public function status()
+	{
+		global $USER;
+
+		$this->sendJSON([
+			'configured' => PushNotificationService::isConfigured(),
+			'publicKey'  => PushNotificationService::getPublicKey(),
+			'enabled'    => PushNotificationService::isEnabledForUser((int) $USER['id']),
+		]);
 	}
 
 	public function vapidPublicKey()
 	{
-		$this->sendJSON([
-			'configured' => PushNotificationService::isConfigured(),
-			'publicKey'  => PushNotificationService::getPublicKey(),
-		]);
+		$this->status();
 	}
 
 	public function subscribe()
@@ -38,6 +46,7 @@ class ShowPushPage extends AbstractGamePage
 			$this->sendJSON(['error' => 'invalid_subscription']);
 		}
 
+		PushNotificationService::setUserPreference((int) $USER['id'], true);
 		PushNotificationService::saveSubscription(
 			(int) $USER['id'],
 			$data,
@@ -49,11 +58,16 @@ class ShowPushPage extends AbstractGamePage
 
 	public function unsubscribe()
 	{
+		global $USER;
+
 		$raw = file_get_contents('php://input');
 		$data = json_decode($raw ?: '', true);
 		if (!empty($data['endpoint'])) {
 			PushNotificationService::removeSubscription($data['endpoint']);
 		}
+
+		PushNotificationService::setUserPreference((int) $USER['id'], false);
+
 		$this->sendJSON(['ok' => true]);
 	}
 }
