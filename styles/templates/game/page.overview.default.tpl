@@ -43,6 +43,17 @@ $("#tn3").hide();
 </style>	
 
 <div>
+<div class="overview-mobile-shortcuts mobile">
+	<a href="game.php?page=buildings">{$LNG.lm_buildings}</a>
+	<a href="game.php?page=fleetTable">{$LNG.lm_fleet}</a>
+	<a href="game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}">{$LNG.lm_galaxy}</a>
+	<a href="game.php?page=messages">{$LNG.lm_messages}</a>
+</div>
+<div class="overview-command-timers mobile">
+	{if $buildInfo.buildings}<div><a href="game.php?page=buildings">{$LNG.lm_buildings}:</a> {$LNG.tech[$buildInfo.buildings['id']]} <span class="timer" data-time="{$buildInfo.buildings['timeleft']}">{$buildInfo.buildings['starttime']}</span></div>{/if}
+	{if $buildInfo.tech}<div><a href="game.php?page=research">{$LNG.lm_research}:</a> {$LNG.tech[$buildInfo.tech['id']]} <span class="timer" data-time="{$buildInfo.tech['timeleft']}">{$buildInfo.tech['starttime']}</span></div>{/if}
+	{if $buildInfo.fleet}<div><a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}:</a> {$LNG.tech[$buildInfo.fleet['id']]} <span class="timer" data-time="{$buildInfo.fleet['timeleft']}">{$buildInfo.fleet['starttime']}</span></div>{/if}
+</div>
 <div class="infos">
 <div class="planeto"><a href="#" onclick="return Dialog.PlanetAction();" title="{$LNG.ov_planetmenu}">{$LNG["type_planet_{$planet_type}"]} {$planetname}</a> ({$username})</div>
 

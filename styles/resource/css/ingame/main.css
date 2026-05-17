@@ -698,8 +698,10 @@ table.tablesorter thead tr .headerSortDown {
 
 @media screen and (max-width: 699px) {
     .wrapper {
-        grid-template-columns: 200px 1fr;
-        grid-template-rows: 67px 1fr auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: 45px 1fr auto;
+        min-height: 100dvh;
+        padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
     }
 
     top {
@@ -711,20 +713,24 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     header {
-        grid-column: 1/2;
+        grid-column: 1;
+        grid-row: 1;
     }
 
     header .fixed {
-        height: 45px;
-        width: 100vw;
-        padding: 0;
+        height: calc(45px + env(safe-area-inset-top, 0px));
+        width: 100%;
+        padding: env(safe-area-inset-top, 0px) 0 0 0;
+        max-width: none;
     }
 
     content {
-        grid-column: 1 / 2;
+        grid-column: 1;
         grid-row: 2;
-        width: 100vw;
-        padding: 0;
+        width: 100%;
+        max-width: none;
+        padding: 8px;
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     }
 
     .mobile {
@@ -736,26 +742,40 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     #planetSelector {
-        top: 44px;
+        top: calc(44px + env(safe-area-inset-top, 0px));
+        max-width: calc(100vw - 16px);
     }
 
     menu {
-        grid-column: 1;
-        grid-row: 2;
+        display: none;
+        position: fixed;
+        top: calc(45px + env(safe-area-inset-top, 0px));
+        left: 0;
+        right: 0;
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+        z-index: 90;
+        overflow-y: auto;
+        background: var(--color-bg-surface);
+        border-top: 1px solid var(--color-border);
     }
 
     menu .fixed {
-        position: unset;
-        width: 200px;
+        position: static;
+        width: 100%;
     }
 
     menu li {
         margin: initial;
-        border-right: 1px solid var(--color-border);
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
     }
 
     #menu a {
-        padding: 16px;
+        padding: 14px 16px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .planetSelectorWrapper {
@@ -771,18 +791,214 @@ table.tablesorter thead tr .headerSortDown {
         display: none;
     }
 
-    /*Show menu when invisible checkbox is checked*/
-    input[type=checkbox]:not(:checked)~menu {
-        display: none;
+    #toggle-menu:checked ~ menu {
+        display: block;
     }
 
     .hamburger {
-        display: unset;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
     }
 
     .buildl img {
+        width: 48px;
+        height: 48px;
+        display: inline-block;
+    }
+
+    button,
+    input[type="submit"],
+    input[type="button"],
+    .button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    #fancybox-wrap.mobile-dialog #fancybox-outer,
+    #fancybox-wrap.mobile-dialog #fancybox-content {
+        max-width: 95vw !important;
+    }
+
+    #fancybox-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    #tooltip.tooltip-mobile-active {
+        max-width: calc(100vw - 24px);
+        max-height: 70vh;
+        overflow: auto;
+        z-index: 200;
+    }
+
+    #bottom-nav {
+        display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100;
+        height: calc(56px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        background: var(--color-bg-surface);
+        border-top: 1px solid var(--color-border);
+        justify-content: space-around;
+    }
+
+    #bottom-nav a,
+    #bottom-nav label {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        text-decoration: none;
+        color: var(--color-text);
+        min-height: 44px;
+        padding: 4px 2px;
+        cursor: pointer;
+    }
+
+    #bottom-nav a.active {
+        color: var(--color-accent);
+    }
+
+    #bottom-nav i {
+        font-size: 18px;
+        margin-bottom: 2px;
+    }
+
+    .galaxy-system-table thead,
+    .galaxy-system-table > tbody > tr:first-child,
+    .galaxy-system-table > tbody > tr:nth-child(2) {
         display: none;
     }
 
+    .galaxy-system-table tr {
+        display: block;
+        margin-bottom: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 8px;
+        background: var(--color-bg-surface);
+    }
 
+    .galaxy-system-table td {
+        display: block;
+        text-align: left;
+        padding: 4px 0;
+        border: none;
+    }
+
+    .galaxy-system-table td:empty {
+        display: none;
+    }
+
+    .galaxy-system-table .galaxy-card-actions-cell img {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 6px;
+    }
+
+    .galaxy-nav-swipe {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .galaxy-nav-swipe button {
+        flex: 1 1 40%;
+        min-height: 44px;
+    }
+
+    .fleet-table-desktop {
+        display: none;
+    }
+
+    .fleet-mobile-list {
+        display: block;
+    }
+
+    .fleet-mobile-card {
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 12px;
+        background: var(--color-bg-surface);
+    }
+
+    .fleet-mobile-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+
+    .fleet-wizard-steps {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 12px;
+        font-size: 12px;
+    }
+
+    .fleet-wizard-steps span {
+        flex: 1;
+        text-align: center;
+        padding: 8px 4px;
+        border-radius: 4px;
+        background: var(--color-menu-bg);
+    }
+
+    .fleet-wizard-steps span.active {
+        background: var(--color-accent);
+    }
+
+    .fleet-ship-stepper {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .fleet-ship-stepper button {
+        min-width: 36px;
+    }
+
+    .overview-mobile-shortcuts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0;
+    }
+
+    .overview-mobile-shortcuts a {
+        flex: 1 1 40%;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        text-decoration: none;
+    }
+
+    .overview-command-timers {
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+    }
+}
+
+#bottom-nav,
+.fleet-mobile-list,
+.overview-mobile-shortcuts,
+.overview-command-timers,
+.galaxy-nav-swipe {
+    display: none;
 }

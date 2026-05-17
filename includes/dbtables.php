@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 15);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 17);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -68,6 +68,7 @@ $dbTableNames	= array(
 	'DM_TRANSACTIONS'	=> DB_PREFIX.'dm_transactions',
 	'LOG_BUILDINGS'		=> DB_PREFIX.'log_buildings',
 	'LOG_RESEARCH'		=> DB_PREFIX.'log_research',
-	'LOG_SHIPYARD'		=> DB_PREFIX.'log_shipyard'
+	'LOG_SHIPYARD'		=> DB_PREFIX.'log_shipyard',
+	'PUSH_SUBSCRIPTIONS'	=> DB_PREFIX.'push_subscriptions',
 );
 // MOD-TABLES

@@ -55,6 +55,8 @@
 		
 		{include file="main.footer.tpl" nocache}
 	</footer>
+
+	{include file="main.bottomnav.tpl"}
 </div>
 
 </body>

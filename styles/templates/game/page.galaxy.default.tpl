@@ -63,7 +63,13 @@
 	</table>
 	</form>
     {/if}
-	<table class="table569">
+	<div class="galaxy-nav-swipe mobile">
+		<button type="button" onclick="galaxy_submit('galaxyLeft')">&larr; {$LNG.gl_galaxy}</button>
+		<button type="button" onclick="galaxy_submit('systemLeft')">&larr; {$LNG.gl_solar_system}</button>
+		<button type="button" onclick="galaxy_submit('systemRight')">{$LNG.gl_solar_system} &rarr;</button>
+		<button type="button" onclick="galaxy_submit('galaxyRight')">{$LNG.gl_galaxy} &rarr;</button>
+	</div>
+	<table class="table569 galaxy-system-table">
     <tr>
 		<th colspan="3">{$LNG.gl_solar_system} {$galaxy}:{$system}</th>
 		<th colspan="2">Controlled by:</th>
@@ -321,7 +327,7 @@
 			</a>
 			{else}-{/if}
 		</td>
-		<td style="white-space: nowrap;">
+		<td class="galaxy-card-actions-cell" style="white-space: nowrap;">
 			{if $currentPlanet.action}
 				{if $currentPlanet.action.esp}
 				<a href="javascript:doit(6,{$currentPlanet.planet.id},{$spyShips|json|escape:'html'})">

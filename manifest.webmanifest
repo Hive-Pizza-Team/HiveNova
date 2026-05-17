@@ -1,0 +1,17 @@
+{
+  "name": "HiveNova",
+  "short_name": "HiveNova",
+  "description": "Space empire browser game",
+  "start_url": "/game.php?page=overview",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

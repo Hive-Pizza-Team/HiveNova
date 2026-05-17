@@ -1,6 +1,6 @@
 {block name="title" prepend}{$LNG.lm_fleet}{/block}
 {block name="content"}
-<table>
+<table class="fleet-table-desktop">
 	<tr>
 		<th colspan="9">
 			<div class="transparent" style="text-align:left;float:left;">{$LNG.fl_fleets} <span id="activeFleetSlots" data-max="{$maxFleetSlots}">{$activeFleetSlots}</span> / {$maxFleetSlots}</div>
@@ -75,6 +75,24 @@
 	<tr><td colspan="9">{$LNG.fl_no_more_slots}</td></tr>
 	{/if}
 </table>
+<div class="fleet-mobile-list">
+	{foreach name=FlyingFleetsMobile item=FlyingFleetRow from=$FlyingFleetList}
+	<div class="fleet-mobile-card">
+		<div class="fleet-mobile-row"><strong>#{$smarty.foreach.FlyingFleetsMobile.iteration}</strong> {$LNG["type_mission_{$FlyingFleetRow.mission}"]}{if $FlyingFleetRow.state == 1} ({$LNG.fl_r}){else} ({$LNG.fl_a}){/if}</div>
+		<div class="fleet-mobile-row"><span>{$LNG.fl_beginning}</span> [{$FlyingFleetRow.startGalaxy}:{$FlyingFleetRow.startSystem}:{$FlyingFleetRow.startPlanet}]</div>
+		<div class="fleet-mobile-row"><span>{$LNG.fl_destiny}</span> [{$FlyingFleetRow.endGalaxy}:{$FlyingFleetRow.endSystem}:{$FlyingFleetRow.endPlanet}]</div>
+		<div class="fleet-mobile-row"><span>{$LNG.fl_arrival}</span> <span class="fleets" data-fleet-end-time="{$FlyingFleetRow.returntime}" data-fleet-time="{$FlyingFleetRow.resttime}">{$FlyingFleetRow.resttime|pretty_fly_time}</span></div>
+		{if !$isVacation && $FlyingFleetRow.state != 1 && $FlyingFleetRow.no_returnable != 1}
+		<form action="game.php?page=fleetTable&amp;action=sendfleetback" method="post">
+			<input name="fleetID" value="{$FlyingFleetRow.id}" type="hidden">
+			<input value="{$LNG.fl_send_back}" type="submit">
+		</form>
+		{/if}
+	</div>
+	{foreachelse}
+	<p>-</p>
+	{/foreach}
+</div>
 {if !empty($acsData)}
 {include file="shared.fleetTable.acsTable.tpl"}
 {/if}
@@ -100,7 +118,14 @@
 		<td id="ship{$FleetRow.id}_value">{$FleetRow.count|number}</td>
 		{if $FleetRow.speed != 0}
 		<td><a href="javascript:maxShip('ship{$FleetRow.id}');">{$LNG.fl_max}</a></td>
-		<td><input type="text" inputmode="numeric" name="ship{$FleetRow.id}" id="ship{$FleetRow.id}_input" size="10" placeholder="0"></td>
+		<td>
+			<div class="fleet-ship-stepper">
+				<button type="button" class="fleet-step-minus mobile" data-target="ship{$FleetRow.id}_input" aria-label="-1">-</button>
+				<input type="text" inputmode="numeric" name="ship{$FleetRow.id}" id="ship{$FleetRow.id}_input" size="10" placeholder="0">
+				<button type="button" class="fleet-step-plus mobile" data-target="ship{$FleetRow.id}_input" data-step="1" aria-label="+1">+</button>
+				<button type="button" class="fleet-step-plus mobile" data-target="ship{$FleetRow.id}_input" data-step="10" aria-label="+10">+10</button>
+			</div>
+		</td>
 		{else}
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -129,4 +154,7 @@
 	<tr><td>+{$bonusCombustion} %</td><td>+{$bonusImpulse} %</td><td>+{$bonusHyperspace} %</td></tr>
 </table>
 {/block}
-{block name="script" append}<script src="scripts/game/fleetTable.js"></script>{/block}
+{block name="script" append}
+<script src="scripts/game/fleetTable.js"></script>
+<script src="scripts/game/fleet-mobile.js"></script>
+{/block}

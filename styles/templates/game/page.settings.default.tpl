@@ -56,6 +56,13 @@
 		<tr>
 			<th colspan="2">{$LNG.op_general_settings}</th>
 		</tr>
+		<tr class="mobile-push-settings">
+			<td>{$LNG.op_push_notifications}</td>
+			<td>
+				<button type="button" id="push-notifications-enable" class="button">{$LNG.op_push_enable}</button>
+				<button type="button" id="push-notifications-disable" class="button">{$LNG.op_push_disable}</button>
+			</td>
+		</tr>
 		<tr>
 			<td>{$LNG.op_timezone}</td>
 			<td>{html_options name=timezone options=$Selectors.timezones selected=$timezone}</td>

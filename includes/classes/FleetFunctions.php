@@ -656,6 +656,16 @@ class FleetFunctions
 		fleet_target_obj			= :missileTarget,
 		start_time					= :timestamp;';
 
+		if ($fleetTargetOwner > 0 && $fleetStartOwner != $fleetTargetOwner && in_array($fleetMission, [1, 2, 6, 9, 10], true)) {
+			PushNotificationService::notifyIncomingHostileFleet(
+				$fleetTargetOwner,
+				$fleetMission,
+				$fleetTargetPlanetGalaxy,
+				$fleetTargetPlanetSystem,
+				$fleetTargetPlanetPlanet
+			);
+		}
+
 		$db->insert($sql, array(
 			':fleetId'					=> $fleetId,
 			':fleetStartOwner'			=> $fleetStartOwner,
