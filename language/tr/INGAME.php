@@ -118,6 +118,7 @@ $LNG['ov_wrong_pass']						= 'Yanlış şifre girdiniz!';
 $LNG['ov_wrong_name']						= 'Yanlış isim girdiniz!';
 $LNG['ov_have_new_message']					= 'Yeni mesajınız var';
 $LNG['ov_have_new_messages']				= ' <b>(%d)</b> Adet Yeni Mesajınız Var';
+$LNG['ov_under_attack']					= 'Saldırı altındasınız!';
 $LNG['ov_planetmenu']						= 'Yeniden Adlandır ya da Sil';
 $LNG['ov_free']								= 'Uygun';
 $LNG['ov_news']								= 'Duyurular';

@@ -112,6 +112,7 @@ $LNG['ov_wrong_pass']						= 'Falsches Passwort. Versuchen sie es noch einmal!';
 $LNG['ov_wrong_name']						= 'Falsches Name. Versuchen sie es noch einmal!';
 $LNG['ov_have_new_message']					= 'Du hast eine neue Nachricht';
 $LNG['ov_have_new_messages']					= 'Du hast %d neue Nachrichten';
+$LNG['ov_under_attack']					= 'Du wirst angegriffen!';
 $LNG['ov_planetmenu']						= 'Name ändern/Löschen';
 $LNG['ov_free']							= 'Frei';
 $LNG['ov_news']							= 'News';

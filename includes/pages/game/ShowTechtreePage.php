@@ -47,7 +47,6 @@ class ShowTechtreePage extends AbstractGamePage
         );
 
         $techTreeList = array();
-        $Messages		= $USER['messages'];
         foreach($elementIDs as $elementId)
         {
             if(!isset($resource[$elementId]))
@@ -74,7 +73,6 @@ class ShowTechtreePage extends AbstractGamePage
 
         $this->assign(array(
             'TechTreeList'		=> $techTreeList,
-            'messages'			=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)): false,
         ));
 
         $this->display('page.techTree.default.tpl');

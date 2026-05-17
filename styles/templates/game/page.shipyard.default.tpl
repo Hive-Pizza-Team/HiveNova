@@ -1,10 +1,6 @@
 {block name="title" prepend}{if $mode == "defense"}{$LNG.lm_defenses}{else}{$LNG.lm_shipshard}{/if}{/block}
 {block name="content"}
 
-	{if $messages}
-	<div class="message"><a href="?page=messages">{$messages}</a></div>
-	
-	{/if}
 {if !$NotBuilding}<table width="70%" id="infobox" style="border: 2px solid red; text-align:center;background:transparent"><tr><td>{$LNG.bd_building_shipyard}</td></tr></table><br><br>{/if}
 {if !empty($BuildList)}
 <div style="text-align: center;">

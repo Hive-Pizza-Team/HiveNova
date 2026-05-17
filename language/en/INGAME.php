@@ -121,6 +121,7 @@ $LNG['ov_wrong_pass']						= 'Password incorrect!';
 $LNG['ov_wrong_name']						= 'Name incorrect!';
 $LNG['ov_have_new_message']					= 'You have a new message';
 $LNG['ov_have_new_messages']				= 'You have %d new messages';
+$LNG['ov_under_attack']					= 'You are under attack!';
 $LNG['ov_planetmenu']						= 'Rename or delete';
 $LNG['ov_free']								= 'Free';
 $LNG['ov_news']								= 'News';

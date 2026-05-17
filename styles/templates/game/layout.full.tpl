@@ -39,7 +39,13 @@
 		{elseif $vacation}
 		<div class="infobox">{$LNG.tn_vacation_mode} {$vacation}</div>
 		{/if}
-		
+		{if $messages}
+		<div class="message"><a href="?page=messages">{$messages}</a></div>
+		{/if}
+		{if $incoming_attack}
+		<div class="attack-notification"><a href="?page=overview">{$incoming_attack}</a></div>
+		{/if}
+
 		{block name="content"}{/block}
 		<table class="hack"></table>
 	</content>

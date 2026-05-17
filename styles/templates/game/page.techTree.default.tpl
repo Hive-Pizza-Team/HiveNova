@@ -10,10 +10,6 @@
 .minus {
         display:none;	}
 </style>
-{if $messages}
-	<div class="message"><a href="?page=messages">{$messages}</a></div>
-	
-	{/if}
 <div>
 <div class="infos"> 
 {foreach $TechTreeList as $elementID => $requireList}
