@@ -1,4 +1,15 @@
 const CACHE_NAME = 'hivenova-static-v1';
+const DEFAULT_GAME_URL = 'game.php?page=overview';
+
+function safeGameUrl(url) {
+  if (typeof url !== 'string' || url === '') {
+    return DEFAULT_GAME_URL;
+  }
+  if (/^game\.php\?page=[a-zA-Z0-9_]+$/.test(url)) {
+    return url;
+  }
+  return DEFAULT_GAME_URL;
+}
 const CACHE_URLS = [
   './styles/resource/css/tokens.css',
   './styles/resource/css/ingame/main.css',
@@ -43,7 +54,7 @@ self.addEventListener('fetch', function (event) {
 });
 
 self.addEventListener('push', function (event) {
-  var payload = { title: 'HiveNova', body: '', url: 'game.php?page=overview' };
+  var payload = { title: 'HiveNova', body: '', url: DEFAULT_GAME_URL };
   try {
     if (event.data) {
       payload = Object.assign(payload, event.data.json());
@@ -53,14 +64,14 @@ self.addEventListener('push', function (event) {
     self.registration.showNotification(payload.title, {
       body: payload.body,
       icon: 'favicon.ico',
-      data: { url: payload.url || 'game.php?page=overview' }
+      data: { url: safeGameUrl(payload.url) }
     })
   );
 });
 
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
-  var target = (event.notification.data && event.notification.data.url) || 'game.php?page=overview';
+  var target = safeGameUrl(event.notification.data && event.notification.data.url);
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
       for (var i = 0; i < clientList.length; i++) {

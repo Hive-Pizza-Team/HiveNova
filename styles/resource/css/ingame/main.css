@@ -685,6 +685,14 @@ table.tablesorter thead tr .headerSortDown {
 
 /* MEDIA */
 
+#bottom-nav,
+.fleet-mobile-list,
+.overview-mobile-shortcuts,
+.overview-command-timers,
+.galaxy-nav-swipe {
+    display: none;
+}
+
 @media screen and (min-width: 700px) and (max-width: 969px) {
     .planetImage {
         display: none;
@@ -993,12 +1001,4 @@ table.tablesorter thead tr .headerSortDown {
         border: 1px solid var(--color-border);
         border-radius: 8px;
     }
-}
-
-#bottom-nav,
-.fleet-mobile-list,
-.overview-mobile-shortcuts,
-.overview-command-timers,
-.galaxy-nav-swipe {
-    display: none;
 }

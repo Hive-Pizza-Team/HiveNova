@@ -23,18 +23,55 @@ class PushNotificationService
 		return defined('PUSH_VAPID_PUBLIC') ? PUSH_VAPID_PUBLIC : '';
 	}
 
-	public static function saveSubscription(int $userId, array $subscription, ?string $userAgent = null): void
+	public static function isValidSubscription(array $subscription): bool
 	{
+		$endpoint = $subscription['endpoint'] ?? '';
+		if (!is_string($endpoint) || $endpoint === '' || strlen($endpoint) > 512) {
+			return false;
+		}
+		if (!filter_var($endpoint, FILTER_VALIDATE_URL) || stripos($endpoint, 'https://') !== 0) {
+			return false;
+		}
+
+		$p256dh = $subscription['keys']['p256dh'] ?? '';
+		$auth   = $subscription['keys']['auth'] ?? '';
+		if (!is_string($p256dh) || !is_string($auth) || $p256dh === '' || $auth === '') {
+			return false;
+		}
+		if (strlen($p256dh) > 255 || strlen($auth) > 255) {
+			return false;
+		}
+		if (!preg_match('#^[A-Za-z0-9_-]+=*$#', $p256dh) || !preg_match('#^[A-Za-z0-9_-]+=*$#', $auth)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public static function saveSubscription(int $userId, array $subscription, ?string $userAgent = null): bool
+	{
+		if (!self::isValidSubscription($subscription)) {
+			return false;
+		}
+
 		$db = Database::get();
-		$existing = $db->selectSingle(
-			'SELECT id FROM %%PUSH_SUBSCRIPTIONS%% WHERE endpoint = :endpoint',
+		$existingUserId = $db->selectSingle(
+			'SELECT user_id FROM %%PUSH_SUBSCRIPTIONS%% WHERE endpoint = :endpoint',
 			[':endpoint' => $subscription['endpoint']],
-			'id'
+			'user_id'
 		);
 
-		if ($existing) {
+		if ($existingUserId !== false && $existingUserId !== null && $existingUserId !== '' && (int) $existingUserId !== $userId) {
+			return false;
+		}
+
+		if ($userAgent !== null && strlen($userAgent) > 255) {
+			$userAgent = substr($userAgent, 0, 255);
+		}
+
+		if ($existingUserId !== false && $existingUserId !== null && $existingUserId !== '') {
 			$db->update(
-				'UPDATE %%PUSH_SUBSCRIPTIONS%% SET user_id = :userId, p256dh = :p256dh, auth = :auth, user_agent = :userAgent, created_at = :createdAt WHERE endpoint = :endpoint',
+				'UPDATE %%PUSH_SUBSCRIPTIONS%% SET p256dh = :p256dh, auth = :auth, user_agent = :userAgent, created_at = :createdAt WHERE endpoint = :endpoint AND user_id = :userId',
 				[
 					':userId'    => $userId,
 					':p256dh'    => $subscription['keys']['p256dh'],
@@ -44,7 +81,8 @@ class PushNotificationService
 					':endpoint'  => $subscription['endpoint'],
 				]
 			);
-			return;
+
+			return true;
 		}
 
 		$db->insert(
@@ -59,8 +97,27 @@ class PushNotificationService
 				':createdAt' => TIMESTAMP,
 			]
 		);
+
+		return true;
 	}
 
+	public static function removeSubscriptionForUser(int $userId, string $endpoint): void
+	{
+		if ($endpoint === '') {
+			return;
+		}
+
+		$db = Database::get();
+		$db->delete(
+			'DELETE FROM %%PUSH_SUBSCRIPTIONS%% WHERE endpoint = :endpoint AND user_id = :userId',
+			[
+				':endpoint' => $endpoint,
+				':userId'   => $userId,
+			]
+		);
+	}
+
+	/** Remove by endpoint only (expired subscription cleanup from push gateway). */
 	public static function removeSubscription(string $endpoint): void
 	{
 		$db = Database::get();
@@ -218,7 +275,13 @@ class PushNotificationService
 			self::escapePhpSingleQuoted($subject)
 		);
 
-		return file_put_contents($path, $content, LOCK_EX) !== false;
+		if (file_put_contents($path, $content, LOCK_EX) === false) {
+			return false;
+		}
+
+		@chmod($path, 0600);
+
+		return true;
 	}
 
 	private static function defaultInstallSubject(): string

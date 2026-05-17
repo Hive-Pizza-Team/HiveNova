@@ -267,9 +267,7 @@ class ShowSettingsPage extends AbstractGamePage
 		
 		$db = Database::get();
 
-		if (PushNotificationService::isConfigured()) {
-			PushNotificationService::setUserPreference((int) $USER['id'], (int) $pushAlerts === 1);
-		}
+		PushNotificationService::setUserPreference((int) $USER['id'], (int) $pushAlerts === 1);
 		
 		if (!empty($username) && $USER['username'] != $username)
 		{
