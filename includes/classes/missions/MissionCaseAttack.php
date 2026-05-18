@@ -197,7 +197,7 @@ HTML;
 		$combatResult 		= calculateAttack($fleetAttack, $fleetDefend, $fleetIntoDebris, $defIntoDebris);
 
 		$fuelConsumption = 0;
-		$gameSpeed = Config::get($this->_fleet['fleet_universe'])->speed;
+		$gameSpeed = Config::get((int) $this->_fleet['fleet_universe'])->fleet_speed / 2500;
 		foreach ($incomingFleets as $fleetID => $fleetDetail) {
 			$distance = FleetFunctions::GetTargetDistance(
 				[$fleetDetail['fleet_start_galaxy'], $fleetDetail['fleet_start_system'], $fleetDetail['fleet_start_planet']],
