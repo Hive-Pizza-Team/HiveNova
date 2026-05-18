@@ -114,7 +114,6 @@ $LNG['ov_wrong_pass']						= 'Błędne hasło, spróbuj ponownie!';
 $LNG['ov_wrong_name']						= 'Błędna nazwa, spróbuj ponownie!';
 $LNG['ov_have_new_message']					= 'Masz wiadomość';
 $LNG['ov_have_new_messages']				= 'Masz %d nowych wiadomości';
-$LNG['ov_under_attack']					= 'Jesteś atakowany!';
 $LNG['ov_planetmenu']						= 'Zmień nazwę / Porzuć planetę';
 $LNG['ov_free']								= 'Bezczynna';
 $LNG['ov_news']								= 'Nowości';

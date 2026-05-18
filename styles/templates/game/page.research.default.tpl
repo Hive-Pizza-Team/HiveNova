@@ -1,5 +1,9 @@
 {block name="title" prepend}{$LNG.lm_research}{/block}
 {block name="content"}
+	{if $messages}
+	<div class="message"><a href="?page=messages">{$messages}</a></div>
+	
+	{/if}
 {if !empty($Queue)}
 <div id="buildlist" class="infos1">
 		{foreach $Queue as $List}

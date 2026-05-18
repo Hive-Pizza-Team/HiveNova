@@ -54,6 +54,10 @@ $("#tn3").hide();
 	{if $buildInfo.tech}<div><a href="game.php?page=research">{$LNG.lm_research}:</a> {$LNG.tech[$buildInfo.tech['id']]} <span class="timer" data-time="{$buildInfo.tech['timeleft']}">{$buildInfo.tech['starttime']}</span></div>{/if}
 	{if $buildInfo.fleet}<div><a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}:</a> {$LNG.tech[$buildInfo.fleet['id']]} <span class="timer" data-time="{$buildInfo.fleet['timeleft']}">{$buildInfo.fleet['starttime']}</span></div>{/if}
 </div>
+	{if $messages}
+	<div class="message"><a href="?page=messages">{$messages}</a></div>
+	
+	{/if}
 <div class="infos">
 <div class="planeto"><a href="#" onclick="return Dialog.PlanetAction();" title="{$LNG.ov_planetmenu}">{$LNG["type_planet_{$planet_type}"]} {$planetname}</a> ({$username})</div>
 
