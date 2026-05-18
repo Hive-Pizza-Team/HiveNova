@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hivenova-static-v1';
+const CACHE_NAME = 'hivenova-static-v2';
 const DEFAULT_GAME_URL = 'game.php?page=overview';
 
 function safeGameUrl(url) {
@@ -10,9 +10,10 @@ function safeGameUrl(url) {
   }
   return DEFAULT_GAME_URL;
 }
+
+// Precache only stable assets; main.css uses network-first (see fetch handler).
 const CACHE_URLS = [
   './styles/resource/css/tokens.css',
-  './styles/resource/css/ingame/main.css',
   './scripts/game/base.js',
   './favicon.ico'
 ];
@@ -27,7 +28,17 @@ self.addEventListener('install', function (event) {
 });
 
 self.addEventListener('activate', function (event) {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then(function (keys) {
+      return Promise.all(
+        keys.filter(function (key) { return key !== CACHE_NAME; }).map(function (key) {
+          return caches.delete(key);
+        })
+      );
+    }).then(function () {
+      return self.clients.claim();
+    })
+  );
 });
 
 self.addEventListener('fetch', function (event) {
@@ -38,17 +49,19 @@ self.addEventListener('fetch', function (event) {
   if (url.pathname.indexOf('/styles/') === -1 && url.pathname.indexOf('/scripts/') === -1) {
     return;
   }
+
+  // Network-first so deploys reach PWA/mobile clients without stale CSS/JS.
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      return cached || fetch(event.request).then(function (response) {
-        if (response && response.status === 200) {
-          var copy = response.clone();
-          caches.open(CACHE_NAME).then(function (cache) {
-            cache.put(event.request, copy);
-          });
-        }
-        return response;
-      });
+    fetch(event.request).then(function (response) {
+      if (response && response.status === 200) {
+        var copy = response.clone();
+        caches.open(CACHE_NAME).then(function (cache) {
+          cache.put(event.request, copy);
+        });
+      }
+      return response;
+    }).catch(function () {
+      return caches.match(event.request);
     })
   );
 });
