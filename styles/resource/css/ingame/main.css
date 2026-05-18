@@ -889,6 +889,11 @@ table.tablesorter thead tr .headerSortDown {
         z-index: 200;
     }
 
+    body.popup #content {
+        padding: 8px;
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    }
+
     #bottom-nav {
         display: flex;
         position: fixed;
