@@ -64,7 +64,7 @@
 		<th style="white-space: nowrap">{$LNG.gl_actions}</th>
 	</tr>
     {for $planet=1 to $max_planets}
-	<tr>
+	<tr class="galaxy-planet-row">
     {if !isset($GalaxyRows[$planet])}
 		<td>
 			<a href="?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$planet}&amp;planettype=1&amp;target_mission=7">{$planet}</a>
