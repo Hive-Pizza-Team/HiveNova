@@ -6,17 +6,17 @@
 		<div class="galaxy-coords-group">
 			<div class="galaxy-coords-title">{$LNG.gl_galaxy}</div>
 			<div class="galaxy-coords-controls">
-				<input type="button" name="galaxyLeft" value="&lt;-" onclick="galaxy_submit('galaxyLeft')">
+				<input type="button" class="galaxy-coords-step" name="galaxyLeft" value="&#8592;" aria-label="{$LNG.gl_galaxy} −" onclick="galaxy_submit('galaxyLeft')">
 				<input type="text" inputmode="numeric" name="galaxy" value="{$galaxy}" size="5" maxlength="3" tabindex="1">
-				<input type="button" name="galaxyRight" value="-&gt;" onclick="galaxy_submit('galaxyRight')">
+				<input type="button" class="galaxy-coords-step" name="galaxyRight" value="&#8594;" aria-label="{$LNG.gl_galaxy} +" onclick="galaxy_submit('galaxyRight')">
 			</div>
 		</div>
 		<div class="galaxy-coords-group">
 			<div class="galaxy-coords-title">{$LNG.gl_solar_system}</div>
 			<div class="galaxy-coords-controls">
-				<input type="button" name="systemLeft" value="&lt;-" onclick="galaxy_submit('systemLeft')">
+				<input type="button" class="galaxy-coords-step" name="systemLeft" value="&#8592;" aria-label="{$LNG.gl_solar_system} −" onclick="galaxy_submit('systemLeft')">
 				<input type="text" inputmode="numeric" name="system" value="{$system}" size="5" maxlength="3" tabindex="2">
-				<input type="button" name="systemRight" value="-&gt;" onclick="galaxy_submit('systemRight')">
+				<input type="button" class="galaxy-coords-step" name="systemRight" value="&#8594;" aria-label="{$LNG.gl_solar_system} +" onclick="galaxy_submit('systemRight')">
 			</div>
 		</div>
 		<div class="galaxy-coords-submit">

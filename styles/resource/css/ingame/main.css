@@ -710,10 +710,19 @@ table.tablesorter thead tr .headerSortDown {
 
 .galaxy-coords-controls {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: minmax(44px, auto) 1fr minmax(44px, auto);
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     padding: 4px 2px;
+}
+
+.galaxy-coords-controls .galaxy-coords-step {
+    min-width: 44px;
+    min-height: 40px;
+    padding: 0;
+    font-size: 22px;
+    line-height: 1;
+    font-weight: bold;
 }
 
 .galaxy-coords-controls input[type="text"] {
@@ -1117,13 +1126,15 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     .galaxy-coords-controls {
-        gap: 8px;
+        grid-template-columns: minmax(56px, auto) 1fr minmax(56px, auto);
+        gap: 10px;
         padding: 0;
     }
 
-    .galaxy-coords-controls input[type="button"] {
-        min-height: 44px;
-        min-width: 44px;
+    .galaxy-coords-controls .galaxy-coords-step {
+        min-height: 56px;
+        min-width: 56px;
+        font-size: 30px;
     }
 
     .galaxy-coords-controls input[type="text"] {
