@@ -556,6 +556,18 @@ div#disclamer {
     padding: 20px;
 }
 
+.tip.notify.notify-error {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 16px 20px;
+    font-weight: bold;
+    background: var(--color-bg-surface);
+    border: 2px solid var(--color-danger);
+    color: var(--color-text);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
 .ui-progressbar {
     height: 10px !important;
 }
@@ -688,9 +700,64 @@ table.tablesorter thead tr .headerSortDown {
 #bottom-nav,
 .fleet-mobile-list,
 .overview-mobile-shortcuts,
-.overview-command-timers,
-.galaxy-nav-swipe {
+.overview-command-timers {
     display: none;
+}
+
+.galaxy-coords-picker {
+    width: 324px;
+    min-width: 324px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 0 auto 8px;
+}
+
+.galaxy-coords-title {
+    text-align: center;
+    padding: 4px 6px;
+    font-weight: bold;
+    background: var(--color-menu-bg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.galaxy-coords-controls {
+    display: grid;
+    grid-template-columns: minmax(44px, auto) 1fr minmax(44px, auto);
+    align-items: center;
+    gap: 4px;
+    padding: 4px 2px;
+}
+
+.galaxy-coords-controls .galaxy-coords-step {
+    min-width: 44px;
+    min-height: 40px;
+    padding: 0;
+    font-size: 22px;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.galaxy-coords-controls input[type="text"] {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.galaxy-coords-submit,
+.galaxy-coords-warning {
+    grid-column: 1 / -1;
+}
+
+.galaxy-coords-submit {
+    text-align: center;
+    padding: 4px 0;
+}
+
+.galaxy-coords-warning {
+    margin: 0;
+    padding: 4px 8px;
 }
 
 @media screen and (min-width: 700px) and (max-width: 969px) {
@@ -883,10 +950,19 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     #tooltip.tooltip-mobile-active {
+        position: fixed;
         max-width: calc(100vw - 24px);
         max-height: 70vh;
         overflow: auto;
-        z-index: 200;
+        z-index: 300;
+        box-sizing: border-box;
+    }
+
+    .galaxy-system-table a.tooltip {
+        display: inline-block;
+        min-height: 44px;
+        line-height: 44px;
+        padding: 0 8px;
     }
 
     body.popup #content {
@@ -932,6 +1008,12 @@ table.tablesorter thead tr .headerSortDown {
         margin-bottom: 2px;
     }
 
+    .galaxy-system-table,
+    .galaxy-system-table tbody {
+        display: block;
+        width: 100%;
+    }
+
     .galaxy-system-table thead,
     .galaxy-system-table > tbody > tr:first-child,
     .galaxy-system-table > tbody > tr:nth-child(2) {
@@ -939,7 +1021,6 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     .galaxy-system-table tr {
-        display: block;
         margin-bottom: 10px;
         border: 1px solid var(--color-border);
         border-radius: 8px;
@@ -947,32 +1028,149 @@ table.tablesorter thead tr .headerSortDown {
         background: var(--color-bg-surface);
     }
 
-    .galaxy-system-table td {
+    .galaxy-system-table tr:not(.galaxy-planet-row) {
+        display: block;
+    }
+
+    .galaxy-system-table tr:not(.galaxy-planet-row) td {
         display: block;
         text-align: left;
         padding: 4px 0;
         border: none;
     }
 
-    .galaxy-system-table td:empty {
+    .galaxy-planet-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        column-gap: 8px;
+        row-gap: 4px;
+        width: 100%;
+    }
+
+    .galaxy-planet-row td {
+        display: block;
+        text-align: left;
+        padding: 0;
+        border: none;
+        min-width: 0;
+    }
+
+    .galaxy-planet-row td:empty {
         display: none;
     }
 
-    .galaxy-system-table .galaxy-card-actions-cell img {
-        min-width: 44px;
-        min-height: 44px;
-        padding: 6px;
+    .galaxy-planet-row td:nth-child(1) {
+        order: 0;
+        flex: 0 0 26px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 36px;
     }
 
-    .galaxy-nav-swipe {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+    .galaxy-planet-row td:nth-child(2) {
+        order: 1;
+        flex: 0 0 36px;
+        align-self: flex-start;
+        padding-top: 2px;
+    }
+
+    .galaxy-planet-row td:nth-child(2) img {
+        display: block;
+        width: 36px;
+        height: 36px;
+    }
+
+    .galaxy-planet-row td:nth-child(3) {
+        order: 2;
+        flex: 1 1 8rem;
+        min-width: 0;
+        font-weight: bold;
+        line-height: 1.3;
+        white-space: normal;
+    }
+
+    .galaxy-planet-row td:nth-child(6) {
+        order: 7;
+        flex: 1 1 100%;
+        padding-left: 70px;
+        line-height: 1.3;
+        white-space: normal;
+    }
+
+    .galaxy-planet-row td:nth-child(4),
+    .galaxy-planet-row td:nth-child(5),
+    .galaxy-planet-row td:nth-child(7),
+    .galaxy-planet-row td:nth-child(8) {
+        flex: 0 0 auto;
+        align-self: center;
+    }
+
+    .galaxy-planet-row td:nth-child(4) {
+        order: 3;
+    }
+
+    .galaxy-planet-row td:nth-child(5) {
+        order: 4;
+    }
+
+    .galaxy-planet-row td:nth-child(7) {
+        order: 5;
+    }
+
+    .galaxy-planet-row td:nth-child(8) {
+        order: 6;
+    }
+
+    .galaxy-planet-row td:nth-child(4) img,
+    .galaxy-planet-row td:nth-child(5) img {
+        display: block;
+        width: 28px;
+        height: 28px;
+    }
+
+    .galaxy-planet-row .galaxy-card-actions-cell {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .galaxy-planet-row .galaxy-card-actions-cell img {
+        min-width: 32px;
+        min-height: 32px;
+        width: 32px;
+        height: 32px;
+        padding: 4px;
+    }
+
+    .galaxy-coords-picker {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: 1fr;
+        gap: 10px;
         margin-bottom: 12px;
     }
 
-    .galaxy-nav-swipe button {
-        flex: 1 1 40%;
+    .galaxy-coords-controls {
+        grid-template-columns: minmax(56px, auto) 1fr minmax(56px, auto);
+        gap: 10px;
+        padding: 0;
+    }
+
+    .galaxy-coords-controls .galaxy-coords-step {
+        min-height: 56px;
+        min-width: 56px;
+        font-size: 30px;
+    }
+
+    .galaxy-coords-controls input[type="text"] {
+        min-height: 56px;
+        font-size: 24px;
+    }
+
+    .galaxy-coords-submit input[type="submit"] {
+        width: 100%;
         min-height: 44px;
     }
 
