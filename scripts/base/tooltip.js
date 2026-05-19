@@ -17,7 +17,20 @@ function isMobileTooltip() {
 	return window.matchMedia('(max-width: 699px)').matches;
 }
 
+function positionMobileTooltip(tip) {
+	tip.css({
+		top: Math.max(8, (window.innerHeight - tip.outerHeight()) / 2),
+		left: Math.max(8, (window.innerWidth - tip.outerWidth()) / 2)
+	});
+}
+
 $(document).ready(function () {
+	$(".tooltip, .tooltip_sticky").each(function () {
+		if (!$(this).attr('href')) {
+			$(this).attr('href', '#');
+		}
+	});
+
 	$(".tooltip, .tooltip_sticky").live('click', function (e) {
 		if (!isMobileTooltip()) {
 			return;
@@ -28,14 +41,18 @@ $(document).ready(function () {
 			return;
 		}
 		if (tip.is(':visible') && tip.data('mobile-source') === this) {
-			tip.hide().removeData('mobile-source');
+			tip.hide().removeData('mobile-source').removeClass('tooltip-mobile-active');
+			e.preventDefault();
+			e.stopPropagation();
 			return;
 		}
 		e.preventDefault();
-		tip.html(content).data('mobile-source', this).addClass('tooltip-mobile-active').css({
-			top: Math.max(8, (window.innerHeight - tip.outerHeight()) / 2),
-			left: Math.max(8, (window.innerWidth - tip.outerWidth()) / 2)
-		}).show();
+		e.stopPropagation();
+		tip.html(content).data('mobile-source', this).addClass('tooltip-mobile-active').show();
+		positionMobileTooltip(tip);
+		setTimeout(function () {
+			positionMobileTooltip(tip);
+		}, 0);
 	});
 
 	$(document).on('click', function (e) {

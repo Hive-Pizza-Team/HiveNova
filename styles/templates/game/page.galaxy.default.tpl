@@ -371,7 +371,7 @@
 				</tr>
 			</table>
 			{/capture}
-			<a class="tooltip" data-tooltip-content="{$smarty.capture.legendTooltip|escape:'html'}">{$LNG.gl_legend}</a>
+			<a class="tooltip" href="#" data-tooltip-content="{$smarty.capture.legendTooltip|escape:'html'}">{$LNG.gl_legend}</a>
 		</td>
 	</tr>
 	<tr>

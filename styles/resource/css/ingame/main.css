@@ -938,10 +938,19 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     #tooltip.tooltip-mobile-active {
+        position: fixed;
         max-width: calc(100vw - 24px);
         max-height: 70vh;
         overflow: auto;
-        z-index: 200;
+        z-index: 300;
+        box-sizing: border-box;
+    }
+
+    .galaxy-system-table a.tooltip {
+        display: inline-block;
+        min-height: 44px;
+        line-height: 44px;
+        padding: 0 8px;
     }
 
     body.popup #content {
