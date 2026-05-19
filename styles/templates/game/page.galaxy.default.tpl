@@ -2,44 +2,28 @@
 {block name="content"}
 	<form action="?page=galaxy" method="post" id="galaxy_form">
 	<input type="hidden" id="auto" value="dr">
-	<table style="min-width:324px;width:324px;">
-		<tr>
-			<td class="transparent">
-				<table>
-					<tr>
-						<th colspan="3">{$LNG.gl_galaxy}</th>
-					</tr>
-					<tr>
-						<td><input type="button" name="galaxyLeft" value="&lt;-" onclick="galaxy_submit('galaxyLeft')"></td>
-						<td><input type="text" inputmode="numeric" name="galaxy" value="{$galaxy}" size="5" maxlength="3" tabindex="1"></td>
-						<td><input type="button" name="galaxyRight" value="-&gt;" onclick="galaxy_submit('galaxyRight')"></td>
-					</tr>
-				</table>
-			</td>
-			<td class="transparent">
-				<table>
-					<tr>
-						<th colspan="3">{$LNG.gl_solar_system}</th>
-					</tr>
-					<tr>
-						<td><input type="button" name="systemLeft" value="&lt;-" onclick="galaxy_submit('systemLeft')"></td>
-						<td><input type="text" inputmode="numeric" name="system" value="{$system}" size="5" maxlength="3" tabindex="2"></td>
-						<td><input type="button" name="systemRight" value="-&gt;" onclick="galaxy_submit('systemRight')"></td>
-					</tr>
-				</table>
-			</td>
-		</tr>
-		<tr>
-			<td style="background-color:transparent;border:0px;" colspan="2">
-				<input type="submit" value="{$LNG.gl_show}">
-			</td>
-		</tr>
-		<tr>
-			<td colspan="2">
-				{$LNG.gl_fuel_warning}
-			</td>
-		</tr>
-	</table>
+	<div class="galaxy-coords-picker">
+		<div class="galaxy-coords-group">
+			<div class="galaxy-coords-title">{$LNG.gl_galaxy}</div>
+			<div class="galaxy-coords-controls">
+				<input type="button" name="galaxyLeft" value="&lt;-" onclick="galaxy_submit('galaxyLeft')">
+				<input type="text" inputmode="numeric" name="galaxy" value="{$galaxy}" size="5" maxlength="3" tabindex="1">
+				<input type="button" name="galaxyRight" value="-&gt;" onclick="galaxy_submit('galaxyRight')">
+			</div>
+		</div>
+		<div class="galaxy-coords-group">
+			<div class="galaxy-coords-title">{$LNG.gl_solar_system}</div>
+			<div class="galaxy-coords-controls">
+				<input type="button" name="systemLeft" value="&lt;-" onclick="galaxy_submit('systemLeft')">
+				<input type="text" inputmode="numeric" name="system" value="{$system}" size="5" maxlength="3" tabindex="2">
+				<input type="button" name="systemRight" value="-&gt;" onclick="galaxy_submit('systemRight')">
+			</div>
+		</div>
+		<div class="galaxy-coords-submit">
+			<input type="submit" value="{$LNG.gl_show}">
+		</div>
+		<p class="galaxy-coords-warning">{$LNG.gl_fuel_warning}</p>
+	</div>
 	</form>
 	{if $action == 'sendMissle'}
     <form action="?page=fleetMissile" method="post">
@@ -63,12 +47,6 @@
 	</table>
 	</form>
     {/if}
-	<div class="galaxy-nav-swipe mobile">
-		<button type="button" onclick="galaxy_submit('galaxyLeft')">&larr; {$LNG.gl_galaxy}</button>
-		<button type="button" onclick="galaxy_submit('systemLeft')">&larr; {$LNG.gl_solar_system}</button>
-		<button type="button" onclick="galaxy_submit('systemRight')">{$LNG.gl_solar_system} &rarr;</button>
-		<button type="button" onclick="galaxy_submit('galaxyRight')">{$LNG.gl_galaxy} &rarr;</button>
-	</div>
 	<table class="table569 galaxy-system-table">
     <tr>
 		<th colspan="3">{$LNG.gl_solar_system} {$galaxy}:{$system}</th>

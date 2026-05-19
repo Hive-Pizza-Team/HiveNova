@@ -688,9 +688,53 @@ table.tablesorter thead tr .headerSortDown {
 #bottom-nav,
 .fleet-mobile-list,
 .overview-mobile-shortcuts,
-.overview-command-timers,
-.galaxy-nav-swipe {
+.overview-command-timers {
     display: none;
+}
+
+.galaxy-coords-picker {
+    width: 324px;
+    min-width: 324px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 8px;
+}
+
+.galaxy-coords-title {
+    text-align: center;
+    padding: 4px 6px;
+    font-weight: bold;
+    background: var(--color-menu-bg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.galaxy-coords-controls {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 2px;
+}
+
+.galaxy-coords-controls input[type="text"] {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+}
+
+.galaxy-coords-submit,
+.galaxy-coords-warning {
+    grid-column: 1 / -1;
+}
+
+.galaxy-coords-submit {
+    text-align: center;
+    padding: 4px 0;
+}
+
+.galaxy-coords-warning {
+    margin: 0;
+    padding: 4px 8px;
 }
 
 @media screen and (min-width: 700px) and (max-width: 969px) {
@@ -964,15 +1008,30 @@ table.tablesorter thead tr .headerSortDown {
         padding: 6px;
     }
 
-    .galaxy-nav-swipe {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+    .galaxy-coords-picker {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: 1fr;
+        gap: 10px;
         margin-bottom: 12px;
     }
 
-    .galaxy-nav-swipe button {
-        flex: 1 1 40%;
+    .galaxy-coords-controls {
+        gap: 8px;
+        padding: 0;
+    }
+
+    .galaxy-coords-controls input[type="button"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .galaxy-coords-controls input[type="text"] {
+        min-height: 44px;
+    }
+
+    .galaxy-coords-submit input[type="submit"] {
+        width: 100%;
         min-height: 44px;
     }
 
