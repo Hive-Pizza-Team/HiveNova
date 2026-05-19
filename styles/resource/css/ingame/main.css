@@ -729,6 +729,8 @@ table.tablesorter thead tr .headerSortDown {
     width: 100%;
     min-width: 0;
     text-align: center;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .galaxy-coords-submit,
@@ -1138,7 +1140,8 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     .galaxy-coords-controls input[type="text"] {
-        min-height: 44px;
+        min-height: 56px;
+        font-size: 24px;
     }
 
     .galaxy-coords-submit input[type="submit"] {
