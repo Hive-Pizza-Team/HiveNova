@@ -139,6 +139,7 @@ class ShowVertifyPage extends AbstractLoginPage
 		$session	= Session::create();
 		$session->userId		= (int) $userData['userID'];
 		$session->adminAccess	= 0;
+		Session::regenerateId();
 		$session->save();
 
 		HTTP::redirectTo('game.php');

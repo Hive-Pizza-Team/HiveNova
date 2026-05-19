@@ -137,6 +137,13 @@ class Session
 		return self::$obj;
 	}
 
+	static public function regenerateId(): void
+	{
+		if (session_status() === PHP_SESSION_ACTIVE) {
+			session_regenerate_id(true);
+		}
+	}
+
 	/**
 	 * Wake an active session
 	 *
@@ -162,6 +169,7 @@ class Session
 			elseif ($restored = self::restoreFromDatabase(session_id()))
 			{
 				self::$obj = $restored;
+				$_SESSION['obj'] = serialize($restored);
 				register_shutdown_function(array(self::$obj, 'save'));
 			}
 			else
@@ -194,11 +202,11 @@ class Session
 		}
 
 		$user = $db->selectSingle(
-			'SELECT id, id_planet FROM %%USERS%% WHERE id = :userId',
+			'SELECT id, id_planet, bana FROM %%USERS%% WHERE id = :userId',
 			[':userId' => $row['userID']]
 		);
 
-		if (empty($user['id'])) {
+		if (empty($user['id']) || (int) $user['bana'] === 1) {
 			return null;
 		}
 
@@ -345,6 +353,10 @@ class Session
 
 	private static function refreshSessionCookie(): void
 	{
+		if (headers_sent()) {
+			return;
+		}
+
 		$params = session_get_cookie_params();
 		$expires = time() + SESSION_LIFETIME;
 
