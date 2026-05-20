@@ -51,9 +51,9 @@ $("#tn3").hide();
 </div>
 {if $buildInfo.buildings || $buildInfo.tech || $buildInfo.fleet}
 <div class="overview-command-timers">
-	{if $buildInfo.buildings}<div><a href="game.php?page=buildings">{$LNG.lm_buildings}:</a> {$LNG.tech[$buildInfo.buildings['id']]} <span class="timer" data-time="{$buildInfo.buildings['timeleft']}">{$buildInfo.buildings['starttime']}</span></div>{/if}
-	{if $buildInfo.tech}<div><a href="game.php?page=research">{$LNG.lm_research}:</a> {$LNG.tech[$buildInfo.tech['id']]} <span class="timer" data-time="{$buildInfo.tech['timeleft']}">{$buildInfo.tech['starttime']}</span></div>{/if}
-	{if $buildInfo.fleet}<div><a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}:</a> {$LNG.tech[$buildInfo.fleet['id']]} <span class="timer" data-time="{$buildInfo.fleet['timeleft']}">{$buildInfo.fleet['starttime']}</span></div>{/if}
+	{if $buildInfo.buildings}<div><a href="game.php?page=buildings">{$LNG.lm_buildings}:</a> {$LNG.tech[$buildInfo.buildings['id']]} <span class="timer" data-time="{$buildInfo.buildings['time']}">{$buildInfo.buildings['starttime']}</span></div>{/if}
+	{if $buildInfo.tech}<div><a href="game.php?page=research">{$LNG.lm_research}:</a> {$LNG.tech[$buildInfo.tech['id']]} <span class="timer" data-time="{$buildInfo.tech['time']}">{$buildInfo.tech['starttime']}</span></div>{/if}
+	{if $buildInfo.fleet}<div><a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}:</a> {$LNG.tech[$buildInfo.fleet['id']]} <span class="timer" data-time="{$buildInfo.fleet['endtime']}">{$buildInfo.fleet['starttime']}</span></div>{/if}
 </div>
 {/if}
 	{if $messages}
@@ -116,9 +116,9 @@ $("#tn3").hide();
 			{$planetname}<br>
 
 			<div class="no-mobile">
-			{if $buildInfo.buildings}<a href="game.php?page=buildings">{$LNG.lm_buildings}: </a>{$LNG.tech[$buildInfo.buildings['id']]} ({$buildInfo.buildings['level']})<br><div class="timer" data-time="{$buildInfo.buildings['timeleft']}">{$buildInfo.buildings['starttime']}</div>{else}<a href="game.php?page=buildings">{$LNG.lm_buildings}: {$LNG.ov_free}</a><br>{/if}
-			{if $buildInfo.tech}<a href="game.php?page=research">{$LNG.lm_research}: </a>{$LNG.tech[$buildInfo.tech['id']]} ({$buildInfo.tech['level']})<br><div class="timer" data-time="{$buildInfo.tech['timeleft']}">{$buildInfo.tech['starttime']}</div>{else}<a href="game.php?page=research">{$LNG.lm_research}: {$LNG.ov_free}</a><br>{/if}
-			{if $buildInfo.fleet}<a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}: </a>{$LNG.tech[$buildInfo.fleet['id']]} ({$buildInfo.fleet['level']})<br><div class="timer" data-time="{$buildInfo.fleet['timeleft']}">{$buildInfo.fleet['starttime']}</div>{else}<a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}: {$LNG.ov_free}</a><br>{/if}
+			{if $buildInfo.buildings}<a href="game.php?page=buildings">{$LNG.lm_buildings}: </a>{$LNG.tech[$buildInfo.buildings['id']]} ({$buildInfo.buildings['level']})<br><div class="timer" data-time="{$buildInfo.buildings['time']}">{$buildInfo.buildings['starttime']}</div>{else}<a href="game.php?page=buildings">{$LNG.lm_buildings}: {$LNG.ov_free}</a><br>{/if}
+			{if $buildInfo.tech}<a href="game.php?page=research">{$LNG.lm_research}: </a>{$LNG.tech[$buildInfo.tech['id']]} ({$buildInfo.tech['level']})<br><div class="timer" data-time="{$buildInfo.tech['time']}">{$buildInfo.tech['starttime']}</div>{else}<a href="game.php?page=research">{$LNG.lm_research}: {$LNG.ov_free}</a><br>{/if}
+			{if $buildInfo.fleet}<a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}: </a>{$LNG.tech[$buildInfo.fleet['id']]} ({$buildInfo.fleet['level']})<br><div class="timer" data-time="{$buildInfo.fleet['endtime']}">{$buildInfo.fleet['starttime']}</div>{else}<a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}: {$LNG.ov_free}</a><br>{/if}
 			</div>
 </br>
 {$LNG.ov_diameter}: {$LNG.ov_distance_unit} (<a title="{$LNG.ov_developed_fields}">{$planet_field_current}</a> / <a title="{$LNG.ov_max_developed_fields}">{$planet_field_max}</a> {$LNG.ov_fields})
