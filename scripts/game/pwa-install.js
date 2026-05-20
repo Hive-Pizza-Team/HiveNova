@@ -1,5 +1,5 @@
 /**
- * PWA install prompts: beforeinstallprompt on Chromium, Share instructions on iOS.
+ * PWA install prompts: platform-specific steps and beforeinstallprompt on Chromium.
  */
 (function () {
 	var DISMISS_KEY = 'hivenova_pwa_install_dismissed';
@@ -12,7 +12,33 @@
 	}
 
 	function isIos() {
-		return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+		return (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream)
+			|| (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+	}
+
+	function isAndroid() {
+		return /Android/i.test(navigator.userAgent);
+	}
+
+	function isFirefox() {
+		return /Firefox|FxiOS/i.test(navigator.userAgent);
+	}
+
+	function isEdge() {
+		return /Edg/i.test(navigator.userAgent);
+	}
+
+	function isChromium() {
+		return /Chrome|CriOS|Edg|OPR|SamsungBrowser/i.test(navigator.userAgent)
+			&& !isFirefox();
+	}
+
+	function isSafari() {
+		return /Safari/i.test(navigator.userAgent) && !isChromium();
+	}
+
+	function isMobileViewport() {
+		return window.matchMedia('(max-width: 699px)').matches;
 	}
 
 	function isDismissed() {
@@ -25,6 +51,51 @@
 		} catch (e) {
 			return false;
 		}
+	}
+
+	function platformToDatasetKey(platform) {
+		return 'hint' + platform.split('-').map(function (part) {
+			return part.charAt(0).toUpperCase() + part.slice(1);
+		}).join('');
+	}
+
+	function getInstallPlatform() {
+		if (isIos()) {
+			return 'ios';
+		}
+		if (isAndroid()) {
+			if (deferredPrompt) {
+				return 'android-chrome-prompt';
+			}
+			if (isChromium()) {
+				return 'android-chrome-manual';
+			}
+			if (isFirefox()) {
+				return 'android-firefox';
+			}
+			return 'android-other';
+		}
+		if (deferredPrompt) {
+			return 'desktop-chrome-prompt';
+		}
+		if (isEdge()) {
+			return 'desktop-edge';
+		}
+		if (isChromium()) {
+			return 'desktop-chrome';
+		}
+		if (isSafari()) {
+			return 'desktop-safari';
+		}
+		if (isFirefox()) {
+			return 'desktop-firefox';
+		}
+		return 'fallback';
+	}
+
+	function getHintText(banner, platform) {
+		var key = platformToDatasetKey(platform);
+		return banner.dataset[key] || banner.dataset.hintFallback || '';
 	}
 
 	function dismiss() {
@@ -41,6 +112,24 @@
 		}
 	}
 
+	function updateInstructions() {
+		var banner = document.getElementById('pwa-install-banner');
+		if (!banner) {
+			return;
+		}
+		var platform = getInstallPlatform();
+		var text = getHintText(banner, platform);
+		var instructions = banner.querySelector('[data-pwa-instructions]');
+		if (instructions) {
+			instructions.textContent = text;
+		}
+		var settingsHint = document.querySelector('[data-pwa-settings-instructions]');
+		if (settingsHint) {
+			settingsHint.textContent = text;
+			settingsHint.hidden = !text;
+		}
+	}
+
 	function showBanner() {
 		if (isStandalone() || isDismissed()) {
 			return;
@@ -50,24 +139,11 @@
 			return;
 		}
 
-		var installBtn = banner.querySelector('[data-pwa-install]');
-		var iosBlock = banner.querySelector('[data-pwa-ios]');
-		var androidBlock = banner.querySelector('[data-pwa-android]');
+		updateInstructions();
 
-		if (isIos()) {
-			if (iosBlock) {
-				iosBlock.hidden = false;
-			}
-			if (installBtn) {
-				installBtn.hidden = true;
-			}
-		} else {
-			if (androidBlock) {
-				androidBlock.hidden = false;
-			}
-			if (installBtn) {
-				installBtn.hidden = !deferredPrompt;
-			}
+		var installBtn = banner.querySelector('[data-pwa-install]');
+		if (installBtn) {
+			installBtn.hidden = isIos() || !deferredPrompt;
 		}
 
 		banner.hidden = false;
@@ -106,9 +182,7 @@
 			install().catch(function () {});
 		});
 
-		if (isIos()) {
-			showBanner();
-		} else if (deferredPrompt) {
+		if (isIos() || deferredPrompt || isMobileViewport()) {
 			showBanner();
 		}
 	}
@@ -131,12 +205,9 @@
 			return;
 		}
 		row.hidden = false;
+		updateInstructions();
 
-		var iosHint = row.querySelector('[data-pwa-settings-ios]');
 		var installBtn = document.getElementById('pwa-install-settings-btn');
-		if (iosHint) {
-			iosHint.hidden = !isIos();
-		}
 		if (installBtn) {
 			installBtn.hidden = isIos() || !deferredPrompt;
 			installBtn.addEventListener('click', function () {
@@ -148,7 +219,8 @@
 	window.HiveNovaPwaInstall = {
 		install: install,
 		isStandalone: isStandalone,
-		dismiss: dismiss
+		dismiss: dismiss,
+		getInstallPlatform: getInstallPlatform
 	};
 
 	$(function () {

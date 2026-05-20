@@ -697,10 +697,6 @@ table.tablesorter thead tr .headerSortDown {
 
 /* MEDIA */
 
-.pwa-install-banner {
-    display: none;
-}
-
 #bottom-nav,
 .fleet-mobile-list,
 .overview-mobile-shortcuts,
@@ -984,12 +980,13 @@ table.tablesorter thead tr .headerSortDown {
         padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     }
 
-    .pwa-install-banner {
+    .pwa-install-banner:not([hidden]) {
+        display: block;
         position: fixed;
         left: 8px;
         right: 8px;
         bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 8px);
-        z-index: 150;
+        z-index: 550;
         padding: 12px 14px;
         background: var(--color-bg-surface);
         border: 1px solid var(--color-border);
@@ -1282,9 +1279,7 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     .overview-mobile-shortcuts {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        display: block;
         margin: 12px 0;
     }
 
@@ -1347,6 +1342,136 @@ table.tablesorter thead tr .headerSortDown {
     #overview .infos .planeth {
         clear: both;
         padding: 10px;
+    }
+
+    body#messages content {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    body#messages .msg-overview {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow: visible;
+    }
+
+    body#messages .msg-table {
+        width: 100%;
+        max-width: 100%;
+        overflow: visible;
+    }
+
+    body#messages .msg-overview tr {
+        display: block;
+    }
+
+    body#messages .msg-overview tr:first-child th,
+    body#messages .msg-table > tr:first-child th {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        line-height: 1.4;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        box-sizing: border-box;
+        overflow: visible;
+        white-space: normal;
+    }
+
+    body#messages .msg-overview tr:not(:first-child) {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    body#messages .msg-overview .msg-cat-cell {
+        min-width: 0;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    body#messages .msg-overview td:not(.msg-cat-cell) {
+        display: none;
+    }
+
+    body#messages .msg-action-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    body#messages .msg-action-bar select,
+    body#messages .msg-action-bar input[type="submit"] {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    body#messages .msg-col-header {
+        display: none;
+    }
+
+    body#messages .msg-date-col,
+    body#messages .msg-from-col,
+    body#messages .msg-action-col {
+        width: auto !important;
+        max-width: 100% !important;
+        white-space: normal;
+    }
+
+    body#messages .msg-pagination-row td {
+        white-space: normal;
+        text-align: left !important;
+        word-break: break-word;
+        font-size: 12px;
+    }
+
+    body#messages .msg-table tr.message_head,
+    body#messages .msg-table tr.messages_body {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    body#messages .msg-table tr.message_head {
+        margin-top: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px 8px 0 0;
+        background: var(--color-bg-surface);
+    }
+
+    body#messages .msg-table tr.messages_body {
+        border: 1px solid var(--color-border);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        margin-bottom: 4px;
+        background: var(--color-bg-surface);
+    }
+
+    body#messages .msg-table tr.message_head td,
+    body#messages .msg-table tr.messages_body td {
+        display: block;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+        text-align: left !important;
+    }
+
+    body#messages .msg-table tr.message_head .msg-action-col {
+        border-bottom: 1px solid var(--color-border);
+        text-align: center !important;
+    }
+
+    body#messages .msg-table tr.message_head .msg-from-col {
+        overflow: visible;
+        text-overflow: unset;
+    }
+
+    body#messages .msg-table tr.messages_body .msg-body-cell {
+        border-top: 1px solid var(--color-border);
     }
 
     content button,

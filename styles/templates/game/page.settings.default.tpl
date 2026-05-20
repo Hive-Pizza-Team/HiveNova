@@ -66,8 +66,8 @@
 		<tr id="pwa-install-settings" hidden>
 			<td colspan="2">
 				<strong>{$LNG.op_install_app_title}</strong>
-				<p>{$LNG.op_install_app_desc}</p>
-				<p data-pwa-settings-ios hidden>{$LNG.pwa_install_ios_steps}</p>
+				<p>{$LNG.op_install_app_desc|sprintf:$game_name|escape:'html'}</p>
+				<p data-pwa-settings-instructions hidden></p>
 				<button type="button" id="pwa-install-settings-btn" class="button" hidden>{$LNG.pwa_install_button}</button>
 			</td>
 		</tr>
