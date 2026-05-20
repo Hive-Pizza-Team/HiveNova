@@ -64,7 +64,7 @@
 	data-hint-desktop-safari="{$LNG.pwa_install_desktop_safari|sprintf:$game_name|escape:'html'}"
 	data-hint-desktop-firefox="{$LNG.pwa_install_desktop_firefox|sprintf:$game_name|escape:'html'}"
 	data-hint-fallback="{$LNG.pwa_install_fallback|sprintf:$game_name|escape:'html'}">
-	<p class="pwa-install-banner__title">{$LNG.pwa_install_banner_title|sprintf:$game_name}</p>
+	<p class="pwa-install-banner__title">{$LNG.pwa_install_banner_title|sprintf:$game_name|escape:'html'}</p>
 	<p class="pwa-install-banner__text" data-pwa-instructions></p>
 	<div class="pwa-install-banner__actions">
 		<button type="button" class="button" data-pwa-install hidden>{$LNG.pwa_install_button}</button>

@@ -12,17 +12,21 @@ require 'includes/common.php';
 
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\Universe;
 
 $uni = (int) HTTP::_GP('uni', 0);
 if ($uni < 1 && isset($_COOKIE['uni'])) {
 	$uni = (int) $_COOKIE['uni'];
 }
 
-try {
-	$config = $uni > 0 ? Config::get($uni) : Config::get();
-} catch (Exception) {
-	$config = Config::get(defined('ROOT_UNI') ? ROOT_UNI : 1);
+if ($uni > 0 && !Universe::exists($uni)) {
+	HTTP::sendHeader('HTTP/1.1 404 Not Found');
+	HTTP::sendHeader('Content-Type', 'application/manifest+json; charset=UTF-8');
+	echo json_encode(array('error' => 'Unknown universe'), JSON_UNESCAPED_UNICODE);
+	exit;
 }
+
+$config = $uni > 0 ? Config::get($uni) : Config::get();
 
 $gameName = trim((string) $config->game_name);
 if ($gameName === '') {
@@ -30,8 +34,8 @@ if ($gameName === '') {
 }
 
 $shortName = $gameName;
-if (function_exists('mb_strlen') && function_exists('mb_substr') && mb_strlen($gameName) > 12) {
-	$shortName = mb_substr($gameName, 0, 12);
+if (function_exists('mb_strlen') && function_exists('mb_substr') && mb_strlen($gameName, 'UTF-8') > 12) {
+	$shortName = mb_substr($gameName, 0, 12, 'UTF-8');
 } elseif (strlen($gameName) > 12) {
 	$shortName = substr($gameName, 0, 12);
 }
