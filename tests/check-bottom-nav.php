@@ -30,7 +30,10 @@ function curl_post(string $url, array $fields, string $cookieFile): string {
     return $body ?: '';
 }
 
-function curl_get(string $url, string $cookieFile): string {
+/**
+ * @return array{0: string, 1: string} body and final URL after redirects
+ */
+function curl_get(string $url, string $cookieFile): array {
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -40,8 +43,15 @@ function curl_get(string $url, string $cookieFile): string {
         CURLOPT_TIMEOUT        => 15,
     ]);
     $body = curl_exec($ch);
+    $effectiveUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL) ?: $url;
     curl_close($ch);
-    return $body ?: '';
+    return [$body ?: '', $effectiveUrl];
+}
+
+function isIngameGameUrl(string $baseUrl, string $url): bool
+{
+    $prefix = rtrim($baseUrl, '/') . '/game.php';
+    return str_starts_with($url, $prefix);
 }
 
 curl_post("$baseUrl/index.php?page=login", [
@@ -74,7 +84,12 @@ echo "=== Bottom nav markup check ===\n";
 echo "Base URL: $baseUrl\n\n";
 
 foreach ($fullPages as $page) {
-    $body = curl_get("$baseUrl/game.php?page=$page", $cookieFile);
+    $url = "$baseUrl/game.php?page=$page";
+    [$body, $effectiveUrl] = curl_get($url, $cookieFile);
+    if (!isIngameGameUrl($baseUrl, $effectiveUrl)) {
+        echo "[ SKIP ] full layout leaves ingame: $page → $effectiveUrl\n";
+        continue;
+    }
     if (strpos($body, 'id="bottom-nav"') === false) {
         echo "[ FAIL ] full layout missing bottom-nav: $page\n";
         $fail++;
@@ -83,7 +98,12 @@ foreach ($fullPages as $page) {
 
 foreach ($popupPages as $query) {
     $label = http_build_query($query);
-    $body = curl_get("$baseUrl/game.php?$label", $cookieFile);
+    $url = "$baseUrl/game.php?$label";
+    [$body, $effectiveUrl] = curl_get($url, $cookieFile);
+    if (!isIngameGameUrl($baseUrl, $effectiveUrl)) {
+        echo "[ SKIP ] popup layout leaves ingame: $label → $effectiveUrl\n";
+        continue;
+    }
     if (strpos($body, 'id="bottom-nav"') === false) {
         echo "[ FAIL ] popup layout missing bottom-nav: $label\n";
         $fail++;

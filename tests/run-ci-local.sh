@@ -2,7 +2,7 @@
 # run-ci-local.sh — mirrors the GitHub Actions CI pipeline locally.
 #
 # Usage:
-#   ./tests/run-ci-local.sh               # unit tests + language check + smoke test
+#   ./tests/run-ci-local.sh               # unit tests + language check + smoke + bottom-nav check
 #   ./tests/run-ci-local.sh --integration # also run integration tests (requires MySQL)
 #
 # Prerequisites:
@@ -53,6 +53,7 @@ run "Language check"   php .github/scripts/check-language-files.php
 run "CSS check"        bash tests/check-css.sh
 run "Unit tests"       php vendor/bin/phpunit --configuration phpunit.xml
 run "Smoke test"       php tests/smoke.php
+run "Bottom nav check" php tests/check-bottom-nav.php
 run "Error log empty"  check_error_log
 
 if [[ $INTEGRATION -eq 1 ]]; then
