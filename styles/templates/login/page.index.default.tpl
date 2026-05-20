@@ -1,4 +1,4 @@
-{block name="title" prepend}{$LNG.siteTitleIndex}{/block}
+{block name="title"}{$gameName}{/block}
 {block name="content"}
 <section class="hero-section">
 	<h1>{$descHeader}</h1>
