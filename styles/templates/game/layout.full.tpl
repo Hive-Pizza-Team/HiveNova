@@ -50,18 +50,19 @@
 		{include file="main.footer.tpl" nocache}
 	</footer>
 
-	<div id="pwa-install-banner" class="pwa-install-banner" hidden>
-		<p class="pwa-install-banner__title">{$LNG.pwa_install_banner_title}</p>
-		<p class="pwa-install-banner__text" data-pwa-android hidden>{$LNG.pwa_install_banner_android}</p>
-		<p class="pwa-install-banner__text" data-pwa-ios hidden>{$LNG.pwa_install_ios_steps}</p>
-		<div class="pwa-install-banner__actions">
-			<button type="button" class="button" data-pwa-install hidden>{$LNG.pwa_install_button}</button>
-			<button type="button" class="button" data-pwa-dismiss>{$LNG.pwa_install_dismiss}</button>
-		</div>
-	</div>
-
-	{include file="main.bottomnav.tpl"}
 </div>
+
+<div id="pwa-install-banner" class="pwa-install-banner" hidden>
+	<p class="pwa-install-banner__title">{$LNG.pwa_install_banner_title}</p>
+	<p class="pwa-install-banner__text" data-pwa-android hidden>{$LNG.pwa_install_banner_android}</p>
+	<p class="pwa-install-banner__text" data-pwa-ios hidden>{$LNG.pwa_install_ios_steps}</p>
+	<div class="pwa-install-banner__actions">
+		<button type="button" class="button" data-pwa-install hidden>{$LNG.pwa_install_button}</button>
+		<button type="button" class="button" data-pwa-dismiss>{$LNG.pwa_install_dismiss}</button>
+	</div>
+</div>
+
+{include file="main.bottomnav.tpl"}
 
 </body>
 </html>
