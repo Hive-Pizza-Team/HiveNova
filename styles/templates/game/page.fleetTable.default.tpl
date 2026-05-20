@@ -146,7 +146,7 @@
 </table>
 </form>
 <br>
-<table style="min-width:519px;width:519px;">
+<table class="table519 fleet-bonus-table">
 	<tr><th colspan="3">{$LNG.fl_bonus}</th></tr>
 	<tr><th style="width:33%">{$LNG.fl_bonus_attack}</th><th style="width:33%">{$LNG.fl_bonus_defensive}</th><th style="width:33%">{$LNG.fl_bonus_shield}</th></tr>
 	<tr><td>+{$bonusAttack} %</td><td>+{$bonusDefensive} %</td><td>+{$bonusShield} %</td></tr>

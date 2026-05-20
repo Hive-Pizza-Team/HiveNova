@@ -776,6 +776,10 @@ table.tablesorter thead tr .headerSortDown {
 }
 
 @media screen and (max-width: 699px) {
+    body.full {
+        padding-top: max(12px, env(safe-area-inset-top, 0px));
+    }
+
     .wrapper {
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr auto;
@@ -799,6 +803,8 @@ table.tablesorter thead tr .headerSortDown {
     header .fixed {
         position: sticky;
         top: 0;
+        left: 0;
+        right: 0;
         z-index: 100;
         display: grid;
         grid-template-columns: 44px 1fr;
@@ -807,9 +813,11 @@ table.tablesorter thead tr .headerSortDown {
         align-items: center;
         width: 100%;
         height: auto;
-        min-height: calc(44px + env(safe-area-inset-top, 0px));
-        padding: calc(4px + env(safe-area-inset-top, 0px)) 6px 6px 6px;
+        min-height: 80px;
+        padding: 8px 6px 6px 6px;
         max-width: none;
+        overflow: visible;
+        box-sizing: border-box;
     }
 
     content {
@@ -847,6 +855,8 @@ table.tablesorter thead tr .headerSortDown {
         grid-row: 1;
         flex-grow: 1;
         min-width: 0;
+        align-self: start;
+        padding-top: 2px;
     }
 
     #resource_mobile {
@@ -1015,7 +1025,7 @@ table.tablesorter thead tr .headerSortDown {
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 100;
+        z-index: 500;
         height: calc(56px + env(safe-area-inset-bottom, 0px));
         padding-bottom: env(safe-area-inset-bottom, 0px);
         background: var(--color-bg-surface);
@@ -1215,6 +1225,12 @@ table.tablesorter thead tr .headerSortDown {
 
     .fleet-table-desktop {
         display: none;
+    }
+
+    .fleet-bonus-table {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
     }
 
     .fleet-mobile-list {
