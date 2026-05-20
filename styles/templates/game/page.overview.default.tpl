@@ -43,9 +43,11 @@ $("#tn3").hide();
 </style>	
 
 <div>
+{if $messages}
 <div class="overview-mobile-shortcuts mobile">
 	<a href="game.php?page=messages">{$LNG.lm_messages}</a>
 </div>
+{/if}
 {if $buildInfo.buildings || $buildInfo.tech || $buildInfo.fleet}
 <div class="overview-command-timers">
 	{if $buildInfo.buildings}<div><a href="game.php?page=buildings">{$LNG.lm_buildings}:</a> {$LNG.tech[$buildInfo.buildings['id']]} <span class="timer" data-time="{$buildInfo.buildings['time']}">{$buildInfo.buildings['starttime']}</span></div>{/if}
