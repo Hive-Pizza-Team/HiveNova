@@ -63,6 +63,14 @@
 				{if !$pushConfigured}<br><small class="push-settings-hint">{$LNG.op_push_not_configured}</small>{/if}
 			</td>
 		</tr>
+		<tr id="pwa-install-settings" hidden>
+			<td colspan="2">
+				<strong>{$LNG.op_install_app_title}</strong>
+				<p>{$LNG.op_install_app_desc}</p>
+				<p data-pwa-settings-ios hidden>{$LNG.pwa_install_ios_steps}</p>
+				<button type="button" id="pwa-install-settings-btn" class="button" hidden>{$LNG.pwa_install_button}</button>
+			</td>
+		</tr>
 		<tr>
 			<td>{$LNG.op_timezone}</td>
 			<td>{html_options name=timezone options=$Selectors.timezones selected=$timezone}</td>
