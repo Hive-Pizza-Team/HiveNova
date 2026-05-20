@@ -63,6 +63,7 @@ jobs:
       - run: mkdir -p cache/sessions cache/templates
       - run: php -S localhost:8000 &> /tmp/php-server.log & sleep 2
       - run: php tests/smoke.php
+      - run: php tests/check-bottom-nav.php
       - name: Check error log is empty
         run: |
           errors=$(grep -v '/vendor/' includes/error.log 2>/dev/null || true)
