@@ -49,11 +49,13 @@ $("#tn3").hide();
 	<a href="game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}">{$LNG.lm_galaxy}</a>
 	<a href="game.php?page=messages">{$LNG.lm_messages}</a>
 </div>
-<div class="overview-command-timers mobile">
+{if $buildInfo.buildings || $buildInfo.tech || $buildInfo.fleet}
+<div class="overview-command-timers">
 	{if $buildInfo.buildings}<div><a href="game.php?page=buildings">{$LNG.lm_buildings}:</a> {$LNG.tech[$buildInfo.buildings['id']]} <span class="timer" data-time="{$buildInfo.buildings['timeleft']}">{$buildInfo.buildings['starttime']}</span></div>{/if}
 	{if $buildInfo.tech}<div><a href="game.php?page=research">{$LNG.lm_research}:</a> {$LNG.tech[$buildInfo.tech['id']]} <span class="timer" data-time="{$buildInfo.tech['timeleft']}">{$buildInfo.tech['starttime']}</span></div>{/if}
 	{if $buildInfo.fleet}<div><a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}:</a> {$LNG.tech[$buildInfo.fleet['id']]} <span class="timer" data-time="{$buildInfo.fleet['timeleft']}">{$buildInfo.fleet['starttime']}</span></div>{/if}
 </div>
+{/if}
 	{if $messages}
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
 	
@@ -107,13 +109,17 @@ $("#tn3").hide();
 {if $Moon}<div class="moon"><a href="game.php?page=overview&amp;cp={$Moon.id}&amp;re=0" title="{$Moon.name}"><img src="{$dpath}planeten/mond.jpg" height="100" width="100" style="margin: 20% 0px 5px 0px;" alt="{$Moon.name} ({$LNG.fcm_moon})"></a><br>{$Moon.name} ({$LNG.fcm_moon})
 </div>
 {else}&nbsp;{/if}
-		<div class="planeth">
-			<img style="float: left;" src="{$dpath}planeten/{$planetimage}.jpg" height="200" width="200" alt="{$planetname}"></div><div class="planeth">
- {$planetname}<br>
-			
+		<div class="planeth overview-planet-visual">
+			<img src="{$dpath}planeten/{$planetimage}.jpg" width="200" height="200" alt="{$planetname}">
+		</div>
+		<div class="planeth overview-planet-details">
+			{$planetname}<br>
+
+			<div class="no-mobile">
 			{if $buildInfo.buildings}<a href="game.php?page=buildings">{$LNG.lm_buildings}: </a>{$LNG.tech[$buildInfo.buildings['id']]} ({$buildInfo.buildings['level']})<br><div class="timer" data-time="{$buildInfo.buildings['timeleft']}">{$buildInfo.buildings['starttime']}</div>{else}<a href="game.php?page=buildings">{$LNG.lm_buildings}: {$LNG.ov_free}</a><br>{/if}
 			{if $buildInfo.tech}<a href="game.php?page=research">{$LNG.lm_research}: </a>{$LNG.tech[$buildInfo.tech['id']]} ({$buildInfo.tech['level']})<br><div class="timer" data-time="{$buildInfo.tech['timeleft']}">{$buildInfo.tech['starttime']}</div>{else}<a href="game.php?page=research">{$LNG.lm_research}: {$LNG.ov_free}</a><br>{/if}
 			{if $buildInfo.fleet}<a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}: </a>{$LNG.tech[$buildInfo.fleet['id']]} ({$buildInfo.fleet['level']})<br><div class="timer" data-time="{$buildInfo.fleet['timeleft']}">{$buildInfo.fleet['starttime']}</div>{else}<a href="game.php?page=shipyard&amp;mode=fleet">{$LNG.lm_shipshard}: {$LNG.ov_free}</a><br>{/if}
+			</div>
 </br>
 {$LNG.ov_diameter}: {$LNG.ov_distance_unit} (<a title="{$LNG.ov_developed_fields}">{$planet_field_current}</a> / <a title="{$LNG.ov_max_developed_fields}">{$planet_field_max}</a> {$LNG.ov_fields})
 <br>{$LNG.ov_temperature}: {$LNG.ov_aprox} {$planet_temp_min}{$LNG.ov_temp_unit} {$LNG.ov_to} {$planet_temp_max}{$LNG.ov_temp_unit}
