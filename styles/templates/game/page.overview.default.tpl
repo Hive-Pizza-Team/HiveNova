@@ -44,9 +44,6 @@ $("#tn3").hide();
 
 <div>
 <div class="overview-mobile-shortcuts mobile">
-	<a href="game.php?page=buildings">{$LNG.lm_buildings}</a>
-	<a href="game.php?page=fleetTable">{$LNG.lm_fleet}</a>
-	<a href="game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}">{$LNG.lm_galaxy}</a>
 	<a href="game.php?page=messages">{$LNG.lm_messages}</a>
 </div>
 {if $buildInfo.buildings || $buildInfo.tech || $buildInfo.fleet}
