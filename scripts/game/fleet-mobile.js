@@ -18,10 +18,6 @@
 	}
 
 	$(function () {
-		if (!window.matchMedia('(max-width: 699px)').matches) {
-			return;
-		}
-
 		$(document).on('click', '.fleet-step-minus', function () {
 			adjustShipInput($(this).data('target'), -1);
 		});

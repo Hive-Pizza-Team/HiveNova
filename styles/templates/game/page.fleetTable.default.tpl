@@ -102,46 +102,46 @@
 <input type="hidden" name="planet" value="{$targetPlanet}">
 <input type="hidden" name="type" value="{$targetType}">
 <input type="hidden" name="target_mission" value="{$targetMission}">
-<table class="table519">
+<table class="table519 fleet-select-table">
 	<tr>
-		<th colspan="4">{$LNG.fl_new_mission_title}</th>
+		<th colspan="3">{$LNG.fl_new_mission_title}</th>
 	</tr>
 	<tr style="height:20px;">
 		<td>{$LNG.fl_ship_type}</td>
 		<td>{$LNG.fl_ship_available}</td>
-		<td>-</td>
-		<td>-</td>
+		<td>{$LNG.fl_ammount}</td>
 	</tr>
 	{foreach $FleetsOnPlanet as $FleetRow}
 	<tr style="height:20px;">
 		<td>{if $FleetRow.speed != 0} <a class='tooltip' data-tooltip-content='<table><tr><td>{$LNG.fl_speed_title}</td><td>{$FleetRow.speed}</td></tr></table>'>{$LNG.tech.{$FleetRow.id}}</a>{else}{$LNG.tech.{$FleetRow.id}}{/if}</td>
 		<td id="ship{$FleetRow.id}_value">{$FleetRow.count|number}</td>
 		{if $FleetRow.speed != 0}
-		<td><a href="javascript:maxShip('ship{$FleetRow.id}');">{$LNG.fl_max}</a></td>
 		<td>
 			<div class="fleet-ship-stepper">
-				<button type="button" class="fleet-step-minus mobile" data-target="ship{$FleetRow.id}_input" aria-label="-1">-</button>
-				<input type="text" inputmode="numeric" name="ship{$FleetRow.id}" id="ship{$FleetRow.id}_input" size="10" placeholder="0">
-				<button type="button" class="fleet-step-plus mobile" data-target="ship{$FleetRow.id}_input" data-step="1" aria-label="+1">+</button>
-				<button type="button" class="fleet-step-plus mobile" data-target="ship{$FleetRow.id}_input" data-step="10" aria-label="+10">+10</button>
+				<button type="button" class="fleet-ship-btn fleet-step-minus" data-target="ship{$FleetRow.id}_input" aria-label="-1">-</button>
+				<input type="text" inputmode="numeric" class="fleet-ship-input" name="ship{$FleetRow.id}" id="ship{$FleetRow.id}_input" placeholder="0">
+				<button type="button" class="fleet-ship-btn fleet-step-plus" data-target="ship{$FleetRow.id}_input" data-step="1" aria-label="+1">+</button>
+				<button type="button" class="fleet-ship-btn fleet-step-plus" data-target="ship{$FleetRow.id}_input" data-step="10" aria-label="+10">+10</button>
+				<button type="button" class="fleet-ship-btn fleet-step-max" onclick="maxShip('ship{$FleetRow.id}');">{$LNG.fl_max}</button>
 			</div>
 		</td>
 		{else}
-		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		{/if}
 	</tr>
 	{/foreach}
 	<tr style="height:20px;">
 	{if $FleetsOnPlanet|count == 0}
-	<td colspan="4">{$LNG.fl_no_ships}</td>
+	<td colspan="3">{$LNG.fl_no_ships}</td>
 	{else}
-	<td colspan="2"><a href="javascript:noShips();">{$LNG.fl_remove_all_ships}</a></td>
-	<td colspan="2"><a href="javascript:maxShips();">{$LNG.fl_select_all_ships}</a></td>
+	<td colspan="3" class="fleet-ship-bulk-actions">
+		<button type="button" class="fleet-ship-btn" onclick="noShips();">{$LNG.fl_remove_all_ships}</button>
+		<button type="button" class="fleet-ship-btn" onclick="maxShips();">{$LNG.fl_select_all_ships}</button>
+	</td>
 	{/if}
 	</tr>
 	<tr id="fleetContinueRow" style="height:20px;{if $maxFleetSlots == $activeFleetSlots}display:none;{/if}">
-		<td colspan="4"><input type="submit" value="{$LNG.fl_continue}"></td>
+		<td colspan="3"><input type="submit" value="{$LNG.fl_continue}"></td>
 	</tr>
 </table>
 </form>
