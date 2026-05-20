@@ -312,6 +312,66 @@ textarea.tinymce {
     font-weight: bold;
 }
 
+.fleet-select-table td:last-child {
+    text-align: right;
+    vertical-align: middle;
+}
+
+.fleet-ship-stepper {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+}
+
+.fleet-ship-stepper .fleet-ship-input {
+    width: 3.25rem;
+    min-width: 2.5rem;
+    max-width: 4.5rem;
+    padding: 4px 2px;
+    margin: 0;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.fleet-select-table .fleet-ship-stepper button.fleet-ship-btn,
+.fleet-select-table .fleet-ship-bulk-actions button.fleet-ship-btn {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 4px 7px;
+    min-width: 2rem;
+    min-height: 1.75rem;
+    border-radius: 6px;
+    background: var(--color-menu-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.fleet-select-table .fleet-ship-stepper button.fleet-ship-btn:hover,
+.fleet-select-table .fleet-ship-bulk-actions button.fleet-ship-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+td.fleet-ship-bulk-actions {
+    text-align: center;
+}
+
+.fleet-ship-bulk-actions button.fleet-ship-btn {
+    margin: 0 6px;
+    min-width: 5.5rem;
+}
+
 .build_form {
     display: inline;
 }
@@ -1267,15 +1327,29 @@ table.tablesorter thead tr .headerSortDown {
         background: var(--color-accent);
     }
 
-    .fleet-ship-stepper {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 4px;
+    .fleet-select-table .fleet-ship-stepper button.fleet-ship-btn {
+        min-height: 36px;
+        min-width: 36px;
+        padding: 4px 6px;
+        font-size: 12px;
     }
 
-    .fleet-ship-stepper button {
-        min-width: 36px;
+    .fleet-ship-stepper .fleet-ship-input {
+        width: 2.75rem;
+        min-height: 36px;
+    }
+
+    .fleet-ship-bulk-actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .fleet-ship-bulk-actions button.fleet-ship-btn {
+        flex: 1 1 calc(50% - 8px);
+        max-width: calc(50% - 8px);
+        min-height: 44px;
+        margin: 0;
     }
 
     .overview-mobile-shortcuts {
