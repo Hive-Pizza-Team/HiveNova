@@ -1002,6 +1002,22 @@ $LNG['du_select_all_tables']		= 'Butun Tablolar';
 $LNG['du_choose_tables']			= 'Tablo Sec';
 $LNG['du_success']					= 'Basariyla yedeklendi! Dosya Adi: %s';
 $LNG['du_not_tables_selected']		= 'Lutfen yedeklemek istediginiz tabloyu seciniz!';
+$LNG['du_backup_dir_error'] = 'Yedek dizini olusturulamadi.';
+$LNG['du_restore_header'] = 'Veritabanini geri yukle';
+$LNG['du_restore_warning'] = 'Geri yukleme mevcut veritabanini secilen yedekle degistirir. Emin degilseniz once guvenlik yedegi alin.';
+$LNG['du_restore_choose_file'] = 'Yedek dosyasi';
+$LNG['du_restore_no_files'] = 'includes/backups/ icinde yedek dosyasi bulunamadi.';
+$LNG['du_restore_backup_before'] = 'Guvenlik yedegi';
+$LNG['du_restore_backup_before_label'] = 'Geri yuklemeden once tam yedek al (onerilir)';
+$LNG['du_restore_confirm'] = 'Onay';
+$LNG['du_restore_confirm_label'] = 'Mevcut veritabaninin ustune yazilacagini anliyorum';
+$LNG['du_restore_submit'] = 'Veritabanini geri yukle';
+$LNG['du_restore_success'] = 'Veritabani %s dosyasindan basariyla geri yuklendi.';
+$LNG['du_restore_safety_backup'] = 'Geri yukleme oncesi guvenlik yedegi: %s';
+$LNG['du_restore_error'] = 'Geri yukleme basarisiz: %s';
+$LNG['du_restore_not_selected'] = 'Lutfen geri yuklenecek bir yedek dosyasi secin.';
+$LNG['du_restore_not_confirmed'] = 'Mevcut veritabaninin ustune yazilacagini onaylamalisiniz.';
+$LNG['du_restore_confirm_dialog'] = '%s dosyasindan geri yuklensin mi? Baska yedek olmadan geri alinamaz.';
 //----------------------------------------------------------------------------//
 //---------------	Genel Mesaj	------------------------//
 $LNG['ma_message_sended'] = 'Your message has been sent!';

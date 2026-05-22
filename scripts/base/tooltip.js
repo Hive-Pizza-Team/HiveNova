@@ -13,9 +13,62 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+function isMobileTooltip() {
+	return window.matchMedia('(max-width: 699px)').matches;
+}
+
+function positionMobileTooltip(tip) {
+	tip.css({
+		top: Math.max(8, (window.innerHeight - tip.outerHeight()) / 2),
+		left: Math.max(8, (window.innerWidth - tip.outerWidth()) / 2)
+	});
+}
+
 $(document).ready(function () {
+	$(".tooltip, .tooltip_sticky").each(function () {
+		if (!$(this).attr('href')) {
+			$(this).attr('href', '#');
+		}
+	});
+
+	$(".tooltip, .tooltip_sticky").live('click', function (e) {
+		if (!isMobileTooltip()) {
+			return;
+		}
+		var tip = $('#tooltip');
+		var content = $(this).attr('data-tooltip-content');
+		if (!content) {
+			return;
+		}
+		if (tip.is(':visible') && tip.data('mobile-source') === this) {
+			tip.hide().removeData('mobile-source').removeClass('tooltip-mobile-active');
+			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
+		e.preventDefault();
+		e.stopPropagation();
+		tip.html(content).data('mobile-source', this).addClass('tooltip-mobile-active').show();
+		positionMobileTooltip(tip);
+		setTimeout(function () {
+			positionMobileTooltip(tip);
+		}, 0);
+	});
+
+	$(document).on('click', function (e) {
+		if (!isMobileTooltip()) {
+			return;
+		}
+		if ($(e.target).closest('.tooltip, .tooltip_sticky, #tooltip').length === 0) {
+			$('#tooltip').hide().removeData('mobile-source').removeClass('tooltip-mobile-active');
+		}
+	});
+
 	$(".tooltip").live({
 		mouseenter : function (e) {
+			if (isMobileTooltip()) {
+				return;
+			}
 			var tip = $('#tooltip');
 			tip.html($(this).attr('data-tooltip-content'));
 			tip.show();
@@ -45,6 +98,9 @@ $(document).ready(function () {
 		}
 	});
 	$(".tooltip_sticky").live('mouseenter', function (e) {
+		if (isMobileTooltip()) {
+			return;
+		}
 		var tip = $('#tooltip');
 		tip.html($(this).attr('data-tooltip-content'));
 		tip.addClass('tooltip_sticky_div');

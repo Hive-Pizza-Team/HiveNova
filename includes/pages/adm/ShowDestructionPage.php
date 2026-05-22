@@ -774,12 +774,8 @@ function ShowDestructionPage()
         $broadcast     = $p['broadcast'];
         $message       = $p['message'];
 
-        $backupBefore = HTTP::_GP('backup_before', 1);
-
         try {
-            if ($backupBefore) {
-                $backupPath = runDestructionDatabaseBackup();
-            }
+            $backupPath = runDestructionDatabaseBackup();
 
             if ($p['spawn_apply']) {
                 if ($p['spawn_galaxy'] < 1 || $p['spawn_system'] < 1 || $p['spawn_planet'] < 1) {
@@ -860,7 +856,6 @@ function ShowDestructionPage()
         'reviewStage'       => $reviewStage,
         'sqlPreviewLines'   => $sqlPreviewLines,
         'reviewToken'       => $reviewToken,
-        'backup_default_on' => 1,
         'preview_error'     => $previewError,
     ]);
 

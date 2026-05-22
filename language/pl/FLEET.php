@@ -46,6 +46,7 @@ $LNG['sys_attacker_won'] 					= "Agresor wygrał bitwę, jego statki lądują w 
 $LNG['sys_defender_won'] 					= "Obrońca wygrał bitwę, gubernator ogłasza dzień wolny od pracy, mieszkańcy świętują, oglądają pokazy fajerwerków i upijają się do nieprzytomności.";
 $LNG['sys_both_won'] 						= "Bitwa nie przyniosła rozstrzygnięcia! Zmęczone floty wracają do swoich baz by dokonać niezbędnych napraw ";
 $LNG['sys_stealed_ressources'] 				= "Po defiladzie opróżniono magazyny surowców i zrabowano:";
+$LNG['sys_steal_unprofitable_tooltip']		= "Zdobyte zasoby są warte mniej niż paliwo wydane na ten atak";
 $LNG['sys_and']								= "i";
 $LNG['sys_mess_tower'] 						= "Dowództwo Floty";
 $LNG['sys_mess_attack_report'] 				= "Raport ze starcia";

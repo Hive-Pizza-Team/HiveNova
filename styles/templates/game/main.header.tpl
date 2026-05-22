@@ -8,7 +8,9 @@
 <head>
 	<title>{block name="title"} - {$uni_name} - {$game_name}{/block}</title>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+	<link rel="manifest" href="manifest.php?uni={$USER.universe}">
+	<meta name="theme-color" content="#1a1a2e">
 	{if !empty($goto)}
 	<meta http-equiv="refresh" content="{$gotoinsec};URL={$goto}">
 	{/if}
@@ -57,6 +59,7 @@
 	<script type="text/javascript" src="./scripts/l18n/validationEngine/jquery.validationEngine-{$lang}.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/tooltip.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}"></script>
 	{foreach item=scriptname from=$scripts}
 	<script type="text/javascript" src="./scripts/game/{$scriptname}.js?v={$REV}"></script>
 	{/foreach}

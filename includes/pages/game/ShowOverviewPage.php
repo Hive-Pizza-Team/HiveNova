@@ -146,6 +146,7 @@ class ShowOverviewPage extends AbstractGamePage
 				'level'		=> $Queue[0][1],
 				'timeleft'	=> $time - $PLANET['b_hangar'],
 				'time'		=> $time,
+				'endtime'	=> TIMESTAMP + ($time - $PLANET['b_hangar']),
 				'starttime'	=> pretty_time($time - $PLANET['b_hangar']),
 			);
 		}

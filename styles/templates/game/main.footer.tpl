@@ -16,3 +16,4 @@
 	onerror = handleErr;
 </script>
 {/if}
+<script src="scripts/game/push-subscribe.js?v={$REV}"></script>

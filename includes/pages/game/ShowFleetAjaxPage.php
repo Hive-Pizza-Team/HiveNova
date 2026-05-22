@@ -130,7 +130,13 @@ class ShowFleetAjaxPage extends AbstractGamePage
 		$fleetArray						= array_filter($fleetArray);
 
 		if(empty($fleetArray)) {
-			$this->sendData(610, $LNG['fa_not_enough_probes']);
+			if($targetMission == 8) {
+				$this->sendData(611, $LNG['fa_no_recyclers']);
+			} elseif($targetMission == 6) {
+				$this->sendData(611, $LNG['fa_no_spios']);
+			} else {
+				$this->sendData(610, $LNG['fa_not_enough_probes']);
+			}
 		}
 
 		$sql = "SELECT planet.id_owner as id_owner,

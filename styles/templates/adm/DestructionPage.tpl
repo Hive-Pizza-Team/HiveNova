@@ -198,13 +198,10 @@ $(function() {
     <input type="hidden" name="spawn_galaxy" value="{$spawn_galaxy}">
     <input type="hidden" name="spawn_system" value="{$spawn_system}">
     <input type="hidden" name="spawn_planet" value="{$spawn_planet}">
-    <input type="hidden" name="backup_before" value="0">
     <table class="table569">
         <tr>
             <td>{$LNG.dest_backup_before}</td>
-            <td>
-                <label><input type="checkbox" name="backup_before" value="1" checked> {$LNG.dest_backup_before_label}</label>
-            </td>
+            <td>{$LNG.dest_backup_before_label}</td>
         </tr>
         <tr>
             <td colspan="2">
@@ -252,31 +249,6 @@ $(function() {
     <tr id="row_system">
         <td>{$LNG.dest_system}</td>
         <td><input type="number" name="system" value="{$system}" step="1"></td>
-    </tr>
-    <tr>
-        <td colspan="2"><strong>{$LNG.dest_spawn_section}</strong></td>
-    </tr>
-    <tr>
-        <td>{$LNG.dest_spawn_apply}</td>
-        <td>
-            <input type="hidden" name="spawn_apply" value="0">
-            <input type="checkbox" name="spawn_apply" value="1" id="spawn_apply" {if $spawn_apply}checked{/if} title="{$LNG.dest_spawn_apply|escape:'html'}">
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2" valign="top" style="font-size:11px; line-height:1.45; opacity:0.95;">{$LNG.dest_spawn_help}</td>
-    </tr>
-    <tr>
-        <td style="padding-top:8px;"><strong>{$LNG.dest_spawn_coords_heading}</strong></td>
-        <td style="padding-top:8px;"></td>
-    </tr>
-    <tr id="row_spawn_coords">
-        <td>{$LNG.dest_spawn_coords}</td>
-        <td>
-            {$LNG.dest_galaxy}: <input type="number" name="spawn_galaxy" value="{$spawn_galaxy}" style="width:70px" step="1">
-            &nbsp; {$LNG.dest_system}: <input type="number" name="spawn_system" value="{$spawn_system}" style="width:70px" step="1">
-            &nbsp; {$LNG.dest_slot}: <input type="number" name="spawn_planet" value="{$spawn_planet}" style="width:70px" step="1">
-        </td>
     </tr>
     <tr>
         <td colspan="2"><strong>{$LNG.dest_spawn_section}</strong></td>

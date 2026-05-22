@@ -64,6 +64,7 @@ class ShowSteemconnectPage extends AbstractLoginPage
 		$session->userId		= (int) $loginData['id'];
 		$session->adminAccess	= 0;
 		$session->data			= $authObj->getAccountData();
+		Session::regenerateId();
 		$session->save();
 		$this->redirectTo("game.php");	
 	}

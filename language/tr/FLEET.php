@@ -51,6 +51,7 @@ $LNG['sys_attacker_won'] 					= "Savaşı saldıran taraf kazandı!";
 $LNG['sys_defender_won'] 					= "Savaşı savunan taraf kazandı!";
 $LNG['sys_both_won'] 						= "Savaşı Kazanan Olmadı Filolar geldikleri gezegene geri dönüyorlar! ";
 $LNG['sys_stealed_ressources'] 				= "Ele geçiriliyor";
+$LNG['sys_steal_unprofitable_tooltip']		= "Ele geçirilen kaynaklar, bu saldırı için harcanan yakıttan daha az değerlidir";
 $LNG['sys_and']								= "ve";
 $LNG['sys_mess_tower'] 						= "Filo Raporu";
 $LNG['sys_mess_attack_report'] 				= "Savaş Raporu";

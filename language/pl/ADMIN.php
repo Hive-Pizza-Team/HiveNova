@@ -1415,6 +1415,22 @@ $LNG['du_select_all_tables']		= 'Wszystkie Tabele';
 $LNG['du_choose_tables']			= 'Wybierz tabele';
 $LNG['du_success']					= 'Utworzono kopię pomyślnie! Dane: %s';
 $LNG['du_not_tables_selected']		= 'Nie wybrałeś tabel!';
+$LNG['du_backup_dir_error'] = 'Nie można utworzyć katalogu kopii zapasowej.';
+$LNG['du_restore_header'] = 'Przywróć bazę danych';
+$LNG['du_restore_warning'] = 'Przywracanie zastępuje bieżącą bazę wybraną kopią. Najpierw utwórz kopię bezpieczeństwa, jeśli nie jesteś pewien.';
+$LNG['du_restore_choose_file'] = 'Plik kopii';
+$LNG['du_restore_no_files'] = 'Brak plików kopii w includes/backups/.';
+$LNG['du_restore_backup_before'] = 'Kopia bezpieczeństwa';
+$LNG['du_restore_backup_before_label'] = 'Zapisz pełną kopię bieżącej bazy przed przywróceniem (zalecane)';
+$LNG['du_restore_confirm'] = 'Potwierdzenie';
+$LNG['du_restore_confirm_label'] = 'Rozumiem, że bieżąca baza zostanie nadpisana';
+$LNG['du_restore_submit'] = 'Przywróć bazę';
+$LNG['du_restore_success'] = 'Baza przywrócona pomyślnie z %s.';
+$LNG['du_restore_safety_backup'] = 'Kopia bezpieczeństwa zapisana w %s.';
+$LNG['du_restore_error'] = 'Przywracanie nie powiodło się: %s';
+$LNG['du_restore_not_selected'] = 'Wybierz plik kopii do przywrócenia.';
+$LNG['du_restore_not_confirmed'] = 'Musisz potwierdzić nadpisanie bieżącej bazy.';
+$LNG['du_restore_confirm_dialog'] = 'Przywrócić bazę z %s? Bez kolejnej kopii nie można cofnąć.';
 // Translated into Polish by Sirgomo . All rights reversed (C) 2012
 // Edited by TheRavikin. All rights resteemed (C) 2018
 $LNG['admin_se_rpg_geologist_cost'] = 'Koszt geoloęga oficera';

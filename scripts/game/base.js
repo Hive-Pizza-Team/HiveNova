@@ -146,9 +146,41 @@ function GetRestTimeFormat(Secs) {
 	return dezInt(h, 2) + ':' + dezInt(m, 2) + ":" + dezInt(s, 2);
 }
 
+function isMobileViewport() {
+	return window.matchMedia('(max-width: 699px)').matches;
+}
+
+function getDialogDimensions(width, height) {
+	if (isMobileViewport()) {
+		var vw = window.innerWidth || document.documentElement.clientWidth;
+		var vh = window.innerHeight || document.documentElement.clientHeight;
+		return {
+			width: Math.max(280, Math.min(width, Math.floor(vw * 0.95))),
+			height: Math.max(200, Math.min(height, Math.floor(vh * 0.9)))
+		};
+	}
+	return { width: width, height: height };
+}
+
+function normalizeGameUrl(target_url) {
+	var url = target_url;
+	if (url.indexOf('game.php') !== 0 && url.charAt(0) === '?') {
+		url = 'game.php' + url;
+	}
+	if (url.indexOf('ajax=1') === -1) {
+		url += (url.indexOf('?') >= 0 ? '&' : '?') + 'ajax=1';
+	}
+	return url;
+}
+
 function OpenPopup(target_url, win_name, width, height) {
-	var new_win = window.open(target_url+'&ajax=1', win_name, 'scrollbars=yes,statusbar=no,toolbar=no,location=no,directories=no,resizable=no,menubar=no,width='+width+',height='+height+',screenX='+((screen.width-width) / 2)+",screenY="+((screen.height-height) / 2)+",top="+((screen.height-height) / 2)+",left="+((screen.width-width) / 2));
+	if (isMobileViewport()) {
+		var dims = getDialogDimensions(width, height);
+		return Dialog.open(normalizeGameUrl(target_url), dims.width, dims.height);
+	}
+	var new_win = window.open(normalizeGameUrl(target_url), win_name, 'scrollbars=yes,statusbar=no,toolbar=no,location=no,directories=no,resizable=no,menubar=no,width='+width+',height='+height+',screenX='+((screen.width-width) / 2)+",screenY="+((screen.height-height) / 2)+",top="+((screen.height-height) / 2)+",left="+((screen.width-width) / 2));
 	new_win.focus();
+	return false;
 }
 
 function DestroyMissiles() {
@@ -209,12 +241,21 @@ var Dialog	= {
 	},
 	
 	open: function(url, width, height) {
+		var dims = getDialogDimensions(width, height);
 		$.fancybox({
-			width: width,
+			width: dims.width,
 			padding: 0,
-			height: height,
+			height: dims.height,
 			type: 'iframe',
-			href: url
+			href: url,
+			onStart: function() {
+				if (isMobileViewport()) {
+					$('#fancybox-wrap').addClass('mobile-dialog');
+				}
+			},
+			onClosed: function() {
+				$('#fancybox-wrap').removeClass('mobile-dialog');
+			}
 		});
 		
 		return false;

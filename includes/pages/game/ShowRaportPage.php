@@ -31,6 +31,14 @@ class ShowRaportPage extends AbstractGamePage
 		parent::__construct();
 	}
 	
+	private function isStealUnprofitable(array $combatReport): bool
+	{
+		if ($combatReport['result'] !== 'a') return false;
+		if (!isset($combatReport['fuel'], $combatReport['steal'])) return false;
+		if ($combatReport['fuel'] <= 0) return false;
+		return array_sum($combatReport['steal']) < $combatReport['fuel'];
+	}
+
 	private function BCWrapperPreRev2321($combatReport)
 	{
 		if(isset($combatReport['moon']['desfail']))
@@ -119,7 +127,8 @@ class ShowRaportPage extends AbstractGamePage
 		$combatReport			= safe_unserialize($reportData['raport']);
 		$combatReport['time']	= _date($LNG['php_tdformat'], $combatReport['time'], $USER['timezone']);
 		$combatReport			= $this->BCWrapperPreRev2321($combatReport);
-		
+		$combatReport['stealUnprofitable'] = $this->isStealUnprofitable($combatReport);
+
 		$this->assign(array(
 			'Raport'	=> $combatReport,
 			'Info'		=> array($reportData["attacker"], $reportData["defender"]),
@@ -163,10 +172,11 @@ class ShowRaportPage extends AbstractGamePage
 		if($isAttacker && !$isDefender && $combatReport['result'] == 'r' && count($combatReport['rounds']) <= 2) {
 			$this->printMessage($LNG['sys_raport_lost_contact']);
 		}
-		
+
 		$combatReport['time']	= _date($LNG['php_tdformat'], $combatReport['time'], $USER['timezone']);
 		$combatReport			= $this->BCWrapperPreRev2321($combatReport);
-		
+		$combatReport['stealUnprofitable'] = $this->isStealUnprofitable($combatReport);
+
 		$this->assign(array(
 			'Raport'	=> $combatReport,
 			'pageTitle'	=> $LNG['sys_mess_attack_report']

@@ -373,6 +373,34 @@ if ($status >= 400) {
     $pass++;
 }
 
+// manifest.php: dynamic PWA manifest JSON with game name from config.
+$ch = curl_init("$baseUrl/manifest.php?uni=1");
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => false,
+    CURLOPT_TIMEOUT        => 10,
+]);
+$body   = curl_exec($ch);
+$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$ctype  = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?? '';
+curl_close($ch);
+
+$label = str_pad('manifest.php', 20);
+$manifest = is_string($body) ? json_decode($body, true) : null;
+if ($status >= 400) {
+    echo "[ FAIL ] $label HTTP $status\n";
+    $fail++;
+} elseif (!is_array($manifest) || empty($manifest['name']) || empty($manifest['short_name'])) {
+    echo "[ FAIL ] $label invalid JSON manifest (HTTP $status)\n";
+    $fail++;
+} elseif (strpos($ctype, 'manifest+json') === false && strpos($ctype, 'application/json') === false) {
+    echo "[ FAIL ] $label unexpected Content-Type: $ctype\n";
+    $fail++;
+} else {
+    echo "[ OK   ] $label HTTP $status (name: {$manifest['name']})\n";
+    $pass++;
+}
+
 // CombatReport.php: must issue a redirect (not crash with class-not-found).
 // When not logged in, common.php redirects to login; when logged in, it redirects
 // to game.php?page=raport. Either way we expect a 3xx with no error body.

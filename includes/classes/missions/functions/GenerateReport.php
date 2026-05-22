@@ -44,6 +44,10 @@ function GenerateReport($combatResult, $reportInfo)
 	{
 		$DATA['additionalInfo']	= "";
 	}
+
+	if (isset($reportInfo['fuelConsumption'])) {
+		$DATA['fuel'] = (int) $reportInfo['fuelConsumption'];
+	}
 	
 	foreach($combatResult['rw'][0]['attackers'] as $player)
 	{

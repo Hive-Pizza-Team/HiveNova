@@ -312,6 +312,66 @@ textarea.tinymce {
     font-weight: bold;
 }
 
+.fleet-select-table td:last-child {
+    text-align: right;
+    vertical-align: middle;
+}
+
+.fleet-ship-stepper {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+}
+
+.fleet-ship-stepper .fleet-ship-input {
+    width: 3.25rem;
+    min-width: 2.5rem;
+    max-width: 4.5rem;
+    padding: 4px 2px;
+    margin: 0;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.fleet-select-table .fleet-ship-stepper button.fleet-ship-btn,
+.fleet-select-table .fleet-ship-bulk-actions button.fleet-ship-btn {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 4px 7px;
+    min-width: 2rem;
+    min-height: 1.75rem;
+    border-radius: 6px;
+    background: var(--color-menu-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.fleet-select-table .fleet-ship-stepper button.fleet-ship-btn:hover,
+.fleet-select-table .fleet-ship-bulk-actions button.fleet-ship-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+td.fleet-ship-bulk-actions {
+    text-align: center;
+}
+
+.fleet-ship-bulk-actions button.fleet-ship-btn {
+    margin: 0 6px;
+    min-width: 5.5rem;
+}
+
 .build_form {
     display: inline;
 }
@@ -556,6 +616,18 @@ div#disclamer {
     padding: 20px;
 }
 
+.tip.notify.notify-error {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 16px 20px;
+    font-weight: bold;
+    background: var(--color-bg-surface);
+    border: 2px solid var(--color-danger);
+    color: var(--color-text);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
 .ui-progressbar {
     height: 10px !important;
 }
@@ -685,6 +757,69 @@ table.tablesorter thead tr .headerSortDown {
 
 /* MEDIA */
 
+#bottom-nav,
+.fleet-mobile-list,
+.overview-mobile-shortcuts,
+.overview-command-timers {
+    display: none;
+}
+
+.galaxy-coords-picker {
+    width: 324px;
+    min-width: 324px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 0 auto 8px;
+}
+
+.galaxy-coords-title {
+    text-align: center;
+    padding: 4px 6px;
+    font-weight: bold;
+    background: var(--color-menu-bg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.galaxy-coords-controls {
+    display: grid;
+    grid-template-columns: minmax(44px, auto) 1fr minmax(44px, auto);
+    align-items: center;
+    gap: 4px;
+    padding: 4px 2px;
+}
+
+.galaxy-coords-controls .galaxy-coords-step {
+    min-width: 44px;
+    min-height: 40px;
+    padding: 0;
+    font-size: 22px;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.galaxy-coords-controls input[type="text"] {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.galaxy-coords-submit,
+.galaxy-coords-warning {
+    grid-column: 1 / -1;
+}
+
+.galaxy-coords-submit {
+    text-align: center;
+    padding: 4px 0;
+}
+
+.galaxy-coords-warning {
+    margin: 0;
+    padding: 4px 8px;
+}
+
 @media screen and (min-width: 700px) and (max-width: 969px) {
     .planetImage {
         display: none;
@@ -697,9 +832,15 @@ table.tablesorter thead tr .headerSortDown {
 }
 
 @media screen and (max-width: 699px) {
+    body.full {
+        padding-top: max(12px, env(safe-area-inset-top, 0px));
+    }
+
     .wrapper {
-        grid-template-columns: 200px 1fr;
-        grid-template-rows: 67px 1fr auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        min-height: 100dvh;
+        padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
     }
 
     top {
@@ -711,20 +852,37 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     header {
-        grid-column: 1/2;
+        grid-column: 1;
+        grid-row: 1;
     }
 
     header .fixed {
-        height: 45px;
-        width: 100vw;
-        padding: 0;
+        position: sticky;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        grid-template-rows: auto auto;
+        gap: 4px 8px;
+        align-items: center;
+        width: 100%;
+        height: auto;
+        min-height: 80px;
+        padding: 8px 6px 6px 6px;
+        max-width: none;
+        overflow: visible;
+        box-sizing: border-box;
     }
 
     content {
-        grid-column: 1 / 2;
+        grid-column: 1;
         grid-row: 2;
-        width: 100vw;
-        padding: 0;
+        width: 100%;
+        max-width: none;
+        padding: 8px;
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     }
 
     .mobile {
@@ -735,54 +893,671 @@ table.tablesorter thead tr .headerSortDown {
         display: none;
     }
 
+    .hamburger {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        align-self: start;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 28px;
+        padding: 0;
+    }
+
+    #resources_mobile {
+        grid-column: 2;
+        grid-row: 1;
+        flex-grow: 1;
+        min-width: 0;
+        align-self: start;
+        padding-top: 2px;
+    }
+
+    #resource_mobile {
+        min-width: 0;
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    #resource_mobile img {
+        max-width: 28px;
+        height: auto;
+    }
+
+    .planetSelectorWrapper {
+        grid-column: 2;
+        grid-row: 2;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .planetSelectorWrapper>img {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+    }
+
     #planetSelector {
-        top: 44px;
+        position: static;
+        top: auto;
+        flex: 1;
+        min-width: 0;
+        max-width: none;
+        width: 100%;
+        font-size: 12px;
     }
 
     menu {
-        grid-column: 1;
-        grid-row: 2;
+        display: none !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+        z-index: 200;
+        overflow-y: auto;
+        background: var(--color-bg-surface);
+        border-top: none;
+        margin: 0;
+        padding-top: calc(8px + env(safe-area-inset-top, 0px));
     }
 
     menu .fixed {
-        position: unset;
-        width: 200px;
+        position: static;
+        width: 100%;
     }
 
     menu li {
         margin: initial;
-        border-right: 1px solid var(--color-border);
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
     }
 
     #menu a {
-        padding: 16px;
-    }
-
-    .planetSelectorWrapper {
-        width: initial;
-    }
-
-    .planetSelectorWrapper>img {
-        width: 42px;
-        height: 42px;
+        padding: 14px 16px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
     }
 
     .no-mobile {
         display: none;
     }
 
-    /*Show menu when invisible checkbox is checked*/
-    input[type=checkbox]:not(:checked)~menu {
-        display: none;
-    }
-
-    .hamburger {
-        display: unset;
+    #toggle-menu:checked ~ menu {
+        display: block !important;
     }
 
     .buildl img {
+        width: 48px;
+        height: 48px;
+        display: inline-block;
+    }
+
+    button,
+    input[type="submit"],
+    input[type="button"],
+    .button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    #fancybox-wrap.mobile-dialog #fancybox-outer,
+    #fancybox-wrap.mobile-dialog #fancybox-content {
+        max-width: 95vw !important;
+    }
+
+    #fancybox-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    #tooltip.tooltip-mobile-active {
+        position: fixed;
+        max-width: calc(100vw - 24px);
+        max-height: 70vh;
+        overflow: auto;
+        z-index: 300;
+        box-sizing: border-box;
+    }
+
+    .galaxy-system-table a.tooltip {
+        display: inline-block;
+        min-height: 44px;
+        line-height: 44px;
+        padding: 0 8px;
+    }
+
+    body.popup #content {
+        padding: 8px;
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .pwa-install-banner:not([hidden]) {
+        display: block;
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 8px);
+        z-index: 550;
+        padding: 12px 14px;
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .pwa-install-banner__title {
+        font-weight: bold;
+        margin: 0 0 6px;
+    }
+
+    .pwa-install-banner__text {
+        margin: 0 0 10px;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .pwa-install-banner__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .pwa-install-banner__actions .button {
+        flex: 1 1 auto;
+        min-height: 44px;
+    }
+
+    #bottom-nav {
+        display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 500;
+        height: calc(56px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        background: var(--color-bg-surface);
+        border-top: 1px solid var(--color-border);
+        justify-content: space-around;
+    }
+
+    #bottom-nav a,
+    #bottom-nav label {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        text-decoration: none;
+        color: var(--color-text);
+        min-height: 44px;
+        padding: 4px 2px;
+        cursor: pointer;
+    }
+
+    #bottom-nav a.active {
+        color: var(--color-accent);
+    }
+
+    #bottom-nav i {
+        font-size: 18px;
+        margin-bottom: 2px;
+    }
+
+    .galaxy-system-table,
+    .galaxy-system-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .galaxy-system-table thead,
+    .galaxy-system-table > tbody > tr:first-child,
+    .galaxy-system-table > tbody > tr:nth-child(2) {
         display: none;
     }
 
+    .galaxy-system-table tr {
+        margin-bottom: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 8px;
+        background: var(--color-bg-surface);
+    }
 
+    .galaxy-system-table tr:not(.galaxy-planet-row) {
+        display: block;
+    }
+
+    .galaxy-system-table tr:not(.galaxy-planet-row) td {
+        display: block;
+        text-align: left;
+        padding: 4px 0;
+        border: none;
+    }
+
+    .galaxy-planet-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        column-gap: 8px;
+        row-gap: 4px;
+        width: 100%;
+    }
+
+    .galaxy-planet-row td {
+        display: block;
+        text-align: left;
+        padding: 0;
+        border: none;
+        min-width: 0;
+    }
+
+    .galaxy-planet-row td:empty {
+        display: none;
+    }
+
+    .galaxy-planet-row td:nth-child(1) {
+        order: 0;
+        flex: 0 0 26px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 36px;
+    }
+
+    .galaxy-planet-row td:nth-child(2) {
+        order: 1;
+        flex: 0 0 36px;
+        align-self: flex-start;
+        padding-top: 2px;
+    }
+
+    .galaxy-planet-row td:nth-child(2) img {
+        display: block;
+        width: 36px;
+        height: 36px;
+    }
+
+    .galaxy-planet-row td:nth-child(3) {
+        order: 2;
+        flex: 1 1 8rem;
+        min-width: 0;
+        font-weight: bold;
+        line-height: 1.3;
+        white-space: normal;
+    }
+
+    .galaxy-planet-row td:nth-child(6) {
+        order: 7;
+        flex: 1 1 100%;
+        padding-left: 70px;
+        line-height: 1.3;
+        white-space: normal;
+    }
+
+    .galaxy-planet-row td:nth-child(4),
+    .galaxy-planet-row td:nth-child(5),
+    .galaxy-planet-row td:nth-child(7),
+    .galaxy-planet-row td:nth-child(8) {
+        flex: 0 0 auto;
+        align-self: center;
+    }
+
+    .galaxy-planet-row td:nth-child(4) {
+        order: 3;
+    }
+
+    .galaxy-planet-row td:nth-child(5) {
+        order: 4;
+    }
+
+    .galaxy-planet-row td:nth-child(7) {
+        order: 5;
+    }
+
+    .galaxy-planet-row td:nth-child(8) {
+        order: 6;
+    }
+
+    .galaxy-planet-row td:nth-child(4) img,
+    .galaxy-planet-row td:nth-child(5) img {
+        display: block;
+        width: 28px;
+        height: 28px;
+    }
+
+    .galaxy-planet-row .galaxy-card-actions-cell {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .galaxy-planet-row .galaxy-card-actions-cell img {
+        min-width: 32px;
+        min-height: 32px;
+        width: 32px;
+        height: 32px;
+        padding: 4px;
+    }
+
+    .galaxy-coords-picker {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .galaxy-coords-controls {
+        grid-template-columns: minmax(56px, auto) 1fr minmax(56px, auto);
+        gap: 10px;
+        padding: 0;
+    }
+
+    .galaxy-coords-controls .galaxy-coords-step {
+        min-height: 56px;
+        min-width: 56px;
+        font-size: 30px;
+    }
+
+    .galaxy-coords-controls input[type="text"] {
+        min-height: 56px;
+        font-size: 24px;
+    }
+
+    .galaxy-coords-submit input[type="submit"] {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .fleet-table-desktop {
+        display: none;
+    }
+
+    .fleet-bonus-table {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .fleet-mobile-list {
+        display: block;
+    }
+
+    .fleet-mobile-card {
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 12px;
+        background: var(--color-bg-surface);
+    }
+
+    .fleet-mobile-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+
+    .fleet-wizard-steps {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 12px;
+        font-size: 12px;
+    }
+
+    .fleet-wizard-steps span {
+        flex: 1;
+        text-align: center;
+        padding: 8px 4px;
+        border-radius: 4px;
+        background: var(--color-menu-bg);
+    }
+
+    .fleet-wizard-steps span.active {
+        background: var(--color-accent);
+    }
+
+    .fleet-select-table .fleet-ship-stepper button.fleet-ship-btn {
+        min-height: 36px;
+        min-width: 36px;
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+
+    .fleet-ship-stepper .fleet-ship-input {
+        width: 2.75rem;
+        min-height: 36px;
+    }
+
+    .fleet-ship-bulk-actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .fleet-ship-bulk-actions button.fleet-ship-btn {
+        flex: 1 1 calc(50% - 8px);
+        max-width: calc(50% - 8px);
+        min-height: 44px;
+        margin: 0;
+    }
+
+    .overview-mobile-shortcuts {
+        display: block;
+        margin: 12px 0;
+    }
+
+    .overview-mobile-shortcuts a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-menu-bg);
+        color: var(--color-text);
+        text-decoration: none;
+        font-weight: 600;
+        box-sizing: border-box;
+    }
+
+    .overview-command-timers {
+        display: block;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg-surface);
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .overview-command-timers > div {
+        padding: 6px 0;
+        line-height: 1.4;
+        text-align: left;
+    }
+
+    .overview-command-timers > div + div {
+        border-top: 1px solid var(--color-border);
+    }
+
+    .overview-command-timers a {
+        font-weight: 600;
+    }
+
+    #overview .infos .moon,
+    #overview .infos .planeth {
+        float: none;
+        width: auto;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    #overview .infos .planeth img {
+        float: none;
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto 8px;
+    }
+
+    #overview .infos .planeth {
+        clear: both;
+        padding: 10px;
+    }
+
+    body#messages content {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    body#messages .msg-overview {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow: visible;
+    }
+
+    body#messages .msg-table {
+        width: 100%;
+        max-width: 100%;
+        overflow: visible;
+    }
+
+    body#messages .msg-overview tr {
+        display: block;
+    }
+
+    body#messages .msg-overview tr:first-child th,
+    body#messages .msg-table > tr:first-child th {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        line-height: 1.4;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        box-sizing: border-box;
+        overflow: visible;
+        white-space: normal;
+    }
+
+    body#messages .msg-overview tr:not(:first-child) {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    body#messages .msg-overview .msg-cat-cell {
+        min-width: 0;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    body#messages .msg-overview td:not(.msg-cat-cell) {
+        display: none;
+    }
+
+    body#messages .msg-action-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    body#messages .msg-action-bar select,
+    body#messages .msg-action-bar input[type="submit"] {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    body#messages .msg-col-header {
+        display: none;
+    }
+
+    body#messages .msg-date-col,
+    body#messages .msg-from-col,
+    body#messages .msg-action-col {
+        width: auto !important;
+        max-width: 100% !important;
+        white-space: normal;
+    }
+
+    body#messages .msg-pagination-row td {
+        white-space: normal;
+        text-align: left !important;
+        word-break: break-word;
+        font-size: 12px;
+    }
+
+    body#messages .msg-table tr.message_head,
+    body#messages .msg-table tr.messages_body {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    body#messages .msg-table tr.message_head {
+        margin-top: 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px 8px 0 0;
+        background: var(--color-bg-surface);
+    }
+
+    body#messages .msg-table tr.messages_body {
+        border: 1px solid var(--color-border);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        margin-bottom: 4px;
+        background: var(--color-bg-surface);
+    }
+
+    body#messages .msg-table tr.message_head td,
+    body#messages .msg-table tr.messages_body td {
+        display: block;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+        text-align: left !important;
+    }
+
+    body#messages .msg-table tr.message_head .msg-action-col {
+        border-bottom: 1px solid var(--color-border);
+        text-align: center !important;
+    }
+
+    body#messages .msg-table tr.message_head .msg-from-col {
+        overflow: visible;
+        text-overflow: unset;
+    }
+
+    body#messages .msg-table tr.messages_body .msg-body-cell {
+        border-top: 1px solid var(--color-border);
+    }
+
+    content button,
+    content input[type="button"],
+    content input[type="submit"],
+    content .button {
+        -webkit-appearance: none;
+        appearance: none;
+        background: var(--color-menu-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        color: var(--color-text);
+        padding: 8px 14px;
+    }
 }

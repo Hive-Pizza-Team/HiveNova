@@ -313,7 +313,7 @@ class PlayerUtil
 			':type'		=> 1,
 		), 'rank');
 		
-		$sql = "INSERT INTO %%STATPOINTS%% SET
+		$sql = "INSERT IGNORE INTO %%STATPOINTS%% SET
 				id_owner	= :userId,
 				universe	= :universe,
 				stat_type	= :type,

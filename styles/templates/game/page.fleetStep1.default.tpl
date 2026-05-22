@@ -1,5 +1,10 @@
 {block name="title" prepend}{$LNG.lm_fleet}{/block}
 {block name="content"}
+<div class="fleet-wizard-steps mobile">
+	<span class="active">1. {$LNG.fl_destiny}</span>
+	<span>2. {$LNG.fl_mission}</span>
+	<span>3. {$LNG.fl_send_fleet}</span>
+</div>
 <form action="game.php?page=fleetStep2" method="post" onsubmit="return CheckTarget()" id="form">
 	<input type="hidden" name="token" value="{$token}">
 	<input type="hidden" name="fleet_group" value="0">

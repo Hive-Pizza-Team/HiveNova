@@ -135,6 +135,10 @@ $config->save();
 
 echo "OK\n";
 
+if (\HiveNova\Core\PushNotificationService::generateAndWriteConfigFile()) {
+    echo "      (push VAPID keys written to includes/push.config.php)\n";
+}
+
 // --- 4. Create admin user ---
 echo "[ 3/4 ] Creating admin user '$adminName' ... ";
 
@@ -153,6 +157,9 @@ $hashPassword = \HiveNova\Core\PlayerUtil::cryptPassword($adminPass);
     null,     // referrer
     AUTH_ADM  // authority
 );
+if (filter_var($adminMail, FILTER_VALIDATE_EMAIL)) {
+    \HiveNova\Core\PushNotificationService::updateConfigSubject('mailto:' . $adminMail);
+}
 echo "OK\n";
 
 // --- 5. Apply pending migrations ---
