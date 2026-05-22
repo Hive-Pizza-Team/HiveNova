@@ -114,6 +114,11 @@ class ResourceUpdate
 		$this->USER			= $this->isGlobalMode ? $GLOBALS['USER'] : $USER;
 		$this->PLANET		= $this->isGlobalMode ? $GLOBALS['PLANET'] : $PLANET;
 		$this->TIME			= is_null($TIME) ? TIMESTAMP : $TIME;
+
+		if (!is_array($this->USER) || !is_array($this->PLANET)) {
+			return $this->ReturnVars();
+		}
+
 		$this->config		= Config::get($this->USER['universe']);
 		
 		if(isVacationMode($this->USER))
@@ -190,7 +195,7 @@ class ResourceUpdate
 	private function ShipyardQueue()
 	{
 		$BuildQueue 	= safe_unserialize($this->PLANET['b_hangar_id']);
-		if (!$BuildQueue) {
+		if (!is_array($BuildQueue) || $BuildQueue === array()) {
 			$this->PLANET['b_hangar'] = 0;
 			$this->PLANET['b_hangar_id'] = '';
 			return false;
@@ -200,6 +205,9 @@ class ResourceUpdate
 		$BuildArray					= array();
 		foreach($BuildQueue as $Item)
 		{
+			if (!is_array($Item) || !isset($Item[0], $Item[1])) {
+				continue;
+			}
 			$AcumTime			= BuildFunctions::getBuildingTime($this->USER, $this->PLANET, $Item[0]);
 			$BuildArray[] 		= array($Item[0], $Item[1], $AcumTime);
 		}
@@ -412,6 +420,13 @@ class ResourceUpdate
 	
 
 		$CurrentQueue	= safe_unserialize($this->USER['b_tech_queue']);
+		if (!is_array($CurrentQueue)) {
+			$this->USER['b_tech']			= 0;
+			$this->USER['b_tech_id']		= 0;
+			$this->USER['b_tech_planet']	= 0;
+			$this->USER['b_tech_queue']		= '';
+			return false;
+		}
 		array_shift($CurrentQueue);		
 			
 		$this->USER['b_tech_id']		= 0;
@@ -440,6 +455,13 @@ class ResourceUpdate
 		}
 
 		$CurrentQueue 	= safe_unserialize($this->USER['b_tech_queue']);
+		if (!is_array($CurrentQueue) || empty($CurrentQueue)) {
+			$this->USER['b_tech']			= 0;
+			$this->USER['b_tech_id']		= 0;
+			$this->USER['b_tech_planet']	= 0;
+			$this->USER['b_tech_queue']		= '';
+			return false;
+		}
 		$Loop       	= true;
 		while ($Loop == true)
 		{
@@ -451,6 +473,20 @@ class ResourceUpdate
 				$PLANET	= Database::get()->selectSingle($sql, array(
 					':planetId'	=> $ListIDArray[4],
 				));
+
+				if (empty($PLANET)) {
+					array_shift($CurrentQueue);
+					if (count($CurrentQueue) == 0) {
+						$this->USER['b_tech']			= 0;
+						$this->USER['b_tech_id']		= 0;
+						$this->USER['b_tech_planet']	= 0;
+						$this->USER['b_tech_queue']		= '';
+						$Loop							= false;
+					} else {
+						$this->USER['b_tech_queue'] = serialize(array_values($CurrentQueue));
+					}
+					continue;
+				}
 
 				$RPLANET 		= new ResourceUpdate(true, false);
 				$RPLANET->setResourceData($this->resource, $this->reslist);

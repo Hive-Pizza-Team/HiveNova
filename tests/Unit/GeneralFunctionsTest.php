@@ -23,6 +23,11 @@ class GeneralFunctionsTest extends TestCase
         $this->assertFalse(safe_unserialize(''));
     }
 
+    public function testSafeUnserializeFalseReturnsFalse(): void
+    {
+        $this->assertFalse(safe_unserialize(false));
+    }
+
     public function testSafeUnserializeValidArrayRoundtrips(): void
     {
         $data = ['foo' => 'bar', 'n' => 42];
