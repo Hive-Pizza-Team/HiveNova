@@ -1,19 +1,28 @@
 var overviewTimerReloadPending = false;
+var overviewTimersWereActive = false;
 
 function updateOverviewTimers() {
 	var needsReload = false;
 
 	$('.timer').each(function() {
-		var endTs = $(this).data('time');
-		if (endTs === undefined || endTs === null) {
+		// data-time is seconds remaining at page load (same as buildings/research pages),
+		// not a unix timestamp — serverTime is a local clock, not epoch seconds.
+		var secondsLeft = $(this).data('time');
+		if (secondsLeft === undefined || secondsLeft === null) {
 			return;
 		}
 
-		var remaining = Math.floor(endTs - serverTime.getTime() / 1000);
+		var remaining = Math.floor(secondsLeft - (serverTime.getTime() - startTime) / 1000);
 		if (remaining <= 0) {
 			$(this).text(Ready);
-			needsReload = true;
+			// Only reload after a timer was actively counting down. Timers already
+			// at zero on first paint (e.g. shipyard queue with elapsed endtime)
+			// would otherwise reload the page in an infinite loop.
+			if (overviewTimersWereActive) {
+				needsReload = true;
+			}
 		} else {
+			overviewTimersWereActive = true;
 			$(this).text(GetRestTimeFormat(remaining));
 		}
 	});
