@@ -445,6 +445,24 @@ class ResourceUpdateTest extends TestCase
 		$this->assertSame('return 0;', $result);
 	}
 
+	public function testCalcResourceWithFalsePlanetDoesNotError(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet();
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+
+		$result = $eco->CalcResource($user, false, false, $planet['last_update'] + 3600);
+
+		$this->assertIsArray($result);
+		$this->assertSame($user, $result[0]);
+	}
+
 	public function testReturnVarsReturnsArrayWhenNotGlobalMode(): void
 	{
 		$resource = $this->makeResource();

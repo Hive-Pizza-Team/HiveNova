@@ -370,7 +370,11 @@ function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 
 function safe_unserialize(?string $data): mixed
 {
-	return isset($data[0]) ? unserialize($data) : false;
+	if (!is_string($data) || $data === '') {
+		return false;
+	}
+
+	return unserialize($data);
 }
 
 function shortly_number($number, $decial = NULL)
