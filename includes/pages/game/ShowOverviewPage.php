@@ -104,7 +104,11 @@ class ShowOverviewPage extends AbstractGamePage
 
 			if (!empty($CPLANET['b_building']) && $CPLANET['b_building'] > TIMESTAMP) {
 				$Queue				= safe_unserialize($CPLANET['b_building_id']);
-				$BuildPlanet		= $LNG['tech'][$Queue[0][0]]." (".$Queue[0][1].")<br><span style=\"color:#7F7F7F;\">(".pretty_time($Queue[0][3] - TIMESTAMP).")</span>";
+				if (is_array($Queue) && isset($Queue[0][0], $Queue[0][3])) {
+					$BuildPlanet	= $LNG['tech'][$Queue[0][0]]." (".$Queue[0][1].")<br><span style=\"color:#7F7F7F;\">(".pretty_time($Queue[0][3] - TIMESTAMP).")</span>";
+				} else {
+					$BuildPlanet	= $LNG['ov_free'];
+				}
 			} else {
 				$BuildPlanet     = $LNG['ov_free'];
 			}
@@ -126,13 +130,17 @@ class ShowOverviewPage extends AbstractGamePage
 			
 		if ($PLANET['b_building'] - TIMESTAMP > 0) {
 			$Queue			= safe_unserialize($PLANET['b_building_id']);
-			$buildInfo['buildings']	= array(
-				'id'		=> $Queue[0][0],
-				'level'		=> $Queue[0][1],
-				'timeleft'	=> $PLANET['b_building'] - TIMESTAMP,
-				'time'		=> $PLANET['b_building'],
-				'starttime'	=> pretty_time($PLANET['b_building'] - TIMESTAMP),
-			);
+			if (is_array($Queue) && isset($Queue[0][0], $Queue[0][1])) {
+				$buildInfo['buildings']	= array(
+					'id'		=> $Queue[0][0],
+					'level'		=> $Queue[0][1],
+					'timeleft'	=> $PLANET['b_building'] - TIMESTAMP,
+					'time'		=> $PLANET['b_building'],
+					'starttime'	=> pretty_time($PLANET['b_building'] - TIMESTAMP),
+				);
+			} else {
+				$buildInfo['buildings']	= false;
+			}
 		}
 		else {
 			$buildInfo['buildings']	= false;
@@ -140,17 +148,19 @@ class ShowOverviewPage extends AbstractGamePage
 		
 		if (!empty($PLANET['b_hangar_id'])) {
 			$Queue	= safe_unserialize($PLANET['b_hangar_id']);
-			$time	= BuildFunctions::getBuildingTime($USER, $PLANET, $Queue[0][0]) * $Queue[0][1];
-			$timeleft = max($time - $PLANET['b_hangar'], 0);
-			if ($timeleft > 0) {
+			if (is_array($Queue) && isset($Queue[0][0], $Queue[0][1])) {
+				$time		= BuildFunctions::getBuildingTime($USER, $PLANET, $Queue[0][0]) * $Queue[0][1];
+				$timeleft	= max($time - $PLANET['b_hangar'], 0);
 				$buildInfo['fleet']	= array(
 					'id'		=> $Queue[0][0],
 					'level'		=> $Queue[0][1],
 					'timeleft'	=> $timeleft,
 					'time'		=> $time,
 					'endtime'	=> TIMESTAMP + $timeleft,
-					'starttime'	=> pretty_time($timeleft),
+					'starttime'	=> $timeleft > 0 ? pretty_time($timeleft) : $LNG['ready'],
 				);
+			} else {
+				$buildInfo['fleet']	= false;
 			}
 		}
 		else {
@@ -159,13 +169,17 @@ class ShowOverviewPage extends AbstractGamePage
 		
 		if ($USER['b_tech'] - TIMESTAMP > 0) {
 			$Queue			= safe_unserialize($USER['b_tech_queue']);
-			$buildInfo['tech']	= array(
-				'id'		=> $Queue[0][0],
-				'level'		=> $Queue[0][1],
-				'timeleft'	=> $USER['b_tech'] - TIMESTAMP,
-				'time'		=> $USER['b_tech'],
-				'starttime'	=> pretty_time($USER['b_tech'] - TIMESTAMP),
-			);
+			if (is_array($Queue) && isset($Queue[0][0], $Queue[0][1])) {
+				$buildInfo['tech']	= array(
+					'id'		=> $Queue[0][0],
+					'level'		=> $Queue[0][1],
+					'timeleft'	=> $USER['b_tech'] - TIMESTAMP,
+					'time'		=> $USER['b_tech'],
+					'starttime'	=> pretty_time($USER['b_tech'] - TIMESTAMP),
+				);
+			} else {
+				$buildInfo['tech']	= false;
+			}
 		}
 		else {
 			$buildInfo['tech']	= false;

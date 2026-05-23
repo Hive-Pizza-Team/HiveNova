@@ -195,7 +195,7 @@ class ResourceUpdate
 	private function ShipyardQueue()
 	{
 		$BuildQueue 	= safe_unserialize($this->PLANET['b_hangar_id']);
-		if (!is_array($BuildQueue) || $BuildQueue === array()) {
+		if (!is_array($BuildQueue) || empty($BuildQueue)) {
 			$this->PLANET['b_hangar'] = 0;
 			$this->PLANET['b_hangar_id'] = '';
 			return false;
@@ -271,6 +271,11 @@ class ResourceUpdate
 			return false;
 		
 		$CurrentQueue	= safe_unserialize($this->PLANET['b_building_id']);
+		if (!is_array($CurrentQueue) || empty($CurrentQueue[0]) || !is_array($CurrentQueue[0])) {
+			$this->PLANET['b_building']		= 0;
+			$this->PLANET['b_building_id']	= '';
+			return false;
+		}
 
 		$Element      	= $CurrentQueue[0][0];
 		$BuildEndTime 	= $CurrentQueue[0][3];
@@ -442,6 +447,16 @@ class ResourceUpdate
 		}
 	}	
 	
+	private function clearTechQueueState(array $currentQueue): void
+	{
+		$this->USER['b_tech']			= 0;
+		$this->USER['b_tech_id']		= 0;
+		$this->USER['b_tech_planet']	= 0;
+		$this->USER['b_tech_queue']		= empty($currentQueue)
+			? ''
+			: serialize(array_values($currentQueue));
+	}
+
 	public function SetNextQueueTechOnTop()
 	{
 		global $LNG;
@@ -466,6 +481,15 @@ class ResourceUpdate
 		while ($Loop == true)
 		{
 			$ListIDArray        = $CurrentQueue[0];
+			if (!is_array($ListIDArray) || !isset($ListIDArray[0], $ListIDArray[4])) {
+				array_shift($CurrentQueue);
+				$this->clearTechQueueState($CurrentQueue);
+				if (empty($CurrentQueue)) {
+					$Loop = false;
+				}
+				continue;
+			}
+
 			$isAnotherPlanet	= $ListIDArray[4] != $this->PLANET['id'];
 			if($isAnotherPlanet)
 			{
@@ -476,14 +500,9 @@ class ResourceUpdate
 
 				if (empty($PLANET)) {
 					array_shift($CurrentQueue);
-					if (count($CurrentQueue) == 0) {
-						$this->USER['b_tech']			= 0;
-						$this->USER['b_tech_id']		= 0;
-						$this->USER['b_tech_planet']	= 0;
-						$this->USER['b_tech_queue']		= '';
-						$Loop							= false;
-					} else {
-						$this->USER['b_tech_queue'] = serialize(array_values($CurrentQueue));
+					$this->clearTechQueueState($CurrentQueue);
+					if (empty($CurrentQueue)) {
+						$Loop = false;
 					}
 					continue;
 				}
