@@ -33,6 +33,41 @@ if (file_exists($hivePhp)) {
 
 class PlayerUtil
 {
+	static public function getHiveRpcNodes(): array
+	{
+		return HIVE_RPC_NODES;
+	}
+
+	static public function isHiveRpcError(mixed $result): bool
+	{
+		if (!is_array($result)) {
+			return true;
+		}
+
+		return array_key_exists('code', $result) && array_key_exists('message', $result);
+	}
+
+	static public function hiveRpcCall(string $method, string $params): mixed
+	{
+		foreach (PlayerUtil::getHiveRpcNodes() as $rpcNode) {
+			try {
+				$hive = new Hive([
+					'rpcNodes' => [$rpcNode],
+					'timeout'  => HIVE_RPC_TIMEOUT,
+				]);
+				$result = $hive->call($method, $params);
+			} catch (\Throwable $e) {
+				continue;
+			}
+
+			if (!PlayerUtil::isHiveRpcError($result)) {
+				return $result;
+			}
+		}
+
+		return null;
+	}
+
 	static public function cryptPassword($password)
 	{
 		return password_hash((string) $password, PASSWORD_BCRYPT, ['cost' => 13]);
@@ -93,17 +128,14 @@ class PlayerUtil
 			return false;
 		}
 
-		$hive = new Hive();
-
-		// verify signature using hive-php
-		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
+		$result = PlayerUtil::hiveRpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
 
 		if(!is_array($result) || count($result) == 0 || !isset($result[0]) || !array_key_exists('posting',$result[0])) {
 			return false;
 		}
 
 		$publicKeyString = $result[0]['posting']['key_auths'][0][0];
-		$publicKey = $hive->publicKeyFrom($publicKeyString);
+		$publicKey = (new Hive())->publicKeyFrom($publicKeyString);
 
 		if (is_null($publicKey)) {
 			return false;
@@ -130,10 +162,7 @@ class PlayerUtil
 			return false;
 		}
 
-		$hive = new Hive();
-
-		// check existence using hive-php
-		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
+		$result = PlayerUtil::hiveRpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
 
 		if(is_array($result) && count($result) > 0) {
 			return true;

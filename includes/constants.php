@@ -65,6 +65,23 @@ if(!defined('CACHE_PATH')) {
 
 define('DISCORD_URL'				, 'https://discord.gg/BWqmGbtuDn');
 
+// Hive RPC — tried in order; each node gets HIVE_RPC_TIMEOUT seconds before the next.
+define('HIVE_RPC_TIMEOUT'			, 5);
+define('HIVE_RPC_NODES'				, [
+	'https://api.openhive.network',
+	'https://hapi.ecency.com',
+	'https://api.deathwing.me',
+	'https://rpc.mahdiyari.info',
+	'https://api.c0ff33a.uk',
+	'https://techcoderx.com',
+	'https://hiveapi.actifit.io',
+	'https://hive.atexoras.com:2096',
+	'https://rpc.ausbit.dev',
+	'https://rpc.ecency.com',
+	'https://api.pharesim.me',
+	'https://api.hive.blog',
+]);
+
 // =============================================================================
 // GAME ENGINE
 // =============================================================================

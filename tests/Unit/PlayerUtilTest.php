@@ -11,6 +11,23 @@ class PlayerUtilTest extends TestCase
     // isHiveAccountValid
     // -------------------------------------------------------------------------
 
+    /** @dataProvider hiveRpcErrorProvider */
+    public function testIsHiveRpcErrorDetectsRpcFailures(mixed $result, bool $expected): void
+    {
+        $this->assertSame($expected, PlayerUtil::isHiveRpcError($result));
+    }
+
+    public static function hiveRpcErrorProvider(): array
+    {
+        return [
+            'json-rpc error object' => [['code' => -32000, 'message' => 'Internal Error'], true],
+            'account list result'   => [[['name' => 'alice', 'posting' => []]], false],
+            'empty account list'    => [[], false],
+            'null result'           => [null, true],
+            'string result'         => ['error', true],
+        ];
+    }
+
     /** @dataProvider validHiveAccountProvider */
     public function testIsHiveAccountValidAcceptsValidAccounts(string $account): void
     {
