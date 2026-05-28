@@ -7,6 +7,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\HiveUtil;
 
 /**
  *  2Moons 
@@ -70,7 +71,7 @@ class ShowLoginPage extends AbstractLoginPage
 		{
 			$verify = "false";
 
-			if (PlayerUtil::isHiveAccountValid($loginData['hive_account']) && PlayerUtil::isHiveSignValid($loginData['hive_account'],$password)) {
+			if (HiveUtil::isAccountValid($loginData['hive_account']) && HiveUtil::isSignValid($loginData['hive_account'],$password)) {
 				$verify = "true";
 			} else if (password_verify((string) $password, (string) $loginData['password'])) {
 				$verify = "true";

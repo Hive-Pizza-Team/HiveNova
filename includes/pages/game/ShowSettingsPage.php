@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\HiveUtil;
 use HiveNova\Core\Theme;
 use HiveNova\Core\PushNotificationService;
 
@@ -410,13 +411,13 @@ class ShowSettingsPage extends AbstractGamePage
 
 		if(!empty($hivesign) && !empty($hiveAccount) && $USER['hive_account'] != $hiveAccount) {
 			// validate signature before saving hive account in DB
-			if (!PlayerUtil::isHiveAccountValid($hiveAccount))
+			if (!HiveUtil::isAccountValid($hiveAccount))
 			{
 				$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
 					'label'	=> $LNG['sys_back'],
 					'url'	=> 'game.php?page=settings'
 				)));
-			} else if (!PlayerUtil::isHiveSignValid($hiveAccount, $hivesign)) {
+			} else if (!HiveUtil::isSignValid($hiveAccount, $hivesign)) {
 				$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
 					'label'	=> $LNG['sys_back'],
 					'url'	=> 'game.php?page=settings'
