@@ -85,6 +85,8 @@ class ShowIndexPage extends AbstractLoginPage
 				'fleet_speed'         => $uniConfig->fleet_speed / 2500,
 				'resource_multiplier' => (int) $uniConfig->resource_multiplier,
 				'galaxy_size'         => sprintf($LNG['uni_info_galaxy_format'], $uniConfig->max_galaxy, $uniConfig->max_system),
+				'debris_percent'      => (int) $uniConfig->Fleet_Cdr,
+				'moon_chance'         => (int) $uniConfig->moon_chance,
 				'age'                 => format_universe_age_label($startedAt),
 				'vacancy_pct'         => universe_vacancy_percent($vacantSystems, $totalSystems),
 				'vacancy_level'       => universe_vacancy_level($vacantSystems, $totalSystems),
