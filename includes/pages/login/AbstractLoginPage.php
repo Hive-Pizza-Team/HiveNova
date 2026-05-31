@@ -56,6 +56,32 @@ abstract class AbstractLoginPage
 		return $universeSelect;
 	}
 
+	/**
+	 * Newest open universe for login/register dropdown default.
+	 * Skips closed universes (and registration-closed when registering).
+	 */
+	protected function getDefaultUniverseId($forRegistration = false)
+	{
+		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
+		{
+			$config = Config::get($uniId);
+			if($config->game_disable == 0)
+			{
+				continue;
+			}
+
+			if($forRegistration && $config->reg_closed == 1)
+			{
+				continue;
+			}
+
+			return $uniId;
+		}
+
+		$universes = array_reverse(Universe::availableUniverses());
+		return $universes ? $universes[0] : ROOT_UNI;
+	}
+
 	protected function initTemplate()
 	{
 		if(isset($this->tplObj))

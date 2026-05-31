@@ -107,6 +107,7 @@ class ShowIndexPage extends AbstractLoginPage
 		$config				= Config::get();
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
+			'defaultUniverse'		=> $this->getDefaultUniverseId(),
 			'universeStats'			=> $universeStats,
 			'code'					=> $loginErrorMessage,
 			'verkey'			=> $verkey,

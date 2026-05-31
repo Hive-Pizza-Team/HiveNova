@@ -19,7 +19,7 @@
 		<input type="hidden" value="{$referralData.id}" name="referralID">
 			<div class="rowForm">
 				<label for="universe">{$LNG.universe}</label>
-				<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$universeSelect|array_key_first}</select>
+				<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$defaultUniverse}</select>
 				{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
 			</div>
 			{if !empty($externalAuth.account)}
@@ -114,7 +114,7 @@
 			</div>
 			<div class="rowForm">
 				<label for="reg-hive-universe">{$LNG.universe}</label>
-				<select name="uni" id="reg-hive-universe" class="changeAction">{html_options options=$universeSelect selected=$universeSelect|array_key_first}</select>
+				<select name="uni" id="reg-hive-universe" class="changeAction">{html_options options=$universeSelect selected=$defaultUniverse}</select>
 				{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
 			</div>
 			<div class="rowForm">
