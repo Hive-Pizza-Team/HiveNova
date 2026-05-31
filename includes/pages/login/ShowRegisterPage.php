@@ -101,6 +101,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			'accountName'		=> $accountName,
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,
+			'defaultUniverse'	=> $this->getDefaultUniverseId(true),
 			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], 6),
 			'registerRulesDesc'			=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
 			'registerTabEmail'			=> $LNG['registerTabEmail'],

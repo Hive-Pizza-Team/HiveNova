@@ -53,9 +53,44 @@ class ShowIndexPage extends AbstractLoginPage
 			$sql = 'SELECT COUNT(*) as cnt FROM %%FLEETS%% WHERE fleet_universe = :uniId;';
 			$fleetCount = $db->selectSingle($sql, array(':uniId' => $uniId), 'cnt');
 
+			$sql = 'SELECT MIN(register_time) as started FROM %%USERS%% WHERE universe = :uniId AND register_time > 0;';
+			$startedAt = (int) $db->selectSingle($sql, array(':uniId' => $uniId), 'started');
+
+			$sql = 'SELECT COUNT(*) as cnt FROM (
+				SELECT galaxy, `system`
+				FROM %%PLANETS%%
+				WHERE universe = :uniId
+					AND planet_type = 1
+					AND galaxy >= 1 AND galaxy <= :maxGalaxy
+					AND `system` >= 1 AND `system` <= :maxSystem
+				GROUP BY galaxy, `system`
+			) AS occupied_systems;';
+			$occupiedSystems = (int) $db->selectSingle($sql, array(
+				':uniId'      => $uniId,
+				':maxGalaxy'  => (int) $uniConfig->max_galaxy,
+				':maxSystem'  => (int) $uniConfig->max_system,
+			), 'cnt');
+
+			$totalSystems = calculate_universe_system_capacity(
+				(int) $uniConfig->max_galaxy,
+				(int) $uniConfig->max_system
+			);
+			$vacantSystems = calculate_universe_vacant_systems($occupiedSystems, $totalSystems);
+
 			$universeStats[$uniId] = array(
-				'players' => (int) $uniConfig->users_amount,
-				'fleets'  => (int) $fleetCount,
+				'name'                => $uniConfig->uni_name,
+				'open'                => (int) $uniConfig->game_disable === 1,
+				'reg_open'            => (int) $uniConfig->reg_closed === 0,
+				'game_speed'          => $uniConfig->game_speed / 2500,
+				'fleet_speed'         => $uniConfig->fleet_speed / 2500,
+				'resource_multiplier' => (int) $uniConfig->resource_multiplier,
+				'galaxy_size'         => sprintf($LNG['uni_info_galaxy_format'], $uniConfig->max_galaxy, $uniConfig->max_system),
+				'age'                 => format_universe_age_label($startedAt),
+				'vacancy_pct'         => universe_vacancy_percent($vacantSystems, $totalSystems),
+				'vacancy_level'       => universe_vacancy_level($vacantSystems, $totalSystems),
+				'vacancy_label'       => format_universe_vacancy_label($vacantSystems, $totalSystems),
+				'players'             => (int) $uniConfig->users_amount,
+				'fleets'              => (int) $fleetCount,
 			);
 		}
 
@@ -72,6 +107,7 @@ class ShowIndexPage extends AbstractLoginPage
 		$config				= Config::get();
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
+			'defaultUniverse'		=> $this->getDefaultUniverseId(),
 			'universeStats'			=> $universeStats,
 			'code'					=> $loginErrorMessage,
 			'verkey'			=> $verkey,

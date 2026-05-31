@@ -239,6 +239,66 @@ function CalculateMaxPlanetFields($planet)
 	return $planet['field_max'] + ($planet[$resource[33]] * FIELDS_BY_TERRAFORMER) + ($planet[$resource[41]] * FIELDS_BY_MOONBASIS_LEVEL);
 }
 
+function format_universe_age_label(int $startedAt): string
+{
+	global $LNG;
+
+	if ($startedAt <= 0) {
+		return $LNG['uni_info_age_today'];
+	}
+
+	$ageDays = max(0, intdiv(TIMESTAMP - $startedAt, 86400));
+
+	if ($ageDays === 0) {
+		return $LNG['uni_info_age_today'];
+	}
+
+	if ($ageDays === 1) {
+		return $LNG['uni_info_age_one_day'];
+	}
+
+	return sprintf($LNG['uni_info_age_days'], pretty_number($ageDays));
+}
+
+function calculate_universe_system_capacity(int $maxGalaxy, int $maxSystem): int
+{
+	// Vacancy is measured per solar system (empty vs at least one planet).
+	return max(1, $maxGalaxy * $maxSystem);
+}
+
+function calculate_universe_vacant_systems(int $occupiedSystems, int $totalSystems): int
+{
+	// Vacant = no planets at all; any planet in a system makes it occupied.
+	return max(0, $totalSystems - $occupiedSystems);
+}
+
+function universe_vacancy_percent(int $vacantSystems, int $totalSystems): int
+{
+	return min(100, (int) round($vacantSystems * 100 / max(1, $totalSystems)));
+}
+
+function format_universe_vacancy_label(int $vacantSystems, int $totalSystems): string
+{
+	global $LNG;
+
+	return sprintf($LNG['uni_info_fullness_format'], pretty_number($vacantSystems), pretty_number($totalSystems));
+}
+
+function universe_vacancy_level(int $vacantSystems, int $totalSystems): string
+{
+	$pct = universe_vacancy_percent($vacantSystems, $totalSystems);
+
+	if ($pct <= 10) {
+		return 'full';
+	}
+
+	if ($pct <= 30) {
+		return 'warn';
+	}
+
+	return 'ok';
+}
+
 function pretty_time($seconds)
 {
 	global $LNG;
