@@ -91,6 +91,14 @@
 							<div class="uni-stats-config-term">{$LNG.uni_info_galaxy}</div>
 							<div class="uni-stats-config-desc">{$stats.galaxy_size|escape}</div>
 						</div>
+						<div class="uni-stats-config-item">
+							<div class="uni-stats-config-term">{$LNG.uni_info_debris}</div>
+							<div class="uni-stats-config-desc">{$stats.debris_percent}%</div>
+						</div>
+						<div class="uni-stats-config-item">
+							<div class="uni-stats-config-term">{$LNG.uni_info_moon_chance}</div>
+							<div class="uni-stats-config-desc">{$stats.moon_chance}%</div>
+						</div>
 						<div class="uni-stats-config-item uni-stats-config-item--paired">
 							<div class="uni-stats-config-term">{$LNG.uni_info_age}</div>
 							<div class="uni-stats-config-desc">{$stats.age|escape}</div>
