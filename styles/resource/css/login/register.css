@@ -5,6 +5,12 @@
     margin: 0 auto 30px;
 }
 
+.reg-tabs-wrapper .contentbox {
+    width: auto;
+    max-width: 460px;
+    padding: 16px 20px;
+}
+
 /* ── Tab navigation ──────────────────────────── */
 
 .reg-tab-nav {
@@ -52,6 +58,11 @@
     margin-bottom: 1px;
 }
 
+.reg-tab-icon--keychain {
+    width: 16px;
+    height: 16px;
+}
+
 /* ── Tab panels ──────────────────────────────── */
 
 .reg-tab-panel {
@@ -72,6 +83,193 @@
     max-width: 460px;
 }
 
+.reg-tab-panel .contentbox form {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    max-width: none;
+}
+
+.contentbox .login-form-fields select,
+.contentbox .login-form-fields input[type="text"],
+.contentbox .login-form-fields input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+    margin-bottom: 5px;
+    border-radius: 8px;
+}
+
+/* ── Universe info (home page) ───────────────── */
+
+.uni-stats {
+    margin: 0;
+}
+
+.uni-stats .contentbox {
+    margin: 10px auto 15px;
+    text-align: left;
+}
+
+.uni-stats .contentbox h2 {
+    text-align: center;
+}
+
+.uni-stats-row {
+    display: none;
+}
+
+.uni-stats-row.active {
+    display: block;
+}
+
+.uni-stats-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    list-style: none;
+    margin: 0 0 14px;
+    padding: 0;
+}
+
+.uni-stats-badges .uni-badge {
+    background: rgba(5, 20, 35, 0.75);
+    border: 1px solid rgba(227, 19, 55, 0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #cfe0ed;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.uni-stats-badges .uni-badge::before {
+    content: '✦ ';
+    color: #E31337;
+    font-size: 8px;
+    vertical-align: middle;
+}
+
+.uni-stats-badges .uni-badge--warn {
+    border-color: rgba(227, 19, 55, 0.55);
+    color: #e8b0ba;
+}
+
+/* Inner blocks — match login form fields (dark fill, red border) */
+.uni-stats-field {
+    background-color: #212529;
+    border: 1px solid #E31337;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+}
+
+.uni-stats-config {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    margin: 0;
+}
+
+.uni-stats-config-item {
+    margin: 0;
+    min-width: 0;
+}
+
+.uni-stats-config-item--paired {
+    display: flex;
+    flex-direction: column;
+}
+
+.uni-stats-config-item--paired .uni-stats-config-desc {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.uni-stats-config-term {
+    margin: 0;
+    font-size: 10px;
+    font-weight: normal;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #8aa8be;
+}
+
+.uni-stats-config-desc {
+    margin: 4px 0 0;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.uni-stats-vacancy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.uni-stats-capacity-row {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+}
+
+.uni-stats-capacity {
+    background: rgba(5, 20, 35, 0.75);
+    border-radius: 4px;
+    flex: 1;
+    height: 8px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.uni-stats-capacity-pct {
+    color: #fff;
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.uni-stats-capacity-bar {
+    background: #E31337;
+    border-radius: 4px;
+    height: 100%;
+    width: var(--fill, 0%);
+    min-width: 0;
+}
+
+.uni-stats-capacity-bar--warn {
+    background: #e8a040;
+}
+
+.uni-stats-capacity-bar--full {
+    background: #ff4466;
+}
+
+.uni-stats-capacity-label {
+    font-size: 10px;
+    font-weight: normal;
+    line-height: 1.3;
+    color: #cfe0ed;
+}
+
+.uni-stats-live {
+    margin-bottom: 0;
+    text-align: center;
+    color: #f0f0f8;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.25px;
+}
+
 /* ── Hive info blurb ─────────────────────────── */
 
 .reg-hive-info p {
@@ -85,15 +283,16 @@
 /* ── Hive submit button accent ───────────────── */
 
 .reg-hive-submit {
-    background-color: #E31337 !important;
+    border-radius: 30px !important;
+    background-color: #212838 !important;
     color: #fff !important;
     border-color: #E31337 !important;
     font-weight: bold;
 }
 
 .reg-hive-submit:hover {
-    background-color: #c01030 !important;
-    border-color: #c01030 !important;
+    background-color: #E31337 !important;
+    border-color: #E31337 !important;
 }
 
 /* ── Form rows ───────────────────────────────── */
