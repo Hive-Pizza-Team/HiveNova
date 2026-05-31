@@ -30,6 +30,23 @@ $LNG['menu_register']				= 'S\'enregistrer';
 $LNG['chose_a_uni']					= 'Choisir un univers';
 $LNG['universe']					= 'Univers';
 $LNG['uni_closed']					= ' (fermée)';
+$LNG['uni_info_game_speed']			= 'Vitesse du jeu';
+$LNG['uni_info_fleet_speed']		= 'Vitesse des flottes';
+$LNG['uni_info_resources']			= 'Ressources';
+$LNG['uni_info_galaxy']				= 'Taille de la galaxie';
+$LNG['uni_info_galaxy_format']		= '%s galaxies × %s systèmes';
+$LNG['uni_info_age']				= 'Âge';
+$LNG['uni_info_age_today']			= 'Ouvert aujourd\'hui';
+$LNG['uni_info_age_one_day']		= '1 jour';
+$LNG['uni_info_age_days']			= '%s jours';
+$LNG['uni_info_fullness']			= 'Places libres';
+$LNG['uni_info_fullness_format']	= '%s / %s systèmes libres';
+$LNG['uni_info_status_open']		= 'Ouvert';
+$LNG['uni_info_status_closed']		= 'Fermé';
+$LNG['uni_info_reg_open']			= 'Inscription ouverte';
+$LNG['uni_info_reg_closed']			= 'Inscription fermée';
+$LNG['uni_info_players']			= 'Joueurs';
+$LNG['uni_info_fleets']				= 'Flottes en vol';
 
 // Button
 $LNG['buttonRegister']				= 'S\'enregistrer maintenant!';
@@ -152,3 +169,4 @@ $LNG['disclamerLabelNotice']		= 'Plus d\'informations';
 
 
 $LNG['loginHiveAccount'] = 'Compte Hive';
+$LNG['loginKeychainButton'] = 'Se connecter avec Keychain';

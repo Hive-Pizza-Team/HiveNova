@@ -7,7 +7,7 @@
 			&#9993;&nbsp; {$registerTabEmail}
 		</button>
 		<button class="reg-tab-btn" data-tab="reg-hive" role="tab" aria-selected="false" aria-controls="reg-hive">
-			<img src="https://hive.io/favicon.ico" alt="" class="reg-tab-icon"> {$registerTabHive}
+			<img src="styles/resource/images/login/keychain-round-logo.svg" alt="" class="reg-tab-icon reg-tab-icon--keychain"> {$registerTabHive}
 		</button>
 	</div>
 

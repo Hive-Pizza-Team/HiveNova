@@ -45,6 +45,23 @@ $LNG['menu_register']				= 'Kayıt';
 $LNG['chose_a_uni']					= 'Evreni Seçiniz';
 $LNG['universe']					= 'Evren';
 $LNG['uni_closed']					= ' (Offline)';
+$LNG['uni_info_game_speed']			= 'Oyun hızı';
+$LNG['uni_info_fleet_speed']		= 'Filo hızı';
+$LNG['uni_info_resources']			= 'Kaynaklar';
+$LNG['uni_info_galaxy']				= 'Galaksi boyutu';
+$LNG['uni_info_galaxy_format']		= '%s galaksi × %s sistem';
+$LNG['uni_info_age']				= 'Yaş';
+$LNG['uni_info_age_today']			= 'Bugün açıldı';
+$LNG['uni_info_age_one_day']		= '1 gün';
+$LNG['uni_info_age_days']			= '%s gün';
+$LNG['uni_info_fullness']			= 'Boşluk';
+$LNG['uni_info_fullness_format']	= '%s / %s boş sistem';
+$LNG['uni_info_status_open']		= 'Açık';
+$LNG['uni_info_status_closed']		= 'Kapalı';
+$LNG['uni_info_reg_open']			= 'Kayıt açık';
+$LNG['uni_info_reg_closed']			= 'Kayıt kapalı';
+$LNG['uni_info_players']			= 'Oyuncular';
+$LNG['uni_info_fleets']				= 'Uçuşta filolar';
 
 // Button
 $LNG['buttonRegister']				= 'Kayıt Ol!';
@@ -170,3 +187,4 @@ $LNG['disclamerLabelNotice']		= 'Ayrıntılı bilgi';
  //Giris Sayfasi
  $LNG['Browser']				= 'Önerilen browser.';
 $LNG['loginHiveAccount'] = 'Hive Hesabı';
+$LNG['loginKeychainButton'] = 'Keychain ile giriş yap';

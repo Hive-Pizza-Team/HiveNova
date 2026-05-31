@@ -12,7 +12,7 @@
 				&#128274;&nbsp; {$LNG.loginPassword}
 			</button>
 			<button class="reg-tab-btn" data-tab="login-hive" role="tab" aria-selected="false" aria-controls="login-hive">
-				<img src="https://hive.io/favicon.ico" alt="" class="reg-tab-icon"> Hive Keychain
+				<img src="styles/resource/images/login/keychain-round-logo.svg" alt="" class="reg-tab-icon reg-tab-icon--keychain"> Hive Keychain
 			</button>
 		</div>
 
@@ -20,7 +20,7 @@
 			<div class="contentbox">
 				<h2>{$LNG.loginPassword} {$LNG.loginHeader}</h2>
 				<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
-					<div class="row">
+					<div class="login-form-fields">
 					<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultUniverse}</select>
 						<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}">
 						<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
@@ -44,11 +44,16 @@
 			<div class="contentbox">
 				<h2>{$LNG.loginHiveAccount} {$LNG.loginHeader}</h2>
 				<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
-					<select name="uni" id="loginHive-universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultUniverse}</select>
-					<input name="username" id="loginHive-username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
-					<input name="password" id="loginHive-password" type="hidden">
-					<input name="hiveAccount" id="loginHive-hiveAccount" type="hidden">
-					<button onclick="HiveKeychainLogin()" class="button_keychain" title="Log in with HiveKeychain"></button>
+					<div class="login-form-fields">
+						<select name="uni" id="loginHive-universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultUniverse}</select>
+						<input name="username" id="loginHive-username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
+						<input name="password" id="loginHive-password" type="hidden">
+						<input name="hiveAccount" id="loginHive-hiveAccount" type="hidden">
+						<button type="button" onclick="HiveKeychainLogin()" class="button_keychain" title="{$LNG.loginKeychainButton}">
+							<img src="styles/resource/images/login/keychain-round-logo.svg" alt="" class="button_keychain-icon" aria-hidden="true">
+							<span class="button_keychain-label">{$LNG.loginKeychainButton}</span>
+						</button>
+					</div>
 				</form>
 				<br>
 				<span class="small">{$loginInfo}</span>
@@ -57,9 +62,56 @@
 
 		<div id="uni-stats" class="uni-stats">
 			{foreach $universeStats as $uniId => $stats}
-			<div class="uni-stats-row" data-uni="{$uniId}">
-				<span class="uni-stat-item">&#9992;&nbsp; {$stats.fleets} fleets flying</span>
-				<span class="uni-stat-item">&#128100;&nbsp; {$stats.players} players</span>
+			<div class="contentbox uni-stats-row" data-uni="{$uniId}">
+				<h2>{$stats.name|escape}</h2>
+				{if !$stats.open || !$stats.reg_open}
+				<ul class="uni-stats-badges">
+					{if !$stats.open}
+					<li class="uni-badge uni-badge--warn">{$LNG.uni_info_status_closed}</li>
+					{elseif !$stats.reg_open}
+					<li class="uni-badge uni-badge--warn">{$LNG.uni_info_reg_closed}</li>
+					{/if}
+				</ul>
+				{/if}
+				<div class="uni-stats-field">
+					<div class="uni-stats-config">
+						<div class="uni-stats-config-item">
+							<div class="uni-stats-config-term">{$LNG.uni_info_game_speed}</div>
+							<div class="uni-stats-config-desc">{$stats.game_speed|number_format:1}</div>
+						</div>
+						<div class="uni-stats-config-item">
+							<div class="uni-stats-config-term">{$LNG.uni_info_fleet_speed}</div>
+							<div class="uni-stats-config-desc">{$stats.fleet_speed|number_format:1}</div>
+						</div>
+						<div class="uni-stats-config-item">
+							<div class="uni-stats-config-term">{$LNG.uni_info_resources}</div>
+							<div class="uni-stats-config-desc">{$stats.resource_multiplier|number_format}×</div>
+						</div>
+						<div class="uni-stats-config-item">
+							<div class="uni-stats-config-term">{$LNG.uni_info_galaxy}</div>
+							<div class="uni-stats-config-desc">{$stats.galaxy_size|escape}</div>
+						</div>
+						<div class="uni-stats-config-item uni-stats-config-item--paired">
+							<div class="uni-stats-config-term">{$LNG.uni_info_age}</div>
+							<div class="uni-stats-config-desc">{$stats.age|escape}</div>
+						</div>
+						<div class="uni-stats-config-item uni-stats-config-item--paired">
+							<div class="uni-stats-config-term">{$LNG.uni_info_fullness}</div>
+							<div class="uni-stats-config-desc uni-stats-vacancy">
+								<div class="uni-stats-capacity-row">
+									<div class="uni-stats-capacity" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{$stats.vacancy_pct}" aria-label="{$stats.vacancy_label|escape}">
+										<div class="uni-stats-capacity-bar uni-stats-capacity-bar--{$stats.vacancy_level|escape}" style="--fill: {$stats.vacancy_pct}%;"></div>
+									</div>
+									<span class="uni-stats-capacity-pct">{$stats.vacancy_pct}%</span>
+								</div>
+								<span class="uni-stats-capacity-label">{$stats.vacancy_label|escape}</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="uni-stats-field uni-stats-live">
+					{$stats.players|number_format} {$LNG.uni_info_players} · {$stats.fleets|number_format} {$LNG.uni_info_fleets}
+				</div>
 			</div>
 			{/foreach}
 		</div>
@@ -109,31 +161,6 @@
 {block name="script" append}
 <script>{if $code}alert({$code|default:0|json});{/if}</script>
 <link rel="stylesheet" type="text/css" href="styles/resource/css/login/register.css?v={$REV}">
-<style>
-.uni-stats {
-	width: 300px;
-	margin: 0 auto 12px;
-	text-align: center;
-}
-.uni-stats-row {
-	display: none;
-	gap: 20px;
-	justify-content: center;
-	flex-wrap: wrap;
-	padding: 8px 12px;
-	background: rgba(5, 20, 35, 0.7);
-	border: 1px solid rgba(255,255,255,0.1);
-	border-radius: 8px;
-}
-.uni-stats-row.active {
-	display: flex;
-}
-.uni-stat-item {
-	color: #aac4dd;
-	font-size: 12px;
-	letter-spacing: 0.3px;
-}
-</style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	var btns = document.querySelectorAll('.reg-tab-btn');

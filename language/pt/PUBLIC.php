@@ -44,6 +44,23 @@ $LNG['menu_register']				= 'Registo';
 $LNG['chose_a_uni']					= 'Escolhe o universo';
 $LNG['universe']					= 'Universo';
 $LNG['uni_closed']					= ' (fechado)';
+$LNG['uni_info_game_speed']			= 'Velocidade do jogo';
+$LNG['uni_info_fleet_speed']		= 'Velocidade das frotas';
+$LNG['uni_info_resources']			= 'Recursos';
+$LNG['uni_info_galaxy']				= 'Tamanho da galáxia';
+$LNG['uni_info_galaxy_format']		= '%s galáxias × %s sistemas';
+$LNG['uni_info_age']				= 'Idade';
+$LNG['uni_info_age_today']			= 'Aberto hoje';
+$LNG['uni_info_age_one_day']		= '1 dia';
+$LNG['uni_info_age_days']			= '%s dias';
+$LNG['uni_info_fullness']			= 'Vacância';
+$LNG['uni_info_fullness_format']	= '%s / %s sistemas livres';
+$LNG['uni_info_status_open']		= 'Aberto';
+$LNG['uni_info_status_closed']		= 'Fechado';
+$LNG['uni_info_reg_open']			= 'Registo aberto';
+$LNG['uni_info_reg_closed']			= 'Registo fechado';
+$LNG['uni_info_players']			= 'Jogadores';
+$LNG['uni_info_fleets']				= 'Frotas em voo';
 
 // Button
 $LNG['buttonRegister']				= 'Regista Agora!';
@@ -63,6 +80,7 @@ $LNG['loginInfo']					= 'Com o login eu aceito os %s.';
 $LNG['loginWelcome']				= 'Bem-vindo ao %s';
 $LNG['loginServerDesc']				= '%s é um jogo de estratégia espacial em tempo real.';
 $LNG['loginHiveAccount']			= 'Conta Hive';
+$LNG['loginKeychainButton']			= 'Entrar com Keychain';
 
 // Register
 $LNG['registerFacebookAccount']		= 'Conta de Facebook';

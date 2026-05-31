@@ -280,6 +280,10 @@ class GeneralFunctionsTest extends TestCase
             'short_hour'   => 'h',
             'short_minute' => 'm',
             'short_second' => 's',
+            'uni_info_age_today'   => 'Opened today',
+            'uni_info_age_one_day' => '1 day',
+            'uni_info_age_days'    => '%s days',
+            'uni_info_fullness_format' => '%s / %s systems vacant',
         ];
     }
 
@@ -370,5 +374,57 @@ class GeneralFunctionsTest extends TestCase
         // 23h 59m 59s = 86399s — no day prefix
         $result = pretty_time(86399);
         $this->assertStringNotContainsString('d ', $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // format_universe_age_label
+    // -------------------------------------------------------------------------
+
+    public function testFormatUniverseAgeLabelReturnsTodayWhenUnset(): void
+    {
+        $this->assertSame('Opened today', format_universe_age_label(0));
+    }
+
+    public function testFormatUniverseAgeLabelReturnsOneDay(): void
+    {
+        $this->assertSame('1 day', format_universe_age_label(TIMESTAMP - 86400));
+    }
+
+    public function testFormatUniverseAgeLabelReturnsDayCount(): void
+    {
+        $this->assertSame('5 days', format_universe_age_label(TIMESTAMP - (5 * 86400)));
+    }
+
+    // -------------------------------------------------------------------------
+    // calculate_universe_system_capacity / universe vacancy helpers
+    // -------------------------------------------------------------------------
+
+    public function testCalculateUniverseSystemCapacityUsesGalaxyTimesSystem(): void
+    {
+        $this->assertSame(3600, calculate_universe_system_capacity(9, 400));
+    }
+
+    public function testCalculateUniverseVacantSystemsNeverNegative(): void
+    {
+        $this->assertSame(0, calculate_universe_vacant_systems(4000, 3600));
+        $this->assertSame(100, calculate_universe_vacant_systems(3500, 3600));
+    }
+
+    public function testUniverseVacancyPercentMeasuresVacantSystems(): void
+    {
+        $this->assertSame(50, universe_vacancy_percent(50, 100));
+        $this->assertSame(100, universe_vacancy_percent(150, 100));
+    }
+
+    public function testFormatUniverseVacancyLabelReturnsVacantSystems(): void
+    {
+        $this->assertSame('75 / 100 systems vacant', format_universe_vacancy_label(75, 100));
+    }
+
+    public function testUniverseVacancyLevelEscalatesWhenVacancyIsLow(): void
+    {
+        $this->assertSame('ok', universe_vacancy_level(50, 100));
+        $this->assertSame('warn', universe_vacancy_level(25, 100));
+        $this->assertSame('full', universe_vacancy_level(5, 100));
     }
 }
