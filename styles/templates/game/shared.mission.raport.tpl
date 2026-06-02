@@ -11,15 +11,15 @@
 
 <div class="battle-report__summary">
 	<div class="battle-report__summary-item">
-		<div class="battle-report__summary-label">{$LNG.sys_attack_title}</div>
-		<div class="battle-report__summary-value">{if $Raport.mode == 1}{$LNG.sys_destruc_title}{else}{$LNG.sys_attack_title}{/if}</div>
+		<div class="battle-report__summary-label">{$LNG.sys_ship_type}</div>
+		<div class="battle-report__summary-value">{if $Raport.mode == 1}{$LNG.type_mission_9}{else}{$LNG.type_mission_1}{/if}</div>
 	</div>
 	<div class="battle-report__summary-item">
-		<div class="battle-report__summary-label">Time</div>
+		<div class="battle-report__summary-label">{$LNG.sys_br_time}</div>
 		<div class="battle-report__summary-value">{$Raport.time}</div>
 	</div>
 	<div class="battle-report__summary-item">
-		<div class="battle-report__summary-label">Result</div>
+		<div class="battle-report__summary-label">{$LNG.sys_br_result}</div>
 		<div class="battle-report__summary-value">
 			{if $Raport.result == "a"}
 				<span class="battle-report__result battle-report__result--attacker">{$LNG.sys_attacker_won}</span>
@@ -38,7 +38,7 @@
 		<div class="battle-report__summary-label">{$LNG.sys_defender_lostunits}</div>
 		<div class="battle-report__summary-value">{$Raport['units'][1]|number}</div>
 	</div>
-	<div class="battle-report__summary-item battle-report__summary-item--wide">
+	<div class="battle-report__summary-item">
 		<div class="battle-report__summary-label">{$LNG.debree_field_1}</div>
 		<div class="battle-report__summary-value">{foreach $Raport.debris as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.debris|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach}</div>
 	</div>
@@ -246,12 +246,18 @@ $(function() {
 		return;
 	}
 
-	$tabs.on('click', function() {
+	$panels.hide().addClass('is-hidden');
+	$panels.first().show().removeClass('is-hidden');
+	$tabs.removeClass('is-active');
+	$tabs.first().addClass('is-active');
+
+	$tabs.on('click', function(event) {
+		event.preventDefault();
 		var index = $(this).data('round-tab');
 		$tabs.removeClass('is-active');
 		$(this).addClass('is-active');
-		$panels.addClass('is-hidden');
-		$panels.filter('[data-round-panel="' + index + '"]').removeClass('is-hidden');
+		$panels.hide().addClass('is-hidden');
+		$panels.filter('[data-round-panel="' + index + '"]').show().removeClass('is-hidden');
 	});
 });
 </script>

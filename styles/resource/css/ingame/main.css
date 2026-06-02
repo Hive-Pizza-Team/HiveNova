@@ -693,6 +693,8 @@ div#disclamer {
 .battle-report {
     width: 100%;
     text-align: center;
+    max-width: 1180px;
+    margin: 0 auto;
 }
 
 .battle-report__players {
@@ -807,6 +809,7 @@ div#disclamer {
 
 .battle-report__table-wrap {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     margin-bottom: 10px;
