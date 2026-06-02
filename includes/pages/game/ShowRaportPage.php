@@ -132,7 +132,8 @@ class ShowRaportPage extends AbstractGamePage
 		$this->assign(array(
 			'Raport'	=> $combatReport,
 			'Info'		=> array($reportData["attacker"], $reportData["defender"]),
-			'pageTitle'	=> $LNG['lm_topkb']
+			'pageTitle'	=> $LNG['lm_topkb'],
+			'hideSidebarMenu' => true,
 		));
 		
 		$this->display('shared.mission.raport.tpl');
@@ -179,7 +180,8 @@ class ShowRaportPage extends AbstractGamePage
 
 		$this->assign(array(
 			'Raport'	=> $combatReport,
-			'pageTitle'	=> $LNG['sys_mess_attack_report']
+			'pageTitle'	=> $LNG['sys_mess_attack_report'],
+			'hideSidebarMenu' => true,
 		));
 		
 		$this->display('shared.mission.raport.tpl');
