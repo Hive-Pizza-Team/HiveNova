@@ -690,6 +690,146 @@ div#disclamer {
     padding-top: 8px;
 }
 
+.battle-report {
+    width: 100%;
+    text-align: center;
+}
+
+.battle-report__players {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.battle-report__player {
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.battle-report__player--attacker {
+    color: var(--color-success);
+}
+
+.battle-report__player--defender {
+    color: var(--color-danger);
+}
+
+.battle-report__versus {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.battle-report__summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+    text-align: left;
+}
+
+.battle-report__summary-item {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+
+.battle-report__summary-item--wide {
+    grid-column: 1 / -1;
+}
+
+.battle-report__summary-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 4px;
+}
+
+.battle-report__summary-value {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.battle-report__result {
+    font-weight: bold;
+}
+
+.battle-report__result--attacker {
+    color: var(--color-success);
+}
+
+.battle-report__result--defender {
+    color: var(--color-danger);
+}
+
+.battle-report__result--draw {
+    color: var(--color-text);
+}
+
+.battle-report__round-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.battle-report__round-tab {
+    border: 1px solid var(--color-border);
+    background: var(--color-menu-bg);
+    color: var(--color-text);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin: 0;
+}
+
+.battle-report__round-tab.is-active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.battle-report__round {
+    margin-bottom: 14px;
+}
+
+.battle-report__round.is-hidden {
+    display: none;
+}
+
+.battle-report__round-meta {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.battle-report__table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-bottom: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-surface);
+    padding: 4px;
+}
+
+.battle-report__ships-table {
+    min-width: 680px;
+}
+
+.battle-report__round-damage {
+    margin: 8px 0 0;
+    line-height: 1.5;
+}
+
+.battle-report__details {
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
 table.tablesorter thead {
     position: relative;
 }
@@ -1038,6 +1178,27 @@ table.tablesorter thead tr .headerSortDown {
     body.popup #content {
         padding: 8px;
         padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .battle-report__players {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .battle-report__versus {
+        display: none;
+    }
+
+    .battle-report__player {
+        font-size: 18px;
+    }
+
+    .battle-report__summary {
+        grid-template-columns: 1fr;
+    }
+
+    .battle-report__ships-table {
+        min-width: 560px;
     }
 
     .pwa-install-banner:not([hidden]) {
