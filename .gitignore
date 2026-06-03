@@ -10,3 +10,4 @@ includes/backups
 includes/config.php
 includes/push.config.php
 includes/error.log
+.worktrees/
