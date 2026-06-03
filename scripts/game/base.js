@@ -364,7 +364,7 @@ const HiveKeychainLogin = async () => {
 	}
 }
 
-const DepositPizzaTokens = async (hiveaccount) => {
+const DepositPizzaTokens = async (hiveaccount, universe) => {
 	if (typeof(hive_keychain) == "undefined") {
 		alert('You must install HiveKeychain extension first');
 		return;
@@ -373,8 +373,11 @@ const DepositPizzaTokens = async (hiveaccount) => {
 	try
 	{
 		const amount = parseFloat(prompt("Enter $PIZZA amount: "));
+		if (isNaN(amount) || amount <= 0) {
+			return;
+		}
 		const depositWallet = 'moon.deposit';
-		const memo = '';
+		const memo = 'u' + universe;
 		const tokenSymbol = 'PIZZA';
 		hive_keychain.requestSendToken(hiveaccount, depositWallet, amount.toFixed(3), memo, tokenSymbol, (response) => {
 			console.debug(JSON.stringify(response));
