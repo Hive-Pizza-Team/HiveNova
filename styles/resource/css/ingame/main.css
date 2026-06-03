@@ -628,6 +628,18 @@ div#disclamer {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
+.tip.notify.notify-toast {
+    top: auto;
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: normal;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
 .ui-progressbar {
     height: 10px !important;
 }
@@ -1006,6 +1018,10 @@ table.tablesorter thead tr .headerSortDown {
     font-weight: bold;
     background: var(--color-menu-bg);
     border-bottom: 1px solid var(--color-border);
+}
+
+.galaxy-coords-abbrev {
+    display: none;
 }
 
 .galaxy-coords-controls {
@@ -1398,6 +1414,15 @@ table.tablesorter thead tr .headerSortDown {
         margin-bottom: 2px;
     }
 
+    content:has(.galaxy-coords-picker) {
+        --galaxy-mobile-chrome: calc(88px + 64px + 52px + 56px + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px));
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding-top: 4px;
+        padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 4px);
+    }
+
     .galaxy-system-table,
     .galaxy-system-table tbody {
         display: block;
@@ -1435,11 +1460,17 @@ table.tablesorter thead tr .headerSortDown {
 
     .galaxy-planet-row {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
-        column-gap: 4px;
+        column-gap: 3px;
         row-gap: 0;
         width: 100%;
+        margin-bottom: 1px;
+        padding: 1px 4px;
+        min-height: calc((100dvh - var(--galaxy-mobile-chrome)) / 15);
+        max-height: calc((100dvh - var(--galaxy-mobile-chrome)) / 15);
+        overflow: hidden;
+        box-sizing: border-box;
     }
 
     .galaxy-planet-row td {
@@ -1456,24 +1487,24 @@ table.tablesorter thead tr .headerSortDown {
 
     .galaxy-planet-row td:nth-child(1) {
         order: 0;
-        flex: 0 0 18px;
+        flex: 0 0 16px;
         font-weight: bold;
-        font-size: 12px;
+        font-size: 11px;
         text-align: center;
-        line-height: 28px;
+        line-height: 1;
     }
 
     .galaxy-planet-row td:nth-child(2) {
         order: 1;
-        flex: 0 0 28px;
+        flex: 0 0 22px;
         align-self: center;
         padding-top: 0;
     }
 
     .galaxy-planet-row td:nth-child(2) img {
         display: block;
-        width: 28px;
-        height: 28px;
+        width: 22px;
+        height: 22px;
     }
 
     .galaxy-planet-row td:nth-child(3) {
@@ -1481,8 +1512,8 @@ table.tablesorter thead tr .headerSortDown {
         flex: 1 1 4rem;
         min-width: 0;
         font-weight: bold;
-        font-size: 12px;
-        line-height: 1.2;
+        font-size: 11px;
+        line-height: 1.1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1492,10 +1523,10 @@ table.tablesorter thead tr .headerSortDown {
         order: 2;
         flex: 0 1 auto;
         min-width: 0;
-        max-width: 42%;
+        max-width: 38%;
         padding-left: 0;
-        font-size: 11px;
-        line-height: 1.2;
+        font-size: 10px;
+        line-height: 1.1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1529,8 +1560,8 @@ table.tablesorter thead tr .headerSortDown {
     .galaxy-planet-row td:nth-child(4) img,
     .galaxy-planet-row td:nth-child(5) img {
         display: block;
-        width: 22px;
-        height: 22px;
+        width: 18px;
+        height: 18px;
     }
 
     .galaxy-planet-row .galaxy-card-actions-cell {
@@ -1541,60 +1572,72 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     .galaxy-planet-row .galaxy-card-actions-cell img {
-        min-width: 24px;
-        min-height: 24px;
-        width: 24px;
-        height: 24px;
-        padding: 2px;
+        min-width: 20px;
+        min-height: 20px;
+        width: 20px;
+        height: 20px;
+        padding: 1px;
     }
 
     .galaxy-coords-picker {
         width: 100%;
         min-width: 0;
         grid-template-columns: 1fr 1fr;
-        gap: 4px 6px;
-        margin-bottom: 6px;
+        gap: 2px 6px;
+        margin-bottom: 4px;
+        flex-shrink: 0;
     }
 
     .galaxy-coords-title {
-        padding: 2px 4px;
+        display: none;
+    }
+
+    .galaxy-coords-abbrev {
+        display: block;
         font-size: 11px;
+        font-weight: bold;
+        line-height: 1;
+        text-align: center;
+        color: var(--color-text-muted, var(--color-text));
+        opacity: 0.8;
+        align-self: center;
     }
 
     .galaxy-coords-controls {
-        grid-template-columns: 36px 1fr 36px;
-        gap: 4px;
+        grid-template-columns: 14px 32px 1fr 32px;
+        gap: 2px;
         padding: 0;
     }
 
     .galaxy-coords-controls .galaxy-coords-step {
-        min-height: 36px;
-        min-width: 36px;
-        font-size: 18px;
+        min-height: 32px;
+        min-width: 32px;
+        font-size: 16px;
     }
 
     .galaxy-coords-controls input[type="text"] {
-        min-height: 36px;
-        font-size: 16px;
+        min-height: 32px;
+        font-size: 15px;
         padding: 2px 4px;
     }
 
     .galaxy-coords-submit {
-        padding: 2px 0 0;
+        display: none;
     }
 
-    .galaxy-coords-submit input[type="submit"] {
-        width: 100%;
-        min-height: 36px;
-        padding: 4px 8px;
-        font-size: 14px;
+    .galaxy-coords-warning--desktop {
+        display: none;
     }
 
-    .galaxy-coords-warning {
-        font-size: 10px;
-        line-height: 1.2;
-        padding: 2px 4px 0;
-        text-align: center;
+    #galaxy_form {
+        flex-shrink: 0;
+    }
+
+    .galaxy-system-table {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .fleet-table-desktop {
