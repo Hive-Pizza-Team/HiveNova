@@ -1,8 +1,33 @@
+function showGalaxyToast(message, className, durationMs) {
+	var tip = $('#tooltip');
+	tip.stop(true, true);
+	tip.html(message)
+		.removeClass('tooltip-mobile-active tooltip_sticky_div notify notify-error notify-toast')
+		.addClass('notify ' + (className || 'notify-toast'))
+		.css({
+			position: 'fixed',
+			top: 'auto',
+			left: '50%',
+			right: 'auto',
+			bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)',
+			transform: 'translateX(-50%)',
+			zIndex: 400,
+			maxWidth: 'calc(100vw - 32px)',
+			textAlign: 'center'
+		})
+		.show();
+	window.setTimeout(function () {
+		tip.fadeOut(400, function () {
+			tip.removeClass('notify notify-error notify-toast').css({ transform: '', zIndex: '', bottom: '' });
+		});
+	}, durationMs || 4500);
+}
+
 function showGalaxyFleetAlert(message) {
 	var tip = $('#tooltip');
 	tip.stop(true, true);
 	tip.html(message)
-		.removeClass('tooltip-mobile-active tooltip_sticky_div')
+		.removeClass('tooltip-mobile-active tooltip_sticky_div notify notify-toast')
 		.addClass('notify notify-error')
 		.css({
 			position: 'fixed',
@@ -18,7 +43,7 @@ function showGalaxyFleetAlert(message) {
 		.show();
 	window.setTimeout(function () {
 		tip.fadeOut(400, function () {
-			tip.removeClass('notify notify-error').css({ transform: '', zIndex: '' });
+			tip.removeClass('notify notify-error notify-toast').css({ transform: '', zIndex: '', bottom: '' });
 		});
 	}, 4000);
 }
@@ -53,3 +78,20 @@ function galaxy_submit(value) {
 	$('#auto').attr('name', value);
 	$('#galaxy_form').submit();
 }
+
+$(function () {
+	if (!window.matchMedia('(max-width: 699px)').matches) {
+		return;
+	}
+
+	var form = $('#galaxy_form');
+	var warning = form.attr('data-fuel-warning');
+	if (warning) {
+		showGalaxyToast(warning, 'notify-toast', 4500);
+	}
+
+	form.find('input[name="galaxy"], input[name="system"]').on('change', function () {
+		$('#auto').removeAttr('name');
+		form.submit();
+	});
+});

@@ -1,11 +1,12 @@
 {block name="title" prepend}{$LNG.lm_galaxy}{/block}
 {block name="content"}
-	<form action="?page=galaxy" method="post" id="galaxy_form">
+	<form action="?page=galaxy" method="post" id="galaxy_form" data-fuel-warning="{$LNG.gl_fuel_warning|escape:'html'}">
 	<input type="hidden" id="auto" value="dr">
 	<div class="galaxy-coords-picker">
 		<div class="galaxy-coords-group">
 			<div class="galaxy-coords-title">{$LNG.gl_galaxy}</div>
 			<div class="galaxy-coords-controls">
+				<span class="galaxy-coords-abbrev" aria-hidden="true">G</span>
 				<input type="button" class="galaxy-coords-step" name="galaxyLeft" value="&#8592;" aria-label="{$LNG.gl_galaxy} −" onclick="galaxy_submit('galaxyLeft')">
 				<input type="text" inputmode="numeric" name="galaxy" value="{$galaxy}" size="5" maxlength="3" tabindex="1">
 				<input type="button" class="galaxy-coords-step" name="galaxyRight" value="&#8594;" aria-label="{$LNG.gl_galaxy} +" onclick="galaxy_submit('galaxyRight')">
@@ -14,6 +15,7 @@
 		<div class="galaxy-coords-group">
 			<div class="galaxy-coords-title">{$LNG.gl_solar_system}</div>
 			<div class="galaxy-coords-controls">
+				<span class="galaxy-coords-abbrev" aria-hidden="true">S</span>
 				<input type="button" class="galaxy-coords-step" name="systemLeft" value="&#8592;" aria-label="{$LNG.gl_solar_system} −" onclick="galaxy_submit('systemLeft')">
 				<input type="text" inputmode="numeric" name="system" value="{$system}" size="5" maxlength="3" tabindex="2">
 				<input type="button" class="galaxy-coords-step" name="systemRight" value="&#8594;" aria-label="{$LNG.gl_solar_system} +" onclick="galaxy_submit('systemRight')">
@@ -22,7 +24,7 @@
 		<div class="galaxy-coords-submit">
 			<input type="submit" value="{$LNG.gl_show}">
 		</div>
-		<p class="galaxy-coords-warning">{$LNG.gl_fuel_warning}</p>
+		<p class="galaxy-coords-warning galaxy-coords-warning--desktop">{$LNG.gl_fuel_warning}</p>
 	</div>
 	</form>
 	{if $action == 'sendMissle'}
