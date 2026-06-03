@@ -1,150 +1,232 @@
 {block name="title" prepend}{$pageTitle}{/block}
 {block name="content"}
+<div class="battle-report">
 {if isset($Info)}
-<table>
-	<tr>
-		<td class="transparent" style="width:40%;font-size:22px;font-weight:bold;padding:10px 0 30px;color:{if $Raport.result == "a"}lime{elseif $Raport.result == "r"}red{else}white{/if}">{$Info.0}</td>
-		<td class="transparent" style="font-size:22px;font-weight:bold;padding:10px 0 30px;">VS</td>
-		<td class="transparent" style="width:40%;font-size:22px;font-weight:bold;padding:10px 0 30px;color:{if $Raport.result == "r"}lime{elseif $Raport.result == "a"}red{else}white{/if}">{$Info.1}</td>
-	</tr>
-</table>
+<div class="battle-report__players">
+	<div class="battle-report__player {if $Raport.result == "a"}battle-report__player--attacker{elseif $Raport.result == "r"}battle-report__player--defender{/if}">{$Info.0}</div>
+	<div class="battle-report__versus">VS</div>
+	<div class="battle-report__player {if $Raport.result == "r"}battle-report__player--attacker{elseif $Raport.result == "a"}battle-report__player--defender{/if}">{$Info.1}</div>
+</div>
 {/if}
-<div style="width:100%;text-align:center">
-{if $Raport.mode == 1}{$LNG.sys_destruc_title}{else}{$LNG.sys_attack_title}{/if} 
-{$Raport.time}:<br><br>
+
+<div class="battle-report__summary">
+	<div class="battle-report__summary-item">
+		<div class="battle-report__summary-label">{$LNG.sys_ship_type}</div>
+		<div class="battle-report__summary-value">{if $Raport.mode == 1}{$LNG.type_mission_9}{else}{$LNG.type_mission_1}{/if}</div>
+	</div>
+	<div class="battle-report__summary-item">
+		<div class="battle-report__summary-label">{$LNG.sys_br_time}</div>
+		<div class="battle-report__summary-value">{$Raport.time}</div>
+	</div>
+	<div class="battle-report__summary-item">
+		<div class="battle-report__summary-label">{$LNG.sys_br_result}</div>
+		<div class="battle-report__summary-value">
+			{if $Raport.result == "a"}
+				<span class="battle-report__result battle-report__result--attacker">{$LNG.sys_attacker_won}</span>
+			{elseif $Raport.result == "r"}
+				<span class="battle-report__result battle-report__result--defender">{$LNG.sys_defender_won}</span>
+			{else}
+				<span class="battle-report__result battle-report__result--draw">{$LNG.sys_both_won}</span>
+			{/if}
+		</div>
+	</div>
+	<div class="battle-report__summary-item">
+		<div class="battle-report__summary-label">{$LNG.sys_attacker_lostunits}</div>
+		<div class="battle-report__summary-value">{$Raport['units'][0]|number}</div>
+	</div>
+	<div class="battle-report__summary-item">
+		<div class="battle-report__summary-label">{$LNG.sys_defender_lostunits}</div>
+		<div class="battle-report__summary-value">{$Raport['units'][1]|number}</div>
+	</div>
+	<div class="battle-report__summary-item">
+		<div class="battle-report__summary-label">{$LNG.debree_field_1}</div>
+		<div class="battle-report__summary-value">{foreach $Raport.debris as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.debris|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach}</div>
+	</div>
+	{if $Raport.result == "a"}
+	<div class="battle-report__summary-item battle-report__summary-item--wide">
+		<div class="battle-report__summary-label">{$LNG.sys_stealed_ressources}</div>
+		<div class="battle-report__summary-value">
+			{if $Raport.stealUnprofitable}<span style="color:var(--color-notice)" title="{$LNG.sys_steal_unprofitable_tooltip}">{/if}
+			{foreach $Raport.steal as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.steal|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach}
+			{if $Raport.stealUnprofitable}</span>{/if}
+		</div>
+	</div>
+	{/if}
+</div>
+
+{if $Raport.rounds|count > 1}
+<div class="battle-report__round-tabs" role="tablist">
+	{foreach $Raport.rounds as $Round => $RoundInfo}
+	<button type="button" class="battle-report__round-tab{if $RoundInfo@first} is-active{/if}" data-round-tab="{$Round}">
+		{$LNG.sys_attack_round} {$Round+1}
+	</button>
+	{/foreach}
+</div>
+{/if}
+
+<div class="battle-report__rounds">
 {foreach $Raport.rounds as $Round => $RoundInfo}
-<table class="auto">
-	<tr>
+<section class="battle-report__round{if !$RoundInfo@first} is-hidden{/if}" data-round-panel="{$Round}">
+	<div class="battle-report__round-meta">{$LNG.sys_attack_round} {$Round+1}</div>
+	<div class="battle-report__table-wrap battle-report__table-wrap--players">
 		{foreach $RoundInfo.attacker as $Player}
 		{$PlayerInfo = $Raport.players[$Player.userID]}
-		<td class="transparent">
-			<table>
-				<tr>
-					<td>
-						{$LNG.sys_attack_attacker_pos} {$PlayerInfo.name} {if isset($Info)}([XX:XX:XX]){else}([{$PlayerInfo.koords[0]}:{$PlayerInfo.koords[1]}:{$PlayerInfo.koords[2]}]{if isset($PlayerInfo.koords[3])} ({$LNG["type_planet_short_{$PlayerInfo.koords[3]}"]}){/if}){/if}<br>
-						{$LNG.sys_ship_weapon} {$PlayerInfo.tech[0]}% - {$LNG.sys_ship_shield} {$PlayerInfo.tech[1]}% - {$LNG.sys_ship_armour} {$PlayerInfo.tech[2]}%
-						<table>
-						{if !empty($Player.ships)}
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_type}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$LNG.shortNames.{$ShipID}}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_count}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$ShipData[0]|number}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_weapon}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$ShipData[1]|number}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_shield}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$ShipData[2]|number}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_armour}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$ShipData[3]|number}</td>
-								{/foreach}
-							</tr>
-						{else}
-							<tr>
-								<td class="transparent">
-									<br>{$LNG.sys_destroyed}<br><br>
-								</td>
-							</tr>
-						{/if}
-						</table>
-					</td>
-				</tr>
-			</table>
-		</td>
+		<div class="battle-report__player-block">
+			<div class="battle-report__player-info">
+				<div class="battle-report__player-role">{$LNG.sys_attack_attacker_pos} {$PlayerInfo.name} {if isset($Info)}([XX:XX:XX]){else}([{$PlayerInfo.koords[0]}:{$PlayerInfo.koords[1]}:{$PlayerInfo.koords[2]}]{if isset($PlayerInfo.koords[3])} ({$LNG["type_planet_short_{$PlayerInfo.koords[3]}"]}){/if}){/if}</div>
+				<div class="battle-report__player-tech">{$LNG.sys_ship_weapon} {$PlayerInfo.tech[0]}% - {$LNG.sys_ship_shield} {$PlayerInfo.tech[1]}% - {$LNG.sys_ship_armour} {$PlayerInfo.tech[2]}%</div>
+			</div>
+			{if !empty($Player.ships)}
+			<div class="battle-report__ships-desktop">
+				<table class="battle-report__ships-table">
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_type}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$LNG.shortNames.{$ShipID}}</td>
+						{/foreach}
+					</tr>
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_count}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$ShipData[0]|number}</td>
+						{/foreach}
+					</tr>
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_weapon}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$ShipData[1]|number}</td>
+						{/foreach}
+					</tr>
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_shield}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$ShipData[2]|number}</td>
+						{/foreach}
+					</tr>
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_armour}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$ShipData[3]|number}</td>
+						{/foreach}
+					</tr>
+				</table>
+			</div>
+			<div class="battle-report__ships-mobile">
+				{foreach $Player.ships as $ShipID => $ShipData}
+				<div class="battle-report__ship-card">
+					<div class="battle-report__ship-card-title">{$LNG.shortNames.{$ShipID}}</div>
+					<dl class="battle-report__ship-stats">
+						<div class="battle-report__ship-stat">
+							<dt>{$LNG.sys_ship_count}</dt>
+							<dd>{$ShipData[0]|number}</dd>
+						</div>
+						<div class="battle-report__ship-stat">
+							<dt>{$LNG.sys_ship_weapon}</dt>
+							<dd>{$ShipData[1]|number}</dd>
+						</div>
+						<div class="battle-report__ship-stat">
+							<dt>{$LNG.sys_ship_shield}</dt>
+							<dd>{$ShipData[2]|number}</dd>
+						</div>
+						<div class="battle-report__ship-stat">
+							<dt>{$LNG.sys_ship_armour}</dt>
+							<dd>{$ShipData[3]|number}</dd>
+						</div>
+					</dl>
+				</div>
+				{/foreach}
+			</div>
+			{else}
+			<div class="battle-report__destroyed">{$LNG.sys_destroyed}</div>
+			{/if}
+		</div>
 		{/foreach}
-	</tr>
-</table>
-<table class="auto">
-	<tr>
+	</div>
+	<div class="battle-report__table-wrap battle-report__table-wrap--players">
 		{foreach $RoundInfo.defender as $Player}
 		{$PlayerInfo = $Raport.players[$Player.userID]}
-		<td class="transparent">
-			<table>
-				<tr>
-					<td>
-						{$LNG.sys_attack_defender_pos} {$PlayerInfo.name} {if isset($Info)}([XX:XX:XX]){else}([{$PlayerInfo.koords[0]}:{$PlayerInfo.koords[1]}:{$PlayerInfo.koords[2]}]{if isset($PlayerInfo.koords[3])} ({$LNG["type_planet_short_{$PlayerInfo.koords[3]}"]}){/if}){/if}<br>
-						{$LNG.sys_ship_weapon} {$PlayerInfo.tech[0]}% - {$LNG.sys_ship_shield} {$PlayerInfo.tech[1]}% - {$LNG.sys_ship_armour} {$PlayerInfo.tech[2]}%
-						<table>
-						{if !empty($Player.ships)}
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_type}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$LNG.shortNames.{$ShipID}}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_count}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$ShipData[0]|number}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_weapon}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$ShipData[1]|number}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_shield}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$ShipData[2]|number}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td class="transparent">{$LNG.sys_ship_armour}</td>
-								{foreach $Player.ships as $ShipID => $ShipData}
-								<td class="transparent">{$ShipData[3]|number}</td>
-								{/foreach}
-							</tr>
-						{else}
-							<tr>
-								<td class="transparent">
-									<br>{$LNG.sys_destroyed}<br><br>
-								</td>
-							</tr>
-						{/if}
-						</table>
-					</td>
-				</tr>
-			</table>
-		</td>
+		<div class="battle-report__player-block">
+			<div class="battle-report__player-info">
+				<div class="battle-report__player-role">{$LNG.sys_attack_defender_pos} {$PlayerInfo.name} {if isset($Info)}([XX:XX:XX]){else}([{$PlayerInfo.koords[0]}:{$PlayerInfo.koords[1]}:{$PlayerInfo.koords[2]}]{if isset($PlayerInfo.koords[3])} ({$LNG["type_planet_short_{$PlayerInfo.koords[3]}"]}){/if}){/if}</div>
+				<div class="battle-report__player-tech">{$LNG.sys_ship_weapon} {$PlayerInfo.tech[0]}% - {$LNG.sys_ship_shield} {$PlayerInfo.tech[1]}% - {$LNG.sys_ship_armour} {$PlayerInfo.tech[2]}%</div>
+			</div>
+			{if !empty($Player.ships)}
+			<div class="battle-report__ships-desktop">
+				<table class="battle-report__ships-table">
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_type}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$LNG.shortNames.{$ShipID}}</td>
+						{/foreach}
+					</tr>
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_count}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$ShipData[0]|number}</td>
+						{/foreach}
+					</tr>
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_weapon}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$ShipData[1]|number}</td>
+						{/foreach}
+					</tr>
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_shield}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$ShipData[2]|number}</td>
+						{/foreach}
+					</tr>
+					<tr>
+						<td class="transparent">{$LNG.sys_ship_armour}</td>
+						{foreach $Player.ships as $ShipID => $ShipData}
+						<td class="transparent">{$ShipData[3]|number}</td>
+						{/foreach}
+					</tr>
+				</table>
+			</div>
+			<div class="battle-report__ships-mobile">
+				{foreach $Player.ships as $ShipID => $ShipData}
+				<div class="battle-report__ship-card">
+					<div class="battle-report__ship-card-title">{$LNG.shortNames.{$ShipID}}</div>
+					<dl class="battle-report__ship-stats">
+						<div class="battle-report__ship-stat">
+							<dt>{$LNG.sys_ship_count}</dt>
+							<dd>{$ShipData[0]|number}</dd>
+						</div>
+						<div class="battle-report__ship-stat">
+							<dt>{$LNG.sys_ship_weapon}</dt>
+							<dd>{$ShipData[1]|number}</dd>
+						</div>
+						<div class="battle-report__ship-stat">
+							<dt>{$LNG.sys_ship_shield}</dt>
+							<dd>{$ShipData[2]|number}</dd>
+						</div>
+						<div class="battle-report__ship-stat">
+							<dt>{$LNG.sys_ship_armour}</dt>
+							<dd>{$ShipData[3]|number}</dd>
+						</div>
+					</dl>
+				</div>
+				{/foreach}
+			</div>
+			{else}
+			<div class="battle-report__destroyed">{$LNG.sys_destroyed}</div>
+			{/if}
+		</div>
 		{/foreach}
-	</tr>
-</table>
-{if !$RoundInfo@last}
-{$LNG.fleet_attack_1} {$RoundInfo.info[0]|number} {$LNG.fleet_attack_2} {$RoundInfo.info[3]|number} {$LNG.damage}<br>
-{$LNG.fleet_defs_1} {$RoundInfo.info[2]|number} {$LNG.fleet_defs_2} {$RoundInfo.info[1]|number} {$LNG.damage}<br><hr>
-{/if}
+	</div>
+	{if !$RoundInfo@last}
+	<div class="battle-report__round-damage">
+		{$LNG.fleet_attack_1} {$RoundInfo.info[0]|number} {$LNG.fleet_attack_2} {$RoundInfo.info[3]|number} {$LNG.damage}<br>
+		{$LNG.fleet_defs_1} {$RoundInfo.info[2]|number} {$LNG.fleet_defs_2} {$RoundInfo.info[1]|number} {$LNG.damage}
+	</div>
+	{/if}
+</section>
 {/foreach}
-<br><br>
-{if $Raport.result == "a"}
-{$LNG.sys_attacker_won}<br>
-{if $Raport.stealUnprofitable}<span style="color:var(--color-notice)" title="{$LNG.sys_steal_unprofitable_tooltip}">{/if}{$LNG.sys_stealed_ressources} {foreach $Raport.steal as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.steal|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach}{if $Raport.stealUnprofitable}</span>{/if}
-{elseif $Raport.result == "r"}
-{$LNG.sys_defender_won}
-{else}
-{$LNG.sys_both_won}
-{/if}
-<br><br>
-{$LNG.sys_attacker_lostunits} {$Raport['units'][0]|number} {$LNG.sys_units}<br>
-{$LNG.sys_defender_lostunits} {$Raport['units'][1]|number} {$LNG.sys_units}<br>
-{$LNG.debree_field_1} {foreach $Raport.debris as $elementID => $amount}{$amount|number} {$LNG.tech.$elementID}{if ($amount@index + 2) == $Raport.debris|count} {$LNG.sys_and} {elseif !$amount@last}, {/if}{/foreach} {$LNG.debree_field_2}<br><br>
+</div>
+
+<div class="battle-report__details">
 {if $Raport.mode == 1}
 	{* Destruction *}
 	{if $Raport.moon.moonDestroySuccess == -1}
@@ -183,4 +265,31 @@
 
 {$Raport.additionalInfo}
 </div>
+ </div>
+{block name="script" append}
+<script>
+$(function() {
+	var $tabs = $('.battle-report__round-tab');
+	var $panels = $('.battle-report__round');
+
+	if (!$tabs.length) {
+		return;
+	}
+
+	$panels.hide().addClass('is-hidden');
+	$panels.first().show().removeClass('is-hidden');
+	$tabs.removeClass('is-active');
+	$tabs.first().addClass('is-active');
+
+	$tabs.on('click', function(event) {
+		event.preventDefault();
+		var index = $(this).data('round-tab');
+		$tabs.removeClass('is-active');
+		$(this).addClass('is-active');
+		$panels.hide().addClass('is-hidden');
+		$panels.filter('[data-round-panel="' + index + '"]').show().removeClass('is-hidden');
+	});
+});
+</script>
+{/block}
 {/block} 
