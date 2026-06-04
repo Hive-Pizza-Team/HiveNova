@@ -669,14 +669,7 @@ class ResourceUpdate
 
 		Database::get()->update($sql, $params);
 
-		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && !empty($this->Builded)) {
-			\HiveNova\Core\AchievementService::recordBuildCompleted(
-				(int) $USER['id'],
-				$this->Builded,
-				$USER,
-				$PLANET
-			);
-		}
+		\HiveNova\Core\AchievementHooks::afterBuildCompleted($this->Builded, $USER, $PLANET);
 
 		$this->Builded	= array();
 

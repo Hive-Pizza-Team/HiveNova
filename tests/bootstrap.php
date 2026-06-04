@@ -29,6 +29,10 @@ if (!defined('MODULE_ACHIEVEMENTS')) {
     define('MODULE_ACHIEVEMENTS', 46);
 }
 
+if (!defined('DB_PREFIX')) {
+    define('DB_PREFIX', 'uni1_');
+}
+
 // Element-type bitmask constants (defined in includes/constants.php)
 if (!defined('ELEMENT_BUILD'))      define('ELEMENT_BUILD',      1);
 if (!defined('ELEMENT_TECH'))       define('ELEMENT_TECH',       2);

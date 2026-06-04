@@ -3,10 +3,13 @@
 use HiveNova\Core\DatabaseInterface;
 
 /**
- * In-memory stub for AchievementService unit tests.
+ * In-memory stub for AchievementService and related unit tests.
  */
 class FakeAchievementDatabase implements DatabaseInterface
 {
+    /** @var list<array<string, mixed>> */
+    public array $achievementDefinitions = [];
+
     public array $users = [];
 
     /** @var array<int, true> */
@@ -23,35 +26,94 @@ class FakeAchievementDatabase implements DatabaseInterface
     /** @var list<array<string, mixed>> */
     public array $messages = [];
 
+    /** @var list<array<string, mixed>> */
+    public array $pendingCelebrationRows = [];
+
+    /** @var list<array<string, mixed>> */
+    public array $badgeRows = [];
+
+    /** @var list<array{id: int}> */
+    public array $cronUserBatch = [];
+
+    public ?int $allianceRequestUserId = null;
+
     public bool $schemaReady = true;
+
+    public int $planetCount = 1;
+
+    public int $expeditionCount = 0;
+
+    /** @var array<string, int|string> */
+    public array $statPoints = [
+        'total_points' => 0,
+        'fleet_points' => 0,
+        'tech_points'  => 0,
+        'build_points' => 0,
+        'defs_points'  => 0,
+    ];
+
+    /** @var array<string, int> */
+    public array $planetMaxLevels = [];
+
+    /** @var list<string> */
+    public array $planetColumns = ['metal_mine', 'crystal_mine', 'solar_plant'];
+
+    public function __construct()
+    {
+        $this->achievementDefinitions = [[
+            'id'               => 1,
+            'key'              => 'combat_first_win',
+            'category'         => 'combat',
+            'name_key'         => 'ach_combat_first_win_name',
+            'desc_key'         => 'ach_combat_first_win_desc',
+            'trigger_type'     => 'combat_wins',
+            'trigger_params'   => '{"threshold":1}',
+            'reward_type'      => 'darkmatter',
+            'reward_amount'    => 100,
+            'points'           => 10,
+            'celebration_tier' => 'normal',
+            'hidden'           => 0,
+            'active'           => 1,
+            'universe'         => 1,
+        ]];
+    }
+
+    public function addAchievement(array $row): void
+    {
+        $this->achievementDefinitions[] = $row;
+    }
 
     public function select($qry, array $params = array())
     {
-        if (str_contains($qry, 'FROM %%ACHIEVEMENTS%%') && str_contains($qry, 'active = 1')) {
-            return [[
-                'id'               => 1,
-                'key'              => 'combat_first_win',
-                'category'         => 'combat',
-                'name_key'         => 'ach_combat_first_win_name',
-                'desc_key'         => 'ach_combat_first_win_desc',
-                'trigger_type'     => 'combat_wins',
-                'trigger_params'   => '{"threshold":1}',
-                'reward_type'      => 'darkmatter',
-                'reward_amount'    => 100,
-                'points'           => 10,
-                'celebration_tier' => 'normal',
-                'hidden'           => 0,
-                'active'           => 1,
-                'universe'         => 1,
-            ]];
+        if (str_contains($qry, 'FROM %%ACHIEVEMENTS%%') && str_contains($qry, 'active = 1') && !str_contains($qry, 'LEFT JOIN')) {
+            return $this->achievementDefinitions;
         }
 
-        if (str_contains($qry, 'USER_ACHIEVEMENTS%% ua') && str_contains($qry, 'celebrated = 0')) {
-            return [];
+        if (str_contains($qry, 'FROM %%ACHIEVEMENTS%% a') && str_contains($qry, 'LEFT JOIN')) {
+            $userId = (int) ($params[':userId'] ?? 0);
+            $rows = [];
+            foreach ($this->achievementDefinitions as $def) {
+                $aid = (int) $def['id'];
+                $key = $userId . ':' . $aid;
+                $rows[] = array_merge($def, [
+                    'progress'    => $this->progress[$key] ?? 0,
+                    'unlocked'    => isset($this->unlocked[$key]) ? 1 : 0,
+                    'unlocked_at' => isset($this->unlocked[$key]) ? TIMESTAMP : 0,
+                ]);
+            }
+            return $rows;
         }
 
-        if (str_contains($qry, 'FROM %%ACHIEVEMENTS%% a') && str_contains($qry, 'getAchievementsForUser')) {
-            return [];
+        if (str_contains($qry, 'celebrated = 0')) {
+            return $this->pendingCelebrationRows;
+        }
+
+        if (str_contains($qry, 'USER_ACHIEVEMENTS%% ua') && str_contains($qry, 'ORDER BY a.points')) {
+            return $this->badgeRows;
+        }
+
+        if (str_contains($qry, 'FROM %%USERS%% WHERE id >') && str_contains($qry, 'LIMIT')) {
+            return $this->cronUserBatch;
         }
 
         return [];
@@ -82,6 +144,30 @@ class FakeAchievementDatabase implements DatabaseInterface
             return $this->progress[$key] ?? 0;
         }
 
+        if (str_contains($qry, 'FROM %%STATPOINTS%%')) {
+            return $this->statPoints;
+        }
+
+        if (str_contains($qry, 'planet_type = 1') && str_contains($qry, 'COUNT(*)')) {
+            return $this->planetCount;
+        }
+
+        if (str_contains($qry, 'fleet_mission = 15')) {
+            return $this->expeditionCount;
+        }
+
+        if (str_contains($qry, 'MAX(') && str_contains($qry, 'FROM %%PLANETS%%')) {
+            return $this->planetMaxLevels;
+        }
+
+        if (str_contains($qry, 'COUNT(*) FROM %%ALLIANCE%%')) {
+            return 0;
+        }
+
+        if (str_contains($qry, 'ALLIANCE_REQUEST%%') && str_contains($qry, 'userId')) {
+            return $this->allianceRequestUserId;
+        }
+
         return null;
     }
 
@@ -101,12 +187,12 @@ class FakeAchievementDatabase implements DatabaseInterface
             $this->grants[] = $params;
         }
 
-        if (str_contains($qry, 'DM_TRANSACTIONS%%')) {
-            // tracked via grants path for DM
+        if (str_contains($qry, '%%MESSAGES%%')) {
+            $this->messages[] = $params;
         }
 
-        if (str_contains($qry, 'MESSAGES%%')) {
-            $this->messages[] = $params;
+        if (str_contains($qry, 'INSERT INTO %%ALLIANCE%%')) {
+            return true;
         }
 
         return true;
@@ -115,11 +201,19 @@ class FakeAchievementDatabase implements DatabaseInterface
     public function update($qry, array $params = array())
     {
         if (str_contains($qry, 'darkmatter')) {
-            $this->darkmatter += (float) $params[':amount'];
+            $this->darkmatter += (float) ($params[':amount'] ?? 0);
         }
 
         if (str_contains($qry, 'celebrated = 1')) {
-            // mark celebrated — no-op for stub
+            return true;
+        }
+
+        if (str_contains($qry, 'CRONJOBS%%')) {
+            return true;
+        }
+
+        if (str_contains($qry, 'UPDATE %%PLANETS%% as p,%%USERS%% as u')) {
+            return true;
         }
 
         return true;
@@ -128,8 +222,21 @@ class FakeAchievementDatabase implements DatabaseInterface
     public function delete($qry, array $params = array()) { return true; }
     public function replace($qry, array $params = array()) { return true; }
     public function query($qry) { return true; }
-    public function nativeQuery($qry) { return $this->schemaReady ? [['uni1_achievements']] : []; }
-    public function lastInsertId() { return 1; }
+
+    public function nativeQuery($qry)
+    {
+        if (str_contains($qry, 'SHOW TABLES')) {
+            return $this->schemaReady ? [['uni1_achievements']] : [];
+        }
+
+        if (str_contains($qry, 'SHOW COLUMNS FROM %%PLANETS%%')) {
+            return array_map(static fn (string $col) => ['Field' => $col], $this->planetColumns);
+        }
+
+        return [];
+    }
+
+    public function lastInsertId() { return 99; }
     public function rowCount() { return 1; }
     public function getQueryCounter() { return 0; }
     public function quote($str) { return "'" . addslashes((string) $str) . "'"; }

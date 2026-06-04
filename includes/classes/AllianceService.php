@@ -71,9 +71,7 @@ class AllianceService
             ':userId'     => $userId,
         ]);
 
-        if (isModuleAvailable(MODULE_ACHIEVEMENTS)) {
-            \HiveNova\Core\AchievementService::record((int) $userId, 'ally_joined', ['joined' => 1], true);
-        }
+        \HiveNova\Core\AchievementService::record((int) $userId, 'ally_joined', ['joined' => 1], true);
 
         return $allianceId;
     }
@@ -229,9 +227,7 @@ class AllianceService
         $sql = 'UPDATE %%ALLIANCE%% SET ally_members = (SELECT COUNT(*) FROM %%USERS%% WHERE ally_id = :allianceId) WHERE id = :allianceId;';
         $db->update($sql, [':allianceId' => $allyId]);
 
-        if (isModuleAvailable(MODULE_ACHIEVEMENTS)) {
-            \HiveNova\Core\AchievementService::record((int) $userId, 'ally_joined', ['joined' => 1], true);
-        }
+        \HiveNova\Core\AchievementService::record((int) $userId, 'ally_joined', ['joined' => 1], true);
     }
 
     /**

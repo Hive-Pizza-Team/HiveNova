@@ -14,7 +14,12 @@ class AchievementServiceDatabaseTest extends TestCase
 
     protected function setUp(): void
     {
+        AchievementService::resetSchemaReadyCache();
         AchievementService::get()->clearDefinitionCache();
+        \HiveNova\Core\Config::setInstance(new \HiveNova\Core\Config([
+            'uni' => 1,
+            'moduls' => implode(';', array_fill(0, 50, 1)),
+        ]), 1);
     }
 
     protected function tearDown(): void

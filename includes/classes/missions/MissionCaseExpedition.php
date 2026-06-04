@@ -690,14 +690,7 @@ HTML;
 		PlayerUtil::sendMessage($this->_fleet['fleet_owner'], 0, $LNG['sys_mess_tower'], 15,
 			$LNG['sys_expe_report'], $Message, $this->_fleet['fleet_end_stay'], NULL, 1, $this->_fleet['fleet_universe']);
 
-		if (isModuleAvailable(MODULE_ACHIEVEMENTS)) {
-			\HiveNova\Core\AchievementService::record(
-				(int) $this->_fleet['fleet_owner'],
-				'expedition_count',
-				[],
-				true
-			);
-		}
+		\HiveNova\Core\AchievementHooks::afterExpedition((int) $this->_fleet['fleet_owner']);
 
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();

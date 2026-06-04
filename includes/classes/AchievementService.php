@@ -179,11 +179,18 @@ class AchievementService
         return $unlocked;
     }
 
+    /** @var bool|null Cached schema readiness (reset in tests via resetSchemaReadyCache). */
+    private static ?bool $schemaReadyCache = null;
+
+    public static function resetSchemaReadyCache(): void
+    {
+        self::$schemaReadyCache = null;
+    }
+
     public static function isSchemaReady(): bool
     {
-        static $ready = null;
-        if ($ready !== null) {
-            return $ready;
+        if (self::$schemaReadyCache !== null) {
+            return self::$schemaReadyCache;
         }
 
         try {
@@ -193,18 +200,18 @@ class AchievementService
                 'dbVersion'
             );
             if ($version < 19) {
-                $ready = false;
+                self::$schemaReadyCache = false;
             } else {
                 $tables = Database::get()->nativeQuery(
                     "SHOW TABLES LIKE '" . DB_PREFIX . "achievements'"
                 );
-                $ready = !empty($tables);
+                self::$schemaReadyCache = !empty($tables);
             }
         } catch (\Throwable) {
-            $ready = false;
+            self::$schemaReadyCache = false;
         }
 
-        return $ready;
+        return self::$schemaReadyCache;
     }
 
     public function getPendingCelebrations(int $userId): array
