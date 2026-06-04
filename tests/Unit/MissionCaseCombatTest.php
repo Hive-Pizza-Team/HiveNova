@@ -2,6 +2,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Mission\MissionCaseAttack;
+use HiveNova\Mission\MissionCaseDestruction;
 use HiveNova\Mission\MissionCaseMIP;
 
 use PHPUnit\Framework\TestCase;
@@ -73,6 +74,21 @@ class MissionCaseCombatTest extends TestCase
 
         $this->assertNotEmpty($this->fake->achievement->messages);
         $this->assertNotEmpty($this->fake->fleetUpdates);
+    }
+
+    public function test_destruction_runs_combat_against_planet(): void
+    {
+        $fleet = missionFleetFixture([
+            'fleet_mission' => 9,
+            'fleet_array' => '202,50;',
+            'fleet_amount' => 50,
+            'fleet_target_owner' => 2,
+        ]);
+
+        $mission = new MissionCaseDestruction($fleet);
+        $mission->TargetEvent();
+
+        $this->assertNotEmpty($this->fake->achievement->messages);
     }
 
     public function test_mip_destroys_defenses_when_missiles_outnumber_interceptors(): void

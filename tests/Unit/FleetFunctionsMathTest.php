@@ -82,4 +82,17 @@ class FleetFunctionsMathTest extends TestCase
     {
         $this->assertEqualsWithDelta(1.0, FleetFunctions::GetGameSpeedFactor(), 0.001);
     }
+
+    public function testGetMissionDurationRespectsMinFleetTime(): void
+    {
+        $user = ['factor' => ['FlyTime' => 0]];
+        $duration = FleetFunctions::GetMissionDuration(1, 10000, 1000, 1, $user);
+        $this->assertGreaterThanOrEqual(MIN_FLEET_TIME, $duration);
+    }
+
+    public function testGetFleetMaxSpeedReturnsZeroForEmptyFleet(): void
+    {
+        $player = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+        $this->assertSame(0, FleetFunctions::GetFleetMaxSpeed([], $player));
+    }
 }
