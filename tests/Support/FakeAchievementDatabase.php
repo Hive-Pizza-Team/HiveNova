@@ -29,9 +29,6 @@ class FakeAchievementDatabase implements DatabaseInterface
     /** @var list<array<string, mixed>> */
     public array $pendingCelebrationRows = [];
 
-    /** @var list<array<string, mixed>> */
-    public array $badgeRows = [];
-
     /** @var list<array{id: int}> */
     public array $cronUserBatch = [];
 
@@ -125,8 +122,21 @@ class FakeAchievementDatabase implements DatabaseInterface
             return $this->pendingCelebrationRows;
         }
 
-        if (str_contains($qry, 'USER_ACHIEVEMENTS%% ua') && str_contains($qry, 'ORDER BY a.points')) {
-            return $this->badgeRows;
+        if (str_contains($qry, 'USER_ACHIEVEMENTS%% ua') && str_contains($qry, 'INNER JOIN %%ACHIEVEMENTS%%')) {
+            $userId = (int) ($params[':userId'] ?? 0);
+            if ($userId <= 0) {
+                return [];
+            }
+            $rows = [];
+            foreach ($this->achievementDefinitions as $def) {
+                $aid = (int) $def['id'];
+                $key = $userId . ':' . $aid;
+                if (!isset($this->unlocked[$key])) {
+                    continue;
+                }
+                $rows[] = ['key' => $def['key'], 'points' => (int) ($def['points'] ?? 0)];
+            }
+            return $rows;
         }
 
         if (str_contains($qry, 'FROM %%USERS%% WHERE id >') && str_contains($qry, 'LIMIT')) {
@@ -157,8 +167,9 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public function selectSingle($qry, array $params = array(), $field = false)
     {
-        if (str_contains($qry, 'dbVersion')) {
-            return $this->schemaReady ? 19 : 0;
+        if (str_contains($qry, 'dbVersion') || (str_contains($qry, '%%SYSTEM%%') && str_contains($qry, 'dbVersion'))) {
+            $version = $this->schemaReady ? 19 : 0;
+            return $field === 'dbVersion' ? $version : ['dbVersion' => $version];
         }
 
         if (str_contains($qry, 'SHOW TABLES')) {

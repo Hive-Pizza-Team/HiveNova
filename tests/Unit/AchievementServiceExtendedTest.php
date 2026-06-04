@@ -362,9 +362,7 @@ class AchievementServiceExtendedTest extends TestCase
     public function testPlayerUtilAchievementBadgesRendersHtml(): void
     {
         $fake = $this->useFake(new FakeAchievementDatabase());
-        $fake->badgeRows = [
-            ['key' => 'combat_first_win', 'points' => 10],
-        ];
+        $fake->unlocked['1:1'] = true;
         $html = PlayerUtil::getAchievementBadges(1, 3);
         $this->assertStringContainsString('achievement-badge', $html);
         $this->assertStringContainsString('🏅', $html);
