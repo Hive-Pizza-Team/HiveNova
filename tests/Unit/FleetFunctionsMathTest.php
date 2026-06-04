@@ -64,4 +64,22 @@ class FleetFunctionsMathTest extends TestCase
         ];
         $this->assertEquals(4, FleetFunctions::getExpeditionLimit($user));
     }
+
+    public function testCheckUserSpeedAcceptsAllowedValues(): void
+    {
+        $this->assertTrue(FleetFunctions::CheckUserSpeed(10));
+        $this->assertFalse(FleetFunctions::CheckUserSpeed(99));
+    }
+
+    public function testGetMaxFleetSlotsIncludesComputerTech(): void
+    {
+        $GLOBALS['resource'][108] = 'computer_tech';
+        $user = ['computer_tech' => 3, 'factor' => ['FleetSlots' => 1]];
+        $this->assertSame(5, FleetFunctions::GetMaxFleetSlots($user));
+    }
+
+    public function testGetGameSpeedFactorFromConfig(): void
+    {
+        $this->assertEqualsWithDelta(1.0, FleetFunctions::GetGameSpeedFactor(), 0.001);
+    }
 }
