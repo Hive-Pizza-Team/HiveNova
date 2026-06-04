@@ -69,6 +69,30 @@ trait FakePlanetQueryHandler
         return $row;
     }
 
+    public int $lastPlanetInsertId = 0;
+
+    /** @var list<array<string, mixed>> */
+    public array $planetInserts = [];
+
+    private function planetInsert(string $qry, array $params): bool
+    {
+        $this->lastPlanetInsertId = ($this->lastPlanetInsertId === 0)
+            ? 200
+            : $this->lastPlanetInsertId + 1;
+        $this->planetInserts[] = $params;
+        $this->planetRowsById[$this->lastPlanetInsertId] = [
+            'id' => $this->lastPlanetInsertId,
+            'id_owner' => (int) ($params[':userId'] ?? 0),
+            'galaxy' => (int) ($params[':galaxy'] ?? 0),
+            'system' => (int) ($params[':system'] ?? 0),
+            'planet' => (int) ($params[':position'] ?? 0),
+            'name' => $params[':name'] ?? 'Planet',
+        ];
+        $this->planetPositionCount = 1;
+
+        return true;
+    }
+
     private function planetUpdate(string $qry, array $params): bool
     {
         if (str_contains($qry, '%%PLANETS%%') && str_contains($qry, 'der_')) {

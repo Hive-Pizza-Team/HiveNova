@@ -236,4 +236,118 @@ class FleetFunctionsDatabaseTest extends TestCase
 
         $this->assertNotContains(8, $missions);
     }
+
+    public function testGetAvailableMissionsIncludesColonyOnEmptyPlanet(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 8,
+            'planettype' => 1,
+            'Ship' => [208 => 1],
+        ];
+        $planet = ['id_owner' => 0, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertContains(7, $missions);
+        $this->assertNotContains(3, $missions, 'Transport requires an occupied planet');
+    }
+
+    public function testGetAvailableMissionsExcludesColonyWithoutColonyShip(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 8,
+            'planettype' => 1,
+            'Ship' => [202 => 1],
+        ];
+        $planet = ['id_owner' => 0, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertNotContains(7, $missions);
+    }
+
+    public function testGetAvailableMissionsIncludesSpyWithOnlyProbe(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 5,
+            'planettype' => 1,
+            'Ship' => [210 => 1],
+        ];
+        $planet = ['id_owner' => 99, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertContains(6, $missions);
+    }
+
+    public function testGetAvailableMissionsExcludesSpyWhenFleetIsNotProbeOnly(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 5,
+            'planettype' => 1,
+            'Ship' => [210 => 1, 202 => 1],
+        ];
+        $planet = ['id_owner' => 99, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertNotContains(6, $missions);
+    }
+
+    public function testGetAvailableMissionsIncludesStationOnOwnPlanet(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 5,
+            'planettype' => 1,
+            'Ship' => [202 => 1],
+        ];
+        $planet = ['id_owner' => 1, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertContains(4, $missions);
+        $this->assertNotContains(1, $missions, 'Attack is not offered on your own planet');
+    }
+
+    public function testGetFleetMissionsHoldBuildsStayBlock(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 5,
+            'planettype' => 1,
+            'Ship' => [202 => 1],
+        ];
+        $planet = ['id_owner' => 99, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $result = FleetFunctions::GetFleetMissions($user, $misInfo, $planet);
+
+        $this->assertContains(5, $result['MissionSelector']);
+        $this->assertSame(
+            [1 => 1, 2 => 2, 4 => 4, 8 => 8, 12 => 12, 16 => 16, 32 => 32],
+            $result['StayBlock']
+        );
+        $this->assertFalse($result['Exchange']);
+    }
+
+    public function testGetFleetMissionsTradeSetsExchangeAndStayBlock(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 17,
+            'planettype' => 1,
+            'Ship' => [202 => 1],
+        ];
+        $planet = ['id_owner' => 0, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $result = FleetFunctions::GetFleetMissions($user, $misInfo, $planet);
+
+        $this->assertContains(16, $result['MissionSelector']);
+        $this->assertTrue($result['Exchange']);
+        $this->assertArrayHasKey(168, $result['StayBlock']);
+    }
 }

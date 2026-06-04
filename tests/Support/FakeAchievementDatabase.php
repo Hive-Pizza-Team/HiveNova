@@ -216,6 +216,10 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'FROM %%STATPOINTS%%')) {
+            if (str_contains($qry, 'MAX(') && str_contains($qry, 'total_rank')) {
+                $rank = (int) ($this->statPoints['total_rank'] ?? 0);
+                return $field === 'rank' ? $rank : ['rank' => $rank];
+            }
             if (str_contains($qry, 'MAX(') && ($field === 'total' || $field === false)) {
                 $total = (int) ($this->statPoints['total_points'] ?? 0);
                 return $field === 'total' ? $total : ['total' => $total];

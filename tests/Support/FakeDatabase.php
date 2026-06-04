@@ -20,6 +20,10 @@ class FakeDatabase implements DatabaseInterface
 
     public SessionDatabaseStub $session;
 
+    public int $lastUserInsertId = 0;
+
+    private ?string $lastInsertKind = null;
+
     public function __construct(
         ?FakeAchievementDatabase $achievement = null,
         ?SessionDatabaseStub $session = null,
@@ -94,6 +98,25 @@ class FakeDatabase implements DatabaseInterface
 
     public function insert($qry, array $params = [])
     {
+        if ($this->isPlanetQuery($qry) && str_contains($qry, 'INSERT')) {
+            $this->lastInsertKind = 'planet';
+
+            return $this->planetInsert($qry, $params);
+        }
+
+        if (str_contains($qry, '%%USERS%%') && str_contains($qry, 'INSERT')) {
+            $this->lastInsertKind = 'user';
+            $this->lastUserInsertId = ($this->lastUserInsertId === 0) ? 100 : $this->lastUserInsertId + 1;
+            $this->achievement->users[$this->lastUserInsertId] = [
+                'id' => $this->lastUserInsertId,
+                'username' => $params[':username'] ?? '',
+                'universe' => (int) ($params[':universe'] ?? 1),
+                'lang' => $params[':language'] ?? 'en',
+            ];
+
+            return true;
+        }
+
         return match ($this->route($qry)) {
             'fleet' => true,
             'session' => $this->session->insert($qry, $params),
@@ -149,7 +172,11 @@ class FakeDatabase implements DatabaseInterface
 
     public function lastInsertId()
     {
-        return $this->achievement->lastInsertId();
+        return match ($this->lastInsertKind) {
+            'user' => $this->lastUserInsertId,
+            'planet' => $this->lastPlanetInsertId,
+            default => $this->achievement->lastInsertId(),
+        };
     }
 
     public function rowCount()

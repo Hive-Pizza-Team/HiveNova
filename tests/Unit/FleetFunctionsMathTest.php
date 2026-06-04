@@ -67,7 +67,11 @@ class FleetFunctionsMathTest extends TestCase
 
     public function testCheckUserSpeedAcceptsAllowedValues(): void
     {
-        $this->assertTrue(FleetFunctions::CheckUserSpeed(10));
+        foreach (range(1, 10) as $speed) {
+            $this->assertTrue(FleetFunctions::CheckUserSpeed($speed), "Speed {$speed} should be allowed");
+        }
+        $this->assertFalse(FleetFunctions::CheckUserSpeed(0));
+        $this->assertFalse(FleetFunctions::CheckUserSpeed(11));
         $this->assertFalse(FleetFunctions::CheckUserSpeed(99));
     }
 
