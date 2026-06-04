@@ -199,6 +199,16 @@ class SessionTest extends TestCase
         $this->assertFalse($session->isValidSession());
     }
 
+    public function testInitReturnsTrueOnceThenFalse(): void
+    {
+        $ref = new ReflectionProperty(Session::class, 'iniSet');
+        $ref->setAccessible(true);
+        $ref->setValue(false);
+
+        $this->assertTrue(Session::init());
+        $this->assertFalse(Session::init());
+    }
+
     public function testIsValidSessionReturnsTrueWhenObjMissingButUserIdSetAndDbRowExists(): void
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
