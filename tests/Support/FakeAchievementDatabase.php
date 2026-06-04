@@ -130,8 +130,18 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'FROM %%USERS%%') && str_contains($qry, 'WHERE id')) {
-            $userId = (int) ($params[':userId'] ?? 0);
-            return $this->users[$userId] ?? null;
+            $userId = (int) ($params[':userId'] ?? $params[':id'] ?? 0);
+            $row = $this->users[$userId] ?? null;
+            if ($row === null) {
+                return $field === false ? null : false;
+            }
+            if ($field === 'lang') {
+                return $row['lang'] ?? 'en';
+            }
+            if ($field !== false) {
+                return $row[$field] ?? false;
+            }
+            return $row;
         }
 
         if (str_contains($qry, 'FROM %%USER_ACHIEVEMENTS%%') && str_contains($qry, 'SELECT 1')) {
@@ -145,6 +155,13 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'FROM %%STATPOINTS%%')) {
+            if (str_contains($qry, 'MAX(') && ($field === 'total' || $field === false)) {
+                $total = (int) ($this->statPoints['total_points'] ?? 0);
+                return $field === 'total' ? $total : ['total' => $total];
+            }
+            if ($field !== false) {
+                return $this->statPoints[$field] ?? false;
+            }
             return $this->statPoints;
         }
 

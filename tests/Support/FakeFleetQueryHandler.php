@@ -21,6 +21,9 @@ trait FakeFleetQueryHandler
 
     public int $bashLogCount = 0;
 
+    /** Expeditions in target system (LOG_FLEETS COUNT … AS total). */
+    public int $expeditionLogCount = 0;
+
     public int $acsGroupMemberCount = 0;
 
     /** @var list<array{sql: string, params: array}> */
@@ -32,7 +35,6 @@ trait FakeFleetQueryHandler
             || (str_contains($qry, '%%FLEETS%%') && !str_contains($qry, '%%LOG_FLEETS%%'))
             || str_contains($qry, '%%AKS%%')
             || str_contains($qry, '%%USERS_ACS%%')
-            || (str_contains($qry, '%%PLANETS%%') && str_contains($qry, 'id_owner'))
             || (str_contains($qry, '%%USERS%%') && str_contains($qry, 'onlinetime'));
     }
 
@@ -48,6 +50,10 @@ trait FakeFleetQueryHandler
         }
 
         if (str_contains($qry, '%%LOG_FLEETS%%') && str_contains($qry, 'COUNT(*)')) {
+            if (str_contains($qry, 'fleet_end_galaxy') || str_contains($qry, 'AS total')) {
+                $count = ['total' => $this->expeditionLogCount];
+                return $field === false ? $count : ($count[$field] ?? false);
+            }
             $count = ['state' => $this->bashLogCount];
             return $field === false ? $count : ($count[$field] ?? false);
         }
@@ -71,28 +77,10 @@ trait FakeFleetQueryHandler
             return $field === false ? $count : $count[$field];
         }
 
-        if (str_contains($qry, '%%PLANETS%%')) {
-            $planetId = (int) ($params[':id'] ?? 0);
-            $owner = $this->planetOwners[$planetId] ?? null;
-            if ($owner === null) {
-                return $field === false ? null : false;
-            }
-            if ($field === 'id_owner') {
-                return $owner;
-            }
-            $row = ['id_owner' => $owner];
-            return $field === false ? $row : ($row[$field] ?? false);
-        }
-
         if (str_contains($qry, '%%USERS%%') && str_contains($qry, 'onlinetime')) {
             $userId = (int) ($params[':id'] ?? 0);
             $time = $this->userOnlinetime[$userId] ?? TIMESTAMP;
             return $field === false ? ['onlinetime' => $time] : $time;
-        }
-
-        if (str_contains($qry, '%%LOG_FLEETS%%') && str_contains($qry, 'COUNT(*)')) {
-            $count = ['state' => $this->bashLogCount];
-            return $field === false ? $count : $count[$field];
         }
 
         return $field === false ? null : false;

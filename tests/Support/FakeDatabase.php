@@ -5,6 +5,7 @@ use HiveNova\Core\DatabaseInterface;
 require_once __DIR__ . '/FakeAchievementDatabase.php';
 require_once __DIR__ . '/SessionDatabaseStub.php';
 require_once __DIR__ . '/FakeFleetQueryHandler.php';
+require_once __DIR__ . '/FakePlanetQueryHandler.php';
 
 /**
  * Composed in-memory DatabaseInterface for unit tests.
@@ -13,6 +14,7 @@ require_once __DIR__ . '/FakeFleetQueryHandler.php';
 class FakeDatabase implements DatabaseInterface
 {
     use FakeFleetQueryHandler;
+    use FakePlanetQueryHandler;
 
     public FakeAchievementDatabase $achievement;
 
@@ -30,6 +32,9 @@ class FakeDatabase implements DatabaseInterface
     {
         if ($this->isFleetQuery($qry)) {
             return 'fleet';
+        }
+        if ($this->isPlanetQuery($qry)) {
+            return 'planet';
         }
         if (str_contains($qry, '%%SESSION%%')) {
             return 'session';
@@ -55,6 +60,7 @@ class FakeDatabase implements DatabaseInterface
     {
         return match ($this->route($qry)) {
             'fleet' => $this->fleetSelectSingle($qry, $params, $field),
+            'planet' => $this->planetSelectSingle($qry, $params, $field),
             'session' => $this->session->selectSingle($qry, $params, $field),
             default => $this->achievement->selectSingle($qry, $params, $field),
         };

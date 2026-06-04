@@ -172,7 +172,7 @@ class FleetFunctionsDatabaseTest extends TestCase
     public function testCheckBashReturnsFalseForInactiveTarget(): void
     {
         $GLOBALS['USER'] = ['id' => 1];
-        $this->fake->planetOwners[55] = 2;
+        $this->fake->planetRowsById[55] = ['id_owner' => 2];
         $this->fake->userOnlinetime[2] = TIMESTAMP - INACTIVE - 100;
 
         $this->assertFalse(FleetFunctions::CheckBash(55));
@@ -181,7 +181,7 @@ class FleetFunctionsDatabaseTest extends TestCase
     public function testCheckBashReturnsTrueWhenLogCountExceeded(): void
     {
         $GLOBALS['USER'] = ['id' => 1];
-        $this->fake->planetOwners[55] = 2;
+        $this->fake->planetRowsById[55] = ['id_owner' => 2];
         $this->fake->userOnlinetime[2] = TIMESTAMP;
         $this->fake->bashLogCount = 5;
 
