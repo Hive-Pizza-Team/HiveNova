@@ -187,4 +187,53 @@ class FleetFunctionsDatabaseTest extends TestCase
 
         $this->assertTrue(FleetFunctions::CheckBash(55));
     }
+
+    public function testSetACSTimeThrowsWhenAcsIdEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        FleetFunctions::setACSTime(60, 0);
+    }
+
+    public function testSetACSTimeUpdatesAksAndFleetTables(): void
+    {
+        $this->fake->aksRows[3] = ['ankunft' => TIMESTAMP + 1000];
+
+        $this->assertTrue(FleetFunctions::setACSTime(120, 3));
+        $this->assertCount(2, $this->fake->fleetUpdates);
+        $this->assertStringContainsString('%%AKS%%', $this->fake->fleetUpdates[0]['sql']);
+        $this->assertSame(120, $this->fake->fleetUpdates[0]['params'][':time']);
+        $this->assertStringContainsString('fleet_group', $this->fake->fleetUpdates[1]['sql']);
+    }
+
+    public function testGetAvailableMissionsIncludesRecycleOnDebrisField(): void
+    {
+        $GLOBALS['resource'][209] = 'recycler';
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 5,
+            'planettype' => 2,
+            'Ship' => [209 => 1],
+        ];
+        $planet = ['id_owner' => 0, 'der_metal' => 100, 'der_crystal' => 50];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertContains(8, $missions);
+    }
+
+    public function testGetAvailableMissionsExcludesRecycleWhenDebrisEmpty(): void
+    {
+        $GLOBALS['resource'][209] = 'recycler';
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 5,
+            'planettype' => 2,
+            'Ship' => [209 => 1],
+        ];
+        $planet = ['id_owner' => 0, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertNotContains(8, $missions);
+    }
 }
