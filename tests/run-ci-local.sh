@@ -4,18 +4,27 @@
 # Usage:
 #   ./tests/run-ci-local.sh               # unit tests + language check + smoke + bottom-nav check
 #   ./tests/run-ci-local.sh --integration # also run integration tests (requires MySQL)
+#   ./tests/run-ci-local.sh --coverage    # unit tests with Clover + tree % report
+#   ./tests/run-ci-local.sh --diff-cover  # after tests, PR diff-cover (needs pip install diff-cover)
 #
 # Prerequisites:
 #   - composer install
 #   - Local PHP dev server running on :8000  (php -S localhost:8000)
 #   - For --integration: MySQL with game installed (php tests/ci-install.php)
+#   - For --coverage: PHP with Xdebug coverage mode
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 INTEGRATION=0
+COVERAGE=0
+DIFF_COVER=0
 for arg in "$@"; do
-  [[ "$arg" == "--integration" ]] && INTEGRATION=1
+  case "$arg" in
+    --integration) INTEGRATION=1 ;;
+    --coverage)    COVERAGE=1 ;;
+    --diff-cover)  DIFF_COVER=1 ;;
+  esac
 done
 
 # Clear error.log so we only see errors from this run
@@ -51,7 +60,16 @@ check_error_log() {
 
 run "Language check"   php .github/scripts/check-language-files.php
 run "CSS check"        bash tests/check-css.sh
-run "Unit tests"       php vendor/bin/phpunit --configuration phpunit.xml
+
+if [[ $COVERAGE -eq 1 ]]; then
+  mkdir -p coverage
+  run "Unit tests (coverage)" bash -c \
+    'XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration phpunit.xml --coverage-clover coverage/clover.xml'
+  run "Tree coverage report" bash tests/check-tree-coverage.sh
+else
+  run "Unit tests"       php vendor/bin/phpunit --configuration phpunit.xml
+fi
+
 run "Smoke test"       php tests/smoke.php
 run "Bottom nav check" php tests/check-bottom-nav.php
 run "Error log empty"  check_error_log
@@ -59,6 +77,14 @@ run "Error log empty"  check_error_log
 if [[ $INTEGRATION -eq 1 ]]; then
   run "Integration tests" php vendor/bin/phpunit --configuration phpunit-integration.xml
   run "Error log empty (post-integration)" check_error_log
+fi
+
+if [[ $DIFF_COVER -eq 1 ]]; then
+  if [[ $COVERAGE -eq 1 ]]; then
+    run "Diff coverage" bash tests/check-diff-coverage.sh --from-artifacts
+  else
+    run "Diff coverage" bash tests/check-diff-coverage.sh
+  fi
 fi
 
 echo ""

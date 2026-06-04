@@ -11,3 +11,5 @@ includes/config.php
 includes/push.config.php
 includes/error.log
 .worktrees/
+swarm-state.md
+coverage/

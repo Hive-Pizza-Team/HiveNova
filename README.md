@@ -114,6 +114,8 @@ Run the full CI pipeline locally before pushing:
 ```bash
 ./tests/run-ci-local.sh               # unit tests + language check + smoke test
 ./tests/run-ci-local.sh --integration # also run integration tests (requires MySQL)
+./tests/run-ci-local.sh --coverage    # unit tests with Clover + tree % on includes/classes/
+./tests/run-ci-local.sh --diff-cover  # PR diff coverage gate (requires pip install diff-cover)
 ```
 
 This mirrors what GitHub Actions runs, including checking that `includes/error.log` is empty after the smoke test. Requires the local dev server to be running on `:8000`.
