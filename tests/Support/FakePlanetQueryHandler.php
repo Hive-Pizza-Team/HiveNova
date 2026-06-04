@@ -8,6 +8,9 @@ trait FakePlanetQueryHandler
     /** @var array<int, array<string, mixed>> */
     public array $planetRowsById = [];
 
+    /** Occupied coords for isPositionFree (COUNT … AS record). */
+    public int $planetPositionCount = 0;
+
     private function isPlanetQuery(string $qry): bool
     {
         return str_contains($qry, '%%PLANETS%%');
@@ -15,6 +18,11 @@ trait FakePlanetQueryHandler
 
     private function planetSelectSingle(string $qry, array $params, $field = false)
     {
+        if (str_contains($qry, 'COUNT(*)') && str_contains($qry, 'record')) {
+            $count = ['record' => $this->planetPositionCount];
+            return $field === false ? $count : ($count[$field] ?? false);
+        }
+
         $planetId = (int) ($params[':id'] ?? 0);
         $row = $this->planetRowsById[$planetId] ?? null;
         if ($row === null) {
