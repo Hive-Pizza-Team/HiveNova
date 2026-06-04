@@ -277,22 +277,27 @@ class AchievementService
         );
 
         $elementLevels = [];
-        if (!empty($reslist['build'])) {
+        if (!empty($reslist['build']) && is_array($resource)) {
+            static $planetColumns = null;
+            if ($planetColumns === null) {
+                $planetColumns = [];
+                foreach ($db->select('SHOW COLUMNS FROM %%PLANETS%%;') as $col) {
+                    $planetColumns[$col['Field']] = true;
+                }
+            }
+
             $cols = [];
             foreach ($reslist['build'] as $elementId) {
-                if (!empty($resource[$elementId])) {
-                    $cols[] = 'MAX(' . $resource[$elementId] . ') AS e' . $elementId;
+                $column = $resource[$elementId] ?? null;
+                if ($column !== null && $column !== '' && isset($planetColumns[$column])) {
+                    $cols[] = 'MAX(' . $column . ') AS e' . $elementId;
                 }
             }
             if ($cols !== []) {
-                try {
-                    $row = $db->selectSingle(
-                        'SELECT ' . implode(', ', $cols) . ' FROM %%PLANETS%% WHERE id_owner = :userId;',
-                        [':userId' => $userId]
-                    );
-                } catch (\Throwable $e) {
-                    $row = null;
-                }
+                $row = $db->selectSingle(
+                    'SELECT ' . implode(', ', $cols) . ' FROM %%PLANETS%% WHERE id_owner = :userId;',
+                    [':userId' => $userId]
+                );
                 if (is_array($row)) {
                     foreach ($reslist['build'] as $elementId) {
                         $elementLevels[$elementId] = (int) ($row['e' . $elementId] ?? 0);
