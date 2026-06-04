@@ -25,6 +25,7 @@ function missionFleetFixture(array $overrides = []): array
         'fleet_end_system' => 1,
         'fleet_end_planet' => 16,
         'fleet_end_type' => 1,
+        'start_time' => TIMESTAMP - 8000,
         'fleet_start_time' => TIMESTAMP - 7200,
         'fleet_end_stay' => TIMESTAMP + 1800,
         'fleet_end_time' => TIMESTAMP + 5400,

@@ -58,6 +58,12 @@ class FakeAchievementDatabase implements DatabaseInterface
     /** @var list<string> */
     public array $planetColumns = ['metal_mine', 'crystal_mine', 'solar_plant'];
 
+    /** @var list<array{uni: int}> */
+    public array $configUniverses = [['uni' => 1]];
+
+    /** @var list<string> */
+    public array $deleteLog = [];
+
     public function __construct()
     {
         $this->achievementDefinitions = [[
@@ -114,6 +120,14 @@ class FakeAchievementDatabase implements DatabaseInterface
 
         if (str_contains($qry, 'FROM %%USERS%% WHERE id >') && str_contains($qry, 'LIMIT')) {
             return $this->cronUserBatch;
+        }
+
+        if (str_contains($qry, 'FROM %%CONFIG%%') && str_contains($qry, 'uni')) {
+            return $this->configUniverses;
+        }
+
+        if (str_contains($qry, 'FROM %%USERS%%') && str_contains($qry, 'authlevel')) {
+            return [];
         }
 
         return [];
@@ -236,7 +250,11 @@ class FakeAchievementDatabase implements DatabaseInterface
         return true;
     }
 
-    public function delete($qry, array $params = array()) { return true; }
+    public function delete($qry, array $params = array())
+    {
+        $this->deleteLog[] = $qry;
+        return true;
+    }
     public function replace($qry, array $params = array()) { return true; }
     public function query($qry) { return true; }
 

@@ -23,7 +23,23 @@ trait FakePlanetQueryHandler
             return $field === false ? $count : ($count[$field] ?? false);
         }
 
-        $planetId = (int) ($params[':id'] ?? 0);
+        $planetId = (int) ($params[':planetId'] ?? $params[':id'] ?? 0);
+        if (str_contains($qry, 'der_') && str_contains($qry, 'AS total')) {
+            $row = $this->planetRowsById[$planetId] ?? [
+                'der_metal' => 0,
+                'der_crystal' => 0,
+                'total' => 0,
+            ];
+            if (!isset($row['total'])) {
+                $row['total'] = (int) ($row['der_metal'] ?? 0) + (int) ($row['der_crystal'] ?? 0);
+            }
+            if ($field === 'total') {
+                return $row['total'];
+            }
+            return $field === false ? $row : ($row[$field] ?? false);
+        }
+
+        $planetId = (int) ($params[':id'] ?? $planetId);
         $row = $this->planetRowsById[$planetId] ?? null;
         if ($row === null) {
             return $field === false ? null : false;
@@ -42,5 +58,26 @@ trait FakePlanetQueryHandler
         }
 
         return $row;
+    }
+
+    private function planetUpdate(string $qry, array $params): bool
+    {
+        if (str_contains($qry, '%%PLANETS%%') && str_contains($qry, 'der_')) {
+            $planetId = (int) ($params[':planetId'] ?? 0);
+            if (!isset($this->planetRowsById[$planetId])) {
+                $this->planetRowsById[$planetId] = ['id' => $planetId];
+            }
+            foreach (['metal', 'crystal', 'deuterium'] as $res) {
+                if (isset($params[':' . $res])) {
+                    $this->planetRowsById[$planetId]['der_' . $res] = max(
+                        0,
+                        (int) ($this->planetRowsById[$planetId]['der_' . $res] ?? 0) - (int) $params[':' . $res]
+                    );
+                }
+            }
+            return true;
+        }
+
+        return true;
     }
 }

@@ -50,7 +50,7 @@ class FakeDatabase implements DatabaseInterface
     public function select($qry, array $params = [])
     {
         return match ($this->route($qry)) {
-            'fleet' => [],
+            'fleet' => $this->fleetSelect($qry, $params),
             'session' => $this->session->select($qry, $params),
             default => $this->achievement->select($qry, $params),
         };
@@ -79,6 +79,7 @@ class FakeDatabase implements DatabaseInterface
     {
         return match ($this->route($qry)) {
             'fleet' => $this->fleetUpdate($qry, $params),
+            'planet' => $this->planetUpdate($qry, $params),
             'session' => $this->session->update($qry, $params),
             default => $this->achievement->update($qry, $params),
         };

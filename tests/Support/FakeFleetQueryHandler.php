@@ -29,6 +29,9 @@ trait FakeFleetQueryHandler
     /** @var list<array{sql: string, params: array}> */
     public array $fleetUpdates = [];
 
+    /** @var list<array<string, mixed>> */
+    public array $stayFleetsAtPlanet = [];
+
     private function isFleetQuery(string $qry): bool
     {
         return str_contains($qry, '%%LOG_FLEETS%%')
@@ -36,6 +39,29 @@ trait FakeFleetQueryHandler
             || str_contains($qry, '%%AKS%%')
             || str_contains($qry, '%%USERS_ACS%%')
             || (str_contains($qry, '%%USERS%%') && str_contains($qry, 'onlinetime'));
+    }
+
+    private function fleetSelect(string $qry, array $params): array
+    {
+        if (str_contains($qry, '%%FLEETS%%')
+            && str_contains($qry, 'fleet_end_id')
+            && str_contains($qry, 'fleet_mission')) {
+            $planetId = (int) ($params[':planetId'] ?? 0);
+            return array_values(array_filter(
+                $this->stayFleetsAtPlanet,
+                static fn (array $row): bool => (int) ($row['fleet_end_id'] ?? 0) === $planetId
+            ));
+        }
+
+        if (str_contains($qry, '%%FLEETS%%') && str_contains($qry, 'fleet_group')) {
+            $acsId = (int) ($params[':acsId'] ?? 0);
+            return array_values(array_filter(
+                $this->fleetRowsById,
+                static fn (array $row): bool => (int) ($row['fleet_group'] ?? 0) === $acsId
+            ));
+        }
+
+        return [];
     }
 
     private function fleetSelectSingle(string $qry, array $params, $field = false)
