@@ -267,7 +267,7 @@ class FleetFunctions
 			':acsId'	=> $acsId
 		), 'ankunft');
 
-		return empty($acsEndTime) ? $acsEndTime - TIMESTAMP : 0;
+		return !empty($acsEndTime) ? $acsEndTime - TIMESTAMP : 0;
 	}
 
 	public static function setACSTime($timeDifference, $acsId)

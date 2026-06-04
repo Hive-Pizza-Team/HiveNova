@@ -4,6 +4,7 @@ use HiveNova\Core\DatabaseInterface;
 
 require_once __DIR__ . '/FakeAchievementDatabase.php';
 require_once __DIR__ . '/SessionDatabaseStub.php';
+require_once __DIR__ . '/FakeFleetQueryHandler.php';
 
 /**
  * Composed in-memory DatabaseInterface for unit tests.
@@ -11,6 +12,8 @@ require_once __DIR__ . '/SessionDatabaseStub.php';
  */
 class FakeDatabase implements DatabaseInterface
 {
+    use FakeFleetQueryHandler;
+
     public FakeAchievementDatabase $achievement;
 
     public SessionDatabaseStub $session;
@@ -23,58 +26,92 @@ class FakeDatabase implements DatabaseInterface
         $this->session = $session ?? new SessionDatabaseStub();
     }
 
-    private function route(string $qry): SessionDatabaseStub|FakeAchievementDatabase
+    private function route(string $qry): string
     {
-        if (str_contains($qry, '%%SESSION%%')) {
-            return $this->session;
+        if ($this->isFleetQuery($qry)) {
+            return 'fleet';
         }
-
+        if (str_contains($qry, '%%SESSION%%')) {
+            return 'session';
+        }
         if (str_contains($qry, '%%USERS%%')
             && (str_contains($qry, 'id_planet') || str_contains($qry, 'bana'))) {
-            return $this->session;
+            return 'session';
         }
 
-        return $this->achievement;
+        return 'achievement';
     }
 
     public function select($qry, array $params = [])
     {
-        return $this->route($qry)->select($qry, $params);
+        return match ($this->route($qry)) {
+            'fleet' => [],
+            'session' => $this->session->select($qry, $params),
+            default => $this->achievement->select($qry, $params),
+        };
     }
 
     public function selectSingle($qry, array $params = [], $field = false)
     {
-        return $this->route($qry)->selectSingle($qry, $params, $field);
+        return match ($this->route($qry)) {
+            'fleet' => $this->fleetSelectSingle($qry, $params, $field),
+            'session' => $this->session->selectSingle($qry, $params, $field),
+            default => $this->achievement->selectSingle($qry, $params, $field),
+        };
     }
 
     public function insert($qry, array $params = [])
     {
-        return $this->route($qry)->insert($qry, $params);
+        return match ($this->route($qry)) {
+            'fleet' => true,
+            'session' => $this->session->insert($qry, $params),
+            default => $this->achievement->insert($qry, $params),
+        };
     }
 
     public function update($qry, array $params = [])
     {
-        return $this->route($qry)->update($qry, $params);
+        return match ($this->route($qry)) {
+            'fleet' => $this->fleetUpdate($qry, $params),
+            'session' => $this->session->update($qry, $params),
+            default => $this->achievement->update($qry, $params),
+        };
     }
 
     public function delete($qry, array $params = [])
     {
-        return $this->route($qry)->delete($qry, $params);
+        return match ($this->route($qry)) {
+            'fleet' => $this->fleetDelete($qry, $params),
+            'session' => $this->session->delete($qry, $params),
+            default => $this->achievement->delete($qry, $params),
+        };
     }
 
     public function replace($qry, array $params = [])
     {
-        return $this->route($qry)->replace($qry, $params);
+        return match ($this->route($qry)) {
+            'fleet' => true,
+            'session' => $this->session->replace($qry, $params),
+            default => $this->achievement->replace($qry, $params),
+        };
     }
 
     public function query($qry)
     {
-        return $this->route($qry)->query($qry);
+        return match ($this->route($qry)) {
+            'fleet' => true,
+            'session' => $this->session->query($qry),
+            default => $this->achievement->query($qry),
+        };
     }
 
     public function nativeQuery($qry)
     {
-        return $this->route($qry)->nativeQuery($qry);
+        return match ($this->route($qry)) {
+            'fleet' => [],
+            'session' => $this->session->nativeQuery($qry),
+            default => $this->achievement->nativeQuery($qry),
+        };
     }
 
     public function lastInsertId()
