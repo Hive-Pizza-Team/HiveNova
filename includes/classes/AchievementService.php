@@ -281,7 +281,7 @@ class AchievementService
             static $planetColumns = null;
             if ($planetColumns === null) {
                 $planetColumns = [];
-                foreach ($db->select('SHOW COLUMNS FROM %%PLANETS%%;') as $col) {
+                foreach ($db->nativeQuery('SHOW COLUMNS FROM %%PLANETS%%') as $col) {
                     $planetColumns[$col['Field']] = true;
                 }
             }
