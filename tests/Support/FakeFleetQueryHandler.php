@@ -45,6 +45,17 @@ trait FakeFleetQueryHandler
     {
         if (str_contains($qry, '%%FLEETS%%')
             && str_contains($qry, 'fleet_end_id')
+            && str_contains($qry, 'fleet_mission')
+            && str_contains($qry, ':mission')) {
+            $planetId = (int) ($params[':fleetEndId'] ?? 0);
+            return array_values(array_filter(
+                $this->stayFleetsAtPlanet,
+                static fn (array $row): bool => (int) ($row['fleet_end_id'] ?? 0) === $planetId
+            ));
+        }
+
+        if (str_contains($qry, '%%FLEETS%%')
+            && str_contains($qry, 'fleet_end_id')
             && str_contains($qry, 'fleet_mission')) {
             $planetId = (int) ($params[':planetId'] ?? 0);
             return array_values(array_filter(

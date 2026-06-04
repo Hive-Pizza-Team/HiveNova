@@ -258,6 +258,14 @@ class FakeAchievementDatabase implements DatabaseInterface
             $this->messages[] = $params;
         }
 
+        if (str_contains($qry, '%%RW%%')) {
+            return true;
+        }
+
+        if (str_contains($qry, '%%LOG%%')) {
+            return true;
+        }
+
         if (str_contains($qry, 'INSERT INTO %%ALLIANCE%%')) {
             return true;
         }

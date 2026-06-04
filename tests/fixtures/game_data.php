@@ -36,6 +36,9 @@ $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
 
 	202 => 'light_fighter',
 	210 => 'bomber',
+	401 => 'rocket_launcher',
+	402 => 'light_laser',
+	502 => 'interplanetary_missile',
 
 	901 => 'metal',
 	902 => 'crystal',

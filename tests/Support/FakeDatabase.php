@@ -58,12 +58,38 @@ class FakeDatabase implements DatabaseInterface
 
     public function selectSingle($qry, array $params = [], $field = false)
     {
+        if ($this->isPlanetQuery($qry) && str_contains($qry, 'INNER JOIN %%USERS%%')) {
+            return $this->planetUserJoinSelectSingle($qry, $params, $field);
+        }
+
         return match ($this->route($qry)) {
             'fleet' => $this->fleetSelectSingle($qry, $params, $field),
             'planet' => $this->planetSelectSingle($qry, $params, $field),
             'session' => $this->session->selectSingle($qry, $params, $field),
             default => $this->achievement->selectSingle($qry, $params, $field),
         };
+    }
+
+    private function planetUserJoinSelectSingle(string $qry, array $params, $field = false)
+    {
+        $planetId = (int) ($params[':planetId'] ?? 0);
+        $planet = $this->planetRowsById[$planetId] ?? null;
+        if ($planet === null) {
+            return $field === false ? null : false;
+        }
+
+        $ownerId = (int) ($planet['id_owner'] ?? 0);
+        $user = $this->achievement->users[$ownerId] ?? [];
+        $row = array_merge($planet, [
+            'lang' => $user['lang'] ?? 'en',
+            'shield_tech' => $user['shielding_tech'] ?? 0,
+        ]);
+
+        if ($field !== false) {
+            return $row[$field] ?? false;
+        }
+
+        return $row;
     }
 
     public function insert($qry, array $params = [])
