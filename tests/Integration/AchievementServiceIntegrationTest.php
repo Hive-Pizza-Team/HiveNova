@@ -58,10 +58,10 @@ class AchievementServiceIntegrationTest extends IntegrationTestCase
 
         $username = self::makeUniqueUsername('ach_prog');
         [$userId] = self::createTestPlayer($username, 3, 1, 5);
-        $this->resetUserAchievements($userId, self::$wins10Id);
+        $this->resetUserAchievements($userId, self::$firstWinId, self::$wins10Id);
 
         Database::get()->update(
-            'UPDATE %%USERS%% SET wons = 3 WHERE id = :userId;',
+            'UPDATE %%USERS%% SET wons = 0 WHERE id = :userId;',
             [':userId' => $userId]
         );
 
@@ -76,7 +76,7 @@ class AchievementServiceIntegrationTest extends IntegrationTestCase
             [':userId' => $userId, ':achievementId' => self::$wins10Id],
             'progress'
         );
-        $this->assertSame(3, $progress);
+        $this->assertSame(0, $progress);
 
         $this->assertFalse((bool) Database::get()->selectSingle(
             'SELECT 1 FROM %%USER_ACHIEVEMENTS%% WHERE user_id = :userId AND achievement_id = :achievementId;',

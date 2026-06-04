@@ -14,7 +14,6 @@ class AchievementServiceDatabaseTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->previousDb = Database::get();
         AchievementService::get()->clearDefinitionCache();
     }
 
@@ -28,11 +27,18 @@ class AchievementServiceDatabaseTest extends TestCase
             $prop->setAccessible(true);
             $prop->setValue(null);
         }
+        $this->previousDb = null;
         AchievementService::get()->clearDefinitionCache();
     }
 
     private function useFakeDb(FakeAchievementDatabase $fake): void
     {
+        if ($this->previousDb === null) {
+            $ref = new ReflectionClass(Database::class);
+            $prop = $ref->getProperty('instance');
+            $prop->setAccessible(true);
+            $this->previousDb = $prop->getValue();
+        }
         Database::setInstance($fake);
         AchievementService::get()->clearDefinitionCache();
     }

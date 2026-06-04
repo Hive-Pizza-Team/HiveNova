@@ -285,10 +285,14 @@ class AchievementService
                 }
             }
             if ($cols !== []) {
-                $row = $db->selectSingle(
-                    'SELECT ' . implode(', ', $cols) . ' FROM %%PLANETS%% WHERE id_owner = :userId;',
-                    [':userId' => $userId]
-                );
+                try {
+                    $row = $db->selectSingle(
+                        'SELECT ' . implode(', ', $cols) . ' FROM %%PLANETS%% WHERE id_owner = :userId;',
+                        [':userId' => $userId]
+                    );
+                } catch (\Throwable $e) {
+                    $row = null;
+                }
                 if (is_array($row)) {
                     foreach ($reslist['build'] as $elementId) {
                         $elementLevels[$elementId] = (int) ($row['e' . $elementId] ?? 0);
