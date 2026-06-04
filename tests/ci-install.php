@@ -130,7 +130,7 @@ $config->lang             = 'en';
 $config->OverviewNewsText = 'Welcome to HiveNova ' . $installVersion;
 $config->uni_name         = 'Universe ' . \HiveNova\Core\Universe::current();
 $config->close_reason     = 'Maintenance';
-$config->moduls           = implode(';', array_fill(0, MODULE_AMOUNT - 1, 1));
+$config->moduls           = implode(';', array_fill(0, MODULE_AMOUNT, 1));
 $config->save();
 
 echo "OK\n";

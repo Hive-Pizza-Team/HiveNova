@@ -669,6 +669,8 @@ class ResourceUpdate
 
 		Database::get()->update($sql, $params);
 
+		\HiveNova\Core\AchievementHooks::afterBuildCompleted($this->Builded, $USER, $PLANET);
+
 		$this->Builded	= array();
 
 		return array($USER, $PLANET);

@@ -164,6 +164,37 @@ class PlayerUtil
 		return '⛓️‍💥';
 	}
 
+	static public function getAchievementBadges(int $userId, int $limit = 5): string
+	{
+		if (!isModuleAvailable(MODULE_ACHIEVEMENTS) || !\HiveNova\Core\AchievementService::isSchemaReady()) {
+			return '';
+		}
+
+		try {
+			$rows = \HiveNova\Core\Database::get()->select(
+			'SELECT a.`key`, a.points FROM %%USER_ACHIEVEMENTS%% ua
+			INNER JOIN %%ACHIEVEMENTS%% a ON a.id = ua.achievement_id
+			WHERE ua.user_id = :userId
+			ORDER BY a.points DESC, ua.unlocked_at DESC
+			LIMIT ' . (int) $limit . ';',
+			[':userId' => $userId]
+			);
+		} catch (\Throwable) {
+			return '';
+		}
+
+		if (empty($rows)) {
+			return '';
+		}
+
+		$icons = [];
+		foreach ($rows as $row) {
+			$icons[] = '<span class="achievement-badge" title="' . htmlspecialchars((string) $row['key']) . '">🏅</span>';
+		}
+
+		return implode(' ', $icons);
+	}
+
 	static public function isMailValid($address) {
 		
 		if(function_exists('filter_var')) {

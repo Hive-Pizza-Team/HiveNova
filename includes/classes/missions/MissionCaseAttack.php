@@ -601,6 +601,8 @@ HTML;
 			':destroyedUnits'	=> $combatResult['unitLost']['attacker']
 		));
 
+		\HiveNova\Core\AchievementHooks::afterCombat($userAttack, $userDefend, $attackStatus, $defendStatus);
+
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
 	}

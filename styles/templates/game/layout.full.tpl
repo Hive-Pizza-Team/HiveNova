@@ -72,6 +72,20 @@
 	</div>
 </div>
 
+<div id="achievement-celebration-root" class="achievement-celebration" aria-hidden="true">
+	<div class="achievement-celebration__backdrop"></div>
+	<canvas class="achievement-celebration__canvas"></canvas>
+	<div class="achievement-celebration__sparkles"></div>
+	<div class="achievement-celebration__modal">
+		<div class="achievement-celebration__tier"></div>
+		<h2 class="achievement-celebration__title">{$LNG.ach_celebration_unlocked}</h2>
+		<div class="achievement-celebration__name"></div>
+		<p class="achievement-celebration__desc"></p>
+		<p class="achievement-celebration__reward"></p>
+		<p class="achievement-celebration__more"></p>
+		<button type="button" class="achievement-celebration__btn">{$LNG.ach_celebration_continue}</button>
+	</div>
+</div>
 {include file="main.bottomnav.tpl"}
 
 </body>

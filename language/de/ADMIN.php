@@ -1135,6 +1135,7 @@ $LNG['modul_8'] = 'DM-Bank';
 $LNG['modul_9'] = 'Flotte';
 $LNG['modul_10'] = 'Flotte - Handler';
 $LNG['modul_41'] = 'Flotten Shourtcuts';
+$LNG['modul_46'] = 'Achievements';
 $LNG['modul_11'] = 'Galaxie';
 $LNG['modul_12'] = 'Hall of Fame';
 $LNG['modul_13'] = 'Händler';

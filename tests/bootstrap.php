@@ -2,6 +2,17 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__) . '/');
+}
+
+if (!defined('CACHE_PATH')) {
+    define('CACHE_PATH', sys_get_temp_dir() . '/hivenova-phpunit-cache/');
+}
+if (!is_dir(CACHE_PATH)) {
+    mkdir(CACHE_PATH, 0777, true);
+}
+
 // Constants required by some classes
 if (!defined('UTF8_SUPPORT'))  define('UTF8_SUPPORT',  true);
 if (!defined('TIMESTAMP'))     define('TIMESTAMP',      time());
@@ -13,6 +24,14 @@ if (!defined('INACTIVE_LONG')) define('INACTIVE_LONG',  28 * 86400);
 if (!defined('ROOT_UNI'))      define('ROOT_UNI',        1);
 
 require_once __DIR__ . '/../includes/GeneralFunctions.php';
+
+if (!defined('MODULE_ACHIEVEMENTS')) {
+    define('MODULE_ACHIEVEMENTS', 46);
+}
+
+if (!defined('DB_PREFIX')) {
+    define('DB_PREFIX', 'uni1_');
+}
 
 // Element-type bitmask constants (defined in includes/constants.php)
 if (!defined('ELEMENT_BUILD'))      define('ELEMENT_BUILD',      1);

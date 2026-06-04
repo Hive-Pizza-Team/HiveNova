@@ -21,6 +21,7 @@
     {if !empty($hasBoard)}<li><a href="game.php?page=board" target="forum">{$LNG.lm_forums}</a></li>{/if}
     {if $smarty.const.MODULE_STATISTICS|isModuleAvailable}<li><a href="game.php?page=statistics">{$LNG.lm_statistics}</a></li>{/if}
     {if $smarty.const.MODULE_RECORDS|isModuleAvailable}<li><a href="game.php?page=records">{$LNG.lm_records}</a></li>{/if}
+    {if $smarty.const.MODULE_ACHIEVEMENTS|isModuleAvailable}<li><a href="game.php?page=achievements">{$LNG.lm_achievements}</a></li>{/if}
     {if $smarty.const.MODULE_BATTLEHALL|isModuleAvailable}<li><a href="game.php?page=battleHall">{$LNG.lm_topkb}</a></li>{/if}
     {if $smarty.const.MODULE_SEARCH|isModuleAvailable}<li><a href="game.php?page=search">{$LNG.lm_search}</a></li>{/if}
     <!--{if $smarty.const.MODULE_CHAT|isModuleAvailable}<li><a href="game.php?page=chat">{$LNG.lm_chat}</a></li>{/if}-->

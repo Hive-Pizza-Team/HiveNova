@@ -15,9 +15,11 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Log;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
@@ -170,7 +172,42 @@ function ShowQuickEditorPage()
 				$SQL	.= "`authattack` = '".($UserData['authlevel'] != AUTH_USR && HTTP::_GP('authattack', '') == 'on' ? $UserData['authlevel'] : 0)."' ";
 				$SQL	.= "WHERE `id` = '".$id."' AND `universe` = '".Universe::getEmulated()."';";
 				$GLOBALS['DATABASE']->query($SQL);
-				
+
+				$newDm = max(HTTP::_GP('darkmatter', 0), 0);
+				$oldDm = (float) $UserData['darkmatter'];
+				$deltaDm = $newDm - $oldDm;
+				if ($GLOBALS['DATABASE']->affectedRows() > 0 && $deltaDm != 0.0) {
+					$adminId = (int) Session::load()->userId;
+					$memo = 'quick_editor_set uni='.(int) Universe::getEmulated().' admin='.$adminId;
+					if ($deltaDm > 0) {
+						Database::get()->insert(
+							'INSERT INTO %%DM_TRANSACTIONS%% SET
+								timestamp = NOW(),
+								user_id = :user_id,
+								amount_received = :amount_received,
+								memo = :memo;',
+							[
+								':user_id' => $id,
+								':amount_received' => abs($deltaDm),
+								':memo' => $memo,
+							]
+						);
+					} else {
+						Database::get()->insert(
+							'INSERT INTO %%DM_TRANSACTIONS%% SET
+								timestamp = NOW(),
+								user_id = :user_id,
+								amount_spent = :amount_spent,
+								memo = :memo;',
+							[
+								':user_id' => $id,
+								':amount_spent' => abs($deltaDm),
+								':memo' => $memo,
+							]
+						);
+					}
+				}
+
 				$old = array();
 				$new = array();
 				$multi	=  HTTP::_GP('multi', 0);

@@ -86,6 +86,10 @@ switch($page)
 		include_once('includes/pages/adm/ShowModulePage.php');
 		ShowModulePage();
 	break;
+	case 'achievements':
+		include_once('includes/pages/adm/ShowAchievementsPage.php');
+		ShowAchievementsPage();
+	break;
 	case 'statsconf':
 		include_once('includes/pages/adm/ShowStatsPage.php');
 		ShowStatsPage();
