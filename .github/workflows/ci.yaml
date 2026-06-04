@@ -142,9 +142,14 @@ jobs:
       - name: Download coverage reports
         uses: actions/download-artifact@v4
         with:
-          pattern: "*-coverage"
-          merge-multiple: true
-          path: .
+          name: unit-coverage
+          path: coverage
+      - uses: actions/download-artifact@v4
+        with:
+          name: integration-coverage
+          path: coverage
+      - name: List downloaded coverage files
+        run: find coverage -type f | sort
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

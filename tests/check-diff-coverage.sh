@@ -52,6 +52,15 @@ if [[ "$FROM_ARTIFACTS" -eq 0 ]]; then
   fi
 fi
 
+# GitHub artifact layout may flatten paths (clover.xml at coverage/ root).
+if [[ ! -f coverage/clover.xml ]] && [[ -f coverage/coverage/clover.xml ]]; then
+  mv coverage/coverage/clover.xml coverage/clover.xml
+  rmdir coverage/coverage 2>/dev/null || true
+fi
+if [[ ! -f coverage/integration-clover.xml ]] && [[ -f coverage/coverage/integration-clover.xml ]]; then
+  mv coverage/coverage/integration-clover.xml coverage/integration-clover.xml
+fi
+
 if [[ ! -f coverage/clover.xml ]]; then
   echo "=== coverage/ contents ==="
   find coverage -type f 2>/dev/null || echo "(no coverage directory)"
