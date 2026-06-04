@@ -5,6 +5,9 @@ use HiveNova\Core\DatabaseInterface;
 
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/../Support/FakeDatabase.php';
+require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+
 /**
  * Contract tests for DatabaseInterface and Database.
  *
@@ -18,6 +21,88 @@ use PHPUnit\Framework\TestCase;
  */
 class DatabaseTest extends TestCase
 {
+    use SwapDatabaseInstance;
+
+    protected function tearDown(): void
+    {
+        $this->restoreDatabaseInstance();
+        parent::tearDown();
+    }
+
+    // -----------------------------------------------------------------------
+    // FakeDatabase + Database::setInstance (behavioral)
+    // -----------------------------------------------------------------------
+
+    public function testSetInstanceIsReturnedByGet(): void
+    {
+        $fake = new FakeDatabase();
+        $this->swapDatabaseInstance($fake);
+
+        $this->assertSame($fake, Database::get());
+    }
+
+    public function testFakeDatabaseRoutesSessionSelectSingle(): void
+    {
+        $fake = new FakeDatabase();
+        $fake->session->sessionRows['sid-1'] = ['userID' => 7, 'lastonline' => TIMESTAMP];
+        $this->swapDatabaseInstance($fake);
+
+        $row = Database::get()->selectSingle(
+            'SELECT userID, lastonline FROM %%SESSION%% WHERE sessionID = :sessionId',
+            [':sessionId' => 'sid-1'],
+        );
+
+        $this->assertSame(7, (int) $row['userID']);
+    }
+
+    public function testFakeDatabaseRoutesAchievementSelect(): void
+    {
+        $fake = new FakeDatabase();
+        $fake->achievement->addAchievement([
+            'id' => 99, 'key' => 'test', 'category' => 'x', 'name_key' => 'n', 'desc_key' => 'd',
+            'trigger_type' => 'combat_wins', 'trigger_params' => '{}', 'reward_type' => 'none',
+            'reward_amount' => 0, 'points' => 1, 'celebration_tier' => 'normal', 'hidden' => 0,
+            'active' => 1, 'universe' => 1,
+        ]);
+        $this->swapDatabaseInstance($fake);
+
+        $rows = Database::get()->select(
+            'SELECT * FROM %%ACHIEVEMENTS%% WHERE active = 1',
+        );
+
+        $this->assertCount(2, $rows);
+        $this->assertSame(99, (int) $rows[1]['id']);
+    }
+
+    public function testFakeDatabaseInsertUnlocksAchievement(): void
+    {
+        $fake = new FakeDatabase();
+        $this->swapDatabaseInstance($fake);
+
+        Database::get()->insert(
+            'INSERT INTO %%USER_ACHIEVEMENTS%% SET userId = :userId, achievementId = :achievementId',
+            [':userId' => 5, ':achievementId' => 1],
+        );
+
+        $key = '5:1';
+        $this->assertTrue($fake->achievement->unlocked[$key] ?? false);
+    }
+
+    public function testFakeDatabaseSessionFieldAccessViaSessionProperty(): void
+    {
+        $fake = new FakeDatabase();
+        $fake->session->sessionCount = 3;
+        $this->swapDatabaseInstance($fake);
+
+        $count = Database::get()->selectSingle(
+            'SELECT COUNT(*) as record FROM %%SESSION%%',
+            [],
+            'record',
+        );
+
+        $this->assertSame(3, (int) $count);
+    }
+
     // -----------------------------------------------------------------------
     // Interface shape
     // -----------------------------------------------------------------------

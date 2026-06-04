@@ -4,7 +4,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Session;
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../Support/SessionDatabaseStub.php';
+require_once __DIR__ . '/../Support/FakeDatabase.php';
 
 if (!defined('SESSION_LIFETIME')) define('SESSION_LIFETIME', 3600);
 if (!defined('CACHE_PATH')) {
@@ -16,7 +16,7 @@ if (!defined('MODE')) define('MODE', 'INSTALL');
 
 class SessionTest extends TestCase
 {
-    private SessionDatabaseStub $dbStub;
+    private FakeDatabase $dbStub;
 
     private function newSession(): Session
     {
@@ -49,7 +49,7 @@ class SessionTest extends TestCase
         $dbRef->setAccessible(true);
         $dbRef->setValue(null, null);
 
-        $this->dbStub = new SessionDatabaseStub();
+        $this->dbStub = new FakeDatabase();
         Database::setInstance($this->dbStub);
 
         if (!is_dir(CACHE_PATH . 'sessions')) {
@@ -130,11 +130,11 @@ class SessionTest extends TestCase
 
     public function testRestoreFromDatabaseReturnsNullWhenSessionExpired(): void
     {
-        $this->dbStub->sessionRows['expired'] = [
+        $this->dbStub->session->sessionRows['expired'] = [
             'userID'     => 42,
             'lastonline' => TIMESTAMP - SESSION_LIFETIME - 1,
         ];
-        $this->dbStub->userRows[42] = [
+        $this->dbStub->session->userRows[42] = [
             'id'        => 42,
             'id_planet' => 7,
             'bana'      => 0,
@@ -145,11 +145,11 @@ class SessionTest extends TestCase
 
     public function testRestoreFromDatabaseReturnsNullWhenUserBanned(): void
     {
-        $this->dbStub->sessionRows['banned-user'] = [
+        $this->dbStub->session->sessionRows['banned-user'] = [
             'userID'     => 99,
             'lastonline' => TIMESTAMP,
         ];
-        $this->dbStub->userRows[99] = [
+        $this->dbStub->session->userRows[99] = [
             'id'        => 99,
             'id_planet' => 3,
             'bana'      => 1,
@@ -160,11 +160,11 @@ class SessionTest extends TestCase
 
     public function testRestoreFromDatabaseRebuildsSessionWithAdminAccessZero(): void
     {
-        $this->dbStub->sessionRows['valid-restore'] = [
+        $this->dbStub->session->sessionRows['valid-restore'] = [
             'userID'     => 42,
             'lastonline' => TIMESTAMP,
         ];
-        $this->dbStub->userRows[42] = [
+        $this->dbStub->session->userRows[42] = [
             'id'        => 42,
             'id_planet' => 7,
             'bana'      => 0,
@@ -207,7 +207,7 @@ class SessionTest extends TestCase
         session_id('restored-session');
         session_start();
 
-        $this->dbStub->sessionCount = 1;
+        $this->dbStub->session->sessionCount = 1;
 
         $session = $this->newSession();
         $this->setSessionData($session, [
