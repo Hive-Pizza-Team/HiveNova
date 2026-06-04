@@ -6,6 +6,13 @@ if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(__DIR__) . '/');
 }
 
+if (!defined('CACHE_PATH')) {
+    define('CACHE_PATH', sys_get_temp_dir() . '/hivenova-phpunit-cache/');
+}
+if (!is_dir(CACHE_PATH)) {
+    mkdir(CACHE_PATH, 0777, true);
+}
+
 // Constants required by some classes
 if (!defined('UTF8_SUPPORT'))  define('UTF8_SUPPORT',  true);
 if (!defined('TIMESTAMP'))     define('TIMESTAMP',      time());
