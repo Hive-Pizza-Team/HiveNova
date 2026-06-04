@@ -15,6 +15,8 @@ class ResourceUpdateTest extends TestCase
 	{
 		$data = array_merge([
 			'uni'                    => 1,
+			'game_speed'             => 1,
+			'min_build_time'         => 0,
 			'metal_basic_income'     => 0,
 			'crystal_basic_income'   => 0,
 			'deuterium_basic_income' => 0,
@@ -30,6 +32,9 @@ class ResourceUpdateTest extends TestCase
 	private function makeResource(): array
 	{
 		return [
+			1   => 'metal_mine',
+			21  => 'hangar',
+			202 => 'light_fighter',
 			901 => 'metal',
 			902 => 'crystal',
 			903 => 'deuterium',
@@ -481,5 +486,84 @@ class ResourceUpdateTest extends TestCase
 		$result = $eco->CalcResource($user, $planet, false, $planet['last_update']);
 		$this->assertIsArray($result);
 		$this->assertCount(2, $result);
+	}
+
+	public function testGetNetworkLevelWithoutIntergalacticTech(): void
+	{
+		$resource = $this->makeResource();
+		$user     = $this->makeUser(['intergalactic_research' => 0]);
+		$planet   = $this->makePlanet(['intergalactic_research' => 4]);
+
+		$levels = ResourceUpdate::getNetworkLevel($user, $planet);
+
+		$this->assertSame([4], $levels);
+	}
+
+	public function testShipyardQueueClearsInvalidHangarPayload(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig(['game_speed' => 5000]);
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'b_hangar_id' => 'not-an-array',
+			'b_hangar'    => 500,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, $planet['last_update'] + 3600);
+
+		$this->assertSame(0, $updated['b_hangar']);
+		$this->assertSame('', $updated['b_hangar_id']);
+	}
+
+	public function testShipyardQueueBuildsShipsWhenHangarTimeAccumulated(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['fleet' => [202]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$user     = $this->makeUser(['factor' => array_merge($this->makeUser()['factor'], ['ShipTime' => 0])]);
+		$planet   = $this->makePlanet([
+			'hangar'        => 10,
+			'light_fighter' => 0,
+			'b_hangar_id'   => serialize([[202, 2]]),
+			'b_hangar'      => 0,
+			'last_update'   => TIMESTAMP - 86400,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, TIMESTAMP);
+
+		$this->assertGreaterThan(0, $updated['light_fighter']);
+	}
+
+	public function testBuildingQueueCompletesFinishedBuild(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['prod' => [1], 'build' => [1]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_mine'      => 0,
+			'field_current'   => 0,
+			'b_building'      => $now - 1,
+			'b_building_id'   => serialize([[1, 1, 1, $now, 'build']]),
+			'last_update'     => $now - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(1, $updated['metal_mine']);
+		$this->assertSame(1, $updated['field_current']);
+		$this->assertSame(0, $updated['b_building']);
+		$this->assertSame('', $updated['b_building_id']);
 	}
 }
