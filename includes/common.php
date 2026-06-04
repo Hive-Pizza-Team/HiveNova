@@ -162,7 +162,7 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	}
 
 	$LNG	= new Language($USER['lang']);
-	$LNG->includeData(array('L18N', 'INGAME', 'TECH', 'CUSTOM'));
+	$LNG->includeData(array('L18N', 'INGAME', 'TECH', 'CUSTOM', 'ACHIEVEMENTS'));
 	if(!empty($USER['dpath'])) { $THEME->setUserTheme($USER['dpath']); }
 	$GLOBALS['userNumberFormat'] = $USER['number_format'] ?? 'auto';
 

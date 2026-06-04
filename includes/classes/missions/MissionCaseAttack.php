@@ -601,6 +601,11 @@ HTML;
 			':destroyedUnits'	=> $combatResult['unitLost']['attacker']
 		));
 
+		if (isModuleAvailable(MODULE_ACHIEVEMENTS)) {
+			\HiveNova\Core\AchievementService::recordCombatAfterBattle(array_keys($userAttack), $attackStatus === 'wons');
+			\HiveNova\Core\AchievementService::recordCombatAfterBattle(array_keys($userDefend), $defendStatus === 'wons');
+		}
+
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
 	}

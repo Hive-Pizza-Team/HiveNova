@@ -10,6 +10,7 @@
 		{if allowedTo('ShowTeamspeakPage')}<li><a href="?page=teamspeak" target="Hauptframe">{$LNG.mu_ts_options}</a></li>{/if}
 		{if allowedTo('ShowFacebookPage')}<li><a href="?page=facebook" target="Hauptframe">{$LNG.mu_fb_options}</a></li>{/if}
 		{if allowedTo('ShowModulePage')}<li><a href="?page=module" target="Hauptframe">{$LNG.mu_module}</a></li>{/if}
+		{if allowedTo('ShowAchievementsPage')}<li><a href="?page=achievements" target="Hauptframe">Achievements</a></li>{/if}
 		{if allowedTo('ShowDisclamerPage')}<li><a href="?page=disclamer" target="Hauptframe">{$LNG.mu_disclaimer}</a></li>{/if}
 		{if allowedTo('ShowStatsPage')}<li><a href="?page=statsconf" target="Hauptframe">{$LNG.mu_stats_options}</a></li>{/if}
 		{* if allowedTo('ShowVertifyPage')}<li><a href="?page=vertify" target="Hauptframe">{$LNG.mu_vertify}</a></li>{/if *}

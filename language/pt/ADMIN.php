@@ -1169,6 +1169,7 @@ $LNG['modul_38']						= 'Sucateiros : Comprador de Frota';
 $LNG['modul_39']						= 'Simulador de batalha';
 $LNG['modul_40']						= 'Atalhos de Frotas';
 $LNG['modul_41']                       = 'Aplicação do Facebook';
+$LNG['modul_46']                       = 'Achievements';
 $LNG['mod_module']						= 'Modulos';
 $LNG['mod_info']						= 'Modulos no Jogo';
 $LNG['mod_active']						= 'Ativo';

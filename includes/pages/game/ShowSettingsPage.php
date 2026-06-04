@@ -444,6 +444,14 @@ class ShowSettingsPage extends AbstractGamePage
 						':hiveaccount'  => $hiveAccount,
 						':userID'       => $USER['id']
 					));
+					if (isModuleAvailable(MODULE_ACHIEVEMENTS)) {
+						\HiveNova\Core\AchievementService::record(
+							(int) $USER['id'],
+							'hive_account_valid',
+							['valid' => 1],
+							true
+						);
+					}
 				}
 			}
 		}

@@ -1171,6 +1171,7 @@ $LNG['modul_26'] = 'Search';
 $LNG['modul_27'] = 'Support Tickets';
 $LNG['modul_28'] = 'Techtree';
 $LNG['modul_41'] = 'Facebook Application';
+$LNG['modul_46'] = 'Achievements';
 $LNG['mod_module'] = 'Modules';
 $LNG['mod_info'] = 'Modules in the Game';
 $LNG['mod_active'] = 'Active';

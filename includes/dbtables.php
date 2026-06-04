@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 18);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 19);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -70,5 +70,9 @@ $dbTableNames	= array(
 	'LOG_RESEARCH'		=> DB_PREFIX.'log_research',
 	'LOG_SHIPYARD'		=> DB_PREFIX.'log_shipyard',
 	'PUSH_SUBSCRIPTIONS'	=> DB_PREFIX.'push_subscriptions',
+	'ACHIEVEMENTS'			=> DB_PREFIX.'achievements',
+	'USER_ACHIEVEMENT_PROGRESS'	=> DB_PREFIX.'user_achievement_progress',
+	'USER_ACHIEVEMENTS'		=> DB_PREFIX.'user_achievements',
+	'ACHIEVEMENT_GRANTS'	=> DB_PREFIX.'achievement_grants',
 );
 // MOD-TABLES

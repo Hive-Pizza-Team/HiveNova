@@ -105,7 +105,7 @@ class ShowPlayerCardPage extends AbstractGamePage
 			'siegprozent'   => round($siegprozent, 2),
 			'loosprozent'   => round($loosprozent, 2),
 			'drawsprozent'  => round($drawsprozent, 2),
-			'badges'        => PlayerUtil::getPlayerBadges($query),
+			'badges'        => PlayerUtil::getPlayerBadges($query) . ' ' . PlayerUtil::getAchievementBadges($PlayerID),
 		));
 		
 		$this->display('page.playerCard.default.tpl');

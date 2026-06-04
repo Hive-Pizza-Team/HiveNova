@@ -1196,6 +1196,7 @@ $LNG['modul_26']                       		= 'Rechercher';
 $LNG['modul_27']                       		= 'Tickets Support';
 $LNG['modul_28']                       		= 'Technologies';
 $LNG['modul_41']                           = 'Facebook Application';
+$LNG['modul_46']                           = 'Achievements';
 $LNG['mod_module']					= 'Modules';
 $LNG['mod_info']					= 'Modules dans le Jeu';
 $LNG['mod_active']					= 'Actif';
