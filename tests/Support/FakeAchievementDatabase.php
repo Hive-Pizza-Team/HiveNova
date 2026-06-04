@@ -64,6 +64,17 @@ class FakeAchievementDatabase implements DatabaseInterface
     /** @var list<string> */
     public array $deleteLog = [];
 
+    public ?string $cronjobClass = null;
+
+    public bool $cronjobActive = true;
+
+    public bool $cronjobLockCleared = false;
+
+    /** @var list<array<string, mixed>> */
+    public array $cronjobRows = [
+        ['cronjobID' => 12, 'min' => '0', 'hours' => '0', 'dom' => '*', 'month' => '*', 'dow' => '*'],
+    ];
+
     public function __construct()
     {
         $this->achievementDefinitions = [[
@@ -130,6 +141,17 @@ class FakeAchievementDatabase implements DatabaseInterface
             return [];
         }
 
+        if (str_contains($qry, 'FROM %%CRONJOBS%%') && str_contains($qry, 'min')) {
+            $id = (int) ($params[':cronjobId'] ?? 0);
+            if ($id > 0) {
+                return array_values(array_filter(
+                    $this->cronjobRows,
+                    static fn (array $r): bool => (int) ($r['cronjobID'] ?? 0) === $id
+                ));
+            }
+            return $this->cronjobRows;
+        }
+
         return [];
     }
 
@@ -166,6 +188,20 @@ class FakeAchievementDatabase implements DatabaseInterface
         if (str_contains($qry, 'progress FROM %%USER_ACHIEVEMENT_PROGRESS%%')) {
             $key = ($params[':userId'] ?? 0) . ':' . ($params[':achievementId'] ?? 0);
             return $this->progress[$key] ?? 0;
+        }
+
+        if (str_contains($qry, 'FROM %%CRONJOBS%%') && str_contains($qry, 'class')) {
+            $id = (int) ($params[':cronjobId'] ?? 0);
+            $match = $this->cronjobActive
+                && $this->cronjobClass !== null
+                && ($id === 0 || (int) ($this->cronjobRows[0]['cronjobID'] ?? 0) === $id);
+            if (!$match) {
+                return $field === false ? null : false;
+            }
+            if ($field === 'class') {
+                return $this->cronjobClass;
+            }
+            return $field === false ? ['class' => $this->cronjobClass] : ($this->cronjobClass ?? false);
         }
 
         if (str_contains($qry, 'FROM %%STATPOINTS%%')) {
@@ -240,6 +276,9 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'CRONJOBS%%')) {
+            if (str_contains($qry, 'lock') && str_contains($qry, 'NULL')) {
+                $this->cronjobLockCleared = true;
+            }
             return true;
         }
 

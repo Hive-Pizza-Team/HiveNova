@@ -11,6 +11,9 @@ trait FakePlanetQueryHandler
     /** Occupied coords for isPositionFree (COUNT … AS record). */
     public int $planetPositionCount = 0;
 
+    /** @var array<int, int> ownerId => planet count (colonisation). */
+    public array $planetCountByOwner = [];
+
     private function isPlanetQuery(string $qry): bool
     {
         return str_contains($qry, '%%PLANETS%%');
@@ -20,6 +23,12 @@ trait FakePlanetQueryHandler
     {
         if (str_contains($qry, 'COUNT(*)') && str_contains($qry, 'record')) {
             $count = ['record' => $this->planetPositionCount];
+            return $field === false ? $count : ($count[$field] ?? false);
+        }
+
+        if (str_contains($qry, 'COUNT(*)') && str_contains($qry, 'state') && str_contains($qry, 'id_owner')) {
+            $ownerId = (int) ($params[':userId'] ?? 0);
+            $count = ['state' => $this->planetCountByOwner[$ownerId] ?? 0];
             return $field === false ? $count : ($count[$field] ?? false);
         }
 
