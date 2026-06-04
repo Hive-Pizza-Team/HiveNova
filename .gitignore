@@ -1,4 +1,5 @@
 .phpunit.cache/
+coverage/
 .claude/
 CLAUDE.md
 .phpunit.result.cache
