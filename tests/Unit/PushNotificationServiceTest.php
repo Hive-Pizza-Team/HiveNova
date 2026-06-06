@@ -1,8 +1,101 @@
 <?php
 
+namespace Minishlink\WebPush {
+	if (!class_exists(__NAMESPACE__ . '\\WebPush', false)) {
+		final class MessageSentReport
+		{
+			public function __construct(
+				private bool $success,
+				private bool $expired,
+				private string $endpoint
+			) {}
+
+			public function isSuccess(): bool
+			{
+				return $this->success;
+			}
+
+			public function isSubscriptionExpired(): bool
+			{
+				return $this->expired;
+			}
+
+			public function getEndpoint(): string
+			{
+				return $this->endpoint;
+			}
+		}
+
+		final class Subscription
+		{
+			public static function create(array $data): self
+			{
+				return new self();
+			}
+		}
+
+		final class WebPush
+		{
+			/** @var list<MessageSentReport> */
+			public static array $flushReports = [];
+
+			public static int $queueCount = 0;
+
+			/** @var array<string, mixed>|null */
+			public static ?array $lastAuth = null;
+
+			public static ?string $lastPayload = null;
+
+			public function __construct(array $auth)
+			{
+				self::$lastAuth = $auth;
+			}
+
+			public function queueNotification($subscription, ?string $payload = null): void
+			{
+				self::$queueCount++;
+				self::$lastPayload = $payload;
+			}
+
+			public function flush(): \Generator
+			{
+				foreach (self::$flushReports as $report) {
+					yield $report;
+				}
+			}
+
+			public static function reset(): void
+			{
+				self::$flushReports = [];
+				self::$queueCount     = 0;
+				self::$lastAuth       = null;
+				self::$lastPayload    = null;
+			}
+		}
+
+		final class VAPID
+		{
+			public const IS_TEST_STUB = true;
+
+			public static function createVapidKeys(): array
+			{
+				return [
+					'publicKey'  => 'stub-generated-public-key',
+					'privateKey' => 'stub-generated-private-key',
+				];
+			}
+		}
+	}
+}
+
+namespace {
+
 use HiveNova\Core\Database;
 use HiveNova\Core\DatabaseInterface;
 use HiveNova\Core\PushNotificationService;
+use Minishlink\WebPush\MessageSentReport;
+use Minishlink\WebPush\VAPID;
+use Minishlink\WebPush\WebPush;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -174,6 +267,8 @@ class PushNotificationServiceTest extends TestCase
 
 	protected function setUp(): void
 	{
+		WebPush::reset();
+
 		$ref = new ReflectionClass(Database::class);
 		$prop = $ref->getProperty('instance');
 		$prop->setAccessible(true);
@@ -229,14 +324,73 @@ class PushNotificationServiceTest extends TestCase
 			file_put_contents($path, $this->pushConfigBackup);
 		} elseif ($this->pushConfigExisted === false && is_file($path)) {
 			unlink($path);
+		} elseif ($this->pushConfigExisted === false && is_dir($path)) {
+			rmdir($path);
 		}
 		$this->pushConfigBackup  = null;
 		$this->pushConfigExisted = false;
 	}
 
+	private function ensurePushConfigured(string $public = 'test-public-key', string $private = 'test-private-key', string $subject = 'mailto:test@example.com'): void
+	{
+		if (PushNotificationService::isConfigured()) {
+			return;
+		}
+
+		$this->backupPushConfigFile();
+		$path = PushNotificationService::configFilePath();
+		if (is_file($path)) {
+			unlink($path);
+		}
+		if (is_dir($path)) {
+			rmdir($path);
+		}
+
+		$this->assertTrue(PushNotificationService::writeConfigFile($public, $private, $subject));
+		require $path;
+	}
+
+	private function ensurePushKeysWithoutSubject(string $public = 'test-public-key', string $private = 'test-private-key'): void
+	{
+		if (defined('PUSH_VAPID_PUBLIC') && defined('PUSH_VAPID_PRIVATE') && !defined('PUSH_VAPID_SUBJECT')) {
+			return;
+		}
+
+		if (!defined('PUSH_VAPID_PUBLIC')) {
+			define('PUSH_VAPID_PUBLIC', $public);
+		}
+		if (!defined('PUSH_VAPID_PRIVATE')) {
+			define('PUSH_VAPID_PRIVATE', $private);
+		}
+	}
+
+	private function invokeDefaultInstallSubject(): string
+	{
+		$method = new ReflectionMethod(PushNotificationService::class, 'defaultInstallSubject');
+		$method->setAccessible(true);
+
+		return (string) $method->invoke(null);
+	}
+
 	public function testIsConfiguredReturnsFalseWhenKeysAreEmpty(): void
 	{
 		$this->assertFalse(PushNotificationService::isConfigured());
+	}
+
+	public function testUpdateConfigSubjectReturnsFalseWhenNotConfigured(): void
+	{
+		$this->assertFalse(PushNotificationService::updateConfigSubject('mailto:new@example.com'));
+	}
+
+	public function testDefaultInstallSubjectFallsBackToMailtoWhenHostEmpty(): void
+	{
+		if (!defined('HTTP_HOST')) {
+			define('HTTP_HOST', '');
+		} elseif (HTTP_HOST !== '') {
+			$this->markTestSkipped('HTTP_HOST already defined with a non-empty value in this process.');
+		}
+
+		$this->assertSame('mailto:support@hive.pizza', $this->invokeDefaultInstallSubject());
 	}
 
 	public function testGetPublicKeyReturnsEmptyWhenUnconfigured(): void
@@ -524,11 +678,189 @@ class PushNotificationServiceTest extends TestCase
 		$this->assertSame(0, $fake->deleteCount);
 	}
 
+	public function testNotifyUserDefaultVapidSubjectWhenSubjectConstantUndefined(): void
+	{
+		$fake = $this->swapDatabase(new PushNotificationFakeDatabase());
+		$this->ensurePushKeysWithoutSubject();
+		$fake->subscriptions[] = [
+			'user_id'    => 22,
+			'endpoint'   => 'https://push.example.com/sub/subject',
+			'p256dh'     => 'k',
+			'auth'       => 'a',
+			'user_agent' => null,
+			'created_at' => 1,
+		];
+
+		PushNotificationService::notifyUser(22, 'Title', 'Body');
+
+		$this->assertSame('mailto:support@hive.pizza', WebPush::$lastAuth['VAPID']['subject']);
+	}
+
 	public function testNotifyUserReturnsEarlyWhenNoSubscriptions(): void
 	{
+		$this->ensurePushConfigured();
+
 		PushNotificationService::notifyUser(3, 'Title', 'Body');
 
-		$this->assertTrue(true);
+		$this->assertSame(0, WebPush::$queueCount);
+	}
+
+	public function testNotifyUserQueuesNotificationsForEnabledUser(): void
+	{
+		$fake = $this->swapDatabase(new PushNotificationFakeDatabase());
+		$this->ensurePushConfigured();
+		$fake->subscriptions[] = [
+			'user_id'    => 20,
+			'endpoint'   => 'https://push.example.com/sub/notify-live',
+			'p256dh'     => 'k',
+			'auth'       => 'a',
+			'user_agent' => null,
+			'created_at' => 1,
+		];
+
+		PushNotificationService::notifyUser(20, 'Alert', 'Incoming fleet', ['url' => 'game.php?page=fleetTable']);
+
+		$this->assertSame(1, WebPush::$queueCount);
+		$this->assertSame('test-public-key', WebPush::$lastAuth['VAPID']['publicKey']);
+		$this->assertStringContainsString('"title":"Alert"', (string) WebPush::$lastPayload);
+		$this->assertStringContainsString('"url":"game.php?page=fleetTable"', (string) WebPush::$lastPayload);
+	}
+
+	public function testNotifyUserUsesDefaultOverviewUrlWhenDataOmitsUrl(): void
+	{
+		$fake = $this->swapDatabase(new PushNotificationFakeDatabase());
+		$this->ensurePushConfigured();
+		$fake->subscriptions[] = [
+			'user_id'    => 21,
+			'endpoint'   => 'https://push.example.com/sub/default-url',
+			'p256dh'     => 'k',
+			'auth'       => 'a',
+			'user_agent' => null,
+			'created_at' => 1,
+		];
+
+		PushNotificationService::notifyUser(21, 'Title', 'Body');
+
+		$this->assertStringContainsString('"url":"game.php?page=overview"', (string) WebPush::$lastPayload);
+	}
+
+	public function testNotifyUserRemovesExpiredSubscriptionAfterFailedPush(): void
+	{
+		$fake = $this->swapDatabase(new PushNotificationFakeDatabase());
+		$this->ensurePushConfigured();
+		$endpoint = 'https://push.example.com/sub/expired-cleanup';
+		$fake->subscriptions[] = [
+			'user_id'    => 23,
+			'endpoint'   => $endpoint,
+			'p256dh'     => 'k',
+			'auth'       => 'a',
+			'user_agent' => null,
+			'created_at' => 1,
+		];
+		WebPush::$flushReports = [
+			new MessageSentReport(false, true, $endpoint),
+		];
+
+		PushNotificationService::notifyUser(23, 'Title', 'Body');
+
+		$this->assertCount(0, $fake->subscriptions);
+		$this->assertSame(1, $fake->deleteCount);
+	}
+
+	public function testNotifyUserKeepsSubscriptionWhenPushFailsWithoutExpiry(): void
+	{
+		$fake = $this->swapDatabase(new PushNotificationFakeDatabase());
+		$this->ensurePushConfigured();
+		$endpoint = 'https://push.example.com/sub/transient-failure';
+		$fake->subscriptions[] = [
+			'user_id'    => 24,
+			'endpoint'   => $endpoint,
+			'p256dh'     => 'k',
+			'auth'       => 'a',
+			'user_agent' => null,
+			'created_at' => 1,
+		];
+		WebPush::$flushReports = [
+			new MessageSentReport(false, false, $endpoint),
+		];
+
+		PushNotificationService::notifyUser(24, 'Title', 'Body');
+
+		$this->assertCount(1, $fake->subscriptions);
+		$this->assertSame(0, $fake->deleteCount);
+	}
+
+	public function testDefaultInstallSubjectUsesHttpsHostWhenDefined(): void
+	{
+		if (defined('HTTP_HOST') && HTTP_HOST === '') {
+			$this->markTestSkipped('HTTP_HOST is empty from prior defaultInstallSubject fallback test.');
+		}
+		if (!defined('HTTP_HOST')) {
+			define('HTTP_HOST', 'push.example.com');
+		}
+		if (!defined('HTTPS')) {
+			define('HTTPS', true);
+		} elseif (HTTPS === false) {
+			$this->markTestSkipped('HTTPS already defined as false in this process.');
+		}
+
+		$this->assertSame('https://push.example.com', $this->invokeDefaultInstallSubject());
+	}
+
+	public function testDefaultInstallSubjectUsesHttpWhenHttpsDisabled(): void
+	{
+		if (defined('HTTP_HOST') && HTTP_HOST === '') {
+			$this->markTestSkipped('HTTP_HOST is empty from prior defaultInstallSubject fallback test.');
+		}
+		if (!defined('HTTP_HOST')) {
+			define('HTTP_HOST', 'push.example.com');
+		}
+		if (!defined('HTTPS')) {
+			define('HTTPS', false);
+		} else {
+			$this->markTestSkipped('HTTPS constant already defined as true in this process.');
+		}
+
+		$this->assertSame('http://push.example.com', $this->invokeDefaultInstallSubject());
+	}
+
+	public function testGenerateAndWriteConfigFileUsesDefaultInstallSubjectWhenSubjectNull(): void
+	{
+		$this->backupPushConfigFile();
+		$path = PushNotificationService::configFilePath();
+		if (is_file($path)) {
+			unlink($path);
+		}
+
+		$expectedSubject = $this->invokeDefaultInstallSubject();
+		$this->assertTrue(PushNotificationService::generateAndWriteConfigFile(null));
+
+		$content = (string) file_get_contents($path);
+		$this->assertStringContainsString("define('PUSH_VAPID_PUBLIC', 'stub-generated-public-key');", $content);
+		$this->assertStringContainsString("define('PUSH_VAPID_PRIVATE', 'stub-generated-private-key');", $content);
+		$this->assertStringContainsString(
+			"define('PUSH_VAPID_SUBJECT', '" . str_replace(['\\', "'"], ['\\\\', "\\'"], $expectedSubject) . "');",
+			$content
+		);
+	}
+
+	public function testWriteConfigFileReturnsFalseWhenConfigPathIsDirectory(): void
+	{
+		$this->backupPushConfigFile();
+		$path = PushNotificationService::configFilePath();
+		if (is_file($path)) {
+			unlink($path);
+		}
+		if (is_dir($path)) {
+			rmdir($path);
+		}
+		mkdir($path);
+
+		try {
+			$this->assertFalse(PushNotificationService::writeConfigFile('pub', 'priv', 'mailto:test@example.com'));
+		} finally {
+			rmdir($path);
+		}
 	}
 
 	public function testNotifyIncomingHostileFleetSkipsInvalidTarget(): void
@@ -594,8 +926,8 @@ class PushNotificationServiceTest extends TestCase
 
 	public function testGenerateAndWriteConfigFileReturnsFalseWithoutVapidLibrary(): void
 	{
-		if (class_exists(\Minishlink\WebPush\VAPID::class)) {
-			$this->markTestSkipped('VAPID library available; false-return path not exercised in this environment.');
+		if (class_exists(VAPID::class)) {
+			$this->markTestSkipped('VAPID class available (stub or library); false-return path not exercised in this environment.');
 		}
 
 		$this->assertFalse(PushNotificationService::generateAndWriteConfigFile('mailto:admin@test.example'));
@@ -603,7 +935,7 @@ class PushNotificationServiceTest extends TestCase
 
 	public function testGenerateAndWriteConfigFileWritesNewKeysWhenVapidAvailable(): void
 	{
-		if (!class_exists(\Minishlink\WebPush\VAPID::class)) {
+		if (!class_exists(VAPID::class)) {
 			$this->markTestSkipped('minishlink/web-push is not installed.');
 		}
 
@@ -618,11 +950,6 @@ class PushNotificationServiceTest extends TestCase
 		$this->assertStringContainsString("define('PUSH_VAPID_PUBLIC', '", $content);
 		$this->assertStringContainsString("define('PUSH_VAPID_PRIVATE', '", $content);
 		$this->assertStringContainsString("define('PUSH_VAPID_SUBJECT', 'mailto:admin@test.example');", $content);
-	}
-
-	public function testUpdateConfigSubjectReturnsFalseWhenNotConfigured(): void
-	{
-		$this->assertFalse(PushNotificationService::updateConfigSubject('mailto:new@example.com'));
 	}
 
 	/** Runs last (zzz prefix): defines PUSH_VAPID_* constants for the remainder of the process. */
@@ -662,4 +989,6 @@ class PushNotificationServiceTest extends TestCase
 		$this->assertStringContainsString("define('PUSH_VAPID_PRIVATE', '", $content);
 		$this->assertStringContainsString("define('PUSH_VAPID_SUBJECT', 'mailto:new@example.com');", $content);
 	}
+}
+
 }
