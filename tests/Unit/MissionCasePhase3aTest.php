@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../Support/FakeDatabase.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 require_once __DIR__ . '/../Support/MissionFleetFixtures.php';
+require_once __DIR__ . '/../Support/MissionCombatFixtures.php';
 
 class MissionCasePhase3aTest extends TestCase
 {
@@ -110,6 +111,115 @@ class MissionCasePhase3aTest extends TestCase
         $mission->ReturnEvent();
 
         $this->assertNotEmpty($this->fake->achievement->messages);
+    }
+
+    public function test_destruction_return_event_restores_fleet(): void
+    {
+        $combatFake = new MissionCombatFakeDatabase();
+        $this->swapDatabaseInstance($combatFake);
+        missionCombatEnvironmentSetup();
+        Config::setInstance(missionCombatConfig(), 1);
+        missionCombatSeedStandardTargets($combatFake);
+        $combatFake->planetRowsById[99]['name'] = 'Moon Target';
+
+        $fleet = missionFleetFixture([
+            'fleet_mission' => 9,
+            'fleet_array' => '202,5;',
+            'fleet_resource_metal' => 300,
+        ]);
+
+        $mission = new MissionCaseDestruction($fleet);
+        $mission->ReturnEvent();
+
+        $this->assertSame(1, $mission->kill);
+        $this->assertNotEmpty($combatFake->achievement->messages);
+        $this->assertNotEmpty($combatFake->fleetUpdates);
+    }
+
+    public function test_destruction_moon_destroy_succeeds_with_fixed_seed(): void
+    {
+        $combatFake = new MissionCombatFakeDatabase();
+        $this->swapDatabaseInstance($combatFake);
+        missionCombatEnvironmentSetup();
+        Config::setInstance(missionCombatConfig(), 1);
+        missionCombatSeedStandardTargets($combatFake);
+        $fleet = missionCombatMoonDestructionSetup($combatFake);
+
+        mt_srand(18);
+        $mission = new MissionCaseDestruction($fleet);
+        $mission->TargetEvent();
+
+        $this->assertNotEmpty($combatFake->achievement->deleteLog);
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertSame('Win', missionCombatReportClass($combatFake, 1));
+    }
+
+    public function test_destruction_moon_destroy_fails_with_fixed_seed(): void
+    {
+        $combatFake = new MissionCombatFakeDatabase();
+        $this->swapDatabaseInstance($combatFake);
+        missionCombatEnvironmentSetup();
+        Config::setInstance(missionCombatConfig(), 1);
+        missionCombatSeedStandardTargets($combatFake);
+        $fleet = missionCombatMoonDestructionSetup($combatFake);
+
+        mt_srand(2);
+        $mission = new MissionCaseDestruction($fleet);
+        $mission->TargetEvent();
+
+        $this->assertEmpty($combatFake->achievement->deleteLog);
+        $this->assertSame(0, $mission->kill);
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+    }
+
+    public function test_destruction_win_can_destroy_attacking_fleet_with_fixed_seed(): void
+    {
+        $combatFake = new MissionCombatFakeDatabase();
+        $this->swapDatabaseInstance($combatFake);
+        missionCombatEnvironmentSetup();
+        Config::setInstance(missionCombatConfig(), 1);
+        missionCombatSeedStandardTargets($combatFake);
+        $fleet = missionCombatMoonDestructionSetup($combatFake);
+
+        mt_srand(1);
+        $mission = new MissionCaseDestruction($fleet);
+        $mission->TargetEvent();
+
+        $this->assertSame(1, $mission->kill);
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+    }
+
+    public function test_destruction_with_acs_runs_combat(): void
+    {
+        $combatFake = new MissionCombatFakeDatabase();
+        $this->swapDatabaseInstance($combatFake);
+        missionCombatEnvironmentSetup();
+        Config::setInstance(missionCombatConfig(), 1);
+        missionCombatSeedStandardTargets($combatFake);
+        $combatFake->fleetRowsById[2] = missionCombatAcsMemberFleet(2, 11, [
+            'fleet_owner' => 3,
+            'fleet_mission' => 9,
+        ]);
+        $combatFake->achievement->users[3] = missionCombatUser(3);
+
+        $fleet = missionFleetFixture([
+            'fleet_mission' => 9,
+            'fleet_group' => 11,
+            'fleet_array' => '202,100;',
+            'fleet_amount' => 100,
+        ]);
+
+        $mission = new MissionCaseDestruction($fleet);
+        $mission->TargetEvent();
+
+        $aksDeletes = array_filter(
+            $combatFake->fleetUpdates,
+            static fn (array $update): bool => str_contains($update['sql'], '%%AKS%%')
+                && !empty($update['delete'])
+        );
+
+        $this->assertNotEmpty($aksDeletes);
+        $this->assertGreaterThanOrEqual(2, count($combatFake->achievement->messages));
     }
 
     private function defineMissionModules(): void

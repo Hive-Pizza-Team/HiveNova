@@ -1,5 +1,6 @@
 <?php
 
+use HiveNova\Core\Config;
 use HiveNova\Core\Language;
 use HiveNova\Core\Template;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -7,6 +8,64 @@ use PHPUnit\Framework\TestCase;
 
 class TemplateTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        if (!defined('DEFAULT_THEME')) {
+            define('DEFAULT_THEME', 'hive');
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['LNG'], $GLOBALS['THEME'], $GLOBALS['USER']);
+
+        $ref = new ReflectionProperty(Config::class, 'instances');
+        $ref->setAccessible(true);
+        $ref->setValue(null, []);
+    }
+
+    private function seedLanguage(array $files = ['INGAME']): Language
+    {
+        $lng = new Language('en');
+        $lng->includeData($files);
+
+        return $lng;
+    }
+
+    /** @return object{isCustomTPL: callable, getTheme: callable, getTemplatePath: callable} */
+    private function makeThemeStub(bool $customTpl = false, ?string $templatePath = null): object
+    {
+        $path = $templatePath ?? ROOT_PATH . 'styles/templates/install/';
+
+        return new class($customTpl, $path) {
+            public function __construct(private bool $customTpl, private string $templatePath) {}
+
+            public function isCustomTPL(string $tpl): bool
+            {
+                return $this->customTpl;
+            }
+
+            public function getTheme(): string
+            {
+                return './styles/theme/hive/';
+            }
+
+            public function getTemplatePath(): string
+            {
+                return $this->templatePath;
+            }
+        };
+    }
+
+    private function seedConfig(): void
+    {
+        Config::setInstance(new Config([
+            'game_name' => 'HiveNova',
+            'VERSION'   => '1.0.0.0',
+            'uni'       => 1,
+        ]), 1);
+    }
+
     private function invokePrivate(Template $template, string $method, mixed ...$args): mixed
     {
         $ref = new ReflectionMethod(Template::class, $method);
@@ -85,6 +144,14 @@ class TemplateTest extends TestCase
         $this->assertSame('yes', $template->getTemplateVars('cached'));
     }
 
+    public function testAssignVarsDefaultsToNocacheTrue(): void
+    {
+        $template = new Template();
+        $template->assign_vars(['live' => 'value']);
+
+        $this->assertSame('value', $template->getTemplateVars('live'));
+    }
+
     public function testLoadscriptStripsJsExtension(): void
     {
         $template = new Template();
@@ -109,6 +176,14 @@ class TemplateTest extends TestCase
 
         $this->assertSame(5, $template->getTemplateVars('gotoinsec'));
         $this->assertSame('game.php?page=overview', $template->getTemplateVars('goto'));
+    }
+
+    public function testGotosideDefaultsRedirectDelayToThreeSeconds(): void
+    {
+        $template = new Template();
+        $template->gotoside('game.php?page=overview');
+
+        $this->assertSame(3, $template->getTemplateVars('gotoinsec'));
     }
 
     public function testDisplaySetsCompileIdFromLanguageBeforeRender(): void
@@ -193,6 +268,21 @@ class TemplateTest extends TestCase
         $this->assertSame($template->getCompileDir(), $template->compile_dir);
     }
 
+    #[DataProvider('smartyMagicPropertyProvider')]
+    public function testMagicGetReturnsSmartyDirectoryGetters(string $property, string $getter): void
+    {
+        $template = new Template();
+
+        $this->assertSame($template->{$getter}(), $template->{$property});
+    }
+
+    public function testMagicGetReturnsProtectedWindowProperty(): void
+    {
+        $template = new Template();
+
+        $this->assertSame('full', $template->window);
+    }
+
     public function testMagicSetUpdatesTemplateDir(): void
     {
         $template = new Template();
@@ -202,11 +292,148 @@ class TemplateTest extends TestCase
         $this->assertSame($customDir, $template->getTemplateDir()[0]);
     }
 
+    #[DataProvider('smartyMagicPropertyProvider')]
+    public function testMagicSetUpdatesSmartyDirectorySetters(string $property, string $getter): void
+    {
+        $template = new Template();
+        $value = ROOT_PATH . 'cache/custom-' . $property . '/';
+
+        $template->{$property} = $value;
+
+        $actual = $template->{$getter}();
+        if (is_array($actual)) {
+            $this->assertSame($value, $actual[0]);
+        } else {
+            $this->assertSame($value, $actual);
+        }
+    }
+
+    /** @return array<string, array{0: string, 1: string}> */
+    public static function smartyMagicPropertyProvider(): array
+    {
+        return [
+            'template_dir' => ['template_dir', 'getTemplateDir'],
+            'config_dir'   => ['config_dir', 'getConfigDir'],
+            'plugins_dir'  => ['plugins_dir', 'getPluginsDir'],
+            'compile_dir'  => ['compile_dir', 'getCompileDir'],
+            'cache_dir'    => ['cache_dir', 'getCacheDir'],
+        ];
+    }
+
     public function testMagicSetAllowsCustomProperty(): void
     {
         $template = new Template();
         $template->custom_flag = true;
 
         $this->assertTrue($template->custom_flag);
+    }
+
+    // -------------------------------------------------------------------------
+    // adm_main
+    // -------------------------------------------------------------------------
+
+    public function testAdmMainAssignsAdminLayoutVariables(): void
+    {
+        $this->seedConfig();
+        $GLOBALS['LNG'] = $this->seedLanguage(['INGAME', 'ADMIN']);
+        $GLOBALS['USER'] = ['timezone' => 'Europe/Berlin'];
+
+        $template = new Template();
+        $this->invokePrivate($template, 'adm_main');
+
+        $this->assertSame('HiveNova - Administration Panel', $template->getTemplateVars('title'));
+        $this->assertSame('Info', $template->getTemplateVars('fcm_info'));
+        $this->assertSame('en', $template->getTemplateVars('lang'));
+        $this->assertSame('.0.0', $template->getTemplateVars('REV'));
+        $this->assertSame('1.0.0.0', $template->getTemplateVars('VERSION'));
+        $this->assertSame('styles/theme/hive/', $template->getTemplateVars('dpath'));
+        $this->assertSame('full', $template->getTemplateVars('bodyclass'));
+        $this->assertIsArray($template->getTemplateVars('date'));
+        $this->assertIsInt($template->getTemplateVars('Offset'));
+    }
+
+    public function testAdmMainFallsBackWhenTimezoneIsInvalid(): void
+    {
+        $this->seedConfig();
+        $GLOBALS['LNG'] = $this->seedLanguage(['INGAME', 'ADMIN']);
+        $GLOBALS['USER'] = ['timezone' => 'Not/A_Timezone'];
+
+        $template = new Template();
+        $this->invokePrivate($template, 'adm_main');
+
+        $this->assertSame(0, $template->getTemplateVars('Offset'));
+    }
+
+    public function testAdmMainUsesServerTimeWhenUserTimezoneMissing(): void
+    {
+        $this->seedConfig();
+        $GLOBALS['LNG'] = $this->seedLanguage(['INGAME', 'ADMIN']);
+        $GLOBALS['USER'] = [];
+
+        $template = new Template();
+        $this->invokePrivate($template, 'adm_main');
+
+        $this->assertSame(0, $template->getTemplateVars('Offset'));
+        $this->assertSame([], $template->getTemplateVars('scripts'));
+    }
+
+    // -------------------------------------------------------------------------
+    // show / message
+    // -------------------------------------------------------------------------
+
+    public function testShowRendersInstallTemplateWithAssignedScripts(): void
+    {
+        $GLOBALS['LNG'] = $this->seedLanguage(['INGAME']);
+        $GLOBALS['THEME'] = $this->makeThemeStub();
+
+        $template = new Template();
+        $template->setCaching(\Smarty::CACHING_OFF);
+        $template->loadscript('scripts/game.js');
+        $template->execscript('console.log("render");');
+
+        ob_start();
+        $template->show('error_message_body.tpl');
+        $html = ob_get_clean();
+
+        $this->assertStringContainsString('console.log("render");', $html);
+        $this->assertSame(['scripts/game'], $template->getTemplateVars('scripts'));
+        $this->assertSame("console.log(\"render\");", $template->getTemplateVars('execscript'));
+        $this->assertSame('en', $template->compile_id);
+    }
+
+    public function testShowUsesCustomThemeTemplateDirectory(): void
+    {
+        $customPath = ROOT_PATH . 'styles/templates/';
+        $GLOBALS['LNG'] = $this->seedLanguage(['INGAME']);
+        $GLOBALS['THEME'] = $this->makeThemeStub(true, $customPath);
+
+        $template = new Template();
+        $template->setCaching(\Smarty::CACHING_OFF);
+
+        ob_start();
+        $template->show('error_message_body.tpl');
+        ob_end_clean();
+
+        $this->assertSame($customPath . 'install/', $template->getTemplateDir()[0]);
+    }
+
+    public function testMessageAssignsFatalFlagAndRendersErrorTemplate(): void
+    {
+        $GLOBALS['LNG'] = $this->seedLanguage(['INGAME']);
+        $GLOBALS['THEME'] = $this->makeThemeStub();
+
+        $template = new Template();
+        $template->setCaching(\Smarty::CACHING_OFF);
+
+        ob_start();
+        $template->message('Something went wrong', 'game.php?page=overview', 7, true);
+        ob_end_clean();
+
+        $this->assertSame('Something went wrong', $template->getTemplateVars('mes'));
+        $this->assertTrue($template->getTemplateVars('Fatal'));
+        $this->assertSame('./styles/theme/hive/', $template->getTemplateVars('dpath'));
+        $this->assertSame('Info', $template->getTemplateVars('fcm_info'));
+        $this->assertSame(7, $template->getTemplateVars('gotoinsec'));
+        $this->assertSame('game.php?page=overview', $template->getTemplateVars('goto'));
     }
 }

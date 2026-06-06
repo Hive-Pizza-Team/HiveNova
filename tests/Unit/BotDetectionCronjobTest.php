@@ -1,25 +1,204 @@
 <?php
 
-use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Universe;
+use HiveNova\Cronjob\BotDetectionCronjob;
 
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/../Support/FakeDatabase.php';
+require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+
 /**
- * Source-inspection tests for BotDetectionCronjob.
- *
- * No database connection is required. These tests verify that the detection
- * constants, query structure, filter conditions, and message-sending logic
- * are correct and cannot silently regress.
+ * Inline fake that serves BotDetectionCronjob UNION + admin queries.
+ */
+class BotDetectionFakeDatabase extends FakeDatabase
+{
+    /** @var list<array{user_id: int, username: string, event_time: int}> */
+    public array $botDetectionEvents = [];
+
+    /** @var list<array{id: int}> */
+    public array $adminUsers = [];
+
+    public function select($qry, array $params = [])
+    {
+        if (str_contains($qry, '%%LOG_FLEETS%%')
+            && str_contains($qry, '%%LOG_BUILDINGS%%')
+            && str_contains($qry, 'event_time')) {
+            $cutoff = (int) ($params[':cutoff'] ?? 0);
+            $rows = array_values(array_filter(
+                $this->botDetectionEvents,
+                static fn (array $row): bool => (int) $row['event_time'] >= $cutoff
+            ));
+            usort(
+                $rows,
+                static function (array $a, array $b): int {
+                    $uidCmp = $a['user_id'] <=> $b['user_id'];
+                    return $uidCmp !== 0 ? $uidCmp : $a['event_time'] <=> $b['event_time'];
+                }
+            );
+
+            return $rows;
+        }
+
+        if (str_contains($qry, 'FROM %%USERS%%') && str_contains($qry, 'authlevel')) {
+            return $this->adminUsers;
+        }
+
+        return parent::select($qry, $params);
+    }
+}
+
+/**
+ * Source-inspection and runtime tests for BotDetectionCronjob.
  */
 class BotDetectionCronjobTest extends TestCase
 {
+    use SwapDatabaseInstance;
+
     private string $source;
+
+    private BotDetectionFakeDatabase $fake;
 
     protected function setUp(): void
     {
         $this->source = file_get_contents(
             __DIR__ . '/../../includes/classes/cronjob/BotDetectionCronjob.php'
         );
+
+        if (!defined('AUTH_ADM')) {
+            define('AUTH_ADM', 3);
+        }
+        if (!defined('AUTH_USR')) {
+            define('AUTH_USR', 0);
+        }
+        if (!defined('ROOT_UNI')) {
+            define('ROOT_UNI', 1);
+        }
+
+        $this->fake = new BotDetectionFakeDatabase();
+        $this->swapDatabaseInstance($this->fake);
+
+        $ref = new ReflectionProperty(Universe::class, 'availableUniverses');
+        $ref->setAccessible(true);
+        $ref->setValue([1]);
+    }
+
+    protected function tearDown(): void
+    {
+        $ref = new ReflectionProperty(Universe::class, 'availableUniverses');
+        $ref->setAccessible(true);
+        $ref->setValue(null);
+
+        $this->restoreDatabaseInstance();
+        parent::tearDown();
+    }
+
+    /**
+     * @return list<array{user_id: int, username: string, event_time: int}>
+     */
+    private function seedEvents(int $userId, string $username, int $count, int $gapSeconds, ?int $longGapAfterIndex = null, int $longGapSeconds = 0): array
+    {
+        $rows = [];
+        $time = TIMESTAMP - ($count * $gapSeconds);
+        for ($i = 0; $i < $count; $i++) {
+            if ($longGapAfterIndex !== null && $i === $longGapAfterIndex + 1) {
+                $time += $longGapSeconds;
+            } else {
+                $time += $gapSeconds;
+            }
+            $rows[] = [
+                'user_id'    => $userId,
+                'username'   => $username,
+                'event_time' => $time,
+            ];
+        }
+        $this->fake->botDetectionEvents = array_merge($this->fake->botDetectionEvents, $rows);
+
+        return $rows;
+    }
+
+    // -----------------------------------------------------------------------
+    // Runtime — run()
+    // -----------------------------------------------------------------------
+
+    public function test_run_does_nothing_when_no_events(): void
+    {
+        (new BotDetectionCronjob())->run();
+
+        $this->assertSame([], $this->fake->achievement->messages);
+    }
+
+    public function test_run_skips_users_with_fewer_than_min_actions(): void
+    {
+        $this->seedEvents(42, 'CasualPlayer', BotDetectionCronjob::MIN_ACTIONS - 1, 1800);
+        $this->fake->adminUsers = [['id' => 99]];
+
+        (new BotDetectionCronjob())->run();
+
+        $this->assertSame([], $this->fake->achievement->messages);
+    }
+
+    public function test_run_skips_users_with_natural_sleep_break(): void
+    {
+        $this->seedEvents(
+            42,
+            'Sleeper',
+            BotDetectionCronjob::MIN_ACTIONS,
+            1800,
+            4,
+            BotDetectionCronjob::SLEEP_THRESHOLD
+        );
+        $this->fake->adminUsers = [['id' => 99]];
+
+        (new BotDetectionCronjob())->run();
+
+        $this->assertSame([], $this->fake->achievement->messages);
+    }
+
+    public function test_run_sends_bot_report_to_admins(): void
+    {
+        $this->seedEvents(42, 'BotSuspect', BotDetectionCronjob::MIN_ACTIONS, 1800);
+        $this->fake->adminUsers = [
+            ['id' => 99],
+            ['id' => 100],
+        ];
+
+        (new BotDetectionCronjob())->run();
+
+        $this->assertCount(2, $this->fake->achievement->messages);
+
+        $recipientIds = array_map(
+            static fn (array $row): int => (int) $row[':userId'],
+            $this->fake->achievement->messages
+        );
+        $this->assertSame([99, 100], $recipientIds);
+
+        $message = $this->fake->achievement->messages[0];
+        $this->assertSame('Bot Detection Report', $message[':subject']);
+        $this->assertSame('Game Master', $message[':from']);
+        $this->assertSame(1, $message[':unread']);
+        $this->assertStringContainsString('BotSuspect', $message[':text']);
+        $this->assertStringContainsString('longest break: 0h 30m', $message[':text']);
+        $this->assertStringContainsString(
+            'no natural sleep break in the last ' . BotDetectionCronjob::DAYS_WINDOW . ' days',
+            $message[':text']
+        );
+    }
+
+    public function test_run_processes_each_available_universe(): void
+    {
+        $ref = new ReflectionProperty(Universe::class, 'availableUniverses');
+        $ref->setAccessible(true);
+        $ref->setValue([1, 2]);
+
+        $this->seedEvents(42, 'UniOneBot', BotDetectionCronjob::MIN_ACTIONS, 1800);
+        $this->fake->adminUsers = [['id' => 99]];
+
+        (new BotDetectionCronjob())->run();
+
+        $this->assertCount(2, $this->fake->achievement->messages);
+        $this->assertSame(99, $this->fake->achievement->messages[0][':userId']);
+        $this->assertSame(99, $this->fake->achievement->messages[1][':userId']);
     }
 
     // -----------------------------------------------------------------------
