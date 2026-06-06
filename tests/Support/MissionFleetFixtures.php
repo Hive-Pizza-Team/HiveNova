@@ -44,6 +44,102 @@ function expeditionFleetCombatReady(array $overrides = []): array
     ], $overrides));
 }
 
+/**
+ * Transport mission (mission 3) with typical cargo.
+ *
+ * @return array<string, mixed>
+ */
+function transportFleetFixture(array $overrides = []): array
+{
+    return missionFleetFixture(array_merge([
+        'fleet_mission' => 3,
+        'fleet_array' => '202,5;',
+        'fleet_resource_metal' => 1000,
+        'fleet_resource_crystal' => 500,
+        'fleet_resource_deuterium' => 250,
+        'fleet_resource_darkmatter' => 0,
+    ], $overrides));
+}
+
+/**
+ * Transport to the fleet owner's own planet (single notification).
+ *
+ * @return array<string, mixed>
+ */
+function transportFleetSelf(array $overrides = []): array
+{
+    return transportFleetFixture(array_merge([
+        'fleet_owner' => 1,
+        'fleet_target_owner' => 1,
+        'fleet_start_id' => 10,
+        'fleet_end_id' => 99,
+    ], $overrides));
+}
+
+/**
+ * Transport to another player's planet (owner + recipient notifications).
+ *
+ * @return array<string, mixed>
+ */
+function transportFleetForeign(array $overrides = []): array
+{
+    return transportFleetFixture(array_merge([
+        'fleet_owner' => 1,
+        'fleet_target_owner' => 2,
+        'fleet_start_id' => 10,
+        'fleet_end_id' => 99,
+    ], $overrides));
+}
+
+/**
+ * Seed FakeDatabase rows shared by transport mission tests.
+ */
+function transportDatabaseFixture(FakeDatabase $fake): void
+{
+    $fake->achievement->users[1] = ['id' => 1, 'lang' => 'en', 'universe' => 1];
+    $fake->achievement->users[2] = ['id' => 2, 'lang' => 'en', 'universe' => 1];
+
+    $fake->planetRowsById[10] = ['id' => 10, 'name' => 'Origin', 'id_owner' => 1];
+    $fake->planetRowsById[99] = ['id' => 99, 'name' => 'Colony', 'id_owner' => 2];
+}
+
+/**
+ * Constants and Universe state required by Log::saveTr on foreign deliveries.
+ */
+function transportMissionEnvironmentSetup(): void
+{
+    foreach ([
+        'SESSION_LIFETIME' => 3600,
+        'HTTP_ROOT' => '/',
+        'HTTPS' => false,
+        'PREVENT_MULTISESSIONS' => false,
+    ] as $name => $value) {
+        if (!defined($name)) {
+            define($name, $value);
+        }
+    }
+
+    $available = new ReflectionProperty(\HiveNova\Core\Universe::class, 'availableUniverses');
+    $available->setAccessible(true);
+    $available->setValue([1]);
+
+    $emulated = new ReflectionProperty(\HiveNova\Core\Universe::class, 'emulatedUniverse');
+    $emulated->setAccessible(true);
+    $emulated->setValue(1);
+}
+
+/**
+ * Reset Universe singleton state after transport tests.
+ */
+function transportMissionEnvironmentTeardown(): void
+{
+    foreach (['availableUniverses', 'currentUniverse', 'emulatedUniverse'] as $prop) {
+        $ref = new ReflectionProperty(\HiveNova\Core\Universe::class, $prop);
+        $ref->setAccessible(true);
+        $ref->setValue(null);
+    }
+}
+
 function missionFleetFixture(array $overrides = []): array
 {
     return array_merge([
