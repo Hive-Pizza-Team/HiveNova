@@ -22,6 +22,12 @@ class FakeDatabase implements DatabaseInterface
 
     public int $lastUserInsertId = 0;
 
+    /** @var list<array<string, mixed>> */
+    public array $galaxyRows = [];
+
+    /** @var list<array{ally_name: string}> */
+    public array $systemControlAlliances = [];
+
     private ?string $lastInsertKind = null;
 
     public function __construct(
@@ -57,6 +63,14 @@ class FakeDatabase implements DatabaseInterface
             return $this->flyingFleetsTableSelect($qry, $params);
         }
 
+        if ($this->isGalaxyDataQuery($qry)) {
+            return $this->galaxyDataSelect($qry, $params);
+        }
+
+        if ($this->isSystemControlQuery($qry)) {
+            return $this->systemControlSelect();
+        }
+
         return match ($this->route($qry)) {
             'fleet' => $this->fleetSelect($qry, $params),
             'session' => $this->session->select($qry, $params),
@@ -67,6 +81,59 @@ class FakeDatabase implements DatabaseInterface
     private function isFlyingFleetsTableQuery(string $qry): bool
     {
         return str_contains($qry, '%%FLEETS%%') && str_contains($qry, 'own_username');
+    }
+
+    private function isGalaxyDataQuery(string $qry): bool
+    {
+        return str_contains($qry, 'SQL_BIG_RESULT')
+            && str_contains($qry, '%%PLANETS%%')
+            && str_contains($qry, 'diploLevel');
+    }
+
+    private function isSystemControlQuery(string $qry): bool
+    {
+        return str_contains($qry, 'planet_count')
+            && str_contains($qry, 'ally_name')
+            && str_contains($qry, 'MAX(planet_count)');
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function galaxyDataSelect(string $qry, array $params): array
+    {
+        $galaxy = (int) ($params[':galaxy'] ?? 0);
+        $system = (int) ($params[':system'] ?? 0);
+        $universe = (int) ($params[':universe'] ?? 0);
+        $planetType = (int) ($params[':planetTypePlanet'] ?? 1);
+
+        return array_values(array_filter(
+            $this->galaxyRows,
+            static function (array $row) use ($galaxy, $system, $universe, $planetType): bool {
+                if ((int) ($row['galaxy'] ?? 0) !== $galaxy) {
+                    return false;
+                }
+                if ((int) ($row['system'] ?? 0) !== $system) {
+                    return false;
+                }
+                if (isset($row['universe']) && (int) $row['universe'] !== $universe) {
+                    return false;
+                }
+                if (isset($row['planet_type']) && (int) $row['planet_type'] !== $planetType) {
+                    return false;
+                }
+
+                return true;
+            }
+        ));
+    }
+
+    /**
+     * @return list<array{ally_name: string}>
+     */
+    private function systemControlSelect(): array
+    {
+        return $this->systemControlAlliances;
     }
 
     /**
