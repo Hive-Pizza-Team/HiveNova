@@ -17,8 +17,6 @@ class MissionCaseExpeditionEventsTest extends TestCase
 
     protected function setUp(): void
     {
-        mt_srand(42);
-
         if (!defined('MODULE_ACHIEVEMENTS')) {
             define('MODULE_ACHIEVEMENTS', 46);
         }

@@ -53,11 +53,101 @@ class FakeDatabase implements DatabaseInterface
 
     public function select($qry, array $params = [])
     {
+        if ($this->isFlyingFleetsTableQuery($qry)) {
+            return $this->flyingFleetsTableSelect($qry, $params);
+        }
+
         return match ($this->route($qry)) {
             'fleet' => $this->fleetSelect($qry, $params),
             'session' => $this->session->select($qry, $params),
             default => $this->achievement->select($qry, $params),
         };
+    }
+
+    private function isFlyingFleetsTableQuery(string $qry): bool
+    {
+        return str_contains($qry, '%%FLEETS%%') && str_contains($qry, 'own_username');
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function flyingFleetsTableSelect(string $qry, array $params): array
+    {
+        $rows = array_values($this->fleetRowsById);
+
+        if (isset($params[':acsId'])) {
+            $acsId = (int) $params[':acsId'];
+            $rows = array_values(array_filter(
+                $rows,
+                static fn (array $row): bool => (int) ($row['fleet_group'] ?? 0) === $acsId
+            ));
+        } elseif (isset($params[':planetId']) && str_contains($qry, 'fleet_start_id = :planetId')) {
+            $planetId = (int) $params[':planetId'];
+            $rows = array_values(array_filter(
+                $rows,
+                static function (array $row) use ($planetId): bool {
+                    $startMatch = (int) ($row['fleet_start_id'] ?? 0) === $planetId
+                        && (int) ($row['fleet_start_type'] ?? 0) === 1
+                        && (int) ($row['fleet_mission'] ?? 0) !== 4;
+                    $endMatch = (int) ($row['fleet_end_id'] ?? 0) === $planetId
+                        && (int) ($row['fleet_end_type'] ?? 0) === 1
+                        && (int) ($row['fleet_mission'] ?? 0) !== 8
+                        && in_array((int) ($row['fleet_mess'] ?? 0), [0, 2], true);
+
+                    return $startMatch || $endMatch;
+                }
+            ));
+        } elseif (isset($params[':userId'])) {
+            $userId = (int) $params[':userId'];
+            if (str_contains($qry, 'fleet_mission IN')) {
+                preg_match('/fleet_mission IN \(([^)]+)\)/', $qry, $matches);
+                $missions = array_map(intval(...), explode(',', $matches[1] ?? ''));
+                $rows = array_values(array_filter(
+                    $rows,
+                    static function (array $row) use ($userId, $missions): bool {
+                        $owner = (int) ($row['fleet_owner'] ?? 0) === $userId;
+                        $target = (int) ($row['fleet_target_owner'] ?? 0) === $userId
+                            && (int) ($row['fleet_mission'] ?? 0) !== 8;
+                        $missionOk = in_array((int) ($row['fleet_mission'] ?? 0), $missions, true);
+
+                        return ($owner || $target) && $missionOk;
+                    }
+                ));
+            } else {
+                $rows = array_values(array_filter(
+                    $rows,
+                    static function (array $row) use ($userId): bool {
+                        return (int) ($row['fleet_owner'] ?? 0) === $userId
+                            || ((int) ($row['fleet_target_owner'] ?? 0) === $userId
+                                && (int) ($row['fleet_mission'] ?? 0) !== 8);
+                    }
+                ));
+            }
+        } else {
+            return [];
+        }
+
+        return array_map(fn (array $row): array => $this->enrichFlyingFleetRow($row), $rows);
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private function enrichFlyingFleetRow(array $row): array
+    {
+        $ownerId = (int) ($row['fleet_owner'] ?? 0);
+        $targetId = (int) ($row['fleet_target_owner'] ?? 0);
+        $startPlanetId = (int) ($row['fleet_start_id'] ?? 0);
+        $endPlanetId = (int) ($row['fleet_end_id'] ?? 0);
+
+        $row['own_username'] = $this->achievement->users[$ownerId]['username'] ?? 'owner' . $ownerId;
+        $row['target_username'] = $this->achievement->users[$targetId]['username'] ?? 'target' . $targetId;
+        $row['own_planetname'] = $this->planetRowsById[$startPlanetId]['name'] ?? 'Planet' . $startPlanetId;
+        $row['target_planetname'] = $this->planetRowsById[$endPlanetId]['name'] ?? 'Planet' . $endPlanetId;
+
+        return $row;
     }
 
     public function selectSingle($qry, array $params = [], $field = false)

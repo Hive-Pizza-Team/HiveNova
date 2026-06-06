@@ -7,11 +7,31 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../Support/FakeDatabase.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 
+class PlayerUtilHomeworldFakeDatabase extends FakeDatabase
+{
+    /** @var list<int> */
+    public array $userHomeworldPlanetIds = [];
+
+    public function selectSingle($qry, array $params = [], $field = false)
+    {
+        if (str_contains($qry, '%%PLANETS%%')
+            && str_contains($qry, 'id NOT IN')
+            && str_contains($qry, 'id_planet')) {
+            $planetId = (int) ($params[':planetId'] ?? 0);
+            if (in_array($planetId, $this->userHomeworldPlanetIds, true)) {
+                return $field === false ? null : false;
+            }
+        }
+
+        return parent::selectSingle($qry, $params, $field);
+    }
+}
+
 class PlayerUtilCreatePlayerTest extends TestCase
 {
     use SwapDatabaseInstance;
 
-    private FakeDatabase $fake;
+    private PlayerUtilHomeworldFakeDatabase $fake;
 
     protected function setUp(): void
     {
@@ -19,7 +39,7 @@ class PlayerUtilCreatePlayerTest extends TestCase
             define('DEFAULT_THEME', 'hive');
         }
 
-        $this->fake = new FakeDatabase();
+        $this->fake = new PlayerUtilHomeworldFakeDatabase();
         $this->swapDatabaseInstance($this->fake);
 
         $ref = new ReflectionProperty(Config::class, 'instances');
@@ -125,5 +145,30 @@ class PlayerUtilCreatePlayerTest extends TestCase
             100,
             8,
         );
+    }
+
+    public function testDeletePlanetThrowsForCreatedPlayerHomeworld(): void
+    {
+        $this->fake->planetPositionCount = 0;
+
+        [, $planetId] = PlayerUtil::createPlayer(
+            1,
+            'homeworld',
+            'pw',
+            'home@example.com',
+            'homehive',
+            'en',
+            2,
+            100,
+            8,
+            'Capital',
+        );
+
+        $this->fake->userHomeworldPlanetIds = [$planetId];
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Can not found planet #' . $planetId . '!');
+
+        PlayerUtil::deletePlanet($planetId);
     }
 }
