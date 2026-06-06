@@ -51,6 +51,35 @@ class PlayerUtilTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // isHiveAccountExists — validation edge + live Hive API lookup
+    // -------------------------------------------------------------------------
+
+    /** @dataProvider invalidHiveAccountExistsProvider */
+    public function testIsHiveAccountExistsReturnsFalseForInvalidAccounts($account): void
+    {
+        $this->assertFalse(PlayerUtil::isHiveAccountExists($account));
+    }
+
+    public static function invalidHiveAccountExistsProvider(): array
+    {
+        return [
+            'null value'              => [null],
+            'empty string'            => [''],
+            'too long (17 chars)'     => ['averylonghiveaccountname'],
+            'starts with number'      => ['1player'],
+            'starts with hyphen'      => ['-player'],
+            'ends with hyphen'        => ['player-'],
+            'contains space'          => ['hive nova'],
+            'contains special chars'  => ['hive@nova'],
+        ];
+    }
+
+    public function testIsHiveAccountExistsReturnsFalseForValidFormatButMissingAccount(): void
+    {
+        $this->assertFalse(PlayerUtil::isHiveAccountExists('zzzznotexist9999'));
+    }
+
+    // -------------------------------------------------------------------------
     // isMailValid
     // -------------------------------------------------------------------------
 
@@ -316,5 +345,35 @@ class PlayerUtilTest extends TestCase
         ];
         // min=1, tech capped at planets_tech=4, bonus=0 → ceil(5)=5
         $this->assertSame(5, PlayerUtil::maxPlanetCount($USER));
+    }
+
+    public function testMaxPlanetCountIncludesOfficerBonus(): void
+    {
+        Config::setInstance($this->makePlanetCountConfig(), 1);
+        $GLOBALS['resource'][124] = 'astrophysics_tech';
+        $USER = [
+            'universe'          => 1,
+            'astrophysics_tech' => 2,
+            'factor'            => ['Planets' => 2],
+        ];
+        // min=1, tech=min(4,2)=2, bonus=min(2,2)=2 → ceil(5)=5
+        $this->assertSame(5, PlayerUtil::maxPlanetCount($USER));
+    }
+
+    public function testMaxPlanetCountUnlimitedTechWhenMinPlanetsDisabled(): void
+    {
+        Config::setInstance($this->makePlanetCountConfig([
+            'min_player_planets' => 0,
+            'planets_tech'       => 4,
+            'planets_officier'   => 2,
+        ]), 1);
+        $GLOBALS['resource'][124] = 'astrophysics_tech';
+        $USER = [
+            'universe'          => 1,
+            'astrophysics_tech' => 10,
+            'factor'            => ['Planets' => 5],
+        ];
+        // min=0, tech cap 999 → 10, bonus cap 999 → 5 → ceil(15)=15
+        $this->assertSame(15, PlayerUtil::maxPlanetCount($USER));
     }
 }

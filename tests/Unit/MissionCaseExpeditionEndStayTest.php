@@ -68,11 +68,7 @@ class MissionCaseExpeditionEndStayTest extends TestCase
     {
         mt_srand(2000);
 
-        $fleet = missionFleetFixture([
-            'fleet_array' => '202,10;',
-            'fleet_end_stay' => TIMESTAMP + 7200,
-            'fleet_start_time' => TIMESTAMP,
-        ]);
+        $fleet = expeditionFleetLongHold(['fleet_array' => '202,10;']);
 
         $mission = new MissionCaseExpedition($fleet);
         $mission->EndStayEvent();

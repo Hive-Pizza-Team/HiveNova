@@ -26,7 +26,7 @@ trait SwapDatabaseInstance
         $ref = new ReflectionClass(Database::class);
         $prop = $ref->getProperty('instance');
         $prop->setAccessible(true);
-        $prop->setValue($this->savedDatabaseInstance);
+        $prop->setValue(null, $this->savedDatabaseInstance);
         $this->savedDatabaseInstance = null;
     }
 }

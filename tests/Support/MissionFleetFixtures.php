@@ -5,6 +5,45 @@
  *
  * @return array<string, mixed>
  */
+/**
+ * Expedition stay long enough that hold-time penalty forces the resource-find branch.
+ *
+ * @return array<string, mixed>
+ */
+function expeditionFleetLongHold(array $overrides = []): array
+{
+    return missionFleetFixture(array_merge([
+        'fleet_mission' => 15,
+        'fleet_end_stay' => TIMESTAMP + 400000,
+        'fleet_start_time' => TIMESTAMP,
+        'fleet_array' => '202,10;',
+        'fleet_resource_metal' => 0,
+        'fleet_resource_crystal' => 0,
+        'fleet_resource_deuterium' => 0,
+        'fleet_resource_darkmatter' => 0,
+    ], $overrides));
+}
+
+/**
+ * Expedition fleet tuned for combat / ship-find branches (strong fleet, short hold).
+ *
+ * @return array<string, mixed>
+ */
+function expeditionFleetCombatReady(array $overrides = []): array
+{
+    return missionFleetFixture(array_merge([
+        'fleet_mission' => 15,
+        'fleet_end_stay' => TIMESTAMP + 7200,
+        'fleet_start_time' => TIMESTAMP,
+        'fleet_array' => '204,500;206,50;207,20;',
+        'fleet_amount' => 570,
+        'fleet_resource_metal' => 0,
+        'fleet_resource_crystal' => 0,
+        'fleet_resource_deuterium' => 0,
+        'fleet_resource_darkmatter' => 0,
+    ], $overrides));
+}
+
 function missionFleetFixture(array $overrides = []): array
 {
     return array_merge([

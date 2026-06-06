@@ -1,12 +1,17 @@
 <?php
 
 use HiveNova\Core\Config;
+use HiveNova\Core\Database;
+use HiveNova\Core\DatabaseInterface;
 use HiveNova\Core\ResourceUpdate;
 
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/../Support/FakeDatabase.php';
+
 class ResourceUpdateTest extends TestCase
 {
+	private ?DatabaseInterface $previousDb = null;
 	// -----------------------------------------------------------------------
 	// Fixtures
 	// -----------------------------------------------------------------------
@@ -33,6 +38,7 @@ class ResourceUpdateTest extends TestCase
 	{
 		return [
 			1   => 'metal_mine',
+			6   => 'research_lab',
 			21  => 'hangar',
 			202 => 'light_fighter',
 			901 => 'metal',
@@ -45,7 +51,7 @@ class ResourceUpdateTest extends TestCase
 			24  => 'solar_satellite',
 			31  => 'intergalactic_research',
 			113 => 'energy_tech',
-			123 => 'intergalactic_research',
+			123 => 'intergalactic_research_tech',
 			131 => 'plasma_tech',
 			132 => 'graviton_tech',
 			133 => 'laser_tech',
@@ -59,7 +65,48 @@ class ResourceUpdateTest extends TestCase
 			'storage'  => [],
 			'resstype' => [1 => [901, 902, 903], 2 => [911]],
 			'one'      => [],
+			'build'    => [1],
+			'tech'     => [113],
+			'fleet'    => [202],
+			'defense'  => [],
+			'officier' => [],
 		];
+	}
+
+	/** Minimal ProdGrid formulae for metal mine (1) and solar plant (22). */
+	private function makeProdGrid(): array
+	{
+		return [
+			1 => [
+				'production' => [
+					901 => '3600 * $BuildLevel * ($BuildLevelFactor / 10)',
+					911 => '-360 * $BuildLevel * ($BuildLevelFactor / 10)',
+				],
+			],
+			22 => [
+				'production' => [
+					911 => '3600 * $BuildLevel * ($BuildLevelFactor / 10)',
+				],
+			],
+			23 => [
+				'storage' => [
+					901 => '50000 * $BuildLevel',
+				],
+			],
+		];
+	}
+
+	private function installProdGrid(): void
+	{
+		$GLOBALS['ProdGrid'] = $this->makeProdGrid();
+	}
+
+	private function useFakeDatabase(FakeDatabase $fake): FakeDatabase
+	{
+		$this->previousDb = Database::get();
+		Database::setInstance($fake);
+
+		return $fake;
 	}
 
 	private function makeUser(array $overrides = []): array
@@ -85,6 +132,7 @@ class ResourceUpdateTest extends TestCase
 			'laser_tech'                => 0,
 			'energy_tech'               => 0,
 			'intergalactic_research'    => 0,
+			'intergalactic_research_tech' => 0,
 		], $overrides);
 	}
 
@@ -117,7 +165,14 @@ class ResourceUpdateTest extends TestCase
 			'fusion_reactor'              => 0,
 			'fusion_reactor_porcent'      => 100,
 			'solar_satellite'             => 0,
-			'solar_satellite_porcent'     => 100,
+			'metal_mine'                  => 0,
+			'metal_mine_porcent'          => 100,
+			'name'                        => 'Homeworld',
+			'galaxy'                      => 1,
+			'system'                      => 1,
+			'planet'                      => 8,
+			'research_lab'                => 0,
+			'intergalactic_research'      => 0,
 		], $overrides);
 	}
 
@@ -157,6 +212,27 @@ class ResourceUpdateTest extends TestCase
 		$ref = new ReflectionProperty(Config::class, 'instances');
 		$ref->setAccessible(true);
 		$ref->setValue(null, []);
+
+		$GLOBALS['pricelist'][113] = [
+			'cost'   => [901 => 0, 902 => 0, 903 => 0],
+			'factor' => 2,
+			'time'   => 1,
+		];
+	}
+
+	protected function tearDown(): void
+	{
+		unset($GLOBALS['ProdGrid']);
+
+		if ($this->previousDb instanceof DatabaseInterface) {
+			Database::setInstance($this->previousDb);
+		} else {
+			$ref = new ReflectionClass(Database::class);
+			$prop = $ref->getProperty('instance');
+			$prop->setAccessible(true);
+			$prop->setValue(null, null);
+		}
+		$this->previousDb = null;
 	}
 
 	// -----------------------------------------------------------------------

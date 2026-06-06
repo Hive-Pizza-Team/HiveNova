@@ -33,7 +33,7 @@ class PlayerUtilBadgesTest extends TestCase
 
         $cache = new ReflectionProperty(AchievementService::class, 'schemaReadyCache');
         $cache->setAccessible(true);
-        $cache->setValue(null);
+        $cache->setValue(null, null);
 
         $this->restoreDatabaseInstance();
         parent::tearDown();
@@ -61,5 +61,37 @@ class PlayerUtilBadgesTest extends TestCase
 
         $this->assertStringContainsString('achievement-badge', $html);
         $this->assertStringContainsString('combat_first_win', $html);
+    }
+
+    public function test_getAchievementBadges_returns_empty_when_module_disabled(): void
+    {
+        $modules = array_fill(0, 50, '1');
+        $modules[46] = '0';
+        Config::setInstance(new Config(['uni' => 1, 'moduls' => implode(';', $modules)]), 1);
+
+        $this->assertSame('', PlayerUtil::getAchievementBadges(7));
+    }
+
+    public function test_getAchievementBadges_returns_empty_when_schema_not_ready(): void
+    {
+        $fake = new FakeDatabase();
+        $this->swapDatabaseInstance($fake);
+        $fake->achievement->schemaReady = false;
+
+        $this->assertSame('', PlayerUtil::getAchievementBadges(7));
+    }
+
+    public function test_getAchievementBadges_returns_empty_when_user_has_no_unlocks(): void
+    {
+        $fake = new FakeDatabase();
+        $this->swapDatabaseInstance($fake);
+
+        $this->assertSame('', PlayerUtil::getAchievementBadges(99));
+    }
+
+    public function test_getPlayerBadges_broken_chain_for_invalid_hive_username(): void
+    {
+        $user = ['username' => 'Not Valid!', 'hive_account' => ''];
+        $this->assertSame('⛓️‍💥', PlayerUtil::getPlayerBadges($user));
     }
 }
