@@ -136,6 +136,7 @@ $LNG['ov_security_confirm']					= 'Por favor, confirma se queres destruir o plan
 $LNG['ov_password']							= 'Senha';
 $LNG['ov_delete_planet']					= 'Apagar Planeta';
 $LNG['ov_planet_rename']					= 'Renomear Planeta';
+$LNG['ov_rename_short']						= 'renomear';
 $LNG['ov_rename_label']						= 'Novo nome';
 $LNG['ov_fields']							= 'Campos';
 $LNG['ov_developed_fields']					= 'Campos usados';
