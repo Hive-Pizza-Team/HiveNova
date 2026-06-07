@@ -104,14 +104,14 @@ foreach ($popupPages as $query) {
         echo "[ SKIP ] popup layout leaves ingame: $label → $effectiveUrl\n";
         continue;
     }
-    if (strpos($body, 'id="bottom-nav"') === false) {
-        echo "[ FAIL ] popup layout missing bottom-nav: $label\n";
+    if (strpos($body, 'id="bottom-nav"') !== false) {
+        echo "[ FAIL ] popup layout must not include bottom-nav: $label\n";
         $fail++;
     }
 }
 
 if ($fail === 0) {
-    echo "All checked pages include #bottom-nav.\n";
+    echo "Bottom navigation present on full pages and absent on popup pages.\n";
     exit(0);
 }
 
