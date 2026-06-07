@@ -127,6 +127,7 @@ $LNG['ov_security_confirm']               = 'Подтвердите пароле
 $LNG['ov_password']                       = 'Пароль';
 $LNG['ov_delete_planet']                  = 'Удаление планеты';
 $LNG['ov_planet_rename']                  = 'Переименование планеты';
+$LNG['ov_rename_short']                   = 'переименовать';
 $LNG['ov_rename_label']                   = 'Новое название';
 $LNG['ov_fields']                         = 'Поля';
 $LNG['ov_developed_fields']               = 'застроенная территория';

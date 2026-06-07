@@ -134,6 +134,7 @@ $LNG['ov_security_confirm']					= 'Bitte bestätigen sie, dass sie den Planet %s
 $LNG['ov_password']						= 'Passwort';
 $LNG['ov_delete_planet']					= 'Aufgeben';
 $LNG['ov_planet_rename']					= 'Umbenennen';
+$LNG['ov_rename_short']						= 'umbenennen';
 $LNG['ov_rename_label']						= 'Neuer Name';
 $LNG['ov_fields']						= 'Felder';
 $LNG['ov_developed_fields']					= 'bebaute Felder';

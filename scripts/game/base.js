@@ -232,8 +232,12 @@ var Dialog	= {
 		return Dialog.open('game.php?page=buddyList&mode=request&id='+ID, 650, 300);
 	},
 	
-	PlanetAction: function() {
-		return Dialog.open('game.php?page=overview&mode=actions', 400, 210);
+	PlanetAction: function(tab) {
+		var url = 'game.php?page=overview&mode=actions';
+		if (tab === 'delete') {
+			url += '&tab=delete';
+		}
+		return Dialog.open(url, 400, 210);
 	},
 	
 	AllianceChat: function() {
