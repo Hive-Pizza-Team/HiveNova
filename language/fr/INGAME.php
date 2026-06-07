@@ -122,6 +122,7 @@ $LNG['ov_security_confirm']					= 'S\'il vous plaît confirmer que la planète';
 $LNG['ov_password']							= 'Mot de passe';
 $LNG['ov_delete_planet']					= 'Abandonner planète';
 $LNG['ov_planet_rename']					= 'Renommer';
+$LNG['ov_rename_short']						= 'renommer';
 $LNG['ov_rename_label']						= 'Nouveau nom';
 $LNG['ov_fields']							= 'Cases';
 $LNG['ov_developed_fields']                = 'Cases occupées';

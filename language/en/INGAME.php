@@ -143,6 +143,7 @@ $LNG['ov_security_confirm']					= 'Please confirm if you want to destroy the pla
 $LNG['ov_password']							= 'Password';
 $LNG['ov_delete_planet']					= 'Delete Planet';
 $LNG['ov_planet_rename']					= 'Rename Planet';
+$LNG['ov_rename_short']						= 'rename';
 $LNG['ov_rename_label']						= 'New name';
 $LNG['ov_fields']							= 'Fields';
 $LNG['ov_developed_fields']					= 'Fields used';
