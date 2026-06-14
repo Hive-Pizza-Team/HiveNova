@@ -9,10 +9,13 @@ const {
 	hasOverviewPlanetDom,
 	isLoaderConfigValid,
 	isHiveThemePath,
+	getVisualSlotSide,
+	reserveOverviewCanvasSlot,
 	resolveFallbackSrc,
 	FALLBACK,
 	LOADING,
-	READY
+	READY,
+	VISUAL_SIZE_CAP
 } = require('../../scripts/game/overview-planet-loader-utils.js');
 
 function createClassList() {
@@ -20,7 +23,8 @@ function createClassList() {
 	return {
 		add(name) { classes.add(name); },
 		remove(name) { classes.delete(name); },
-		has(name) { return classes.has(name); }
+		has(name) { return classes.has(name); },
+		contains(name) { return classes.has(name); }
 	};
 }
 
@@ -33,9 +37,10 @@ function createFallbackImg(dataSrc) {
 	};
 }
 
-function createOverviewDom({ withData = true, withCanvas = true, dataSrc = './styles/theme/hive/planeten/normaltempplanet03_hq.jpg' } = {}) {
-	const wrap = { classList: createClassList() };
-	const canvas = { id: 'overview-planet-canvas', parentElement: wrap };
+function createOverviewDom({ withData = true, withCanvas = true, dataSrc = './styles/theme/hive/planeten/normaltempplanet03_hq.jpg', slotWidth = 0 } = {}) {
+	const wrap = { classList: createClassList(), clientWidth: slotWidth, style: {} };
+	wrap.classList.add('overview-planet-visual');
+	const canvas = { id: 'overview-planet-canvas', parentElement: wrap, width: 0, height: 0 };
 	const fallbackImg = createFallbackImg(dataSrc);
 	const nodes = {
 		'overview-planet-data': withData ? { id: 'overview-planet-data' } : null,
@@ -109,11 +114,26 @@ describe('overview-planet-loader fallback helpers', () => {
 		);
 	});
 
-	it('applyLoadingVisual keeps a dimmed placeholder visible during boot', () => {
+	it('applyLoadingVisual marks boot state without promoting fallback image', () => {
 		const { wrap, fallbackImg } = createOverviewDom();
 		applyLoadingVisual(wrap, fallbackImg);
 		assert.equal(wrap.classList.has(LOADING), true);
-		assert.equal(fallbackImg.getAttribute('src'), './styles/theme/hive/planeten/normaltempplanet03_hq.jpg');
+		assert.equal(fallbackImg.getAttribute('src'), null);
+	});
+
+	it('getVisualSlotSide caps width at the visual maximum', () => {
+		const wrap = { clientWidth: 360, getBoundingClientRect: () => ({ width: 360 }) };
+		assert.equal(getVisualSlotSide(wrap), VISUAL_SIZE_CAP);
+	});
+
+	it('reserveOverviewCanvasSlot sets square canvas attributes from wrapper width', () => {
+		const { canvas, wrap, doc } = createOverviewDom({ slotWidth: 220 });
+		const side = reserveOverviewCanvasSlot(doc);
+		assert.equal(side, 220);
+		assert.equal(canvas.width, 220);
+		assert.equal(canvas.height, 220);
+		assert.equal(wrap.style.width, '220px');
+		assert.equal(wrap.style.height, '220px');
 	});
 
 	it('isHiveThemePath detects hive skin paths only', () => {

@@ -16,6 +16,79 @@
 	var LOADING = 'overview-planet-visual--loading';
 	var READY = 'overview-planet-visual--ready';
 	var FALLBACK = 'overview-planet-visual--fallback';
+	var VISUAL_SIZE_CAP = 280;
+
+	function getVisualSlotSide(wrap, cap) {
+		cap = cap || VISUAL_SIZE_CAP;
+		if (!wrap) {
+			return cap;
+		}
+
+		var available = wrap.clientWidth;
+		if (!(available > 0)) {
+			available = wrap.getBoundingClientRect().width;
+		}
+		if (!(available > 0) && wrap.parentElement) {
+			var parentWidth = wrap.parentElement.clientWidth;
+			if (parentWidth > 0) {
+				available = parentWidth;
+			}
+		}
+		if (!(available > 0)) {
+			return cap;
+		}
+
+		return Math.max(120, Math.round(Math.min(available, cap)));
+	}
+
+	function reserveOverviewCanvasSlot(doc) {
+		doc = doc || (typeof document !== 'undefined' ? document : null);
+		if (!doc) {
+			return 0;
+		}
+
+		var canvas = doc.getElementById('overview-planet-canvas');
+		if (!canvas) {
+			return 0;
+		}
+
+		var wrap = canvas.parentElement;
+		if (!wrap || !wrap.classList.contains('overview-planet-visual')) {
+			return 0;
+		}
+
+		var side = getVisualSlotSide(wrap);
+		canvas.width = side;
+		canvas.height = side;
+		if (side > 0 && wrap.clientWidth > 0 && wrap.style) {
+			wrap.style.width = side + 'px';
+			wrap.style.height = side + 'px';
+		}
+		return side;
+	}
+
+	function watchOverviewVisualSlot(doc) {
+		doc = doc || (typeof document !== 'undefined' ? document : null);
+		if (!doc || typeof ResizeObserver === 'undefined') {
+			return;
+		}
+
+		var canvas = doc.getElementById('overview-planet-canvas');
+		var wrap = canvas && canvas.parentElement;
+		if (!wrap || !wrap.classList.contains('overview-planet-visual')) {
+			return;
+		}
+
+		var observer = new ResizeObserver(function () {
+			if (wrap.clientWidth > 0) {
+				reserveOverviewCanvasSlot(doc);
+			}
+		});
+		observer.observe(wrap);
+		if (wrap.parentElement) {
+			observer.observe(wrap.parentElement);
+		}
+	}
 
 	function resolveFallbackSrc(fallbackImg) {
 		if (!fallbackImg) {
@@ -44,6 +117,10 @@
 		}
 		if (fallbackImg) {
 			resolveFallbackSrc(fallbackImg);
+			var alt = fallbackImg.getAttribute('data-alt');
+			if (alt) {
+				fallbackImg.setAttribute('alt', alt);
+			}
 			fallbackImg.removeAttribute('aria-hidden');
 		}
 	}
@@ -52,9 +129,6 @@
 		if (wrap) {
 			wrap.classList.add(LOADING);
 			wrap.classList.remove(READY, FALLBACK);
-		}
-		if (fallbackImg) {
-			resolveFallbackSrc(fallbackImg);
 		}
 	}
 
@@ -79,6 +153,10 @@
 		LOADING: LOADING,
 		READY: READY,
 		FALLBACK: FALLBACK,
+		VISUAL_SIZE_CAP: VISUAL_SIZE_CAP,
+		getVisualSlotSide: getVisualSlotSide,
+		reserveOverviewCanvasSlot: reserveOverviewCanvasSlot,
+		watchOverviewVisualSlot: watchOverviewVisualSlot,
 		resolveFallbackSrc: resolveFallbackSrc,
 		applyFallbackVisual: applyFallbackVisual,
 		applyLoadingVisual: applyLoadingVisual,

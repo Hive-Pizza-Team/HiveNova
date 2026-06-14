@@ -53,7 +53,7 @@ class GalaxyRows
 		global $USER;
 
         $sql	= 'SELECT SQL_BIG_RESULT DISTINCT
-		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.temp_max, p.field_current, p.field_max, p.terraformer, p.destruyed, p.der_metal, p.der_crystal, p.id_luna, 
+		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.temp_max, p.field_current, p.field_max, p.destruyed, p.der_metal, p.der_crystal, p.id_luna,
 		u.id as userid, u.ally_id, u.username, u.onlinetime, u.urlaubs_modus, u.banaday, 
 		m.id as m_id, m.diameter as m_diameter, m.name as m_name, m.temp_min as m_temp_min, m.temp_max as m_temp_max, m.mondbasis as m_mondbasis, m.last_update as m_last_update,
 		s.total_points, s.total_rank, 
@@ -307,13 +307,17 @@ class GalaxyRows
 		if(!isset($this->galaxyRow['m_id'])) {
 			$this->galaxyData[$this->galaxyRow['planet']]['moon']	= false;
 		} else {
+			$themePath = $THEME->getTheme();
+			$vizEnabled = str_contains($themePath, '/hive/');
 			$this->galaxyData[$this->galaxyRow['planet']]['moon']	= array(
 				'id'		=> $this->galaxyRow['m_id'],
 				'name'		=> htmlspecialchars((string) $this->galaxyRow['m_name'], ENT_QUOTES, "UTF-8"),
 				'temp_min'	=> $this->galaxyRow['m_temp_min'], 
 				'temp_max'	=> $this->galaxyRow['m_temp_max'],
 				'diameter'	=> $this->galaxyRow['m_diameter'],
-				'vizJson'	=> $this->buildMoonVizJson($THEME->getTheme()),
+				'vizJson'	=> $vizEnabled
+					? $this->buildMoonVizJson($this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'], $themePath)
+					: '',
 			);
 		}
 	}
@@ -323,26 +327,93 @@ class GalaxyRows
 		global $THEME;
 
 		$ownPlanet = $this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'];
+		$themePath = $THEME->getTheme();
+		$vizEnabled = str_contains($themePath, '/hive/');
 		$this->galaxyData[$this->galaxyRow['planet']]['planet']	= array(
 			'id'			=> $this->galaxyRow['id'],
 			'name'			=> htmlspecialchars((string) $this->galaxyRow['name'], ENT_QUOTES, "UTF-8"),
 			'image'			=> $this->galaxyRow['image'],
 			'phalanx'		=> isModuleAvailable(MODULE_PHALANX) && ShowPhalanxPage::allowPhalanx($this->galaxyRow['galaxy'], $this->galaxyRow['system']),
-			'vizJson'		=> $this->buildPlanetVizJson($ownPlanet, $THEME->getTheme()),
+			'vizJson'		=> $vizEnabled ? $this->buildPlanetVizJson($ownPlanet, $themePath) : '',
 		);
+	}
+
+	protected function getPlanetInventoryColumns(): array
+	{
+		global $resource, $reslist;
+
+		$columns = array();
+		foreach (array('build', 'fleet', 'defense') as $category) {
+			if (empty($reslist[$category])) {
+				continue;
+			}
+			foreach ($reslist[$category] as $elementID) {
+				if (empty($resource[$elementID])) {
+					continue;
+				}
+				$columns[] = $resource[$elementID];
+			}
+		}
+
+		return $columns;
+	}
+
+	protected function fetchPlanetInventory(int $planetId): array
+	{
+		$columns = $this->getPlanetInventoryColumns();
+		if ($planetId <= 0 || !$columns) {
+			return array();
+		}
+
+		$sql = 'SELECT ' . implode(', ', $columns) . ' FROM %%PLANETS%% WHERE id = :planetId;';
+		$row = Database::get()->selectSingle($sql, array(
+			':planetId' => $planetId,
+		));
+
+		return is_array($row) ? $row : array();
+	}
+
+	protected function resolveInventoryRow(bool $ownPlanet): array
+	{
+		if (!$ownPlanet || empty($this->galaxyRow['id'])) {
+			return $this->galaxyRow;
+		}
+
+		return array_merge($this->galaxyRow, $this->fetchPlanetInventory((int) $this->galaxyRow['id']));
+	}
+
+	protected function buildCountMap(array $elementIds, array $sourceRow = null)
+	{
+		global $resource;
+
+		$sourceRow = $sourceRow ?? $this->galaxyRow;
+		$map = array();
+		foreach ($elementIds as $elementID) {
+			if (empty($resource[$elementID])) {
+				continue;
+			}
+			$column = $resource[$elementID];
+			$value = (int) ($sourceRow[$column] ?? 0);
+			if ($value > 0) {
+				$map[$elementID] = $value;
+			}
+		}
+
+		return $map ?: new \stdClass();
 	}
 
 	protected function buildPlanetVizJson($ownPlanet, $dpath)
 	{
-		global $resource;
+		global $resource, $reslist;
 
+		$inventoryRow = $this->resolveInventoryRow($ownPlanet);
 		$fieldsCurrent = 0;
 		$fieldsMax = 0;
 		if ($ownPlanet) {
 			$fieldsCurrent = (int) $this->galaxyRow['field_current'];
 			$planetForFields = array(
 				'field_max' => (int) $this->galaxyRow['field_max'],
-				$resource[33] => (int) ($this->galaxyRow['terraformer'] ?? 0),
+				$resource[33] => (int) ($inventoryRow[$resource[33]] ?? 0),
 				$resource[41] => 0,
 			);
 			$fieldsMax = max(1, (int) CalculateMaxPlanetFields($planetForFields));
@@ -379,9 +450,9 @@ class GalaxyRows
 			'galaxy'    => (int) $this->galaxyRow['galaxy'],
 			'system'    => (int) $this->galaxyRow['system'],
 			'planet'    => (int) $this->galaxyRow['planet'],
-			'buildings' => new \stdClass(),
-			'fleet'     => new \stdClass(),
-			'defense'   => new \stdClass(),
+			'buildings' => $ownPlanet ? $this->buildCountMap($reslist['build'], $inventoryRow) : new \stdClass(),
+			'fleet'     => $ownPlanet ? $this->buildCountMap($reslist['fleet'], $inventoryRow) : new \stdClass(),
+			'defense'   => $ownPlanet ? $this->buildCountMap($reslist['defense'], $inventoryRow) : new \stdClass(),
 			'queue'     => array(
 				'building' => 0,
 				'hangar'   => 0,
@@ -398,7 +469,7 @@ class GalaxyRows
 		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 	}
 
-	protected function buildMoonVizJson($dpath)
+	protected function buildMoonVizJson($ownPlanet, $dpath)
 	{
 		$tempMin = (int) $this->galaxyRow['m_temp_min'];
 		$tempMax = (int) $this->galaxyRow['m_temp_max'];
@@ -407,7 +478,7 @@ class GalaxyRows
 		}
 
 		$moonBaseLevel = (int) ($this->galaxyRow['m_mondbasis'] ?? 0);
-		$buildings = $moonBaseLevel > 0 ? array(41 => $moonBaseLevel) : new \stdClass();
+		$buildings = ($ownPlanet && $moonBaseLevel > 0) ? array(41 => $moonBaseLevel) : new \stdClass();
 
 		$payload = array(
 			'texture'   => 'mond',
@@ -432,8 +503,11 @@ class GalaxyRows
 			'moon'      => null,
 			'debris'    => null,
 			'dpath'     => $dpath,
-			'vizState'  => 'unknown',
 		);
+
+		if (!$ownPlanet) {
+			$payload['vizState'] = 'unknown';
+		}
 
 		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 	}

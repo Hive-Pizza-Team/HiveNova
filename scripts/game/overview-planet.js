@@ -4,8 +4,8 @@
  * The game's planeten/*.jpg files are pre-rendered planet portraits (baked
  * shading + black background), so they cannot be used as sphere textures.
  * Instead we synthesize a seamless equirectangular surface procedurally from
- * the planet's biome (derived from its image name) and temperature, render city
- * lights on a night-side emissive overlay mesh, and add a fresnel atmosphere,
+ * the planet's biome (derived from its image name) and temperature, bake city/buildup
+ * lights into the base material emissive map, and add a fresnel atmosphere,
  * clouds, a solar-satellite ring, ship traffic and construction activity.
  *
  * Production behaviour: static JPG fallback only when WebGL fails or is unavailable;
@@ -22,9 +22,6 @@
 	var satelliteMesh, shipGroup, constructionBeam, starField;
 	var moonOrbitGroup, debrisOrbitGroup;
 	var unknownScanGroup = null;
-	var nightEmissiveMesh = null;
-	var nightEmissiveUniforms = null;
-	var sceneSunLight = null;
 	var previewRenderer = null;
 	var previewCanvasEl = null;
 	var rafId = null;
@@ -109,74 +106,6 @@
 		material.dispose();
 	}
 
-	// City/buildup emissive on a night-side overlay (Coruscant-style).
-	var NIGHT_EMISSIVE_VERTEX_SHADER = [
-		'varying vec2 vHiveNovaUv;',
-		'varying vec3 vHiveNovaWorldNormal;',
-		'void main() {',
-		'  vHiveNovaUv = uv;',
-		'  vHiveNovaWorldNormal = normalize(mat3(modelMatrix) * normal);',
-		'  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
-		'}'
-	].join('\n');
-
-	var NIGHT_EMISSIVE_FRAGMENT_SHADER = [
-		'uniform sampler2D uEmissiveMap;',
-		'uniform sampler2D uSurfaceMap;',
-		'uniform vec3 uSunDirection;',
-		'uniform float uIntensity;',
-		'uniform float uTerminator;',
-		'uniform float uDayBleed;',
-		'uniform float uNightSurfaceGlow;',
-		'varying vec2 vHiveNovaUv;',
-		'varying vec3 vHiveNovaWorldNormal;',
-		'void main() {',
-		'  vec3 cityColor = texture2D(uEmissiveMap, vHiveNovaUv).rgb;',
-		'  float cityLum = max(cityColor.r, max(cityColor.g, cityColor.b));',
-		'  float sunFacing = dot(normalize(vHiveNovaWorldNormal), normalize(uSunDirection));',
-		'  float night = 1.0 - smoothstep(-0.06, uTerminator, sunFacing);',
-		'  float cityMask = mix(uDayBleed, 1.0, night);',
-		'  vec3 city = cityColor * cityMask * uIntensity;',
-		'  vec3 surf = texture2D(uSurfaceMap, vHiveNovaUv).rgb * uNightSurfaceGlow * night;',
-		'  vec3 color = city + surf;',
-		'  float bright = max(cityLum * cityMask * uIntensity, max(surf.r, max(surf.g, surf.b)));',
-		'  if (bright < 0.0015) discard;',
-		'  gl_FragColor = vec4(color, 1.0);',
-		'}'
-	].join('\n');
-
-	function attachNightEmissiveOverlay(planetGeo, emissiveMap, surfaceMap, options) {
-		options = options || {};
-		nightEmissiveUniforms = {
-			uEmissiveMap: { value: emissiveMap },
-			uSurfaceMap: { value: surfaceMap },
-			uSunDirection: { value: new THREE.Vector3(1, 0.4, 0.75).normalize() },
-			uIntensity: { value: options.intensity !== undefined ? options.intensity : 1.0 },
-			uTerminator: { value: options.terminator !== undefined ? options.terminator : 0.38 },
-			uDayBleed: { value: options.dayBleed !== undefined ? options.dayBleed : 0.04 },
-			uNightSurfaceGlow: { value: options.nightSurfaceGlow !== undefined ? options.nightSurfaceGlow : 0.22 }
-		};
-		if (sceneSunLight) {
-			nightEmissiveUniforms.uSunDirection.value.copy(sceneSunLight.position).normalize();
-		}
-		var material = new THREE.ShaderMaterial({
-			uniforms: nightEmissiveUniforms,
-			vertexShader: NIGHT_EMISSIVE_VERTEX_SHADER,
-			fragmentShader: NIGHT_EMISSIVE_FRAGMENT_SHADER,
-			transparent: true,
-			blending: THREE.CustomBlending,
-			blendEquation: THREE.AddEquation,
-			blendSrc: THREE.OneFactor,
-			blendDst: THREE.OneFactor,
-			depthWrite: false,
-			toneMapped: false
-		});
-		nightEmissiveMesh = new THREE.Mesh(planetGeo, material);
-		nightEmissiveMesh.scale.setScalar(1.0025);
-		nightEmissiveMesh.renderOrder = 2;
-		planetSystem.add(nightEmissiveMesh);
-	}
-
 	function disposeObject3D(root) {
 		if (!root) {
 			return;
@@ -245,7 +174,6 @@
 		if (isLoading) {
 			wrap.classList.add('overview-planet-visual--loading');
 			wrap.classList.remove('overview-planet-visual--ready', 'overview-planet-visual--fallback');
-			ensureFallbackSrc();
 		} else {
 			wrap.classList.remove('overview-planet-visual--loading');
 		}
@@ -285,6 +213,10 @@
 		wrap.classList.add('overview-planet-visual--fallback');
 		ensureFallbackSrc();
 		if (fallbackImg) {
+			var alt = fallbackImg.getAttribute('data-alt');
+			if (alt) {
+				fallbackImg.setAttribute('alt', alt);
+			}
 			fallbackImg.removeAttribute('aria-hidden');
 		}
 	}
@@ -1795,14 +1727,26 @@
 			return viewerOptions.fixedSize;
 		}
 		var wrap = canvas.parentElement;
+		if (typeof OverviewPlanetLoaderUtils !== 'undefined'
+			&& typeof OverviewPlanetLoaderUtils.getVisualSlotSide === 'function') {
+			return OverviewPlanetLoaderUtils.getVisualSlotSide(wrap);
+		}
 		if (!wrap) {
 			return 280;
 		}
 		var rect = wrap.getBoundingClientRect();
 		var cap = 280;
-		// Always render a square buffer so the planet stays a perfect sphere.
-		var side = Math.max(120, Math.round(Math.min(rect.width, rect.height || rect.width, cap)));
-		return side;
+		return Math.max(120, Math.round(Math.min(rect.width, rect.height || rect.width, cap)));
+	}
+
+	function reserveCanvasSlot() {
+		if (viewerOptions.preview || !canvas) {
+			return;
+		}
+		if (typeof OverviewPlanetLoaderUtils !== 'undefined'
+			&& typeof OverviewPlanetLoaderUtils.reserveOverviewCanvasSlot === 'function') {
+			OverviewPlanetLoaderUtils.reserveOverviewCanvasSlot();
+		}
 	}
 
 	function applySize() {
@@ -1880,8 +1824,6 @@
 		var matOpts = { map: surfaceTex, roughness: 0.95, metalness: 0.02 };
 		var useBuildup = buildupRatio !== null && buildupRatio > 0.02
 			&& style.band !== 'unknown' && style.band !== 'destroyed';
-		var nightOverlayTex = null;
-		var nightOverlayOpts = null;
 
 		if (style.band === 'unknown') {
 			matOpts.roughness = 1;
@@ -1895,8 +1837,9 @@
 			matOpts.metalness = 0.04;
 		} else if (style.moonBase && surface.emissive) {
 			finalizeCanvasTexture(surface.emissive);
-			nightOverlayTex = surface.emissive;
-			nightOverlayOpts = { intensity: 1.0 + style.moonBase.tier * 0.14 };
+			matOpts.emissiveMap = surface.emissive;
+			matOpts.emissive = new THREE.Color(0xffffff);
+			matOpts.emissiveIntensity = 1.0 + style.moonBase.tier * 0.14;
 			matOpts.metalness = 0.3;
 			matOpts.roughness = 0.78;
 		} else if (useBuildup && style.band !== 'moon' && style.band !== 'gas') {
@@ -1906,19 +1849,16 @@
 				if (style.lava && surface.emissive) {
 					finalizeCanvasTexture(surface.emissive);
 					var lavaWeight = Math.max(0.42, 1 - buildupRatio * 0.58);
-					matOpts.emissiveMap = surface.emissive;
+					var cityWeight = 0.9 + buildupRatio * 0.95;
+					matOpts.emissiveMap = combineEmissiveMaps(
+						surface.emissive, buildupLights, texW, texH, lavaWeight, cityWeight
+					);
 					matOpts.emissive = new THREE.Color(0xffffff);
 					matOpts.emissiveIntensity = 1.25 + buildupRatio * 1.55 + lavaWeight * 0.65;
-					nightOverlayTex = buildupLights;
-					nightOverlayOpts = {
-						intensity: 0.95 + buildupRatio * 1.85,
-						terminator: 0.42,
-						dayBleed: 0.08,
-						nightSurfaceGlow: 0
-					};
 				} else {
-					nightOverlayTex = buildupLights;
-					nightOverlayOpts = { intensity: 1.05 + buildupRatio * 1.75 };
+					matOpts.emissiveMap = buildupLights;
+					matOpts.emissive = new THREE.Color(0xffffff);
+					matOpts.emissiveIntensity = 1.05 + buildupRatio * 1.75;
 				}
 				matOpts.metalness = 0.08 + buildupRatio * 0.22;
 				matOpts.roughness = 0.92 - buildupRatio * 0.18;
@@ -1934,16 +1874,14 @@
 			var lightsTex = generateCityLights(surface.elev, surface.sea, style.seed, texW, texH, industrial);
 			if (lightsTex) {
 				finalizeCanvasTexture(lightsTex);
-				nightOverlayTex = lightsTex;
-				nightOverlayOpts = { intensity: 1.0 };
+				matOpts.emissiveMap = lightsTex;
+				matOpts.emissive = new THREE.Color(0xffffff);
+				matOpts.emissiveIntensity = 1.0;
 			}
 		}
 
 		var planetGeo = new THREE.SphereGeometry(1, detail, detail);
 		planetMesh = new THREE.Mesh(planetGeo, new THREE.MeshStandardMaterial(matOpts));
-		if (nightOverlayTex) {
-			attachNightEmissiveOverlay(planetGeo, nightOverlayTex, surfaceTex, nightOverlayOpts);
-		}
 		if (style.band === 'destroyed') {
 			planetMesh.userData.vizState = 'destroyed';
 		}
@@ -2019,7 +1957,9 @@
 		framePlanetAnchorContent(DEFAULT_FRAME_PADDING);
 		zoomFactor = 1;
 		applyCameraZoom();
+	}
 
+	function finalizeBoot() {
 		markReady();
 		if (!viewerOptions.preview) {
 			createZoomControls();
@@ -2028,9 +1968,57 @@
 		if (animating) {
 			clock.start();
 			startAnimationLoop();
-		} else {
+		} else if (renderer && scene && camera) {
 			renderer.render(scene, camera);
 		}
+	}
+
+	function scheduleBuildScene(callback) {
+		var run = function () {
+			buildScene();
+			finalizeBoot();
+			if (callback) {
+				callback(true);
+			}
+		};
+		if ('requestIdleCallback' in window) {
+			requestIdleCallback(run, { timeout: 150 });
+		} else {
+			requestAnimationFrame(function () {
+				requestAnimationFrame(run);
+			});
+		}
+	}
+
+	function completeBoot(options, success) {
+		if (options && typeof options.onBootComplete === 'function') {
+			options.onBootComplete(!!success);
+		}
+	}
+
+	function onCanvasContextLost(e) {
+		e.preventDefault();
+		stopAnimationLoop();
+		if (viewerOptions.preview) {
+			if (previewRenderer) {
+				previewRenderer.dispose();
+				previewRenderer = null;
+				previewCanvasEl = null;
+			}
+			renderer = null;
+			window.dispatchEvent(new CustomEvent('hiveNovaPlanetPreviewContextLost', {
+				detail: { canvas: canvas }
+			}));
+			return;
+		}
+		showFallback();
+	}
+
+	function bindCanvasContextHandlers() {
+		if (!canvas) {
+			return;
+		}
+		canvas.addEventListener('webglcontextlost', onCanvasContextLost, false);
 	}
 
 	function resetSceneState() {
@@ -2046,9 +2034,6 @@
 		moonOrbitGroup = null;
 		debrisOrbitGroup = null;
 		unknownScanGroup = null;
-		nightEmissiveMesh = null;
-		nightEmissiveUniforms = null;
-		sceneSunLight = null;
 		zoomControlsEl = null;
 		zoomFactor = 1;
 	}
@@ -2109,9 +2094,11 @@
 				});
 			} catch (err) {
 				if (viewerOptions.preview) {
+					completeBoot(options, false);
 					return false;
 				}
 				showFallback();
+				completeBoot(options, false);
 				return false;
 			}
 			if (viewerOptions.preview) {
@@ -2123,14 +2110,9 @@
 			renderer.outputEncoding = THREE.sRGBEncoding;
 		}
 
-		if (!viewerOptions.preview) {
-			canvas.addEventListener('webglcontextlost', function (e) {
-				e.preventDefault();
-				stopAnimationLoop();
-				showFallback();
-			}, false);
-		}
+		bindCanvasContextHandlers();
 
+		reserveCanvasSlot();
 		applySize();
 
 		starField = createStarfield();
@@ -2147,28 +2129,48 @@
 		var sunLight = new THREE.DirectionalLight(0xfff4e6, 1.45);
 		sunLight.position.set(3.5, 1.4, 2.6);
 		scene.add(sunLight);
-		sceneSunLight = sunLight;
 		var rimLight = new THREE.DirectionalLight(0x4a78c8, 0.35);
 		rimLight.position.set(-3, -1, -2.5);
 		scene.add(rimLight);
 
-		buildScene();
+		if (viewerOptions.staticExport) {
+			buildScene();
+			finalizeBoot();
+			completeBoot(options, true);
+		} else {
+			scheduleBuildScene(function (success) {
+				completeBoot(options, success);
+			});
+		}
 		return true;
 	}
 
 	function mountPreview(targetCanvas, planetData, options) {
+		options = options || {};
 		if (typeof THREE === 'undefined') {
-			return false;
+			return Promise.resolve(false);
 		}
 		unmountPreview();
-		options = options || {};
-		var ok = bootViewer(targetCanvas, planetData, {
-			enableZoom: false,
-			fixedSize: options.size || 96,
-			preview: true,
-			lite: true
+		return new Promise(function (resolve) {
+			var settled = false;
+			function finish(ok) {
+				if (settled) {
+					return;
+				}
+				settled = true;
+				resolve(!!ok);
+			}
+			var ok = bootViewer(targetCanvas, planetData, {
+				enableZoom: false,
+				fixedSize: options.size || 96,
+				preview: true,
+				lite: true,
+				onBootComplete: finish
+			});
+			if (!ok) {
+				finish(false);
+			}
 		});
-		return ok;
 	}
 
 	function renderStatic(targetCanvas, planetData, options) {
@@ -2283,6 +2285,7 @@
 
 		markLoading(true);
 		overviewMounted = true;
+		reserveCanvasSlot();
 
 		window.addEventListener('resize', onResize);
 
@@ -2291,7 +2294,7 @@
 				bootViewer(canvas, data, {
 					enableZoom: true,
 					preview: false,
-					lite: window.innerWidth <= 699,
+					lite: false,
 					fallbackImg: fallbackImg
 				});
 			} catch (err) {
@@ -2304,6 +2307,7 @@
 		if (!renderer || viewerOptions.preview) { return; }
 		var wasMobile = isMobile;
 		isMobile = window.innerWidth <= 699;
+		reserveCanvasSlot();
 		applySize();
 		if (wasMobile !== isMobile || !animating) {
 			renderer.render(scene, camera);
@@ -2383,9 +2387,6 @@
 		}
 		if (planetMesh && planetMesh.userData.vizState === 'destroyed' && planetMesh.material.emissiveIntensity !== undefined) {
 			planetMesh.material.emissiveIntensity = 0.88 + Math.sin(t * 1.5) * 0.14;
-		}
-		if (nightEmissiveUniforms && sceneSunLight) {
-			nightEmissiveUniforms.uSunDirection.value.copy(sceneSunLight.position).normalize();
 		}
 
 		updateShips(t);

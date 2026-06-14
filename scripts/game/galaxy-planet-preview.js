@@ -4,7 +4,9 @@
 (function ($) {
 	'use strict';
 
-	var assetsPromise = null;
+	var assetLoader = (typeof GalaxyPlanetPreviewUtils !== 'undefined')
+		? GalaxyPlanetPreviewUtils.createAssetLoader(loadScript)
+		: null;
 	var activeTrigger = null;
 	var previewCanvas = null;
 
@@ -35,25 +37,18 @@
 		if (window.HiveNovaOverviewPlanet && typeof THREE !== 'undefined') {
 			return Promise.resolve();
 		}
-		if (assetsPromise) {
-			return assetsPromise;
+		if (!assetLoader) {
+			return Promise.reject(new Error('Missing planet viz asset loader'));
 		}
-		var config = getConfig();
-		if (!config || !config.threeSrc || !config.planetSrc) {
-			return Promise.reject(new Error('Missing planet viz asset config'));
-		}
-		assetsPromise = loadScript(config.threeSrc).then(function () {
-			return loadScript(config.planetSrc);
-		}).catch(function (err) {
-			assetsPromise = null;
-			throw err;
-		});
-		return assetsPromise;
+		return assetLoader.ensureAssets(getConfig());
 	}
 
 	function cleanupPreview() {
 		if (window.HiveNovaOverviewPlanet) {
 			window.HiveNovaOverviewPlanet.unmountPreview();
+		}
+		if (previewCanvas) {
+			previewCanvas.classList.remove('galaxy-planet-viz-canvas--ready');
 		}
 		if (previewCanvas && previewCanvas.parentNode) {
 			previewCanvas.parentNode.removeChild(previewCanvas);
@@ -97,16 +92,21 @@
 		cleanupPreview();
 		activeTrigger = trigger;
 
-		host.find('.galaxy-viz-fallback').hide();
 		var canvas = getOrCreatePreviewCanvas(host);
+		canvas.classList.remove('galaxy-planet-viz-canvas--ready');
 
 		ensureAssets().then(function () {
 			if (activeTrigger !== trigger) {
 				return;
 			}
-			if (!window.HiveNovaOverviewPlanet.mountPreview(canvas, data, { size: 75 })) {
-				cleanupPreview();
-			}
+			window.HiveNovaOverviewPlanet.mountPreview(canvas, data, { size: 75 }).then(function (ok) {
+				if (!ok || activeTrigger !== trigger) {
+					cleanupPreview();
+					return;
+				}
+				host.find('.galaxy-viz-fallback').hide();
+				canvas.classList.add('galaxy-planet-viz-canvas--ready');
+			});
 		}).catch(function () {
 			cleanupPreview();
 		});
@@ -120,6 +120,10 @@
 		if (isMobileTooltip()) {
 			return;
 		}
+
+		window.addEventListener('hiveNovaPlanetPreviewContextLost', function () {
+			cleanupPreview();
+		});
 
 		$(document).on('mouseenter', '.galaxy-planet-preview', function () {
 			var self = this;

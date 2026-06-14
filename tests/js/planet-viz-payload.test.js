@@ -60,6 +60,16 @@ describe('planet-viz-payload contract', () => {
 		assert.ok(result.errors.some((e) => e.includes('buildings must be empty')));
 	});
 
+	it('rejects sparse moon payloads with moon base building 41', () => {
+		const payload = loadFixture('planet-viz-galaxy-sparse.json');
+		payload.type = 3;
+		payload.texture = 'mond';
+		payload.buildings = { '41': 2 };
+		const result = validatePlanetVizPayload(payload, { sparse: true });
+		assert.equal(result.valid, false);
+		assert.ok(result.errors.some((e) => e.includes('buildings must be empty')));
+	});
+
 	it('rejects theme paths outside ./styles/theme/', () => {
 		const payload = loadFixture('planet-viz-overview-full.json');
 		payload.dpath = '/absolute/theme/hive/';

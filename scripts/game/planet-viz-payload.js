@@ -91,7 +91,10 @@
 				}
 			});
 			if (data.fields.max < 1) {
-				errors.push('fields.max must be at least 1');
+				var allowZeroFields = options.sparse && data.vizState === 'unknown';
+				if (!allowZeroFields) {
+					errors.push('fields.max must be at least 1');
+				}
 			}
 		}
 		['galaxy', 'system', 'planet'].forEach(function (key) {
@@ -159,9 +162,10 @@
 					return;
 				}
 				Object.keys(data[key]).forEach(function (mapKey) {
-					if (data[key][mapKey] > 0) {
-						errors.push(key + ' must be empty in sparse galaxy payloads');
+					if (data[key][mapKey] <= 0) {
+						return;
 					}
+					errors.push(key + ' must be empty in sparse galaxy payloads');
 				});
 			});
 		}

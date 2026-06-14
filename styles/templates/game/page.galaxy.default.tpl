@@ -144,7 +144,7 @@
 				</tr>
 			</table>
 			{/capture}
-			<a class="tooltip_sticky galaxy-planet-preview" data-planet-viz="{$currentPlanet.planet.vizJson|escape:'html'}" data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
+			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz="{$currentPlanet.planet.vizJson|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
 				<img src="{$dpath}planeten/{$currentPlanet.planet.image}.jpg" height="30" width="30" alt="">
 			</a>
 		</td>
@@ -206,7 +206,7 @@
 				</tr>
 			</table>
 			{/capture}
-			<a class="tooltip_sticky galaxy-planet-preview" data-planet-viz="{$currentPlanet.moon.vizJson|escape:'html'}" data-tooltip-content="{$smarty.capture.moonTooltip|escape:'html'}">
+			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz="{$currentPlanet.moon.vizJson|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.moonTooltip|escape:'html'}">
 				<img src="{$dpath}planeten/mond.jpg" height="22" width="22" alt="{$currentPlanet.moon.name}">
 			</a>
 			{/if}
@@ -402,6 +402,8 @@
 		MaxFleetSetting = {$settings_fleetactions};
 	</script>
 	{if $dpath|strstr:'/hive/'}
+	<script type="text/javascript"
+		src="./scripts/game/galaxy-planet-preview-utils.js?v={$REV}"></script>
 	<script type="text/javascript"
 		src="./scripts/game/galaxy-planet-preview.js?v={$REV}"
 		data-three-src="./scripts/threejs/three.min.js?v={$REV}"

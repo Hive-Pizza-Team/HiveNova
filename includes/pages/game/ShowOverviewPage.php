@@ -156,7 +156,7 @@ class ShowOverviewPage extends AbstractGamePage
 		
 	function show()
 	{
-		global $LNG, $PLANET, $USER;
+		global $LNG, $PLANET, $USER, $THEME;
 		
 		$AdminsOnline 	= array();
 		$chatOnline 	= array();

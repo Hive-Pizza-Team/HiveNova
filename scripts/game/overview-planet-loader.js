@@ -1,6 +1,6 @@
 /**
  * Lazy-loads Three.js and overview-planet.js on the hive-theme overview page only.
- * Keeps ~600KB three.min.js off the critical path; shows a dimmed JPG while WebGL boots.
+ * Keeps ~600KB three.min.js off the critical path; shows a dark panel until WebGL is ready.
  */
 (function () {
 	'use strict';
@@ -55,9 +55,17 @@
 			if (utils && typeof utils.resolveFallbackSrc === 'function') {
 				utils.resolveFallbackSrc(img);
 			} else {
-				var src = img.getAttribute('data-src');
-				if (src && !img.getAttribute('src')) {
-					img.src = src;
+				var hqSrc = img.getAttribute('data-src-hq');
+				var stdSrc = img.getAttribute('data-src');
+				if (hqSrc && !img.getAttribute('src')) {
+					img.setAttribute('src', hqSrc);
+					img.onerror = function () {
+						if (stdSrc) {
+							img.setAttribute('src', stdSrc);
+						}
+					};
+				} else if (stdSrc && !img.getAttribute('src')) {
+					img.setAttribute('src', stdSrc);
 				}
 			}
 			img.removeAttribute('aria-hidden');
@@ -104,6 +112,9 @@
 	}
 
 	function scheduleBoot() {
+		if (utils && typeof utils.reserveOverviewCanvasSlot === 'function') {
+			utils.reserveOverviewCanvasSlot();
+		}
 		if ('requestIdleCallback' in window) {
 			requestIdleCallback(boot, { timeout: 500 });
 		} else {
@@ -112,8 +123,22 @@
 	}
 
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', scheduleBoot);
+		document.addEventListener('DOMContentLoaded', function () {
+			if (utils && typeof utils.reserveOverviewCanvasSlot === 'function') {
+				utils.reserveOverviewCanvasSlot();
+			}
+			if (utils && typeof utils.watchOverviewVisualSlot === 'function') {
+				utils.watchOverviewVisualSlot();
+			}
+			scheduleBoot();
+		});
 	} else {
+		if (utils && typeof utils.reserveOverviewCanvasSlot === 'function') {
+			utils.reserveOverviewCanvasSlot();
+		}
+		if (utils && typeof utils.watchOverviewVisualSlot === 'function') {
+			utils.watchOverviewVisualSlot();
+		}
 		scheduleBoot();
 	}
 })();
