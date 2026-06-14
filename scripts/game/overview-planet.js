@@ -2222,7 +2222,7 @@
 				enableZoom: false,
 				fixedSize: options.size || 96,
 				preview: true,
-				lite: true,
+				lite: options.lite !== false,
 				onBootComplete: finish
 			});
 			if (!ok) {

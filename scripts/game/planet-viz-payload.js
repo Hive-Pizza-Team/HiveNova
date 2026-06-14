@@ -91,7 +91,7 @@
 				}
 			});
 			if (data.fields.max < 1) {
-				var allowZeroFields = options.sparse && data.vizState === 'unknown';
+				var allowZeroFields = options.sparse;
 				if (!allowZeroFields) {
 					errors.push('fields.max must be at least 1');
 				}

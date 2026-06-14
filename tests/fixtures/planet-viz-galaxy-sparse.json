@@ -4,7 +4,7 @@
   "tempMin": 20,
   "tempMax": 60,
   "diameter": 11800,
-  "fields": { "current": 0, "max": 163 },
+  "fields": { "current": 0, "max": 0 },
   "galaxy": 2,
   "system": 145,
   "planet": 9,
@@ -14,6 +14,5 @@
   "queue": { "building": 0, "hangar": 0 },
   "moon": null,
   "debris": null,
-  "dpath": "./styles/theme/nova/",
-  "vizState": "unknown"
+  "dpath": "./styles/theme/nova/"
 }

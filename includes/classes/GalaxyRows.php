@@ -68,7 +68,8 @@ class GalaxyRows
 		LEFT JOIN %%ALLIANCE%% a ON a.id = u.ally_id
 		LEFT JOIN %%DIPLO%% as d ON d.accept = 1 AND ((d.owner_1 = :allianceId AND d.owner_2 = a.id) OR (d.owner_1 = a.id AND d.owner_2 = :allianceId))
 		LEFT JOIN %%STATPOINTS%% allys ON allys.stat_type = :statTypeAlliance AND allys.id_owner = a.id
-		LEFT JOIN %%BUDDY%% buddy ON (buddy.sender = :userId AND buddy.owner = u.id) OR (buddy.sender = u.id AND buddy.owner = :userId)
+		LEFT JOIN %%BUDDY%% buddy ON ((buddy.sender = :userId AND buddy.owner = u.id) OR (buddy.sender = u.id AND buddy.owner = :userId))
+			AND NOT EXISTS (SELECT 1 FROM %%BUDDY_REQUEST%% br WHERE br.id = buddy.id)
 		WHERE p.universe = :universe AND p.galaxy = :galaxy AND p.system = :system AND p.planet_type = :planetTypePlanet
 		GROUP BY p.id;';
 
@@ -300,6 +301,33 @@ class GalaxyRows
 		}
 	}
 
+	protected function hasSharedPlanetVizIntel(): bool
+	{
+		global $USER;
+
+		if ($this->galaxyData[$this->galaxyRow['planet']]['ownPlanet']) {
+			return true;
+		}
+
+		if (empty($this->galaxyRow['id_owner']) || (int) $this->galaxyRow['id_owner'] === (int) $USER['id']) {
+			return false;
+		}
+
+		if ((int) ($this->galaxyRow['buddy'] ?? 0) > 0) {
+			return true;
+		}
+
+		if (
+			!empty($USER['ally_id'])
+			&& !empty($this->galaxyRow['ally_id'])
+			&& (int) $USER['ally_id'] === (int) $this->galaxyRow['ally_id']
+		) {
+			return true;
+		}
+
+		return false;
+	}
+
 	protected function getMoonData()
 	{		
 		global $THEME;
@@ -316,7 +344,7 @@ class GalaxyRows
 				'temp_max'	=> $this->galaxyRow['m_temp_max'],
 				'diameter'	=> $this->galaxyRow['m_diameter'],
 				'vizJson'	=> $vizEnabled
-					? $this->buildMoonVizJson($this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'], $themePath)
+					? $this->buildMoonVizJson($this->hasSharedPlanetVizIntel(), $themePath)
 					: '',
 			);
 		}
@@ -326,7 +354,7 @@ class GalaxyRows
 	{
 		global $THEME;
 
-		$ownPlanet = $this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'];
+		$shareIntel = $this->hasSharedPlanetVizIntel();
 		$themePath = $THEME->getTheme();
 		$vizEnabled = str_contains($themePath, '/hive/');
 		$this->galaxyData[$this->galaxyRow['planet']]['planet']	= array(
@@ -334,7 +362,7 @@ class GalaxyRows
 			'name'			=> htmlspecialchars((string) $this->galaxyRow['name'], ENT_QUOTES, "UTF-8"),
 			'image'			=> $this->galaxyRow['image'],
 			'phalanx'		=> isModuleAvailable(MODULE_PHALANX) && ShowPhalanxPage::allowPhalanx($this->galaxyRow['galaxy'], $this->galaxyRow['system']),
-			'vizJson'		=> $vizEnabled ? $this->buildPlanetVizJson($ownPlanet, $themePath) : '',
+			'vizJson'		=> $vizEnabled ? $this->buildPlanetVizJson($shareIntel, $themePath) : '',
 		);
 	}
 
@@ -373,9 +401,9 @@ class GalaxyRows
 		return is_array($row) ? $row : array();
 	}
 
-	protected function resolveInventoryRow(bool $ownPlanet): array
+	protected function resolveInventoryRow(bool $shareIntel): array
 	{
-		if (!$ownPlanet || empty($this->galaxyRow['id'])) {
+		if (!$shareIntel || empty($this->galaxyRow['id'])) {
 			return $this->galaxyRow;
 		}
 
@@ -402,14 +430,14 @@ class GalaxyRows
 		return $map ?: new \stdClass();
 	}
 
-	protected function buildPlanetVizJson($ownPlanet, $dpath)
+	protected function buildPlanetVizJson($shareIntel, $dpath)
 	{
 		global $resource, $reslist;
 
-		$inventoryRow = $this->resolveInventoryRow($ownPlanet);
+		$inventoryRow = $this->resolveInventoryRow($shareIntel);
 		$fieldsCurrent = 0;
 		$fieldsMax = 0;
-		if ($ownPlanet) {
+		if ($shareIntel) {
 			$fieldsCurrent = (int) $this->galaxyRow['field_current'];
 			$planetForFields = array(
 				'field_max' => (int) $this->galaxyRow['field_max'],
@@ -450,9 +478,9 @@ class GalaxyRows
 			'galaxy'    => (int) $this->galaxyRow['galaxy'],
 			'system'    => (int) $this->galaxyRow['system'],
 			'planet'    => (int) $this->galaxyRow['planet'],
-			'buildings' => $ownPlanet ? $this->buildCountMap($reslist['build'], $inventoryRow) : new \stdClass(),
-			'fleet'     => $ownPlanet ? $this->buildCountMap($reslist['fleet'], $inventoryRow) : new \stdClass(),
-			'defense'   => $ownPlanet ? $this->buildCountMap($reslist['defense'], $inventoryRow) : new \stdClass(),
+			'buildings' => $shareIntel ? $this->buildCountMap($reslist['build'], $inventoryRow) : new \stdClass(),
+			'fleet'     => $shareIntel ? $this->buildCountMap($reslist['fleet'], $inventoryRow) : new \stdClass(),
+			'defense'   => $shareIntel ? $this->buildCountMap($reslist['defense'], $inventoryRow) : new \stdClass(),
 			'queue'     => array(
 				'building' => 0,
 				'hangar'   => 0,
@@ -462,14 +490,10 @@ class GalaxyRows
 			'dpath'     => $dpath,
 		);
 
-		if (!$ownPlanet) {
-			$payload['vizState'] = 'unknown';
-		}
-
 		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 	}
 
-	protected function buildMoonVizJson($ownPlanet, $dpath)
+	protected function buildMoonVizJson($shareIntel, $dpath)
 	{
 		$tempMin = (int) $this->galaxyRow['m_temp_min'];
 		$tempMax = (int) $this->galaxyRow['m_temp_max'];
@@ -478,7 +502,7 @@ class GalaxyRows
 		}
 
 		$moonBaseLevel = (int) ($this->galaxyRow['m_mondbasis'] ?? 0);
-		$buildings = ($ownPlanet && $moonBaseLevel > 0) ? array(41 => $moonBaseLevel) : new \stdClass();
+		$buildings = ($shareIntel && $moonBaseLevel > 0) ? array(41 => $moonBaseLevel) : new \stdClass();
 
 		$payload = array(
 			'texture'   => 'mond',
@@ -504,10 +528,6 @@ class GalaxyRows
 			'debris'    => null,
 			'dpath'     => $dpath,
 		);
-
-		if (!$ownPlanet) {
-			$payload['vizState'] = 'unknown';
-		}
 
 		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 	}

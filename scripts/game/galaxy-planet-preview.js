@@ -70,6 +70,10 @@
 		return previewCanvas;
 	}
 
+	function hasSharedPlanetIntel(data) {
+		return !!(data && data.fields && data.fields.max > 0);
+	}
+
 	function startPreview(trigger) {
 		var vizJson = $(trigger).attr('data-planet-viz');
 		if (!vizJson || isMobileTooltip()) {
@@ -99,7 +103,10 @@
 			if (activeTrigger !== trigger) {
 				return;
 			}
-			window.HiveNovaOverviewPlanet.mountPreview(canvas, data, { size: 75 }).then(function (ok) {
+			window.HiveNovaOverviewPlanet.mountPreview(canvas, data, {
+				size: 75,
+				lite: !hasSharedPlanetIntel(data)
+			}).then(function (ok) {
 				if (!ok || activeTrigger !== trigger) {
 					cleanupPreview();
 					return;
