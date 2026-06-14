@@ -78,17 +78,27 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 
 class PushNotificationServiceTest extends TestCase
 {
-	private ?DatabaseInterface $previousDb = null;
-
-	protected function setUp(): void
+	/**
+	 * @param callable(PushSubscriptionDatabaseStub): void $callback
+	 */
+	private function withDatabaseStub(callable $callback): void
 	{
-		$this->previousDb = Database::get();
-	}
+		$ref = new ReflectionClass(Database::class);
+		$prop = $ref->getProperty('instance');
+		$prop->setAccessible(true);
+		$previous = $prop->getValue();
 
-	protected function tearDown(): void
-	{
-		if ($this->previousDb !== null) {
-			Database::setInstance($this->previousDb);
+		$stub = new PushSubscriptionDatabaseStub();
+		Database::setInstance($stub);
+
+		try {
+			$callback($stub);
+		} finally {
+			if ($previous instanceof DatabaseInterface) {
+				Database::setInstance($previous);
+			} else {
+				$prop->setValue(null);
+			}
 		}
 	}
 
@@ -105,49 +115,48 @@ class PushNotificationServiceTest extends TestCase
 
 	public function testSaveSubscriptionInsertsNewEndpoint(): void
 	{
-		$stub = new PushSubscriptionDatabaseStub();
-		Database::setInstance($stub);
-
-		$this->assertTrue(PushNotificationService::saveSubscription(42, $this->validSubscription()));
-		$this->assertCount(1, $stub->inserts);
-		$this->assertSame([], $stub->updates);
-		$this->assertSame(42, $stub->subscriptionsByEndpoint['https://fcm.googleapis.com/fcm/send/example']['user_id']);
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub): void {
+			$this->assertTrue(PushNotificationService::saveSubscription(42, $this->validSubscription()));
+			$this->assertCount(1, $stub->inserts);
+			$this->assertSame([], $stub->updates);
+			$this->assertSame(42, $stub->subscriptionsByEndpoint['https://fcm.googleapis.com/fcm/send/example']['user_id']);
+		});
 	}
 
 	public function testSaveSubscriptionReassignsEndpointFromAnotherUser(): void
 	{
 		$endpoint = 'https://fcm.googleapis.com/fcm/send/shared-device';
-		$stub = new PushSubscriptionDatabaseStub();
-		$stub->subscriptionsByEndpoint[$endpoint] = [
-			'user_id'  => 7,
-			'endpoint' => $endpoint,
-			'p256dh'   => 'old-key',
-			'auth'     => 'old-auth',
-		];
-		Database::setInstance($stub);
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub) use ($endpoint): void {
+			$stub->subscriptionsByEndpoint[$endpoint] = [
+				'user_id'  => 7,
+				'endpoint' => $endpoint,
+				'p256dh'   => 'old-key',
+				'auth'     => 'old-auth',
+			];
 
-		$this->assertTrue(PushNotificationService::saveSubscription(99, $this->validSubscription($endpoint)));
-		$this->assertCount(1, $stub->updates);
-		$this->assertSame([], $stub->inserts);
-		$this->assertSame(99, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
-		$this->assertSame(99, $stub->updates[0][':userId']);
+			$this->assertTrue(PushNotificationService::saveSubscription(99, $this->validSubscription($endpoint)));
+			$this->assertCount(1, $stub->updates);
+			$this->assertSame([], $stub->inserts);
+			$this->assertSame(99, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
+			$this->assertSame(99, $stub->updates[0][':userId']);
+		});
 	}
 
 	public function testSaveSubscriptionUpdatesExistingEndpointForSameUser(): void
 	{
 		$endpoint = 'https://fcm.googleapis.com/fcm/send/same-user';
-		$stub = new PushSubscriptionDatabaseStub();
-		$stub->subscriptionsByEndpoint[$endpoint] = [
-			'user_id'  => 5,
-			'endpoint' => $endpoint,
-			'p256dh'   => 'old-key',
-			'auth'     => 'old-auth',
-		];
-		Database::setInstance($stub);
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub) use ($endpoint): void {
+			$stub->subscriptionsByEndpoint[$endpoint] = [
+				'user_id'  => 5,
+				'endpoint' => $endpoint,
+				'p256dh'   => 'old-key',
+				'auth'     => 'old-auth',
+			];
 
-		$this->assertTrue(PushNotificationService::saveSubscription(5, $this->validSubscription($endpoint)));
-		$this->assertCount(1, $stub->updates);
-		$this->assertSame(5, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
+			$this->assertTrue(PushNotificationService::saveSubscription(5, $this->validSubscription($endpoint)));
+			$this->assertCount(1, $stub->updates);
+			$this->assertSame(5, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
+		});
 	}
 
 	public function testIsValidSubscriptionAcceptsWellFormedPayload(): void
