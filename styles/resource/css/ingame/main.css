@@ -1107,9 +1107,15 @@ table.tablesorter thead tr .headerSortDown {
 
 #bottom-nav,
 .fleet-mobile-list,
+.fleet-mobile-active-toggle,
 .overview-mobile-shortcuts,
 .overview-command-timers {
     display: none;
+}
+
+.fleet-page-layout {
+    display: flex;
+    flex-direction: column;
 }
 
 .galaxy-coords-picker {
@@ -1750,6 +1756,45 @@ table.tablesorter thead tr .headerSortDown {
 
     .fleet-table-desktop {
         display: none;
+    }
+
+    .fleet-page-layout {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fleet-dispatch-section {
+        order: 1;
+    }
+
+    .fleet-active-section {
+        order: 2;
+    }
+
+    .fleet-mobile-active-toggle {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-menu-bg);
+        color: var(--color-text);
+        font-size: 13px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .fleet-mobile-active-toggle[aria-expanded="true"] {
+        margin-bottom: 6px;
+    }
+
+    .fleet-mobile-list.fleet-mobile-list--collapsed {
+        display: none;
+    }
+
+    .fleet-mobile-list.fleet-mobile-list--collapsed.is-expanded {
+        display: block;
     }
 
     .fleet-bonus-table {
