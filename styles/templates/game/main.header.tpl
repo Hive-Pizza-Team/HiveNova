@@ -22,8 +22,9 @@
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/jquery.fancybox.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/validationEngine.jquery.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="{$dpath}formate.css?v={$REV}">
-	<link rel="stylesheet" type="text/css" href="./styles/resource/css/fontawesome/css/all.min.css">
+	<link rel="stylesheet" type="text/css" href="./styles/resource/css/fontawesome/css/ingame-icons.css?v={$REV}">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+	{assign var="ingamePage" value=$smarty.get.page|default:''}
 	<script type="text/javascript">
 	var ServerTimezoneOffset = {$Offset};
 	var serverTime 	= new Date({$date.0}, {$date.1 - 1}, {$date.2}, {$date.3}, {$date.4}, {$date.5});
@@ -51,6 +52,16 @@
 		}
 	}, 1);
 	</script>
+{if $ingamePage == 'overview'}
+	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/base/jquery.fancybox.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/base/jquery.validationEngine.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/l18n/validationEngine/jquery.validationEngine-{$lang}.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/base/tooltip.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}"></script>
+{else}
 	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.ui.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
@@ -60,6 +71,7 @@
 	<script type="text/javascript" src="./scripts/base/tooltip.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}"></script>
+{/if}
 	{foreach item=scriptname from=$scripts}
 	<script type="text/javascript" src="./scripts/game/{$scriptname}.js?v={$REV}"></script>
 	{/foreach}
