@@ -1,0 +1,13 @@
+{
+  "name": "hivenova-dev-tools",
+  "private": true,
+  "description": "Optional dev deps for scripts/dev and scripts/lighthouse",
+  "scripts": {
+    "lighthouse:audit": "node scripts/lighthouse/audit.mjs",
+    "lighthouse:summarize": "node scripts/lighthouse/summarize.mjs"
+  },
+  "devDependencies": {
+    "lighthouse": "^12.6.0",
+    "puppeteer": "^24.0.0"
+  }
+}

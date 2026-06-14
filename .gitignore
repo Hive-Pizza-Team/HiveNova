@@ -11,3 +11,6 @@ includes/config.php
 includes/push.config.php
 includes/error.log
 .worktrees/
+node_modules/
+package-lock.json
+reports/lighthouse/
