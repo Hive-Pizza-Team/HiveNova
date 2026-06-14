@@ -1,5 +1,7 @@
 {block name="title" prepend}{$LNG.lm_fleet}{/block}
 {block name="content"}
+<div class="fleet-page-layout">
+<div class="fleet-active-section">
 <table class="fleet-table-desktop">
 	<tr>
 		<th colspan="9">
@@ -75,7 +77,13 @@
 	<tr><td colspan="9">{$LNG.fl_no_more_slots}</td></tr>
 	{/if}
 </table>
-<div class="fleet-mobile-list">
+{if $activeFleetSlots > 0 && $activeFleetSlots < $maxFleetSlots}
+<button type="button" class="fleet-mobile-active-toggle" id="fleetMobileToggle" aria-controls="fleetMobileList" aria-expanded="false">
+	{$activeFleetSlots} / {$maxFleetSlots} {$LNG.fl_fleets}
+</button>
+{/if}
+{if $activeFleetSlots > 0}
+<div class="fleet-mobile-list{if $activeFleetSlots < $maxFleetSlots} fleet-mobile-list--collapsed{/if}" id="fleetMobileList">
 	{foreach name=FlyingFleetsMobile item=FlyingFleetRow from=$FlyingFleetList}
 	<div class="fleet-mobile-card">
 		<div class="fleet-mobile-row"><strong>#{$smarty.foreach.FlyingFleetsMobile.iteration}</strong> {$LNG["type_mission_{$FlyingFleetRow.mission}"]}{if $FlyingFleetRow.state == 1} ({$LNG.fl_r}){else} ({$LNG.fl_a}){/if}</div>
@@ -89,10 +97,11 @@
 		</form>
 		{/if}
 	</div>
-	{foreachelse}
-	<p>-</p>
 	{/foreach}
 </div>
+{/if}
+</div>
+<div class="fleet-dispatch-section">
 {if !empty($acsData)}
 {include file="shared.fleetTable.acsTable.tpl"}
 {/if}
@@ -153,6 +162,8 @@
 	<tr><th style="width:33%">{$LNG.tech.115}</th><th style="width:33%">{$LNG.tech.117}</th><th style="width:33%">{$LNG.tech.118}</th></tr>
 	<tr><td>+{$bonusCombustion} %</td><td>+{$bonusImpulse} %</td><td>+{$bonusHyperspace} %</td></tr>
 </table>
+</div>
+</div>
 {/block}
 {block name="script" append}
 <script src="scripts/game/fleetTable.js"></script>

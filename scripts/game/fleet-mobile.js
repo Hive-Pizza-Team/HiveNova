@@ -26,5 +26,12 @@
 			var step = parseInt($(this).data('step'), 10) || 1;
 			adjustShipInput($(this).data('target'), step);
 		});
+
+		$('#fleetMobileToggle').on('click', function () {
+			var $btn = $(this);
+			var expanded = $btn.attr('aria-expanded') === 'true';
+			$btn.attr('aria-expanded', expanded ? 'false' : 'true');
+			$('#fleetMobileList').toggleClass('is-expanded', !expanded);
+		});
 	});
 })(jQuery);
