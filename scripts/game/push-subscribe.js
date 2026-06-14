@@ -161,7 +161,7 @@
 				HiveNovaPush.disable();
 			} else {
 				HiveNovaPush.enable().catch(function (err) {
-					if (err && (err.message === 'denied' || err.message === 'not_configured' || err.message === 'subscribe_failed' || err.message === 'invalid_subscription' || err.message === 'subscription_forbidden')) {
+					if (err && (err.message === 'denied' || err.message === 'not_configured' || err.message === 'subscribe_failed' || err.message === 'invalid_subscription' || err.message === 'subscription_forbidden' || err.message === 'empty_body' || err.message === 'invalid_json' || err.message === 'method_not_allowed')) {
 						$('#pushAlerts').prop('checked', false);
 					}
 				});

@@ -192,10 +192,23 @@ class PushNotificationServiceTest extends TestCase
 		]));
 	}
 
+	public function testIsValidSubscriptionAcceptsLongFcmEndpoint(): void
+	{
+		$endpoint = 'https://fcm.googleapis.com/fcm/send/abc:APA91b' . str_repeat('x', 500);
+		$this->assertGreaterThan(512, strlen($endpoint));
+		$this->assertTrue(PushNotificationService::isValidSubscription([
+			'endpoint' => $endpoint,
+			'keys'     => [
+				'p256dh' => 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpY',
+				'auth'   => 'tBHItJI5svbpez7KI4CCXg',
+			],
+		]));
+	}
+
 	public function testIsValidSubscriptionRejectsOversizedEndpoint(): void
 	{
 		$this->assertFalse(PushNotificationService::isValidSubscription([
-			'endpoint' => 'https://example.com/' . str_repeat('a', 512),
+			'endpoint' => 'https://example.com/' . str_repeat('a', 2048),
 			'keys'     => [
 				'p256dh' => 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpY',
 				'auth'   => 'tBHItJI5svbpez7KI4CCXg',

@@ -26,7 +26,7 @@ class PushNotificationService
 	public static function isValidSubscription(array $subscription): bool
 	{
 		$endpoint = $subscription['endpoint'] ?? '';
-		if (!is_string($endpoint) || $endpoint === '' || strlen($endpoint) > 512) {
+		if (!is_string($endpoint) || $endpoint === '' || strlen($endpoint) > 2048) {
 			return false;
 		}
 		if (!filter_var($endpoint, FILTER_VALIDATE_URL) || stripos($endpoint, 'https://') !== 0) {

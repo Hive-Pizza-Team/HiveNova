@@ -39,9 +39,27 @@ class ShowPushPage extends AbstractGamePage
 	{
 		global $USER;
 
+		if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+			HTTP::sendHeader('HTTP/1.1 405 Method Not Allowed');
+			$this->sendJSON(['error' => 'method_not_allowed']);
+			return;
+		}
+
 		$raw = file_get_contents('php://input');
-		$data = json_decode($raw ?: '', true);
-		if (!is_array($data) || !PushNotificationService::isValidSubscription($data)) {
+		if (!is_string($raw) || trim($raw) === '') {
+			HTTP::sendHeader('HTTP/1.1 400 Bad Request');
+			$this->sendJSON(['error' => 'empty_body']);
+			return;
+		}
+
+		$data = json_decode($raw, true);
+		if (!is_array($data)) {
+			HTTP::sendHeader('HTTP/1.1 400 Bad Request');
+			$this->sendJSON(['error' => 'invalid_json']);
+			return;
+		}
+
+		if (!PushNotificationService::isValidSubscription($data)) {
 			HTTP::sendHeader('HTTP/1.1 400 Bad Request');
 			$this->sendJSON(['error' => 'invalid_subscription']);
 			return;
