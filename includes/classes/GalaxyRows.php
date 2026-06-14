@@ -53,9 +53,9 @@ class GalaxyRows
 		global $USER;
 
         $sql	= 'SELECT SQL_BIG_RESULT DISTINCT
-		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.destruyed, p.der_metal, p.der_crystal, p.id_luna, 
+		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.temp_max, p.field_current, p.field_max, p.terraformer, p.destruyed, p.der_metal, p.der_crystal, p.id_luna, 
 		u.id as userid, u.ally_id, u.username, u.onlinetime, u.urlaubs_modus, u.banaday, 
-		m.id as m_id, m.diameter as m_diameter, m.name as m_name, m.temp_min as m_temp_min, m.last_update as m_last_update,
+		m.id as m_id, m.diameter as m_diameter, m.name as m_name, m.temp_min as m_temp_min, m.temp_max as m_temp_max, m.mondbasis as m_mondbasis, m.last_update as m_last_update,
 		s.total_points, s.total_rank, 
 		a.id as allyid, a.ally_tag, a.ally_web, a.ally_members, a.ally_name, 
 		allys.total_rank as ally_rank,
@@ -302,6 +302,8 @@ class GalaxyRows
 
 	protected function getMoonData()
 	{		
+		global $THEME;
+
 		if(!isset($this->galaxyRow['m_id'])) {
 			$this->galaxyData[$this->galaxyRow['planet']]['moon']	= false;
 		} else {
@@ -309,18 +311,130 @@ class GalaxyRows
 				'id'		=> $this->galaxyRow['m_id'],
 				'name'		=> htmlspecialchars((string) $this->galaxyRow['m_name'], ENT_QUOTES, "UTF-8"),
 				'temp_min'	=> $this->galaxyRow['m_temp_min'], 
+				'temp_max'	=> $this->galaxyRow['m_temp_max'],
 				'diameter'	=> $this->galaxyRow['m_diameter'],
+				'vizJson'	=> $this->buildMoonVizJson($THEME->getTheme()),
 			);
 		}
 	}
 
 	protected function getPlanetData()
 	{
+		global $THEME;
+
+		$ownPlanet = $this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'];
 		$this->galaxyData[$this->galaxyRow['planet']]['planet']	= array(
 			'id'			=> $this->galaxyRow['id'],
 			'name'			=> htmlspecialchars((string) $this->galaxyRow['name'], ENT_QUOTES, "UTF-8"),
 			'image'			=> $this->galaxyRow['image'],
 			'phalanx'		=> isModuleAvailable(MODULE_PHALANX) && ShowPhalanxPage::allowPhalanx($this->galaxyRow['galaxy'], $this->galaxyRow['system']),
+			'vizJson'		=> $this->buildPlanetVizJson($ownPlanet, $THEME->getTheme()),
 		);
+	}
+
+	protected function buildPlanetVizJson($ownPlanet, $dpath)
+	{
+		global $resource;
+
+		$fieldsCurrent = 0;
+		$fieldsMax = 0;
+		if ($ownPlanet) {
+			$fieldsCurrent = (int) $this->galaxyRow['field_current'];
+			$planetForFields = array(
+				'field_max' => (int) $this->galaxyRow['field_max'],
+				$resource[33] => (int) ($this->galaxyRow['terraformer'] ?? 0),
+				$resource[41] => 0,
+			);
+			$fieldsMax = max(1, (int) CalculateMaxPlanetFields($planetForFields));
+		}
+
+		$moon = null;
+		if (!empty($this->galaxyRow['m_id'])) {
+			$moon = array(
+				'id'       => (int) $this->galaxyRow['m_id'],
+				'name'     => (string) $this->galaxyRow['m_name'],
+				'diameter' => (int) $this->galaxyRow['m_diameter'],
+			);
+		}
+
+		$debrisTotal = (int) $this->galaxyRow['der_metal'] + (int) $this->galaxyRow['der_crystal'];
+		$debris = null;
+		if ($debrisTotal > 0) {
+			$debris = array(
+				'metal'   => (int) $this->galaxyRow['der_metal'],
+				'crystal' => (int) $this->galaxyRow['der_crystal'],
+			);
+		}
+
+		$payload = array(
+			'texture'   => $this->galaxyRow['image'],
+			'type'      => 1,
+			'tempMin'   => (int) $this->galaxyRow['temp_min'],
+			'tempMax'   => (int) $this->galaxyRow['temp_max'],
+			'diameter'  => (int) $this->galaxyRow['diameter'],
+			'fields'    => array(
+				'current' => $fieldsCurrent,
+				'max'     => $fieldsMax,
+			),
+			'galaxy'    => (int) $this->galaxyRow['galaxy'],
+			'system'    => (int) $this->galaxyRow['system'],
+			'planet'    => (int) $this->galaxyRow['planet'],
+			'buildings' => new \stdClass(),
+			'fleet'     => new \stdClass(),
+			'defense'   => new \stdClass(),
+			'queue'     => array(
+				'building' => 0,
+				'hangar'   => 0,
+			),
+			'moon'      => $moon,
+			'debris'    => $debris,
+			'dpath'     => $dpath,
+		);
+
+		if (!$ownPlanet) {
+			$payload['vizState'] = 'unknown';
+		}
+
+		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+	}
+
+	protected function buildMoonVizJson($dpath)
+	{
+		$tempMin = (int) $this->galaxyRow['m_temp_min'];
+		$tempMax = (int) $this->galaxyRow['m_temp_max'];
+		if ($tempMax < $tempMin) {
+			$tempMax = $tempMin;
+		}
+
+		$moonBaseLevel = (int) ($this->galaxyRow['m_mondbasis'] ?? 0);
+		$buildings = $moonBaseLevel > 0 ? array(41 => $moonBaseLevel) : new \stdClass();
+
+		$payload = array(
+			'texture'   => 'mond',
+			'type'      => 3,
+			'tempMin'   => $tempMin,
+			'tempMax'   => $tempMax,
+			'diameter'  => (int) $this->galaxyRow['m_diameter'],
+			'fields'    => array(
+				'current' => 0,
+				'max'     => 1,
+			),
+			'galaxy'    => (int) $this->galaxyRow['galaxy'],
+			'system'    => (int) $this->galaxyRow['system'],
+			'planet'    => (int) $this->galaxyRow['planet'],
+			'buildings' => $buildings,
+			'fleet'     => new \stdClass(),
+			'defense'   => new \stdClass(),
+			'queue'     => array(
+				'building' => 0,
+				'hangar'   => 0,
+			),
+			'moon'      => null,
+			'debris'    => null,
+			'dpath'     => $dpath,
+			'vizState'  => 'unknown',
+		);
+
+		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 	}
 }

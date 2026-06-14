@@ -12,6 +12,8 @@ jobs:
         run: php .github/scripts/check-language-files.php
       - name: Check CSS design tokens (no named colors)
         run: bash tests/check-css.sh
+      - name: JS tests
+        run: npm run test:js
 
   test:
     runs-on: ubuntu-latest

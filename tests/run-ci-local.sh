@@ -51,6 +51,7 @@ check_error_log() {
 
 run "Language check"   php .github/scripts/check-language-files.php
 run "CSS check"        bash tests/check-css.sh
+run "JS tests"         npm run test:js
 run "Unit tests"       php vendor/bin/phpunit --configuration phpunit.xml
 run "Smoke test"       php tests/smoke.php
 run "Bottom nav check" php tests/check-bottom-nav.php
