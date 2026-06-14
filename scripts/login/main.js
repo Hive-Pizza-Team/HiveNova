@@ -6,11 +6,6 @@ $(function() {
 		return false;
 	});
 	
-	$('.fancybox').fancybox({
-		'type' : 'iframe',
-		'padding' : 1,
-	});
-	
 	if(LoginConfig.isMultiUniverse)
 	{
 		$('.changeAction')

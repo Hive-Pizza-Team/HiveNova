@@ -12,8 +12,10 @@
 	{/foreach}
 </table>
 {/block}
-{block name="script"}
-<script>
+{block name="script" append}
+<link rel="stylesheet" type="text/css" href="styles/resource/css/base/jquery.fancybox.css?v={$REV}">
+<script src="scripts/base/jquery.fancybox.js?v={$REV}" defer></script>
+<script defer>
 $(function() {
 	$(".gallery").fancybox();
 });

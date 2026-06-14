@@ -62,7 +62,7 @@
 
 		<div id="uni-stats" class="uni-stats">
 			{foreach $universeStats as $uniId => $stats}
-			<div class="contentbox uni-stats-row" data-uni="{$uniId}">
+			<div class="contentbox uni-stats-row{if $uniId == $defaultUniverse} active{/if}" data-uni="{$uniId}">
 				<h2>{$stats.name|escape}</h2>
 				{if !$stats.open || !$stats.reg_open}
 				<ul class="uni-stats-badges">

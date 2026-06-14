@@ -7,7 +7,6 @@
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/tokens.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/theme/{$dpath|default:'nova'}/formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/main.css?v={$REV}">
-	<link rel="stylesheet" type="text/css" href="styles/resource/css/base/jquery.fancybox.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/icon-font/style.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/hivekeychain_button.css?v={$REV}">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
@@ -29,7 +28,6 @@
 	<meta name="twitter:image" content="{$basepath}styles/resource/images/login/HiveNova.png">
 	<script src="scripts/base/jquery.js?v={$REV}" defer></script>
 	<script src="scripts/base/jquery.cookie.js?v={$REV}" defer></script>
-	<script src="scripts/base/jquery.fancybox.js?v={$REV}" defer></script>
 	<script src="scripts/login/main.js" defer></script>
 	<script>{if isset($code)}var loginError = {$code|json};{/if}</script>
 	{block name="script"}{/block}
