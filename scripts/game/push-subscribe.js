@@ -36,7 +36,13 @@
 		if (!err) {
 			return Promise.resolve();
 		}
-		if (err.message === 'denied' || err.message === 'not_configured' || err.message === 'disabled') {
+		if (err.message === 'denied' || err.message === 'disabled') {
+			return Promise.resolve();
+		}
+		if (err.message === 'not_configured') {
+			if (options.uncheckSettings && $('#pushAlerts').length) {
+				$('#pushAlerts').prop('checked', false);
+			}
 			return Promise.resolve();
 		}
 		if (isSubscribeFatalError(err)) {

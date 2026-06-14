@@ -12,6 +12,7 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 
 	public array $updates = [];
 	public array $inserts = [];
+	public array $deletes = [];
 	/** @var array<int, int> */
 	public array $settingsPushByUser = [];
 
@@ -37,7 +38,27 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 	}
 
 	public function select($qry, array $params = []) { return []; }
-	public function delete($qry, array $params = []) { return 0; }
+
+	public function delete($qry, array $params = [])
+	{
+		$this->deletes[] = ['qry' => $qry, 'params' => $params];
+
+		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':userId'])) {
+			$userId = (int) $params[':userId'];
+			foreach ($this->subscriptionsByEndpoint as $endpoint => $row) {
+				if ((int) $row['user_id'] === $userId) {
+					unset($this->subscriptionsByEndpoint[$endpoint]);
+				}
+			}
+		}
+
+		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':endpoint']) && !isset($params[':userId'])) {
+			unset($this->subscriptionsByEndpoint[$params[':endpoint']]);
+		}
+
+		return 1;
+	}
+
 	public function replace($qry, array $params = []) { return 0; }
 	public function query($qry) { return 0; }
 	public function nativeQuery($qry) { return false; }
