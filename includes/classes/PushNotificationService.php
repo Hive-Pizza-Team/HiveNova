@@ -67,6 +67,13 @@ class PushNotificationService
 
 		if ($existingUserId !== false && $existingUserId !== null && $existingUserId !== '') {
 			// One browser endpoint per origin — reassign to whoever is logged in now.
+			// Same device switching accounts/universes must work; a stolen subscription
+			// object could re-point alerts (tradeoff vs hard block in #163).
+			$previousUserId = (int) $existingUserId;
+			if ($previousUserId !== $userId) {
+				self::setUserPreference($previousUserId, false);
+			}
+
 			$db->update(
 				'UPDATE %%PUSH_SUBSCRIPTIONS%% SET user_id = :userId, p256dh = :p256dh, auth = :auth, user_agent = :userAgent, created_at = :createdAt WHERE endpoint = :endpoint',
 				[

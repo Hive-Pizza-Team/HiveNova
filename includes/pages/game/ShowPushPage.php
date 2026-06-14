@@ -45,8 +45,8 @@ class ShowPushPage extends AbstractGamePage
 			return;
 		}
 
-		$raw = file_get_contents('php://input');
-		if (!is_string($raw) || trim($raw) === '') {
+		$raw = $this->readSubscribeBody();
+		if (trim($raw) === '') {
 			HTTP::sendHeader('HTTP/1.1 400 Bad Request');
 			$this->sendJSON(['error' => 'empty_body']);
 			return;
@@ -65,19 +65,22 @@ class ShowPushPage extends AbstractGamePage
 			return;
 		}
 
-		if (!PushNotificationService::saveSubscription(
+		PushNotificationService::saveSubscription(
 			(int) $USER['id'],
 			$data,
 			$_SERVER['HTTP_USER_AGENT'] ?? null
-		)) {
-			HTTP::sendHeader('HTTP/1.1 403 Forbidden');
-			$this->sendJSON(['error' => 'subscription_forbidden']);
-			return;
-		}
+		);
 
 		PushNotificationService::setUserPreference((int) $USER['id'], true);
 
 		$this->sendJSON(['ok' => true]);
+	}
+
+	protected function readSubscribeBody(): string
+	{
+		$raw = file_get_contents('php://input');
+
+		return is_string($raw) ? $raw : '';
 	}
 
 	public function unsubscribe()
