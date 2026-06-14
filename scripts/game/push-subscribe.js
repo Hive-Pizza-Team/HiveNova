@@ -24,6 +24,26 @@
 			.then(function (r) { return r.json(); });
 	}
 
+	function postSubscribe(subscription) {
+		return fetch('game.php?page=push&mode=subscribe', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(subscription.toJSON())
+		}).then(function (response) {
+			if (response.ok) {
+				return response.json();
+			}
+			return response.json().catch(function () {
+				return {};
+			}).then(function (body) {
+				var err = new Error(body.error || 'subscribe_failed');
+				err.status = response.status;
+				throw err;
+			});
+		});
+	}
+
 	function subscribeWithRegistration(reg, publicKey) {
 		return reg.pushManager.getSubscription().then(function (existing) {
 			if (existing) {
@@ -34,12 +54,7 @@
 				applicationServerKey: urlBase64ToUint8Array(publicKey)
 			});
 		}).then(function (subscription) {
-			return fetch('game.php?page=push&mode=subscribe', {
-				method: 'POST',
-				credentials: 'same-origin',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(subscription.toJSON())
-			});
+			return postSubscribe(subscription);
 		});
 	}
 
@@ -146,10 +161,7 @@
 				HiveNovaPush.disable();
 			} else {
 				HiveNovaPush.enable().catch(function (err) {
-					if (err && err.message === 'denied') {
-						$('#pushAlerts').prop('checked', false);
-					}
-					if (err && err.message === 'not_configured') {
+					if (err && (err.message === 'denied' || err.message === 'not_configured' || err.message === 'subscribe_failed' || err.message === 'invalid_subscription' || err.message === 'subscription_forbidden')) {
 						$('#pushAlerts').prop('checked', false);
 					}
 				});
