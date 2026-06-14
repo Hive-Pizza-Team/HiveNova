@@ -39,27 +39,48 @@ class ShowPushPage extends AbstractGamePage
 	{
 		global $USER;
 
-		$raw = file_get_contents('php://input');
-		$data = json_decode($raw ?: '', true);
-		if (!is_array($data) || !PushNotificationService::isValidSubscription($data)) {
+		if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+			HTTP::sendHeader('HTTP/1.1 405 Method Not Allowed');
+			$this->sendJSON(['error' => 'method_not_allowed']);
+			return;
+		}
+
+		$raw = $this->readSubscribeBody();
+		if (trim($raw) === '') {
+			HTTP::sendHeader('HTTP/1.1 400 Bad Request');
+			$this->sendJSON(['error' => 'empty_body']);
+			return;
+		}
+
+		$data = json_decode($raw, true);
+		if (!is_array($data)) {
+			HTTP::sendHeader('HTTP/1.1 400 Bad Request');
+			$this->sendJSON(['error' => 'invalid_json']);
+			return;
+		}
+
+		if (!PushNotificationService::isValidSubscription($data)) {
 			HTTP::sendHeader('HTTP/1.1 400 Bad Request');
 			$this->sendJSON(['error' => 'invalid_subscription']);
 			return;
 		}
 
-		if (!PushNotificationService::saveSubscription(
+		PushNotificationService::saveSubscription(
 			(int) $USER['id'],
 			$data,
 			$_SERVER['HTTP_USER_AGENT'] ?? null
-		)) {
-			HTTP::sendHeader('HTTP/1.1 403 Forbidden');
-			$this->sendJSON(['error' => 'subscription_forbidden']);
-			return;
-		}
+		);
 
 		PushNotificationService::setUserPreference((int) $USER['id'], true);
 
 		$this->sendJSON(['ok' => true]);
+	}
+
+	protected function readSubscribeBody(): string
+	{
+		$raw = file_get_contents('php://input');
+
+		return is_string($raw) ? $raw : '';
 	}
 
 	public function unsubscribe()

@@ -10,6 +10,44 @@
 		return outputArray;
 	}
 
+	var SUBSCRIBE_FATAL_ERRORS = [
+		'subscribe_failed',
+		'invalid_subscription',
+		'empty_body',
+		'invalid_json',
+		'method_not_allowed'
+	];
+
+	function isSubscribeFatalError(err) {
+		return err && SUBSCRIBE_FATAL_ERRORS.indexOf(err.message) !== -1;
+	}
+
+	function syncServerPushPreferenceOff() {
+		return fetch('game.php?page=push&mode=unsubscribe', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({})
+		}).catch(function () {});
+	}
+
+	function handleSubscribeFailure(err, options) {
+		options = options || {};
+		if (!err) {
+			return Promise.resolve();
+		}
+		if (err.message === 'denied' || err.message === 'not_configured' || err.message === 'disabled') {
+			return Promise.resolve();
+		}
+		if (isSubscribeFatalError(err)) {
+			if (options.uncheckSettings && $('#pushAlerts').length) {
+				$('#pushAlerts').prop('checked', false);
+			}
+			return syncServerPushPreferenceOff();
+		}
+		return Promise.resolve();
+	}
+
 	function registerServiceWorker() {
 		if (!('serviceWorker' in navigator)) {
 			return Promise.resolve(null);
@@ -24,6 +62,26 @@
 			.then(function (r) { return r.json(); });
 	}
 
+	function postSubscribe(subscription) {
+		return fetch('game.php?page=push&mode=subscribe', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(subscription.toJSON())
+		}).then(function (response) {
+			if (response.ok) {
+				return response.json();
+			}
+			return response.json().catch(function () {
+				return {};
+			}).then(function (body) {
+				var err = new Error(body.error || 'subscribe_failed');
+				err.status = response.status;
+				throw err;
+			});
+		});
+	}
+
 	function subscribeWithRegistration(reg, publicKey) {
 		return reg.pushManager.getSubscription().then(function (existing) {
 			if (existing) {
@@ -34,12 +92,7 @@
 				applicationServerKey: urlBase64ToUint8Array(publicKey)
 			});
 		}).then(function (subscription) {
-			return fetch('game.php?page=push&mode=subscribe', {
-				method: 'POST',
-				credentials: 'same-origin',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(subscription.toJSON())
-			});
+			return postSubscribe(subscription);
 		});
 	}
 
@@ -125,12 +178,7 @@
 				return HiveNovaPush.enable({
 					skipPermissionRequest: Notification.permission === 'granted'
 				}).catch(function (err) {
-					if (err && err.message === 'denied') {
-						return;
-					}
-					if (err && err.message === 'not_configured') {
-						return;
-					}
+					return handleSubscribeFailure(err, {});
 				});
 			});
 		}
@@ -146,12 +194,7 @@
 				HiveNovaPush.disable();
 			} else {
 				HiveNovaPush.enable().catch(function (err) {
-					if (err && err.message === 'denied') {
-						$('#pushAlerts').prop('checked', false);
-					}
-					if (err && err.message === 'not_configured') {
-						$('#pushAlerts').prop('checked', false);
-					}
+					handleSubscribeFailure(err, { uncheckSettings: true });
 				});
 			}
 		});

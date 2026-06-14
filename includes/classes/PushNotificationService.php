@@ -26,7 +26,7 @@ class PushNotificationService
 	public static function isValidSubscription(array $subscription): bool
 	{
 		$endpoint = $subscription['endpoint'] ?? '';
-		if (!is_string($endpoint) || $endpoint === '' || strlen($endpoint) > 512) {
+		if (!is_string($endpoint) || $endpoint === '' || strlen($endpoint) > 2048) {
 			return false;
 		}
 		if (!filter_var($endpoint, FILTER_VALIDATE_URL) || stripos($endpoint, 'https://') !== 0) {
@@ -61,17 +61,21 @@ class PushNotificationService
 			'user_id'
 		);
 
-		if ($existingUserId !== false && $existingUserId !== null && $existingUserId !== '' && (int) $existingUserId !== $userId) {
-			return false;
-		}
-
 		if ($userAgent !== null && strlen($userAgent) > 255) {
 			$userAgent = substr($userAgent, 0, 255);
 		}
 
 		if ($existingUserId !== false && $existingUserId !== null && $existingUserId !== '') {
+			// One browser endpoint per origin — reassign to whoever is logged in now.
+			// Same device switching accounts/universes must work; a stolen subscription
+			// object could re-point alerts (tradeoff vs hard block in #163).
+			$previousUserId = (int) $existingUserId;
+			if ($previousUserId !== $userId) {
+				self::setUserPreference($previousUserId, false);
+			}
+
 			$db->update(
-				'UPDATE %%PUSH_SUBSCRIPTIONS%% SET p256dh = :p256dh, auth = :auth, user_agent = :userAgent, created_at = :createdAt WHERE endpoint = :endpoint AND user_id = :userId',
+				'UPDATE %%PUSH_SUBSCRIPTIONS%% SET user_id = :userId, p256dh = :p256dh, auth = :auth, user_agent = :userAgent, created_at = :createdAt WHERE endpoint = :endpoint',
 				[
 					':userId'    => $userId,
 					':p256dh'    => $subscription['keys']['p256dh'],
