@@ -54,6 +54,9 @@
 		lite: false
 	};
 	var overviewMounted = false;
+	var bootGeneration = 0;
+	var pendingBuildCancel = null;
+	var pendingBootOptions = null;
 
 	function getCanvas2d(canvasEl, opts) {
 		opts = opts || {};
@@ -1799,6 +1802,9 @@
 	}
 
 	function buildScene() {
+		if (!scene || !planetSystem || !planetAnchor || !renderer) {
+			return;
+		}
 		var style = computeStyle();
 		var vizState = getVizState();
 		var buildupRatio = getBuildupRatio();
@@ -1973,32 +1979,83 @@
 		}
 	}
 
-	function scheduleBuildScene(callback) {
-		var run = function () {
-			buildScene();
-			finalizeBoot();
-			if (callback) {
-				callback(true);
-			}
-		};
-		if ('requestIdleCallback' in window) {
-			requestIdleCallback(run, { timeout: 150 });
-		} else {
-			requestAnimationFrame(function () {
-				requestAnimationFrame(run);
-			});
-		}
-	}
-
 	function completeBoot(options, success) {
 		if (options && typeof options.onBootComplete === 'function') {
 			options.onBootComplete(!!success);
 		}
 	}
 
+	function abortPendingBuild() {
+		bootGeneration += 1;
+		if (pendingBuildCancel) {
+			pendingBuildCancel();
+			pendingBuildCancel = null;
+		}
+		if (pendingBootOptions) {
+			var opts = pendingBootOptions;
+			pendingBootOptions = null;
+			completeBoot(opts, false);
+		}
+	}
+
+	function scheduleBuildScene(callback, options) {
+		options = options || {};
+		var bootId = bootGeneration;
+		pendingBootOptions = options;
+
+		function finish(success) {
+			if (pendingBootOptions === options) {
+				pendingBootOptions = null;
+			}
+			pendingBuildCancel = null;
+			if (callback) {
+				callback(!!success);
+			}
+		}
+
+		function run() {
+			pendingBuildCancel = null;
+			if (bootId !== bootGeneration || !scene || !renderer || !planetSystem) {
+				finish(false);
+				return;
+			}
+			try {
+				buildScene();
+				if (bootId !== bootGeneration || !scene || !renderer) {
+					finish(false);
+					return;
+				}
+				finalizeBoot();
+				finish(true);
+			} catch (err) {
+				finish(false);
+			}
+		}
+
+		if ('requestIdleCallback' in window) {
+			var idleId = requestIdleCallback(run, { timeout: 150 });
+			pendingBuildCancel = function () {
+				if (typeof cancelIdleCallback === 'function') {
+					cancelIdleCallback(idleId);
+				}
+			};
+		} else {
+			var rafIds = [];
+			rafIds.push(requestAnimationFrame(function () {
+				rafIds.push(requestAnimationFrame(run));
+			}));
+			pendingBuildCancel = function () {
+				for (var i = 0; i < rafIds.length; i += 1) {
+					cancelAnimationFrame(rafIds[i]);
+				}
+			};
+		}
+	}
+
 	function onCanvasContextLost(e) {
 		e.preventDefault();
 		stopAnimationLoop();
+		abortPendingBuild();
 		if (viewerOptions.preview) {
 			if (previewRenderer) {
 				previewRenderer.dispose();
@@ -2040,6 +2097,7 @@
 
 	function bootViewer(targetCanvas, planetData, options) {
 		options = options || {};
+		abortPendingBuild();
 		viewerOptions = {
 			enableZoom: options.enableZoom !== false,
 			fixedSize: options.fixedSize || 0,
@@ -2140,7 +2198,7 @@
 		} else {
 			scheduleBuildScene(function (success) {
 				completeBoot(options, success);
-			});
+			}, options);
 		}
 		return true;
 	}
@@ -2244,6 +2302,7 @@
 		if (!viewerOptions.preview) {
 			return;
 		}
+		abortPendingBuild();
 		stopAnimationLoop();
 		if (intersectionObserver) {
 			intersectionObserver.disconnect();

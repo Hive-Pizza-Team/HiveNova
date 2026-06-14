@@ -23,7 +23,8 @@
 		'generateBuildupLights',
 		'combineEmissiveMaps',
 		'matOpts.emissiveMap = buildupLights',
-		'scheduleBuildScene'
+		'scheduleBuildScene',
+		'abortPendingBuild'
 	];
 
 	function sourceMatchesUrbanizationContract(source) {
