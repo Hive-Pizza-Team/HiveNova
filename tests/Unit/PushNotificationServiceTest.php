@@ -69,13 +69,39 @@ class PushNotificationServiceTest extends TestCase
 				'auth'     => 'old-auth',
 			];
 			$stub->settingsPushByUser[7] = 1;
-			$stub->settingsPushByUser[99] = 1;
 
 			$this->assertTrue(PushNotificationService::saveSubscription(99, $this->validSubscription($endpoint)));
 			$this->assertCount(1, array_filter($stub->updates, static fn (array $row): bool => str_contains($row['qry'], '%%PUSH_SUBSCRIPTIONS%%')));
 			$this->assertSame([], $stub->inserts);
+			$this->assertSame([], $stub->deletes);
 			$this->assertSame(99, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
-			$this->assertSame(0, $stub->settingsPushByUser[7]);
+			$this->assertSame(1, $stub->settingsPushByUser[7]);
+		});
+	}
+
+	public function testSaveSubscriptionReassignSurvivesPreviousOwnerDisableSideEffects(): void
+	{
+		$endpoint = 'https://fcm.googleapis.com/fcm/send/shared-device';
+		$otherEndpoint = 'https://fcm.googleapis.com/fcm/send/other-device';
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub) use ($endpoint, $otherEndpoint): void {
+			$stub->subscriptionsByEndpoint[$endpoint] = [
+				'user_id'  => 7,
+				'endpoint' => $endpoint,
+				'p256dh'   => 'old-key',
+				'auth'     => 'old-auth',
+			];
+			$stub->subscriptionsByEndpoint[$otherEndpoint] = [
+				'user_id'  => 7,
+				'endpoint' => $otherEndpoint,
+				'p256dh'   => 'other-key',
+				'auth'     => 'other-auth',
+			];
+
+			$this->assertTrue(PushNotificationService::saveSubscription(99, $this->validSubscription($endpoint)));
+
+			$this->assertSame(99, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
+			$this->assertSame(7, $stub->subscriptionsByEndpoint[$otherEndpoint]['user_id']);
+			$this->assertSame([], $stub->deletes);
 		});
 	}
 
