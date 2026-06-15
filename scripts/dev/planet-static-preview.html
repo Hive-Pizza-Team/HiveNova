@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Planet static thumbnail preview</title>
+	<style>
+		:root {
+			color-scheme: dark;
+			--bg: #05060e;
+			--panel: #0c0f1a;
+			--text: #c8d0e0;
+			--muted: #7a8498;
+			--accent: #ffb347;
+			--line: #1a2030;
+		}
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			font: 14px/1.45 system-ui, -apple-system, sans-serif;
+			background: var(--bg);
+			color: var(--text);
+		}
+		header, .controls {
+			padding: 16px 20px;
+			border-bottom: 1px solid var(--line);
+		}
+		header h1 { margin: 0 0 6px; font-size: 1.2rem; }
+		header p { margin: 0; color: var(--muted); max-width: 72rem; }
+		.controls {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px 24px;
+			align-items: center;
+			background: var(--panel);
+		}
+		.controls label {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			color: var(--muted);
+		}
+		.controls select, .controls input[type="range"] { accent-color: var(--accent); }
+		.legend {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			gap: 8px;
+			padding: 12px 20px;
+			background: #080a12;
+			border-bottom: 1px solid var(--line);
+			font-size: 0.85rem;
+			color: var(--muted);
+		}
+		.legend strong { color: var(--text); display: block; }
+		.grid-wrap { padding: 16px 20px 32px; overflow-x: auto; }
+		table {
+			border-collapse: collapse;
+			min-width: 960px;
+			width: 100%;
+		}
+		th, td {
+			border: 1px solid var(--line);
+			padding: 10px;
+			vertical-align: middle;
+			text-align: center;
+		}
+		th {
+			background: var(--panel);
+			font-weight: 600;
+			font-size: 0.85rem;
+		}
+		td.texture {
+			text-align: left;
+			font-family: ui-monospace, monospace;
+			font-size: 0.82rem;
+			white-space: nowrap;
+		}
+		td.texture span {
+			display: block;
+			color: var(--muted);
+			font-family: system-ui, sans-serif;
+			font-size: 0.78rem;
+		}
+		.thumb {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			background: var(--bg);
+			border: 1px solid #222a3a;
+			border-radius: 6px;
+			overflow: hidden;
+		}
+		.thumb img, .thumb iframe {
+			display: block;
+			border: 0;
+		}
+		.thumb iframe { pointer-events: none; }
+		.missing {
+			color: #6a3040;
+			font-size: 0.78rem;
+			padding: 8px;
+		}
+		code { color: var(--accent); }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>Planet static thumbnail preview</h1>
+		<p>
+			Compare legacy painted JPGs, current on-disk batch assets, higher-res re-render settings
+			(<code>256</code> lite / <code>512</code> hq @ q0.96), and optional
+			<strong>option #2</strong> biome bands (texture family → palette instead of temperature alone).
+			Run <code>bash scripts/dev/extract-legacy-planet-samples.sh</code> once for legacy column.
+			Serve repo root: <code>php -S 127.0.0.1:8765</code>.
+		</p>
+	</header>
+	<div class="controls">
+		<label>
+			UI display size
+			<select id="displaySize">
+				<option value="80">Empire 80×80</option>
+				<option value="100" selected>Overview grid 100×100</option>
+				<option value="50">Top nav 50×50</option>
+				<option value="75">Galaxy tooltip 75×75</option>
+			</select>
+		</label>
+		<label>
+			Live render size
+			<select id="renderSize">
+				<option value="128">Current lite 128</option>
+				<option value="256" selected>Proposed lite 256</option>
+				<option value="200">Current hq 200</option>
+				<option value="512">Proposed hq 512</option>
+			</select>
+		</label>
+		<label>
+			<input type="checkbox" id="showProposed" checked>
+			Show option #2 column
+		</label>
+	</div>
+	<div class="legend">
+		<div><strong>Legacy</strong>Pre-batch hive JPG (200×200 painted)</div>
+		<div><strong>On disk</strong>Current <code>_hq.jpg</code> or <code>.jpg</code> in theme</div>
+		<div><strong>Live render</strong>Fresh export via planet-viz-export.html</div>
+		<div><strong>Option #2</strong>Biome band from texture prefix (preview only)</div>
+	</div>
+	<div class="grid-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Texture</th>
+					<th>Legacy</th>
+					<th>On disk (_hq → lite)</th>
+					<th>Live render</th>
+					<th id="proposedHead">Option #2 (biome band)</th>
+				</tr>
+			</thead>
+			<tbody id="rows"></tbody>
+		</table>
+	</div>
+	<script src="planet-image-catalog.js"></script>
+	<script>
+	(function () {
+		'use strict';
+
+		var PREVIEW_TEXTURES = [
+			'trockenplanet01', 'trockenplanet05', 'wuestenplanet02',
+			'dschjungelplanet03', 'dschjungelplanet08',
+			'normaltempplanet03', 'normaltempplanet07',
+			'wasserplanet04', 'wasserplanet09',
+			'eisplanet02', 'eisplanet10',
+			'mond', 'unknown', 'destroyed'
+		];
+
+		var HIVE_BASE = '../../styles/theme/hive/planeten/';
+		var LEGACY_BASE = 'legacy-samples/';
+		var rowsEl = document.getElementById('rows');
+		var displaySizeEl = document.getElementById('displaySize');
+		var renderSizeEl = document.getElementById('renderSize');
+		var showProposedEl = document.getElementById('showProposed');
+		var proposedHead = document.getElementById('proposedHead');
+
+		function exportUrl(entry, opts) {
+			opts = opts || {};
+			var mode = opts.mode || (parseInt(renderSizeEl.value, 10) >= 384 ? 'full' : 'lite');
+			var size = opts.size || parseInt(renderSizeEl.value, 10);
+			var url = 'planet-viz-export.html?texture=' + encodeURIComponent(entry.texture)
+				+ '&mode=' + mode
+				+ '&size=' + size
+				+ '&quality=0.96';
+			if (opts.bandOverride) {
+				url += '&bandOverride=' + encodeURIComponent(opts.bandOverride);
+			}
+			return url;
+		}
+
+		function thumbImg(src, alt, onerrorFallback) {
+			var wrap = document.createElement('div');
+			wrap.className = 'thumb';
+			var px = parseInt(displaySizeEl.value, 10);
+			wrap.style.width = px + 'px';
+			wrap.style.height = px + 'px';
+			var img = document.createElement('img');
+			img.width = px;
+			img.height = px;
+			img.alt = alt || '';
+			img.src = src;
+			if (onerrorFallback) {
+				img.onerror = function () {
+					img.onerror = null;
+					img.src = onerrorFallback;
+				};
+			}
+			wrap.appendChild(img);
+			return wrap;
+		}
+
+		function thumbIframe(src) {
+			var wrap = document.createElement('div');
+			wrap.className = 'thumb';
+			var px = parseInt(displaySizeEl.value, 10);
+			wrap.style.width = px + 'px';
+			wrap.style.height = px + 'px';
+			var iframe = document.createElement('iframe');
+			iframe.title = src;
+			iframe.src = src;
+			iframe.width = px;
+			iframe.height = px;
+			wrap.appendChild(iframe);
+			return wrap;
+		}
+
+		function missing(label) {
+			var el = document.createElement('div');
+			el.className = 'missing';
+			el.textContent = label;
+			return el;
+		}
+
+		function render() {
+			var showProposed = showProposedEl.checked;
+			proposedHead.style.display = showProposed ? '' : 'none';
+			rowsEl.innerHTML = '';
+
+			PREVIEW_TEXTURES.forEach(function (texture) {
+				var entry = PlanetImageCatalog.getByTexture(texture)
+					|| PlanetImageCatalog.getByVizState(texture);
+				if (!entry) {
+					return;
+				}
+
+				var tr = document.createElement('tr');
+
+				var nameTd = document.createElement('td');
+				nameTd.className = 'texture';
+				var biome = PlanetImageCatalog.classifyBiomeFromTexture(entry.texture, entry.type);
+				var proposed = PlanetImageCatalog.proposedBandOverride(entry);
+				nameTd.innerHTML = '<strong>' + entry.texture + '</strong>'
+					+ '<span>biome: ' + biome
+					+ (proposed ? ' · proposed band: ' + proposed : ' · temp band (current)')
+					+ '</span>';
+				tr.appendChild(nameTd);
+
+				var legacyTd = document.createElement('td');
+				legacyTd.appendChild(thumbImg(LEGACY_BASE + entry.texture + '.jpg', 'legacy', null));
+				tr.appendChild(legacyTd);
+
+				var diskTd = document.createElement('td');
+				diskTd.appendChild(thumbImg(
+					HIVE_BASE + entry.texture + '_hq.jpg',
+					'on disk hq',
+					HIVE_BASE + entry.texture + '.jpg'
+				));
+				tr.appendChild(diskTd);
+
+				var liveTd = document.createElement('td');
+				liveTd.appendChild(thumbIframe(exportUrl(entry)));
+				tr.appendChild(liveTd);
+
+				var proposedTd = document.createElement('td');
+				if (showProposed) {
+					if (proposed) {
+						proposedTd.appendChild(thumbIframe(exportUrl(entry, { bandOverride: proposed })));
+					} else {
+						proposedTd.appendChild(missing('Same as current (normaltemp uses temp band)'));
+					}
+				}
+				tr.appendChild(proposedTd);
+
+				rowsEl.appendChild(tr);
+			});
+		}
+
+		[displaySizeEl, renderSizeEl, showProposedEl].forEach(function (el) {
+			el.addEventListener('change', render);
+		});
+
+		render();
+	})();
+	</script>
+</body>
+</html>

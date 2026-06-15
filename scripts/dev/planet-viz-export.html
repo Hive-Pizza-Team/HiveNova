@@ -37,7 +37,10 @@
 		var texture = params.get('texture') || 'normaltempplanet03';
 		var mode = params.get('mode') || 'lite';
 		var size = parseInt(params.get('size') || '256', 10);
+		var quality = parseFloat(params.get('quality') || '0.96');
 		if (isNaN(size) || size < 64) { size = 256; }
+		if (isNaN(quality) || quality <= 0 || quality > 1) { quality = 0.96; }
+		var bandOverride = params.get('bandOverride') || '';
 
 		var entry = PlanetImageCatalog.getByTexture(texture);
 		if (!entry && params.get('vizState')) {
@@ -49,7 +52,13 @@
 		}
 
 		document.getElementById('overview-planet-data').textContent = JSON.stringify(
-			PlanetImageCatalog.buildPayload(entry, mode === 'full' ? 'full' : 'lite')
+			(function () {
+				var payload = PlanetImageCatalog.buildPayload(entry, mode === 'full' ? 'full' : 'lite');
+				if (bandOverride) {
+					payload.bandOverride = bandOverride;
+				}
+				return payload;
+			})()
 		);
 
 		function loadScript(src) {
@@ -70,7 +79,8 @@
 					document.getElementById('overview-planet-data').textContent
 				), {
 					lite: mode !== 'full',
-					size: size
+					size: size,
+					jpegQuality: quality
 				});
 			})
 			.catch(function (err) {

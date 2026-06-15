@@ -744,7 +744,8 @@
 		var avgTemp = ((data.tempMin || 0) + (data.tempMax || 0)) / 2;
 
 		var band;
-		if (biome === 'moon') { band = 'moon'; }
+		if (data.bandOverride) { band = data.bandOverride; }
+		else if (biome === 'moon') { band = 'moon'; }
 		else if (biome === 'gas') { band = 'gas'; }
 		else { band = tempBand(avgTemp); }
 
@@ -2239,6 +2240,7 @@
 		options = options || {};
 		var lite = options.lite !== false;
 		var size = options.size || 256;
+		var jpegQuality = options.jpegQuality != null ? options.jpegQuality : 0.96;
 		var ok = bootViewer(targetCanvas, planetData, {
 			enableZoom: false,
 			fixedSize: size,
@@ -2256,7 +2258,7 @@
 					if (renderer && scene && camera) {
 						renderer.render(scene, camera);
 					}
-					var dataUrl = captureStaticDataUrl(targetCanvas, 'image/jpeg', 0.92);
+					var dataUrl = captureStaticDataUrl(targetCanvas, 'image/jpeg', jpegQuality);
 					if (!dataUrl || dataUrl.length < 500) {
 						reject(new Error('Static capture produced empty canvas'));
 						return;

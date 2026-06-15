@@ -264,12 +264,43 @@
 		return null;
 	}
 
+	/** Mirrors overview-planet.js classifyBiome — used by static preview tooling. */
+	function classifyBiomeFromTexture(texture, type) {
+		if (type === 3) { return 'moon'; }
+		texture = (texture || '').toLowerCase();
+		if (texture.indexOf('mond') === 0 || texture.indexOf('moon') >= 0) { return 'moon'; }
+		if (texture.indexOf('gas') >= 0) { return 'gas'; }
+		if (texture.indexOf('eis') >= 0) { return 'ice'; }
+		if (texture.indexOf('wasser') >= 0) { return 'water'; }
+		if (texture.indexOf('wuest') >= 0 || texture.indexOf('trocken') >= 0) { return 'desert'; }
+		if (texture.indexOf('dschjungel') >= 0 || texture.indexOf('jungel') >= 0 || texture.indexOf('jungle') >= 0) { return 'jungle'; }
+		return 'terra';
+	}
+
+	/**
+	 * Option #2 preview: pick color band from texture family instead of temperature alone.
+	 * Returns null to keep current temp-driven band (normaltemp*, etc.).
+	 */
+	function proposedBandOverride(entry) {
+		if (!entry || entry.vizState || entry.type === 3) {
+			return null;
+		}
+		var biome = classifyBiomeFromTexture(entry.texture, entry.type);
+		if (biome === 'desert') { return 'desert'; }
+		if (biome === 'jungle') { return 'savanna'; }
+		if (biome === 'water') { return 'terra'; }
+		if (biome === 'ice') { return 'ice'; }
+		return null;
+	}
+
 	var PlanetImageCatalog = {
 		entries: ENTRIES,
 		map: TEXTURE_MAP,
 		buildPayload: buildPayload,
 		getByTexture: getByTexture,
-		getByVizState: getByVizState
+		getByVizState: getByVizState,
+		classifyBiomeFromTexture: classifyBiomeFromTexture,
+		proposedBandOverride: proposedBandOverride
 	};
 
 	if (typeof module !== 'undefined' && module.exports) {
