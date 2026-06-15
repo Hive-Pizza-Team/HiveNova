@@ -703,6 +703,31 @@ class PlayerUtil
 
 	static public function countOwnedPlanets($USER)
 	{
+		if (empty($USER['id'])) {
+			return self::countOwnedPlanetsFromCache($USER);
+		}
+
+		try {
+			$sql = 'SELECT COUNT(*) as state
+			FROM %%PLANETS%%
+			WHERE id_owner = :userId
+			AND universe = :universe
+			AND planet_type = :type
+			AND destruyed = :destroyed;';
+
+			return (int) Database::get()->selectSingle($sql, array(
+				':userId'     => (int) $USER['id'],
+				':universe'   => (int) $USER['universe'],
+				':type'       => 1,
+				':destroyed'  => 0,
+			), 'state');
+		} catch (\Throwable $e) {
+			return self::countOwnedPlanetsFromCache($USER);
+		}
+	}
+
+	static protected function countOwnedPlanetsFromCache($USER)
+	{
 		if (!isset($USER['PLANETS']) || !is_array($USER['PLANETS'])) {
 			return 0;
 		}

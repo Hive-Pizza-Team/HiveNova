@@ -75,6 +75,53 @@ class GalaxyRowsVizJsonTest extends TestCase
 		return (bool) $method->invoke($rows);
 	}
 
+	private function invokeGetColonizeSlotStatus(int $position): array
+	{
+		$rows = new GalaxyRows();
+		$method = new ReflectionMethod(GalaxyRows::class, 'getColonizeSlotStatus');
+		$method->setAccessible(true);
+
+		return $method->invoke($rows, $position);
+	}
+
+	private function invokeBuildVizPayloadFromGalaxyRow(array $galaxyRow, string $type, array $user): ?array
+	{
+		global $USER;
+		$USER = $user;
+
+		$rows = new GalaxyRows();
+		$method = new ReflectionMethod(GalaxyRows::class, 'buildVizPayloadFromGalaxyRow');
+		$method->setAccessible(true);
+
+		return $method->invoke($rows, $galaxyRow, $type, './styles/theme/hive/');
+	}
+
+	private function makeLazyVizGalaxyRow(array $overrides = []): array
+	{
+		return array_merge([
+			'galaxy'        => 1,
+			'system'        => 88,
+			'planet'        => 7,
+			'id'            => 501,
+			'id_owner'      => 42,
+			'name'          => 'Colony',
+			'image'         => 'normaltempplanet03',
+			'temp_min'      => 30,
+			'temp_max'      => 70,
+			'diameter'      => 12767,
+			'field_current' => 55,
+			'field_max'     => 163,
+			'der_metal'     => 0,
+			'der_crystal'   => 0,
+			'buddy'         => 0,
+			'ally_id'       => 0,
+			'allyid'        => 0,
+			'diploLevel'    => 0,
+			'metal_mine'    => 12,
+			'light_fighter' => 3,
+		], $overrides);
+	}
+
 	private function decodePayload(string $json): array
 	{
 		return json_decode($json, true);
@@ -349,6 +396,72 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$rows->fillUncolonizedSlots($data, 15, 2, 145, './styles/theme/hive/');
 		$this->assertFalse($data[1]['canColonize']);
 		$this->assertTrue($data[8]['canColonize']);
+	}
+
+	public function testHasSharedPlanetVizIntelRequiresAcceptedBuddyNotPendingRequest(): void
+	{
+		// Galaxy SQL excludes pending requests via NOT EXISTS on buddy_request, so buddy=0
+		// is the row shape for both strangers and pending buddy requests.
+		$row = [
+			'planet'    => 5,
+			'id_owner'  => 42,
+			'buddy'     => 0,
+			'ally_id'   => 0,
+		];
+		$user = ['id' => 7, 'ally_id' => 0];
+
+		$this->assertFalse($this->invokeHasSharedPlanetVizIntel($row, false, $user));
+	}
+
+	public function testPlanetVizLazyPayloadStrangerOmitsInventory(): void
+	{
+		$payload = $this->invokeBuildVizPayloadFromGalaxyRow(
+			$this->makeLazyVizGalaxyRow(),
+			'planet',
+			['id' => 7, 'ally_id' => 0]
+		);
+
+		$this->assertIsArray($payload);
+		$this->assertFalse($payload['shareIntel']);
+		$this->assertSame([], (array) $payload['buildings']);
+		$this->assertSame([], (array) $payload['fleet']);
+	}
+
+	public function testPlanetVizLazyPayloadAcceptedBuddyIncludesInventory(): void
+	{
+		$payload = $this->invokeBuildVizPayloadFromGalaxyRow(
+			$this->makeLazyVizGalaxyRow(['buddy' => 1]),
+			'planet',
+			['id' => 7, 'ally_id' => 0]
+		);
+
+		$this->assertIsArray($payload);
+		$this->assertTrue($payload['shareIntel']);
+		$this->assertSame(12, $payload['buildings'][1]);
+		$this->assertSame(3, $payload['fleet'][202]);
+	}
+
+	public function testGetColonizeSlotStatusPrefersCapWhenBothBlock(): void
+	{
+		global $USER, $resource;
+
+		Config::setInstance($this->makeColonizeConfig([
+			'planets_tech' => 0,
+		]), 1);
+		$resource = array_replace($resource ?? [], [124 => 'astrophysics_tech']);
+		$USER = [
+			'universe'          => 1,
+			'astrophysics_tech' => 0,
+			'factor'            => ['Planets' => 0],
+			'PLANETS'           => [
+				['planet_type' => 1, 'destruyed' => 0],
+			],
+		];
+
+		$status = $this->invokeGetColonizeSlotStatus(1);
+
+		$this->assertFalse($status['canColonize']);
+		$this->assertSame('cap', $status['colonizeBlockedReason']);
 	}
 
 	public function testFillUncolonizedSlotsBlocksWhenColonyCapReached(): void

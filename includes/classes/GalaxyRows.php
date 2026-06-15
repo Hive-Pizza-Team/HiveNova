@@ -52,8 +52,6 @@ class GalaxyRows
 	{
 		global $USER;
 
-		$inventorySelect = $this->getGalaxyInventorySelectSql();
-
         $sql	= 'SELECT SQL_BIG_RESULT DISTINCT
 		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.temp_max, p.field_current, p.field_max, p.destruyed, p.der_metal, p.der_crystal, p.id_luna,
 		u.id as userid, u.ally_id, u.username, u.onlinetime, u.urlaubs_modus, u.banaday, 
@@ -62,7 +60,7 @@ class GalaxyRows
 		a.id as allyid, a.ally_tag, a.ally_web, a.ally_members, a.ally_name, 
 		allys.total_rank as ally_rank,
 		COUNT(buddy.id) as buddy,
-		d.level as diploLevel'.$inventorySelect.'
+		d.level as diploLevel
 		FROM %%PLANETS%% p
 		LEFT JOIN %%USERS%% u ON p.id_owner = u.id
 		LEFT JOIN %%PLANETS%% m ON m.id = p.id_luna
@@ -338,21 +336,25 @@ class GalaxyRows
 		return false;
 	}
 
-	protected function getColonizeSlotStatus(int $position): array
+	protected function getColonizeSlotStatus(int $position, ?bool $hasCapacity = null): array
 	{
 		global $USER;
+
+		if ($hasCapacity === null) {
+			$hasCapacity = PlayerUtil::hasColonizationCapacity($USER);
+		}
+
+		if (!$hasCapacity) {
+			return array(
+				'canColonize'             => false,
+				'colonizeBlockedReason'   => 'cap',
+			);
+		}
 
 		if (!PlayerUtil::allowPlanetPosition($position, $USER)) {
 			return array(
 				'canColonize'             => false,
 				'colonizeBlockedReason'   => 'astro',
-			);
-		}
-
-		if (!PlayerUtil::hasColonizationCapacity($USER)) {
-			return array(
-				'canColonize'             => false,
-				'colonizeBlockedReason'   => 'cap',
 			);
 		}
 
@@ -563,12 +565,15 @@ class GalaxyRows
 
 	public function fillUncolonizedSlots(array &$galaxyData, int $maxPlanets, int $galaxy, int $system, string $themePath): void
 	{
+		global $USER;
+
 		$vizEnabled = str_contains($themePath, '/hive/');
+		$hasCapacity = PlayerUtil::hasColonizationCapacity($USER);
 		for ($position = 1; $position <= $maxPlanets; $position++) {
 			if (isset($galaxyData[$position])) {
 				continue;
 			}
-			$colonizeStatus = $this->getColonizeSlotStatus($position);
+			$colonizeStatus = $this->getColonizeSlotStatus($position, $hasCapacity);
 			$galaxyData[$position] = array(
 				'uncolonized'             => true,
 				'canColonize'             => $colonizeStatus['canColonize'],
@@ -619,6 +624,13 @@ class GalaxyRows
 		if (!$row) {
 			return null;
 		}
+
+		return $this->buildVizPayloadFromGalaxyRow($row, $type, $themePath);
+	}
+
+	protected function buildVizPayloadFromGalaxyRow(array $row, string $type, string $themePath): ?array
+	{
+		global $USER;
 
 		$this->galaxyRow = $row;
 		$this->galaxyData = array(
