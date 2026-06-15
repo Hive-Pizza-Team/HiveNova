@@ -24,7 +24,7 @@
 	<link rel="stylesheet" type="text/css" href="{$dpath}formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/fontawesome/css/ingame-icons.css?v={$REV}">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
-	{assign var="ingamePage" value=$smarty.get.page|default:''}
+	{assign var="ingamePage" value=$smarty.get.page|default:'overview'}
 	<script type="text/javascript">
 	var ServerTimezoneOffset = {$Offset};
 	var serverTime 	= new Date({$date.0}, {$date.1 - 1}, {$date.2}, {$date.3}, {$date.4}, {$date.5});
