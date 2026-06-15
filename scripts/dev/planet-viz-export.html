@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" data-planet-export="1">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>exporting</title>
+	<style>
+		* { box-sizing: border-box; }
+		html, body {
+			margin: 0;
+			background: #05060e;
+			overflow: hidden;
+		}
+		#planet-wrap {
+			width: 512px;
+			height: 512px;
+			position: relative;
+		}
+		#overview-planet-canvas {
+			display: block;
+			width: 512px;
+			height: 512px;
+		}
+	</style>
+</head>
+<body>
+	<div id="planet-wrap">
+		<canvas id="overview-planet-canvas" class="overview-planet-canvas" aria-hidden="true"></canvas>
+	</div>
+	<script type="application/json" id="overview-planet-data"></script>
+	<script src="planet-image-catalog.js"></script>
+	<script>
+	(function () {
+		'use strict';
+
+		var params = new URLSearchParams(window.location.search);
+		var texture = params.get('texture') || 'normaltempplanet03';
+		var mode = params.get('mode') || 'lite';
+		var size = parseInt(params.get('size') || '256', 10);
+		if (isNaN(size) || size < 64) { size = 256; }
+
+		var entry = PlanetImageCatalog.getByTexture(texture);
+		if (!entry && params.get('vizState')) {
+			entry = PlanetImageCatalog.getByVizState(params.get('vizState'));
+		}
+		if (!entry) {
+			document.title = 'error:unknown-texture';
+			return;
+		}
+
+		document.getElementById('overview-planet-data').textContent = JSON.stringify(
+			PlanetImageCatalog.buildPayload(entry, mode === 'full' ? 'full' : 'lite')
+		);
+
+		function loadScript(src) {
+			return new Promise(function (resolve, reject) {
+				var el = document.createElement('script');
+				el.src = src;
+				el.onload = resolve;
+				el.onerror = function () { reject(new Error('Failed to load ' + src)); };
+				document.head.appendChild(el);
+			});
+		}
+
+		loadScript('../threejs/three.min.js')
+			.then(function () { return loadScript('../game/overview-planet.js'); })
+			.then(function () {
+				var canvas = document.getElementById('overview-planet-canvas');
+				return window.HiveNovaOverviewPlanet.renderStatic(canvas, JSON.parse(
+					document.getElementById('overview-planet-data').textContent
+				), {
+					lite: mode !== 'full',
+					size: size
+				});
+			})
+			.catch(function (err) {
+				document.title = 'error:' + (err && err.message ? err.message : 'render');
+			});
+	})();
+	</script>
+</body>
+</html>

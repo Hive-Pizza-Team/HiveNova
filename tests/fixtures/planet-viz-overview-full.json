@@ -1,0 +1,19 @@
+{
+  "shareIntel": true,
+  "texture": "normaltempplanet03",
+  "type": 1,
+  "tempMin": 30,
+  "tempMax": 70,
+  "diameter": 12767,
+  "fields": { "current": 42, "max": 163 },
+  "galaxy": 1,
+  "system": 88,
+  "planet": 7,
+  "buildings": { "1": 10, "2": 8, "22": 5 },
+  "fleet": { "202": 12, "204": 3 },
+  "defense": { "401": 50 },
+  "queue": { "building": 1, "hangar": 0 },
+  "moon": { "id": 9001, "name": "Luna", "diameter": 4200 },
+  "debris": { "metal": 0, "crystal": 0 },
+  "dpath": "./styles/theme/hive/"
+}

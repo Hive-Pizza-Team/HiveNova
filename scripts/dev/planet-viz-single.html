@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Planet viz</title>
+	<style>
+		* { box-sizing: border-box; }
+		html, body {
+			margin: 0;
+			height: 100%;
+			background: #05060e;
+			overflow: hidden;
+		}
+		.planet-visual {
+			width: 100%;
+			height: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.planet-square {
+			width: 100%;
+			height: 100%;
+			max-width: 100%;
+			max-height: 100%;
+			aspect-ratio: 1 / 1;
+			position: relative;
+		}
+		.overview-planet-canvas {
+			display: block;
+			width: 100% !important;
+			height: 100% !important;
+		}
+	</style>
+</head>
+<body>
+	<div class="planet-visual">
+		<div class="planet-square" id="planet-wrap">
+			<canvas id="overview-planet-canvas" class="overview-planet-canvas" aria-hidden="true"></canvas>
+		</div>
+	</div>
+	<script type="application/json" id="overview-planet-data"></script>
+	<script src="planet-viz-presets.js"></script>
+	<script>
+	(function () {
+		'use strict';
+
+		var params = new URLSearchParams(window.location.search);
+		var presetId = params.get('preset') || 'terra';
+		var preset = PlanetVizPresets.map[presetId] || PlanetVizPresets.map.terra;
+		var buildup = parseFloat(params.get('buildup') || '0.53');
+		if (isNaN(buildup)) { buildup = 0.53; }
+
+		document.getElementById('overview-planet-data').textContent = JSON.stringify(
+			PlanetVizPresets.buildPayload(preset, buildup)
+		);
+		document.title = preset.label + ' — planet viz';
+	})();
+	</script>
+	<script
+		src="../game/overview-planet-loader.js"
+		data-three-src="../threejs/three.min.js"
+		data-planet-src="../game/overview-planet.js"></script>
+</body>
+</html>

@@ -104,13 +104,21 @@ $("#tn3").hide();
  &nbsp;<span style="display:none" id="tn3"><button id="chkbtn3">Show fleets</button></span>
 	</div>
 <br>
-<div class="infos">
-{if $Moon}<div class="moon"><a href="game.php?page=overview&amp;cp={$Moon.id}&amp;re=0" title="{$Moon.name}"><img src="{$dpath}planeten/mond.jpg" height="100" width="100" style="margin: 20% 0px 5px 0px;" alt="{$Moon.name} ({$LNG.fcm_moon})"></a><br>{$Moon.name} ({$LNG.fcm_moon})
+<div class="infos overview-planet-panel">
+{if $Moon}<div class="moon overview-planet-moon"><a href="game.php?page=overview&amp;cp={$Moon.id}&amp;re=0" title="{$Moon.name}"><img src="{$dpath}planeten/mond.jpg" height="100" width="100" alt="{$Moon.name} ({$LNG.fcm_moon})"></a><br>{$Moon.name} ({$LNG.fcm_moon})
 </div>
-{else}&nbsp;{/if}
-		<div class="planeth overview-planet-visual">
-			<img src="{$dpath}planeten/{$planetimage}.jpg" width="200" height="200" alt="{$planetname}">
+{/if}
+	<div class="overview-planet-main">
+		{if $planetVizEnabled}
+		<div class="planeth overview-planet-visual overview-planet-visual--loading">
+			<img class="overview-planet-fallback" data-src="{$dpath}planeten/{$planetimage}.jpg" data-src-hq="{$dpath}planeten/{$planetimage}_hq.jpg" data-alt="{$planetname|escape:'html'}" alt="" aria-hidden="true">
+			<canvas id="overview-planet-canvas" class="overview-planet-canvas" width="280" height="280" aria-label="{$planetname|escape:'html'} — animated planet view"></canvas>
 		</div>
+		{else}
+		<div class="planeth overview-planet-visual overview-planet-visual--fallback">
+			<img class="overview-planet-fallback" src="{$dpath}planeten/{$planetimage}.jpg" alt="{$planetname}">
+		</div>
+		{/if}
 		<div class="planeth overview-planet-details">
 			<div class="overview-planet-header">
 				<span class="overview-planet-name">{$planetname}</span>
@@ -145,7 +153,8 @@ $("#tn3").hide();
 				</div>
 			</dl>
 
-</div>
+		</div>
+	</div>
 </div>
 <br>
 <div class="infos">		
@@ -157,7 +166,7 @@ $("#tn3").hide();
 		
 			{foreach $AllPlanets as $PlanetRow}
 			{if ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW) === 1}{/if}
-			<div class="planetl"><a href="game.php?page=overview&amp;cp={$PlanetRow.id}" title="{$PlanetRow.name}"><img style="margin: 5px;" src="{$dpath}planeten/{$PlanetRow.image}.jpg" width="100" height="100" alt="{$PlanetRow.name}"></a><br>{$PlanetRow.name}<br>{$PlanetRow.build|default:''}<br></div>
+			<div class="planetl"><a href="game.php?page=overview&amp;cp={$PlanetRow.id}" title="{$PlanetRow.name}"><img style="margin: 5px;" loading="lazy" src="{$dpath}planeten/{$PlanetRow.image}.jpg" width="100" height="100" alt="{$PlanetRow.name}"></a><br>{$PlanetRow.name}<br>{$PlanetRow.build|default:''}<br></div>
 			{if $PlanetRow@last && $PlanetRow@total > 1 && ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW) !== 0}
 			{$to = $themeSettings.PLANET_ROWS_ON_OVERVIEW - ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW)}
 			{for $foo=1 to $to}
@@ -174,6 +183,16 @@ $("#tn3").hide();
 	
 	
 </div>
+
+{if $planetVizEnabled}
+<script type="application/json" id="overview-planet-data">{$planetVizJson nofilter}</script>
+<script type="text/javascript"
+	src="./scripts/game/overview-planet-loader-utils.js?v={$REV}"></script>
+<script type="text/javascript"
+	src="./scripts/game/overview-planet-loader.js?v={$REV}"
+	data-three-src="./scripts/threejs/three.min.js?v={$REV}"
+	data-planet-src="./scripts/game/overview-planet.js?v={$REV}"></script>
+{/if}
 
 {/block}
 {block name="script" append}

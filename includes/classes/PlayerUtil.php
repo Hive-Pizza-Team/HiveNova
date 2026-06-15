@@ -701,6 +701,59 @@ class PlayerUtil
 		return (int) ceil($config->min_player_planets + min($planetPerTech, $USER[$resource[124]] * $config->planets_per_tech) + min($planetPerBonus, $USER['factor']['Planets']));
 	}
 
+	static public function countOwnedPlanets($USER)
+	{
+		if (empty($USER['id'])) {
+			return self::countOwnedPlanetsFromCache($USER);
+		}
+
+		try {
+			$sql = 'SELECT COUNT(*) as state
+			FROM %%PLANETS%%
+			WHERE id_owner = :userId
+			AND universe = :universe
+			AND planet_type = :type
+			AND destruyed = :destroyed;';
+
+			return (int) Database::get()->selectSingle($sql, array(
+				':userId'     => (int) $USER['id'],
+				':universe'   => (int) $USER['universe'],
+				':type'       => 1,
+				':destroyed'  => 0,
+			), 'state');
+		} catch (\Throwable $e) {
+			return self::countOwnedPlanetsFromCache($USER);
+		}
+	}
+
+	static protected function countOwnedPlanetsFromCache($USER)
+	{
+		if (!isset($USER['PLANETS']) || !is_array($USER['PLANETS'])) {
+			return 0;
+		}
+
+		$count = 0;
+		foreach ($USER['PLANETS'] as $planet) {
+			if (!is_array($planet)) {
+				continue;
+			}
+			if ((int) ($planet['planet_type'] ?? 1) !== 1) {
+				continue;
+			}
+			if (!empty($planet['destruyed'])) {
+				continue;
+			}
+			$count++;
+		}
+
+		return $count;
+	}
+
+	static public function hasColonizationCapacity($USER)
+	{
+		return self::countOwnedPlanets($USER) < self::maxPlanetCount($USER);
+	}
+
 	static public function allowPlanetPosition($position, $USER)
 	{
 		// http://owiki.de/index.php/Astrophysik#.C3.9Cbersicht

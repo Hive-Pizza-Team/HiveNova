@@ -23,6 +23,8 @@ $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
 	21  => 'hangar',
 	22  => 'solar_plant',
 	31  => 'intergalactic_research',
+	33  => 'terraformer',
+	41  => 'mondbasis',
 
 	108 => 'computer_tech',
 	109 => 'weapons_tech',
@@ -36,6 +38,8 @@ $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
 
 	202 => 'light_fighter',
 	210 => 'bomber',
+
+	401 => 'rocket_launcher',
 
 	901 => 'metal',
 	902 => 'crystal',

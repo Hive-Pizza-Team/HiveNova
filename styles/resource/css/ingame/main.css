@@ -999,6 +999,177 @@ table.tablesorter thead tr .headerSortDown {
     font-variant: normal;
     font-variant-caps: normal;
     line-height: 1.6;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+#overview .infos.overview-planet-panel {
+    display: block;
+    position: relative;
+    overflow: visible;
+    text-align: center;
+    padding: 8px 12px 12px;
+}
+
+#overview .overview-planet-panel .overview-planet-moon {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    float: none;
+    width: auto;
+    z-index: 2;
+    padding: 0;
+}
+
+#overview .overview-planet-moon img {
+    display: block;
+    margin: 0 auto 6px;
+}
+
+#overview .overview-planet-main {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#overview .overview-planet-panel .planeth.overview-planet-visual {
+    float: none;
+    width: min(280px, 100%);
+    max-width: 100%;
+    padding: 0;
+    line-height: 0;
+}
+
+#overview .overview-planet-panel .overview-planet-visual {
+    margin: 0 auto 12px;
+}
+
+#overview .overview-planet-panel .overview-planet-details {
+    width: 100%;
+}
+
+.overview-planet-visual {
+    position: relative;
+    width: min(280px, 100%);
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto 12px;
+    line-height: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #05060e;
+    box-sizing: border-box;
+}
+
+.overview-planet-fallback,
+.overview-planet-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+
+.overview-planet-visual--fallback .overview-planet-fallback {
+    opacity: 1;
+    z-index: 1;
+}
+
+.overview-planet-visual--loading .overview-planet-fallback {
+    opacity: 0;
+    visibility: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.overview-planet-visual--ready .overview-planet-canvas {
+    opacity: 1;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+#overview .overview-planet-panel .overview-planet-visual .overview-planet-fallback,
+#overview .overview-planet-panel .overview-planet-visual .overview-planet-canvas {
+    margin: 0;
+}
+
+.overview-planet-fallback {
+    display: block;
+    object-fit: cover;
+}
+
+.overview-planet-canvas {
+    display: block;
+    touch-action: none;
+    object-fit: contain;
+}
+
+.overview-planet-zoom {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 3;
+}
+
+.overview-planet-zoom-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-surface-dark);
+    color: var(--color-text-bright);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.overview-planet-zoom-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.overview-planet-zoom-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.galaxy-viz-host {
+    position: relative;
+    width: 75px;
+    height: 75px;
+    line-height: 0;
+}
+
+.galaxy-viz-fallback {
+    display: block;
+    width: 75px;
+    height: 75px;
+    object-fit: contain;
+}
+
+.galaxy-planet-viz-canvas {
+    display: block;
+    width: 75px;
+    height: 75px;
+    border-radius: 6px;
+    opacity: 0;
+}
+
+.galaxy-planet-viz-canvas--ready {
+    opacity: 1;
 }
 
 .overview-planet-header {
@@ -1918,7 +2089,21 @@ table.tablesorter thead tr .headerSortDown {
         box-sizing: border-box;
     }
 
-    #overview .infos .planeth img {
+    #overview .infos.overview-planet-panel {
+        padding-top: 12px;
+    }
+
+    #overview .overview-planet-panel .overview-planet-moon {
+        position: static;
+        margin: 0 auto 8px;
+    }
+
+    #overview .overview-planet-main {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    #overview .infos .planeth img:not(.overview-planet-fallback) {
         float: none;
         display: block;
         max-width: 100%;
@@ -1926,7 +2111,28 @@ table.tablesorter thead tr .headerSortDown {
         margin: 0 auto 8px;
     }
 
-    #overview .infos .planeth {
+    #overview .infos .overview-planet-visual {
+        width: min(280px, 100%);
+        max-width: 100%;
+        aspect-ratio: 1 / 1;
+    }
+
+    #overview .infos .planeth.overview-planet-visual {
+        padding: 0;
+        line-height: 0;
+    }
+
+    #overview .infos .planeth .overview-planet-canvas,
+    #overview .infos .planeth .overview-planet-fallback {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+
+    #overview .infos .planeth.overview-planet-details,
+    #overview .infos .planeth:not(.overview-planet-visual) {
         clear: both;
         padding: 10px;
     }

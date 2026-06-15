@@ -84,10 +84,80 @@ class ShowOverviewPage extends AbstractGamePage
 		$fleetTableObj->setPlanet($PLANET['id']);
 		return $fleetTableObj->renderTable();
 	}
+
+	private function buildPlanetVizData($moonRow = null)
+	{
+		global $PLANET, $resource, $reslist, $THEME;
+
+		$buildings = array();
+		foreach ($reslist['build'] as $elementID) {
+			$level = (int) $PLANET[$resource[$elementID]];
+			if ($level > 0) {
+				$buildings[$elementID] = $level;
+			}
+		}
+
+		$fleet = array();
+		foreach ($reslist['fleet'] as $elementID) {
+			$count = (int) $PLANET[$resource[$elementID]];
+			if ($count > 0) {
+				$fleet[$elementID] = $count;
+			}
+		}
+
+		$defense = array();
+		foreach ($reslist['defense'] as $elementID) {
+			$count = (int) $PLANET[$resource[$elementID]];
+			if ($count > 0) {
+				$defense[$elementID] = $count;
+			}
+		}
+
+		$hasBuildingQueue = ($PLANET['b_building'] - TIMESTAMP) > 0;
+		$hasHangarQueue = !empty($PLANET['b_hangar_id']);
+
+		$moon = null;
+		if ($PLANET['planet_type'] == 1 && !empty($moonRow)) {
+			$moon = array(
+				'id'       => (int) $moonRow['id'],
+				'name'     => $moonRow['name'],
+				'diameter' => (int) $moonRow['diameter'],
+			);
+		}
+
+		return array(
+			'shareIntel' => true,
+			'texture'   => $PLANET['planet_type'] == 3 ? 'mond' : $PLANET['image'],
+			'type'      => (int) $PLANET['planet_type'],
+			'tempMin'   => (int) $PLANET['temp_min'],
+			'tempMax'   => (int) $PLANET['temp_max'],
+			'diameter'  => (int) $PLANET['diameter'],
+			'fields'    => array(
+				'current' => (int) $PLANET['field_current'],
+				'max'     => (int) CalculateMaxPlanetFields($PLANET),
+			),
+			'galaxy'    => (int) $PLANET['galaxy'],
+			'system'    => (int) $PLANET['system'],
+			'planet'    => (int) $PLANET['planet'],
+			'buildings' => $buildings,
+			'fleet'     => $fleet,
+			'defense'   => $defense,
+			'queue'     => array(
+				'building' => $hasBuildingQueue ? 1 : 0,
+				'hangar'   => $hasHangarQueue ? 1 : 0,
+			),
+			'moon'      => $moon,
+			'debris'    => array(
+				'metal'   => (int) $PLANET['der_metal'],
+				'crystal' => (int) $PLANET['der_crystal'],
+			),
+			'dpath'     => $THEME->getTheme(),
+		);
+	}
 		
 	function show()
 	{
-		global $LNG, $PLANET, $USER;
+		global $LNG, $PLANET, $USER, $THEME;
 		
 		$AdminsOnline 	= array();
 		$chatOnline 	= array();
@@ -118,7 +188,7 @@ class ShowOverviewPage extends AbstractGamePage
 		}
 		
 		if ($PLANET['id_luna'] != 0) {
-			$sql = "SELECT id, name FROM %%PLANETS%% WHERE id = :lunaID;";
+			$sql = "SELECT id, name, diameter FROM %%PLANETS%% WHERE id = :lunaID;";
             $Moon = $db->selectSingle($sql, array(
                 ':lunaID'   => $PLANET['id_luna']
             ));
@@ -269,6 +339,11 @@ class ShowOverviewPage extends AbstractGamePage
 			'chatOnline'				=> $chatOnline,
 			'servertime'				=> _date("M D d H:i:s", TIMESTAMP, $USER['timezone']),
 			'path'						=> HTTP_PATH,
+			'planetVizJson'				=> json_encode(
+				$this->buildPlanetVizData(!empty($Moon) ? $Moon : null),
+				JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+			),
+			'planetVizEnabled'			=> str_contains($THEME->getTheme(), '/hive/'),
 		));
 		
 		$this->display('page.overview.default.tpl');

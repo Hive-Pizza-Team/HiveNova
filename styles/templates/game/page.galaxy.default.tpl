@@ -67,12 +67,43 @@
 	</tr>
     {for $planet=1 to $max_planets}
 	<tr class="galaxy-planet-row">
-    {if !isset($GalaxyRows[$planet])}
+    {if !empty($GalaxyRows[$planet].uncolonized)}
 		<td>
+			{if !empty($GalaxyRows[$planet].canColonize)}
 			<a href="?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$planet}&amp;planettype=1&amp;target_mission=7">{$planet}</a>
+			{else}
+			{$planet}
+			{/if}
 		</td>
-        <td></td>
-        <td></td>
+        {$currentPlanet = $GalaxyRows[$planet]}
+		<td>
+			{capture name="planetTooltip"}
+			<table style='width:220px'>
+				<tr>
+					<th colspan='2'>{$LNG.gl_unknown} [{$galaxy}:{$system}:{$planet}]</th>
+				</tr>
+				<tr>
+					<td style='width:80px' class='galaxy-viz-host'>
+						<img class='galaxy-viz-fallback' src='{$dpath}planeten/unknown.jpg' height='75' width='75' alt=''>
+					</td>
+					<td>
+						{if !empty($currentPlanet.canColonize)}
+						{$LNG.gl_free_desc}<br><br>
+						<a href='?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$planet}&amp;planettype=1&amp;target_mission=7'>{$LNG["type_mission_7"]}</a>
+						{elseif $currentPlanet.colonizeBlockedReason == 'cap'}
+						{$LNG.gl_free_colony_cap_reached}
+						{else}
+						{$LNG.gl_free_astrotech_required}
+						{/if}
+					</td>
+				</tr>
+			</table>
+			{/capture}
+			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
+				<img src="{$dpath}planeten/unknown.jpg" height="30" width="30" alt="">
+			</a>
+		</td>
+		<td></td>
         <td></td>
         <td></td>
         <td></td>
@@ -101,7 +132,9 @@
 					<th colspan='2'>{$LNG.gl_planet} {$currentPlanet.planet.name} [{$galaxy}:{$system}:{$planet}]</th>
 				</tr>
 				<tr>
-					<td style='width:80px'><img src='{$dpath}planeten/{$currentPlanet.planet.image}.jpg' height='75' width='75'></td>
+					<td style='width:80px' class='galaxy-viz-host'>
+						<img class='galaxy-viz-fallback' src='{$dpath}planeten/{$currentPlanet.planet.image}.jpg' height='75' width='75' alt=''>
+					</td>
 					<td>
 						{if $currentPlanet.missions.6}
 							<a href='javascript:doit(6,{$currentPlanet.planet.id});'>{$LNG["type_mission_6"]}</a><br><br>
@@ -142,7 +175,7 @@
 				</tr>
 			</table>
 			{/capture}
-			<a class="tooltip_sticky" data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
+			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
 				<img src="{$dpath}planeten/{$currentPlanet.planet.image}.jpg" height="30" width="30" alt="">
 			</a>
 		</td>
@@ -155,7 +188,9 @@
 					<th colspan='2'>{$LNG.gl_moon} {$currentPlanet.moon.name} [{$galaxy}:{$system}:{$planet}]</th>
 				</tr>
 				<tr>
-					<td style='width:80px'><img src='{$dpath}planeten/mond.jpg' height='75' width='75'></td>
+					<td style='width:80px' class='galaxy-viz-host'>
+						<img class='galaxy-viz-fallback' src='{$dpath}planeten/mond.jpg' height='75' width='75' alt=''>
+					</td>
 					<td>
 						<table style='width:100%'>
 							<tr>
@@ -202,7 +237,7 @@
 				</tr>
 			</table>
 			{/capture}
-			<a class="tooltip_sticky" data-tooltip-content="{$smarty.capture.moonTooltip|escape:'html'}">
+			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.moon.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.moonTooltip|escape:'html'}">
 				<img src="{$dpath}planeten/mond.jpg" height="22" width="22" alt="{$currentPlanet.moon.name}">
 			</a>
 			{/if}
@@ -397,4 +432,12 @@
 		status_fail		= '{$LNG.gl_ajax_status_fail}';
 		MaxFleetSetting = {$settings_fleetactions};
 	</script>
+	{if $dpath|strstr:'/hive/'}
+	<script type="text/javascript"
+		src="./scripts/game/galaxy-planet-preview-utils.js?v={$REV}"></script>
+	<script type="text/javascript"
+		src="./scripts/game/galaxy-planet-preview.js?v={$REV}"
+		data-three-src="./scripts/threejs/three.min.js?v={$REV}"
+		data-planet-src="./scripts/game/overview-planet.js?v={$REV}"></script>
+	{/if}
 {/block}
