@@ -437,7 +437,7 @@ class GalaxyRows
 		return $this->galaxyRow;
 	}
 
-	protected function buildCountMap(array $elementIds, array $sourceRow = null)
+	protected function buildCountMap(array $elementIds, ?array $sourceRow = null)
 	{
 		global $resource;
 
