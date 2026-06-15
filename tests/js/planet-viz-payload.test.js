@@ -77,4 +77,19 @@ describe('planet-viz-payload contract', () => {
 		assert.equal(result.valid, false);
 		assert.ok(result.errors.some((e) => e.includes('dpath')));
 	});
+
+	it('accepts uncolonized galaxy payloads with vizState unknown', () => {
+		const payload = loadFixture('planet-viz-galaxy-unknown.json');
+		const result = validatePlanetVizPayload(payload);
+		assert.equal(result.valid, true, result.errors.join('; '));
+		assert.equal(payload.vizState, 'unknown');
+	});
+
+	it('rejects invalid shareIntel type', () => {
+		const payload = loadFixture('planet-viz-overview-full.json');
+		payload.shareIntel = 'yes';
+		const result = validatePlanetVizPayload(payload);
+		assert.equal(result.valid, false);
+		assert.ok(result.errors.some((e) => e.includes('shareIntel')));
+	});
 });

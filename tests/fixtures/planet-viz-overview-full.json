@@ -1,4 +1,5 @@
 {
+  "shareIntel": true,
   "texture": "normaltempplanet03",
   "type": 1,
   "tempMin": 30,

@@ -52,6 +52,8 @@ class GalaxyRows
 	{
 		global $USER;
 
+		$inventorySelect = $this->getGalaxyInventorySelectSql();
+
         $sql	= 'SELECT SQL_BIG_RESULT DISTINCT
 		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.temp_max, p.field_current, p.field_max, p.destruyed, p.der_metal, p.der_crystal, p.id_luna,
 		u.id as userid, u.ally_id, u.username, u.onlinetime, u.urlaubs_modus, u.banaday, 
@@ -60,7 +62,7 @@ class GalaxyRows
 		a.id as allyid, a.ally_tag, a.ally_web, a.ally_members, a.ally_name, 
 		allys.total_rank as ally_rank,
 		COUNT(buddy.id) as buddy,
-		d.level as diploLevel
+		d.level as diploLevel'.$inventorySelect.'
 		FROM %%PLANETS%% p
 		LEFT JOIN %%USERS%% u ON p.id_owner = u.id
 		LEFT JOIN %%PLANETS%% m ON m.id = p.id_luna
@@ -325,7 +327,39 @@ class GalaxyRows
 			return true;
 		}
 
+		if (
+			!empty($USER['ally_id'])
+			&& !empty($this->galaxyRow['allyid'])
+			&& (int) ($this->galaxyRow['diploLevel'] ?? 0) === 1
+		) {
+			return true;
+		}
+
 		return false;
+	}
+
+	protected function getColonizeSlotStatus(int $position): array
+	{
+		global $USER;
+
+		if (!PlayerUtil::allowPlanetPosition($position, $USER)) {
+			return array(
+				'canColonize'             => false,
+				'colonizeBlockedReason'   => 'astro',
+			);
+		}
+
+		if (!PlayerUtil::hasColonizationCapacity($USER)) {
+			return array(
+				'canColonize'             => false,
+				'colonizeBlockedReason'   => 'cap',
+			);
+		}
+
+		return array(
+			'canColonize'             => true,
+			'colonizeBlockedReason'   => null,
+		);
 	}
 
 	protected function getMoonData()
@@ -343,9 +377,7 @@ class GalaxyRows
 				'temp_min'	=> $this->galaxyRow['m_temp_min'], 
 				'temp_max'	=> $this->galaxyRow['m_temp_max'],
 				'diameter'	=> $this->galaxyRow['m_diameter'],
-				'vizJson'	=> $vizEnabled
-					? $this->buildMoonVizJson($this->hasSharedPlanetVizIntel(), $themePath)
-					: '',
+				'vizRef'	=> $vizEnabled ? ('moon:' . (int) $this->galaxyRow['m_id']) : '',
 			);
 		}
 	}
@@ -354,7 +386,6 @@ class GalaxyRows
 	{
 		global $THEME;
 
-		$shareIntel = $this->hasSharedPlanetVizIntel();
 		$themePath = $THEME->getTheme();
 		$vizEnabled = str_contains($themePath, '/hive/');
 		$this->galaxyData[$this->galaxyRow['planet']]['planet']	= array(
@@ -362,8 +393,23 @@ class GalaxyRows
 			'name'			=> htmlspecialchars((string) $this->galaxyRow['name'], ENT_QUOTES, "UTF-8"),
 			'image'			=> $this->galaxyRow['image'],
 			'phalanx'		=> isModuleAvailable(MODULE_PHALANX) && ShowPhalanxPage::allowPhalanx($this->galaxyRow['galaxy'], $this->galaxyRow['system']),
-			'vizJson'		=> $vizEnabled ? $this->buildPlanetVizJson($shareIntel, $themePath) : '',
+			'vizRef'		=> $vizEnabled ? ('planet:' . (int) $this->galaxyRow['id']) : '',
 		);
+	}
+
+	protected function getGalaxyInventorySelectSql(): string
+	{
+		$columns = $this->getPlanetInventoryColumns();
+		if (!$columns) {
+			return '';
+		}
+
+		$parts = array();
+		foreach ($columns as $column) {
+			$parts[] = 'p.' . $column;
+		}
+
+		return ', ' . implode(', ', $parts);
 	}
 
 	protected function getPlanetInventoryColumns(): array
@@ -386,28 +432,9 @@ class GalaxyRows
 		return $columns;
 	}
 
-	protected function fetchPlanetInventory(int $planetId): array
-	{
-		$columns = $this->getPlanetInventoryColumns();
-		if ($planetId <= 0 || !$columns) {
-			return array();
-		}
-
-		$sql = 'SELECT ' . implode(', ', $columns) . ' FROM %%PLANETS%% WHERE id = :planetId;';
-		$row = Database::get()->selectSingle($sql, array(
-			':planetId' => $planetId,
-		));
-
-		return is_array($row) ? $row : array();
-	}
-
 	protected function resolveInventoryRow(bool $shareIntel): array
 	{
-		if (!$shareIntel || empty($this->galaxyRow['id'])) {
-			return $this->galaxyRow;
-		}
-
-		return array_merge($this->galaxyRow, $this->fetchPlanetInventory((int) $this->galaxyRow['id']));
+		return $this->galaxyRow;
 	}
 
 	protected function buildCountMap(array $elementIds, array $sourceRow = null)
@@ -430,11 +457,11 @@ class GalaxyRows
 		return $map ?: new \stdClass();
 	}
 
-	protected function buildPlanetVizJson($shareIntel, $dpath)
+	protected function buildPlanetVizJson($shareIntel, $dpath, $galaxyPreview = false)
 	{
 		global $resource, $reslist;
 
-		$inventoryRow = $this->resolveInventoryRow($shareIntel);
+		$inventoryRow = $shareIntel ? $this->resolveInventoryRow(true) : $this->galaxyRow;
 		$fieldsCurrent = 0;
 		$fieldsMax = 0;
 		if ($shareIntel) {
@@ -448,7 +475,7 @@ class GalaxyRows
 		}
 
 		$moon = null;
-		if (!empty($this->galaxyRow['m_id'])) {
+		if (!$galaxyPreview && !empty($this->galaxyRow['m_id'])) {
 			$moon = array(
 				'id'       => (int) $this->galaxyRow['m_id'],
 				'name'     => (string) $this->galaxyRow['m_name'],
@@ -466,6 +493,7 @@ class GalaxyRows
 		}
 
 		$payload = array(
+			'shareIntel' => (bool) $shareIntel,
 			'texture'   => $this->galaxyRow['image'],
 			'type'      => 1,
 			'tempMin'   => (int) $this->galaxyRow['temp_min'],
@@ -480,7 +508,7 @@ class GalaxyRows
 			'planet'    => (int) $this->galaxyRow['planet'],
 			'buildings' => $shareIntel ? $this->buildCountMap($reslist['build'], $inventoryRow) : new \stdClass(),
 			'fleet'     => $shareIntel ? $this->buildCountMap($reslist['fleet'], $inventoryRow) : new \stdClass(),
-			'defense'   => $shareIntel ? $this->buildCountMap($reslist['defense'], $inventoryRow) : new \stdClass(),
+			'defense'   => ($shareIntel && !$galaxyPreview) ? $this->buildCountMap($reslist['defense'], $inventoryRow) : new \stdClass(),
 			'queue'     => array(
 				'building' => 0,
 				'hangar'   => 0,
@@ -493,7 +521,7 @@ class GalaxyRows
 		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 	}
 
-	protected function buildMoonVizJson($shareIntel, $dpath)
+	protected function buildMoonVizJson($shareIntel, $dpath, $galaxyPreview = false)
 	{
 		$tempMin = (int) $this->galaxyRow['m_temp_min'];
 		$tempMax = (int) $this->galaxyRow['m_temp_max'];
@@ -505,6 +533,7 @@ class GalaxyRows
 		$buildings = ($shareIntel && $moonBaseLevel > 0) ? array(41 => $moonBaseLevel) : new \stdClass();
 
 		$payload = array(
+			'shareIntel' => (bool) $shareIntel,
 			'texture'   => 'mond',
 			'type'      => 3,
 			'tempMin'   => $tempMin,
@@ -518,6 +547,158 @@ class GalaxyRows
 			'system'    => (int) $this->galaxyRow['system'],
 			'planet'    => (int) $this->galaxyRow['planet'],
 			'buildings' => $buildings,
+			'fleet'     => new \stdClass(),
+			'defense'   => new \stdClass(),
+			'queue'     => array(
+				'building' => 0,
+				'hangar'   => 0,
+			),
+			'moon'      => null,
+			'debris'    => null,
+			'dpath'     => $dpath,
+		);
+
+		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+	}
+
+	public function fillUncolonizedSlots(array &$galaxyData, int $maxPlanets, int $galaxy, int $system, string $themePath): void
+	{
+		$vizEnabled = str_contains($themePath, '/hive/');
+		for ($position = 1; $position <= $maxPlanets; $position++) {
+			if (isset($galaxyData[$position])) {
+				continue;
+			}
+			$colonizeStatus = $this->getColonizeSlotStatus($position);
+			$galaxyData[$position] = array(
+				'uncolonized'             => true,
+				'canColonize'             => $colonizeStatus['canColonize'],
+				'colonizeBlockedReason'   => $colonizeStatus['colonizeBlockedReason'],
+				'planet'                  => array(
+					'image'   => 'unknown',
+					'vizRef'  => $vizEnabled
+						? ('slot:' . $galaxy . ':' . $system . ':' . $position)
+						: '',
+				),
+			);
+		}
+	}
+
+	public function resolveVizJsonRef(string $ref, string $themePath): ?array
+	{
+		if (!str_contains($themePath, '/hive/')) {
+			return null;
+		}
+
+		if (preg_match('/^slot:(\d+):(\d+):(\d+)$/', $ref, $matches)) {
+			$json = $this->buildUncolonizedPlanetVizJson(
+				(int) $matches[1],
+				(int) $matches[2],
+				(int) $matches[3],
+				$themePath
+			);
+
+			return json_decode($json, true);
+		}
+
+		if (preg_match('/^planet:(\d+)$/', $ref, $matches)) {
+			return $this->buildVizPayloadForContextRow((int) $matches[1], 'planet', $themePath);
+		}
+
+		if (preg_match('/^moon:(\d+)$/', $ref, $matches)) {
+			return $this->buildVizPayloadForContextRow((int) $matches[1], 'moon', $themePath);
+		}
+
+		return null;
+	}
+
+	protected function buildVizPayloadForContextRow(int $entityId, string $type, string $themePath): ?array
+	{
+		global $USER;
+
+		$row = $this->fetchGalaxyContextRow($entityId, $type);
+		if (!$row) {
+			return null;
+		}
+
+		$this->galaxyRow = $row;
+		$this->galaxyData = array(
+			$row['planet'] => array(
+				'ownPlanet' => (int) $row['id_owner'] === (int) $USER['id'],
+			),
+		);
+
+		$shareIntel = $this->hasSharedPlanetVizIntel();
+		$json = $type === 'moon'
+			? $this->buildMoonVizJson($shareIntel, $themePath, true)
+			: $this->buildPlanetVizJson($shareIntel, $themePath, true);
+
+		return json_decode($json, true);
+	}
+
+	protected function fetchGalaxyContextRow(int $entityId, string $type): ?array
+	{
+		global $USER;
+
+		if ($entityId <= 0) {
+			return null;
+		}
+
+		$inventorySelect = $this->getGalaxyInventorySelectSql();
+		$where = $type === 'moon' ? 'm.id = :entityId' : 'p.id = :entityId';
+
+		$sql = 'SELECT SQL_BIG_RESULT DISTINCT
+		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.temp_max, p.field_current, p.field_max, p.destruyed, p.der_metal, p.der_crystal, p.id_luna,
+		u.id as userid, u.ally_id, u.username, u.onlinetime, u.urlaubs_modus, u.banaday,
+		m.id as m_id, m.diameter as m_diameter, m.name as m_name, m.temp_min as m_temp_min, m.temp_max as m_temp_max, m.mondbasis as m_mondbasis, m.last_update as m_last_update,
+		s.total_points, s.total_rank,
+		a.id as allyid, a.ally_tag, a.ally_web, a.ally_members, a.ally_name,
+		allys.total_rank as ally_rank,
+		COUNT(buddy.id) as buddy,
+		d.level as diploLevel'.$inventorySelect.'
+		FROM %%PLANETS%% p
+		LEFT JOIN %%USERS%% u ON p.id_owner = u.id
+		LEFT JOIN %%PLANETS%% m ON m.id = p.id_luna
+		LEFT JOIN %%STATPOINTS%% s ON s.id_owner = u.id AND s.stat_type = :statTypeUser
+		LEFT JOIN %%ALLIANCE%% a ON a.id = u.ally_id
+		LEFT JOIN %%DIPLO%% as d ON d.accept = 1 AND ((d.owner_1 = :allianceId AND d.owner_2 = a.id) OR (d.owner_1 = a.id AND d.owner_2 = :allianceId))
+		LEFT JOIN %%STATPOINTS%% allys ON allys.stat_type = :statTypeAlliance AND allys.id_owner = a.id
+		LEFT JOIN %%BUDDY%% buddy ON ((buddy.sender = :userId AND buddy.owner = u.id) OR (buddy.sender = u.id AND buddy.owner = :userId))
+			AND NOT EXISTS (SELECT 1 FROM %%BUDDY_REQUEST%% br WHERE br.id = buddy.id)
+		WHERE p.universe = :universe AND p.planet_type = :planetTypePlanet AND '.$where.'
+		GROUP BY p.id
+		LIMIT 1;';
+
+		$row = Database::get()->selectSingle($sql, array(
+			':statTypeUser'       => 1,
+			':statTypeAlliance'   => 2,
+			':allianceId'         => $USER['ally_id'],
+			':userId'             => $USER['id'],
+			':universe'           => Universe::current(),
+			':planetTypePlanet'   => $type === 'moon' ? 1 : 1,
+			':entityId'           => $entityId,
+		));
+
+		return is_array($row) ? $row : null;
+	}
+
+	public function buildUncolonizedPlanetVizJson(int $galaxy, int $system, int $planet, string $dpath): string
+	{
+		$payload = array(
+			'shareIntel' => false,
+			'vizState'  => 'unknown',
+			'texture'   => '',
+			'type'      => 1,
+			'tempMin'   => 0,
+			'tempMax'   => 0,
+			'diameter'  => 0,
+			'fields'    => array(
+				'current' => 0,
+				'max'     => 0,
+			),
+			'galaxy'    => $galaxy,
+			'system'    => $system,
+			'planet'    => $planet,
+			'buildings' => new \stdClass(),
 			'fleet'     => new \stdClass(),
 			'defense'   => new \stdClass(),
 			'queue'     => array(

@@ -1,5 +1,6 @@
 <?php
 
+use HiveNova\Core\Config;
 use HiveNova\Core\GalaxyRows;
 use PHPUnit\Framework\TestCase;
 
@@ -18,7 +19,7 @@ class GalaxyRowsVizJsonTest extends TestCase
 		}
 	}
 
-	private function invokeBuildPlanetVizJson(array $galaxyRow, bool $shareIntel, string $themePath): string
+	private function invokeBuildPlanetVizJson(array $galaxyRow, bool $shareIntel, string $themePath, bool $galaxyPreview = false): string
 	{
 		global $resource, $reslist;
 
@@ -34,10 +35,10 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$method = new ReflectionMethod(GalaxyRows::class, 'buildPlanetVizJson');
 		$method->setAccessible(true);
 
-		return $method->invoke($rows, $shareIntel, $themePath);
+		return $method->invoke($rows, $shareIntel, $themePath, $galaxyPreview);
 	}
 
-	private function invokeBuildMoonVizJson(array $galaxyRow, bool $shareIntel, string $themePath): string
+	private function invokeBuildMoonVizJson(array $galaxyRow, bool $shareIntel, string $themePath, bool $galaxyPreview = false): string
 	{
 		$rows = new GalaxyRows();
 		$ref = new ReflectionObject($rows);
@@ -48,7 +49,7 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$method = new ReflectionMethod(GalaxyRows::class, 'buildMoonVizJson');
 		$method->setAccessible(true);
 
-		return $method->invoke($rows, $shareIntel, $themePath);
+		return $method->invoke($rows, $shareIntel, $themePath, $galaxyPreview);
 	}
 
 	private function invokeHasSharedPlanetVizIntel(array $galaxyRow, bool $ownPlanet, array $user): bool
@@ -114,6 +115,7 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$payload = $this->decodePayload($json);
 
 		$this->assertSame(['current' => 42, 'max' => 173], $payload['fields']);
+		$this->assertTrue($payload['shareIntel']);
 		$this->assertArrayNotHasKey('vizState', $payload);
 		$this->assertJsContractValidJson($json);
 	}
@@ -164,6 +166,7 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$payload = $this->decodePayload($json);
 
 		$this->assertSame(['current' => 0, 'max' => 0], $payload['fields']);
+		$this->assertFalse($payload['shareIntel']);
 		$this->assertArrayNotHasKey('vizState', $payload);
 		$this->assertSame([], (array) $payload['buildings']);
 		$this->assertJsContractValidJson($json, ['sparse' => true]);
@@ -190,12 +193,13 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$payload = $this->decodePayload($json);
 
 		$this->assertSame(['current' => 55, 'max' => 168], $payload['fields']);
+		$this->assertTrue($payload['shareIntel']);
 		$this->assertSame(8, $payload['buildings'][1]);
 		$this->assertSame(2, $payload['fleet'][202]);
 		$this->assertJsContractValidJson($json);
 	}
 
-	public function testHasSharedPlanetVizIntelForBuddyAndAlliance(): void
+	public function testHasSharedPlanetVizIntelForBuddyAllianceAndDiploFriend(): void
 	{
 		$row = [
 			'planet'    => 5,
@@ -214,6 +218,11 @@ class GalaxyRowsVizJsonTest extends TestCase
 
 		$row['ally_id'] = 9;
 		$user['ally_id'] = 3;
+		$row['allyid'] = 99;
+		$row['diploLevel'] = 1;
+		$this->assertTrue($this->invokeHasSharedPlanetVizIntel($row, false, $user));
+
+		$row['diploLevel'] = 0;
 		$this->assertFalse($this->invokeHasSharedPlanetVizIntel($row, false, $user));
 	}
 
@@ -268,7 +277,144 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$payload = $this->decodePayload($json);
 
 		$this->assertArrayNotHasKey('vizState', $payload);
+		$this->assertFalse($payload['shareIntel']);
 		$this->assertSame([], (array) $payload['buildings']);
 		$this->assertJsContractValidJson($json, ['sparse' => true]);
+	}
+
+	public function testUncolonizedPlanetVizJsonUsesUnknownState(): void
+	{
+		$rows = new GalaxyRows();
+		$json = $rows->buildUncolonizedPlanetVizJson(1, 88, 4, './styles/theme/hive/');
+		$payload = $this->decodePayload($json);
+
+		$this->assertSame('unknown', $payload['vizState']);
+		$this->assertFalse($payload['shareIntel']);
+		$this->assertSame(['current' => 0, 'max' => 0], $payload['fields']);
+		$this->assertSame(1, $payload['galaxy']);
+		$this->assertSame(88, $payload['system']);
+		$this->assertSame(4, $payload['planet']);
+		$this->assertJsContractValidJson($json);
+	}
+
+	private function makeColonizeConfig(array $overrides = []): Config
+	{
+		return new Config(array_merge([
+			'uni'                 => 1,
+			'max_planets'         => 15,
+			'min_player_planets'  => 1,
+			'planets_tech'        => 4,
+			'planets_officier'    => 2,
+			'planets_per_tech'    => 1,
+		], $overrides));
+	}
+
+	public function testFillUncolonizedSlotsAddsUnknownEntriesWithoutOverwriting(): void
+	{
+		global $USER, $resource;
+
+		Config::setInstance($this->makeColonizeConfig(), 1);
+		$resource = array_replace($resource ?? [], [124 => 'astrophysics_tech']);
+		$USER = [
+			'universe'          => 1,
+			'astrophysics_tech' => 8,
+			'factor'            => ['Planets' => 0],
+		];
+
+		$rows = new GalaxyRows();
+		$data = [
+			3 => ['ownPlanet' => true, 'planet' => ['id' => 99]],
+		];
+		$rows->fillUncolonizedSlots($data, 5, 2, 145, './styles/theme/hive/');
+
+		$this->assertArrayHasKey(1, $data);
+		$this->assertTrue($data[1]['uncolonized']);
+		$this->assertTrue($data[1]['canColonize']);
+		$this->assertSame('unknown', $data[1]['planet']['image']);
+		$this->assertArrayHasKey(3, $data);
+		$this->assertArrayNotHasKey('uncolonized', $data[3]);
+		$this->assertArrayHasKey(5, $data);
+		$this->assertTrue($data[5]['uncolonized']);
+		$this->assertTrue($data[5]['canColonize']);
+
+		$USER['astrophysics_tech'] = 0;
+		$USER['factor'] = ['Planets' => 0];
+		$data = [];
+		$rows->fillUncolonizedSlots($data, 15, 2, 145, './styles/theme/hive/');
+		$this->assertFalse($data[1]['canColonize']);
+		$this->assertFalse($data[8]['canColonize']);
+
+		$USER['astrophysics_tech'] = 1;
+		$data = [];
+		$rows->fillUncolonizedSlots($data, 15, 2, 145, './styles/theme/hive/');
+		$this->assertFalse($data[1]['canColonize']);
+		$this->assertTrue($data[8]['canColonize']);
+	}
+
+	public function testFillUncolonizedSlotsBlocksWhenColonyCapReached(): void
+	{
+		global $USER, $resource;
+
+		Config::setInstance($this->makeColonizeConfig([
+			'planets_tech' => 0,
+		]), 1);
+		$resource = array_replace($resource ?? [], [124 => 'astrophysics_tech']);
+		$USER = [
+			'universe'          => 1,
+			'astrophysics_tech' => 8,
+			'factor'            => ['Planets' => 0],
+			'PLANETS'           => [
+				['planet_type' => 1, 'destruyed' => 0],
+			],
+		];
+
+		$rows = new GalaxyRows();
+		$data = [];
+		$rows->fillUncolonizedSlots($data, 15, 2, 145, './styles/theme/hive/');
+
+		$this->assertFalse($data[8]['canColonize']);
+		$this->assertSame('cap', $data[8]['colonizeBlockedReason']);
+	}
+
+	public function testGalaxyPreviewPayloadOmitsMoonAndDefense(): void
+	{
+		$json = $this->invokeBuildPlanetVizJson([
+			'image'          => 'normaltempplanet03',
+			'temp_min'       => 30,
+			'temp_max'       => 70,
+			'diameter'       => 12767,
+			'field_current'  => 42,
+			'field_max'      => 163,
+			'terraformer'    => 0,
+			'metal_mine'     => 10,
+			'rocket_launcher'=> 12,
+			'm_id'           => 501,
+			'm_name'         => 'Luna',
+			'm_diameter'     => 4200,
+			'galaxy'         => 1,
+			'system'         => 88,
+			'planet'         => 7,
+			'der_metal'      => 0,
+			'der_crystal'    => 0,
+		], true, './styles/theme/hive/', true);
+		$payload = $this->decodePayload($json);
+
+		$this->assertNull($payload['moon']);
+		$this->assertSame([], (array) $payload['defense']);
+		$this->assertSame(10, $payload['buildings'][1]);
+		$this->assertJsContractValidJson($json);
+	}
+
+	public function testResolveVizJsonRefForUncolonizedSlot(): void
+	{
+		$rows = new GalaxyRows();
+		$payload = $rows->resolveVizJsonRef('slot:2:145:8', './styles/theme/hive/');
+
+		$this->assertIsArray($payload);
+		$this->assertSame('unknown', $payload['vizState']);
+		$this->assertFalse($payload['shareIntel']);
+		$this->assertSame(2, $payload['galaxy']);
+		$this->assertSame(145, $payload['system']);
+		$this->assertSame(8, $payload['planet']);
 	}
 }

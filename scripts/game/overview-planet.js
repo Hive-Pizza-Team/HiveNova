@@ -2353,7 +2353,7 @@
 				bootViewer(canvas, data, {
 					enableZoom: true,
 					preview: false,
-					lite: false,
+					lite: window.innerWidth <= 699,
 					fallbackImg: fallbackImg
 				});
 			} catch (err) {

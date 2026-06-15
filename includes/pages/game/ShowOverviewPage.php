@@ -126,6 +126,7 @@ class ShowOverviewPage extends AbstractGamePage
 		}
 
 		return array(
+			'shareIntel' => true,
 			'texture'   => $PLANET['planet_type'] == 3 ? 'mond' : $PLANET['image'],
 			'type'      => (int) $PLANET['planet_type'],
 			'tempMin'   => (int) $PLANET['temp_min'],

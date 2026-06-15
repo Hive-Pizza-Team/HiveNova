@@ -91,7 +91,7 @@
 				}
 			});
 			if (data.fields.max < 1) {
-				var allowZeroFields = options.sparse;
+				var allowZeroFields = options.sparse || data.vizState === 'unknown';
 				if (!allowZeroFields) {
 					errors.push('fields.max must be at least 1');
 				}
@@ -154,6 +154,10 @@
 
 		if (data.vizState !== undefined && typeof data.vizState !== 'string') {
 			errors.push('vizState must be a string when present');
+		}
+
+		if (data.shareIntel !== undefined && typeof data.shareIntel !== 'boolean') {
+			errors.push('shareIntel must be a boolean when present');
 		}
 
 		if (options.sparse) {

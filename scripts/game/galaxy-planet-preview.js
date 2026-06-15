@@ -9,6 +9,8 @@
 		: null;
 	var activeTrigger = null;
 	var previewCanvas = null;
+	var vizPayloadCache = Object.create(null);
+	var vizPayloadInflight = Object.create(null);
 
 	function getConfig() {
 		var tag = document.getElementById('galaxy-planet-viz-loader')
@@ -71,19 +73,43 @@
 	}
 
 	function hasSharedPlanetIntel(data) {
-		return !!(data && data.fields && data.fields.max > 0);
+		return !!(data && data.shareIntel);
+	}
+
+	function fetchVizPayload(ref) {
+		if (vizPayloadCache[ref]) {
+			return Promise.resolve(vizPayloadCache[ref]);
+		}
+		if (vizPayloadInflight[ref]) {
+			return vizPayloadInflight[ref];
+		}
+
+		vizPayloadInflight[ref] = fetch(
+			'game.php?page=galaxy&mode=planetViz&ref=' + encodeURIComponent(ref),
+			{ credentials: 'same-origin' }
+		).then(function (response) {
+			if (!response.ok) {
+				throw new Error('Viz payload request failed');
+			}
+			return response.json();
+		}).then(function (data) {
+			if (!data || data.error) {
+				throw new Error('Viz payload unavailable');
+			}
+			vizPayloadCache[ref] = data;
+			delete vizPayloadInflight[ref];
+			return data;
+		}).catch(function (err) {
+			delete vizPayloadInflight[ref];
+			throw err;
+		});
+
+		return vizPayloadInflight[ref];
 	}
 
 	function startPreview(trigger) {
-		var vizJson = $(trigger).attr('data-planet-viz');
-		if (!vizJson || isMobileTooltip()) {
-			return;
-		}
-
-		var data;
-		try {
-			data = JSON.parse(vizJson);
-		} catch (e) {
+		var vizRef = $(trigger).attr('data-planet-viz-ref');
+		if (!vizRef || isMobileTooltip()) {
 			return;
 		}
 
@@ -99,23 +125,37 @@
 		var canvas = getOrCreatePreviewCanvas(host);
 		canvas.classList.remove('galaxy-planet-viz-canvas--ready');
 
-		ensureAssets().then(function () {
+		fetchVizPayload(vizRef).then(function (data) {
 			if (activeTrigger !== trigger) {
+				return null;
+			}
+			return ensureAssets().then(function () {
+				return data;
+			});
+		}).then(function (data) {
+			if (!data || activeTrigger !== trigger) {
+				if (activeTrigger === trigger) {
+					cleanupPreview();
+				}
 				return;
 			}
-			window.HiveNovaOverviewPlanet.mountPreview(canvas, data, {
+			return window.HiveNovaOverviewPlanet.mountPreview(canvas, data, {
 				size: 75,
 				lite: !hasSharedPlanetIntel(data)
-			}).then(function (ok) {
-				if (!ok || activeTrigger !== trigger) {
-					cleanupPreview();
-					return;
-				}
-				host.find('.galaxy-viz-fallback').hide();
-				canvas.classList.add('galaxy-planet-viz-canvas--ready');
 			});
+		}).then(function (ok) {
+			if (!ok || activeTrigger !== trigger) {
+				if (activeTrigger === trigger) {
+					cleanupPreview();
+				}
+				return;
+			}
+			host.find('.galaxy-viz-fallback').hide();
+			canvas.classList.add('galaxy-planet-viz-canvas--ready');
 		}).catch(function () {
-			cleanupPreview();
+			if (activeTrigger === trigger) {
+				cleanupPreview();
+			}
 		});
 	}
 

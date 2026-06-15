@@ -1,19 +1,20 @@
 {
   "shareIntel": false,
-  "texture": "wasserplanet04",
+  "vizState": "unknown",
+  "texture": "",
   "type": 1,
-  "tempMin": 20,
-  "tempMax": 60,
-  "diameter": 11800,
+  "tempMin": 0,
+  "tempMax": 0,
+  "diameter": 0,
   "fields": { "current": 0, "max": 0 },
-  "galaxy": 2,
-  "system": 145,
-  "planet": 9,
+  "galaxy": 1,
+  "system": 88,
+  "planet": 4,
   "buildings": {},
   "fleet": {},
   "defense": {},
   "queue": { "building": 0, "hangar": 0 },
   "moon": null,
   "debris": null,
-  "dpath": "./styles/theme/nova/"
+  "dpath": "./styles/theme/hive/"
 }
