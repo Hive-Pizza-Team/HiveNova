@@ -19,19 +19,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: php-actions/composer@v6
+      - uses: shivammathur/setup-php@v2
         with:
-          version: "2.9.8"
-          php_version: "8.3"
-          php_extensions: "gmp"
-      - uses: php-actions/phpunit@v4
+          php-version: "8.3"
+          extensions: gmp, xdebug
+          tools: composer:2.9.8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: composer install --no-interaction --prefer-dist
+      - name: Run unit tests with coverage
         env:
           XDEBUG_MODE: coverage
-        with:
-          configuration: "phpunit.xml"
-          php_version: "8.3"
-          php_extensions: "xdebug gmp"
-          coverage_clover: "coverage/clover.xml"
+        run: php vendor/bin/phpunit --configuration phpunit.xml --coverage-clover coverage/clover.xml --coverage-text
 
   smoke:
     runs-on: ubuntu-latest
