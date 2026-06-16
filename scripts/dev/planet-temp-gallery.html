@@ -43,6 +43,13 @@
 			color: var(--muted);
 		}
 		.controls select { accent-color: var(--accent); }
+		.status {
+			padding: 8px 24px;
+			font-size: 0.85rem;
+			color: var(--muted);
+			border-bottom: 1px solid var(--line);
+		}
+		.status.error { color: #e88; }
 		.family-section {
 			padding: 20px 24px 8px;
 			max-width: 1600px;
@@ -60,9 +67,12 @@
 		}
 		.grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			grid-template-columns: repeat(5, minmax(0, 1fr));
 			gap: 16px;
 			padding-bottom: 12px;
+		}
+		@media (max-width: 1100px) {
+			.grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 		}
 		.cell {
 			background: var(--panel);
@@ -88,17 +98,27 @@
 		.cell-frame {
 			aspect-ratio: 1 / 1;
 			background: var(--bg);
+			display: flex;
+			align-items: center;
+			justify-content: center;
 		}
-		.cell-frame iframe {
+		.cell-frame img {
 			display: block;
 			width: 100%;
 			height: 100%;
-			border: 0;
+			object-fit: contain;
+		}
+		.cell-frame .pending {
+			color: var(--muted);
+			font-size: 0.75rem;
 		}
 		.special-wrap {
 			padding: 8px 24px 32px;
 			max-width: 1600px;
 			margin: 0 auto;
+		}
+		.special-wrap .grid {
+			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 		}
 		code { color: var(--accent); }
 	</style>
@@ -107,16 +127,17 @@
 	<header>
 		<h1>Planet temperature gallery</h1>
 		<p class="sub">
-			Five variants per biome family (<code>01</code> hottest → <code>05</code> coldest), aligned with
-			<code>PlanetImageUtil</code> and colonization temps. Serve repo root:
-			<code>php -S 127.0.0.1:8765</code>.
+			<strong>Six families × five variants</strong> (<code>01</code> hottest → <code>05</code> coldest),
+			from <code>planet-image-catalog.js</code> / <code>PlanetImageUtil</code>.
+			Requires branch <code>fix/planet-static-thumbnail-quality</code> (or merged PR #215).
+			Serve repo root: <code>php -S 127.0.0.1:8765</code>.
 		</p>
 	</header>
 	<div class="controls">
 		<label>
 			Render mode
 			<select id="renderMode">
-				<option value="full">Full (hq pipeline)</option>
+				<option value="full" selected>Full (hq pipeline)</option>
 				<option value="lite">Lite</option>
 			</select>
 		</label>
@@ -128,10 +149,14 @@
 			</select>
 		</label>
 	</div>
+	<div class="status" id="status">Loading renderer…</div>
 	<div id="families"></div>
 	<div class="special-wrap">
 		<h2>Special</h2>
 		<div class="grid" id="special-grid"></div>
+	</div>
+	<div id="render-host" hidden aria-hidden="true">
+		<canvas id="shared-export-canvas" class="overview-planet-canvas"></canvas>
 	</div>
 	<script src="planet-image-catalog.js"></script>
 	<script>
@@ -151,18 +176,25 @@
 
 		var familiesEl = document.getElementById('families');
 		var specialGrid = document.getElementById('special-grid');
+		var statusEl = document.getElementById('status');
 		var renderModeEl = document.getElementById('renderMode');
 		var renderSizeEl = document.getElementById('renderSize');
+		var sharedCanvas = document.getElementById('shared-export-canvas');
+		var rendererReady = false;
+		var renderGen = 0;
+
+		function loadScript(src) {
+			return new Promise(function (resolve, reject) {
+				var el = document.createElement('script');
+				el.src = src;
+				el.onload = resolve;
+				el.onerror = function () { reject(new Error('Failed to load ' + src)); };
+				document.head.appendChild(el);
+			});
+		}
 
 		function formatTemp(min, max) {
 			return min + '\u2013' + max + ' \u00B0C';
-		}
-
-		function exportUrl(texture) {
-			return 'planet-viz-export.html?texture=' + encodeURIComponent(texture)
-				+ '&mode=' + encodeURIComponent(renderModeEl.value)
-				+ '&size=' + encodeURIComponent(renderSizeEl.value)
-				+ '&quality=0.96';
 		}
 
 		function variantLabel(variant) {
@@ -171,10 +203,34 @@
 			return 'mid';
 		}
 
+		function renderOpts() {
+			var size = parseInt(renderSizeEl.value, 10);
+			var lite = renderModeEl.value === 'lite' || size < 384;
+			return { size: size, lite: lite, mode: lite ? 'lite' : 'full' };
+		}
+
+		function captureEntry(entry) {
+			if (!rendererReady || !window.HiveNovaOverviewPlanet) {
+				return Promise.resolve(null);
+			}
+			var opts = renderOpts();
+			return window.HiveNovaOverviewPlanet.renderStatic(
+				sharedCanvas,
+				PlanetImageCatalog.buildPayload(entry, opts.mode),
+				{ lite: opts.lite, size: opts.size, jpegQuality: 0.96 }
+			).then(function (result) {
+				return result && result.dataUrl ? result.dataUrl : null;
+			}).catch(function () { return null; });
+		}
+
 		function makeCell(entry) {
 			var variant = parseInt(entry.texture.replace(/\D+/g, ''), 10) || 0;
-			var band = PlanetImageCatalog.bandOverrideForTexture(entry.texture, entry.type);
-			var kept = PlanetImageCatalog.staticBandKeepTextures[entry.texture];
+			var band = PlanetImageCatalog.bandOverrideForTexture
+				? PlanetImageCatalog.bandOverrideForTexture(entry.texture, entry.type)
+				: null;
+			var kept = PlanetImageCatalog.staticBandKeepTextures
+				? PlanetImageCatalog.staticBandKeepTextures[entry.texture]
+				: false;
 
 			var cell = document.createElement('article');
 			cell.className = 'cell';
@@ -195,14 +251,22 @@
 
 			var frame = document.createElement('div');
 			frame.className = 'cell-frame';
-			var iframe = document.createElement('iframe');
-			iframe.title = entry.texture;
-			iframe.loading = 'lazy';
-			iframe.src = exportUrl(entry.texture);
-			frame.appendChild(iframe);
+			frame.innerHTML = '<span class="pending">…</span>';
 			cell.appendChild(frame);
 
-			return cell;
+			return { cell: cell, frame: frame, entry: entry };
+		}
+
+		function setFrameImage(frame, dataUrl, alt) {
+			frame.innerHTML = '';
+			if (!dataUrl) {
+				frame.innerHTML = '<span class="pending">failed</span>';
+				return;
+			}
+			var img = document.createElement('img');
+			img.src = dataUrl;
+			img.alt = alt || '';
+			frame.appendChild(img);
 		}
 
 		function familyEntries(prefix) {
@@ -217,27 +281,39 @@
 			return list;
 		}
 
+		function catalogReady() {
+			return PlanetImageCatalog.familyTempRanges
+				&& familyEntries('trockenplanet').length === 5;
+		}
+
 		function render() {
+			var gen = ++renderGen;
 			familiesEl.innerHTML = '';
 			specialGrid.innerHTML = '';
 
+			if (!catalogReady()) {
+				statusEl.className = 'status error';
+				statusEl.textContent = 'Catalog missing 5-variant entries — checkout fix/planet-static-thumbnail-quality (needs familyTempRanges + 01–05 textures).';
+				return;
+			}
+
+			var jobs = [];
+
 			FAMILIES.forEach(function (family) {
 				var entries = familyEntries(family.prefix);
-				if (!entries.length) {
-					return;
-				}
 				var range = PlanetImageCatalog.familyTempRanges[family.key];
 				var section = document.createElement('section');
 				section.className = 'family-section';
 				section.innerHTML = '<h2>' + family.label + '</h2>'
-					+ '<p class="family-meta">Family span '
-					+ formatTemp(range[0], range[1])
-					+ ' · five equal temperature buckets · variant <code>01</code> = hot end</p>';
+					+ '<p class="family-meta">Span ' + formatTemp(range[0], range[1])
+					+ ' · 5 temperature buckets · <code>01</code> = hot end</p>';
 
 				var grid = document.createElement('div');
 				grid.className = 'grid';
 				entries.forEach(function (entry) {
-					grid.appendChild(makeCell(entry));
+					var slot = makeCell(entry);
+					grid.appendChild(slot.cell);
+					jobs.push(slot);
 				});
 				section.appendChild(grid);
 				familiesEl.appendChild(section);
@@ -247,16 +323,47 @@
 				var entry = PlanetImageCatalog.getByTexture(texture)
 					|| PlanetImageCatalog.getByVizState(texture);
 				if (entry) {
-					specialGrid.appendChild(makeCell(entry));
+					var slot = makeCell(entry);
+					specialGrid.appendChild(slot.cell);
+					jobs.push(slot);
 				}
 			});
+
+			if (!rendererReady) {
+				statusEl.textContent = 'Loading Three.js…';
+				return;
+			}
+
+			(function runJobs(i) {
+				if (gen !== renderGen) { return; }
+				if (i >= jobs.length) {
+					statusEl.textContent = 'Gallery ready — ' + jobs.length + ' planets.';
+					return;
+				}
+				statusEl.textContent = 'Rendering ' + (i + 1) + ' / ' + jobs.length + '…';
+				captureEntry(jobs[i].entry).then(function (dataUrl) {
+					if (gen !== renderGen) { return; }
+					setFrameImage(jobs[i].frame, dataUrl, jobs[i].entry.texture);
+					runJobs(i + 1);
+				});
+			})(0);
 		}
 
 		[renderModeEl, renderSizeEl].forEach(function (el) {
 			el.addEventListener('change', render);
 		});
 
-		render();
+		loadScript('../threejs/three.min.js')
+			.then(function () { return loadScript('../game/overview-planet.js'); })
+			.then(function () {
+				rendererReady = true;
+				render();
+			})
+			.catch(function (err) {
+				statusEl.className = 'status error';
+				statusEl.textContent = 'Renderer failed: ' + err.message;
+				render();
+			});
 	})();
 	</script>
 </body>
