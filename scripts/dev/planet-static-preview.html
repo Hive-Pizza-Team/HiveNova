@@ -94,7 +94,18 @@
 			display: block;
 			border: 0;
 		}
-		.thumb iframe { pointer-events: none; }
+		.thumb .pending {
+			color: var(--muted);
+			font-size: 0.72rem;
+			padding: 6px;
+		}
+		.status {
+			padding: 8px 20px;
+			font-size: 0.85rem;
+			color: var(--muted);
+			border-bottom: 1px solid var(--line);
+		}
+		.status.error { color: #e88; }
 		.missing {
 			color: #6a3040;
 			font-size: 0.78rem;
@@ -141,9 +152,10 @@
 	<div class="legend">
 		<div><strong>Legacy</strong>Pre-batch hive JPG (200×200 painted)</div>
 		<div><strong>On disk</strong>Current <code>_hq.jpg</code> or <code>.jpg</code> in theme</div>
-		<div><strong>Live render</strong>Fresh export via planet-viz-export.html</div>
+		<div><strong>Live render</strong>In-page Three.js capture (same as batch pipeline)</div>
 		<div><strong>Option #2</strong>Biome band from texture prefix (preview only)</div>
 	</div>
+	<div class="status" id="status">Loading renderer…</div>
 	<div class="grid-wrap">
 		<table>
 			<thead>
@@ -157,6 +169,9 @@
 			</thead>
 			<tbody id="rows"></tbody>
 		</table>
+	</div>
+	<div id="render-host" hidden aria-hidden="true">
+		<canvas id="shared-export-canvas" class="overview-planet-canvas"></canvas>
 	</div>
 	<script src="planet-image-catalog.js"></script>
 	<script>
@@ -175,23 +190,60 @@
 		var HIVE_BASE = '../../styles/theme/hive/planeten/';
 		var LEGACY_BASE = 'legacy-samples/';
 		var rowsEl = document.getElementById('rows');
+		var statusEl = document.getElementById('status');
 		var displaySizeEl = document.getElementById('displaySize');
 		var renderSizeEl = document.getElementById('renderSize');
 		var showProposedEl = document.getElementById('showProposed');
 		var proposedHead = document.getElementById('proposedHead');
+		var sharedCanvas = document.getElementById('shared-export-canvas');
+		var renderGen = 0;
+		var rendererReady = false;
 
-		function exportUrl(entry, opts) {
-			opts = opts || {};
-			var mode = opts.mode || (parseInt(renderSizeEl.value, 10) >= 384 ? 'full' : 'lite');
-			var size = opts.size || parseInt(renderSizeEl.value, 10);
-			var url = 'planet-viz-export.html?texture=' + encodeURIComponent(entry.texture)
-				+ '&mode=' + mode
-				+ '&size=' + size
-				+ '&quality=0.96';
-			if (opts.bandOverride) {
-				url += '&bandOverride=' + encodeURIComponent(opts.bandOverride);
+		function loadScript(src) {
+			return new Promise(function (resolve, reject) {
+				var el = document.createElement('script');
+				el.src = src;
+				el.onload = resolve;
+				el.onerror = function () { reject(new Error('Failed to load ' + src)); };
+				document.head.appendChild(el);
+			});
+		}
+
+		function renderModeAndSize() {
+			var size = parseInt(renderSizeEl.value, 10);
+			return {
+				size: size,
+				lite: size < 384
+			};
+		}
+
+		function buildPayload(entry, bandOverride) {
+			var mode = renderModeAndSize().lite ? 'lite' : 'full';
+			var payload = PlanetImageCatalog.buildPayload(entry, mode);
+			if (bandOverride) {
+				payload.bandOverride = bandOverride;
 			}
-			return url;
+			return payload;
+		}
+
+		function captureEntry(entry, bandOverride) {
+			if (!rendererReady || !window.HiveNovaOverviewPlanet) {
+				return Promise.resolve(null);
+			}
+			var opts = renderModeAndSize();
+			return window.HiveNovaOverviewPlanet.renderStatic(
+				sharedCanvas,
+				buildPayload(entry, bandOverride),
+				{
+					lite: opts.lite,
+					size: opts.size,
+					jpegQuality: 0.96
+				}
+			).then(function (result) {
+				return result && result.dataUrl ? result.dataUrl : null;
+			}).catch(function () {
+				return null;
+			});
 		}
 
 		function thumbImg(src, alt, onerrorFallback) {
@@ -215,19 +267,35 @@
 			return wrap;
 		}
 
-		function thumbIframe(src) {
+		function thumbPending(label) {
 			var wrap = document.createElement('div');
 			wrap.className = 'thumb';
 			var px = parseInt(displaySizeEl.value, 10);
 			wrap.style.width = px + 'px';
 			wrap.style.height = px + 'px';
-			var iframe = document.createElement('iframe');
-			iframe.title = src;
-			iframe.src = src;
-			iframe.width = px;
-			iframe.height = px;
-			wrap.appendChild(iframe);
+			var el = document.createElement('div');
+			el.className = 'pending';
+			el.textContent = label || '…';
+			wrap.appendChild(el);
 			return wrap;
+		}
+
+		function setThumbDataUrl(wrap, dataUrl, alt) {
+			wrap.innerHTML = '';
+			if (!dataUrl) {
+				var miss = document.createElement('div');
+				miss.className = 'missing';
+				miss.textContent = 'Render failed';
+				wrap.appendChild(miss);
+				return;
+			}
+			var px = parseInt(displaySizeEl.value, 10);
+			var img = document.createElement('img');
+			img.width = px;
+			img.height = px;
+			img.alt = alt || '';
+			img.src = dataUrl;
+			wrap.appendChild(img);
 		}
 
 		function missing(label) {
@@ -237,10 +305,15 @@
 			return el;
 		}
 
-		function render() {
+		function renderTable() {
 			var showProposed = showProposedEl.checked;
+			var gen = ++renderGen;
 			proposedHead.style.display = showProposed ? '' : 'none';
 			rowsEl.innerHTML = '';
+			statusEl.textContent = rendererReady ? 'Rendering live previews…' : 'Loading renderer…';
+			statusEl.className = 'status';
+
+			var jobs = [];
 
 			PREVIEW_TEXTURES.forEach(function (texture) {
 				var entry = PlanetImageCatalog.getByTexture(texture)
@@ -250,11 +323,11 @@
 				}
 
 				var tr = document.createElement('tr');
+				var biome = PlanetImageCatalog.classifyBiomeFromTexture(entry.texture, entry.type);
+				var proposed = PlanetImageCatalog.proposedBandOverride(entry);
 
 				var nameTd = document.createElement('td');
 				nameTd.className = 'texture';
-				var biome = PlanetImageCatalog.classifyBiomeFromTexture(entry.texture, entry.type);
-				var proposed = PlanetImageCatalog.proposedBandOverride(entry);
 				nameTd.innerHTML = '<strong>' + entry.texture + '</strong>'
 					+ '<span>biome: ' + biome
 					+ (proposed ? ' · proposed band: ' + proposed : ' · temp band (current)')
@@ -274,28 +347,64 @@
 				tr.appendChild(diskTd);
 
 				var liveTd = document.createElement('td');
-				liveTd.appendChild(thumbIframe(exportUrl(entry)));
+				var liveWrap = thumbPending('…');
+				liveTd.appendChild(liveWrap);
 				tr.appendChild(liveTd);
+				jobs.push({ entry: entry, wrap: liveWrap, bandOverride: null });
 
 				var proposedTd = document.createElement('td');
 				if (showProposed) {
 					if (proposed) {
-						proposedTd.appendChild(thumbIframe(exportUrl(entry, { bandOverride: proposed })));
+						var proposedWrap = thumbPending('…');
+						proposedTd.appendChild(proposedWrap);
+						jobs.push({ entry: entry, wrap: proposedWrap, bandOverride: proposed });
 					} else {
 						proposedTd.appendChild(missing('Same as current (normaltemp uses temp band)'));
 					}
 				}
 				tr.appendChild(proposedTd);
-
 				rowsEl.appendChild(tr);
 			});
+
+			if (!rendererReady) {
+				return;
+			}
+
+			(function runJobs(i) {
+				if (gen !== renderGen) {
+					return;
+				}
+				if (i >= jobs.length) {
+					statusEl.textContent = 'Live previews ready.';
+					return;
+				}
+				var job = jobs[i];
+				statusEl.textContent = 'Rendering ' + (i + 1) + ' / ' + jobs.length + '…';
+				captureEntry(job.entry, job.bandOverride).then(function (dataUrl) {
+					if (gen !== renderGen) {
+						return;
+					}
+					setThumbDataUrl(job.wrap, dataUrl, job.entry.texture);
+					runJobs(i + 1);
+				});
+			})(0);
 		}
 
 		[displaySizeEl, renderSizeEl, showProposedEl].forEach(function (el) {
-			el.addEventListener('change', render);
+			el.addEventListener('change', renderTable);
 		});
 
-		render();
+		loadScript('../threejs/three.min.js')
+			.then(function () { return loadScript('../game/overview-planet.js'); })
+			.then(function () {
+				rendererReady = true;
+				renderTable();
+			})
+			.catch(function (err) {
+				statusEl.textContent = 'Renderer failed to load — use php -S from repo root. ' + err.message;
+				statusEl.className = 'status error';
+				renderTable();
+			});
 	})();
 	</script>
 </body>
