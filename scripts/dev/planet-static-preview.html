@@ -127,7 +127,8 @@
 			<code>512</code> hq), and live Three.js captures for all
 			<strong>five variants per biome family</strong>. Variant <code>01</code> is the hot end of
 			each family’s temperature span; colonization assigns variant from planet temperature.
-			Legacy samples: <code>bash scripts/dev/extract-legacy-planet-samples.sh</code>.
+			Legacy column = <code>nova</code> theme painted JPGs in <code>legacy-samples/</code>
+			(<code>bash scripts/dev/extract-legacy-planet-samples.sh</code>).
 			Serve: <code>php -S 127.0.0.1:8765</code>.
 		</p>
 	</header>
@@ -167,7 +168,7 @@
 		</label>
 	</div>
 	<div class="legend">
-		<div><strong>Legacy</strong>Pre-batch painted JPG (if extracted)</div>
+		<div><strong>Legacy</strong>Nova theme painted JPGs (<code>legacy-samples/</code>)</div>
 		<div><strong>On disk</strong><code>_hq.jpg</code> with lite fallback</div>
 		<div><strong>Live render</strong>Current catalog + batch pipeline</div>
 		<div><strong>Meta</strong>Temp bucket, biome band, kept textures</div>
@@ -208,6 +209,15 @@
 
 		var HIVE_BASE = '../../styles/theme/hive/planeten/';
 		var LEGACY_BASE = 'legacy-samples/';
+		var NOVA_LEGACY_BASE = '../../styles/theme/nova/planeten/';
+		var LEGACY_ALIASES = {
+			wuestenplanet05: 'wuestenplanet04',
+			moon-small: 'mond',
+			moon-large: 'mond',
+			'moon-base-2': 'mond',
+			'moon-base-5': 'mond',
+			destroyed: 'trockenplanet01'
+		};
 		var rowsEl = document.getElementById('rows');
 		var statusEl = document.getElementById('status');
 		var familyFilterEl = document.getElementById('familyFilter');
@@ -247,6 +257,45 @@
 			).then(function (result) {
 				return result && result.dataUrl ? result.dataUrl : null;
 			}).catch(function () { return null; });
+		}
+
+		function legacySrc(texture) {
+			return LEGACY_BASE + texture + '.jpg';
+		}
+
+		function thumbLegacy(texture) {
+			var wrap = document.createElement('div');
+			wrap.className = 'thumb';
+			var px = parseInt(displaySizeEl.value, 10);
+			wrap.style.width = px + 'px';
+			wrap.style.height = px + 'px';
+			var img = document.createElement('img');
+			img.width = px;
+			img.height = px;
+			img.alt = 'legacy ' + texture;
+			img.title = 'Legacy nova theme';
+			img.src = legacySrc(texture);
+			img.onerror = function () {
+				var step = img.getAttribute('data-legacy-step') || '0';
+				if (step === '0' && LEGACY_ALIASES[texture]) {
+					img.setAttribute('data-legacy-step', '1');
+					img.src = LEGACY_BASE + LEGACY_ALIASES[texture] + '.jpg';
+					return;
+				}
+				if (step === '0' || step === '1') {
+					img.setAttribute('data-legacy-step', '2');
+					img.src = NOVA_LEGACY_BASE + texture + '.jpg';
+					return;
+				}
+				if (step === '2' && LEGACY_ALIASES[texture]) {
+					img.setAttribute('data-legacy-step', '3');
+					img.src = NOVA_LEGACY_BASE + LEGACY_ALIASES[texture] + '.jpg';
+					return;
+				}
+				img.alt = 'no legacy asset';
+			};
+			wrap.appendChild(img);
+			return wrap;
 		}
 
 		function thumbImg(src, alt, onerrorFallback) {
@@ -327,9 +376,9 @@
 				+ ' · ' + biome + '</span>';
 			tr.appendChild(nameTd);
 
-			tr.appendChild(document.createElement('td')).appendChild(
-				thumbImg(LEGACY_BASE + entry.texture + '.jpg', 'legacy', null)
-			);
+			var legacyTd = document.createElement('td');
+			legacyTd.appendChild(thumbLegacy(entry.texture));
+			tr.appendChild(legacyTd);
 
 			var diskTd = document.createElement('td');
 			diskTd.appendChild(thumbImg(
