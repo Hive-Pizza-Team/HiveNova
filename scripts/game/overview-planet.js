@@ -658,6 +658,24 @@
 		return 'terra';
 	}
 
+	var STATIC_BAND_KEEP_TEXTURES = {
+		wuestenplanet02: true,
+		trockenplanet05: true,
+		trockenplanet01: true
+	};
+
+	function staticBandOverrideFromTexture(texture, type) {
+		if (!texture || STATIC_BAND_KEEP_TEXTURES[texture] || type === 3) {
+			return null;
+		}
+		var biome = classifyBiome(texture, type);
+		if (biome === 'desert') { return 'desert'; }
+		if (biome === 'jungle') { return 'savanna'; }
+		if (biome === 'water') { return 'terra'; }
+		if (biome === 'ice') { return 'ice'; }
+		return null;
+	}
+
 	function mix(a, b, t) { return a + (b - a) * t; }
 
 	function hslToRgb(h, s, l) {
@@ -745,9 +763,13 @@
 
 		var band;
 		if (data.bandOverride) { band = data.bandOverride; }
-		else if (biome === 'moon') { band = 'moon'; }
-		else if (biome === 'gas') { band = 'gas'; }
-		else { band = tempBand(avgTemp); }
+		else {
+			var staticBand = staticBandOverrideFromTexture(data.texture, data.type);
+			if (staticBand) { band = staticBand; }
+			else if (biome === 'moon') { band = 'moon'; }
+			else if (biome === 'gas') { band = 'gas'; }
+			else { band = tempBand(avgTemp); }
+		}
 
 		var sizeFactor = 0;
 		if (data.diameter) {

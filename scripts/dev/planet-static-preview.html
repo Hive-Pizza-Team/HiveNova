@@ -152,8 +152,8 @@
 	<div class="legend">
 		<div><strong>Legacy</strong>Pre-batch hive JPG (200×200 painted)</div>
 		<div><strong>On disk</strong>Current <code>_hq.jpg</code> or <code>.jpg</code> in theme</div>
-		<div><strong>Live render</strong>In-page Three.js capture (same as batch pipeline)</div>
-		<div><strong>Option #2</strong>Biome band from texture prefix (preview only)</div>
+		<div><strong>Live render</strong>Production batch settings (option #2 bands; 3 textures kept)</div>
+		<div><strong>Band</strong>Texture-family override, or kept unchanged</div>
 	</div>
 	<div class="status" id="status">Loading renderer…</div>
 	<div class="grid-wrap">
@@ -164,7 +164,7 @@
 					<th>Legacy</th>
 					<th>On disk (_hq → lite)</th>
 					<th>Live render</th>
-					<th id="proposedHead">Option #2 (biome band)</th>
+					<th id="proposedHead">Band override</th>
 				</tr>
 			</thead>
 			<tbody id="rows"></tbody>
@@ -217,23 +217,19 @@
 			};
 		}
 
-		function buildPayload(entry, bandOverride) {
+		function buildPayload(entry) {
 			var mode = renderModeAndSize().lite ? 'lite' : 'full';
-			var payload = PlanetImageCatalog.buildPayload(entry, mode);
-			if (bandOverride) {
-				payload.bandOverride = bandOverride;
-			}
-			return payload;
+			return PlanetImageCatalog.buildPayload(entry, mode);
 		}
 
-		function captureEntry(entry, bandOverride) {
+		function captureEntry(entry) {
 			if (!rendererReady || !window.HiveNovaOverviewPlanet) {
 				return Promise.resolve(null);
 			}
 			var opts = renderModeAndSize();
 			return window.HiveNovaOverviewPlanet.renderStatic(
 				sharedCanvas,
-				buildPayload(entry, bandOverride),
+				buildPayload(entry),
 				{
 					lite: opts.lite,
 					size: opts.size,
@@ -324,13 +320,14 @@
 
 				var tr = document.createElement('tr');
 				var biome = PlanetImageCatalog.classifyBiomeFromTexture(entry.texture, entry.type);
-				var proposed = PlanetImageCatalog.proposedBandOverride(entry);
+				var bandOverride = PlanetImageCatalog.bandOverrideForTexture(entry.texture, entry.type);
+				var kept = PlanetImageCatalog.staticBandKeepTextures[entry.texture];
 
 				var nameTd = document.createElement('td');
 				nameTd.className = 'texture';
 				nameTd.innerHTML = '<strong>' + entry.texture + '</strong>'
 					+ '<span>biome: ' + biome
-					+ (proposed ? ' · proposed band: ' + proposed : ' · temp band (current)')
+					+ (kept ? ' · kept unchanged' : (bandOverride ? ' · band: ' + bandOverride : ' · temp band'))
 					+ '</span>';
 				tr.appendChild(nameTd);
 
@@ -350,16 +347,16 @@
 				var liveWrap = thumbPending('…');
 				liveTd.appendChild(liveWrap);
 				tr.appendChild(liveTd);
-				jobs.push({ entry: entry, wrap: liveWrap, bandOverride: null });
+				jobs.push({ entry: entry, wrap: liveWrap });
 
 				var proposedTd = document.createElement('td');
 				if (showProposed) {
-					if (proposed) {
-						var proposedWrap = thumbPending('…');
-						proposedTd.appendChild(proposedWrap);
-						jobs.push({ entry: entry, wrap: proposedWrap, bandOverride: proposed });
+					if (kept) {
+						proposedTd.appendChild(missing('Kept (no band override)'));
+					} else if (bandOverride) {
+						proposedTd.appendChild(missing(bandOverride));
 					} else {
-						proposedTd.appendChild(missing('Same as current (normaltemp uses temp band)'));
+						proposedTd.appendChild(missing('temp band'));
 					}
 				}
 				tr.appendChild(proposedTd);
@@ -380,7 +377,7 @@
 				}
 				var job = jobs[i];
 				statusEl.textContent = 'Rendering ' + (i + 1) + ' / ' + jobs.length + '…';
-				captureEntry(job.entry, job.bandOverride).then(function (dataUrl) {
+				captureEntry(job.entry).then(function (dataUrl) {
 					if (gen !== renderGen) {
 						return;
 					}

@@ -142,6 +142,13 @@
 		TEXTURE_MAP[ENTRIES[e].texture] = ENTRIES[e];
 	}
 
+	/** Static JPGs kept as-is (temp-driven band); all other planets use texture-family bands. */
+	var STATIC_BAND_KEEP_TEXTURES = {
+		wuestenplanet02: true,
+		trockenplanet05: true,
+		trockenplanet01: true
+	};
+
 	function buildMoonPayload(entry) {
 		var buildings = {};
 		if (entry.buildings) {
@@ -228,7 +235,7 @@
 		}
 		// Static catalog: pristine planets only — no fields fill, buildings, or fleet.
 		// mode=lite|full affects renderer richness (clouds/atmosphere), not urbanization.
-		return {
+		var payload = {
 			texture: entry.texture,
 			type: entry.type || 1,
 			tempMin: entry.tempMin,
@@ -249,6 +256,11 @@
 			debris: null,
 			dpath: '../../styles/theme/hive/'
 		};
+		var bandOverride = bandOverrideForTexture(entry.texture, entry.type);
+		if (bandOverride) {
+			payload.bandOverride = bandOverride;
+		}
+		return payload;
 	}
 
 	function getByTexture(texture) {
@@ -278,14 +290,16 @@
 	}
 
 	/**
-	 * Option #2 preview: pick color band from texture family instead of temperature alone.
-	 * Returns null to keep current temp-driven band (normaltemp*, etc.).
+	 * Texture-family color band (option #2). Returns null for keep-list textures and normaltemp*.
 	 */
-	function proposedBandOverride(entry) {
-		if (!entry || entry.vizState || entry.type === 3) {
+	function bandOverrideForTexture(texture, type) {
+		if (!texture || STATIC_BAND_KEEP_TEXTURES[texture]) {
 			return null;
 		}
-		var biome = classifyBiomeFromTexture(entry.texture, entry.type);
+		if (type === 3) {
+			return null;
+		}
+		var biome = classifyBiomeFromTexture(texture, type);
 		if (biome === 'desert') { return 'desert'; }
 		if (biome === 'jungle') { return 'savanna'; }
 		if (biome === 'water') { return 'terra'; }
@@ -300,7 +314,12 @@
 		getByTexture: getByTexture,
 		getByVizState: getByVizState,
 		classifyBiomeFromTexture: classifyBiomeFromTexture,
-		proposedBandOverride: proposedBandOverride
+		bandOverrideForTexture: bandOverrideForTexture,
+		staticBandKeepTextures: STATIC_BAND_KEEP_TEXTURES,
+		/** @deprecated use bandOverrideForTexture */
+		proposedBandOverride: function (entry) {
+			return entry ? bandOverrideForTexture(entry.texture, entry.type) : null;
+		}
 	};
 
 	if (typeof module !== 'undefined' && module.exports) {
