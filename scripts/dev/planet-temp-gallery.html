@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Planet temperature gallery — spacepizzadev</title>
+	<title>Planet temperature gallery</title>
 	<style>
 		:root {
 			color-scheme: dark;
@@ -12,6 +12,7 @@
 			--text: #c8d0e0;
 			--muted: #7a8498;
 			--accent: #ffb347;
+			--line: #1a2030;
 		}
 		* { box-sizing: border-box; }
 		body {
@@ -22,18 +23,10 @@
 		}
 		header {
 			padding: 20px 24px 12px;
-			border-bottom: 1px solid #1a2030;
+			border-bottom: 1px solid var(--line);
 		}
-		h1 {
-			margin: 0 0 6px;
-			font-size: 1.25rem;
-			font-weight: 600;
-		}
-		.sub {
-			margin: 0;
-			color: var(--muted);
-			font-size: 0.92rem;
-		}
+		h1 { margin: 0 0 6px; font-size: 1.25rem; font-weight: 600; }
+		.sub { margin: 0; color: var(--muted); font-size: 0.92rem; max-width: 52rem; }
 		.controls {
 			display: flex;
 			flex-wrap: wrap;
@@ -41,7 +34,7 @@
 			align-items: center;
 			padding: 14px 24px;
 			background: var(--panel);
-			border-bottom: 1px solid #1a2030;
+			border-bottom: 1px solid var(--line);
 		}
 		.controls label {
 			display: flex;
@@ -49,39 +42,48 @@
 			gap: 8px;
 			color: var(--muted);
 		}
-		.controls input[type="range"] {
-			width: 160px;
-		}
-		.controls output {
-			min-width: 2.5rem;
-			color: var(--accent);
-			font-variant-numeric: tabular-nums;
-		}
-		.grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-			gap: 20px;
-			padding: 24px;
+		.controls select { accent-color: var(--accent); }
+		.family-section {
+			padding: 20px 24px 8px;
 			max-width: 1600px;
 			margin: 0 auto;
 		}
+		.family-section h2 {
+			margin: 0 0 4px;
+			font-size: 1.05rem;
+			font-weight: 600;
+		}
+		.family-section .family-meta {
+			margin: 0 0 14px;
+			color: var(--muted);
+			font-size: 0.85rem;
+		}
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 16px;
+			padding-bottom: 12px;
+		}
 		.cell {
 			background: var(--panel);
-			border: 1px solid #1a2030;
+			border: 1px solid var(--line);
 			border-radius: 10px;
 			overflow: hidden;
 		}
 		.cell-head {
 			padding: 10px 12px 8px;
-			border-bottom: 1px solid #1a2030;
+			border-bottom: 1px solid var(--line);
 		}
 		.cell-head strong {
 			display: block;
-			font-size: 0.95rem;
+			font-size: 0.9rem;
+			font-family: ui-monospace, monospace;
 		}
 		.cell-head span {
+			display: block;
 			color: var(--muted);
-			font-size: 0.82rem;
+			font-size: 0.78rem;
+			margin-top: 2px;
 		}
 		.cell-frame {
 			aspect-ratio: 1 / 1;
@@ -93,71 +95,168 @@
 			height: 100%;
 			border: 0;
 		}
+		.special-wrap {
+			padding: 8px 24px 32px;
+			max-width: 1600px;
+			margin: 0 auto;
+		}
+		code { color: var(--accent); }
 	</style>
 </head>
 <body>
 	<header>
-		<h1>Overview planet — temperature gallery</h1>
-		<p class="sub">1:1 previews · planet bands, moons (size + lunar base), unknown/destroyed · buildup slider applies to planets only</p>
+		<h1>Planet temperature gallery</h1>
+		<p class="sub">
+			Five variants per biome family (<code>01</code> hottest → <code>05</code> coldest), aligned with
+			<code>PlanetImageUtil</code> and colonization temps. Serve repo root:
+			<code>php -S 127.0.0.1:8765</code>.
+		</p>
 	</header>
 	<div class="controls">
 		<label>
-			Buildup (field fill)
-			<input type="range" id="buildup" min="0" max="100" value="53" step="1">
-			<output id="buildup-out">53%</output>
+			Render mode
+			<select id="renderMode">
+				<option value="full">Full (hq pipeline)</option>
+				<option value="lite">Lite</option>
+			</select>
+		</label>
+		<label>
+			Canvas size
+			<select id="renderSize">
+				<option value="256" selected>256px</option>
+				<option value="512">512px</option>
+			</select>
 		</label>
 	</div>
-	<div class="grid" id="grid"></div>
-	<script src="planet-viz-presets.js"></script>
+	<div id="families"></div>
+	<div class="special-wrap">
+		<h2>Special</h2>
+		<div class="grid" id="special-grid"></div>
+	</div>
+	<script src="planet-image-catalog.js"></script>
 	<script>
 	(function () {
 		'use strict';
 
-		var grid = document.getElementById('grid');
-		var buildupInput = document.getElementById('buildup');
-		var buildupOut = document.getElementById('buildup-out');
+		var FAMILIES = [
+			{ key: 'trocken', label: 'Trocken', prefix: 'trockenplanet' },
+			{ key: 'wuesten', label: 'Wüsten', prefix: 'wuestenplanet' },
+			{ key: 'dschjungel', label: 'Dschungel', prefix: 'dschjungelplanet' },
+			{ key: 'normaltemp', label: 'Normal temp', prefix: 'normaltempplanet' },
+			{ key: 'wasser', label: 'Wasser', prefix: 'wasserplanet' },
+			{ key: 'eis', label: 'Eis', prefix: 'eisplanet' }
+		];
 
-		function buildupRatio() {
-			return (parseInt(buildupInput.value, 10) || 0) / 100;
+		var SPECIAL_TEXTURES = ['mond', 'moon-small', 'moon-large', 'moon-base-2', 'moon-base-5', 'unknown', 'destroyed'];
+
+		var familiesEl = document.getElementById('families');
+		var specialGrid = document.getElementById('special-grid');
+		var renderModeEl = document.getElementById('renderMode');
+		var renderSizeEl = document.getElementById('renderSize');
+
+		function formatTemp(min, max) {
+			return min + '\u2013' + max + ' \u00B0C';
 		}
 
-		function renderGrid() {
-			var ratio = buildupRatio();
-			buildupOut.textContent = Math.round(ratio * 100) + '%';
-			grid.innerHTML = '';
+		function exportUrl(texture) {
+			return 'planet-viz-export.html?texture=' + encodeURIComponent(texture)
+				+ '&mode=' + encodeURIComponent(renderModeEl.value)
+				+ '&size=' + encodeURIComponent(renderSizeEl.value)
+				+ '&quality=0.96';
+		}
 
-			PlanetVizPresets.list.forEach(function (preset) {
-				var cell = document.createElement('article');
-				cell.className = 'cell';
+		function variantLabel(variant) {
+			if (variant === 1) { return 'hottest'; }
+			if (variant === 5) { return 'coldest'; }
+			return 'mid';
+		}
 
-				var head = document.createElement('div');
-				head.className = 'cell-head';
-				head.innerHTML = '<strong>' + preset.label + '</strong>'
-					+ '<span>' + PlanetVizPresets.subtitle(preset) + '</span>';
-				cell.appendChild(head);
+		function makeCell(entry) {
+			var variant = parseInt(entry.texture.replace(/\D+/g, ''), 10) || 0;
+			var band = PlanetImageCatalog.bandOverrideForTexture(entry.texture, entry.type);
+			var kept = PlanetImageCatalog.staticBandKeepTextures[entry.texture];
 
-				var frame = document.createElement('div');
-				frame.className = 'cell-frame';
+			var cell = document.createElement('article');
+			cell.className = 'cell';
 
-				var iframe = document.createElement('iframe');
-				iframe.title = preset.label + ' planet preview';
-				iframe.loading = 'lazy';
-				iframe.src = 'planet-viz-single.html?preset=' + encodeURIComponent(preset.id)
-					+ '&buildup=' + ratio.toFixed(2);
-				frame.appendChild(iframe);
-				cell.appendChild(frame);
-				grid.appendChild(cell);
+			var head = document.createElement('div');
+			head.className = 'cell-head';
+			var meta = formatTemp(entry.tempMin, entry.tempMax);
+			if (variant >= 1 && variant <= 5) {
+				meta += ' · v' + String(variant).padStart(2, '0') + ' (' + variantLabel(variant) + ')';
+			}
+			if (kept) {
+				meta += ' · kept JPG';
+			} else if (band) {
+				meta += ' · ' + band + ' band';
+			}
+			head.innerHTML = '<strong>' + entry.texture + '</strong><span>' + meta + '</span>';
+			cell.appendChild(head);
+
+			var frame = document.createElement('div');
+			frame.className = 'cell-frame';
+			var iframe = document.createElement('iframe');
+			iframe.title = entry.texture;
+			iframe.loading = 'lazy';
+			iframe.src = exportUrl(entry.texture);
+			frame.appendChild(iframe);
+			cell.appendChild(frame);
+
+			return cell;
+		}
+
+		function familyEntries(prefix) {
+			var list = [];
+			for (var v = 1; v <= 5; v++) {
+				var texture = prefix + (v < 10 ? '0' + v : String(v));
+				var entry = PlanetImageCatalog.getByTexture(texture);
+				if (entry) {
+					list.push(entry);
+				}
+			}
+			return list;
+		}
+
+		function render() {
+			familiesEl.innerHTML = '';
+			specialGrid.innerHTML = '';
+
+			FAMILIES.forEach(function (family) {
+				var entries = familyEntries(family.prefix);
+				if (!entries.length) {
+					return;
+				}
+				var range = PlanetImageCatalog.familyTempRanges[family.key];
+				var section = document.createElement('section');
+				section.className = 'family-section';
+				section.innerHTML = '<h2>' + family.label + '</h2>'
+					+ '<p class="family-meta">Family span '
+					+ formatTemp(range[0], range[1])
+					+ ' · five equal temperature buckets · variant <code>01</code> = hot end</p>';
+
+				var grid = document.createElement('div');
+				grid.className = 'grid';
+				entries.forEach(function (entry) {
+					grid.appendChild(makeCell(entry));
+				});
+				section.appendChild(grid);
+				familiesEl.appendChild(section);
+			});
+
+			SPECIAL_TEXTURES.forEach(function (texture) {
+				var entry = PlanetImageCatalog.getByTexture(texture)
+					|| PlanetImageCatalog.getByVizState(texture);
+				if (entry) {
+					specialGrid.appendChild(makeCell(entry));
+				}
 			});
 		}
 
-		var debounceTimer;
-		buildupInput.addEventListener('input', function () {
-			buildupOut.textContent = buildupInput.value + '%';
-			clearTimeout(debounceTimer);
-			debounceTimer = setTimeout(renderGrid, 280);
+		[renderModeEl, renderSizeEl].forEach(function (el) {
+			el.addEventListener('change', render);
 		});
 
-		renderGrid();
+		render();
 	})();
 	</script>
 </body>

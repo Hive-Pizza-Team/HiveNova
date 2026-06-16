@@ -40,10 +40,10 @@
 			gap: 8px;
 			color: var(--muted);
 		}
-		.controls select, .controls input[type="range"] { accent-color: var(--accent); }
+		.controls select { accent-color: var(--accent); }
 		.legend {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 			gap: 8px;
 			padding: 12px 20px;
 			background: #080a12;
@@ -69,6 +69,14 @@
 			font-weight: 600;
 			font-size: 0.85rem;
 		}
+		tr.family-row td {
+			background: #0a0d16;
+			text-align: left;
+			font-weight: 600;
+			font-size: 0.88rem;
+			color: var(--accent);
+			padding: 8px 12px;
+		}
 		td.texture {
 			text-align: left;
 			font-family: ui-monospace, monospace;
@@ -90,10 +98,7 @@
 			border-radius: 6px;
 			overflow: hidden;
 		}
-		.thumb img, .thumb iframe {
-			display: block;
-			border: 0;
-		}
+		.thumb img { display: block; border: 0; }
 		.thumb .pending {
 			color: var(--muted);
 			font-size: 0.72rem;
@@ -107,7 +112,7 @@
 		}
 		.status.error { color: #e88; }
 		.missing {
-			color: #6a3040;
+			color: var(--muted);
 			font-size: 0.78rem;
 			padding: 8px;
 		}
@@ -118,14 +123,28 @@
 	<header>
 		<h1>Planet static thumbnail preview</h1>
 		<p>
-			Compare legacy painted JPGs, current on-disk batch assets, higher-res re-render settings
-			(<code>256</code> lite / <code>512</code> hq @ q0.96), and optional
-			<strong>option #2</strong> biome bands (texture family → palette instead of temperature alone).
-			Run <code>bash scripts/dev/extract-legacy-planet-samples.sh</code> once for legacy column.
-			Serve repo root: <code>php -S 127.0.0.1:8765</code>.
+			Compare legacy painted JPGs, on-disk batch assets (<code>256</code> lite /
+			<code>512</code> hq), and live Three.js captures for all
+			<strong>five variants per biome family</strong>. Variant <code>01</code> is the hot end of
+			each family’s temperature span; colonization assigns variant from planet temperature.
+			Legacy samples: <code>bash scripts/dev/extract-legacy-planet-samples.sh</code>.
+			Serve: <code>php -S 127.0.0.1:8765</code>.
 		</p>
 	</header>
 	<div class="controls">
+		<label>
+			Family
+			<select id="familyFilter">
+				<option value="all" selected>All families</option>
+				<option value="trocken">Trocken</option>
+				<option value="wuesten">Wüsten</option>
+				<option value="dschjungel">Dschungel</option>
+				<option value="normaltemp">Normal temp</option>
+				<option value="wasser">Wasser</option>
+				<option value="eis">Eis</option>
+				<option value="special">Moons + special</option>
+			</select>
+		</label>
 		<label>
 			UI display size
 			<select id="displaySize">
@@ -138,33 +157,31 @@
 		<label>
 			Live render size
 			<select id="renderSize">
-				<option value="128">Current lite 128</option>
-				<option value="256" selected>Proposed lite 256</option>
-				<option value="200">Current hq 200</option>
-				<option value="512">Proposed hq 512</option>
+				<option value="256" selected>Lite 256</option>
+				<option value="512">HQ 512</option>
 			</select>
 		</label>
 		<label>
-			<input type="checkbox" id="showProposed" checked>
-			Show option #2 column
+			<input type="checkbox" id="showMeta" checked>
+			Show band / kept notes
 		</label>
 	</div>
 	<div class="legend">
-		<div><strong>Legacy</strong>Pre-batch hive JPG (200×200 painted)</div>
-		<div><strong>On disk</strong>Current <code>_hq.jpg</code> or <code>.jpg</code> in theme</div>
-		<div><strong>Live render</strong>Production batch settings (option #2 bands; 3 textures kept)</div>
-		<div><strong>Band</strong>Texture-family override, or kept unchanged</div>
+		<div><strong>Legacy</strong>Pre-batch painted JPG (if extracted)</div>
+		<div><strong>On disk</strong><code>_hq.jpg</code> with lite fallback</div>
+		<div><strong>Live render</strong>Current catalog + batch pipeline</div>
+		<div><strong>Meta</strong>Temp bucket, biome band, kept textures</div>
 	</div>
 	<div class="status" id="status">Loading renderer…</div>
 	<div class="grid-wrap">
 		<table>
 			<thead>
 				<tr>
-					<th>Texture</th>
+					<th>Texture / temp</th>
 					<th>Legacy</th>
 					<th>On disk (_hq → lite)</th>
 					<th>Live render</th>
-					<th id="proposedHead">Band override</th>
+					<th id="metaHead">Meta</th>
 				</tr>
 			</thead>
 			<tbody id="rows"></tbody>
@@ -178,24 +195,26 @@
 	(function () {
 		'use strict';
 
-		var PREVIEW_TEXTURES = [
-			'trockenplanet01', 'trockenplanet03', 'trockenplanet05',
-			'wuestenplanet02', 'wuestenplanet04',
-			'dschjungelplanet02', 'dschjungelplanet05',
-			'normaltempplanet02', 'normaltempplanet05',
-			'wasserplanet02', 'wasserplanet05',
-			'eisplanet01', 'eisplanet05',
-			'mond', 'unknown', 'destroyed'
+		var FAMILIES = [
+			{ key: 'trocken', label: 'Trocken (120–260°C)', prefix: 'trockenplanet' },
+			{ key: 'wuesten', label: 'Wüsten (120–260°C)', prefix: 'wuestenplanet' },
+			{ key: 'dschjungel', label: 'Dschungel (50–110°C)', prefix: 'dschjungelplanet' },
+			{ key: 'normaltemp', label: 'Normal temp (−10–80°C)', prefix: 'normaltempplanet' },
+			{ key: 'wasser', label: 'Wasser (−10–60°C)', prefix: 'wasserplanet' },
+			{ key: 'eis', label: 'Eis (−130–−10°C)', prefix: 'eisplanet' }
 		];
+
+		var SPECIAL_TEXTURES = ['mond', 'moon-small', 'moon-large', 'moon-base-2', 'moon-base-5', 'unknown', 'destroyed'];
 
 		var HIVE_BASE = '../../styles/theme/hive/planeten/';
 		var LEGACY_BASE = 'legacy-samples/';
 		var rowsEl = document.getElementById('rows');
 		var statusEl = document.getElementById('status');
+		var familyFilterEl = document.getElementById('familyFilter');
 		var displaySizeEl = document.getElementById('displaySize');
 		var renderSizeEl = document.getElementById('renderSize');
-		var showProposedEl = document.getElementById('showProposed');
-		var proposedHead = document.getElementById('proposedHead');
+		var showMetaEl = document.getElementById('showMeta');
+		var metaHead = document.getElementById('metaHead');
 		var sharedCanvas = document.getElementById('shared-export-canvas');
 		var renderGen = 0;
 		var rendererReady = false;
@@ -212,15 +231,7 @@
 
 		function renderModeAndSize() {
 			var size = parseInt(renderSizeEl.value, 10);
-			return {
-				size: size,
-				lite: size < 384
-			};
-		}
-
-		function buildPayload(entry) {
-			var mode = renderModeAndSize().lite ? 'lite' : 'full';
-			return PlanetImageCatalog.buildPayload(entry, mode);
+			return { size: size, lite: size < 384 };
 		}
 
 		function captureEntry(entry) {
@@ -228,19 +239,14 @@
 				return Promise.resolve(null);
 			}
 			var opts = renderModeAndSize();
+			var mode = opts.lite ? 'lite' : 'full';
 			return window.HiveNovaOverviewPlanet.renderStatic(
 				sharedCanvas,
-				buildPayload(entry),
-				{
-					lite: opts.lite,
-					size: opts.size,
-					jpegQuality: 0.96
-				}
+				PlanetImageCatalog.buildPayload(entry, mode),
+				{ lite: opts.lite, size: opts.size, jpegQuality: 0.96 }
 			).then(function (result) {
 				return result && result.dataUrl ? result.dataUrl : null;
-			}).catch(function () {
-				return null;
-			});
+			}).catch(function () { return null; });
 		}
 
 		function thumbImg(src, alt, onerrorFallback) {
@@ -264,7 +270,7 @@
 			return wrap;
 		}
 
-		function thumbPending(label) {
+		function thumbPending() {
 			var wrap = document.createElement('div');
 			wrap.className = 'thumb';
 			var px = parseInt(displaySizeEl.value, 10);
@@ -272,7 +278,7 @@
 			wrap.style.height = px + 'px';
 			var el = document.createElement('div');
 			el.className = 'pending';
-			el.textContent = label || '…';
+			el.textContent = '…';
 			wrap.appendChild(el);
 			return wrap;
 		}
@@ -295,100 +301,132 @@
 			wrap.appendChild(img);
 		}
 
-		function missing(label) {
-			var el = document.createElement('div');
-			el.className = 'missing';
-			el.textContent = label;
-			return el;
+		function metaText(entry) {
+			var band = PlanetImageCatalog.bandOverrideForTexture(entry.texture, entry.type);
+			var kept = PlanetImageCatalog.staticBandKeepTextures[entry.texture];
+			if (kept) { return 'Kept JPG'; }
+			if (band) { return band + ' band'; }
+			if (entry.vizState) { return entry.vizState; }
+			if (entry.type === 3) { return 'moon'; }
+			return 'temp band';
+		}
+
+		function addEntryRow(entry, jobs) {
+			var tr = document.createElement('tr');
+			var variant = parseInt((entry.texture || '').replace(/\D+/g, ''), 10);
+			var biome = PlanetImageCatalog.classifyBiomeFromTexture(entry.texture, entry.type);
+
+			var nameTd = document.createElement('td');
+			nameTd.className = 'texture';
+			var tempLine = entry.tempMin != null && entry.tempMax != null
+				? entry.tempMin + '–' + entry.tempMax + ' °C'
+				: '—';
+			nameTd.innerHTML = '<strong>' + entry.texture + '</strong>'
+				+ '<span>' + tempLine
+				+ (variant ? ' · v' + String(variant).padStart(2, '0') : '')
+				+ ' · ' + biome + '</span>';
+			tr.appendChild(nameTd);
+
+			tr.appendChild(document.createElement('td')).appendChild(
+				thumbImg(LEGACY_BASE + entry.texture + '.jpg', 'legacy', null)
+			);
+
+			var diskTd = document.createElement('td');
+			diskTd.appendChild(thumbImg(
+				HIVE_BASE + entry.texture + '_hq.jpg',
+				'on disk',
+				HIVE_BASE + entry.texture + '.jpg'
+			));
+			tr.appendChild(diskTd);
+
+			var liveTd = document.createElement('td');
+			var liveWrap = thumbPending();
+			liveTd.appendChild(liveWrap);
+			tr.appendChild(liveTd);
+			jobs.push({ entry: entry, wrap: liveWrap });
+
+			var metaTd = document.createElement('td');
+			var metaSpan = document.createElement('span');
+			metaSpan.className = 'missing';
+			metaSpan.textContent = metaText(entry);
+			metaTd.appendChild(metaSpan);
+			tr.appendChild(metaTd);
+
+			rowsEl.appendChild(tr);
+		}
+
+		function familyEntries(prefix) {
+			var list = [];
+			for (var v = 1; v <= 5; v++) {
+				var texture = prefix + (v < 10 ? '0' + v : String(v));
+				var entry = PlanetImageCatalog.getByTexture(texture);
+				if (entry) { list.push(entry); }
+			}
+			return list;
 		}
 
 		function renderTable() {
-			var showProposed = showProposedEl.checked;
+			var filter = familyFilterEl.value;
+			var showMeta = showMetaEl.checked;
 			var gen = ++renderGen;
-			proposedHead.style.display = showProposed ? '' : 'none';
+			metaHead.style.display = showMeta ? '' : 'none';
 			rowsEl.innerHTML = '';
 			statusEl.textContent = rendererReady ? 'Rendering live previews…' : 'Loading renderer…';
 			statusEl.className = 'status';
 
 			var jobs = [];
 
-			PREVIEW_TEXTURES.forEach(function (texture) {
-				var entry = PlanetImageCatalog.getByTexture(texture)
-					|| PlanetImageCatalog.getByVizState(texture);
-				if (!entry) {
+			FAMILIES.forEach(function (family) {
+				if (filter !== 'all' && filter !== family.key) {
 					return;
 				}
-
-				var tr = document.createElement('tr');
-				var biome = PlanetImageCatalog.classifyBiomeFromTexture(entry.texture, entry.type);
-				var bandOverride = PlanetImageCatalog.bandOverrideForTexture(entry.texture, entry.type);
-				var kept = PlanetImageCatalog.staticBandKeepTextures[entry.texture];
-
-				var nameTd = document.createElement('td');
-				nameTd.className = 'texture';
-				nameTd.innerHTML = '<strong>' + entry.texture + '</strong>'
-					+ '<span>biome: ' + biome
-					+ (kept ? ' · kept unchanged' : (bandOverride ? ' · band: ' + bandOverride : ' · temp band'))
-					+ '</span>';
-				tr.appendChild(nameTd);
-
-				var legacyTd = document.createElement('td');
-				legacyTd.appendChild(thumbImg(LEGACY_BASE + entry.texture + '.jpg', 'legacy', null));
-				tr.appendChild(legacyTd);
-
-				var diskTd = document.createElement('td');
-				diskTd.appendChild(thumbImg(
-					HIVE_BASE + entry.texture + '_hq.jpg',
-					'on disk hq',
-					HIVE_BASE + entry.texture + '.jpg'
-				));
-				tr.appendChild(diskTd);
-
-				var liveTd = document.createElement('td');
-				var liveWrap = thumbPending('…');
-				liveTd.appendChild(liveWrap);
-				tr.appendChild(liveTd);
-				jobs.push({ entry: entry, wrap: liveWrap });
-
-				var proposedTd = document.createElement('td');
-				if (showProposed) {
-					if (kept) {
-						proposedTd.appendChild(missing('Kept (no band override)'));
-					} else if (bandOverride) {
-						proposedTd.appendChild(missing(bandOverride));
-					} else {
-						proposedTd.appendChild(missing('temp band'));
-					}
-				}
-				tr.appendChild(proposedTd);
-				rowsEl.appendChild(tr);
+				var header = document.createElement('tr');
+				header.className = 'family-row';
+				header.innerHTML = '<td colspan="5">' + family.label + '</td>';
+				rowsEl.appendChild(header);
+				familyEntries(family.prefix).forEach(function (entry) {
+					addEntryRow(entry, jobs);
+				});
 			});
+
+			if (filter === 'all' || filter === 'special') {
+				var header = document.createElement('tr');
+				header.className = 'family-row';
+				header.innerHTML = '<td colspan="5">Moons &amp; special</td>';
+				rowsEl.appendChild(header);
+				SPECIAL_TEXTURES.forEach(function (texture) {
+					var entry = PlanetImageCatalog.getByTexture(texture)
+						|| PlanetImageCatalog.getByVizState(texture);
+					if (entry) { addEntryRow(entry, jobs); }
+				});
+			}
+
+			if (!showMeta) {
+				rowsEl.querySelectorAll('tr td:last-child').forEach(function (td) {
+					td.style.display = 'none';
+				});
+			}
 
 			if (!rendererReady) {
 				return;
 			}
 
 			(function runJobs(i) {
-				if (gen !== renderGen) {
-					return;
-				}
+				if (gen !== renderGen) { return; }
 				if (i >= jobs.length) {
-					statusEl.textContent = 'Live previews ready.';
+					statusEl.textContent = 'Live previews ready (' + jobs.length + ').';
 					return;
 				}
-				var job = jobs[i];
 				statusEl.textContent = 'Rendering ' + (i + 1) + ' / ' + jobs.length + '…';
-				captureEntry(job.entry).then(function (dataUrl) {
-					if (gen !== renderGen) {
-						return;
-					}
-					setThumbDataUrl(job.wrap, dataUrl, job.entry.texture);
+				captureEntry(jobs[i].entry).then(function (dataUrl) {
+					if (gen !== renderGen) { return; }
+					setThumbDataUrl(jobs[i].wrap, dataUrl, jobs[i].entry.texture);
 					runJobs(i + 1);
 				});
 			})(0);
 		}
 
-		[displaySizeEl, renderSizeEl, showProposedEl].forEach(function (el) {
+		[familyFilterEl, displaySizeEl, renderSizeEl, showMetaEl].forEach(function (el) {
 			el.addEventListener('change', renderTable);
 		});
 
@@ -399,7 +437,7 @@
 				renderTable();
 			})
 			.catch(function (err) {
-				statusEl.textContent = 'Renderer failed to load — use php -S from repo root. ' + err.message;
+				statusEl.textContent = 'Renderer failed — use php -S from repo root. ' + err.message;
 				statusEl.className = 'status error';
 				renderTable();
 			});
