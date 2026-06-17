@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\HiveUtil;
 use HiveNova\Core\Mail;
 
 /**
@@ -150,7 +151,7 @@ class ShowRegisterPage extends AbstractLoginPage
 
 		if ($hiveAccount !== '') {
 			// validate hive signature
-			if (!PlayerUtil::isHiveSignValid($hiveAccount,$password)) {
+			if (!HiveUtil::isSignValid($hiveAccount,$password)) {
 				$errors[]	= $LNG['registerErrorPasswordSame'];
 			}
 		}
@@ -189,7 +190,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			$errors[]	= $LNG['registerErrorRules'];
 		}
 
-		if(!empty($hiveAccount) && !PlayerUtil::isHiveAccountValid($hiveAccount)) {
+		if(!empty($hiveAccount) && !HiveUtil::isAccountValid($hiveAccount)) {
 			$errors[]	= $LNG['registerErrorHiveAccountInvalid'];
 		}
 		
@@ -253,7 +254,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			$errors[]	= $LNG['registerErrorUsernameExist'];
 		}
 
-		if(PlayerUtil::isHiveAccountExists($userName) && empty($hiveAccount)) {
+		if(HiveUtil::accountExists($userName) && empty($hiveAccount)) {
 			// disallow registering a non-hive account with same name as an existing hive account
 			// to avoid collisions
 			$errors[]	= $LNG['registerErrorUsernameExist'];

@@ -8,7 +8,6 @@ use HiveNova\Core\Cache;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
 use Exception;
-use Hive\Hive;
 
 /**
  *  2Moons 
@@ -24,12 +23,6 @@ use Hive\Hive;
  * @version 1.8.0
  * @link https://github.com/jkroepke/2Moons
  */
-
-// import hive-php and instantiate $hive
-$hivePhp = __DIR__.'/../../vendor/mahdiyari/hive-php/lib/Hive.php';
-if (file_exists($hivePhp)) {
-    require_once $hivePhp;
-}
 
 class PlayerUtil
 {
@@ -69,82 +62,9 @@ class PlayerUtil
 		}
 	}
 
-	static public function isHiveAccountValid($hiveaccount)
-	{
-		if (is_null($hiveaccount) || strlen($hiveaccount) == 0 || strlen((string) $hiveaccount) > 16) {
-			return false;
-		}
-		return preg_match('/^[a-z][-a-z0-9]+[a-z0-9](\.[a-z][-a-z0-9]+[a-z0-9])*$/', (string) $hiveaccount);
-	}
-
-	static public function isHiveSignValid($hiveaccount, $signedblob)
-	{
-		// verify account
-		if (!PlayerUtil::isHiveAccountValid($hiveaccount)) {
-			return false;
-		}
-
-		// verify length
-		if (is_null($signedblob) || strlen($signedblob) < 32 || strlen($signedblob) > 132) {
-			return false;
-		}
-		// verify content
-		if (!PlayerUtil::isNameValid($signedblob)) {
-			return false;
-		}
-
-		$hive = new Hive();
-
-		// verify signature using hive-php
-		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
-
-		if(!is_array($result) || count($result) == 0 || !isset($result[0]) || !array_key_exists('posting',$result[0])) {
-			return false;
-		}
-
-		$publicKeyString = $result[0]['posting']['key_auths'][0][0];
-		$publicKey = $hive->publicKeyFrom($publicKeyString);
-
-		if (is_null($publicKey)) {
-			return false;
-		}
-
-		$message = hash('sha256', $hiveaccount.' is my account.');
-		try {
-			$verified = $publicKey->verify($message, $signedblob);
-		} catch (\Throwable $e) {
-			return false;
-		}
-		if ($verified) {
-			return true;
-		}
-
-		return false;
-	}
-
-	static public function isHiveAccountExists($hiveaccount) {
-		$hiveaccount = strtolower((string) $hiveaccount); // force lower case
-
-		// verify account
-		if (!PlayerUtil::isHiveAccountValid($hiveaccount)) {
-			return false;
-		}
-
-		$hive = new Hive();
-
-		// check existence using hive-php
-		$result = $hive->call('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
-
-		if(is_array($result) && count($result) > 0) {
-			return true;
-		}
-
-		return false;
-	}
-
 	static public function getPlayerAvatarURL($USER){
 		$usernameLower = strtolower((string) $USER['username']);
-		if (PlayerUtil::isHiveAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
+		if (HiveUtil::isAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
 			return 'https://images.hive.blog/u/'.$usernameLower.'/avatar';
 		}
 
@@ -153,7 +73,7 @@ class PlayerUtil
 
 	static public function getPlayerBadges($USER){
 		$usernameLower = strtolower((string) $USER['username']);
-		if (PlayerUtil::isHiveAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
+		if (HiveUtil::isAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
 			return '<a href="https://peakd.com/@'.$USER['hive_account'].'" target="_blank">♦️</a>';
 		}
 
