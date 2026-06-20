@@ -658,6 +658,24 @@
 		return 'terra';
 	}
 
+	var STATIC_BAND_KEEP_TEXTURES = {
+		wuestenplanet02: true,
+		trockenplanet05: true,
+		trockenplanet01: true
+	};
+
+	function staticBandOverrideFromTexture(texture, type) {
+		if (!texture || STATIC_BAND_KEEP_TEXTURES[texture] || type === 3) {
+			return null;
+		}
+		var biome = classifyBiome(texture, type);
+		if (biome === 'desert') { return 'desert'; }
+		if (biome === 'jungle') { return 'savanna'; }
+		if (biome === 'water') { return 'terra'; }
+		if (biome === 'ice') { return 'ice'; }
+		return null;
+	}
+
 	function mix(a, b, t) { return a + (b - a) * t; }
 
 	function hslToRgb(h, s, l) {
@@ -744,9 +762,14 @@
 		var avgTemp = ((data.tempMin || 0) + (data.tempMax || 0)) / 2;
 
 		var band;
-		if (biome === 'moon') { band = 'moon'; }
-		else if (biome === 'gas') { band = 'gas'; }
-		else { band = tempBand(avgTemp); }
+		if (data.bandOverride) { band = data.bandOverride; }
+		else {
+			var staticBand = staticBandOverrideFromTexture(data.texture, data.type);
+			if (staticBand) { band = staticBand; }
+			else if (biome === 'moon') { band = 'moon'; }
+			else if (biome === 'gas') { band = 'gas'; }
+			else { band = tempBand(avgTemp); }
+		}
 
 		var sizeFactor = 0;
 		if (data.diameter) {
@@ -2239,6 +2262,7 @@
 		options = options || {};
 		var lite = options.lite !== false;
 		var size = options.size || 256;
+		var jpegQuality = options.jpegQuality != null ? options.jpegQuality : 0.96;
 		var ok = bootViewer(targetCanvas, planetData, {
 			enableZoom: false,
 			fixedSize: size,
@@ -2256,7 +2280,7 @@
 					if (renderer && scene && camera) {
 						renderer.render(scene, camera);
 					}
-					var dataUrl = captureStaticDataUrl(targetCanvas, 'image/jpeg', 0.92);
+					var dataUrl = captureStaticDataUrl(targetCanvas, 'image/jpeg', jpegQuality);
 					if (!dataUrl || dataUrl.length < 500) {
 						reject(new Error('Static capture produced empty canvas'));
 						return;

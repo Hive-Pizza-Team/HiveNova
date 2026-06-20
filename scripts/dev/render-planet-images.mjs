@@ -16,8 +16,9 @@ const catalog = require('./planet-image-catalog.js');
 
 const ROOT = path.resolve(__dirname, '../..');
 const OUT_DIR = path.join(ROOT, 'styles/theme/hive/planeten');
-const LITE_SIZE = 128;
-const FULL_SIZE = 200;
+const LITE_SIZE = 256;
+const FULL_SIZE = 512;
+const JPEG_QUALITY = 0.96;
 const DEFAULT_JOBS = Math.min(6, Math.max(2, os.cpus()?.length || 4));
 
 function parseArgs(argv) {
@@ -59,7 +60,8 @@ async function renderOne(page, baseUrl, entry, mode, size) {
 	const url = baseUrl
 		+ '?texture=' + encodeURIComponent(entry.texture)
 		+ '&mode=' + encodeURIComponent(mode)
-		+ '&size=' + encodeURIComponent(String(size));
+		+ '&size=' + encodeURIComponent(String(size))
+		+ '&quality=' + encodeURIComponent(String(JPEG_QUALITY));
 
 	await page.goto(url, { waitUntil: 'load', timeout: 60000 });
 	await page.waitForFunction(
@@ -67,7 +69,7 @@ async function renderOne(page, baseUrl, entry, mode, size) {
 		{ timeout: 60000 }
 	);
 
-	const dataUrl = await page.evaluate(() => {
+	const dataUrl = await page.evaluate((quality) => {
 		if (window.__planetExportDataUrl) {
 			return window.__planetExportDataUrl;
 		}
@@ -75,15 +77,15 @@ async function renderOne(page, baseUrl, entry, mode, size) {
 		if (!canvas || !window.HiveNovaOverviewPlanet) {
 			return null;
 		}
-		return window.HiveNovaOverviewPlanet.captureStaticDataUrl(canvas, 'image/jpeg', 0.92);
-	});
+		return window.HiveNovaOverviewPlanet.captureStaticDataUrl(canvas, 'image/jpeg', quality);
+	}, JPEG_QUALITY);
 
 	if (!dataUrl || !dataUrl.startsWith('data:image/jpeg')) {
 		throw new Error('Canvas capture failed for ' + entry.texture + ' (' + mode + ')');
 	}
 
 	const buf = dataUrlToBuffer(dataUrl);
-	const minBytes = mode === 'lite' ? 1500 : 2500;
+	const minBytes = mode === 'lite' ? 3500 : 8000;
 	if (buf.length < minBytes) {
 		throw new Error('JPG too small (' + buf.length + ' bytes) — likely black frame for ' + entry.texture);
 	}
@@ -101,7 +103,7 @@ function buildJobs(entries) {
 
 async function runWorker(browser, baseUrl, jobs, stats, workerId, nextJobIndex) {
 	const page = await browser.newPage();
-	await page.setViewport({ width: 512, height: 512, deviceScaleFactor: 1 });
+	await page.setViewport({ width: Math.max(640, FULL_SIZE + 64), height: Math.max(640, FULL_SIZE + 64), deviceScaleFactor: 1 });
 
 	try {
 		while (true) {

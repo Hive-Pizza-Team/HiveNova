@@ -105,7 +105,7 @@ $("#tn3").hide();
 	</div>
 <br>
 <div class="infos overview-planet-panel">
-{if $Moon}<div class="moon overview-planet-moon"><a href="game.php?page=overview&amp;cp={$Moon.id}&amp;re=0" title="{$Moon.name}"><img src="{$dpath}planeten/mond.jpg" height="100" width="100" alt="{$Moon.name} ({$LNG.fcm_moon})"></a><br>{$Moon.name} ({$LNG.fcm_moon})
+{if $Moon}<div class="moon overview-planet-moon"><a href="game.php?page=overview&amp;cp={$Moon.id}&amp;re=0" title="{$Moon.name}">{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=100 height=100 alt="{$Moon.name} ({$LNG.fcm_moon})"}</a><br>{$Moon.name} ({$LNG.fcm_moon})
 </div>
 {/if}
 	<div class="overview-planet-main">
@@ -116,7 +116,7 @@ $("#tn3").hide();
 		</div>
 		{else}
 		<div class="planeth overview-planet-visual overview-planet-visual--fallback">
-			<img class="overview-planet-fallback" src="{$dpath}planeten/{$planetimage}.jpg" alt="{$planetname}">
+			<img class="overview-planet-fallback" src="{$dpath}planeten/{$planetimage}_hq.jpg" onerror="this.onerror=null;this.src='{$dpath}planeten/{$planetimage}.jpg'" alt="{$planetname}">
 		</div>
 		{/if}
 		<div class="planeth overview-planet-details">
@@ -166,7 +166,7 @@ $("#tn3").hide();
 		
 			{foreach $AllPlanets as $PlanetRow}
 			{if ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW) === 1}{/if}
-			<div class="planetl"><a href="game.php?page=overview&amp;cp={$PlanetRow.id}" title="{$PlanetRow.name}"><img style="margin: 5px;" loading="lazy" src="{$dpath}planeten/{$PlanetRow.image}.jpg" width="100" height="100" alt="{$PlanetRow.name}"></a><br>{$PlanetRow.name}<br>{$PlanetRow.build|default:''}<br></div>
+			<div class="planetl"><a href="game.php?page=overview&amp;cp={$PlanetRow.id}" title="{$PlanetRow.name}">{include file="shared.planet-thumb.tpl" texture=$PlanetRow.image dpath=$dpath width=100 height=100 style='margin: 5px;' loading='lazy' alt=$PlanetRow.name}</a><br>{$PlanetRow.name}<br>{$PlanetRow.build|default:''}<br></div>
 			{if $PlanetRow@last && $PlanetRow@total > 1 && ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW) !== 0}
 			{$to = $themeSettings.PLANET_ROWS_ON_OVERVIEW - ($PlanetRow@iteration % $themeSettings.PLANET_ROWS_ON_OVERVIEW)}
 			{for $foo=1 to $to}

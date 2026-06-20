@@ -84,7 +84,7 @@
 				</tr>
 				<tr>
 					<td style='width:80px' class='galaxy-viz-host'>
-						<img class='galaxy-viz-fallback' src='{$dpath}planeten/unknown.jpg' height='75' width='75' alt=''>
+						{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt=''}
 					</td>
 					<td>
 						{if !empty($currentPlanet.canColonize)}
@@ -100,7 +100,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
-				<img src="{$dpath}planeten/unknown.jpg" height="30" width="30" alt="">
+				{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=30 height=30 alt=''}
 			</a>
 		</td>
 		<td></td>
@@ -133,7 +133,7 @@
 				</tr>
 				<tr>
 					<td style='width:80px' class='galaxy-viz-host'>
-						<img class='galaxy-viz-fallback' src='{$dpath}planeten/{$currentPlanet.planet.image}.jpg' height='75' width='75' alt=''>
+						{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt=''}
 					</td>
 					<td>
 						{if $currentPlanet.missions.6}
@@ -176,7 +176,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
-				<img src="{$dpath}planeten/{$currentPlanet.planet.image}.jpg" height="30" width="30" alt="">
+				{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=30 height=30 alt=''}
 			</a>
 		</td>
 		<td style="white-space: nowrap;">{$currentPlanet.planet.name} {$currentPlanet.lastActivity}</td>
@@ -189,7 +189,7 @@
 				</tr>
 				<tr>
 					<td style='width:80px' class='galaxy-viz-host'>
-						<img class='galaxy-viz-fallback' src='{$dpath}planeten/mond.jpg' height='75' width='75' alt=''>
+						{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt=''}
 					</td>
 					<td>
 						<table style='width:100%'>
@@ -238,7 +238,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.moon.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.moonTooltip|escape:'html'}">
-				<img src="{$dpath}planeten/mond.jpg" height="22" width="22" alt="{$currentPlanet.moon.name}">
+				{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=22 height=22 alt=$currentPlanet.moon.name}
 			</a>
 			{/if}
 		</td>
@@ -250,7 +250,7 @@
 					<th colspan='2'>{$LNG.gl_debris_field} [{$galaxy}:{$system}:{$planet}]</th>
 				</tr>
 				<tr>
-					<td style='width:80px'><img src='{$dpath}planeten/debris.jpg' height='75' style='width:75'></td>
+					<td style='width:80px'>{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=75 height=75 style='width:75px' alt=''}</td>
 					<td>
 						<table style='width:100%'>
 							<tr>
@@ -278,7 +278,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky" data-tooltip-content="{$smarty.capture.debrisTooltip|escape:'html'}">
-			<img src="{$dpath}planeten/debris.jpg" height="22" width="22" alt="">
+			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt=''}
 			</a>
         {/if}
 		</td>
