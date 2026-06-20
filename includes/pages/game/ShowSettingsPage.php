@@ -256,8 +256,6 @@ class ShowSettingsPage extends AbstractGamePage
 		$vacation			= HTTP::_GP('vacation', 0);	
 		$delete				= HTTP::_GP('delete', 0);
 		
-		// Vertify
-		
 		$adminprotection	= ($adminprotection == 1 && $USER['authlevel'] != AUTH_USR) ? $USER['authlevel'] : 0;
 		
 		$spycount			= min(max(round($spycount), 1), 4294967295);

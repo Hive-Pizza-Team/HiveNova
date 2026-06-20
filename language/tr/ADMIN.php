@@ -147,7 +147,6 @@ $LNG['mu_news']					        = 'Haberler';
 $LNG['mu_multiip_page']					= 'Multi IPs';
 
 $LNG['mu_botdetect_page'] = 'Bot Tespiti';
-$LNG['mu_vertify']				     	= 'Oyun Indexini Kontrol et';
 $LNG['mu_cronjob']					= 'Zamanlanmış Görevler';
 $LNG['mu_logs']						= 'Admin Log';
 $LNG['mu_giveaway']					= 'Genel Hediye/Evrene Dağıt';
@@ -249,9 +248,6 @@ $LNG['tx_search'] = 'Ara';
 $LNG['tx_search_placeholder'] = 'Kullanıcı adı veya not...';
 $LNG['tx_clear'] = 'Temizle';
 
-$LNG['vt_error']					= 'Hasfile dosyası yok! - Güncelle!';
-$LNG['vt_fail']						= 'Değişen Dosyalar';
-$LNG['vt_info']						= 'Bu listedeki dosyalar güncellenmiş ve orijinalinden farkı olan dosyalardır.<br>Eger siz bir değişiklik yapmadıysanız mutlaka orijinali ile değiştirin.';
 
 //###########################################################//
 //---------------  Evren ve Server Parametreleri	------------------------//
@@ -566,19 +562,6 @@ $LNG['cs_no_view']							= 'Adminleri listeleme';
 
 //----------------------------------------------------------------------------//
 // Oyun Indexi
-$LNG['vt_head']						= 'Oyun dosyalari kontrolu';
-$LNG['vt_filephp']					= 'PHP Dosyalari';
-$LNG['vt_filetpl']					= 'Sablon Dosyalari';
-$LNG['vt_filecss']					= 'CSS dosyalari';
-$LNG['vt_filejs']					= 'Java Script dosyalari';
-$LNG['vt_fileimg']					= 'Resim Dosyalari';
-$LNG['vt_filehtaccess']				= 'HTACESS Dosyasi';
-$LNG['vt_all']						= 'Butun Dosyalar';
-$LNG['vt_fileok']					= 'Dosyalar Tamam';
-$LNG['vt_filefail']					= 'Degismis Dosyalar';
-$LNG['vt_filenew']					= 'Yeni Dosya';
-$LNG['vt_fileerror']				= 'Hata';
-$LNG['vt_loadfile']					= 'Dosya listesi yukleniyor';
 
 //----------------------------------------------------------------------------//
 //Zamanlanmis Gorevler

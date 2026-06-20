@@ -576,7 +576,6 @@ $LNG['mu_news']                        = 'Новости';
 $LNG['mu_multiip_page']                = 'Мультиаккаунты';
 $LNG['mu_botdetect_page'] = 'Обнаружение ботов';
 $LNG['mu_clear_cache']				   = 'Очистить кэш';
-$LNG['mu_vertify']                     = 'Сверить хэши файлов';
 $LNG['mu_cronjob']                     = 'Планировщик задач';
 $LNG['mu_logs']                        = 'Логи';
 $LNG['mu_giveaway']                    = 'Подарки';
@@ -678,22 +677,6 @@ $LNG['tx_search'] = 'Поиск';
 $LNG['tx_search_placeholder'] = 'Имя пользователя или комментарий...';
 $LNG['tx_clear'] = 'Очистить';
 
-$LNG['vt_error']                       = 'Хэш файл не доступен. Выполните обновление.';
-$LNG['vt_fail']                        = 'Измененные файлы';
-$LNG['vt_info']                        = 'Это список файлов, которые содержат изменения и не соответствуют оригиналу.<br>Если Вы не меняли содержимое файлов, рекомендуется заменить файлы оригинальными.';
-$LNG['vt_head']                        = 'Проверка файлов игры';
-$LNG['vt_filephp']                     = 'Файлы PHP';
-$LNG['vt_filetpl']                     = 'Файлы шаблона';
-$LNG['vt_filecss']                     = 'Файлы CSS';
-$LNG['vt_filejs']                      = 'Файлы Javascript';
-$LNG['vt_fileimg']                     = 'Файлы изображений';
-$LNG['vt_filehtaccess']                = 'Файлы htaccess';
-$LNG['vt_all']                         = 'Проверить все файлы';
-$LNG['vt_fileok']                      = 'Файлы без изменений';
-$LNG['vt_filefail']                    = 'Файлы с изменениями';
-$LNG['vt_filenew']                     = 'Новые файлы';
-$LNG['vt_fileerror']                   = 'Ошибка';
-$LNG['vt_loadfile']                    = 'Загрузить список файлов';
 
 // Кэш
 $LNG['cc_cache_clear']				   = 'Кэш очищен.';
