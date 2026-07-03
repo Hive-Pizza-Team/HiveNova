@@ -15,6 +15,8 @@ class SessionDatabaseStub implements DatabaseInterface
 
     public int $sessionCount = 0;
 
+    public int $replaceCalls = 0;
+
     public function selectSingle($qry, array $params = [], $field = false)
     {
         if (str_contains($qry, '%%SESSION%%') && str_contains($qry, 'lastonline')) {
@@ -65,6 +67,7 @@ class SessionDatabaseStub implements DatabaseInterface
 
     public function replace($qry, array $params = [])
     {
+        $this->replaceCalls++;
         return 0;
     }
 
