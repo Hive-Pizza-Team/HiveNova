@@ -431,6 +431,7 @@ $LNG['bd_destroy_time'] 					= 'Yıkım Süresi';
 $LNG['bd_max_ships']                                            = 'max';
 $LNG['bd_max_ships_long']                                       = 'Uretime verilebilecek azami miktar';
 $LNG['sys_notenough_money'] 				= 'Hata %s <a href="./game.php?page=buildings&amp;cp=%d&amp;re=0">[%d:%d:%d]</a>de yeterli ham madde yok.  . <br> Inşa Edilmesi Emredilen Bina: %s. Sendeki mevcut ham madde %s %s , %s %s and %s %s. <br>Inşa için gereken ise  %s %s , %s %s ve %s %s.';
+$LNG['sys_notenough_money_energy']			= '<br>Enerjiniz: %s %s. <br>İnşa için gereken enerji: %s %s.';
 $LNG['sys_nomore_level'] 					= "Mevcut olmayan bir binayı yıkmaya çalışıyorsun ( %s ).";
 $LNG['sys_buildlist'] 						= "Inşa Listesi";
 $LNG['sys_techlist'] 						= 'Araştırma Listesi';

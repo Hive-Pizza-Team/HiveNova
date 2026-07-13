@@ -45,6 +45,7 @@ $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
 	902 => 'crystal',
 	903 => 'deuterium',
 	911 => 'energy',
+	921 => 'darkmatter',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -60,7 +61,8 @@ $GLOBALS['reslist'] = array_replace($GLOBALS['reslist'] ?? [], [
 	'officier'  => [601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615],
 	'dmfunc'    => [701, 702, 703, 704, 705, 706, 707],
 	'one'       => [31],
-	'ressources'=> [901, 902, 903],
+	// Matches includes/vars.php — energy (911) is part of buyable checks
+	'ressources'=> [901, 902, 903, 911, 921],
 ]);
 
 // ---------------------------------------------------------------------------
@@ -72,6 +74,13 @@ $GLOBALS['pricelist'] = array_replace($GLOBALS['pricelist'] ?? [], [
 	1   => [
 		'cost'   => [901 => 60, 902 => 15, 903 => 0],
 		'factor' => 1.5,
+		'time'   => 1,
+	],
+	// Terraformer (33) — from install.sql: cost902=50000, cost903=100000, cost911=1000, factor=2
+	33  => [
+		'cost'   => [901 => 0, 902 => 50000, 903 => 100000, 911 => 1000, 921 => 0],
+		'factor' => 2.0,
+		'max'    => 255,
 		'time'   => 1,
 	],
 	// Light Fighter (202) — combustion-drive ship

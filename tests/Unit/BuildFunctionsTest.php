@@ -54,9 +54,11 @@ class BuildFunctionsTest extends TestCase
 			'research_lab'            => 0,
 			'intergalactic_research'  => 0,
 			'intergalactic_research_inter' => 0,
+			'terraformer'             => 0,
 			'metal'                   => 100000,
 			'crystal'                 => 100000,
 			'deuterium'               => 100000,
+			'energy'                  => 10000,
 			'solar_plant'             => 0,
 			'light_fighter'           => 0,
 		], $overrides);
@@ -344,5 +346,85 @@ class BuildFunctionsTest extends TestCase
 		);
 
 		$this->assertEquals(0, $max);
+	}
+
+	// -----------------------------------------------------------------------
+	// Terraformer (33) — player report: "enough resources" but Impossible to build
+	//
+	// PR3 [4:80:13], Terraformer level 3 cost:
+	//   0 Metal, 200000 Silicon, 400000 Uranium, 4000 Energy
+	// Planet had: 556 / 200002 / 400079 and 4119 max energy.
+	// Failure message only lists metal/silicon/uranium (not energy), so a failed
+	// energy check looks like a resource bug. isElementBuyable must treat energy
+	// production as a cost and still allow the build when max energy >= cost.
+	// -----------------------------------------------------------------------
+
+	public function testTerraformerLevel3PriceMatchesInstallFormula(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user   = $this->makeUser();
+		$planet = $this->makePlanet(['terraformer' => 2]);
+
+		// Building to level 3: base * factor^(3-1) = base * 4
+		$price = BuildFunctions::getElementPrice($user, $planet, 33, false, 3);
+
+		$this->assertArrayNotHasKey(901, $price, 'Metal cost is 0 and must be omitted');
+		$this->assertEquals(200000, $price[902]);
+		$this->assertEquals(400000, $price[903]);
+		$this->assertEquals(4000, $price[911], 'Energy is part of Terraformer cost');
+	}
+
+	public function testTerraformerBuyableWithReportedPlayerResourcesAndEnergy(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user = $this->makeUser();
+		// Exact amounts from the 10 Jul 2026 player report (European thousands separators)
+		$planet = $this->makePlanet([
+			'terraformer' => 2,
+			'metal'       => 556,
+			'crystal'     => 200002,
+			'deuterium'   => 400079,
+			'energy'      => 4119,
+		]);
+
+		$price = BuildFunctions::getElementPrice($user, $planet, 33, false, 3);
+
+		$this->assertTrue(
+			BuildFunctions::isElementBuyable($user, $planet, 33, $price),
+			'Terraformer L3 must be buyable when listed resources and max energy meet cost'
+		);
+
+		$rest = BuildFunctions::getRestPrice($user, $planet, 33, $price);
+		$this->assertSame(0.0, (float) ($rest[902] ?? 0));
+		$this->assertSame(0.0, (float) ($rest[903] ?? 0));
+		$this->assertSame(0.0, (float) ($rest[911] ?? 0), 'No energy shortfall when max energy is 4119');
+	}
+
+	public function testTerraformerNotBuyableWhenEnergyBelowCostDespiteEnoughResources(): void
+	{
+		Config::setInstance($this->makeConfig(), 1);
+		$user = $this->makeUser();
+		// Same metal/silicon/uranium as the report, but energy production too low.
+		// This is the failure mode behind the misleading "not enough resources" message
+		// before sys_notenough_money_energy was added (base string only prints 901/902/903).
+		$planet = $this->makePlanet([
+			'terraformer' => 2,
+			'metal'       => 556,
+			'crystal'     => 200002,
+			'deuterium'   => 400079,
+			'energy'      => 3999,
+		]);
+
+		$price = BuildFunctions::getElementPrice($user, $planet, 33, false, 3);
+
+		$this->assertFalse(
+			BuildFunctions::isElementBuyable($user, $planet, 33, $price),
+			'Energy shortfall alone must block the build'
+		);
+
+		$rest = BuildFunctions::getRestPrice($user, $planet, 33, $price);
+		$this->assertSame(0.0, (float) ($rest[902] ?? 0), 'Silicon is sufficient');
+		$this->assertSame(0.0, (float) ($rest[903] ?? 0), 'Uranium is sufficient');
+		$this->assertSame(1.0, (float) $rest[911], 'Short by 1 energy vs cost 4000');
 	}
 }

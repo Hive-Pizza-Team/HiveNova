@@ -423,6 +423,7 @@ $LNG['bd_destroy_time'] 					= 'Duração';
 $LNG['bd_max_ships']                                            = 'max';
 $LNG['bd_max_ships_long']                                       = 'Máximo de unidades possiveis para construir';
 $LNG['sys_notenough_money'] 				= 'Não tem recursos desponíveis no %s <a href="./game.php?page=buildings&amp;cp=%d&amp;re=0">[%d:%d:%d]</a> para a construção que querias efetuar. <br>Recursos disponíveis para a construção da %s %s , %s %s e %s %s. <br>O custo de construção %s %s , %s %s e %s %s.';
+$LNG['sys_notenough_money_energy']			= '<br>A tua energia é: %s %s. <br>O custo de energia da construção é %s %s.';
 $LNG['sys_nomore_level'] 					= 'Está a tentar destruir um edifício que já não tem ( %s ).';
 $LNG['sys_buildlist'] 						= "Lista de construção";
 $LNG['sys_techlist'] 						= 'Lista de Pesquisa';
