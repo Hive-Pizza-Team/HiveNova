@@ -57,13 +57,22 @@ class Database implements DatabaseInterface
 	{
 		$database = array();
 		require 'includes/config.php';
+		// PHP 8.5+ deprecates PDO::MYSQL_ATTR_*; Pdo\Mysql exists since 8.4
+		$usePdoMysql = class_exists(\Pdo\Mysql::class);
+		$mysqlInitCommand = $usePdoMysql
+			? \Pdo\Mysql::ATTR_INIT_COMMAND
+			: PDO::MYSQL_ATTR_INIT_COMMAND;
+		$mysqlBufferedQuery = $usePdoMysql
+			? \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY
+			: PDO::MYSQL_ATTR_USE_BUFFERED_QUERY;
+
 		//Connect
 		$db = new PDO("mysql:host=".$database['host'].";port=".$database['port'].";dbname=".$database['databasename'], $database['user'], $database['userpw'], array(
-		    PDO::MYSQL_ATTR_INIT_COMMAND => "SET CHARACTER SET utf8mb4, NAMES utf8mb4, sql_mode = 'STRICT_ALL_TABLES'"
+		    $mysqlInitCommand => "SET CHARACTER SET utf8mb4, NAMES utf8mb4, sql_mode = 'STRICT_ALL_TABLES'"
 		));
 		//error behaviour
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+		$db->setAttribute($mysqlBufferedQuery, true);
 		// $db->query("set character set utf8");
 		// $db->query("set names utf8");
 		// $db->query("SET sql_mode = 'STRICT_ALL_TABLES'");
