@@ -365,6 +365,7 @@ $LNG['fl_error_not_avalible']				= 'Bu koordinatlarda bir gezegen yok';
 $LNG['fl_error_empty_derbis']				= "Girilen koordinatlarda harabe mevcut değil!";
 $LNG['fl_error_no_moon']					= 'Girilen koordinatlarda AY mevcut değil!';
 $LNG['fl_error_same_planet']				= 'Baslangic ve Varis koortinatlari aynı!';
+$LNG['fl_incomplete_coords']				= 'Filoyu göndermeden önce tam hedef koordinatlarını girin.';
 $LNG['fl_invalid_target']					= 'Hedef bulunamadı';
 $LNG['fl_no_noresource']					= 'Hata : Nakliye edilecek hammadde eklenmedi!';
 $LNG['fl_no_target']						= 'Hedef gezegen bulunamadı';

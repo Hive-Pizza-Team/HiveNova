@@ -354,6 +354,7 @@ $LNG['fl_error_not_avalible']				= '¡No se puede hacer nada con este planeta!';
 $LNG['fl_error_empty_derbis']				= 'No hay escombros.';
 $LNG['fl_error_no_moon']					= 'No hay luna.';
 $LNG['fl_error_same_planet']					= 'Planeta objetivo y de lanzamiento son el mismo.';
+$LNG['fl_incomplete_coords']					= 'Introduce un destino completo antes de enviar la flota.';
 $LNG['fl_invalid_target']					= 'Objetivo no válido';
 $LNG['fl_no_noresource']					= 'No hay materia prima cargada!';
 $LNG['fl_no_target']						= 'Ningún planeta de destino encontrado';

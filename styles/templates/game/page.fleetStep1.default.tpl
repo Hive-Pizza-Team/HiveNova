@@ -183,5 +183,6 @@
 data			= {$fleetdata|json};
 shortCutRows	= {$themeSettings.SHORTCUT_ROWS_ON_FLEET1};
 fl_no_shortcuts	= '{$LNG.fl_no_shortcuts}';
+fl_incomplete_coords = '{$LNG.fl_incomplete_coords|escape:'javascript'}';
 </script>
 {/block}

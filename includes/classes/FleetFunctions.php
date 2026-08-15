@@ -113,6 +113,11 @@ class FleetFunctions
 		return 5;
 	}
 
+	public static function HasCompleteTargetCoords($galaxy, $system, $planet)
+	{
+		return (int) $galaxy > 0 && (int) $system > 0 && (int) $planet > 0;
+	}
+
 	public static function GetMissionDuration($SpeedFactor, $MaxFleetSpeed, $Distance, $GameSpeed, $USER)
 	{
 		$SpeedFactor	= (3500 / ($SpeedFactor * 0.1));

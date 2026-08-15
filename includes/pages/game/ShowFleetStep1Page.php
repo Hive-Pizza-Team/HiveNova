@@ -246,6 +246,11 @@ class ShowFleetStep1Page extends AbstractGamePage
 		$targetSystem 		= HTTP::_GP('system', 0);
 		$targetPlanet		= HTTP::_GP('planet', 0);
 		$targetPlanetType	= HTTP::_GP('planet_type', 1);
+
+		if (!FleetFunctions::HasCompleteTargetCoords($targetGalaxy, $targetSystem, $targetPlanet))
+		{
+			$this->sendJSON($LNG['fl_incomplete_coords']);
+		}
 	
 		if($targetGalaxy == $PLANET['galaxy'] && $targetSystem == $PLANET['system'] && $targetPlanet == $PLANET['planet'] && $targetPlanetType == $PLANET['planet_type'])
 		{
