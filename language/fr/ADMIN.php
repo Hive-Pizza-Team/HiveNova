@@ -635,7 +635,6 @@ $LNG['mu_multiip_page']				= 'MultiIP';
 
 $LNG['mu_botdetect_page'] = 'Détection de Bots';
 $LNG['mu_clear_cache']				= 'Vider le Cache';
-$LNG['mu_vertify']					= 'Vérifiez le contenu du jeu'; 
 $LNG['mu_cronjob']					= 'Cronjobs'; 
 $LNG['mu_logs']						= 'Admin-Log';
 $LNG['mu_giveaway']					= 'Giveaways';
@@ -737,23 +736,7 @@ $LNG['tx_search'] = 'Chercher';
 $LNG['tx_search_placeholder'] = 'Nom d\'utilisateur ou mémo...';
 $LNG['tx_clear'] = 'Effacer';
 
-$LNG['vt_error']					= 'Le Hash du fichier n\'est pas disponible ! Effectuer une mise à jour';
-$LNG['vt_fail']						= 'Fichiers modifiès';
-$LNG['vt_info']						= 'Cette liste contient les fichiers qui ont été modifier, et ne pas correspondre à l\'original.<br>Si vous n\'avez pas changé le jeu lui-même, remplacez les fichiers avec les originaux.';
 /*$LNG['mu_update']                	= 'Mise à jour du jeu';*/
-$LNG['vt_head']						= 'Vèrifier les fichiers du jeu';
-$LNG['vt_filephp']					= 'PHP File';
-$LNG['vt_filetpl']					= 'Fichiers Template';
-$LNG['vt_filecss']					= 'Fichiers CSS';
-$LNG['vt_filejs']					= 'Fichiers Java Script';
-$LNG['vt_fileimg']					= 'Fichiers Image';
-$LNG['vt_filehtaccess']				= 'Fichiers HTACESS';
-$LNG['vt_all']						= 'Tous les fichiers';
-$LNG['vt_fileok']					= 'Fichiers Ok';
-$LNG['vt_filefail']					= 'Fichiers modifier';
-$LNG['vt_filenew']					= 'Nouveau fichier';
-$LNG['vt_fileerror']				= 'Erreur';
-$LNG['vt_loadfile']					= 'Chargement de la listes des fichiers';
 
 //###########################################################//
 

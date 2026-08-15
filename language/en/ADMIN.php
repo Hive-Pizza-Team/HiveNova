@@ -637,7 +637,6 @@ $LNG['mu_news'] = 'News';
 $LNG['mu_multiip_page'] = 'Multiple IPs';
 $LNG['mu_botdetect_page'] = 'Bot Detection';
 $LNG['mu_clear_cache'] = 'Clear Cache';
-$LNG['mu_vertify'] = 'Check Game content';
 $LNG['mu_cronjob'] = 'Cronjobs';
 $LNG['mu_logs'] = 'Admin Log';
 $LNG['mu_giveaway'] = 'Giveaways';
@@ -738,23 +737,7 @@ $LNG['tx_search']              = 'Search';
 $LNG['tx_search_placeholder']  = 'Username or memo...';
 $LNG['tx_clear']               = 'Clear';
 
-$LNG['vt_error'] = 'Hashfile is not available! - Run Update!';
-$LNG['vt_fail'] = 'Changed Files';
-$LNG['vt_info'] = 'This list contains the files that were modified and does not correspond to the original.<br>If not did you change even the game, you must replace the files with the originals.';
 
-$LNG['vt_head'] = 'Verify the game files';
-$LNG['vt_filephp'] = 'PHP File';
-$LNG['vt_filetpl'] = 'Template File';
-$LNG['vt_filecss'] = 'CSS File';
-$LNG['vt_filejs'] = 'Java Script File';
-$LNG['vt_fileimg'] = 'Image file';
-$LNG['vt_filehtaccess'] = 'HTACESS File';
-$LNG['vt_all'] = 'All files';
-$LNG['vt_fileok'] = 'File Ok';
-$LNG['vt_filefail'] = 'File Changed';
-$LNG['vt_filenew'] = 'New File';
-$LNG['vt_fileerror'] = 'Error';
-$LNG['vt_loadfile'] = 'Loading file list';
 
 //###########################################################//
 

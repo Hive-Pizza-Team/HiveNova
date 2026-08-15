@@ -4,6 +4,7 @@
 # Usage:
 #   ./tests/run-ci-local.sh               # unit tests + language check + smoke + bottom-nav check
 #   ./tests/run-ci-local.sh --integration # also run integration tests (requires MySQL)
+#   ./tests/run-ci-local.sh --coverage    # diff coverage gate (requires diff-cover + --integration)
 #
 # Prerequisites:
 #   - composer install
@@ -14,8 +15,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 INTEGRATION=0
+COVERAGE=0
 for arg in "$@"; do
   [[ "$arg" == "--integration" ]] && INTEGRATION=1
+  [[ "$arg" == "--coverage" ]]    && COVERAGE=1 && INTEGRATION=1
 done
 
 # Clear error.log so we only see errors from this run
@@ -51,12 +54,18 @@ check_error_log() {
 
 run "Language check"   php .github/scripts/check-language-files.php
 run "CSS check"        bash tests/check-css.sh
-run "Unit tests"       php vendor/bin/phpunit --configuration phpunit.xml
+
+if [[ $COVERAGE -ne 1 ]]; then
+  run "Unit tests" php vendor/bin/phpunit --configuration phpunit.xml
+fi
+
 run "Smoke test"       php tests/smoke.php
 run "Bottom nav check" php tests/check-bottom-nav.php
 run "Error log empty"  check_error_log
 
-if [[ $INTEGRATION -eq 1 ]]; then
+if [[ $COVERAGE -eq 1 ]]; then
+  run "Diff coverage (unit + integration)" bash tests/check-diff-coverage.sh --integration
+elif [[ $INTEGRATION -eq 1 ]]; then
   run "Integration tests" php vendor/bin/phpunit --configuration phpunit-integration.xml
   run "Error log empty (post-integration)" check_error_log
 fi

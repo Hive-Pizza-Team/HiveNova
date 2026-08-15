@@ -139,6 +139,7 @@ $LNG['ov_security_confirm']					= ' %s gezegenini silme işlemini onaylayınız.
 $LNG['ov_password']							= 'Şifre';
 $LNG['ov_delete_planet']					= 'Gezegeni Sil';
 $LNG['ov_planet_rename']					= 'Yeniden Adlandır';
+$LNG['ov_rename_short']						= 'adlandır';
 $LNG['ov_rename_label']						= 'Yeni Isim';
 $LNG['ov_fields']							= 'Alanlar';
 $LNG['ov_developed_fields']					= 'Kullanılan Alan';

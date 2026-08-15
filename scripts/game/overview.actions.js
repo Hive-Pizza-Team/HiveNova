@@ -1,5 +1,6 @@
 $(function() {
-	$('#tabs').tabs();
+	var activeTab = window.location.search.indexOf('tab=delete') !== -1 ? 1 : 0;
+	$('#tabs').tabs({ active: activeTab });
 });
 
 function checkrename()

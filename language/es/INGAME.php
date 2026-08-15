@@ -132,6 +132,7 @@ $LNG['ov_security_confirm']					= 'Por favor, Confirme que desea eliminar el Pla
 $LNG['ov_password']							= 'Contraseña';
 $LNG['ov_delete_planet']					= 'Abandonar';
 $LNG['ov_planet_rename']					= 'Renombrar';
+$LNG['ov_rename_short']						= 'renombrar';
 $LNG['ov_rename_label']						= 'Nombre Nuevo';
 $LNG['ov_fields']							= 'Campos';
 $LNG['ov_developed_fields']                = 'Campos desarrollados';
