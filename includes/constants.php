@@ -269,7 +269,7 @@ define('ENABLE_SIMULATOR_LINK'		, true);
 // MODULE_AMOUNT must equal the highest module ID + 1.
 // =============================================================================
 
-define('MODULE_AMOUNT'				, 43);
+define('MODULE_AMOUNT'				, 47);
 define('MODULE_ALLIANCE'			, 0);
 define('MODULE_MISSION_ATTACK'		, 1);
 define('MODULE_BUILDING'			, 2);
@@ -315,6 +315,7 @@ define('MODULE_SHORTCUTS'			, 41);
 define('MODULE_MISSION_ACS'			, 42);
 define('MODULE_MISSION_TRADE'		, 44);
 define('MODULE_MISSION_TRANSFER'	, 45);
+define('MODULE_ACHIEVEMENTS'		, 46);
 
 // =============================================================================
 // ELEMENT / RESOURCE TYPE FLAGS (bitmask)

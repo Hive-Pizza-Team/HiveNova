@@ -125,17 +125,21 @@ class DebugManager
     }
 }
 
-function log_var($name, $value)
-{
-    if (is_array($value))
+if (!function_exists('log_var')) {
+    function log_var($name, $value)
     {
-        $value = var_export($value);
+        if (is_array($value))
+        {
+            $value = var_export($value);
+        }
+        log_comment("$name = $value");
     }
-    log_comment("$name = $value");
 }
-function log_comment($comment)
-{
-    echo "[log]$comment<br>\n";
+if (!function_exists('log_comment')) {
+    function log_comment($comment)
+    {
+        echo "[log]$comment<br>\n";
+    }
 }
 
 ?>
