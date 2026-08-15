@@ -105,6 +105,9 @@ class ResourceUpdate
 		$Hash[]	= $this->USER[$this->resource[131]];
 		$Hash[]	= $this->USER[$this->resource[132]];
 		$Hash[]	= $this->USER[$this->resource[133]];
+		// Inactivity forces 100% production in reBuildCache; include it so the
+		// cache rebuilds when a player crosses the inactive threshold (or returns).
+		$Hash[]	= \isInactive($this->USER) ? 1 : 0;
 		return md5(implode("::", $Hash));
 	}
 	
@@ -121,7 +124,9 @@ class ResourceUpdate
 
 		$this->config		= Config::get($this->USER['universe']);
 		
-		if(isVacationMode($this->USER))
+		// Vacation freezes production for active players, but inactive accounts
+		// should still accrue (bash protection is already lifted for them).
+		if(isVacationMode($this->USER) && !\isInactive($this->USER))
 			return $this->ReturnVars();
 			
 		if($this->Build)

@@ -121,8 +121,13 @@ class ResourceCalculator
 
         $ressIDs = array_merge([], $this->reslist['resstype'][1], $this->reslist['resstype'][2]);
 
+        // Inactive players can't manage their mines, so a production percentage
+        // they dialed down before going inactive shouldn't shield them from being
+        // a worthwhile bash target once bash protection lifts (see isInactive()).
+        $forceFullProduction = \isInactive($this->USER);
+
         foreach ($this->reslist['prod'] as $ProdID) {
-            $BuildLevelFactor = $this->PLANET[$this->resource[$ProdID] . '_porcent'];
+            $BuildLevelFactor = $forceFullProduction ? 10 : $this->PLANET[$this->resource[$ProdID] . '_porcent'];
             $BuildLevel       = $this->PLANET[$this->resource[$ProdID]];
 
             foreach ($ressIDs as $ID) {
