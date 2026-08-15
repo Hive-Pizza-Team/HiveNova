@@ -11,6 +11,13 @@ require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 class ResourceUpdateTest extends TestCase
 {
 	use SwapDatabaseInstance;
+
+	/** @var array<int|string, mixed>|null */
+	private static ?array $savedResource = null;
+
+	/** @var array<string, mixed>|null */
+	private static ?array $savedReslist = null;
+
 	// -----------------------------------------------------------------------
 	// Fixtures
 	// -----------------------------------------------------------------------
@@ -229,8 +236,18 @@ class ResourceUpdateTest extends TestCase
 		$ref->setAccessible(true);
 		$ref->setValue(null, []);
 
-		$GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], $this->makeResource());
-		$GLOBALS['reslist']  = array_replace($GLOBALS['reslist'] ?? [], $this->makeReslist());
+		if (self::$savedResource === null) {
+			self::$savedResource = $GLOBALS['resource'] ?? [];
+			self::$savedReslist = $GLOBALS['reslist'] ?? [];
+		}
+
+		$GLOBALS['resource'] = array_replace(self::$savedResource, $this->makeResource());
+		$GLOBALS['reslist'] = self::$savedReslist;
+		$ressources = $GLOBALS['reslist']['ressources'] ?? [901, 902, 903, 921];
+		if (!in_array(911, $ressources, true)) {
+			$GLOBALS['reslist']['ressources'] = array_merge($ressources, [911]);
+		}
+
 		$GLOBALS['pricelist'][113] = [
 			'cost'   => [901 => 0, 902 => 0, 903 => 0],
 			'factor' => 2,
@@ -240,6 +257,12 @@ class ResourceUpdateTest extends TestCase
 
 	protected function tearDown(): void
 	{
+		if (self::$savedResource !== null) {
+			$GLOBALS['resource'] = self::$savedResource;
+		}
+		if (self::$savedReslist !== null) {
+			$GLOBALS['reslist'] = self::$savedReslist;
+		}
 		unset($GLOBALS['ProdGrid']);
 		$this->restoreDatabaseInstance();
 	}
