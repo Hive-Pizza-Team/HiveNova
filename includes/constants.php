@@ -259,6 +259,9 @@ define('MESSAGES_PER_PAGE'			, 10);
 // Banned users shown per page in the ban list
 define('BANNED_USERS_PER_PAGE'		, 25);
 
+// Marketplace resource/fleet trade history rows
+define('MARKET_TRADE_HISTORY_LIMIT'	, 40);
+
 // Show one-click simulation link on spy reports
 define('ENABLE_SIMULATOR_LINK'		, true);
 
