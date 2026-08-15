@@ -3,6 +3,7 @@
 namespace HiveNova\Mission;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Repository\PlanetRepository;
@@ -181,6 +182,17 @@ class MissionCaseMIP extends MissionFunctions implements Mission
 		);
 
 		$this->KillFleet();
+
+		if (is_array($targetData) && !empty($targetData['id_owner'])) {
+			DiscordWebhookService::notifyCombatResolved(
+				(int) $targetData['id_owner'],
+				(int) $this->_fleet['fleet_mission'],
+				(int) $this->_fleet['fleet_end_galaxy'],
+				(int) $this->_fleet['fleet_end_system'],
+				(int) $this->_fleet['fleet_end_planet'],
+				(int) $this->_fleet['fleet_end_type']
+			);
+		}
 	}
 
 	function EndStayEvent()

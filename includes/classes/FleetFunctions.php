@@ -702,6 +702,14 @@ class FleetFunctions
 				$fleetTargetPlanetSystem,
 				$fleetTargetPlanetPlanet
 			);
+			DiscordWebhookService::notifyIncomingHostile(
+				(int) $fleetTargetOwner,
+				(int) $fleetMission,
+				(int) $fleetTargetPlanetGalaxy,
+				(int) $fleetTargetPlanetSystem,
+				(int) $fleetTargetPlanetPlanet,
+				(int) $fleetTargetPlanetType
+			);
 		}
 
 		$db->insert($sql, array(

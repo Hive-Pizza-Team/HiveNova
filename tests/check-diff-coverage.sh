@@ -36,6 +36,24 @@ for arg in "$@"; do
   esac
 done
 
+# Ensure compare ref exists with enough history for a merge-base.
+# A shallow --depth=1 fetch of origin/master leaves no merge-base with HEAD
+# on pull_request checkouts (diff-cover then dies: "no merge base").
+if [[ "$COMPARE_BRANCH" == origin/* ]]; then
+  remote="${COMPARE_BRANCH#origin/}"
+  git fetch --no-tags origin "$remote" 2>/dev/null || true
+fi
+
+# Frontend-only (or other non-class) diffs: diff-cover prints
+# "No lines with coverage information in this diff." which the vacuous-pass
+# check below would treat as a path-mapping failure.
+if git rev-parse --verify "$COMPARE_BRANCH" >/dev/null 2>&1; then
+  if ! git diff --name-only "${COMPARE_BRANCH}...HEAD" | grep -qE '^includes/classes/.+\.php$'; then
+    echo "No includes/classes PHP changes vs ${COMPARE_BRANCH}; coverage gate skipped."
+    exit 0
+  fi
+fi
+
 mkdir -p coverage
 
 if [[ "$FROM_ARTIFACTS" -eq 0 ]]; then
@@ -71,14 +89,6 @@ fi
 if ! command -v diff-cover >/dev/null 2>&1; then
   echo "diff-cover is not installed. Install with: pip install diff-cover" >&2
   exit 1
-fi
-
-# Ensure compare ref exists with enough history for a merge-base.
-# A shallow --depth=1 fetch of origin/master leaves no merge-base with HEAD
-# on pull_request checkouts (diff-cover then dies: "no merge base").
-if [[ "$COMPARE_BRANCH" == origin/* ]]; then
-  remote="${COMPARE_BRANCH#origin/}"
-  git fetch --no-tags origin "$remote" 2>/dev/null || true
 fi
 
 COV_FILES=(coverage/clover.xml)
