@@ -46,6 +46,7 @@ function ShowAccountEditorPage()
 
 			if ($_POST)
 			{
+				$dmUpdated = false;
 				if (!empty($id))
 					$before = $GLOBALS['DATABASE']->getFirstRow("SELECT `metal`,`crystal`,`deuterium`,`universe`  FROM ".PLANETS." WHERE `id` = '". $id ."';");
 				if (!empty($id_dark))
@@ -69,6 +70,7 @@ function ShowAccountEditorPage()
 						$SQL .= "WHERE ";
 						$SQL .= "`id` = '". $id_dark ."' AND `universe` = '".Universe::getEmulated()."' ";
 						$GLOBALS['DATABASE']->query($SQL);
+						$dmUpdated = $GLOBALS['DATABASE']->affectedRows() > 0;
 						$after_dm 	= array('darkmatter' => ($before_dm['darkmatter'] + $dark));
 					}
 				}
@@ -89,13 +91,14 @@ function ShowAccountEditorPage()
 						$SQL  = "UPDATE ".USERS." SET ";
 						$SQL .= "`darkmatter` = `darkmatter` - '". $dark ."' ";
 						$SQL .= "WHERE ";
-						$SQL .= "`id` = '". $id_dark ."';";
+						$SQL .= "`id` = '". $id_dark ."' AND `universe` = '".Universe::getEmulated()."' ";
 						$GLOBALS['DATABASE']->query($SQL);
+						$dmUpdated = $GLOBALS['DATABASE']->affectedRows() > 0;
 						$after_dm 	= array('darkmatter' => ($before_dm['darkmatter'] - $dark));
 					}
 				}
 
-				if (!empty($id_dark) && (float) $dark != 0.0) {
+				if (!empty($id_dark) && (float) $dark != 0.0 && $dmUpdated) {
 					$adminId = (int) Session::load()->userId;
 					$memoSuffix = ' uni='.(int) Universe::getEmulated().' admin='.$adminId;
 					$deltaDm = abs((float) $dark);

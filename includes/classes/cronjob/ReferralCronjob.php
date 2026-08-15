@@ -24,7 +24,7 @@ use HiveNova\Cronjob\CronjobTask;
  */
 
 
-class ReferralCronJob implements CronjobTask
+class ReferralCronjob implements CronjobTask
 {
 	function run()
 	{		

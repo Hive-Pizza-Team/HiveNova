@@ -61,4 +61,24 @@ class HiveUtilTest extends TestCase
             'contains special chars'  => ['hive@nova'],
         ];
     }
+
+    /** @dataProvider invalidHiveAccountExistsProvider */
+    public function testAccountExistsReturnsFalseForInvalidAccounts($account): void
+    {
+        $this->assertFalse(HiveUtil::accountExists($account));
+    }
+
+    public static function invalidHiveAccountExistsProvider(): array
+    {
+        return [
+            'null value'              => [null],
+            'empty string'            => [''],
+            'too long (17 chars)'     => ['averylonghiveaccountname'],
+            'starts with number'      => ['1player'],
+            'starts with hyphen'      => ['-player'],
+            'ends with hyphen'        => ['player-'],
+            'contains space'          => ['hive nova'],
+            'contains special chars'  => ['hive@nova'],
+        ];
+    }
 }

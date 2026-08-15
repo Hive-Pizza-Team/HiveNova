@@ -28,7 +28,7 @@ jobs:
         with:
           configuration: "phpunit.xml"
           php_version: "8.3"
-          php_extensions: "xdebug gmp"
+          php_extensions: "xdebug gmp mysqli"
           coverage_clover: "coverage/clover.xml"
       - name: Upload unit coverage
         uses: actions/upload-artifact@v4

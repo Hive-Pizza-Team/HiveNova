@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\AchievementService;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
 use HiveNova\Core\PushNotificationService;
@@ -187,6 +188,41 @@ abstract class AbstractGamePage
 			'pushAlerts'		=> PushNotificationService::isEnabledForUser((int) $USER['id']) ? 1 : 0,
 			'pushConfigured'	=> PushNotificationService::isConfigured(),
 		));
+
+		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {
+			global $LNG;
+			$pending = AchievementService::get()->getPendingCelebrations((int) $USER['id']);
+			if (!empty($pending)) {
+				$queue = [];
+				foreach ($pending as $row) {
+					$queue[] = [
+						'id'                => (int) $row['id'],
+						'name'              => $LNG[$row['name_key']] ?? $row['name_key'],
+						'description'       => $LNG[$row['desc_key']] ?? $row['desc_key'],
+						'celebration_tier'  => $row['celebration_tier'],
+						'reward_type'       => $row['reward_type'],
+						'reward_amount'     => (float) $row['reward_amount'],
+						'reward_label'      => $LNG['tech'][921] ?? '',
+					];
+				}
+				$payload = json_encode([
+					'queue'   => $queue,
+					'strings' => [
+						'tierNormal'    => $LNG['ach_celebration_tier_normal'],
+						'tierEpic'      => $LNG['ach_celebration_tier_epic'],
+						'tierLegendary' => $LNG['ach_celebration_tier_legendary'],
+						'more'          => $LNG['ach_celebration_more'],
+						'rewardPrefix'  => $LNG['ach_reward'],
+					],
+				], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+				$this->tplObj->loadscript('achievement-celebration.js');
+				$this->tplObj->execscript(
+					'jQuery(function(){if(window.HiveNovaAchievementCelebration){HiveNovaAchievementCelebration.init('
+					. $payload
+					. ');}});'
+				);
+			}
+		}
 	}
 
 	protected function getPageData()

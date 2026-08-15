@@ -84,12 +84,44 @@ if [[ -f coverage/integration-clover.xml ]]; then
   COV_FILES+=(coverage/integration-clover.xml)
 fi
 
+# PHPUnit Clover uses <file name="..."> (absolute paths). diff-cover's Clover parser
+# expects <file path="..."> and a clover attribute on <coverage>; without those it
+# uses the Cobertura parser and reports "No lines with coverage information".
+normalize_clover_for_diff_cover() {
+  local src="$1"
+  local dest="$2"
+  perl -pe '
+    if (!/clover=/) { s/<coverage /<coverage clover="4.5.2" /; }
+    s{<file name="(?:[^"]*/)?(includes/classes/[^"]+)"}{<file path="$1" name="$1"}g;
+  ' "$src" > "$dest"
+}
+
+NORMALIZED=()
+for f in "${COV_FILES[@]}"; do
+  norm="coverage/.diff-cover-$(basename "$f")"
+  normalize_clover_for_diff_cover "$f" "$norm"
+  NORMALIZED+=("$norm")
+done
+
 echo "=== Diff coverage (includes/classes/, fail under ${FAIL_UNDER}%) ==="
 echo "Compare branch: ${COMPARE_BRANCH}"
-echo "Reports: ${COV_FILES[*]}"
+echo "Reports: ${COV_FILES[*]} (normalized for diff-cover)"
 
-diff-cover "${COV_FILES[@]}" \
+DIFF_COVER_LOG="$(mktemp)"
+trap 'rm -f "$DIFF_COVER_LOG"' EXIT
+set +e
+diff-cover "${NORMALIZED[@]}" \
   --compare-branch="$COMPARE_BRANCH" \
   --fail-under="$FAIL_UNDER" \
   --include='includes/classes/*' \
-  --show-uncovered
+  --show-uncovered 2>&1 | tee "$DIFF_COVER_LOG"
+DIFF_COVER_RC=${PIPESTATUS[0]}
+set -e
+
+if grep -Fq 'No lines with coverage information in this diff.' "$DIFF_COVER_LOG"; then
+  echo "diff-cover could not match Clover paths to the git diff (vacuous pass)." >&2
+  echo "Ensure coverage reports include includes/classes/ with path attributes." >&2
+  exit 1
+fi
+
+exit "$DIFF_COVER_RC"
