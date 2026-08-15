@@ -73,10 +73,12 @@ if ! command -v diff-cover >/dev/null 2>&1; then
   exit 1
 fi
 
-# Ensure compare ref exists (best-effort for local runs).
+# Ensure compare ref exists with enough history for a merge-base.
+# A shallow --depth=1 fetch of origin/master leaves no merge-base with HEAD
+# on pull_request checkouts (diff-cover then dies: "no merge base").
 if [[ "$COMPARE_BRANCH" == origin/* ]]; then
   remote="${COMPARE_BRANCH#origin/}"
-  git fetch origin "$remote" --depth=1 2>/dev/null || true
+  git fetch --no-tags origin "$remote" 2>/dev/null || true
 fi
 
 COV_FILES=(coverage/clover.xml)
