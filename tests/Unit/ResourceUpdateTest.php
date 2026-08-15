@@ -253,6 +253,24 @@ class ResourceUpdateTest extends TestCase
 		$this->assertEquals(500, $returned['metal'], 'Vacation mode must leave metal unchanged');
 	}
 
+	public function testVacationModeDoesNotSkipCalculationWhenPlayerIsInactive(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser([
+			'urlaubs_modus' => 1,
+			'onlinetime'    => TIMESTAMP - INACTIVE - 1,
+		]);
+		$planet   = $this->makePlanet(['metal_perhour' => 3600]);
+
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+		$eco->CalcResource($user, $planet, false, $planet['last_update'] + 3600);
+		[, $updated] = $eco->getData();
+
+		$this->assertEquals(3600.0, $updated['metal'], 'Inactive vacation planets must still produce');
+	}
+
 	public function testCrystalAccumulatesIndependentlyOfMetal(): void
 	{
 		$resource = $this->makeResource();
@@ -361,6 +379,29 @@ class ResourceUpdateTest extends TestCase
 		$hash2 = $eco->CreateHash();
 
 		$this->assertNotEquals($hash1, $hash2, 'Hash must differ when a building level changes');
+	}
+
+	public function testHashChangesWhenPlayerBecomesInactive(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_replace($this->makeReslist(), ['prod' => [22]]);
+		$config   = $this->makeConfig();
+		Config::setInstance($config, 1);
+
+		$planet       = $this->makePlanet();
+		$activeUser   = $this->makeUser(['onlinetime' => TIMESTAMP]);
+		$inactiveUser = $this->makeUser(['onlinetime' => TIMESTAMP - INACTIVE - 1]);
+
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+
+		$eco->setData($activeUser, $planet);
+		$hashActive = $eco->CreateHash();
+
+		$eco->setData($inactiveUser, $planet);
+		$hashInactive = $eco->CreateHash();
+
+		$this->assertNotEquals($hashActive, $hashInactive, 'Hash must differ when inactivity forces full production');
 	}
 
 	// -----------------------------------------------------------------------
@@ -620,11 +661,11 @@ class ResourceUpdateTest extends TestCase
 
 	public function testReBuildCacheForcesFullProductionWhenPlayerIsInactive(): void
 	{
-		$resource = array_merge($this->makeResource(), [
+		$resource = array_replace($this->makeResource(), [
 			1 => 'metal_mine',
 			2 => 'solar_plant_building',
 		]);
-		$reslist = array_merge($this->makeReslist(), [
+		$reslist = array_replace($this->makeReslist(), [
 			'prod' => [1, 2],
 		]);
 		$config = $this->makeConfig();
@@ -661,7 +702,7 @@ class ResourceUpdateTest extends TestCase
 		$this->assertEquals(0.0, $activePlanet['metal_perhour'], 'Active player: mines dialed to 0% must stay off');
 
 		// Inactive player: same stored porcent, but mines are forced to full production.
-		$inactiveUser = $this->makeUser(['onlinetime' => 1]); // ancient onlinetime => isInactive() true
+		$inactiveUser = $this->makeUser(['onlinetime' => TIMESTAMP - INACTIVE - 1]);
 		$inactiveEco  = new ResourceUpdate(false, false);
 		$inactiveEco->setResourceData($resource, $reslist);
 		$inactiveEco->setData($inactiveUser, $planet);
