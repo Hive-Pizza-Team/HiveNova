@@ -329,6 +329,25 @@ class FleetFunctionsTest extends TestCase
         $this->assertEqualsWithDelta(10 * ($one - 1) + 1, $ten, 2.0, '10 ships consume ~10× a single ship');
     }
 
+    public function testGetFleetConsumptionSumsMultipleShipTypesInFleetArray(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']       = 12500;
+        $GLOBALS['pricelist'][202]['tech']        = 1;
+        $GLOBALS['pricelist'][202]['consumption'] = 20;
+        $GLOBALS['pricelist'][203]['speed']       = 12500;
+        $GLOBALS['pricelist'][203]['tech']        = 1;
+        $GLOBALS['pricelist'][203]['consumption'] = 50;
+
+        $player = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+        $fleet  = [202 => 2, 203 => 1];
+
+        $mixed = FleetFunctions::GetFleetConsumption($fleet, 3600, 5000, $player, 1);
+        $lfOnly = FleetFunctions::GetFleetConsumption([202 => 2], 3600, 5000, $player, 1);
+
+        $this->assertGreaterThan($lfOnly, $mixed, 'Fleet array should sum consumption per ship type');
+        $this->assertGreaterThan(1, $mixed);
+    }
+
     // -------------------------------------------------------------------------
     // GetGameSpeedFactor
     // -------------------------------------------------------------------------
@@ -407,6 +426,34 @@ class FleetFunctionsTest extends TestCase
         $this->setConfigForFleet(250000);
         $duration = FleetFunctions::GetMIPDuration(5, 5);
         $this->assertGreaterThanOrEqual(MIN_FLEET_TIME, $duration);
+    }
+
+    // -------------------------------------------------------------------------
+    // SuggestDefaultMission — probe-only spy autoselect (issue #221)
+    // -------------------------------------------------------------------------
+
+    public function testSuggestDefaultMissionSelectsSpyForProbeOnlyFleet(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(6, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5], false));
+    }
+
+    public function testSuggestDefaultMissionKeepsTransportForAllianceMember(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(3, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5], true));
+    }
+
+    public function testSuggestDefaultMissionHonorsExplicitMissionFromGalaxy(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(1, FleetFunctions::SuggestDefaultMission(1, $available, [210 => 5], false));
+    }
+
+    public function testSuggestDefaultMissionDoesNotAutoselectWhenFleetIsMixed(): void
+    {
+        $available = [3, 1, 5];
+        $this->assertSame(0, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5, 202 => 1], false));
     }
 
     // -------------------------------------------------------------------------

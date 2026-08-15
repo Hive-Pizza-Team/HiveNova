@@ -5,8 +5,19 @@ use HiveNova\Core\ResourceUpdate;
 
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/../Support/FakeDatabase.php';
+require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+
 class ResourceUpdateTest extends TestCase
 {
+	use SwapDatabaseInstance;
+
+	/** @var array<int|string, mixed>|null */
+	private static ?array $savedResource = null;
+
+	/** @var array<string, mixed>|null */
+	private static ?array $savedReslist = null;
+
 	// -----------------------------------------------------------------------
 	// Fixtures
 	// -----------------------------------------------------------------------
@@ -15,6 +26,10 @@ class ResourceUpdateTest extends TestCase
 	{
 		$data = array_merge([
 			'uni'                    => 1,
+			'game_speed'             => 1,
+			'min_build_time'         => 0,
+			'factor_university'      => 0,
+			'moduls'                 => implode(';', array_fill(0, 50, 0)),
 			'metal_basic_income'     => 0,
 			'crystal_basic_income'   => 0,
 			'deuterium_basic_income' => 0,
@@ -32,6 +47,11 @@ class ResourceUpdateTest extends TestCase
 	private function makeResource(): array
 	{
 		return [
+			1   => 'metal_mine',
+			2   => 'crystal_mine',
+			6   => 'research_lab',
+			21  => 'hangar',
+			202 => 'light_fighter',
 			901 => 'metal',
 			902 => 'crystal',
 			903 => 'deuterium',
@@ -45,7 +65,7 @@ class ResourceUpdateTest extends TestCase
 			31  => 'intergalactic_research',
 			33  => 'terraformer',
 			113 => 'energy_tech',
-			123 => 'intergalactic_research',
+			123 => 'intergalactic_research_tech',
 			131 => 'plasma_tech',
 			132 => 'graviton_tech',
 			133 => 'laser_tech',
@@ -58,14 +78,50 @@ class ResourceUpdateTest extends TestCase
 			'prod'     => [],
 			'storage'  => [],
 			'build'    => [1, 2, 3, 4, 6, 12, 14, 15, 21, 22, 23, 24, 31, 33, 34],
-			'fleet'    => [],
+			'fleet'    => [202],
 			'defense'  => [],
 			'missile'  => [],
-			'tech'     => [],
+			'tech'     => [113],
 			'resstype' => [1 => [901, 902, 903], 2 => [911]],
 			'one'      => [],
 			'ressources' => [901, 902, 903, 911, 921],
+			'officier' => [],
 		];
+	}
+
+	/** Minimal ProdGrid formulae for metal mine (1) and solar plant (22). */
+	private function makeProdGrid(): array
+	{
+		return [
+			1 => [
+				'production' => [
+					901 => '3600 * $BuildLevel * ($BuildLevelFactor / 10)',
+					911 => '-360 * $BuildLevel * ($BuildLevelFactor / 10)',
+				],
+			],
+			22 => [
+				'production' => [
+					911 => '3600 * $BuildLevel * ($BuildLevelFactor / 10)',
+				],
+			],
+			23 => [
+				'storage' => [
+					901 => '50000 * $BuildLevel',
+				],
+			],
+		];
+	}
+
+	private function installProdGrid(): void
+	{
+		$GLOBALS['ProdGrid'] = $this->makeProdGrid();
+	}
+
+	private function useFakeDatabase(FakeDatabase $fake): FakeDatabase
+	{
+		$this->swapDatabaseInstance($fake);
+
+		return $fake;
 	}
 
 	private function makeUser(array $overrides = []): array
@@ -92,6 +148,7 @@ class ResourceUpdateTest extends TestCase
 			'laser_tech'                => 0,
 			'energy_tech'               => 0,
 			'intergalactic_research'    => 0,
+			'intergalactic_research_tech' => 0,
 		], $overrides);
 	}
 
@@ -131,7 +188,14 @@ class ResourceUpdateTest extends TestCase
 			'fusion_reactor'              => 0,
 			'fusion_reactor_porcent'      => 100,
 			'solar_satellite'             => 0,
-			'solar_satellite_porcent'     => 100,
+			'metal_mine'                  => 0,
+			'metal_mine_porcent'          => 100,
+			'name'                        => 'Homeworld',
+			'galaxy'                      => 1,
+			'system'                      => 1,
+			'planet'                      => 8,
+			'research_lab'                => 0,
+			'intergalactic_research'      => 0,
 		], $overrides);
 	}
 
@@ -171,6 +235,36 @@ class ResourceUpdateTest extends TestCase
 		$ref = new ReflectionProperty(Config::class, 'instances');
 		$ref->setAccessible(true);
 		$ref->setValue(null, []);
+
+		if (self::$savedResource === null) {
+			self::$savedResource = $GLOBALS['resource'] ?? [];
+			self::$savedReslist = $GLOBALS['reslist'] ?? [];
+		}
+
+		$GLOBALS['resource'] = array_replace(self::$savedResource, $this->makeResource());
+		$GLOBALS['reslist'] = self::$savedReslist;
+		$ressources = $GLOBALS['reslist']['ressources'] ?? [901, 902, 903, 921];
+		if (!in_array(911, $ressources, true)) {
+			$GLOBALS['reslist']['ressources'] = array_merge($ressources, [911]);
+		}
+
+		$GLOBALS['pricelist'][113] = [
+			'cost'   => [901 => 0, 902 => 0, 903 => 0],
+			'factor' => 2,
+			'time'   => 1,
+		];
+	}
+
+	protected function tearDown(): void
+	{
+		if (self::$savedResource !== null) {
+			$GLOBALS['resource'] = self::$savedResource;
+		}
+		if (self::$savedReslist !== null) {
+			$GLOBALS['reslist'] = self::$savedReslist;
+		}
+		unset($GLOBALS['ProdGrid']);
+		$this->restoreDatabaseInstance();
 	}
 
 	// -----------------------------------------------------------------------
@@ -743,5 +837,1134 @@ class ResourceUpdateTest extends TestCase
 
 		$this->assertStringNotContainsString('energy have', $message);
 		$this->assertStringNotContainsString('Energy', $message);
+	}
+
+	public function testGetNetworkLevelWithoutIntergalacticTech(): void
+	{
+		$resource = $this->makeResource();
+		$user     = $this->makeUser(['intergalactic_research' => 0]);
+		$planet   = $this->makePlanet(['intergalactic_research' => 4]);
+
+		$levels = ResourceUpdate::getNetworkLevel($user, $planet);
+
+		$this->assertSame([4], $levels);
+	}
+
+	public function testShipyardQueueClearsInvalidHangarPayload(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig(['game_speed' => 5000]);
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'b_hangar_id' => 'not-an-array',
+			'b_hangar'    => 500,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, $planet['last_update'] + 3600);
+
+		$this->assertSame(0, $updated['b_hangar']);
+		$this->assertSame('', $updated['b_hangar_id']);
+	}
+
+	public function testShipyardQueueBuildsShipsWhenHangarTimeAccumulated(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['fleet' => [202]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$user     = $this->makeUser(['factor' => array_merge($this->makeUser()['factor'], ['ShipTime' => 0])]);
+		$planet   = $this->makePlanet([
+			'hangar'        => 10,
+			'light_fighter' => 0,
+			'b_hangar_id'   => serialize([[202, 2]]),
+			'b_hangar'      => 0,
+			'last_update'   => TIMESTAMP - 86400,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, TIMESTAMP);
+
+		$this->assertGreaterThan(0, $updated['light_fighter']);
+	}
+
+	public function testBuildingQueueCompletesFinishedBuild(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['prod' => [1], 'build' => [1]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_mine'      => 0,
+			'field_current'   => 0,
+			'b_building'      => $now - 1,
+			'b_building_id'   => serialize([[1, 1, 1, $now, 'build']]),
+			'last_update'     => $now - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(1, $updated['metal_mine']);
+		$this->assertSame(1, $updated['field_current']);
+		$this->assertSame(0, $updated['b_building']);
+		$this->assertSame('', $updated['b_building_id']);
+	}
+
+	// -----------------------------------------------------------------------
+	// Global-mode CalcResource
+	// -----------------------------------------------------------------------
+
+	public function testCalcResourceGlobalModeUpdatesGlobals(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal'         => 100,
+			'metal_perhour' => 3600,
+			'last_update'   => TIMESTAMP - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+
+		$GLOBALS['USER']   = $user;
+		$GLOBALS['PLANET'] = $planet;
+
+		$result = $eco->CalcResource();
+
+		$this->assertTrue($result, 'Global mode ReturnVars must return true');
+		$this->assertEqualsWithDelta(3700.0, $GLOBALS['PLANET']['metal'], 0.01);
+	}
+
+	public function testCalcResourceGlobalModeWithSavePersistsViaDatabase(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet(['last_update' => TIMESTAMP - 60]);
+
+		$GLOBALS['USER']   = $user;
+		$GLOBALS['PLANET'] = $planet;
+		Config::setInstance($config, 1);
+
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+
+		$result = $eco->CalcResource(null, null, true, TIMESTAMP);
+
+		$this->assertTrue($result);
+		$this->assertSame(TIMESTAMP, $GLOBALS['PLANET']['last_update']);
+	}
+
+	// -----------------------------------------------------------------------
+	// SavePlanetToDB
+	// -----------------------------------------------------------------------
+
+	public function testSavePlanetToDBClearsBuildedTracker(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet();
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$builded = new ReflectionProperty(ResourceUpdate::class, 'Builded');
+		$builded->setAccessible(true);
+		$builded->setValue($eco, [202 => 3, 113 => 1]);
+
+		$eco->SavePlanetToDB($user, $planet);
+
+		$this->assertSame([], $builded->getValue($eco));
+	}
+
+	public function testSavePlanetToDBUsesGlobalUserAndPlanetWhenNull(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser(['darkmatter' => 42]);
+		$planet   = $this->makePlanet(['metal' => 777]);
+
+		$GLOBALS['USER']   = $user;
+		$GLOBALS['PLANET'] = $planet;
+		Config::setInstance($config, 1);
+
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		[$returnedUser, $returnedPlanet] = $eco->SavePlanetToDB();
+
+		$this->assertSame(42, $returnedUser['darkmatter']);
+		$this->assertEquals(777, $returnedPlanet['metal']);
+	}
+
+	public function testCalcResourceWithSaveTruePersistsViaDatabase(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_perhour' => 3600,
+			'last_update'   => TIMESTAMP - 3600,
+		]);
+
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+
+		$result = $eco->CalcResource($user, $planet, true, TIMESTAMP);
+
+		$this->assertIsArray($result);
+		$this->assertEqualsWithDelta(3600.0, $result[1]['metal'], 0.01);
+	}
+
+	// -----------------------------------------------------------------------
+	// ResearchQueue / SetNextQueueTechOnTop
+	// -----------------------------------------------------------------------
+
+	public function testResearchQueueCompletesExpiredTech(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser([
+			'b_tech'        => $now - 1,
+			'b_tech_id'     => 113,
+			'b_tech_planet' => 1,
+			'b_tech_queue'  => serialize([[113, 1, 1, $now, 1]]),
+			'energy_tech'   => 2,
+		]);
+		$planet = $this->makePlanet(['last_update' => $now - 3600]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		[$updatedUser] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(3, $updatedUser['energy_tech']);
+		$this->assertSame(0, $updatedUser['b_tech']);
+		$this->assertSame(0, $updatedUser['b_tech_id']);
+		$this->assertSame('', $updatedUser['b_tech_queue']);
+	}
+
+	public function testResearchQueueClearsStateOnInvalidQueuePayload(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser([
+			'b_tech'        => $now - 1,
+			'b_tech_id'     => 113,
+			'b_tech_planet' => 1,
+			'b_tech_queue'  => 'not-an-array',
+			'energy_tech'   => 0,
+		]);
+		$planet = $this->makePlanet(['last_update' => $now - 60]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		[$updatedUser] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(1, $updatedUser['energy_tech']);
+		$this->assertSame(0, $updatedUser['b_tech']);
+		$this->assertSame(0, $updatedUser['b_tech_id']);
+		$this->assertSame(0, $updatedUser['b_tech_planet']);
+		$this->assertSame('', $updatedUser['b_tech_queue']);
+	}
+
+	public function testSetNextQueueTechOnTopSchedulesResearchWithResources(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser([
+			'b_tech'       => TIMESTAMP,
+			'b_tech_queue' => serialize([[113, 1, 60, TIMESTAMP + 60, 1]]),
+		]);
+		$planet = $this->makePlanet([
+			'metal'         => 1_000_000,
+			'crystal'       => 1_000_000,
+			'deuterium'     => 1_000_000,
+			'research_lab'  => 5,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueTechOnTop());
+		[$updatedUser] = $eco->getData();
+
+		$this->assertSame(113, $updatedUser['b_tech_id']);
+		$this->assertGreaterThanOrEqual(TIMESTAMP, $updatedUser['b_tech']);
+		$this->assertSame(1, $updatedUser['b_tech_planet']);
+		$this->assertNotSame('', $updatedUser['b_tech_queue']);
+	}
+
+	public function testSetNextQueueTechOnTopClearsWhenQueueEmpty(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser(['b_tech_queue' => '']);
+		$planet   = $this->makePlanet();
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertFalse($eco->SetNextQueueTechOnTop());
+		[$updatedUser] = $eco->getData();
+
+		$this->assertSame(0, $updatedUser['b_tech']);
+		$this->assertSame(0, $updatedUser['b_tech_id']);
+	}
+
+	// -----------------------------------------------------------------------
+	// BuildingQueue / SetNextQueueElementOnTop
+	// -----------------------------------------------------------------------
+
+	public function testBuildingQueueDemolishReducesBuildingLevel(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_mine'    => 2,
+			'field_current' => 2,
+			'b_building'    => $now - 1,
+			'b_building_id' => serialize([[1, 1, 1, $now, 'destroy']]),
+			'last_update'   => $now - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(1, $updated['metal_mine']);
+		$this->assertSame(1, $updated['field_current']);
+		$this->assertSame(0, $updated['b_building']);
+	}
+
+	public function testSetNextQueueElementOnTopClearsWhenQueueEmpty(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'b_building'    => 999,
+			'b_building_id' => '',
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertFalse($eco->SetNextQueueElementOnTop());
+		[, $updated] = $eco->getData();
+
+		$this->assertSame(0, $updated['b_building']);
+		$this->assertSame('', $updated['b_building_id']);
+	}
+
+	public function testSetNextQueueElementOnTopDeductsResourcesAndSchedulesBuild(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal'         => 100_000,
+			'crystal'       => 100_000,
+			'deuterium'     => 100_000,
+			'metal_mine'    => 0,
+			'b_building'    => TIMESTAMP,
+			'b_building_id' => serialize([[1, 1, 100, TIMESTAMP + 100, 'build']]),
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueElementOnTop());
+		[, $updated] = $eco->getData();
+
+		$this->assertLessThan(100_000, $updated['metal']);
+		$this->assertLessThan(100_000, $updated['crystal']);
+		$this->assertGreaterThanOrEqual(TIMESTAMP, $updated['b_building']);
+		$this->assertNotSame('', $updated['b_building_id']);
+	}
+
+	// -----------------------------------------------------------------------
+	// ShipyardQueue — additional paths
+	// -----------------------------------------------------------------------
+
+	public function testShipyardQueueInstantBuildWhenBuildTimeIsZero(): void
+	{
+		$originalPrice = $GLOBALS['pricelist'][202];
+		$GLOBALS['pricelist'][202] = array_merge($originalPrice, [
+			'cost' => [901 => 0, 902 => 0, 903 => 0],
+		]);
+
+		try {
+			$resource = $this->makeResource();
+			$reslist  = array_merge($this->makeReslist(), ['fleet' => [202]]);
+			$config   = $this->makeConfig();
+			$user     = $this->makeUser();
+			$planet   = $this->makePlanet([
+				'light_fighter' => 0,
+				'b_hangar_id'   => serialize([[202, 5]]),
+				'b_hangar'      => 0,
+				'last_update'   => TIMESTAMP,
+			]);
+
+			Config::setInstance($config, 1);
+			$eco = new ResourceUpdate(true, false);
+			$eco->setResourceData($resource, $reslist);
+			[, $updated] = $eco->CalcResource($user, $planet, false, TIMESTAMP);
+
+			$this->assertSame(5, $updated['light_fighter']);
+			$this->assertSame('', $updated['b_hangar_id']);
+			$this->assertSame(0, $updated['b_hangar']);
+		} finally {
+			$GLOBALS['pricelist'][202] = $originalPrice;
+		}
+	}
+
+	public function testShipyardQueueLeavesRemainderInQueue(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['fleet' => [202]]);
+		$config   = $this->makeConfig(['game_speed' => 500]);
+		$user     = $this->makeUser(['factor' => array_merge($this->makeUser()['factor'], ['ShipTime' => 0])]);
+		$planet   = $this->makePlanet([
+			'hangar'        => 10,
+			'light_fighter' => 0,
+			'b_hangar_id'   => serialize([[202, 5]]),
+			'b_hangar'      => 0,
+			'last_update'   => TIMESTAMP - 3000,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, TIMESTAMP);
+
+		$this->assertGreaterThan(0, $updated['light_fighter']);
+		$this->assertLessThan(5, $updated['light_fighter']);
+		$this->assertNotSame('', $updated['b_hangar_id']);
+		$remainder = safe_unserialize($updated['b_hangar_id']);
+		$this->assertSame(202, $remainder[0][0]);
+		$this->assertGreaterThan(0, $remainder[0][1]);
+	}
+
+	// -----------------------------------------------------------------------
+	// Additional coverage: queues, eco_hash, energy, SavePlanetToDB
+	// -----------------------------------------------------------------------
+
+	public function testShipyardQueueSkipsMalformedQueueItems(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['fleet' => [202]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'light_fighter' => 0,
+			'b_hangar_id'   => serialize(['bad-entry', [202, 2]]),
+			'b_hangar'      => 0,
+			'last_update'   => TIMESTAMP - 86400,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, TIMESTAMP);
+
+		$this->assertSame(2, $updated['light_fighter']);
+	}
+
+	public function testShipyardQueuePreservesQueueWhenHangarTimeInsufficient(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['fleet' => [202]]);
+		$config   = $this->makeConfig(['game_speed' => 1]);
+		$user     = $this->makeUser(['factor' => array_merge($this->makeUser()['factor'], ['ShipTime' => 0])]);
+		$planet   = $this->makePlanet([
+			'hangar'        => 10,
+			'light_fighter' => 0,
+			'b_hangar_id'   => serialize([[202, 3]]),
+			'b_hangar'      => 0,
+			'last_update'   => TIMESTAMP - 1,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, TIMESTAMP);
+
+		$this->assertSame(0, $updated['light_fighter']);
+		$this->assertNotSame('', $updated['b_hangar_id']);
+	}
+
+	public function testBuildingQueueSkipsWhenBuildNotYetFinished(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1]]);
+		$config   = $this->makeConfig();
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_mine'    => 0,
+			'b_building'    => $now + 3600,
+			'b_building_id' => serialize([[1, 1, 100, $now + 3600, 'build']]),
+			'last_update'   => $now - 60,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(0, $updated['metal_mine']);
+		$this->assertSame($now + 3600, $updated['b_building']);
+	}
+
+	public function testBuildingQueueAdvancesToNextQueuedItem(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal'         => 500_000,
+			'crystal'       => 500_000,
+			'deuterium'     => 500_000,
+			'metal_mine'    => 0,
+			'field_current' => 0,
+			'b_building'    => $now - 1,
+			'b_building_id' => serialize([
+				[1, 1, 100, $now - 1, 'build'],
+				[1, 2, 100, $now + 3600, 'build'],
+			]),
+			'last_update'   => $now - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(2, $updated['metal_mine']);
+		$this->assertSame(2, $updated['field_current']);
+		$this->assertSame('', $updated['b_building_id']);
+	}
+
+	public function testBuildingQueueCompletesProdBuildingForcesRebuild(): void
+	{
+		$this->installProdGrid();
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['prod' => [1, 22], 'build' => [1]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_mine'    => 0,
+			'solar_plant'   => 10,
+			'field_current' => 0,
+			'b_building'    => $now - 1,
+			'b_building_id' => serialize([[1, 1, 1, $now, 'build']]),
+			'last_update'   => $now - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		[, $updated] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(1, $updated['metal_mine']);
+		$this->assertGreaterThan(0.0, $updated['metal_perhour']);
+		$this->assertGreaterThan(0.0, $updated['energy']);
+	}
+
+	public function testEcoHashMismatchTriggersRebuild(): void
+	{
+		$this->installProdGrid();
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['prod' => [1, 22]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_mine'  => 3,
+			'solar_plant' => 2,
+			'eco_hash'    => 'stale-hash-value',
+			'last_update' => TIMESTAMP - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+		$eco->UpdateResource(TIMESTAMP, true);
+		[, $updated] = $eco->getData();
+
+		$this->assertGreaterThan(0.0, $updated['metal_perhour']);
+		$this->assertNotSame('stale-hash-value', $updated['eco_hash']);
+	}
+
+	public function testReBuildCacheComputesEnergyFromProdGrid(): void
+	{
+		$this->installProdGrid();
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['prod' => [1, 22]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_mine'  => 2,
+			'solar_plant' => 3,
+		]);
+
+		$eco = $this->makeEcoWithForcedRebuild($user, $planet, $resource, $reslist, $config);
+		$eco->UpdateResource($planet['last_update'] + 3600, false);
+		[, $updated] = $eco->getData();
+
+		$this->assertGreaterThan(0.0, $updated['energy']);
+		$this->assertLessThan(0.0, $updated['energy_used']);
+	}
+
+	public function testResearchQueueSkipsWhenTechNotYetFinished(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser([
+			'b_tech'        => $now + 3600,
+			'b_tech_id'     => 113,
+			'b_tech_planet' => 1,
+			'b_tech_queue'  => serialize([[113, 1, 60, $now + 3600, 1]]),
+			'energy_tech'   => 5,
+		]);
+		$planet = $this->makePlanet(['last_update' => $now - 60]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		[$updatedUser] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(5, $updatedUser['energy_tech']);
+	}
+
+	public function testResearchQueueCompletesMultipleQueuedTechs(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser([
+			'b_tech'        => $now - 1,
+			'b_tech_id'     => 113,
+			'b_tech_planet' => 1,
+			'b_tech_queue'  => serialize([
+				[113, 1, 60, $now, 1],
+				[113, 2, 60, $now + 120, 1],
+			]),
+			'energy_tech'   => 0,
+		]);
+		$planet = $this->makePlanet([
+			'metal'        => 1_000_000,
+			'crystal'      => 1_000_000,
+			'deuterium'    => 1_000_000,
+			'research_lab' => 5,
+			'last_update'  => $now - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		[$updatedUser] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(2, $updatedUser['energy_tech']);
+		$this->assertSame(0, $updatedUser['b_tech']);
+		$this->assertSame('', $updatedUser['b_tech_queue']);
+	}
+
+	public function testSetNextQueueTechOnTopClearsWhenQueueIsEmptyArray(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser(['b_tech_queue' => serialize([])]);
+		$planet   = $this->makePlanet();
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertFalse($eco->SetNextQueueTechOnTop());
+		[$updatedUser] = $eco->getData();
+
+		$this->assertSame(0, $updatedUser['b_tech']);
+		$this->assertSame(0, $updatedUser['b_tech_id']);
+		$this->assertSame('', $updatedUser['b_tech_queue']);
+	}
+
+	public function testSetNextQueueTechOnTopSkipsMissingRemotePlanet(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser([
+			'b_tech'       => TIMESTAMP,
+			'b_tech_queue' => serialize([[113, 1, 60, TIMESTAMP + 60, 999]]),
+		]);
+		$planet = $this->makePlanet();
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueTechOnTop());
+		[$updatedUser] = $eco->getData();
+
+		$this->assertSame(0, $updatedUser['b_tech']);
+		$this->assertSame('', $updatedUser['b_tech_queue']);
+	}
+
+	public function testSetNextQueueTechOnTopSchedulesOnRemotePlanet(): void
+	{
+		$fake = new FakeDatabase();
+		$this->useFakeDatabase($fake);
+
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser([
+			'b_tech'       => TIMESTAMP,
+			'b_tech_queue' => serialize([[113, 1, 60, TIMESTAMP + 60, 2]]),
+		]);
+		$planet = $this->makePlanet(['id' => 1]);
+		$fake->planetRowsById[2] = array_merge($this->makePlanet([
+			'id'           => 2,
+			'metal'        => 1_000_000,
+			'crystal'      => 1_000_000,
+			'deuterium'    => 1_000_000,
+			'research_lab' => 5,
+			'last_update'  => TIMESTAMP - 60,
+		]), ['id_owner' => 1]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueTechOnTop());
+		[$updatedUser] = $eco->getData();
+
+		$this->assertSame(113, $updatedUser['b_tech_id']);
+		$this->assertSame(2, $updatedUser['b_tech_planet']);
+		$this->assertGreaterThanOrEqual(TIMESTAMP, $updatedUser['b_tech']);
+	}
+
+	public function testSetNextQueueElementOnTopSkipsDestroyAtZeroLevel(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal_mine'    => 0,
+			'b_building'    => TIMESTAMP,
+			'b_building_id' => serialize([[1, 1, 100, TIMESTAMP + 100, 'destroy']]),
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueElementOnTop());
+		[, $updated] = $eco->getData();
+
+		$this->assertSame(0, $updated['b_building']);
+		$this->assertSame('', $updated['b_building_id']);
+	}
+
+	public function testSetNextQueueElementOnTopHofNotifiesWhenInsufficientResources(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser(['hof' => 1]);
+		$planet   = $this->makePlanet([
+			'metal'         => 0,
+			'crystal'       => 0,
+			'deuterium'     => 0,
+			'b_building'    => TIMESTAMP,
+			'b_building_id' => serialize([[1, 1, 100, TIMESTAMP + 100, 'build']]),
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueElementOnTop());
+		[, $updated] = $eco->getData();
+
+		$this->assertSame(0, $updated['b_building']);
+		$this->assertSame('', $updated['b_building_id']);
+	}
+
+	public function testSetNextQueueElementOnTopHofNotifiesWhenNoMoreLevelToDestroy(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser(['hof' => 1]);
+		$planet   = $this->makePlanet([
+			'metal_mine'    => 0,
+			'b_building'    => TIMESTAMP,
+			'b_building_id' => serialize([[1, 1, 100, TIMESTAMP + 100, 'destroy']]),
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueElementOnTop());
+		[, $updated] = $eco->getData();
+
+		$this->assertSame(0, $updated['b_building']);
+		$this->assertSame('', $updated['b_building_id']);
+	}
+
+	public function testSetNextQueueElementOnTopReschedulesRemainingQueueOnFailure(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1, 2]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$user     = $this->makeUser();
+		$planet   = $this->makePlanet([
+			'metal'         => 0,
+			'crystal'       => 0,
+			'deuterium'     => 0,
+			'metal_mine'    => 0,
+			'crystal_mine'  => 0,
+			'b_building'    => TIMESTAMP,
+			'b_building_id' => serialize([
+				[1, 1, 100, TIMESTAMP + 100, 'build'],
+				[2, 1, 100, TIMESTAMP + 200, 'build'],
+			]),
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueElementOnTop());
+		[, $updated] = $eco->getData();
+
+		$this->assertNotSame('', $updated['b_building_id']);
+		$queue = safe_unserialize($updated['b_building_id']);
+		$this->assertSame(2, $queue[0][0]);
+		$this->assertGreaterThanOrEqual(TIMESTAMP, $updated['b_building']);
+	}
+
+	public function testSetNextQueueTechOnTopHofNotifiesWhenInsufficientResources(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$originalPrice = $GLOBALS['pricelist'][113];
+		$GLOBALS['pricelist'][113] = array_merge($originalPrice, [
+			'cost' => [901 => 999_999_999, 902 => 999_999_999, 903 => 999_999_999],
+		]);
+
+		try {
+			$resource = $this->makeResource();
+			$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+			$config   = $this->makeConfig();
+			$user     = $this->makeUser([
+				'hof'          => 1,
+				'b_tech'       => TIMESTAMP,
+				'b_tech_queue' => serialize([[113, 1, 60, TIMESTAMP + 60, 1]]),
+			]);
+			$planet = $this->makePlanet([
+				'metal'        => 0,
+				'crystal'      => 0,
+				'deuterium'    => 0,
+				'research_lab' => 5,
+			]);
+
+			Config::setInstance($config, 1);
+			$eco = new ResourceUpdate(true, true);
+			$eco->setResourceData($resource, $reslist);
+			$eco->setData($user, $planet);
+
+			$this->assertTrue($eco->SetNextQueueTechOnTop());
+			[$updatedUser] = $eco->getData();
+
+			$this->assertSame(0, $updatedUser['b_tech']);
+			$this->assertSame('', $updatedUser['b_tech_queue']);
+		} finally {
+			$GLOBALS['pricelist'][113] = $originalPrice;
+		}
+	}
+
+	public function testSetNextQueueTechOnTopReschedulesRemainingQueueOnFailure(): void
+	{
+		$original113 = $GLOBALS['pricelist'][113];
+		$original115 = $GLOBALS['pricelist'][115] ?? [
+			'cost' => [901 => 1000, 902 => 500, 903 => 0],
+			'factor' => 2,
+			'time' => 1,
+		];
+		$GLOBALS['pricelist'][113] = array_merge($original113, [
+			'cost' => [901 => 999_999_999, 902 => 999_999_999, 903 => 999_999_999],
+		]);
+		$GLOBALS['pricelist'][115] = array_merge($original115, [
+			'cost' => [901 => 999_999_999, 902 => 999_999_999, 903 => 999_999_999],
+		]);
+
+		try {
+			$resource = $this->makeResource();
+			$reslist  = array_merge($this->makeReslist(), ['tech' => [113, 115]]);
+			$config   = $this->makeConfig();
+			$user     = $this->makeUser([
+				'b_tech'       => TIMESTAMP,
+				'b_tech_queue' => serialize([
+					[113, 1, 60, TIMESTAMP + 60, 1],
+					[115, 1, 60, TIMESTAMP + 120, 1],
+				]),
+			]);
+			$planet = $this->makePlanet([
+				'metal'        => 0,
+				'crystal'      => 0,
+				'deuterium'    => 0,
+				'research_lab' => 5,
+			]);
+
+			Config::setInstance($config, 1);
+			$eco = new ResourceUpdate(true, true);
+			$eco->setResourceData($resource, $reslist);
+			$eco->setData($user, $planet);
+
+			$this->assertTrue($eco->SetNextQueueTechOnTop());
+			[$updatedUser] = $eco->getData();
+
+			$this->assertSame(0, $updatedUser['b_tech']);
+			$this->assertSame('', $updatedUser['b_tech_queue']);
+		} finally {
+			$GLOBALS['pricelist'][113] = $original113;
+			if (isset($GLOBALS['pricelist'][115])) {
+				$GLOBALS['pricelist'][115] = $original115;
+			}
+		}
+	}
+
+	public function testCalcResourceWithBuildDisabledSkipsQueues(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['build' => [1], 'fleet' => [202], 'tech' => [113]]);
+		$config   = $this->makeConfig(['game_speed' => 500000]);
+		$now      = TIMESTAMP;
+		$user     = $this->makeUser([
+			'b_tech'        => $now - 1,
+			'b_tech_id'     => 113,
+			'b_tech_planet' => 1,
+			'b_tech_queue'  => serialize([[113, 1, 1, $now, 1]]),
+			'energy_tech'   => 0,
+		]);
+		$planet = $this->makePlanet([
+			'metal_mine'    => 0,
+			'light_fighter' => 0,
+			'b_building'    => $now - 1,
+			'b_building_id' => serialize([[1, 1, 1, $now, 'build']]),
+			'b_hangar_id'   => serialize([[202, 1]]),
+			'last_update'   => $now - 3600,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(false, true);
+		$eco->setResourceData($resource, $reslist);
+		[$updatedUser, $updated] = $eco->CalcResource($user, $planet, false, $now);
+
+		$this->assertSame(0, $updatedUser['energy_tech']);
+		$this->assertSame(0, $updated['metal_mine']);
+		$this->assertSame(0, $updated['light_fighter']);
+	}
+
+	public function testSavePlanetToDBIncludesBuildedPlanetAndUserElements(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), [
+			'one'    => [31],
+			'fleet'  => [202],
+			'tech'   => [113],
+		]);
+		$config = $this->makeConfig();
+		$user   = $this->makeUser(['energy_tech' => 2]);
+		$planet = $this->makePlanet(['light_fighter' => 5, 'intergalactic_research' => 0]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$builded = new ReflectionProperty(ResourceUpdate::class, 'Builded');
+		$builded->setAccessible(true);
+		$builded->setValue($eco, [202 => 3, 113 => 1, 31 => 1, 999 => 0]);
+
+		[$returnedUser, $returnedPlanet] = $eco->SavePlanetToDB($user, $planet);
+
+		$this->assertSame(2, $returnedUser['energy_tech']);
+		$this->assertSame(5, $returnedPlanet['light_fighter']);
+		$this->assertSame([], $builded->getValue($eco));
+	}
+
+	public function testCheckUserTechQueueStopsWhenScheduledTechNotReady(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser([
+			'b_tech'        => TIMESTAMP + 3600,
+			'b_tech_id'     => 113,
+			'b_tech_planet' => 1,
+			'b_tech_queue'  => serialize([[113, 2, 60, TIMESTAMP + 7200, 1]]),
+			'energy_tech'   => 1,
+		]);
+		$planet = $this->makePlanet();
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$check = new ReflectionMethod(ResourceUpdate::class, 'CheckUserTechQueue');
+		$check->setAccessible(true);
+
+		$this->assertFalse($check->invoke($eco));
+	}
+
+	public function testSetNextQueueTechOnTopSkipsMissingPlanetAndContinuesQueue(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+
+		$resource = $this->makeResource();
+		$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser([
+			'b_tech'       => TIMESTAMP,
+			'b_tech_queue' => serialize([
+				[113, 1, 60, TIMESTAMP + 60, 999],
+				[113, 2, 60, TIMESTAMP + 120, 1],
+			]),
+		]);
+		$planet = $this->makePlanet([
+			'metal'        => 1_000_000,
+			'crystal'      => 1_000_000,
+			'deuterium'    => 1_000_000,
+			'research_lab' => 5,
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(true, true);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueTechOnTop());
+		[$updatedUser] = $eco->getData();
+
+		$this->assertSame(113, $updatedUser['b_tech_id']);
+		$this->assertSame(1, $updatedUser['b_tech_planet']);
+	}
+
+	public function testSetNextQueueTechOnTopHofLoadsLanguageWhenMissing(): void
+	{
+		$this->useFakeDatabase(new FakeDatabase());
+		unset($GLOBALS['LNG']);
+
+		$originalPrice = $GLOBALS['pricelist'][113];
+		$GLOBALS['pricelist'][113] = array_merge($originalPrice, [
+			'cost' => [901 => 999_999_999, 902 => 999_999_999, 903 => 999_999_999],
+		]);
+
+		try {
+			$resource = $this->makeResource();
+			$reslist  = array_merge($this->makeReslist(), ['tech' => [113]]);
+			$config   = $this->makeConfig();
+			$user     = $this->makeUser([
+				'hof'          => 1,
+				'b_tech'       => TIMESTAMP,
+				'b_tech_queue' => serialize([[113, 1, 60, TIMESTAMP + 60, 1]]),
+			]);
+			$planet = $this->makePlanet([
+				'metal'        => 0,
+				'crystal'      => 0,
+				'deuterium'    => 0,
+				'research_lab' => 5,
+			]);
+
+			Config::setInstance($config, 1);
+			$eco = new ResourceUpdate(true, true);
+			$eco->setResourceData($resource, $reslist);
+			$eco->setData($user, $planet);
+
+			$this->assertTrue($eco->SetNextQueueTechOnTop());
+			[$updatedUser] = $eco->getData();
+
+			$this->assertSame(0, $updatedUser['b_tech']);
+			$this->assertNotEmpty($GLOBALS['LNG']);
+		} finally {
+			$GLOBALS['pricelist'][113] = $originalPrice;
+		}
 	}
 }

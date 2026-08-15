@@ -19,6 +19,9 @@ function ShowTransactionsPage()
 	if ($search !== '') {
 		$escaped = $GLOBALS['DATABASE']->sql_escape($search);
 		$where = "WHERE u.username LIKE '%{$escaped}%' OR t.memo LIKE '%{$escaped}%'";
+		if (ctype_digit($search)) {
+			$where .= ' OR t.user_id = '.(int) $search;
+		}
 	}
 
 	$totalRow = $GLOBALS['DATABASE']->getFirstRow(

@@ -4,12 +4,13 @@
 # Usage:
 #   ./tests/run-ci-local.sh               # unit tests + language check + smoke + bottom-nav check
 #   ./tests/run-ci-local.sh --integration # also run integration tests (requires MySQL)
-#   ./tests/run-ci-local.sh --coverage    # diff coverage gate (requires diff-cover + --integration)
+#   ./tests/run-ci-local.sh --coverage    # diff coverage gate + tree % (requires diff-cover + MySQL)
 #
 # Prerequisites:
 #   - composer install
 #   - Local PHP dev server running on :8000  (php -S localhost:8000)
 #   - For --integration: MySQL with game installed (php tests/ci-install.php)
+#   - For --coverage: PHP with Xdebug coverage mode; pip install diff-cover
 
 set -euo pipefail
 
@@ -85,6 +86,7 @@ run "Error log empty"  check_error_log
 
 if [[ $COVERAGE -eq 1 ]]; then
   run "Diff coverage (unit + integration)" bash tests/check-diff-coverage.sh --integration
+  run "Tree coverage report" bash tests/check-tree-coverage.sh
 elif [[ $INTEGRATION -eq 1 ]]; then
   run "Integration tests" php vendor/bin/phpunit --configuration phpunit-integration.xml
   run "Error log empty (post-integration)" check_error_log
