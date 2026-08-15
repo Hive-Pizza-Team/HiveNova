@@ -47,6 +47,18 @@ class BattleSimulatorCoordsTest extends TestCase
 		], $result);
 	}
 
+	public function testDefaultDefenderIsClassicDummyCoords(): void
+	{
+		$result = BattleSimulatorCoords::normalize([], BattleSimulatorCoords::DEFAULT_DEFENDER, ...self::LIMITS);
+
+		$this->assertSame([
+			'galaxy' => 1,
+			'system' => 33,
+			'planet' => 7,
+			'type' => BattleSimulatorCoords::TYPE_PLANET,
+		], $result);
+	}
+
 	public function testNormalizeFallsBackWhenCoordinatesAreOutOfRange(): void
 	{
 		$result = BattleSimulatorCoords::normalize(

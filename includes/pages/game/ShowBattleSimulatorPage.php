@@ -59,7 +59,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 			'planet' => HTTP::_GP('planet', 0),
 			'type' => HTTP::_GP('type', 0),
 			'planettype' => HTTP::_GP('planettype', 0),
-		], $attacker, $maxGalaxy, $maxSystem, $maxPlanet);
+		], BattleSimulatorCoords::DEFAULT_DEFENDER, $maxGalaxy, $maxSystem, $maxPlanet);
 
 		return [
 			'attacker' => $attacker,

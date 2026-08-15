@@ -13,6 +13,14 @@ class BattleSimulatorCoords
 	public const TYPE_PLANET = 1;
 	public const TYPE_MOON = 3;
 
+	/** Classic dummy target used when the simulator is opened without a spy report. */
+	public const DEFAULT_DEFENDER = [
+		'galaxy' => 1,
+		'system' => 33,
+		'planet' => 7,
+		'type' => self::TYPE_PLANET,
+	];
+
 	/**
 	 * @param array<string, mixed> $coords
 	 * @param array<string, mixed> $fallback
