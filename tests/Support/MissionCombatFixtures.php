@@ -38,6 +38,7 @@ function missionCombatUser(int $id, array $overrides = []): array
         'galaxy' => 1,
         'system' => 1,
         'planet' => 8,
+        'ally_id' => 0,
         'darkmatter' => 0,
         'b_tech' => 0,
         'b_tech_id' => 0,
@@ -101,8 +102,30 @@ class MissionCombatFakeDatabase extends FakeDatabase
     /** @var array<int, int> moonId => parentPlanetId */
     public array $moonParentMap = [];
 
+    /** @var array<int, array<string, mixed>> */
+    public array $alliances = [];
+
     public function selectSingle($qry, array $params = [], $field = false)
     {
+        if (str_contains($qry, 'ally_discord_webhook')) {
+            $userId = (int) ($params[':userId'] ?? 0);
+            $user = $this->achievement->users[$userId] ?? null;
+            if ($user === null) {
+                return $field === false ? false : false;
+            }
+            $allyId = (int) ($user['ally_id'] ?? 0);
+            $webhook = '';
+            if ($allyId > 0 && isset($this->alliances[$allyId])) {
+                $webhook = (string) ($this->alliances[$allyId]['ally_discord_webhook'] ?? '');
+            }
+            $row = [
+                'username' => $user['username'] ?? 'player' . $userId,
+                'ally_id' => $allyId,
+                'ally_discord_webhook' => $webhook,
+            ];
+            return $field === false ? $row : ($row[$field] ?? false);
+        }
+
         if (str_contains($qry, '%%PLANETS%%') && str_contains($qry, 'id_luna = :moonId')) {
             $moonId = (int) ($params[':moonId'] ?? 0);
             $parentId = $this->moonParentMap[$moonId] ?? null;

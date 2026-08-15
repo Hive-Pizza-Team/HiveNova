@@ -39,6 +39,7 @@ CREATE TABLE `%PREFIX%alliance` (
   `ally_register_time` int(11) NOT NULL DEFAULT '0',
   `ally_description` text,
   `ally_web` varchar(255) DEFAULT '',
+  `ally_discord_webhook` varchar(512) NOT NULL DEFAULT '',
   `ally_text` text,
   `ally_image` varchar(255) DEFAULT '',
   `ally_request` varchar(1000) DEFAULT NULL,

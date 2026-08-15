@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\AllianceService;
 use HiveNova\Core\Database;
+use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
@@ -755,9 +756,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminOverview()
 	{
-		global $LNG;
+		global $LNG, $USER;
 		$send 		= HTTP::_GP('send', 0);
 		$textMode  	= HTTP::_GP('textMode', 'external');
+		$webhookInvalid = false;
 
 		if ($send) {
 			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -837,8 +839,26 @@ class ShowAlliancePage extends AbstractGamePage
 					break;
 			}
 
+			$webhookSql = '';
+			$webhookParams = [];
+			if ((int) $this->allianceData['ally_owner'] === (int) $USER['id']) {
+				$resolvedWebhook = DiscordWebhookService::resolveAdminInput(
+					HTTP::_GP('discord_webhook', ''),
+					HTTP::_GP('discord_webhook_clear', 0) == 1,
+					(string) ($this->allianceData['ally_discord_webhook'] ?? '')
+				);
+				if ($resolvedWebhook === false) {
+					$webhookInvalid = true;
+				} else {
+					$this->allianceData['ally_discord_webhook'] = $resolvedWebhook;
+					$webhookSql = 'ally_discord_webhook = :AllianceDiscordWebhook, ';
+					$webhookParams[':AllianceDiscordWebhook'] = $resolvedWebhook;
+				}
+			}
+
 			$sql = "UPDATE %%ALLIANCE%% SET
 			" . $textSQL . "
+			" . $webhookSql . "
 			ally_tag = :AllianceTag,
 			ally_name = :AllianceName,
 			ally_owner_range = :AllianceOwnerRange,
@@ -852,7 +872,7 @@ class ShowAlliancePage extends AbstractGamePage
 			ally_events = :AllianceEvents
 			WHERE id = :AllianceID;";
 
-			$db->update($sql, array(
+			$db->update($sql, array_merge($webhookParams, array(
 				':AllianceTag'				=> $this->allianceData['ally_tag'],
 				':AllianceName'				=> $this->allianceData['ally_name'],
 				':AllianceOwnerRange'		=> $this->allianceData['ally_owner_range'],
@@ -866,7 +886,14 @@ class ShowAlliancePage extends AbstractGamePage
 				':AllianceEvents'			=> $this->allianceData['ally_events'],
 				':AllianceID'				=> $this->allianceData['id'],
 				':text'						=> $text
-			));
+			)));
+
+			if ($webhookInvalid) {
+				$this->printMessage($LNG['al_discord_webhook_invalid'], array(array(
+					'label'	=> $LNG['sys_back'],
+					'url'	=> 'game.php?page=alliance&mode=admin'
+				)));
+			}
 		} else if (isset($this->allianceData)) {
 			$text = match ($textMode) {
                 'internal' => $this->allianceData['ally_text'],
@@ -893,6 +920,8 @@ class ShowAlliancePage extends AbstractGamePage
 			'ally_tag' 					=> $this->allianceData['ally_tag'],
 			'ally_name'					=> $this->allianceData['ally_name'],
 			'ally_web' 					=> $this->allianceData['ally_web'],
+			'AllianceOwner'				=> (int) $this->allianceData['ally_owner'] === (int) $USER['id'],
+			'discord_webhook_configured'	=> !empty($this->allianceData['ally_discord_webhook']),
 			'ally_image'				=> $this->allianceData['ally_image'],
 			'ally_request_notallow' 	=> $this->allianceData['ally_request_notallow'],
 			'ally_members' 				=> $this->allianceData['ally_members'],

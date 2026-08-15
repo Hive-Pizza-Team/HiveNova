@@ -1,6 +1,7 @@
 <?php
 
 use HiveNova\Core\Config;
+use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Mission\MissionCaseAttack;
 use HiveNova\Mission\MissionCaseDestruction;
 use HiveNova\Mission\MissionCaseMIP;
@@ -257,5 +258,122 @@ class MissionCaseCombatTest extends TestCase
 
         $this->assertEmpty($this->fake->achievement->messages);
         $this->assertEmpty($this->fake->fleetUpdates);
+    }
+
+    public function test_attack_posts_combat_discord_when_alliance_has_webhook(): void
+    {
+        $posts = $this->withDiscordPoster(function (): void {
+            $this->seedDefenderWebhook();
+            $mission = new MissionCaseAttack(missionFleetFixture([
+                'fleet_mission' => 1,
+                'fleet_array' => '202,100;',
+                'fleet_amount' => 100,
+                'fleet_target_owner' => 2,
+            ]));
+            $mission->TargetEvent();
+        });
+
+        $this->assertCount(1, $posts);
+        $payload = json_decode($posts[0]['json'], true);
+        $this->assertStringContainsString('Combat resolved', $payload['content']);
+        $this->assertStringContainsString('player2', $payload['content']);
+        $this->assertStringNotContainsString('player1', $payload['content']);
+    }
+
+    public function test_destruction_posts_combat_discord(): void
+    {
+        $posts = $this->withDiscordPoster(function (): void {
+            $this->seedDefenderWebhook();
+            $mission = new MissionCaseDestruction(missionFleetFixture([
+                'fleet_mission' => 9,
+                'fleet_array' => '202,50;',
+                'fleet_amount' => 50,
+                'fleet_target_owner' => 2,
+            ]));
+            $mission->TargetEvent();
+        });
+
+        $this->assertCount(1, $posts);
+    }
+
+    public function test_mip_posts_combat_discord(): void
+    {
+        $this->fake->planetRowsById[99]['interplanetary_missile'] = 0;
+        $this->fake->planetRowsById[99]['rocket_launcher'] = 5;
+        $posts = $this->withDiscordPoster(function (): void {
+            $this->seedDefenderWebhook();
+            $mission = new MissionCaseMIP(missionFleetFixture([
+                'fleet_mission' => 10,
+                'fleet_amount' => 5,
+                'fleet_target_obj' => 401,
+                'fleet_array' => '503,5;',
+            ]));
+            $mission->TargetEvent();
+        });
+
+        $this->assertCount(1, $posts);
+    }
+
+    public function test_attack_skips_combat_discord_when_planet_is_gone(): void
+    {
+        unset($this->fake->planetRowsById[99]);
+        $posts = $this->withDiscordPoster(function (): void {
+            $this->seedDefenderWebhook();
+            $mission = new MissionCaseAttack(missionFleetFixture([
+                'fleet_mission' => 1,
+                'fleet_array' => '202,100;',
+                'fleet_amount' => 100,
+                'fleet_target_owner' => 2,
+            ]));
+            $mission->TargetEvent();
+        });
+
+        $this->assertSame([], $posts);
+    }
+
+    public function test_attack_skips_combat_discord_after_defender_leaves_alliance(): void
+    {
+        $posts = $this->withDiscordPoster(function (): void {
+            $this->seedDefenderWebhook();
+            $this->fake->achievement->users[2]['ally_id'] = 0;
+            $mission = new MissionCaseAttack(missionFleetFixture([
+                'fleet_mission' => 1,
+                'fleet_array' => '202,100;',
+                'fleet_amount' => 100,
+                'fleet_target_owner' => 2,
+            ]));
+            $mission->TargetEvent();
+        });
+
+        $this->assertSame([], $posts);
+    }
+
+    private function seedDefenderWebhook(): void
+    {
+        $this->fake->achievement->users[2]['ally_id'] = 10;
+        $this->fake->alliances[10] = [
+            'id' => 10,
+            'ally_discord_webhook' => 'https://discord.com/api/webhooks/123456789012345678/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0123456789-_xx',
+        ];
+    }
+
+    /**
+     * @param callable(): void $callback
+     * @return list<array{url: string, json: string}>
+     */
+    private function withDiscordPoster(callable $callback): array
+    {
+        $posts = [];
+        DiscordWebhookService::setPoster(static function (string $url, string $json) use (&$posts): int {
+            $posts[] = ['url' => $url, 'json' => $json];
+            return 204;
+        });
+        try {
+            $callback();
+        } finally {
+            DiscordWebhookService::setPoster(null);
+        }
+
+        return $posts;
     }
 }
