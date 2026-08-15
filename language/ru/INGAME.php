@@ -276,6 +276,7 @@ $LNG['fl_planet_shortcut']                = '(П)';
 $LNG['fl_debris_shortcut']                = '(ПО)';
 $LNG['fl_moon_shortcut']                  = '(Л)';
 $LNG['fl_no_shortcuts']                   = 'Нет маршрутов';
+$LNG['fl_recent_destinations']            = 'Недавние цели';
 $LNG['fl_register_shorcut']               = 'Сохранить';
 $LNG['fl_shortcuts']                      = 'Маршруты';
 $LNG['fl_dlte_shortcut']                  = 'Удалить';

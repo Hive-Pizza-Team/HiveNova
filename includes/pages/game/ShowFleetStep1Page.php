@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\FrequentLocationService;
 
 /**
  *  2Moons 
@@ -81,6 +82,10 @@ class ShowFleetStep1Page extends AbstractGamePage
 		$shortcutList	= $this->GetUserShotcut();
 		$colonyList 	= $this->GetColonyList();
 		$ACSList 		= $this->GetAvalibleACS();
+		$frequentLocationList = FrequentLocationService::listForUser(
+			(int) $USER['id'],
+			FrequentLocationService::ownBodiesFromPlanets($USER['PLANETS'] ?? [])
+		);
 		
 		if(!empty($shortcutList)) {
 			$shortcutAmount	= max(array_keys($shortcutList));
@@ -98,6 +103,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 			'mission'		=> $mission,
 			'shortcutList'	=> $shortcutList,
 			'shortcutMax'	=> $shortcutAmount,
+			'frequentLocationList'	=> $frequentLocationList,
 			'colonyList' 	=> $colonyList,
 			'ACSList' 		=> $ACSList,
 			'galaxy' 		=> $targetGalaxy,

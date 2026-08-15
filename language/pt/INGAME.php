@@ -290,6 +290,7 @@ $LNG['fl_planet_shortcut']					= '(P)';
 $LNG['fl_debris_shortcut']					= '(CD)';
 $LNG['fl_moon_shortcut']					= '(L)';
 $LNG['fl_no_shortcuts']						= 'Sem atalhos';
+$LNG['fl_recent_destinations']				= 'Destinos recentes';
 $LNG['fl_register_shorcut']					= 'Criar';
 $LNG['fl_shortcuts']						= 'Atalhos';
 $LNG['fl_dlte_shortcut']					= 'Apagar';

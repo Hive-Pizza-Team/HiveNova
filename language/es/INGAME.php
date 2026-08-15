@@ -286,6 +286,7 @@ $LNG['fl_planet_shortcut']					= '(P)';
 $LNG['fl_debris_shortcut']					= '(E)';
 $LNG['fl_moon_shortcut']					= '(L)';
 $LNG['fl_no_shortcuts']						= 'No hay accesos directos';
+$LNG['fl_recent_destinations']				= 'Destinos recientes';
 $LNG['fl_register_shorcut']					= 'Registrar';
 $LNG['fl_shortcuts']						= 'Accesos directos';
 $LNG['fl_dlte_shortcut']					= 'Eliminar';

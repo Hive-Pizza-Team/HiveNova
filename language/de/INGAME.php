@@ -290,6 +290,7 @@ $LNG['fl_planet_shortcut']					= '(P)';
 $LNG['fl_debris_shortcut']					= '(T)';
 $LNG['fl_moon_shortcut']					= '(M)';
 $LNG['fl_no_shortcuts']						= 'Keine Shortcuts vorhanden';
+$LNG['fl_recent_destinations']				= 'Letzte Ziele';
 $LNG['fl_register_shorcut']					= 'Erstellen';
 $LNG['fl_shortcuts']						= 'Shortcuts';
 $LNG['fl_dlte_shortcut']					= 'Löschen';

@@ -6,6 +6,7 @@ require_once __DIR__ . '/FakeAchievementDatabase.php';
 require_once __DIR__ . '/SessionDatabaseStub.php';
 require_once __DIR__ . '/FakeFleetQueryHandler.php';
 require_once __DIR__ . '/FakePlanetQueryHandler.php';
+require_once __DIR__ . '/FakeFrequentLocationQueryHandler.php';
 
 /**
  * Composed in-memory DatabaseInterface for unit tests.
@@ -15,6 +16,7 @@ class FakeDatabase implements DatabaseInterface
 {
     use FakeFleetQueryHandler;
     use FakePlanetQueryHandler;
+    use FakeFrequentLocationQueryHandler;
 
     public FakeAchievementDatabase $achievement;
 
@@ -40,6 +42,9 @@ class FakeDatabase implements DatabaseInterface
 
     private function route(string $qry): string
     {
+        if ($this->isFrequentLocationQuery($qry)) {
+            return 'frequent';
+        }
         if ($this->isFleetQuery($qry)) {
             return 'fleet';
         }
@@ -72,7 +77,9 @@ class FakeDatabase implements DatabaseInterface
         }
 
         return match ($this->route($qry)) {
+            'frequent' => $this->frequentLocationSelect($qry, $params),
             'fleet' => $this->fleetSelect($qry, $params),
+            'planet' => $this->planetSelect($qry, $params),
             'session' => $this->session->select($qry, $params),
             default => $this->achievement->select($qry, $params),
         };
@@ -224,6 +231,7 @@ class FakeDatabase implements DatabaseInterface
         }
 
         return match ($this->route($qry)) {
+            'frequent' => $this->frequentLocationSelectSingle($qry, $params, $field),
             'fleet' => $this->fleetSelectSingle($qry, $params, $field),
             'planet' => $this->planetSelectSingle($qry, $params, $field),
             'session' => $this->session->selectSingle($qry, $params, $field),
@@ -275,6 +283,7 @@ class FakeDatabase implements DatabaseInterface
         }
 
         return match ($this->route($qry)) {
+            'frequent' => $this->frequentLocationInsert($qry, $params),
             'fleet' => true,
             'session' => $this->session->insert($qry, $params),
             default => $this->achievement->insert($qry, $params),
@@ -284,6 +293,7 @@ class FakeDatabase implements DatabaseInterface
     public function update($qry, array $params = [])
     {
         return match ($this->route($qry)) {
+            'frequent' => $this->frequentLocationUpdate($qry, $params),
             'fleet' => $this->fleetUpdate($qry, $params),
             'planet' => $this->planetUpdate($qry, $params),
             'session' => $this->session->update($qry, $params),
@@ -294,6 +304,7 @@ class FakeDatabase implements DatabaseInterface
     public function delete($qry, array $params = [])
     {
         return match ($this->route($qry)) {
+            'frequent' => $this->frequentLocationDelete($qry, $params),
             'fleet' => $this->fleetDelete($qry, $params),
             'session' => $this->session->delete($qry, $params),
             default => $this->achievement->delete($qry, $params),

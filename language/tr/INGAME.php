@@ -297,6 +297,7 @@ $LNG['fl_planet_shortcut']					= '(G)';
 $LNG['fl_debris_shortcut']					= '(HA)';
 $LNG['fl_moon_shortcut']					= '(A)';
 $LNG['fl_no_shortcuts']						= 'Hiçbir kısayol yok';
+$LNG['fl_recent_destinations']				= 'Son hedefler';
 $LNG['fl_register_shorcut']					= 'Oluştur';
 $LNG['fl_shortcuts']						= 'Kısayollar';
 $LNG['fl_dlte_shortcut']					= 'Sil';
