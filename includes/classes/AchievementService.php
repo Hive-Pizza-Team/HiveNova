@@ -332,7 +332,7 @@ class AchievementService
             'planet_count'      => $planetCount,
             'expedition_count'  => $expeditionCount,
             'ally_id'           => (int) $user['ally_id'],
-            'hive_valid'        => PlayerUtil::isHiveAccountValid($user['hive_account'] ?? '') ? 1 : 0,
+            'hive_valid'        => HiveUtil::isAccountValid($user['hive_account'] ?? '') ? 1 : 0,
             'account_age_days'  => (int) floor((TIMESTAMP - (int) $user['register_time']) / 86400),
             'win_rate'          => $winRate,
             'total_fights'      => $totalFights,
