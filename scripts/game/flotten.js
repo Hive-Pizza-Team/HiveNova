@@ -84,6 +84,16 @@ function setTarget(galaxy, solarsystem, planet, type) {
 	document.getElementsByName("type")[0].value = type;
 }
 
+function setFrequentLocation(sel) {
+	if (!sel.value) {
+		return;
+	}
+	var parts = sel.value.split(',');
+	setTarget(parts[0], parts[1], parts[2], parts[3]);
+	updateVars();
+	sel.selectedIndex = 0;
+}
+
 function FleetTime(){ 
 	var sekunden = serverTime.getSeconds();
 	var starttime = dataFlyTime;

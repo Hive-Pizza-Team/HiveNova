@@ -733,6 +733,16 @@ class FleetFunctions
 			':timestamp'				=> TIMESTAMP,
 			':universe'	   				=> Universe::current(),
 		));
+
+		FrequentLocationService::tryRecordFromFleet(
+			(int) $fleetStartOwner,
+			(int) $fleetTargetPlanetGalaxy,
+			(int) $fleetTargetPlanetSystem,
+			(int) $fleetTargetPlanetPlanet,
+			(int) $fleetTargetPlanetType,
+			(int) $fleetMission
+		);
+
 		return $fleetId;
 	}
 }

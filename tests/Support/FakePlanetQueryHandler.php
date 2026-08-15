@@ -69,6 +69,27 @@ trait FakePlanetQueryHandler
         return $row;
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function planetSelect(string $qry, array $params): array
+    {
+        if (str_contains($qry, 'id_owner') && str_contains($qry, 'destruyed')) {
+            $ownerId = (int) ($params[':userId'] ?? 0);
+            $destroyed = (int) ($params[':destruyed'] ?? 0);
+
+            return array_values(array_filter(
+                $this->planetRowsById,
+                static function (array $row) use ($ownerId, $destroyed): bool {
+                    return (int) ($row['id_owner'] ?? 0) === $ownerId
+                        && (int) ($row['destruyed'] ?? 0) === $destroyed;
+                }
+            ));
+        }
+
+        return [];
+    }
+
     public int $lastPlanetInsertId = 0;
 
     /** @var list<array<string, mixed>> */
