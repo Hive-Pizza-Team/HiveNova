@@ -11,6 +11,13 @@ require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 class ResourceUpdateTest extends TestCase
 {
 	use SwapDatabaseInstance;
+
+	/** @var array<int|string, mixed>|null */
+	private static ?array $savedResource = null;
+
+	/** @var array<string, mixed>|null */
+	private static ?array $savedReslist = null;
+
 	// -----------------------------------------------------------------------
 	// Fixtures
 	// -----------------------------------------------------------------------
@@ -31,6 +38,8 @@ class ResourceUpdateTest extends TestCase
 			'storage_multiplier'     => 1,
 			'energySpeed'            => 1,
 			'max_overflow'           => 2,
+			'game_speed'             => 1,
+			'min_build_time'         => 0,
 		], $overrides);
 		return new Config($data);
 	}
@@ -48,10 +57,13 @@ class ResourceUpdateTest extends TestCase
 			903 => 'deuterium',
 			911 => 'energy',
 			921 => 'darkmatter',
+			14  => 'robotic_factory',
+			15  => 'nanite_factory',
 			22  => 'solar_plant',
 			23  => 'fusion_reactor',
 			24  => 'solar_satellite',
 			31  => 'intergalactic_research',
+			33  => 'terraformer',
 			113 => 'energy_tech',
 			123 => 'intergalactic_research_tech',
 			131 => 'plasma_tech',
@@ -65,12 +77,14 @@ class ResourceUpdateTest extends TestCase
 		return [
 			'prod'     => [],
 			'storage'  => [],
-			'resstype' => [1 => [901, 902, 903], 2 => [911]],
-			'one'      => [],
-			'build'    => [1],
-			'tech'     => [113],
+			'build'    => [1, 2, 3, 4, 6, 12, 14, 15, 21, 22, 23, 24, 31, 33, 34],
 			'fleet'    => [202],
 			'defense'  => [],
+			'missile'  => [],
+			'tech'     => [113],
+			'resstype' => [1 => [901, 902, 903], 2 => [911]],
+			'one'      => [],
+			'ressources' => [901, 902, 903, 911, 921],
 			'officier' => [],
 		];
 	}
@@ -127,6 +141,7 @@ class ResourceUpdateTest extends TestCase
 				'Resource'        => 0,
 				'Energy'          => 0,
 				'ResourceStorage' => 0,
+				'BuildTime'       => 0,
 			],
 			'plasma_tech'               => 0,
 			'graviton_tech'             => 0,
@@ -141,6 +156,10 @@ class ResourceUpdateTest extends TestCase
 	{
 		return array_merge([
 			'id'                => 1,
+			'name'              => 'PR3',
+			'galaxy'            => 4,
+			'system'            => 80,
+			'planet'            => 13,
 			'planet_type'       => 1,
 			'metal'             => 0,
 			'crystal'           => 0,
@@ -161,6 +180,9 @@ class ResourceUpdateTest extends TestCase
 			'b_hangar'          => 0,
 			'field_current'     => 0,
 			'temp_max'          => 30,
+			'terraformer'       => 0,
+			'robotic_factory'   => 0,
+			'nanite_factory'    => 0,
 			'solar_plant'       => 0,
 			'solar_plant_porcent'         => 100,
 			'fusion_reactor'              => 0,
@@ -214,6 +236,18 @@ class ResourceUpdateTest extends TestCase
 		$ref->setAccessible(true);
 		$ref->setValue(null, []);
 
+		if (self::$savedResource === null) {
+			self::$savedResource = $GLOBALS['resource'] ?? [];
+			self::$savedReslist = $GLOBALS['reslist'] ?? [];
+		}
+
+		$GLOBALS['resource'] = array_replace(self::$savedResource, $this->makeResource());
+		$GLOBALS['reslist'] = self::$savedReslist;
+		$ressources = $GLOBALS['reslist']['ressources'] ?? [901, 902, 903, 921];
+		if (!in_array(911, $ressources, true)) {
+			$GLOBALS['reslist']['ressources'] = array_merge($ressources, [911]);
+		}
+
 		$GLOBALS['pricelist'][113] = [
 			'cost'   => [901 => 0, 902 => 0, 903 => 0],
 			'factor' => 2,
@@ -223,6 +257,12 @@ class ResourceUpdateTest extends TestCase
 
 	protected function tearDown(): void
 	{
+		if (self::$savedResource !== null) {
+			$GLOBALS['resource'] = self::$savedResource;
+		}
+		if (self::$savedReslist !== null) {
+			$GLOBALS['reslist'] = self::$savedReslist;
+		}
 		unset($GLOBALS['ProdGrid']);
 		$this->restoreDatabaseInstance();
 	}
@@ -305,6 +345,24 @@ class ResourceUpdateTest extends TestCase
 
 		[, $returned] = $result;
 		$this->assertEquals(500, $returned['metal'], 'Vacation mode must leave metal unchanged');
+	}
+
+	public function testVacationModeDoesNotSkipCalculationWhenPlayerIsInactive(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser([
+			'urlaubs_modus' => 1,
+			'onlinetime'    => TIMESTAMP - INACTIVE - 1,
+		]);
+		$planet   = $this->makePlanet(['metal_perhour' => 3600]);
+
+		$eco = $this->makeEcoWithMatchingHash($user, $planet, $resource, $reslist, $config);
+		$eco->CalcResource($user, $planet, false, $planet['last_update'] + 3600);
+		[, $updated] = $eco->getData();
+
+		$this->assertEquals(3600.0, $updated['metal'], 'Inactive vacation planets must still produce');
 	}
 
 	public function testCrystalAccumulatesIndependentlyOfMetal(): void
@@ -415,6 +473,29 @@ class ResourceUpdateTest extends TestCase
 		$hash2 = $eco->CreateHash();
 
 		$this->assertNotEquals($hash1, $hash2, 'Hash must differ when a building level changes');
+	}
+
+	public function testHashChangesWhenPlayerBecomesInactive(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_replace($this->makeReslist(), ['prod' => [22]]);
+		$config   = $this->makeConfig();
+		Config::setInstance($config, 1);
+
+		$planet       = $this->makePlanet();
+		$activeUser   = $this->makeUser(['onlinetime' => TIMESTAMP]);
+		$inactiveUser = $this->makeUser(['onlinetime' => TIMESTAMP - INACTIVE - 1]);
+
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+
+		$eco->setData($activeUser, $planet);
+		$hashActive = $eco->CreateHash();
+
+		$eco->setData($inactiveUser, $planet);
+		$hashInactive = $eco->CreateHash();
+
+		$this->assertNotEquals($hashActive, $hashInactive, 'Hash must differ when inactivity forces full production');
 	}
 
 	// -----------------------------------------------------------------------
@@ -554,6 +635,208 @@ class ResourceUpdateTest extends TestCase
 		$result = $eco->CalcResource($user, $planet, false, $planet['last_update']);
 		$this->assertIsArray($result);
 		$this->assertCount(2, $result);
+	}
+
+	/**
+	 * Player report (10 Jul 2026): Terraformer queued on PR3 with enough listed
+	 * resources (556/200002/400079) and 4119 max energy vs 4000 required, but
+	 * SetNextQueueElementOnTop rejected the build as "Impossible to build".
+	 *
+	 * With matching amounts the queue item must start and deduct silicon/uranium.
+	 */
+	public function testSetNextQueueStartsTerraformerWithReportedResources(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser(['hof' => 0]);
+
+		$queue = [[33, 3, 0, 1000000, 'build']];
+		$planet = $this->makePlanet([
+			'terraformer'    => 2,
+			'metal'          => 556,
+			'crystal'        => 200002,
+			'deuterium'      => 400079,
+			'energy'         => 4119,
+			'b_building'     => 1000000,
+			'b_building_id'  => serialize($queue),
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueElementOnTop());
+
+		[, $updated] = $eco->getData();
+
+		$this->assertNotSame('', $updated['b_building_id'], 'Queue must keep the Terraformer once started');
+		$this->assertGreaterThan(1000000, $updated['b_building'], 'Build end time must be set in the future');
+		$this->assertEquals(556.0, $updated['metal']);
+		$this->assertEquals(2.0, $updated['crystal'], '200002 - 200000 silicon');
+		$this->assertEquals(79.0, $updated['deuterium'], '400079 - 400000 uranium');
+	}
+
+	/**
+	 * Same report scenario but energy production below the Terraformer cost:
+	 * metal/silicon/uranium look fine in the base message, yet the queue
+	 * item is dropped because isElementBuyable also checks energy (911).
+	 * formatNotEnoughResourcesMessage appends the energy shortfall.
+	 */
+	public function testSetNextQueueDropsTerraformerWhenEnergyTooLow(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = $this->makeReslist();
+		$config   = $this->makeConfig();
+		$user     = $this->makeUser(['hof' => 0]);
+
+		$queue = [[33, 3, 0, 1000000, 'build']];
+		$planet = $this->makePlanet([
+			'terraformer'    => 2,
+			'metal'          => 556,
+			'crystal'        => 200002,
+			'deuterium'      => 400079,
+			'energy'         => 3999,
+			'b_building'     => 1000000,
+			'b_building_id'  => serialize($queue),
+		]);
+
+		Config::setInstance($config, 1);
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+		$eco->setData($user, $planet);
+
+		$this->assertTrue($eco->SetNextQueueElementOnTop());
+
+		[, $updated] = $eco->getData();
+
+		$this->assertSame('', $updated['b_building_id'], 'Queue item must be removed when energy blocks the build');
+		$this->assertSame(0, $updated['b_building']);
+		$this->assertEquals(200002.0, $updated['crystal'], 'Resources must not be deducted on failure');
+		$this->assertEquals(400079.0, $updated['deuterium']);
+	}
+
+	public function testFormatNotEnoughResourcesMessageIncludesEnergyWhenCostRequiresIt(): void
+	{
+		$GLOBALS['LNG'] = [
+			'sys_notenough_money'        => 'RES %s %d [%d:%d:%d] %s | have %s %s , %s %s and %s %s | need %s %s , %s %s and %s %s',
+			'sys_notenough_money_energy' => ' | energy have %s %s need %s %s',
+			'tech' => [
+				33  => 'Terraformer',
+				901 => 'Metal',
+				902 => 'Silicon',
+				903 => 'Uranium',
+				911 => 'Energy',
+			],
+		];
+
+		$planet = [
+			'name'      => 'PR3',
+			'id'        => 42,
+			'galaxy'    => 4,
+			'system'    => 80,
+			'planet'    => 13,
+			'metal'     => 556,
+			'crystal'   => 200002,
+			'deuterium' => 400079,
+			'energy'    => 3999,
+		];
+		$cost = [901 => 0, 902 => 200000, 903 => 400000, 911 => 4000];
+
+		$message = ResourceUpdate::formatNotEnoughResourcesMessage($planet, 33, $cost);
+
+		$this->assertStringContainsString('Terraformer', $message);
+		$this->assertStringContainsString('energy have', $message);
+		$this->assertStringContainsString('Energy', $message);
+		$this->assertStringContainsString('3.999', $message);
+		$this->assertStringContainsString('4.000', $message);
+	}
+
+	public function testReBuildCacheForcesFullProductionWhenPlayerIsInactive(): void
+	{
+		$resource = array_replace($this->makeResource(), [
+			1 => 'metal_mine',
+			2 => 'solar_plant_building',
+		]);
+		$reslist = array_replace($this->makeReslist(), [
+			'prod' => [1, 2],
+		]);
+		$config = $this->makeConfig();
+		Config::setInstance($config, 1);
+
+		// Metal mine's production AND its own energy draw both scale with
+		// BuildLevelFactor (the stored _porcent), mirroring the real formulas
+		// in install.sql — a mine dialed to 0% neither produces nor consumes.
+		$GLOBALS['ProdGrid'] = [
+			1 => ['production' => [
+				901 => '$BuildLevel * $BuildLevelFactor',
+				911 => '-$BuildLevel * $BuildLevelFactor',
+			]],
+			2 => ['production' => [
+				911 => '$BuildLevel * 10',
+			]],
+		];
+
+		$planet = $this->makePlanet([
+			'metal_mine'                  => 1,
+			'metal_mine_porcent'          => 0,   // player dialed mines off
+			'solar_plant_building'        => 100,
+			'solar_plant_building_porcent' => 10,
+		]);
+
+		// Active player: stored porcent is honoured, mine produces nothing.
+		$activeUser = $this->makeUser(['onlinetime' => PHP_INT_MAX]);
+		$activeEco  = new ResourceUpdate(false, false);
+		$activeEco->setResourceData($resource, $reslist);
+		$activeEco->setData($activeUser, $planet);
+		$activeEco->ReBuildCache();
+		[, $activePlanet] = $activeEco->getData();
+
+		$this->assertEquals(0.0, $activePlanet['metal_perhour'], 'Active player: mines dialed to 0% must stay off');
+
+		// Inactive player: same stored porcent, but mines are forced to full production.
+		$inactiveUser = $this->makeUser(['onlinetime' => TIMESTAMP - INACTIVE - 1]);
+		$inactiveEco  = new ResourceUpdate(false, false);
+		$inactiveEco->setResourceData($resource, $reslist);
+		$inactiveEco->setData($inactiveUser, $planet);
+		$inactiveEco->ReBuildCache();
+		[, $inactivePlanet] = $inactiveEco->getData();
+
+		$this->assertEquals(10.0, $inactivePlanet['metal_perhour'], 'Inactive player: mines must run at full production regardless of stored percentage');
+	}
+
+	public function testFormatNotEnoughResourcesMessageOmitsEnergyWhenNotInCost(): void
+	{
+		$GLOBALS['LNG'] = [
+			'sys_notenough_money'        => 'RES %s %d [%d:%d:%d] %s | have %s %s , %s %s and %s %s | need %s %s , %s %s and %s %s',
+			'sys_notenough_money_energy' => ' | energy have %s %s need %s %s',
+			'tech' => [
+				1   => 'Metal Mine',
+				901 => 'Metal',
+				902 => 'Silicon',
+				903 => 'Uranium',
+				911 => 'Energy',
+			],
+		];
+
+		$planet = [
+			'name'      => 'Home',
+			'id'        => 1,
+			'galaxy'    => 1,
+			'system'    => 1,
+			'planet'    => 1,
+			'metal'     => 10,
+			'crystal'   => 10,
+			'deuterium' => 10,
+			'energy'    => 100,
+		];
+		$cost = [901 => 60, 902 => 15];
+
+		$message = ResourceUpdate::formatNotEnoughResourcesMessage($planet, 1, $cost);
+
+		$this->assertStringNotContainsString('energy have', $message);
+		$this->assertStringNotContainsString('Energy', $message);
 	}
 
 	public function testGetNetworkLevelWithoutIntergalacticTech(): void

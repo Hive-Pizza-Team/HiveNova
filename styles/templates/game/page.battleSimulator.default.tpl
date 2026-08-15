@@ -10,6 +10,17 @@
 			<td>{$LNG.bs_steal} {$LNG.tech.901}: <input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.0.1.901)}{$battleinput.0.1.901}{else}0{/if}" name="battleinput[0][1][901]"> {$LNG.tech.902}: <input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.0.1.902)}{$battleinput.0.1.902}{else}0{/if}" name="battleinput[0][1][902]"> {$LNG.tech.903}: <input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.0.1.903)}{$battleinput.0.1.903}{else}0{/if}" name="battleinput[0][1][903]"></td>
 		</tr>
 		<tr>
+			<td>
+				{$LNG.gl_galaxy}: <input type="text" inputmode="numeric" size="3" name="galaxy" value="{$simGalaxy}">
+				{$LNG.gl_solar_system}: <input type="text" inputmode="numeric" size="3" name="system" value="{$simSystem}">
+				{$LNG.gl_planet}: <input type="text" inputmode="numeric" size="3" name="planet" value="{$simPlanet}">
+				<select name="type">
+					<option value="1"{if $simType == 1} selected{/if}>{$LNG.type_planet_1}</option>
+					<option value="3"{if $simType == 3} selected{/if}>{$LNG.type_planet_3}</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td class="left"><input type="button" onClick="return add();" value="{$LNG.bs_add_acs_slot}"></td>
 		</tr>
 		<tr>

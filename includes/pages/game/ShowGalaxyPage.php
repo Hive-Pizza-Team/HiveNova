@@ -35,7 +35,7 @@ class ShowGalaxyPage extends AbstractGamePage
 	
 	public function show()
 	{
-		global $USER, $PLANET, $resource, $LNG, $reslist;
+		global $USER, $PLANET, $resource, $LNG, $reslist, $THEME;
 
 		$config			= Config::get();
 
@@ -101,11 +101,19 @@ class ShowGalaxyPage extends AbstractGamePage
 		{
 			$Result = [];
 		}
+		$populatedCount = count($Result);
+		$galaxyRows->fillUncolonizedSlots(
+			$Result,
+			(int) $config->max_planets,
+			$galaxy,
+			$system,
+			$THEME->getTheme()
+		);
 
         $this->tplObj->loadscript('galaxy.js');
         $this->assign(array(
 			'GalaxyRows'				=> $Result,
-			'planetcount'				=> sprintf($LNG['gl_populed_planets'], count($Result)),
+			'planetcount'				=> sprintf($LNG['gl_populed_planets'], $populatedCount),
 			'action'					=> $action,
 			'galaxy'					=> $galaxy,
 			'system'					=> $system,
@@ -141,5 +149,23 @@ class ShowGalaxyPage extends AbstractGamePage
 		));
 		
 		$this->display('page.galaxy.default.tpl');
+	}
+
+	public function planetViz()
+	{
+		global $THEME;
+
+		$ref = HTTP::_GP('ref', '');
+		if (!is_string($ref) || $ref === '') {
+			$this->sendJSON(array('error' => 'missing_ref'));
+		}
+
+		$galaxyRows = new GalaxyRows();
+		$payload = $galaxyRows->resolveVizJsonRef($ref, $THEME->getTheme());
+		if ($payload === null) {
+			$this->sendJSON(array('error' => 'not_found'));
+		}
+
+		$this->sendJSON($payload);
 	}
 }

@@ -128,4 +128,21 @@ class PlayerUtilIntegrationTest extends IntegrationTestCase
         $cnt = (int) $db->selectSingle($sql, [':id' => $userId], 'cnt');
         $this->assertEquals(0, $cnt, 'Deleted user should not appear in DB');
     }
+
+    public function testCountOwnedPlanetsUsesLiveDatabaseCount(): void
+    {
+        $GLOBALS['resource'][124] = 'astrophysics_tech';
+
+        [$userId] = self::createTestPlayer(self::makeUniqueUsername('pu_cap'), self::$testGalaxy, 11, 8);
+
+        $USER = [
+            'id'                => $userId,
+            'universe'          => Universe::current(),
+            'astrophysics_tech' => 0,
+            'factor'            => ['Planets' => 0],
+            'PLANETS'           => [],
+        ];
+
+        $this->assertSame(1, PlayerUtil::countOwnedPlanets($USER));
+    }
 }

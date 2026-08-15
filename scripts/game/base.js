@@ -279,20 +279,38 @@ function UhrzeitAnzeigen() {
    $(".servertime").text(getFormatedDate(serverTime.getTime(), tdformat));
 }
 
-
-$.widget("custom.catcomplete", $.ui.autocomplete, {
-	_renderMenu: function( ul, items ) {
-		var self = this,
-			currentCategory = "";
-		$.each( items, function( index, item ) {
-			if ( item.category != currentCategory ) {
-				ul.append( "<li class='ui-autocomplete-category'>" + item.category + "</li>" );
-				currentCategory = item.category;
-			}
-			self._renderItem( ul, item );
+(function() {
+	function initPlanetSelector() {
+		var selector = document.getElementById('planetSelector');
+		if (!selector) {
+			return;
+		}
+		selector.addEventListener('change', function() {
+			document.location = '?' + queryString + '&cp=' + selector.value;
 		});
 	}
-});
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initPlanetSelector);
+	} else {
+		initPlanetSelector();
+	}
+})();
+
+if ($.ui && $.ui.autocomplete) {
+	$.widget("custom.catcomplete", $.ui.autocomplete, {
+		_renderMenu: function( ul, items ) {
+			var self = this,
+				currentCategory = "";
+			$.each( items, function( index, item ) {
+				if ( item.category != currentCategory ) {
+					ul.append( "<li class='ui-autocomplete-category'>" + item.category + "</li>" );
+					currentCategory = item.category;
+				}
+				self._renderItem( ul, item );
+			});
+		}
+	});
+}
 
 $(function() {
 	$('#drop-admin').on('click', function() {
@@ -318,10 +336,6 @@ $(function() {
 			}
 		});
 	}, 1000);
-	
-	$('#planetSelector').on('change', function() {
-		document.location = '?'+queryString+'&cp='+$(this).val();
-	});
 
 	UhrzeitAnzeigen();
 	setInterval(UhrzeitAnzeigen, 1000);

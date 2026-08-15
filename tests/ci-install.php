@@ -62,11 +62,15 @@ restore_error_handler();
 
 // Open a raw PDO connection for bulk SQL execution (PDO::exec does not reliably
 // handle multi-statement strings; we split and execute statement by statement).
+// PHP 8.5+ deprecates PDO::MYSQL_ATTR_*; Pdo\Mysql exists since 8.4
+$mysqlInitCommand = class_exists(\Pdo\Mysql::class)
+    ? \Pdo\Mysql::ATTR_INIT_COMMAND
+    : PDO::MYSQL_ATTR_INIT_COMMAND;
 $pdo = new PDO(
     "mysql:host={$dbHost};port={$dbPort};dbname={$dbName}",
     $dbUser,
     $dbPass,
-    [PDO::MYSQL_ATTR_INIT_COMMAND => "SET CHARACTER SET utf8mb4, NAMES utf8mb4"]
+    [$mysqlInitCommand => "SET CHARACTER SET utf8mb4, NAMES utf8mb4"]
 );
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

@@ -12,5 +12,7 @@ includes/config.php
 includes/push.config.php
 includes/error.log
 .worktrees/
+reports/
+node_modules/
+package-lock.json
 swarm-state.md
-coverage/

@@ -1,0 +1,11 @@
+{
+  "name": "hivenova-dev-tools",
+  "private": true,
+  "description": "Optional dev deps for scripts/dev (planet JPG batch render)",
+  "scripts": {
+    "test:js": "node --test tests/js/*.test.js"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.0.0"
+  }
+}

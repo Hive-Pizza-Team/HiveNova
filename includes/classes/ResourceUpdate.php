@@ -105,6 +105,9 @@ class ResourceUpdate
 		$Hash[]	= $this->USER[$this->resource[131]];
 		$Hash[]	= $this->USER[$this->resource[132]];
 		$Hash[]	= $this->USER[$this->resource[133]];
+		// Inactivity forces 100% production in reBuildCache; include it so the
+		// cache rebuilds when a player crosses the inactive threshold (or returns).
+		$Hash[]	= \isInactive($this->USER) ? 1 : 0;
 		return md5(implode("::", $Hash));
 	}
 	
@@ -121,7 +124,9 @@ class ResourceUpdate
 
 		$this->config		= Config::get($this->USER['universe']);
 		
-		if(isVacationMode($this->USER))
+		// Vacation freezes production for active players, but inactive accounts
+		// should still accrue (bash protection is already lifted for them).
+		if(isVacationMode($this->USER) && !\isInactive($this->USER))
 			return $this->ReturnVars();
 			
 		if($this->Build)
@@ -355,19 +360,7 @@ class ResourceUpdate
 					if ($HaveNoMoreLevel) {
 						$Message     = sprintf($LNG['sys_nomore_level'], $LNG['tech'][$Element]);
 					} else {
-						if(!isset($costResources[901])) { $costResources[901] = 0; }
-						if(!isset($costResources[902])) { $costResources[902] = 0; }
-						if(!isset($costResources[903])) { $costResources[903] = 0; }
-						
-						global $LNG;
-
-						if(empty($LNG)) {
-						// Fallback language
-							$LNG = new Language('en');
-							$LNG->includeData(array('L18N', 'INGAME', 'TECH', 'CUSTOM'));
-						}
-
-						$Message     = sprintf($LNG['sys_notenough_money'], $this->PLANET['name'], $this->PLANET['id'], $this->PLANET['galaxy'], $this->PLANET['system'], $this->PLANET['planet'], $LNG['tech'][$Element], pretty_number ($this->PLANET['metal']), $LNG['tech'][901], pretty_number($this->PLANET['crystal']), $LNG['tech'][902], pretty_number ($this->PLANET['deuterium']), $LNG['tech'][903], pretty_number($costResources[901]), $LNG['tech'][901], pretty_number ($costResources[902]), $LNG['tech'][902], pretty_number ($costResources[903]), $LNG['tech'][903]);
+						$Message     = self::formatNotEnoughResourcesMessage($this->PLANET, $Element, $costResources);
 					}
 
 					PlayerUtil::sendMessage($this->USER['id'], 0,$LNG['sys_buildlist'], 99,
@@ -399,6 +392,62 @@ class ResourceUpdate
 		$this->PLANET['b_building_id'] = $NewQueue;
 
 		return true;
+	}
+
+	/**
+	 * Build the "not enough resources" inbox message for a failed queue start.
+	 * When the element costs energy (911), append available vs required energy —
+	 * the base string only lists metal/crystal/deuterium and otherwise hides
+	 * energy shortfalls (e.g. Terraformer).
+	 */
+	public static function formatNotEnoughResourcesMessage(array $planet, $element, array $costResources): string
+	{
+		global $LNG;
+
+		if (empty($LNG)) {
+			$LNG = new Language('en');
+			$LNG->includeData(array('L18N', 'INGAME', 'TECH', 'CUSTOM'));
+		}
+
+		foreach ([901, 902, 903, 911] as $resId) {
+			if (!isset($costResources[$resId])) {
+				$costResources[$resId] = 0;
+			}
+		}
+
+		$Message = sprintf(
+			$LNG['sys_notenough_money'],
+			$planet['name'],
+			$planet['id'],
+			$planet['galaxy'],
+			$planet['system'],
+			$planet['planet'],
+			$LNG['tech'][$element],
+			pretty_number($planet['metal']),
+			$LNG['tech'][901],
+			pretty_number($planet['crystal']),
+			$LNG['tech'][902],
+			pretty_number($planet['deuterium']),
+			$LNG['tech'][903],
+			pretty_number($costResources[901]),
+			$LNG['tech'][901],
+			pretty_number($costResources[902]),
+			$LNG['tech'][902],
+			pretty_number($costResources[903]),
+			$LNG['tech'][903]
+		);
+
+		if ($costResources[911] > 0) {
+			$Message .= sprintf(
+				$LNG['sys_notenough_money_energy'],
+				pretty_number($planet['energy'] ?? 0),
+				$LNG['tech'][911],
+				pretty_number($costResources[911]),
+				$LNG['tech'][911]
+			);
+		}
+
+		return $Message;
 	}
 		
 	private function ResearchQueue()
@@ -520,19 +569,7 @@ class ResourceUpdate
 				$Loop                  			= false;
 			} else {
 				if($this->USER['hof'] == 1){
-					if(!isset($costResources[901])) { $costResources[901] = 0; }
-					if(!isset($costResources[902])) { $costResources[902] = 0; }
-					if(!isset($costResources[903])) { $costResources[903] = 0; }
-					
-					global $LNG;
-
-					if(empty($LNG)) {
-					// Fallback language
-						$LNG = new Language('en');
-						$LNG->includeData(array('L18N', 'INGAME', 'TECH', 'CUSTOM'));
-					}
-
-					$Message     = sprintf($LNG['sys_notenough_money'], $PLANET['name'], $PLANET['id'], $PLANET['galaxy'], $PLANET['system'], $PLANET['planet'], $LNG['tech'][$Element], pretty_number ($PLANET['metal']), $LNG['tech'][901], pretty_number($PLANET['crystal']), $LNG['tech'][902], pretty_number ($PLANET['deuterium']), $LNG['tech'][903], pretty_number($costResources[901]), $LNG['tech'][901], pretty_number ($costResources[902]), $LNG['tech'][902], pretty_number ($costResources[903]), $LNG['tech'][903]);
+					$Message = self::formatNotEnoughResourcesMessage($PLANET, $Element, $costResources);
 					PlayerUtil::sendMessage($this->USER['id'], 0,$LNG['sys_techlist'], 99, $LNG['sys_buildlist_fail'], $Message, $this->TIME);
 				}
 

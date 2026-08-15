@@ -238,10 +238,10 @@ define('FACTOR_CANCEL_SHIPYARD'		, 0.6);
 // =============================================================================
 
 // Seconds until (i) marker appears on galaxy map
-define('INACTIVE'					, 604800);
+define('INACTIVE'					, 1209600); // 14 days
 
 // Seconds until (i I) long-inactive marker appears on galaxy map
-define('INACTIVE_LONG'				, 2419200);
+define('INACTIVE_LONG'				, 5184000); // 60 days
 
 // Cooldown in seconds before a player can change their username again
 define('USERNAME_CHANGETIME'		, 604800);
