@@ -95,6 +95,33 @@ trait FakeFleetQueryHandler
             return $field === false ? $count : ($count[$field] ?? false);
         }
 
+        if (str_contains($qry, '%%FLEETS%%')
+            && str_contains($qry, 'COUNT(*)')
+            && str_contains($qry, 'fleet_target_owner')) {
+            $targetId = (int) ($params[':targetUserId'] ?? 0);
+            $ownerId = (int) ($params[':ownerId'] ?? $targetId);
+            $outward = (int) ($params[':outward'] ?? 0);
+            $hostile = [1, 2, 6, 9, 10];
+            $incoming = 0;
+            foreach ($this->fleetRowsById as $row) {
+                if ((int) ($row['fleet_target_owner'] ?? 0) !== $targetId) {
+                    continue;
+                }
+                if ((int) ($row['fleet_owner'] ?? 0) === $ownerId) {
+                    continue;
+                }
+                if ((int) ($row['fleet_mess'] ?? 0) !== $outward) {
+                    continue;
+                }
+                if (!in_array((int) ($row['fleet_mission'] ?? 0), $hostile, true)) {
+                    continue;
+                }
+                $incoming++;
+            }
+            $count = ['incoming' => $incoming];
+            return $field === false ? $count : ($count[$field] ?? false);
+        }
+
         if (str_contains($qry, '%%FLEETS%%') && str_contains($qry, 'COUNT(*)')) {
             $count = ['state' => $this->fleetCountResult];
             return $field === false ? $count : $count[$field];

@@ -39,6 +39,9 @@
 		{elseif $vacation}
 		<div class="infobox">{$LNG.tn_vacation_mode} {$vacation}</div>
 		{/if}
+		<div id="attack-alert" class="infobox attack-notification"{if $attackAlertCount <= 0} hidden{/if} data-count="{$attackAlertCount}">
+			<a href="game.php?page=overview">{$LNG.ov_attack_alert}</a><span data-attack-alert-count>{if $attackAlertCount > 0} ({$attackAlertCount}){/if}</span>
+		</div>
 		
 		{block name="content"}{/block}
 		<table class="hack"></table>
@@ -87,6 +90,7 @@
 	</div>
 </div>
 {include file="main.bottomnav.tpl"}
+<script src="scripts/game/attack-alert.js?v={$REV}"></script>
 
 </body>
 </html>
