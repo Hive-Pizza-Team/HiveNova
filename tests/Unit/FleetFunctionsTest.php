@@ -429,6 +429,34 @@ class FleetFunctionsTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // SuggestDefaultMission — probe-only spy autoselect (issue #221)
+    // -------------------------------------------------------------------------
+
+    public function testSuggestDefaultMissionSelectsSpyForProbeOnlyFleet(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(6, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5], false));
+    }
+
+    public function testSuggestDefaultMissionKeepsTransportForAllianceMember(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(3, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5], true));
+    }
+
+    public function testSuggestDefaultMissionHonorsExplicitMissionFromGalaxy(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(1, FleetFunctions::SuggestDefaultMission(1, $available, [210 => 5], false));
+    }
+
+    public function testSuggestDefaultMissionDoesNotAutoselectWhenFleetIsMixed(): void
+    {
+        $available = [3, 1, 5];
+        $this->assertSame(0, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5, 202 => 1], false));
+    }
+
+    // -------------------------------------------------------------------------
     // GetACSDuration — empty acsId short-circuit
     // -------------------------------------------------------------------------
 
