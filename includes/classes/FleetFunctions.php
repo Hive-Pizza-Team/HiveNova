@@ -152,13 +152,15 @@ class FleetFunctions
 		return 1 + $USER[$resource[108]] + $USER['factor']['FleetSlots'];
 	}
 
-	public static function GetFleetRoom($Fleet)
+	public static function GetFleetRoom($Fleet, $Player = null)
 	{
-		global $pricelist, $USER;
+		global $USER;
+		$Player = $Player ?? $USER;
+		$storage = 1 + ($Player['factor']['ShipStorage'] ?? 0);
 		$FleetRoom 				= 0;
 		foreach ($Fleet as $ShipID => $amount)
 		{
-			$FleetRoom		   += $pricelist[$ShipID]['capacity'] * $amount * (1 + $USER['factor']['ShipStorage']);
+			$FleetRoom		   += LeftoverBonus::shipCapacity((int) $ShipID, $amount, $Player) * $storage;
 		}
 		return $FleetRoom;
 	}

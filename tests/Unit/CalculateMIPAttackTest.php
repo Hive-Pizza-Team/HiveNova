@@ -21,4 +21,16 @@ class CalculateMIPAttackTest extends TestCase
         $this->assertArrayHasKey(401, $destroyed);
         $this->assertGreaterThan(0, $destroyed[401]);
     }
+
+    public function testMipAttackIgnoresLaserLeftover(): void
+    {
+        $GLOBALS['pricelist'][401]['cost'] = [901 => 2000, 902 => 0];
+        $GLOBALS['CombatCaps'][503]['attack'] = 12000;
+
+        $without = calculateMIPAttack(0, 5, 1, [401 => 100], 401, 0);
+        $GLOBALS['USER'] = ['laser_tech' => 20];
+        $withLaser = calculateMIPAttack(0, 5, 1, [401 => 100], 401, 0);
+
+        $this->assertSame($without, $withLaser);
+    }
 }

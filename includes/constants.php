@@ -88,6 +88,9 @@ define('HIVE_RPC_NODES'				, [
 
 define('COMBAT_ENGINE'				, 'xnova');
 
+// Per-level leftover bonus for Laser/Ion/Plasma attack and Hyperspace cargo
+define('TECH_LEFTOVER_PERCENT_PER_LEVEL', 0.01);
+
 // =============================================================================
 // LOCALIZATION
 // =============================================================================

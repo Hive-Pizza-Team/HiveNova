@@ -213,6 +213,46 @@ class FleetFunctionsTest extends TestCase
         $this->assertEquals(0, FleetFunctions::GetFleetRoom([]));
     }
 
+    public function testGetFleetRoomIgnoresHyperspaceOnSmallCargo(): void
+    {
+        $GLOBALS['pricelist'][202]['capacity'] = 50;
+        $GLOBALS['requirements'][202] = [115 => 1];
+        $player = ['hyperspace_tech' => 50, 'factor' => ['ShipStorage' => 0]];
+        $this->assertEquals(500.0, FleetFunctions::GetFleetRoom([202 => 10], $player));
+    }
+
+    public function testGetFleetRoomAppliesHyperspaceLeftoverPerShip(): void
+    {
+        $GLOBALS['pricelist'][217]['capacity'] = 400000;
+        $GLOBALS['requirements'][217] = [114 => 10];
+        $player = ['hyperspace_tech' => 10, 'factor' => ['ShipStorage' => 0]];
+        $this->assertEquals(10 * 400000 * 1.10, FleetFunctions::GetFleetRoom([217 => 10], $player));
+    }
+
+    public function testGetFleetRoomMixesLeftoverAndNormalShips(): void
+    {
+        $GLOBALS['pricelist'][202]['capacity'] = 50;
+        $GLOBALS['pricelist'][217]['capacity'] = 400000;
+        $GLOBALS['requirements'][202] = [115 => 1];
+        $GLOBALS['requirements'][217] = [114 => 10];
+        $player = ['hyperspace_tech' => 10, 'factor' => ['ShipStorage' => 0]];
+        $expected = (10 * 50) + (1 * 400000 * 1.10);
+        $this->assertEquals($expected, FleetFunctions::GetFleetRoom([202 => 10, 217 => 1], $player));
+    }
+
+    public function testHyperspaceTechDoesNotChangeCombustionSpeed(): void
+    {
+        $GLOBALS['pricelist'][202]['speed'] = 12500;
+        $GLOBALS['pricelist'][202]['tech']  = 1;
+        $player = [
+            'combustion_tech' => 5,
+            'impulse_motor_tech' => 0,
+            'hyperspace_motor_tech' => 0,
+            'hyperspace_tech' => 20,
+        ];
+        $this->assertEquals(18750.0, FleetFunctions::GetFleetMaxSpeed([202 => 1], $player));
+    }
+
     // -------------------------------------------------------------------------
     // getExpeditionLimit
     // -------------------------------------------------------------------------

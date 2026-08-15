@@ -7,6 +7,7 @@ use HiveNova\Core\BuildFunctions;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 
@@ -55,10 +56,11 @@ class MissionCaseExpedition extends MissionFunctions implements Mission
 		$fleetArray		= FleetFunctions::unserialize($this->_fleet['fleet_array']);
 		$fleetPoints 	= 0;
 		$fleetCapacity	= 0;
+		$owner			= $this->getUser((int) $this->_fleet['fleet_owner']);
 
 		foreach ($fleetArray as $shipId => $shipAmount)
 		{
-			$fleetCapacity 			   += $shipAmount * $pricelist[$shipId]['capacity'];
+			$fleetCapacity 			   += LeftoverBonus::shipCapacity((int) $shipId, $shipAmount, $owner);
 			$fleetPoints   			   += $shipAmount * $expeditionPoints[$shipId];
 		}
 
