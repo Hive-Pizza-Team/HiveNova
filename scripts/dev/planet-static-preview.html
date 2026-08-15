@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Planet static thumbnail preview</title>
+	<style>
+		:root {
+			color-scheme: dark;
+			--bg: #05060e;
+			--panel: #0c0f1a;
+			--text: #c8d0e0;
+			--muted: #7a8498;
+			--accent: #ffb347;
+			--line: #1a2030;
+		}
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			font: 14px/1.45 system-ui, -apple-system, sans-serif;
+			background: var(--bg);
+			color: var(--text);
+		}
+		header, .controls {
+			padding: 16px 20px;
+			border-bottom: 1px solid var(--line);
+		}
+		header h1 { margin: 0 0 6px; font-size: 1.2rem; }
+		header p { margin: 0; color: var(--muted); max-width: 72rem; }
+		.controls {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px 24px;
+			align-items: center;
+			background: var(--panel);
+		}
+		.controls label {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			color: var(--muted);
+		}
+		.controls select { accent-color: var(--accent); }
+		.legend {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+			gap: 8px;
+			padding: 12px 20px;
+			background: #080a12;
+			border-bottom: 1px solid var(--line);
+			font-size: 0.85rem;
+			color: var(--muted);
+		}
+		.legend strong { color: var(--text); display: block; }
+		.grid-wrap { padding: 16px 20px 32px; overflow-x: auto; }
+		table {
+			border-collapse: collapse;
+			min-width: 960px;
+			width: 100%;
+		}
+		th, td {
+			border: 1px solid var(--line);
+			padding: 10px;
+			vertical-align: middle;
+			text-align: center;
+		}
+		th {
+			background: var(--panel);
+			font-weight: 600;
+			font-size: 0.85rem;
+		}
+		tr.family-row td {
+			background: #0a0d16;
+			text-align: left;
+			font-weight: 600;
+			font-size: 0.88rem;
+			color: var(--accent);
+			padding: 8px 12px;
+		}
+		td.texture {
+			text-align: left;
+			font-family: ui-monospace, monospace;
+			font-size: 0.82rem;
+			white-space: nowrap;
+		}
+		td.texture span {
+			display: block;
+			color: var(--muted);
+			font-family: system-ui, sans-serif;
+			font-size: 0.78rem;
+		}
+		.thumb {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			background: var(--bg);
+			border: 1px solid #222a3a;
+			border-radius: 6px;
+			overflow: hidden;
+		}
+		.thumb img { display: block; border: 0; }
+		.thumb .pending {
+			color: var(--muted);
+			font-size: 0.72rem;
+			padding: 6px;
+		}
+		.status {
+			padding: 8px 20px;
+			font-size: 0.85rem;
+			color: var(--muted);
+			border-bottom: 1px solid var(--line);
+		}
+		.status.error { color: #e88; }
+		.missing {
+			color: var(--muted);
+			font-size: 0.78rem;
+			padding: 8px;
+		}
+		code { color: var(--accent); }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>Planet static thumbnail preview</h1>
+		<p>
+			Compare legacy painted JPGs, on-disk batch assets (<code>256</code> lite /
+			<code>512</code> hq), and live Three.js captures for all
+			<strong>five variants per biome family</strong>. Variant <code>01</code> is the hot end of
+			each family’s temperature span; colonization assigns variant from planet temperature.
+			Legacy column = <code>nova</code> theme painted JPGs in <code>legacy-samples/</code>
+			(<code>bash scripts/dev/extract-legacy-planet-samples.sh</code>).
+			Serve: <code>php -S 127.0.0.1:8765</code>.
+		</p>
+	</header>
+	<div class="controls">
+		<label>
+			Family
+			<select id="familyFilter">
+				<option value="all" selected>All families</option>
+				<option value="trocken">Trocken</option>
+				<option value="wuesten">Wüsten</option>
+				<option value="dschjungel">Dschungel</option>
+				<option value="normaltemp">Normal temp</option>
+				<option value="wasser">Wasser</option>
+				<option value="eis">Eis</option>
+				<option value="special">Moons + special</option>
+			</select>
+		</label>
+		<label>
+			UI display size
+			<select id="displaySize">
+				<option value="80">Empire 80×80</option>
+				<option value="100" selected>Overview grid 100×100</option>
+				<option value="50">Top nav 50×50</option>
+				<option value="75">Galaxy tooltip 75×75</option>
+			</select>
+		</label>
+		<label>
+			Live render size
+			<select id="renderSize">
+				<option value="256" selected>Lite 256</option>
+				<option value="512">HQ 512</option>
+			</select>
+		</label>
+		<label>
+			<input type="checkbox" id="showMeta" checked>
+			Show band / kept notes
+		</label>
+	</div>
+	<div class="legend">
+		<div><strong>Legacy</strong>Nova theme painted JPGs (<code>legacy-samples/</code>)</div>
+		<div><strong>On disk</strong><code>_hq.jpg</code> with lite fallback</div>
+		<div><strong>Live render</strong>Current catalog + batch pipeline</div>
+		<div><strong>Meta</strong>Temp bucket, biome band, kept textures</div>
+	</div>
+	<div class="status" id="status">Loading renderer…</div>
+	<div class="grid-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Texture / temp</th>
+					<th>Legacy</th>
+					<th>On disk (_hq → lite)</th>
+					<th>Live render</th>
+					<th id="metaHead">Meta</th>
+				</tr>
+			</thead>
+			<tbody id="rows"></tbody>
+		</table>
+	</div>
+	<div id="render-host" hidden aria-hidden="true">
+		<canvas id="shared-export-canvas" class="overview-planet-canvas"></canvas>
+	</div>
+	<script src="planet-image-catalog.js"></script>
+	<script>
+	(function () {
+		'use strict';
+
+		var FAMILIES = [
+			{ key: 'trocken', label: 'Trocken (120–260°C)', prefix: 'trockenplanet' },
+			{ key: 'wuesten', label: 'Wüsten (120–260°C)', prefix: 'wuestenplanet' },
+			{ key: 'dschjungel', label: 'Dschungel (50–110°C)', prefix: 'dschjungelplanet' },
+			{ key: 'normaltemp', label: 'Normal temp (−10–80°C)', prefix: 'normaltempplanet' },
+			{ key: 'wasser', label: 'Wasser (−10–60°C)', prefix: 'wasserplanet' },
+			{ key: 'eis', label: 'Eis (−130–−10°C)', prefix: 'eisplanet' }
+		];
+
+		var SPECIAL_TEXTURES = ['mond', 'moon-small', 'moon-large', 'moon-base-2', 'moon-base-5', 'unknown', 'destroyed'];
+
+		var HIVE_BASE = '../../styles/theme/hive/planeten/';
+		var LEGACY_BASE = 'legacy-samples/';
+		var NOVA_LEGACY_BASE = '../../styles/theme/nova/planeten/';
+		var LEGACY_ALIASES = {
+			wuestenplanet05: 'wuestenplanet04',
+			moon-small: 'mond',
+			moon-large: 'mond',
+			'moon-base-2': 'mond',
+			'moon-base-5': 'mond',
+			destroyed: 'trockenplanet01'
+		};
+		var rowsEl = document.getElementById('rows');
+		var statusEl = document.getElementById('status');
+		var familyFilterEl = document.getElementById('familyFilter');
+		var displaySizeEl = document.getElementById('displaySize');
+		var renderSizeEl = document.getElementById('renderSize');
+		var showMetaEl = document.getElementById('showMeta');
+		var metaHead = document.getElementById('metaHead');
+		var sharedCanvas = document.getElementById('shared-export-canvas');
+		var renderGen = 0;
+		var rendererReady = false;
+
+		function loadScript(src) {
+			return new Promise(function (resolve, reject) {
+				var el = document.createElement('script');
+				el.src = src;
+				el.onload = resolve;
+				el.onerror = function () { reject(new Error('Failed to load ' + src)); };
+				document.head.appendChild(el);
+			});
+		}
+
+		function renderModeAndSize() {
+			var size = parseInt(renderSizeEl.value, 10);
+			return { size: size, lite: size < 384 };
+		}
+
+		function captureEntry(entry) {
+			if (!rendererReady || !window.HiveNovaOverviewPlanet) {
+				return Promise.resolve(null);
+			}
+			var opts = renderModeAndSize();
+			var mode = opts.lite ? 'lite' : 'full';
+			return window.HiveNovaOverviewPlanet.renderStatic(
+				sharedCanvas,
+				PlanetImageCatalog.buildPayload(entry, mode),
+				{ lite: opts.lite, size: opts.size, jpegQuality: 0.96 }
+			).then(function (result) {
+				return result && result.dataUrl ? result.dataUrl : null;
+			}).catch(function () { return null; });
+		}
+
+		function legacySrc(texture) {
+			return LEGACY_BASE + texture + '.jpg';
+		}
+
+		function thumbLegacy(texture) {
+			var wrap = document.createElement('div');
+			wrap.className = 'thumb';
+			var px = parseInt(displaySizeEl.value, 10);
+			wrap.style.width = px + 'px';
+			wrap.style.height = px + 'px';
+			var img = document.createElement('img');
+			img.width = px;
+			img.height = px;
+			img.alt = 'legacy ' + texture;
+			img.title = 'Legacy nova theme';
+			img.src = legacySrc(texture);
+			img.onerror = function () {
+				var step = img.getAttribute('data-legacy-step') || '0';
+				if (step === '0' && LEGACY_ALIASES[texture]) {
+					img.setAttribute('data-legacy-step', '1');
+					img.src = LEGACY_BASE + LEGACY_ALIASES[texture] + '.jpg';
+					return;
+				}
+				if (step === '0' || step === '1') {
+					img.setAttribute('data-legacy-step', '2');
+					img.src = NOVA_LEGACY_BASE + texture + '.jpg';
+					return;
+				}
+				if (step === '2' && LEGACY_ALIASES[texture]) {
+					img.setAttribute('data-legacy-step', '3');
+					img.src = NOVA_LEGACY_BASE + LEGACY_ALIASES[texture] + '.jpg';
+					return;
+				}
+				img.alt = 'no legacy asset';
+			};
+			wrap.appendChild(img);
+			return wrap;
+		}
+
+		function thumbImg(src, alt, onerrorFallback) {
+			var wrap = document.createElement('div');
+			wrap.className = 'thumb';
+			var px = parseInt(displaySizeEl.value, 10);
+			wrap.style.width = px + 'px';
+			wrap.style.height = px + 'px';
+			var img = document.createElement('img');
+			img.width = px;
+			img.height = px;
+			img.alt = alt || '';
+			img.src = src;
+			if (onerrorFallback) {
+				img.onerror = function () {
+					img.onerror = null;
+					img.src = onerrorFallback;
+				};
+			}
+			wrap.appendChild(img);
+			return wrap;
+		}
+
+		function thumbPending() {
+			var wrap = document.createElement('div');
+			wrap.className = 'thumb';
+			var px = parseInt(displaySizeEl.value, 10);
+			wrap.style.width = px + 'px';
+			wrap.style.height = px + 'px';
+			var el = document.createElement('div');
+			el.className = 'pending';
+			el.textContent = '…';
+			wrap.appendChild(el);
+			return wrap;
+		}
+
+		function setThumbDataUrl(wrap, dataUrl, alt) {
+			wrap.innerHTML = '';
+			if (!dataUrl) {
+				var miss = document.createElement('div');
+				miss.className = 'missing';
+				miss.textContent = 'Render failed';
+				wrap.appendChild(miss);
+				return;
+			}
+			var px = parseInt(displaySizeEl.value, 10);
+			var img = document.createElement('img');
+			img.width = px;
+			img.height = px;
+			img.alt = alt || '';
+			img.src = dataUrl;
+			wrap.appendChild(img);
+		}
+
+		function metaText(entry) {
+			var band = PlanetImageCatalog.bandOverrideForTexture(entry.texture, entry.type);
+			var kept = PlanetImageCatalog.staticBandKeepTextures[entry.texture];
+			if (kept) { return 'Kept JPG'; }
+			if (band) { return band + ' band'; }
+			if (entry.vizState) { return entry.vizState; }
+			if (entry.type === 3) { return 'moon'; }
+			return 'temp band';
+		}
+
+		function addEntryRow(entry, jobs) {
+			var tr = document.createElement('tr');
+			var variant = parseInt((entry.texture || '').replace(/\D+/g, ''), 10);
+			var biome = PlanetImageCatalog.classifyBiomeFromTexture(entry.texture, entry.type);
+
+			var nameTd = document.createElement('td');
+			nameTd.className = 'texture';
+			var tempLine = entry.tempMin != null && entry.tempMax != null
+				? entry.tempMin + '–' + entry.tempMax + ' °C'
+				: '—';
+			nameTd.innerHTML = '<strong>' + entry.texture + '</strong>'
+				+ '<span>' + tempLine
+				+ (variant ? ' · v' + String(variant).padStart(2, '0') : '')
+				+ ' · ' + biome + '</span>';
+			tr.appendChild(nameTd);
+
+			var legacyTd = document.createElement('td');
+			legacyTd.appendChild(thumbLegacy(entry.texture));
+			tr.appendChild(legacyTd);
+
+			var diskTd = document.createElement('td');
+			diskTd.appendChild(thumbImg(
+				HIVE_BASE + entry.texture + '_hq.jpg',
+				'on disk',
+				HIVE_BASE + entry.texture + '.jpg'
+			));
+			tr.appendChild(diskTd);
+
+			var liveTd = document.createElement('td');
+			var liveWrap = thumbPending();
+			liveTd.appendChild(liveWrap);
+			tr.appendChild(liveTd);
+			jobs.push({ entry: entry, wrap: liveWrap });
+
+			var metaTd = document.createElement('td');
+			var metaSpan = document.createElement('span');
+			metaSpan.className = 'missing';
+			metaSpan.textContent = metaText(entry);
+			metaTd.appendChild(metaSpan);
+			tr.appendChild(metaTd);
+
+			rowsEl.appendChild(tr);
+		}
+
+		function familyEntries(prefix) {
+			var list = [];
+			for (var v = 1; v <= 5; v++) {
+				var texture = prefix + (v < 10 ? '0' + v : String(v));
+				var entry = PlanetImageCatalog.getByTexture(texture);
+				if (entry) { list.push(entry); }
+			}
+			return list;
+		}
+
+		function renderTable() {
+			var filter = familyFilterEl.value;
+			var showMeta = showMetaEl.checked;
+			var gen = ++renderGen;
+			metaHead.style.display = showMeta ? '' : 'none';
+			rowsEl.innerHTML = '';
+			statusEl.textContent = rendererReady ? 'Rendering live previews…' : 'Loading renderer…';
+			statusEl.className = 'status';
+
+			var jobs = [];
+
+			FAMILIES.forEach(function (family) {
+				if (filter !== 'all' && filter !== family.key) {
+					return;
+				}
+				var header = document.createElement('tr');
+				header.className = 'family-row';
+				header.innerHTML = '<td colspan="5">' + family.label + '</td>';
+				rowsEl.appendChild(header);
+				familyEntries(family.prefix).forEach(function (entry) {
+					addEntryRow(entry, jobs);
+				});
+			});
+
+			if (filter === 'all' || filter === 'special') {
+				var header = document.createElement('tr');
+				header.className = 'family-row';
+				header.innerHTML = '<td colspan="5">Moons &amp; special</td>';
+				rowsEl.appendChild(header);
+				SPECIAL_TEXTURES.forEach(function (texture) {
+					var entry = PlanetImageCatalog.getByTexture(texture)
+						|| PlanetImageCatalog.getByVizState(texture);
+					if (entry) { addEntryRow(entry, jobs); }
+				});
+			}
+
+			if (!showMeta) {
+				rowsEl.querySelectorAll('tr td:last-child').forEach(function (td) {
+					td.style.display = 'none';
+				});
+			}
+
+			if (!rendererReady) {
+				return;
+			}
+
+			(function runJobs(i) {
+				if (gen !== renderGen) { return; }
+				if (i >= jobs.length) {
+					statusEl.textContent = 'Live previews ready (' + jobs.length + ').';
+					return;
+				}
+				statusEl.textContent = 'Rendering ' + (i + 1) + ' / ' + jobs.length + '…';
+				captureEntry(jobs[i].entry).then(function (dataUrl) {
+					if (gen !== renderGen) { return; }
+					setThumbDataUrl(jobs[i].wrap, dataUrl, jobs[i].entry.texture);
+					runJobs(i + 1);
+				});
+			})(0);
+		}
+
+		[familyFilterEl, displaySizeEl, renderSizeEl, showMetaEl].forEach(function (el) {
+			el.addEventListener('change', renderTable);
+		});
+
+		loadScript('../threejs/three.min.js')
+			.then(function () { return loadScript('../game/overview-planet.js'); })
+			.then(function () {
+				rendererReady = true;
+				renderTable();
+			})
+			.catch(function (err) {
+				statusEl.textContent = 'Renderer failed — use php -S from repo root. ' + err.message;
+				statusEl.className = 'status error';
+				renderTable();
+			});
+	})();
+	</script>
+</body>
+</html>
