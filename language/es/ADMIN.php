@@ -614,7 +614,6 @@ $LNG['mu_vaild_users'] = 'Actividad de usuario';
 $LNG['mu_news'] = 'Noticias';
 $LNG['mu_multiip_page'] = 'IPs múltiples';
 $LNG['mu_clear_cache'] = 'Limpiar caché';
-$LNG['mu_vertify'] = 'Verificar contenido del juego';
 $LNG['mu_cronjob'] = 'Cronjobs';
 $LNG['mu_logs'] = 'Registro de administrador';
 $LNG['mu_giveaway'] = 'Obsequios';
@@ -716,23 +715,7 @@ $LNG['tx_search'] = 'Buscar';
 $LNG['tx_search_placeholder'] = 'Nombre de usuario o nota...';
 $LNG['tx_clear'] = 'Limpiar';
 
-$LNG['vt_error'] = '¡El archivo hash no está disponible! - ¡Ejecuta actualización!';
-$LNG['vt_fail'] = 'Archivos cambiados';
-$LNG['vt_info'] = 'Esta lista contiene los archivos que fueron modificados y no corresponden al original.<br>Si no cambiaste el juego, debes reemplazar los archivos con los originales.';
 
-$LNG['vt_head'] = 'Verificar los archivos del juego';
-$LNG['vt_filephp'] = 'Archivo PHP';
-$LNG['vt_filetpl'] = 'Archivo de plantilla';
-$LNG['vt_filecss'] = 'Archivo CSS';
-$LNG['vt_filejs'] = 'Archivo Java Script';
-$LNG['vt_fileimg'] = 'Archivo de imagen';
-$LNG['vt_filehtaccess'] = 'Archivo HTACCESS';
-$LNG['vt_all'] = 'Todos los archivos';
-$LNG['vt_fileok'] = 'Archivo OK';
-$LNG['vt_filefail'] = 'Archivo cambiado';
-$LNG['vt_filenew'] = 'Archivo nuevo';
-$LNG['vt_fileerror'] = 'Error';
-$LNG['vt_loadfile'] = 'Cargando lista de archivos';
 
 //###########################################################//
 

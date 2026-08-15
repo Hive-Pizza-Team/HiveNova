@@ -1,17 +1,16 @@
 <?php
 
 use HiveNova\Core\Config;
-use HiveNova\Core\Database;
-use HiveNova\Core\DatabaseInterface;
 use HiveNova\Core\ResourceUpdate;
 
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/FakeDatabase.php';
+require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 
 class ResourceUpdateTest extends TestCase
 {
-	private ?DatabaseInterface $previousDb = null;
+	use SwapDatabaseInstance;
 	// -----------------------------------------------------------------------
 	// Fixtures
 	// -----------------------------------------------------------------------
@@ -106,8 +105,7 @@ class ResourceUpdateTest extends TestCase
 
 	private function useFakeDatabase(FakeDatabase $fake): FakeDatabase
 	{
-		$this->previousDb = Database::get();
-		Database::setInstance($fake);
+		$this->swapDatabaseInstance($fake);
 
 		return $fake;
 	}
@@ -226,16 +224,7 @@ class ResourceUpdateTest extends TestCase
 	protected function tearDown(): void
 	{
 		unset($GLOBALS['ProdGrid']);
-
-		if ($this->previousDb instanceof DatabaseInterface) {
-			Database::setInstance($this->previousDb);
-		} else {
-			$ref = new ReflectionClass(Database::class);
-			$prop = $ref->getProperty('instance');
-			$prop->setAccessible(true);
-			$prop->setValue(null, null);
-		}
-		$this->previousDb = null;
+		$this->restoreDatabaseInstance();
 	}
 
 	// -----------------------------------------------------------------------

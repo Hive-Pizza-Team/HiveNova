@@ -284,7 +284,6 @@ $adminPages = [
     'multiips',
     'botdetect',
     'log',
-    'vertify',
     'cronjob',
     'giveaway',
     'autocomplete',

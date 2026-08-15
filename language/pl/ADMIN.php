@@ -625,7 +625,6 @@ $LNG['mu_news']						= 'Nowości';
 $LNG['mu_multiip_page']				= 'MultiIP'; 
 
 $LNG['mu_botdetect_page'] = 'Wykrywanie Botów';
-$LNG['mu_vertify']					= 'Sprawdź pliki gry!';
 $LNG['mu_cronjob']					= 'Cronjobs'; 
 $LNG['mu_logs']						= 'Admin-Log';
 $LNG['mu_giveaway']					= 'Bonusy';
@@ -728,22 +727,6 @@ $LNG['tx_search_placeholder'] = 'Nazwa użytkownika lub notatka...';
 $LNG['tx_clear'] = 'Wyczyść';
 
 
-$LNG['vt_error']					= 'Błąd plików - wymagana aktualizacja!';
-$LNG['vt_fail']						= 'Zmienione Pliki';
-$LNG['vt_info']						= 'Ta lista zawiera listę zmodyfikowanych plików<br>Jeśli to nie ty dokonałeś zmian, powinieneś przywrócić orginalne pliki!.';
-$LNG['vt_head']						= 'Poprawne pliki';
-$LNG['vt_filephp']					= 'Pliki php';
-$LNG['vt_filetpl']					= 'Pliki template';
-$LNG['vt_filecss']					= 'Pliki stylów';
-$LNG['vt_filejs']					= 'Pliki Javascript';
-$LNG['vt_fileimg']					= 'Pliki obrazków';
-$LNG['vt_filehtaccess']				= 'Pliki htaccess';
-$LNG['vt_all']						= 'Sprawdź wszystkie pliki';
-$LNG['vt_fileok']					= 'Pliki OK';
-$LNG['vt_filefail']					= 'zmienione pliki ';
-$LNG['vt_filenew']					= 'nowe pliki';
-$LNG['vt_fileerror']				= 'Błąd';
-$LNG['vt_loadfile']					= 'Szczegóły';
 //###########################################################//
 
 $LNG['cc_cache_clear']				= 'Cache Usunięto'; 
