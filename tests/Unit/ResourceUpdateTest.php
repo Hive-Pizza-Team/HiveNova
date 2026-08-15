@@ -229,6 +229,8 @@ class ResourceUpdateTest extends TestCase
 		$ref->setAccessible(true);
 		$ref->setValue(null, []);
 
+		$GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], $this->makeResource());
+		$GLOBALS['reslist']  = array_replace($GLOBALS['reslist'] ?? [], $this->makeReslist());
 		$GLOBALS['pricelist'][113] = [
 			'cost'   => [901 => 0, 902 => 0, 903 => 0],
 			'factor' => 2,

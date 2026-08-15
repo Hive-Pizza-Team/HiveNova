@@ -251,7 +251,7 @@ class SessionTest extends TestCase
 
         $session->save();
 
-        $this->assertSame(0, $this->dbStub->replaceCalls);
+        $this->assertSame(0, $this->dbStub->session->replaceCalls);
     }
 
     public function testInitReturnsTrueOnceThenFalse(): void

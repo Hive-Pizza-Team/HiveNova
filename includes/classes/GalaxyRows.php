@@ -371,7 +371,9 @@ class GalaxyRows
 		if(!isset($this->galaxyRow['m_id'])) {
 			$this->galaxyData[$this->galaxyRow['planet']]['moon']	= false;
 		} else {
-			$themePath = $THEME->getTheme();
+			$themePath = (is_object($THEME) && method_exists($THEME, 'getTheme'))
+				? $THEME->getTheme()
+				: '';
 			$vizEnabled = str_contains($themePath, '/hive/');
 			$this->galaxyData[$this->galaxyRow['planet']]['moon']	= array(
 				'id'		=> $this->galaxyRow['m_id'],
@@ -388,7 +390,9 @@ class GalaxyRows
 	{
 		global $THEME;
 
-		$themePath = $THEME->getTheme();
+		$themePath = (is_object($THEME) && method_exists($THEME, 'getTheme'))
+			? $THEME->getTheme()
+			: '';
 		$vizEnabled = str_contains($themePath, '/hive/');
 		$this->galaxyData[$this->galaxyRow['planet']]['planet']	= array(
 			'id'			=> $this->galaxyRow['id'],
