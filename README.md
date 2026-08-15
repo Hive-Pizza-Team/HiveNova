@@ -114,6 +114,7 @@ Run the full CI pipeline locally before pushing:
 ```bash
 ./tests/run-ci-local.sh               # unit tests + language check + smoke test
 ./tests/run-ci-local.sh --integration # also run integration tests (requires MySQL)
+./tests/run-ci-local.sh --coverage    # PR diff-coverage gate locally (pip install diff-cover; needs MySQL)
 ```
 
 This mirrors what GitHub Actions runs, including checking that `includes/error.log` is empty after the smoke test. Requires the local dev server to be running on `:8000`.
@@ -127,12 +128,27 @@ php .github/scripts/check-language-files.php  # language key validation
 php tests/smoke.php https://staging.moon.hive.pizza admin s3cr3t  # remote host
 ```
 
+#### Coverage (pull requests)
+
+PRs enforce **diff coverage** on `includes/classes/`: at least **80%** of changed lines in that tree must be covered by tests (unit + integration Clover reports merged). Page templates, language files, and other paths are not gated.
+
+Run the same check locally before opening a PR:
+
+```bash
+pip install diff-cover
+./tests/check-diff-coverage.sh --integration   # needs MySQL + php tests/ci-install.php
+```
+
+Compare branch defaults to `origin/develop`; override with `DIFF_COVER_COMPARE_BRANCH=origin/main` if needed.
+
 ### CI
 
 GitHub Actions runs on every push and pull request (`.github/workflows/ci.yaml`):
 
 - **language-check** — validates that all language files are syntactically valid PHP and that every key present in the English reference file exists in each translation
-- **test** — runs the PHPUnit unit test suite on PHP 8.3 with xdebug coverage; generates a Clover coverage report
+- **test** — runs the PHPUnit unit test suite on PHP 8.3 with xdebug coverage; uploads `coverage/clover.xml`
+- **integration** — MySQL + PHPUnit integration suite with coverage; uploads `coverage/integration-clover.xml`
+- **coverage-gate** (pull requests only) — `diff-cover` on merged reports; fails if changed `includes/classes/` lines are below 80% covered vs the PR base branch
 - **smoke** — spins up a MySQL 8 service container, installs the game via `tests/ci-install.php`, starts the PHP built-in server, then runs `tests/smoke.php` which logs in as the test admin and issues an HTTP request to every game page, failing on any PHP error or unexpected redirect
 
 ### Database Migrations
