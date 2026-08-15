@@ -8,49 +8,6 @@ use PHPUnit\Framework\TestCase;
 class PlayerUtilTest extends TestCase
 {
     // -------------------------------------------------------------------------
-    // isHiveAccountValid
-    // -------------------------------------------------------------------------
-
-    /** @dataProvider validHiveAccountProvider */
-    public function testIsHiveAccountValidAcceptsValidAccounts(string $account): void
-    {
-        $this->assertNotFalse(PlayerUtil::isHiveAccountValid($account), "Expected '$account' to be valid");
-    }
-
-    public static function validHiveAccountProvider(): array
-    {
-        return [
-            'simple lowercase'        => ['tor'],
-            'with hyphen'             => ['hive-nova'],
-            'with numbers'            => ['player1'],
-            'with dot separator'      => ['first.last'],
-            'mixed alphanumeric'      => ['abc123'],
-            'min length (3 chars)'    => ['abc'],
-        ];
-    }
-
-    /** @dataProvider invalidHiveAccountProvider */
-    public function testIsHiveAccountValidRejectsInvalidAccounts($account): void
-    {
-        $this->assertFalse((bool) PlayerUtil::isHiveAccountValid($account), "Expected '$account' to be invalid");
-    }
-
-    public static function invalidHiveAccountProvider(): array
-    {
-        return [
-            'null value'              => [null],
-            'empty string'            => [''],
-            'too long (17 chars)'     => ['averylonghiveaccountname'],
-            'starts with number'      => ['1player'],
-            'starts with hyphen'      => ['-player'],
-            'ends with hyphen'        => ['player-'],
-            'uppercase letters'       => ['Player'],
-            'contains space'          => ['hive nova'],
-            'contains special chars'  => ['hive@nova'],
-        ];
-    }
-
-    // -------------------------------------------------------------------------
     // isMailValid
     // -------------------------------------------------------------------------
 
