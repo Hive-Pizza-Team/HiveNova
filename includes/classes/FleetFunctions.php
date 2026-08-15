@@ -489,6 +489,39 @@ class FleetFunctions
 		return $availableMissions;
 	}
 
+	/**
+	 * Choose the pre-selected mission radio on fleet step 2.
+	 *
+	 * When coordinates were typed by hand (no target_mission), a probe-only
+	 * fleet defaults to Spying unless the target is an alliance member.
+	 *
+	 * @param int   $requestedMission Mission from the previous step (0 = none)
+	 * @param int[] $availableMissions
+	 * @param array $fleet            shipId => count
+	 */
+	public static function SuggestDefaultMission($requestedMission, array $availableMissions, array $fleet, $isAllianceMember)
+	{
+		$requestedMission = (int) $requestedMission;
+		$availableMissions = array_map('intval', $availableMissions);
+
+		if ($requestedMission !== 0 && in_array($requestedMission, $availableMissions, true)) {
+			return $requestedMission;
+		}
+
+		$probesOnly = isset($fleet[210]) && count($fleet) === 1;
+		if ($probesOnly && in_array(6, $availableMissions, true)) {
+			if ($isAllianceMember) {
+				if (in_array(3, $availableMissions, true)) {
+					return 3;
+				}
+			} else {
+				return 6;
+			}
+		}
+
+		return $requestedMission;
+	}
+
 	public static function CheckBash($Target)
 	{
 		global $USER;
