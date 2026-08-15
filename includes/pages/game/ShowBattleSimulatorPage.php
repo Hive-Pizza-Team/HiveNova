@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\BattleSimulatorCoords;
 
 /**
  *  2Moons 
@@ -31,6 +32,41 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		parent::__construct();
 	}
 
+	private function simulationCoords(): array
+	{
+		global $PLANET;
+
+		$config = Config::get();
+		$maxGalaxy = (int) $config->max_galaxy;
+		$maxSystem = (int) $config->max_system;
+		$maxPlanet = (int) $config->max_planets;
+
+		$attacker = BattleSimulatorCoords::normalize([
+			'galaxy' => $PLANET['galaxy'] ?? 0,
+			'system' => $PLANET['system'] ?? 0,
+			'planet' => $PLANET['planet'] ?? 0,
+			'type' => $PLANET['planet_type'] ?? BattleSimulatorCoords::TYPE_PLANET,
+		], [
+			'galaxy' => 1,
+			'system' => 1,
+			'planet' => 1,
+			'type' => BattleSimulatorCoords::TYPE_PLANET,
+		], $maxGalaxy, $maxSystem, $maxPlanet);
+
+		$defender = BattleSimulatorCoords::normalize([
+			'galaxy' => HTTP::_GP('galaxy', 0),
+			'system' => HTTP::_GP('system', 0),
+			'planet' => HTTP::_GP('planet', 0),
+			'type' => HTTP::_GP('type', 0),
+			'planettype' => HTTP::_GP('planettype', 0),
+		], $attacker, $maxGalaxy, $maxSystem, $maxPlanet);
+
+		return [
+			'attacker' => $attacker,
+			'defender' => $defender,
+		];
+	}
+
 	function send()
 	{
 		global $reslist, $pricelist, $LNG, $USER;
@@ -38,6 +74,10 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		if(!isset($_REQUEST['battleinput'])) {
 			$this->sendJSON(0);
 		}
+
+		$simCoords = $this->simulationCoords();
+		$attackerFleetDetail = BattleSimulatorCoords::attackerFleetDetail($simCoords['attacker'], $simCoords['defender']);
+		$defenderFleetDetail = BattleSimulatorCoords::defenderFleetDetail($simCoords['defender']);
 		
 		$BattleArray	= $_REQUEST['battleinput'];
 		$elements	= array(0, 0);
@@ -46,19 +86,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 			if(isset($BattleSlot[0]) && (array_sum(array_map('intval', $BattleSlot[0])) > 0 || $BattleSlotID == 0))
 			{
 				$attacker	= array();
-				$attacker['fleetDetail'] 		= array(
-					'fleet_start_galaxy' => 1,
-					'fleet_start_system' => 33,
-					'fleet_start_planet' => 7, 
-					'fleet_start_type' => 1, 
-					'fleet_end_galaxy' => 1, 
-					'fleet_end_system' => 33, 
-					'fleet_end_planet' => 7, 
-					'fleet_end_type' => 1, 
-					'fleet_resource_metal' => 0,
-					'fleet_resource_crystal' => 0,
-					'fleet_resource_deuterium' => 0
-				);
+				$attacker['fleetDetail'] 		= $attackerFleetDetail;
 				
 				$attacker['player']				= array(
 					'id' => (1000 + $BattleSlotID + 1),
@@ -89,19 +117,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 			if(isset($BattleSlot[1]) && (array_sum(array_map('intval', $BattleSlot[1])) > 0 || $BattleSlotID == 0))
 			{
 				$defender	= array();
-				$defender['fleetDetail'] 		= array(
-					'fleet_start_galaxy' => 1,
-					'fleet_start_system' => 33,
-					'fleet_start_planet' => 7, 
-					'fleet_start_type' => 1, 
-					'fleet_end_galaxy' => 1, 
-					'fleet_end_system' => 33, 
-					'fleet_end_planet' => 7, 
-					'fleet_end_type' => 1, 
-					'fleet_resource_metal' => 0,
-					'fleet_resource_crystal' => 0,
-					'fleet_resource_deuterium' => 0
-				);
+				$defender['fleetDetail'] 		= $defenderFleetDetail;
 				
 				$defender['player']				= array(
 					'id' => (2000 + $BattleSlotID + 1),
@@ -183,17 +199,9 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		);
 
 		$reportInfo	= array(
-			'thisFleet'				=> array(
-				'fleet_start_galaxy'	=> 1,
-				'fleet_start_system'	=> 33,
-				'fleet_start_planet'	=> 7,
-				'fleet_start_type'		=> 1,
-				'fleet_end_galaxy'		=> 1,
-				'fleet_end_system'		=> 33,
-				'fleet_end_planet'		=> 7,
-				'fleet_end_type'		=> 1,
+			'thisFleet'				=> array_merge($attackerFleetDetail, array(
 				'fleet_start_time'		=> TIMESTAMP,
-			),
+			)),
 			'debris'				=> $debris,
 			'stealResource'			=> $stealResource,
 			'moonChance'			=> $chanceCreateMoon,
@@ -257,12 +265,18 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		}
 		
 		$this->tplObj->loadscript('battlesim.js');
+
+		$simCoords = $this->simulationCoords();
 		
 		$this->assign(array(
 			'Slots'			=> $Slots,
 			'battleinput'	=> $BattleArray,
 			'fleetList'		=> $reslist['fleet'],
 			'defensiveList'	=> $reslist['defense'],
+			'simGalaxy'		=> $simCoords['defender']['galaxy'],
+			'simSystem'		=> $simCoords['defender']['system'],
+			'simPlanet'		=> $simCoords['defender']['planet'],
+			'simType'		=> $simCoords['defender']['type'],
 		));
 		
 		$this->display('page.battleSimulator.default.tpl');   
