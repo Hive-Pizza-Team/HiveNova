@@ -119,8 +119,11 @@ class TemplateTest extends TestCase
         $this->assertArrayHasKey('array_key_first', $modifiers);
         $this->assertArrayHasKey('abs', $modifiers);
         $this->assertArrayHasKey('pretty_fly_time', $modifiers);
+        $this->assertArrayHasKey('strstr', $modifiers);
         $this->assertSame(5, $modifiers['abs'][0](-5));
         $this->assertSame(3.14, $modifiers['floatval'][0]('3.14abc'));
+        $this->assertSame('/hive/', $modifiers['strstr'][0]('./styles/theme/hive/', '/hive/'));
+        $this->assertFalse($modifiers['strstr'][0]('./styles/theme/nova/', '/hive/'));
     }
 
     // -------------------------------------------------------------------------
