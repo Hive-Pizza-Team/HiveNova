@@ -76,6 +76,7 @@ if (!defined('DEFENSE_DEBRIS_FACTOR')) define('DEFENSE_DEBRIS_FACTOR', 0.0);
 require_once OPBEPATH . 'constants/battle_constants.php';
 require_once OPBEPATH . 'utils/GeometricDistribution.php';
 require_once OPBEPATH . 'utils/Gauss.php';
+require_once OPBEPATH . 'utils/DebugManager.php';
 require_once OPBEPATH . 'utils/IterableUtil.php';
 require_once OPBEPATH . 'utils/Math.php';
 require_once OPBEPATH . 'utils/Number.php';
