@@ -916,6 +916,10 @@ class PushNotificationServiceTest extends TestCase
 			touch($path);
 		}
 		chmod($path, 0444);
+		if (is_writable($path)) {
+			chmod($path, 0644);
+			$this->markTestSkipped('Current user can write mode 0444 files (typical as root in CI).');
+		}
 
 		try {
 			$this->assertFalse(PushNotificationService::writeConfigFile('pub', 'priv', 'mailto:test@example.com'));

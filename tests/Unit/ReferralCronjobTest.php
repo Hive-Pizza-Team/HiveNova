@@ -1,7 +1,7 @@
 <?php
 
 use HiveNova\Core\Config;
-use HiveNova\Cronjob\ReferralCronJob;
+use HiveNova\Cronjob\ReferralCronjob;
 
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +22,7 @@ class ReferralCronjobTest extends TestCase
     {
         Config::setInstance(new Config(['uni' => 1, 'ref_active' => 0]), 1);
 
-        $cron = new ReferralCronJob();
+        $cron = new ReferralCronjob();
         $this->assertNull($cron->run());
     }
 }
