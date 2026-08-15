@@ -366,12 +366,12 @@ class PlayerUtil
 
 		$diameter			= (int) floor(1000 * sqrt($maxFields));
 
-		$imageNames			= array_keys($planetData[$dataIndex]['image']);
+		$imageNames			= $planetData[$dataIndex]['image'];
 		$imageNameType		= $imageNames[array_rand($imageNames)];
-		$imageName			= $imageNameType;
-		$imageName			.= 'planet';
-		$imageName			.= $planetData[$dataIndex]['image'][$imageNameType] < 10 ? '0' : '';
-		$imageName			.= $planetData[$dataIndex]['image'][$imageNameType];
+		$avgTemperature		= (int) floor(($minTemperature + $maxTemperature) / 2);
+		[$rangeMin, $rangeMax] = PlanetImageUtil::familyRange($imageNameType);
+		$imageVariant		= PlanetImageUtil::variantFromTemperature($avgTemperature, $rangeMin, $rangeMax);
+		$imageName			= PlanetImageUtil::buildImageName($imageNameType, $imageVariant);
 
 		if(empty($name))
 		{

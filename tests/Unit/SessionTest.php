@@ -199,6 +199,24 @@ class SessionTest extends TestCase
         $this->assertFalse($session->isValidSession());
     }
 
+    public function testSaveReturnsEarlyWhenUserIdMissing(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        session_id('no-user-session');
+        session_start();
+
+        $session = $this->newSession();
+        $this->setSessionData($session, [
+            'lastActivity' => TIMESTAMP,
+        ]);
+
+        $session->save();
+
+        $this->assertSame(0, $this->dbStub->replaceCalls);
+    }
+
     public function testIsValidSessionReturnsTrueWhenObjMissingButUserIdSetAndDbRowExists(): void
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
