@@ -108,6 +108,8 @@ class ResourceUpdate
 		// Inactivity forces 100% production in reBuildCache; include it so the
 		// cache rebuilds when a player crosses the inactive threshold (or returns).
 		$Hash[]	= \isInactive($this->USER) ? 1 : 0;
+		$Hash[]	= $this->PLANET['planet'];
+		$Hash[]	= $this->PLANET['temp_max'];
 		return md5(implode("::", $Hash));
 	}
 	

@@ -498,6 +498,52 @@ class ResourceUpdateTest extends TestCase
 		$this->assertNotEquals($hashActive, $hashInactive, 'Hash must differ when inactivity forces full production');
 	}
 
+	public function testHashChangesWhenPlanetSlotChanges(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_replace($this->makeReslist(), ['prod' => [22]]);
+		$config   = $this->makeConfig();
+		Config::setInstance($config, 1);
+
+		$user    = $this->makeUser();
+		$planet8 = $this->makePlanet(['planet' => 8]);
+		$planet9 = $this->makePlanet(['planet' => 9]);
+
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+
+		$eco->setData($user, $planet8);
+		$hash8 = $eco->CreateHash();
+
+		$eco->setData($user, $planet9);
+		$hash9 = $eco->CreateHash();
+
+		$this->assertNotEquals($hash8, $hash9, 'Hash must differ when planet slot changes');
+	}
+
+	public function testHashChangesWhenTempMaxChanges(): void
+	{
+		$resource = $this->makeResource();
+		$reslist  = array_replace($this->makeReslist(), ['prod' => [22]]);
+		$config   = $this->makeConfig();
+		Config::setInstance($config, 1);
+
+		$user = $this->makeUser();
+		$cool = $this->makePlanet(['temp_max' => 40]);
+		$hot  = $this->makePlanet(['temp_max' => 200]);
+
+		$eco = new ResourceUpdate(false, false);
+		$eco->setResourceData($resource, $reslist);
+
+		$eco->setData($user, $cool);
+		$hashCool = $eco->CreateHash();
+
+		$eco->setData($user, $hot);
+		$hashHot = $eco->CreateHash();
+
+		$this->assertNotEquals($hashCool, $hashHot, 'Hash must differ when temp_max changes');
+	}
+
 	// -----------------------------------------------------------------------
 	// ReBuildCache path (HASH=false forces ReBuildCache to run)
 	// -----------------------------------------------------------------------
@@ -779,6 +825,7 @@ class ResourceUpdateTest extends TestCase
 		];
 
 		$planet = $this->makePlanet([
+			'planet'                      => 4,
 			'metal_mine'                  => 1,
 			'metal_mine_porcent'          => 0,   // player dialed mines off
 			'solar_plant_building'        => 100,
