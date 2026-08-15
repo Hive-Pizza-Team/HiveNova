@@ -370,6 +370,7 @@ $LNG['fl_error_not_avalible']				= 'There is nothing at these coordinates!';
 $LNG['fl_error_empty_derbis']				= "No debris fields!";
 $LNG['fl_error_no_moon']					= 'No moon found at these coordinates!';
 $LNG['fl_error_same_planet']				= 'Start and destination planet are identical!';
+$LNG['fl_incomplete_coords']				= 'Enter a complete destination before sending the fleet.';
 $LNG['fl_invalid_target']					= 'No valid target';
 $LNG['fl_no_noresource']					= 'No raw materials loaded!';
 $LNG['fl_resources']					= 'Raw materials loaded!';

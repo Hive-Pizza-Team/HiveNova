@@ -189,6 +189,19 @@ function setNumber(name, number) {
 
 function CheckTarget()
 {
+	var galaxy = parseInt(document.getElementsByName("galaxy")[0].value, 10);
+	var system = parseInt(document.getElementsByName("system")[0].value, 10);
+	var planet = parseInt(document.getElementsByName("planet")[0].value, 10);
+	if (!(galaxy > 0) || !(system > 0) || !(planet > 0)) {
+		NotifyBox(fl_incomplete_coords);
+		return false;
+	}
+	updateVars(false);
+	if (typeof dataFlyDistance === "undefined" || isNaN(dataFlyDistance) || dataFlyDistance < 1) {
+		NotifyBox(fl_incomplete_coords);
+		return false;
+	}
+
 	kolo	= (typeof data.ships[208] == "object") ? 1 : 0;
 		
 	$.getJSON('game.php?page=fleetStep1&mode=checkTarget&galaxy='+document.getElementsByName("galaxy")[0].value+'&system='+document.getElementsByName("system")[0].value+'&planet='+document.getElementsByName("planet")[0].value+'&planet_type='+document.getElementsByName("type")[0].value+'&lang='+Lang+'&kolo='+kolo, function(data) {

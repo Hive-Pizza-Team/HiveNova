@@ -344,6 +344,7 @@ $LNG['fl_error_not_avalible']				= 'La planète ne peut actuellement pas être i
 $LNG['fl_error_empty_derbis']				= 'Pas de CDR !';
 $LNG['fl_error_no_moon']					= 'Pas de Lune présente !';
 $LNG['fl_error_same_planet']				= 'Les planètes de départ et d\'arrivé sont identiques!';
+$LNG['fl_incomplete_coords']				= 'Saisissez une destination complète avant d\'envoyer la flotte.';
 $LNG['fl_invalid_target']					= 'Aucune cible valide';
 $LNG['fl_no_noresource']					= 'Pas de matières premières chargées!';
 $LNG['fl_no_target']						= 'Aucune planète cible disponible';

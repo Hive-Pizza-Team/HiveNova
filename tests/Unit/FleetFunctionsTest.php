@@ -69,6 +69,15 @@ class FleetFunctionsTest extends TestCase
     // GetTargetDistance
     // -------------------------------------------------------------------------
 
+    public function testHasCompleteTargetCoordsRequiresPositiveValues(): void
+    {
+        $this->assertTrue(FleetFunctions::HasCompleteTargetCoords(1, 1, 1));
+        $this->assertFalse(FleetFunctions::HasCompleteTargetCoords(0, 1, 1));
+        $this->assertFalse(FleetFunctions::HasCompleteTargetCoords(1, 0, 1));
+        $this->assertFalse(FleetFunctions::HasCompleteTargetCoords(1, 1, 0));
+        $this->assertFalse(FleetFunctions::HasCompleteTargetCoords('', '', ''));
+    }
+
     public function testGetTargetDistanceSamePlanetReturnsFive(): void
     {
         // Identical coordinates → always 5

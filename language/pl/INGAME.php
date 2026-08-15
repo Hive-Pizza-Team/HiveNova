@@ -363,6 +363,7 @@ $LNG['fl_error_not_avalible']				= 'Planet can not currently be served!';
 $LNG['fl_error_empty_derbis']				= 'Brak pola zniszczeń!';
 $LNG['fl_error_no_moon']					= 'Brak księżyca!';
 $LNG['fl_error_same_planet']				= 'Start i cel to ta sama planeta!';
+$LNG['fl_incomplete_coords']				= 'Podaj pełne współrzędne celu przed wysłaniem floty.';
 $LNG['fl_invalid_target']					= 'Nieodpowiedni cel';
 $LNG['fl_no_noresource']					= 'Brak zasobów!';
 $LNG['fl_no_target']						= 'Nie znaleziono celu';

@@ -358,6 +358,7 @@ $LNG['fl_error_not_avalible']				= 'Estas coordenadas não possui qualquer plane
 $LNG['fl_error_empty_derbis']				= 'Não possui qualquer campo de destroços!';
 $LNG['fl_error_no_moon']					= 'Não possui qualquer lua nestas coordenadas!';
 $LNG['fl_error_same_planet']				= 'Início e o destino do planeta são idênticos!';
+$LNG['fl_incomplete_coords']				= 'Indique um destino completo antes de enviar a frota.';
 $LNG['fl_invalid_target']					= 'Nenhum destino válido';
 $LNG['fl_no_noresource']					= 'Nenhum recurso na nave!';
 $LNG['fl_no_target']						= 'Nenhum planeta de destino disponíveis';

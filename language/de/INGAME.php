@@ -358,6 +358,7 @@ $LNG['fl_error_not_avalible']					= 'Auf diesen Koordinaten befinden sich kein P
 $LNG['fl_error_empty_derbis']					= 'Kein Trümmerfeld vorhanden!';
 $LNG['fl_error_no_moon']					= 'Kein Mond vorhanden!';
 $LNG['fl_error_same_planet']					= 'Start- und Zielplanet sind identisch!';
+$LNG['fl_incomplete_coords']					= 'Bitte vollständige Zielkoordinaten eingeben, bevor die Flotte gesendet wird.';
 $LNG['fl_invalid_target']					= 'Kein gültiges Ziel';
 $LNG['fl_no_noresource']					= 'Keine Rohstoffe geladen!';
 $LNG['fl_no_target']						= 'Kein Zielplanet vorhanden';
