@@ -958,6 +958,9 @@ $LNG['op_dst_mode_sel'][1]					= 'Si';
 $LNG['op_dst_mode_sel'][2]					= 'Automatico';
 $LNG['op_timezone']							= 'Zona Horaria';
 $LNG['op_block_pm']							= 'Mensajes privados bloqueados';
+$LNG['op_public_message']					= 'Mensaje público del perfil';
+$LNG['op_public_message_desc']				= 'Se muestra en tu perfil de jugador. Si tu cuenta Hive es pública (el nombre coincide), se usa la descripción de tu perfil Hive.';
+$LNG['op_public_message_hive']				= 'Tu usuario de Hive coincide con esta cuenta, así que los visitantes ven la descripción de tu perfil Hive. Este texto solo se usa si esa descripción está vacía.';
 $LNG['number_format_label']					= 'Formato de número';
 $LNG['number_format_auto']					= 'Predeterminado del navegador (ej. 1.234.567)';
 $LNG['number_format_eu']					= 'Europeo (ej. 1.234.567)';
@@ -1118,6 +1121,7 @@ $LNG['pl_unitslose']    					= 'Unidades Perdidas';
 $LNG['pl_dermetal']    						= 'Total de metal en campos de escombros';
 $LNG['pl_dercrystal']   					= 'Total de cristal en campos de escombros';
 $LNG['pl_etc']   							= 'Otros';
+$LNG['pl_public_message']					= 'Acerca de';
 
 //----------------------------------------------------------------------------//
 // Support

@@ -72,6 +72,8 @@ class ShowSettingsPage extends AbstractGamePage
 				'email'				=> $USER['email'],
 				'permaEmail'		=> $USER['email_2'],
 				'hiveAccount'		=> $USER['hive_account'],
+				'publicMessage'		=> $USER['public_message'] ?? '',
+				'hiveIdentityPublic'=> PlayerUtil::isHiveIdentityPublic($USER),
 				'universe'			=> $USER['universe'],
 				'isHiveKeychainAct' => (str_ends_with((string) $USER['email'], '@hive.blog')),
 				'disableDepositButton' => ($USER['universe'] === "1"),
@@ -232,6 +234,7 @@ class ShowSettingsPage extends AbstractGamePage
 
 		$hiveAccount		= HTTP::_GP('hiveAccount', '');
 		$hivesign           = HTTP::_GP('hivesign', '');
+		$publicMessage		= PlayerUtil::sanitizePublicMessage(HTTP::_GP('publicMessage', '', true));
 		
 		$timezone			= HTTP::_GP('timezone', '');	
 		$language			= HTTP::_GP('language', '');	
@@ -471,7 +474,8 @@ class ShowSettingsPage extends AbstractGamePage
 		lang					= :language,
 		hof						= :queueMessages,
 		spyMessagesMode			= :spyMessagesMode,
-		number_format			= :numberFormat
+		number_format			= :numberFormat,
+		public_message			= :publicMessage
 		WHERE id = :userID;";
 		$db->update($sql, array(
 			':theme'			=> $theme,
@@ -490,6 +494,7 @@ class ShowSettingsPage extends AbstractGamePage
 			':queueMessages'	=> $queueMessages,
 			':spyMessagesMode'	=> $spyMessagesMode,
 			':numberFormat'		=> in_array(HTTP::_GP('number_format', ''), ['auto', 'eu']) ? HTTP::_GP('number_format', '') : 'auto',
+			':publicMessage'	=> $publicMessage,
 			':userID'			=> $USER['id']
 		));
 		

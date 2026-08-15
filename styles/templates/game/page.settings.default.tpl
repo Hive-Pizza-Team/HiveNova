@@ -53,6 +53,13 @@
 		<td style="height:22px;">1 PIZZA = 10 Pizzabits</td>
 		<td><button type="button" onclick="DepositPizzaTokens('{$hiveAccount}', '{$universe}')" class="login-button button_standard" title="Deposit Pizza Tokens" {if $disableDepositButton}disabled{/if}>Deposit $PIZZA</button></td>
 	</tr>
+	<tr>
+		<td><a title="{if $hiveIdentityPublic}{$LNG.op_public_message_hive}{else}{$LNG.op_public_message_desc}{/if}">{$LNG.op_public_message}</a></td>
+		<td>
+			<textarea name="publicMessage" rows="5" style="width:100%">{$publicMessage|escape:'html'}</textarea>
+			{if $hiveIdentityPublic}<br><small>{$LNG.op_public_message_hive}</small>{/if}
+		</td>
+	</tr>
 		<tr>
 			<th colspan="2">{$LNG.op_general_settings}</th>
 		</tr>

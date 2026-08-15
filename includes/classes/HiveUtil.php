@@ -104,4 +104,43 @@ class HiveUtil
 
 		return is_array($result) && count($result) > 0;
 	}
+
+	static public function extractProfileAbout(mixed $account): string
+	{
+		if (!is_array($account)) {
+			return '';
+		}
+
+		foreach (['posting_json_metadata', 'json_metadata'] as $field) {
+			if (empty($account[$field]) || !is_string($account[$field])) {
+				continue;
+			}
+
+			$decoded = json_decode($account[$field], true);
+			if (!is_array($decoded)) {
+				continue;
+			}
+
+			$about = $decoded['profile']['about'] ?? null;
+			if (is_string($about) && trim($about) !== '') {
+				return trim($about);
+			}
+		}
+
+		return '';
+	}
+
+	static public function getAccountAbout(string $hiveaccount): string
+	{
+		if (!HiveUtil::isAccountValid($hiveaccount)) {
+			return '';
+		}
+
+		$result = HiveUtil::rpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
+		if (!is_array($result) || !isset($result[0])) {
+			return '';
+		}
+
+		return HiveUtil::extractProfileAbout($result[0]);
+	}
 }

@@ -981,6 +981,9 @@ $LNG['op_dst_mode_sel'][1]					= 'Hayır';
 $LNG['op_dst_mode_sel'][2]					= 'Otomatik';
 $LNG['op_timezone']							= 'Zaman Dilimi';
 $LNG['op_block_pm']							= 'Özel mesajları blokla';
+$LNG['op_public_message']						= 'Herkese açık profil mesajı';
+$LNG['op_public_message_desc']				= 'Oyuncu profilinde gösterilir. Hive hesabın herkese açıksa (kullanıcı adı eşleşirse) Hive profil açıklaması kullanılır.';
+$LNG['op_public_message_hive']				= 'Hive kullanıcı adın bu hesapla eşleşiyor, bu yüzden ziyaretçiler Hive profil açıklamanı görür. Bu metin yalnızca o açıklama boşsa kullanılır.';
 $LNG['number_format_label']					= 'Sayı formatı';
 $LNG['number_format_auto']					= 'Tarayıcı varsayılanı (örn. 1.234.567)';
 $LNG['number_format_eu']					= 'Avrupa (örn. 1.234.567)';
@@ -1141,6 +1144,7 @@ $LNG['pl_unitslose']						= 'Unite Kaybedildi';
 $LNG['pl_dermetal']							= 'Geri Dönüşümlü Metal';
 $LNG['pl_dercrystal']						= 'Geri Dönüşümlü Kristal';
 $LNG['pl_etc']								= 'Diğerleri ';
+$LNG['pl_public_message']						= 'Hakkında';
 
 //----------------------------------------------------------------------------//
 // Destek
