@@ -26,8 +26,8 @@ class CacheFile {
 
 	private function getTempPath()
 	{
-		require_once 'includes/libs/wcf/BasicFileUtil.class.php';
-		return BasicFileUtil::getTempFolder();
+		require_once ROOT_PATH . 'includes/libs/wcf/BasicFileUtil.class.php';
+		return \BasicFileUtil::getTempFolder();
 	}
 
 	public function store($Key, $Value) {

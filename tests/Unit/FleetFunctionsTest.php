@@ -329,6 +329,25 @@ class FleetFunctionsTest extends TestCase
         $this->assertEqualsWithDelta(10 * ($one - 1) + 1, $ten, 2.0, '10 ships consume ~10× a single ship');
     }
 
+    public function testGetFleetConsumptionSumsMultipleShipTypesInFleetArray(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']       = 12500;
+        $GLOBALS['pricelist'][202]['tech']        = 1;
+        $GLOBALS['pricelist'][202]['consumption'] = 20;
+        $GLOBALS['pricelist'][203]['speed']       = 12500;
+        $GLOBALS['pricelist'][203]['tech']        = 1;
+        $GLOBALS['pricelist'][203]['consumption'] = 50;
+
+        $player = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+        $fleet  = [202 => 2, 203 => 1];
+
+        $mixed = FleetFunctions::GetFleetConsumption($fleet, 3600, 5000, $player, 1);
+        $lfOnly = FleetFunctions::GetFleetConsumption([202 => 2], 3600, 5000, $player, 1);
+
+        $this->assertGreaterThan($lfOnly, $mixed, 'Fleet array should sum consumption per ship type');
+        $this->assertGreaterThan(1, $mixed);
+    }
+
     // -------------------------------------------------------------------------
     // GetGameSpeedFactor
     // -------------------------------------------------------------------------
