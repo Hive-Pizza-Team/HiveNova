@@ -19,6 +19,7 @@ if (!defined('TIMESTAMP'))     define('TIMESTAMP',      time());
 if (!defined('MODE'))          define('MODE',           'INSTALL');
 if (!defined('DEFAULT_LANG'))  define('DEFAULT_LANG',   'en');
 if (!defined('MIN_FLEET_TIME')) define('MIN_FLEET_TIME', 10);
+if (!defined('MARKET_TRADE_HISTORY_LIMIT')) define('MARKET_TRADE_HISTORY_LIMIT', 40);
 if (!defined('INACTIVE'))      define('INACTIVE',       7 * 86400);
 if (!defined('INACTIVE_LONG')) define('INACTIVE_LONG',  28 * 86400);
 if (!defined('ROOT_UNI'))      define('ROOT_UNI',        1);

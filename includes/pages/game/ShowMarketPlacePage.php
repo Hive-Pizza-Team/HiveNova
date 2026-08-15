@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\MarketPlaceResource;
 
 /**
  *  Steemnova
@@ -89,9 +90,9 @@ class ShowMarketPlacePage extends AbstractGamePage
 			FROM %%TRADES%%
 			JOIN %%LOG_FLEETS%% seller ON seller.fleet_id = seller_fleet_id
 			JOIN %%LOG_FLEETS%% buyer ON buyer.fleet_id = buyer_fleet_id
-			WHERE transaction_type = 0 ORDER BY time DESC LIMIT 40;';
+			WHERE transaction_type = 0 ORDER BY time DESC LIMIT :limit;';
 		$trades = $db->select($sql, array(
-			//TODO LIMIT
+			':limit' => MarketPlaceResource::historyLimit(),
 		));
 		return $trades;
 	}
@@ -107,9 +108,9 @@ class ShowMarketPlacePage extends AbstractGamePage
 			FROM %%TRADES%%
 			JOIN %%LOG_FLEETS%% seller ON seller.fleet_id = seller_fleet_id
 			JOIN %%LOG_FLEETS%% buyer ON buyer.fleet_id = buyer_fleet_id
-			WHERE transaction_type = 1 ORDER BY time DESC LIMIT 40;';
+			WHERE transaction_type = 1 ORDER BY time DESC LIMIT :limit;';
 		$trades = $db->select($sql, array(
-			//TODO LIMIT
+			':limit' => MarketPlaceResource::historyLimit(),
 		));
 		for($i =0; $i< count($trades);$i++){
 			$fleet =  FleetFunctions::unserialize($trades[$i]['fleet']);
@@ -235,21 +236,7 @@ class ShowMarketPlacePage extends AbstractGamePage
 		$fleetStayTime		= $fleetStartTime;
 		$fleetEndTime		= $fleetStayTime + $Duration;
 
-		$met = 0;
-		$cry = 0;
-		$deu = 0;
-		if ($fleetResult['ex_resource_type'] == 1)
-			$met = $amount;
-		elseif ($fleetResult['ex_resource_type'] == 2)
-			$cry = $amount;
-		elseif ($fleetResult['ex_resource_type'] == 3)
-			$deu = $amount;
-
-		$fleetResource	= array(
-			901	=> $met,
-			902	=> $cry,
-			903	=> $deu,
-		);
+		$fleetResource	= MarketPlaceResource::amounts((int) $fleetResult['ex_resource_type'], $amount);
 
 		if($PLANET[$resource[901]]-$fleetResource[901] < 0 ||
 			$PLANET[$resource[902]]	-$fleetResource[902] <0 ||
@@ -378,21 +365,7 @@ class ShowMarketPlacePage extends AbstractGamePage
 
 		foreach ($fleetResult as $fleetsRow)
 		{
-			$resourceN = " ";
-			//TODO TRANSLATION
-			switch($fleetsRow['ex_resource_type']) {
-				case 1:
-					$resourceN = $LNG['tech'][901];
-					break;
-				case 2:
-					$resourceN = $LNG['tech'][902];
-					break;
-				case 3:
-					$resourceN = $LNG['tech'][903];
-					break;
-				default:
-					break;
-			}
+			$resourceN = MarketPlaceResource::label((int) $fleetsRow['ex_resource_type'], $LNG['tech']);
 
 			//Level of diplo
 			if($fleetsRow['accept'] == 0){
