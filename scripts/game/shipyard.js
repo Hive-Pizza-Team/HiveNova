@@ -16,6 +16,20 @@ function ShipyardInit() {
 	ShipyardInterval	= window.setInterval(BuildlistShipyard, 1000);
 }
 
+function shipyardReadCount($el) {
+	var n = parseInt($el.attr('data-n'), 10);
+	return isNaN(n) ? 0 : n;
+}
+
+function shipyardWriteCount($el, n, withAvailableLabel) {
+	$el.attr('data-n', n);
+	if (withAvailableLabel) {
+		$el.text(' (' + bd_available + NumberGetHumanReadable(n) + ')');
+	} else {
+		$el.text(NumberGetHumanReadable(n));
+	}
+}
+
 function BuildlistShipyard() {
 	var n = new Date();
 	var s = Shipyard[0][2] - hanger_id - Math.round((n.getTime() - v.getTime()) / 1000);
@@ -24,9 +38,13 @@ function BuildlistShipyard() {
 	var h = 0;
 	if (s <= 0) {
 		Amount.sub('1');
-		$('#val_'+Shipyard[0][3]).text(function(i, old){
-			return ' ('+bd_available+NumberGetHumanReadable(parseInt(old.replace(/.* (.*)\)/, '$1').replace(/\./g, ''))+1)+')';
-		})
+		var elementId = Shipyard[0][3];
+		var $owned = $('#val_' + elementId);
+		var $max = $('#max_' + elementId);
+		shipyardWriteCount($owned, shipyardReadCount($owned) + 1, true);
+		if ($max.length) {
+			shipyardWriteCount($max, Math.max(0, shipyardReadCount($max) - 1), false);
+		}
 		if (Amount.toString() == '0') {
 			Shipyard.shift();
 			if (Shipyard.length == 0) {

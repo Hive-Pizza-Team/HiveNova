@@ -32,7 +32,7 @@
 	{foreach $elementList as $ID => $Element}
 	
 		<div class="infos" id="s{$ID}"><form action="game.php?page=shipyard&amp;mode={$mode}" method="post" id="s{$ID}">
-			<div class="buildn"><a href="#" onclick="return Dialog.info({$ID})">{$LNG.tech.{$ID}}</a><span id="val_{$ID}">{if $Element.available != 0} ({$LNG.bd_available} {$Element.available|number}){/if}</span>
+			<div class="buildn"><a href="#" onclick="return Dialog.info({$ID})">{$LNG.tech.{$ID}}</a><span id="val_{$ID}" data-n="{$Element.available}">{if $Element.available != 0} ({$LNG.bd_available} {$Element.available|number}){/if}</span>
 		</div>
 			
 <div class="buildl">
@@ -44,7 +44,7 @@
 						{foreach $Element.costOverflow as $ResType => $ResCount}
 						<a href='#' onclick='return Dialog.info({$ResType})' class='tooltip' data-tooltip-content="<table><tr><th>{$LNG.tech.{$ResType}}</th></tr><tr><table class='hoverinfo'><tr><td><img src='{$dpath}gebaeude/{$ResType}.{if $ResType >=600 && $ResType <= 699}jpg{else}gif{/if}'></td><td>{$LNG.shortDescription.$ResType}</td></tr></table></tr></table>">{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
-						<p>{$LNG.bd_max_ships_long}:<span style="font-weight:700"><br>{$Element.maxBuildable|number}</p>
+						<p>{$LNG.bd_max_ships_long}:<span style="font-weight:700"><br><span id="max_{$ID}" data-n="{$Element.maxBuildable}">{$Element.maxBuildable|number}</span></p>
 
 		</div>
 	
@@ -54,7 +54,7 @@
 					{/foreach}</span></br>
 					{if $ID==212} +<span id="SolarEnergy">{$SolarEnergy}</span> {$LNG.tech.911}<br><script>$('#SolarEnergy').text(number_format({$SolarEnergy},0))</script>{/if}
 					<span>{if $Element.AlreadyBuild}<span style="color:red">{$LNG.bd_protection_shield_only_one}</span>{elseif $NotBuilding && $Element.buyable}<input type="text" inputmode="numeric" name="fmenge[{$ID}]" id="input_{$ID}" size="3" maxlength="{$maxlength}" placeholder="0" tabindex="{$smarty.foreach.FleetList.iteration}" >
-					<input type="button" class="b" value="{$LNG.bd_max_ships}" onclick="$('#input_{$ID}').val('{$Element.maxBuildable}')"> <input class="b" type="submit" value="{$LNG.bd_build_ships}">
+					<input type="button" class="b" value="{$LNG.bd_max_ships}" onclick="$('#input_{$ID}').val($('#max_{$ID}').attr('data-n'))"> <input class="b" type="submit" value="{$LNG.bd_build_ships}">
 					{/if}
 					
 					</p>{$LNG.fgf_time}
