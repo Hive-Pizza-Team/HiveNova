@@ -149,6 +149,81 @@ class PlayerUtilTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // public profile message
+    // -------------------------------------------------------------------------
+
+    public function testIsHiveIdentityPublicWhenUsernameMatchesHiveAccount(): void
+    {
+        $this->assertTrue(PlayerUtil::isHiveIdentityPublic([
+            'username' => 'Alice',
+            'hive_account' => 'alice',
+        ]));
+        $this->assertFalse(PlayerUtil::isHiveIdentityPublic([
+            'username' => 'alice',
+            'hive_account' => 'bob',
+        ]));
+        $this->assertFalse(PlayerUtil::isHiveIdentityPublic([
+            'username' => 'alice',
+            'hive_account' => '',
+        ]));
+    }
+
+    public function testResolvePublicMessageUsesStoredTextWhenHiveLinkIsNotPublic(): void
+    {
+        $user = [
+            'username' => 'alice',
+            'hive_account' => 'bob',
+            'public_message' => 'Trade deuterium',
+        ];
+
+        $this->assertSame('Trade deuterium', PlayerUtil::resolvePublicMessage($user, static function (): string {
+            return 'should not be used';
+        }));
+    }
+
+    public function testResolvePublicMessageUsesHiveAboutWhenIdentityIsPublic(): void
+    {
+        $user = [
+            'username' => 'alice',
+            'hive_account' => 'alice',
+            'public_message' => 'in-game fallback',
+        ];
+
+        $this->assertSame('Hive bio', PlayerUtil::resolvePublicMessage($user, static function (string $account): string {
+            TestCase::assertSame('alice', $account);
+            return 'Hive bio';
+        }));
+    }
+
+    public function testResolvePublicMessageFallsBackToStoredWhenHiveAboutEmpty(): void
+    {
+        $user = [
+            'username' => 'alice',
+            'hive_account' => 'alice',
+            'public_message' => 'in-game fallback',
+        ];
+
+        $this->assertSame('in-game fallback', PlayerUtil::resolvePublicMessage($user, static function (): string {
+            return '';
+        }));
+    }
+
+    public function testSanitizePublicMessageStripsImgAndTruncates(): void
+    {
+        $this->assertSame('evilhello', PlayerUtil::sanitizePublicMessage("  [img]evil.php[/img]hello  "));
+        $this->assertSame(
+            PlayerUtil::PUBLIC_MESSAGE_MAX_LENGTH,
+            strlen(PlayerUtil::sanitizePublicMessage(str_repeat('a', 2500)))
+        );
+    }
+
+    public function testFormatPublicMessageHtmlEscapesAndKeepsLineBreaks(): void
+    {
+        $this->assertSame('', PlayerUtil::formatPublicMessageHtml(''));
+        $this->assertSame("a&lt;b&gt;<br>\nc", PlayerUtil::formatPublicMessageHtml("a<b>\nc"));
+    }
+
+    // -------------------------------------------------------------------------
     // checkPosition — uses Config (no DB)
     // -------------------------------------------------------------------------
 

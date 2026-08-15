@@ -1109,6 +1109,7 @@ $LNG['pl_unitslose']    					= 'Unités perdues';
 $LNG['pl_dermetal']    						= 'Total champs de débris en métal';
 $LNG['pl_dercrystal']   					= 'Total champs de débris en cristal';
 $LNG['pl_etc']   							= 'Divers ';
+$LNG['pl_public_message']					= 'À propos';
 
 //----------------------------------------------------------------------------//
 // Support
@@ -1212,6 +1213,9 @@ $LNG['fl_mt_resources'] = 'Marché des ressources';
 $LNG['fl_stronger_techs'] = 'Votre attaque/défense/bouclier est trop faible.';
 $LNG['op_active_spy_messages_mode'] = 'Enable Summarized Spy Reports';
 $LNG['op_block_pm'] = 'Block private messages';
+$LNG['op_public_message'] = 'Message public du profil';
+$LNG['op_public_message_desc'] = 'Affiché sur votre profil joueur. Si votre compte Hive est public (le nom correspond), la description de votre profil Hive est utilisée.';
+$LNG['op_public_message_hive'] = 'Votre nom Hive correspond à ce compte, les visiteurs voient donc la description de votre profil Hive. Ce texte n\'est utilisé que si cette description est vide.';
 $LNG['number_format_label'] = 'Format des nombres';
 $LNG['number_format_auto'] = 'Navigateur par défaut (ex. 1 234 567)';
 $LNG['number_format_eu'] = 'Européen (ex. 1.234.567)';

@@ -978,6 +978,9 @@ $LNG['op_dst_mode_sel'][1]					= 'Tak';
 $LNG['op_dst_mode_sel'][2]					= 'Automatycznie';
 $LNG['op_timezone']							= 'Strefa czasowa';
 $LNG['op_block_pm']							= 'Zablokuj prywatne wiadomości od tego użytkownika';
+$LNG['op_public_message']					= 'Publiczna wiadomość profilu';
+$LNG['op_public_message_desc']				= 'Wyświetlana na profilu gracza. Jeśli konto Hive jest publiczne (nazwa się zgadza), używany jest opis profilu Hive.';
+$LNG['op_public_message_hive']				= 'Twoja nazwa Hive zgadza się z tym kontem, więc odwiedzający widzą opis profilu Hive. Ten tekst jest używany tylko, gdy ten opis jest pusty.';
 $LNG['number_format_label']					= 'Format liczb';
 $LNG['number_format_auto']					= 'Domyślny przeglądarki (np. 1 234 567)';
 $LNG['number_format_eu']					= 'Europejski (np. 1.234.567)';
@@ -1139,6 +1142,7 @@ $LNG['pl_unitslose']    					= 'Stracił jednostek';
 $LNG['pl_dermetal']    						= 'Wytworzyl pole zniszczeń z metalu';
 $LNG['pl_dercrystal']   					= 'Wytworzyl pole zniszczeń z kryształu';
 $LNG['pl_etc']   							= 'Itd. ';
+$LNG['pl_public_message']					= 'O graczu';
 //----------------------------------------------------------------------------//
 // Support
 

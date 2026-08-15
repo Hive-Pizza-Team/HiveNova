@@ -81,4 +81,38 @@ class HiveUtilTest extends TestCase
             'contains special chars'  => ['hive@nova'],
         ];
     }
+
+    public function testExtractProfileAboutPrefersPostingJsonMetadata(): void
+    {
+        $account = [
+            'posting_json_metadata' => json_encode(['profile' => ['about' => '  Hive about  ']]),
+            'json_metadata' => json_encode(['profile' => ['about' => 'legacy']]),
+        ];
+
+        $this->assertSame('Hive about', HiveUtil::extractProfileAbout($account));
+    }
+
+    public function testExtractProfileAboutFallsBackToJsonMetadata(): void
+    {
+        $account = [
+            'posting_json_metadata' => '',
+            'json_metadata' => json_encode(['profile' => ['about' => 'legacy about']]),
+        ];
+
+        $this->assertSame('legacy about', HiveUtil::extractProfileAbout($account));
+    }
+
+    public function testExtractProfileAboutReturnsEmptyWhenMissingOrInvalid(): void
+    {
+        $this->assertSame('', HiveUtil::extractProfileAbout(null));
+        $this->assertSame('', HiveUtil::extractProfileAbout(['posting_json_metadata' => '{']));
+        $this->assertSame('', HiveUtil::extractProfileAbout([
+            'posting_json_metadata' => json_encode(['profile' => ['about' => '   ']]),
+        ]));
+    }
+
+    public function testGetAccountAboutReturnsEmptyForInvalidAccount(): void
+    {
+        $this->assertSame('', HiveUtil::getAccountAbout('Not Valid!'));
+    }
 }
