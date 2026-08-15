@@ -75,9 +75,10 @@ class ShowMessagesPage extends AbstractGamePage
 
         $MessCategory  	= HTTP::_GP('messcat', 100);
         $page		 	= HTTP::_GP('page', 1);
+        $filter		 	= HTTP::_GP('filter', '') === 'lost' ? 'lost' : '';
         $messageIDs		= HTTP::_GP('messageID', array());
 
-        $redirectUrl	= 'game.php?page=messages&category='.$MessCategory.'&side='.$page;
+        $redirectUrl	= 'game.php?page=messages&category='.$MessCategory.'&side='.$page.($filter !== '' ? '&filter='.$filter : '');
 
 		$action			= false;
 
@@ -281,6 +282,7 @@ class ShowMessagesPage extends AbstractGamePage
 
         $MessCategory      	= HTTP::_GP('category', -1);
         $page			= HTTP::_GP('side', 1);
+        $filter			= HTTP::_GP('filter', '') === 'lost' ? 'lost' : '';
 
         $db = Database::get();
 
@@ -324,10 +326,10 @@ class ShowMessagesPage extends AbstractGamePage
 
 		//// view()
 
-        $MessageCount  = MessageRepository::countMessages($USER['id'], $MessCategory);
+        $MessageCount  = MessageRepository::countMessages($USER['id'], $MessCategory, false, $filter);
         $maxPage       = max(1, ceil($MessageCount / MESSAGES_PER_PAGE));
         $page          = max(1, min($page, $maxPage));
-        $MessageResult = MessageRepository::getMessagesPaged($USER['id'], $MessCategory, ($page - 1) * MESSAGES_PER_PAGE, MESSAGES_PER_PAGE);
+        $MessageResult = MessageRepository::getMessagesPaged($USER['id'], $MessCategory, ($page - 1) * MESSAGES_PER_PAGE, MESSAGES_PER_PAGE, $filter);
 
 		////
 
@@ -362,6 +364,9 @@ class ShowMessagesPage extends AbstractGamePage
             'CategoryList'	=> $CategoryList,
             'page'			=> $page,
             'maxPage'		=> $maxPage,
+            'lostFilter'	=> $filter === 'lost',
+            'canFilterLost'	=> in_array($MessCategory, [0, 3, 15], true),
+            'filterQuery'	=> $filter === 'lost' ? '&filter=lost' : '',
         ));
 
         $this->display('page.messages.default.tpl');
