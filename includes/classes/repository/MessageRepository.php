@@ -20,6 +20,16 @@ class MessageRepository
             return ['sql' => '', 'params' => []];
         }
 
+        if ($category === 100) {
+            return [
+                'sql'    => ' AND (message_text LIKE :lostNeedle OR message_text LIKE :lostNeedleSpy)',
+                'params' => [
+                    ':lostNeedle'    => '%raportLose%',
+                    ':lostNeedleSpy' => '%spyReportLost%',
+                ],
+            ];
+        }
+
         $pattern = match ($category) {
             0 => '%spyReportLost%',
             3, 15 => '%raportLose%',

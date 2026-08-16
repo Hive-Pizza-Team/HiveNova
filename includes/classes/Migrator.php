@@ -79,8 +79,8 @@ class Migrator
     }
 
     /**
-     * Applies a single SQL migration. Individual query errors are logged and skipped
-     * (mirrors web-runner behaviour for ALTER TABLE IF NOT EXISTS scenarios).
+     * Applies a single SQL migration. Idempotent schema errors (duplicate column/table/key)
+     * are logged and skipped. Other SQL errors abort the migration.
      */
     public function applySqlMigration(array $migration): void
     {
@@ -91,9 +91,22 @@ class Migrator
             try {
                 $this->pdo->exec($query);
             } catch (PDOException $e) {
+                if (!self::isIgnorableSqlError($e)) {
+                    throw $e;
+                }
                 error_log("Migration [{$migration['filename']}] query skipped: " . $e->getMessage());
             }
         }
+    }
+
+    public static function isIgnorableSqlError(PDOException $e): bool
+    {
+        $message = $e->getMessage();
+
+        return (bool) preg_match(
+            '/duplicate (column|entry|key)|duplicate column name|already exists|check that column\/key exists/i',
+            $message
+        );
     }
 
     /**

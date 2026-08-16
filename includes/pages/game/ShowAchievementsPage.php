@@ -60,6 +60,7 @@ class ShowAchievementsPage extends AbstractGamePage
             'unlockedCount'          => $unlockedCount,
             'totalCount'             => count($achievements),
             'pointsTotal'            => $pointsTotal,
+            'darkmatterName'         => $LNG['tech'][921] ?? '',
         ]);
 
         $this->display('page.achievements.default.tpl');

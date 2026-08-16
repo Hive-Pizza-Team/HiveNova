@@ -87,6 +87,10 @@ class ShowFleetStep3Page extends AbstractGamePage
 		$fleetSpeed   = $formData['fleetSpeed'];
 		$ownPlanet    = $formData['ownPlanet'];
 
+		if (!FleetFunctions::HasCompleteTargetCoords($targetGalaxy, $targetSystem, $targetPlanet)) {
+			FleetFunctions::GotoFleetPage(0);
+		}
+
 		if ($ownPlanet != $PLANET['id']) {
 			$this->printMessage($LNG['fl_own_planet_error'], array(array(
 				'label' => $LNG['sys_back'],

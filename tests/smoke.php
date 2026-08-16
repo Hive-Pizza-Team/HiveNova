@@ -62,6 +62,7 @@ $pages = [
     'ticket',
     'phalanx',
     'viz',
+    'achievements',
 ];
 
 $pass = 0;

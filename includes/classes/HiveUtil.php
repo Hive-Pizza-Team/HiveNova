@@ -13,7 +13,7 @@ class HiveUtil
 {
 	static public function getRpcNodes(): array
 	{
-		return HIVE_RPC_NODES;
+		return \HIVE_RPC_NODES;
 	}
 
 	static public function isRpcError(mixed $result): bool
@@ -25,13 +25,23 @@ class HiveUtil
 		return array_key_exists('code', $result) && array_key_exists('message', $result);
 	}
 
-	static public function rpcCall(string $method, string $params): mixed
+	static public function rpcNodesToTry(?int $maxNodes = null): array
 	{
-		foreach (HiveUtil::getRpcNodes() as $rpcNode) {
+		$nodes = self::getRpcNodes();
+		if ($maxNodes === null) {
+			return $nodes;
+		}
+
+		return array_slice($nodes, 0, max(1, $maxNodes));
+	}
+
+	static public function rpcCall(string $method, string $params, ?int $maxNodes = null): mixed
+	{
+		foreach (HiveUtil::rpcNodesToTry($maxNodes) as $rpcNode) {
 			try {
 				$hive = new Hive([
 					'rpcNodes' => [$rpcNode],
-					'timeout'  => HIVE_RPC_TIMEOUT,
+					'timeout'  => \HIVE_RPC_TIMEOUT,
 				]);
 				$result = $hive->call($method, $params);
 			} catch (\Throwable $e) {
@@ -136,7 +146,7 @@ class HiveUtil
 			return '';
 		}
 
-		$result = HiveUtil::rpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
+		$result = HiveUtil::rpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]', 3);
 		if (!is_array($result) || !isset($result[0])) {
 			return '';
 		}

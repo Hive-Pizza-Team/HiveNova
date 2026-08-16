@@ -268,6 +268,20 @@ class FleetFunctionsDatabaseTest extends TestCase
         $this->assertNotContains(7, $missions);
     }
 
+    public function testGetAvailableMissionsAcceptsMissingPlanetRow(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'planet' => 8,
+            'planettype' => 1,
+            'Ship' => [208 => 1],
+        ];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, false);
+
+        $this->assertContains(7, $missions);
+    }
+
     public function testGetAvailableMissionsIncludesSpyWithOnlyProbe(): void
     {
         $user = ['id' => 1, 'universe' => 1];
