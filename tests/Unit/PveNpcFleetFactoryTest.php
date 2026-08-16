@@ -26,6 +26,13 @@ class PveNpcFleetFactoryTest extends TestCase
         }
     }
 
+    public function testFamilyFromFleetArrayDetectsTemplates(): void
+    {
+        $this->assertSame('pirate', PveNpcFleetFactory::familyFromFleetArray('204,8;202,2;'));
+        $this->assertSame('alien', PveNpcFleetFactory::familyFromFleetArray('205,6;203,1;'));
+        $this->assertSame('salvager', PveNpcFleetFactory::familyFromFleetArray('209,4;204,4;'));
+    }
+
     public function testFamilyFromSeedBuckets(): void
     {
         $this->assertSame('pirate', PveNpcFleetFactory::familyFromSeed(10));

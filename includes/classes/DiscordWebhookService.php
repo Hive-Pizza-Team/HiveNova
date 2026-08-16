@@ -102,21 +102,57 @@ class DiscordWebhookService
 		return $normalized ?? false;
 	}
 
-	public static function formatIncoming(string $username, int $mission, int $galaxy, int $system, int $planet, int $planetType): string
-	{
+	public static function formatIncoming(
+		string $username,
+		int $mission,
+		int $galaxy,
+		int $system,
+		int $planet,
+		int $planetType,
+		?string $npcName = null
+	): string {
+		$missionLabel = self::missionName($mission);
+		if ($npcName !== null) {
+			return sprintf(
+				'Incoming %s (%s) to %s at %s',
+				$missionLabel,
+				$npcName,
+				$username,
+				self::coords($galaxy, $system, $planet, $planetType)
+			);
+		}
+
 		return sprintf(
 			'Incoming %s to %s at %s',
-			self::missionName($mission),
+			$missionLabel,
 			$username,
 			self::coords($galaxy, $system, $planet, $planetType)
 		);
 	}
 
-	public static function formatCombat(string $username, int $mission, int $galaxy, int $system, int $planet, int $planetType): string
-	{
+	public static function formatCombat(
+		string $username,
+		int $mission,
+		int $galaxy,
+		int $system,
+		int $planet,
+		int $planetType,
+		?string $npcName = null
+	): string {
+		$missionLabel = self::missionName($mission);
+		if ($npcName !== null) {
+			return sprintf(
+				'Combat resolved (%s) — %s vs %s at %s',
+				$missionLabel,
+				$npcName,
+				$username,
+				self::coords($galaxy, $system, $planet, $planetType)
+			);
+		}
+
 		return sprintf(
 			'Combat resolved (%s) involving %s at %s',
-			self::missionName($mission),
+			$missionLabel,
 			$username,
 			self::coords($galaxy, $system, $planet, $planetType)
 		);
@@ -128,9 +164,11 @@ class DiscordWebhookService
 		int $galaxy,
 		int $system,
 		int $planet,
-		int $planetType
+		int $planetType,
+		int $attackerOwnerId = -1,
+		string $fleetArray = ''
 	): void {
-		self::notify($targetUserId, $mission, $galaxy, $system, $planet, $planetType, true);
+		self::notify($targetUserId, $mission, $galaxy, $system, $planet, $planetType, true, $attackerOwnerId, $fleetArray);
 	}
 
 	public static function notifyCombatResolved(
@@ -139,9 +177,20 @@ class DiscordWebhookService
 		int $galaxy,
 		int $system,
 		int $planet,
-		int $planetType
+		int $planetType,
+		int $attackerOwnerId = -1,
+		string $fleetArray = ''
 	): void {
-		self::notify($targetUserId, $mission, $galaxy, $system, $planet, $planetType, false);
+		self::notify($targetUserId, $mission, $galaxy, $system, $planet, $planetType, false, $attackerOwnerId, $fleetArray);
+	}
+
+	private static function npcName(int $attackerOwnerId, string $fleetArray): ?string
+	{
+		if ($attackerOwnerId !== 0) {
+			return null;
+		}
+
+		return PveNpcFleetFactory::displayName(PveNpcFleetFactory::familyFromFleetArray($fleetArray));
 	}
 
 	private static function notify(
@@ -151,7 +200,9 @@ class DiscordWebhookService
 		int $system,
 		int $planet,
 		int $planetType,
-		bool $incoming
+		bool $incoming,
+		int $attackerOwnerId = -1,
+		string $fleetArray = ''
 	): void {
 		try {
 			if ($targetUserId <= 0) {
@@ -170,11 +221,12 @@ class DiscordWebhookService
 
 			$username = (string) ($row['username'] ?? 'Unknown');
 			$coords   = self::coords($galaxy, $system, $planet, $planetType);
+			$npcName  = self::npcName($attackerOwnerId, $fleetArray);
 			$content  = $incoming
-				? self::formatIncoming($username, $mission, $galaxy, $system, $planet, $planetType)
-				: self::formatCombat($username, $mission, $galaxy, $system, $planet, $planetType);
+				? self::formatIncoming($username, $mission, $galaxy, $system, $planet, $planetType, $npcName)
+				: self::formatCombat($username, $mission, $galaxy, $system, $planet, $planetType, $npcName);
 
-			self::post($webhook, self::buildPayload($content, $incoming, $username, $mission, $coords));
+			self::post($webhook, self::buildPayload($content, $incoming, $username, $mission, $coords, $npcName));
 		} catch (\Throwable $e) {
 			return;
 		}
@@ -214,12 +266,24 @@ class DiscordWebhookService
 		bool $incoming,
 		string $username,
 		int $mission,
-		string $coords
+		string $coords,
+		?string $npcName = null
 	): array {
 		$missionName = self::missionName($mission);
 		$title = $incoming
 			? ('Incoming ' . $missionName)
 			: ('Combat resolved — ' . $missionName);
+		if ($npcName !== null) {
+			$title .= ' — ' . $npcName;
+		}
+
+		$fields = [
+			['name' => 'Player', 'value' => $username, 'inline' => true],
+			['name' => 'Location', 'value' => $coords, 'inline' => true],
+		];
+		if ($npcName !== null) {
+			$fields[] = ['name' => 'Attacker', 'value' => $npcName, 'inline' => true];
+		}
 
 		return [
 			'username'         => self::USERNAME,
@@ -230,10 +294,7 @@ class DiscordWebhookService
 				'description' => $description,
 				'color'       => $incoming ? self::COLOR_INCOMING : self::COLOR_COMBAT,
 				'thumbnail'   => ['url' => self::AVATAR_URL],
-				'fields'      => [
-					['name' => 'Player', 'value' => $username, 'inline' => true],
-					['name' => 'Location', 'value' => $coords, 'inline' => true],
-				],
+				'fields'      => $fields,
 			]],
 		];
 	}

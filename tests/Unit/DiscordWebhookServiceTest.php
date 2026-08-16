@@ -137,6 +137,30 @@ class DiscordWebhookServiceTest extends TestCase
 		$this->assertSame($payload['avatar_url'], $embed['thumbnail']['url']);
 		$this->assertSame('Alice', $embed['fields'][0]['value']);
 		$this->assertSame('[1:2:3] (planet)', $embed['fields'][1]['value']);
+		$this->assertCount(2, $embed['fields']);
+	}
+
+	public function testIncomingNpcRaidNamesPiratesInEmbed(): void
+	{
+		$this->seedDefender();
+		DiscordWebhookService::notifyIncomingHostile(2, 1, 1, 50, 13, 1, 0, '204,8;202,2');
+
+		$this->assertCount(1, $this->posts);
+		$embed = json_decode($this->posts[0]['json'], true)['embeds'][0];
+		$this->assertSame('Incoming Attack — Pirates', $embed['title']);
+		$this->assertStringContainsString('Incoming Attack (Pirates) to Alice at [1:50:13] (planet)', $embed['description']);
+		$this->assertSame('Pirates', $embed['fields'][2]['value']);
+	}
+
+	public function testCombatNpcRaidNamesAliensInEmbed(): void
+	{
+		$this->seedDefender();
+		DiscordWebhookService::notifyCombatResolved(2, 1, 1, 50, 13, 1, 0, '205,6;203,1');
+
+		$embed = json_decode($this->posts[0]['json'], true)['embeds'][0];
+		$this->assertSame('Combat resolved — Attack — Aliens', $embed['title']);
+		$this->assertStringContainsString('Aliens vs Alice', $embed['description']);
+		$this->assertSame('Aliens', $embed['fields'][2]['value']);
 	}
 
 	public function testBuildPayloadUsesLogoAvatarAndEmbedFields(): void
@@ -165,6 +189,11 @@ class DiscordWebhookServiceTest extends TestCase
 		$this->assertNotSame($incoming, $combat);
 		$this->assertStringContainsString('Incoming', $incoming);
 		$this->assertStringContainsString('Combat resolved', $combat);
+		$this->assertStringNotContainsString('Pirates', $incoming);
+		$this->assertStringContainsString(
+			'Pirates',
+			DiscordWebhookService::formatIncoming('Alice', 1, 1, 2, 3, 1, 'Pirates')
+		);
 	}
 
 	public function testEmptyWebhookDoesNotPost(): void

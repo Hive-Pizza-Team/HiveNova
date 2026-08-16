@@ -107,6 +107,16 @@ class DiscordHostileNotifyTest extends TestCase
 		];
 	}
 
+	public function testSendFleetNpcRaidNamesPiratesInDiscordEmbed(): void
+	{
+		$this->posts = [];
+		$this->sendHostile(1, 0, 2);
+		$this->assertCount(1, $this->posts);
+		$embed = json_decode($this->posts[0]['json'], true)['embeds'][0];
+		$this->assertStringContainsString('Pirates', $embed['title']);
+		$this->assertStringContainsString('Pirates', $embed['description']);
+	}
+
 	public function testSendFleetTransportDoesNotPost(): void
 	{
 		$this->sendHostile(3);
