@@ -418,6 +418,11 @@ class ConfigRecordingDatabase implements DatabaseInterface
     {
     }
 
+    public function getHandle(): ?\PDO
+    {
+        return null;
+    }
+
     public function beginTransaction(): void
     {
         $this->begins++;
