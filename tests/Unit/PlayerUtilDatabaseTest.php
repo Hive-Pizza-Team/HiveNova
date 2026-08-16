@@ -373,6 +373,7 @@ class PlayerUtilDatabaseTest extends TestCase
 
         $this->assertFalse(PlayerUtil::createMoon(1, 2, 100, 8, 77, 10));
         $this->assertCount(0, $this->fake->planetInserts);
+        $this->assertSame([], $this->fake->achievement->universeEvents);
     }
 
     public function testCreateMoonInsertsMoonAndLinksParent(): void
@@ -394,6 +395,10 @@ class PlayerUtilDatabaseTest extends TestCase
         $this->assertSame(3, $this->fake->planetInserts[0][':type']);
         $this->assertSame(8500, $this->fake->planetInserts[0][':diameter']);
         $this->assertSame(200, $this->fake->planetRowsById[150]['id_luna']);
+        $this->assertCount(1, $this->fake->achievement->universeEvents);
+        $this->assertSame('moon', $this->fake->achievement->universeEvents[0]['event_type']);
+        $this->assertSame('large', $this->fake->achievement->universeEvents[0]['size_bucket']);
+        $this->assertSame('formed', $this->fake->achievement->universeEvents[0]['outcome']);
     }
 
     public function testCreateMoonUsesLngDefaultNameWhenMoonNameEmpty(): void

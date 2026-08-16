@@ -108,12 +108,17 @@ $LNG['lm_disclamer']						= 'Creditos';
 $LNG['ef_title']							= 'Feed do universo';
 $LNG['ef_empty']							= 'O universo está calmo.';
 $LNG['ef_event_battle']					= 'Batalha';
+$LNG['ef_event_moon']						= 'Lua';
 $LNG['ef_size_small']						= 'Escaramuça';
 $LNG['ef_size_medium']						= 'Confronto';
 $LNG['ef_size_large']						= 'Grande batalha';
+$LNG['ef_size_moon_small']					= 'Pequena';
+$LNG['ef_size_moon_medium']					= 'Média';
+$LNG['ef_size_moon_large']					= 'Grande';
 $LNG['ef_outcome_attacker']				= 'Os atacantes prevaleceram';
 $LNG['ef_outcome_defender']				= 'Os defensores resistiram';
 $LNG['ef_outcome_draw']					= 'Empate';
+$LNG['ef_outcome_formed']					= 'Formada';
 	
 //----------------------------------------------------------------------------//
 // Vista Geral

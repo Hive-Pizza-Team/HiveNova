@@ -101,12 +101,17 @@ $LNG['lm_disclamer']                      = 'Контакты';
 $LNG['ef_title']							= 'Лента вселенной';
 $LNG['ef_empty']							= 'Во вселенной тихо.';
 $LNG['ef_event_battle']					= 'Бой';
+$LNG['ef_event_moon']						= 'Луна';
 $LNG['ef_size_small']						= 'Стычка';
 $LNG['ef_size_medium']						= 'Сражение';
 $LNG['ef_size_large']						= 'Крупный бой';
+$LNG['ef_size_moon_small']					= 'Малая';
+$LNG['ef_size_moon_medium']					= 'Средняя';
+$LNG['ef_size_moon_large']					= 'Крупная';
 $LNG['ef_outcome_attacker']				= 'Атакующие победили';
 $LNG['ef_outcome_defender']				= 'Защитники устояли';
 $LNG['ef_outcome_draw']					= 'Ничья';
+$LNG['ef_outcome_formed']					= 'Образовалась';
 
 // Обзор
 $LNG['ov_newname_specialchar']            = 'Название планеты и луны может состоять только из букв, цифр, пробелов и символов "_", "-", "."';

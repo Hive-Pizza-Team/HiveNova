@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\Cache;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\EventFirehoseWriter;
 use Exception;
 
 /**
@@ -514,6 +515,8 @@ class PlayerUtil
 			':moonId'	=> $moonId,
 			':planetId'	=> $parentPlanet['id'],
 		));
+
+		EventFirehoseWriter::recordMoon((int) $universe, TIMESTAMP, (float) $diameter);
 
 		return $moonId;
 	}

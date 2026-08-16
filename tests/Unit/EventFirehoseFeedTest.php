@@ -25,12 +25,17 @@ class EventFirehoseFeedTest extends TestCase
 		$this->lng = [
 			'php_tdformat' => 'Y-m-d',
 			'ef_event_battle' => 'Battle',
+			'ef_event_moon' => 'Moon',
 			'ef_size_small' => 'Skirmish',
 			'ef_size_medium' => 'Clash',
 			'ef_size_large' => 'Major battle',
+			'ef_size_moon_small' => 'Small',
+			'ef_size_moon_medium' => 'Medium',
+			'ef_size_moon_large' => 'Large',
 			'ef_outcome_attacker' => 'Attackers prevailed',
 			'ef_outcome_defender' => 'Defenders held',
 			'ef_outcome_draw' => 'Stalemate',
+			'ef_outcome_formed' => 'Formed',
 		];
 	}
 
@@ -103,5 +108,20 @@ class EventFirehoseFeedTest extends TestCase
 		$this->fake->achievement->throwOnUniverseEventsSelect = true;
 
 		$this->assertSame([], EventFirehoseFeed::fetch(1, $this->lng, 'UTC'));
+	}
+
+	public function test_present_uses_moon_labels(): void
+	{
+		$presented = EventFirehoseFeed::present([
+			'id' => 4,
+			'time' => 1_700_000_000,
+			'event_type' => 'moon',
+			'size_bucket' => 'large',
+			'outcome' => 'formed',
+		], $this->lng, 'UTC');
+
+		$this->assertSame('Moon', $presented['eventType']);
+		$this->assertSame('Large', $presented['size']);
+		$this->assertSame('Formed', $presented['outcome']);
 	}
 }

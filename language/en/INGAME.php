@@ -115,12 +115,17 @@ $LNG['lm_disclamer']						= 'Credits';
 $LNG['ef_title']							= 'Universe feed';
 $LNG['ef_empty']							= 'The universe is quiet.';
 $LNG['ef_event_battle']					= 'Battle';
+$LNG['ef_event_moon']						= 'Moon';
 $LNG['ef_size_small']						= 'Skirmish';
 $LNG['ef_size_medium']						= 'Clash';
 $LNG['ef_size_large']						= 'Major battle';
+$LNG['ef_size_moon_small']					= 'Small';
+$LNG['ef_size_moon_medium']					= 'Medium';
+$LNG['ef_size_moon_large']					= 'Large';
 $LNG['ef_outcome_attacker']				= 'Attackers prevailed';
 $LNG['ef_outcome_defender']				= 'Defenders held';
 $LNG['ef_outcome_draw']					= 'Stalemate';
+$LNG['ef_outcome_formed']					= 'Formed';
 
 //----------------------------------------------------------------------------//
 // Overview

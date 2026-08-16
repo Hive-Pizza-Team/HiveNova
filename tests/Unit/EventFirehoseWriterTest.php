@@ -56,4 +56,34 @@ class EventFirehoseWriterTest extends TestCase
 		EventFirehoseWriter::record(1, 1, 10, 'w');
 		$this->assertSame([], $this->fake->achievement->universeEvents);
 	}
+
+	public function test_moon_size_bucket_boundaries(): void
+	{
+		$this->assertSame(EventFirehoseWriter::SIZE_SMALL, EventFirehoseWriter::moonSizeBucket(0));
+		$this->assertSame(EventFirehoseWriter::SIZE_SMALL, EventFirehoseWriter::moonSizeBucket(5999));
+		$this->assertSame(EventFirehoseWriter::SIZE_MEDIUM, EventFirehoseWriter::moonSizeBucket(6000));
+		$this->assertSame(EventFirehoseWriter::SIZE_MEDIUM, EventFirehoseWriter::moonSizeBucket(7999));
+		$this->assertSame(EventFirehoseWriter::SIZE_LARGE, EventFirehoseWriter::moonSizeBucket(8000));
+	}
+
+	public function test_record_moon_stores_formed_event(): void
+	{
+		EventFirehoseWriter::recordMoon(1, 1_700_000_000, 8500);
+
+		$rows = $this->fake->achievement->universeEvents;
+		$this->assertCount(1, $rows);
+		$row = $rows[0];
+		$this->assertSame('moon', $row['event_type']);
+		$this->assertSame('large', $row['size_bucket']);
+		$this->assertSame('formed', $row['outcome']);
+		$this->assertArrayNotHasKey('rid', $row);
+		$this->assertArrayNotHasKey('diameter', $row);
+	}
+
+	public function test_record_moon_failure_does_not_throw(): void
+	{
+		$this->fake->achievement->throwOnUniverseEventsInsert = true;
+		EventFirehoseWriter::recordMoon(1, 1, 5000);
+		$this->assertSame([], $this->fake->achievement->universeEvents);
+	}
 }
