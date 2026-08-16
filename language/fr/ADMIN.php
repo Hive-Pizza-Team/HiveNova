@@ -406,6 +406,8 @@ $LNG['se_ref_active']					= 'Activer les lien de parrainage';
 $LNG['se_ref_active_info']				= 'Lien de parrainage donne aux joueurs la possibilité de renvoyer plus d\'amis. Cela vous donnera des bonus de joueurs';
 $LNG['se_ref_bonus']					= 'Lien de parrainage bonus';
 $LNG['se_ref_bonus_info']				= 'Nombre de matière noire, l\'utilisateur obtient le recrutement par utilisateur.';
+$LNG['se_ref_bonus_referee']				= 'Bonus du filleul';
+$LNG['se_ref_bonus_referee_info']		= 'Matière noire versée au joueur recruté au seuil de points. 0 = seul le parrain est payé.';
 $LNG['se_ref_minpoints']				= 'Des points de bonus pour les Min';
 $LNG['se_ref_minpoints_info']			= 'L\'utilisateur a renvoyé d\'atteindre ces seuils afin que l\'utilisateur obtient son bonus promotionnel.';
 $LNG['se_ref_max_referals']				= 'Saisi maximale';

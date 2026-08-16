@@ -1042,6 +1042,8 @@ $LNG['sys_module_inactive']        	 		= 'Modulo inactivo';
 $LNG['sys_refferal_from']        	 		= 'Sistema';
 $LNG['sys_refferal_title']        	 		= 'Bonificación por %s';
 $LNG['sys_refferal_text']        	 		= 'El jugador %s que reclutaste ha alcanzado %s puntos.<br><br>Como agradecimiento, que ha reclutado un jugador activo, obtienes %s %s';
+$LNG['sys_refferal_recruit_title']			= 'Bonus por jugar con amigos';
+$LNG['sys_refferal_recruit_text']			= 'Has alcanzado %s puntos tras unirte con una invitación.<br><br>Tu bonus es %s %s';
 $LNG['sys_closed_game']        	 			= 'El universo no está disponible actualmente:';
 $LNG['spec_mail_inactive_title']  			= '%s - Memoria';
 

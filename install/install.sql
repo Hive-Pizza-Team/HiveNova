@@ -272,6 +272,7 @@ CREATE TABLE `%PREFIX%config` (
   `ttf_file` varchar(128) NOT NULL DEFAULT 'styles/resource/fonts/DroidSansMono.ttf',
   `ref_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `ref_bonus` int(11) unsigned NOT NULL DEFAULT '1000',
+  `ref_bonus_referee` int(11) unsigned NOT NULL DEFAULT '1000',
   `ref_minpoints` bigint(20) unsigned NOT NULL DEFAULT '2000',
   `ref_max_referals` tinyint(1) unsigned NOT NULL DEFAULT '5',
   `del_oldstuff` tinyint(3) unsigned NOT NULL DEFAULT '30',

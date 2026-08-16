@@ -79,6 +79,10 @@
 	<td><input name="ref_bonus" maxlength="6" size="8" value="{$ref_bonus}" type="text"></td>
 	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$se_ref_bonus_info}"></td>
 </tr><tr>
+	<td>{$se_ref_bonus_referee}</td>
+	<td><input name="ref_bonus_referee" maxlength="6" size="8" value="{$ref_bonus_referee}" type="text"></td>
+	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$se_ref_bonus_referee_info}"></td>
+</tr><tr>
 	<td>{$se_ref_minpoints}</td>
 	<td><input name="ref_minpoints" maxlength="20" size="25" value="{$ref_minpoints}" type="text"></td>
 	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$se_ref_minpoints_info}"></td>

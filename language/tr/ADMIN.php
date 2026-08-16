@@ -330,6 +330,8 @@ $LNG['se_ref_active']					= 'Referans linkini aktif et';
 $LNG['se_ref_active_info']				= 'Referans linki/davet linki, oyuncuya daha fazla oyuncu ve arkadas davet etme firsati verir. Bu ayni zamanda oyuncuya KM bonusu verir.';
 $LNG['se_ref_bonus']					= 'Referans Link bonus';
 $LNG['se_ref_bonus_info']				= 'Her davet basina alinabilecek Karanlik Madde miktari.';
+$LNG['se_ref_bonus_referee']				= 'Davet edilen oyuncu bonusu';
+$LNG['se_ref_bonus_referee_info']		= 'Puan esigine ulasan davet edilen oyuncuya verilen Karanlik Madde. 0 = sadece davet eden odul alir.';
 $LNG['se_ref_minpoints']				= 'Minimum referans puani ';
 $LNG['se_ref_minpoints_info']			= 'Davet edilen oyuncu bu puana eristiginde referansi veren oyuncuya KM aktarilir';
 $LNG['se_ref_max_referals']				= 'Maksimum referans sayisi';

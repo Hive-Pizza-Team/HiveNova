@@ -500,6 +500,8 @@ $LNG['se_ref_active'] = 'Aktiviere Referallink';
 $LNG['se_ref_active_info'] = 'Referallink gibt den Spieler die Möglichkeit, weitere Freunde zu werben. Diese bekommen dann jeweilg einen Bonus.';
 $LNG['se_ref_bonus'] = 'Referallinkbonus';
 $LNG['se_ref_bonus_info'] = 'Anzahl der Dunkle Materie, die der werbende User bekommt pro User.';
+$LNG['se_ref_bonus_referee'] = 'Bonus für den Geworbenen';
+$LNG['se_ref_bonus_referee_info'] = 'Dunkle Materie für den geworbenen Spieler beim Erreichen der Punkteschwelle. 0 = nur der Werber erhält etwas.';
 $LNG['se_ref_minpoints'] = 'Min. Punkte für Bonus';
 $LNG['se_ref_minpoints_info'] = 'Der geworbende User muss diese Mindestpunktzahl erreichen, damit der werbende User seinen Bonus bekommt.';
 $LNG['se_ref_max_referals'] = 'Maximale Referal';

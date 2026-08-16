@@ -1066,6 +1066,8 @@ $LNG['sys_module_inactive']        	 		= 'Modül Aktif Değil';
 $LNG['sys_refferal_from']        	 		= 'Sistem';
 $LNG['sys_refferal_title']        	 		= 'Oyuncu Bonusu %s';
 $LNG['sys_refferal_text']        	 		= 'Oyuncu %s sizin tarafınızdan evrene kazandırıldı ve şu an %s puanı var.<br><br> Aktif bir oyuncu davet ettiğiniz için kazandığınız ödül %s %s';
+$LNG['sys_refferal_recruit_title']			= 'Arkadaşlarla oyna bonusu';
+$LNG['sys_refferal_recruit_text']			= 'Davet bağlantısıyla katıldıktan sonra %s puana ulaştınız.<br><br>Bonusunuz %s %s';
 $LNG['sys_closed_game']        	 			= 'Oyun şu an aktif değil:';
 $LNG['spec_mail_inactive_title']  			= '%s - Hatırlatma Mesajı';
 //----------------------------------------------------------------------------//
