@@ -399,6 +399,29 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$this->assertJsContractValidJson($json);
 	}
 
+	public function testUncolonizedVizJsonIncludesPackageDebrisAndSalvage(): void
+	{
+		$json = (new GalaxyRows())->buildUncolonizedPlanetVizJson(
+			1,
+			88,
+			4,
+			'./styles/theme/hive/',
+			[
+				'metal' => 8000,
+				'crystal' => 3000,
+				'spawned_at' => TIMESTAMP,
+				'encounter_seed' => 10,
+				'tier' => 2,
+			],
+			8
+		);
+		$payload = $this->decodePayload($json);
+
+		$this->assertSame(['metal' => 8000, 'crystal' => 3000], $payload['debris']);
+		$this->assertSame('pirate', $payload['salvage']['family']);
+		$this->assertSame(2, $payload['salvage']['tier']);
+	}
+
 	private function makeColonizeConfig(array $overrides = []): Config
 	{
 		return new Config(array_merge([

@@ -146,4 +146,69 @@ class PveRaidServiceTest extends TestCase
         ]);
         $this->assertSame(180, $power);
     }
+
+    public function testRunReturnsZeroWhenModuleDisabled(): void
+    {
+        Config::setInstance(new Config(['uni' => 1, 'moduls' => implode(';', array_fill(0, 50, 0))]), 1);
+        $this->assertSame(0, PveRaidService::run(1, TIMESTAMP));
+    }
+
+    public function testRunSpawnsFromOutwardCombatFleet(): void
+    {
+        $this->fake->fleetRowsById[3] = [
+            'fleet_owner' => 10,
+            'fleet_start_id' => 55,
+            'fleet_start_galaxy' => 1,
+            'fleet_start_system' => 2,
+            'fleet_start_planet' => 3,
+            'fleet_start_type' => 1,
+            'fleet_amount' => 40,
+            'fleet_mission' => 1,
+            'fleet_mess' => FLEET_OUTWARD,
+            'fleet_universe' => 1,
+        ];
+        $this->assertSame(1, PveRaidService::run(1, TIMESTAMP));
+        $this->assertSame(99, $this->fake->lastFleetInsertId);
+    }
+
+    public function testRunAccusedIdlePathSpawnsWhenChanceHits(): void
+    {
+        $this->fake->accusedDestIds = range(200, 280);
+        foreach ($this->fake->accusedDestIds as $id) {
+            $this->fake->achievement->users[$id] = [
+                'id' => $id,
+                'urlaubs_modus' => 0,
+                'universe' => 1,
+                'lang' => 'en',
+            ];
+            $this->fake->planetRowsById[$id] = [
+                'id' => $id,
+                'id_owner' => $id,
+                'galaxy' => 1,
+                'system' => 1,
+                'planet' => 1,
+                'planet_type' => 1,
+                'universe' => 1,
+                'destruyed' => 0,
+            ];
+        }
+        $spawned = PveRaidService::run(1, TIMESTAMP);
+        $this->assertGreaterThan(0, $spawned);
+    }
+
+    public function testTrySpawnRaidSkipsMissingPlanet(): void
+    {
+        $this->assertFalse(PveRaidService::trySpawnRaid(1, 10, $this->outward(['fleet_start_id' => 404]), TIMESTAMP, false));
+    }
+
+    public function testTrySpawnRaidSkipsAccusedIdleWhenHangarStrong(): void
+    {
+        global $resource, $reslist, $pricelist;
+        $resource[204] = 'light_hunter';
+        $reslist['fleet'] = [204];
+        $reslist['defense'] = [];
+        $pricelist[204]['attack'] = 50;
+        $this->fake->planetRowsById[55]['light_hunter'] = 20;
+        $this->assertFalse(PveRaidService::trySpawnRaid(1, 10, $this->outward(['fleet_amount' => 10]), TIMESTAMP, true));
+    }
 }

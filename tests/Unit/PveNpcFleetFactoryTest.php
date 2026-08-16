@@ -40,4 +40,11 @@ class PveNpcFleetFactoryTest extends TestCase
         $this->assertSame('Aliens', $player['username']);
         $this->assertSame(7, $player['military_tech']);
     }
+
+    public function testDisplayNameMapsFamily(): void
+    {
+        $this->assertSame('Pirates', PveNpcFleetFactory::displayName('pirate'));
+        $this->assertSame('Aliens', PveNpcFleetFactory::displayName('alien'));
+        $this->assertSame('Salvagers', PveNpcFleetFactory::displayName('salvager'));
+    }
 }

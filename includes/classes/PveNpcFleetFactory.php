@@ -74,6 +74,7 @@ class PveNpcFleetFactory
 			'dmg_cd' => 0,
 			'rpg_amiral' => 0,
 			'lang' => 'en',
+			'universe' => defined('ROOT_UNI') ? ROOT_UNI : 1,
 			'factor' => [
 				'Attack' => 0,
 				'Defensive' => 0,

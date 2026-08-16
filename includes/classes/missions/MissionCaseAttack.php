@@ -130,6 +130,7 @@ HTML;
 				$fleetAttack[$fleetID]['player'] = \HiveNova\Core\PveNpcFleetFactory::syntheticPlayer(
 					\HiveNova\Core\PveNpcFleetFactory::displayName($family)
 				);
+				$fleetAttack[$fleetID]['player']['universe'] = (int) $this->_fleet['fleet_universe'];
 			} else {
 				$fleetAttack[$fleetID]['player']	= $this->getUser((int) $fleetDetail['fleet_owner']);
 			}

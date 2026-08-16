@@ -121,6 +121,33 @@ class MissionCaseCombatTest extends TestCase
         $this->assertEmpty($this->fake->fleetUpdates);
     }
 
+    public function test_npc_attack_return_kills_fleet_without_owner_mail(): void
+    {
+        $fleet = missionFleetFixture([
+            'fleet_owner' => 0,
+            'fleet_mission' => 1,
+            'fleet_array' => '204,8;',
+        ]);
+        $mission = new MissionCaseAttack($fleet);
+        $mission->ReturnEvent();
+        $this->assertSame(1, $mission->kill);
+        $this->assertEmpty($this->fake->achievement->messages);
+    }
+
+    public function test_npc_attack_runs_combat_with_synthetic_attacker(): void
+    {
+        $fleet = missionFleetFixture([
+            'fleet_owner' => 0,
+            'fleet_target_owner' => 2,
+            'fleet_mission' => 1,
+            'fleet_array' => '204,8;',
+            'fleet_amount' => 8,
+        ]);
+        $mission = new MissionCaseAttack($fleet);
+        $mission->TargetEvent();
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+    }
+
     public function test_attack_with_acs_runs_combat_for_group_fleets(): void
     {
         $this->fake->fleetRowsById[2] = missionCombatAcsMemberFleet(2, 7, ['fleet_owner' => 3]);

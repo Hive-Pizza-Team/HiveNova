@@ -128,4 +128,32 @@ class PvePackageServiceTest extends TestCase
         PvePackageService::expireOld(1, TIMESTAMP);
         $this->assertSame([], $this->fake->salvagePackages);
     }
+
+    public function testSpawnTickDisabledWhenModuleOff(): void
+    {
+        Config::setInstance(new Config(['uni' => 1, 'moduls' => implode(';', array_fill(0, 50, 0))]), 1);
+        $this->assertSame(0, PvePackageService::spawnTick(1, TIMESTAMP));
+    }
+
+    public function testCountOnlineReadsFakeUserWindow(): void
+    {
+        $this->fake->onlineUserCount = 4;
+        $this->assertSame(4, PvePackageService::countOnline(1, TIMESTAMP));
+    }
+
+    public function testSpawnTickCreatesPackageOnEmptyMap(): void
+    {
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'moduls' => implode(';', array_fill(0, 50, 1)),
+            'max_galaxy' => 1,
+            'max_system' => 1,
+            'max_planets' => 1,
+        ]), 1);
+        $this->fake->onlineUserCount = 0;
+        $created = PvePackageService::spawnTick(1, TIMESTAMP);
+        $this->assertGreaterThan(0, $created);
+        $this->assertNotEmpty($this->fake->salvagePackages);
+        $this->assertSame(1, (int) $this->fake->salvagePackages[0]['galaxy']);
+    }
 }

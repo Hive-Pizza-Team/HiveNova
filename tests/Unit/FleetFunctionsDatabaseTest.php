@@ -377,6 +377,36 @@ class FleetFunctionsDatabaseTest extends TestCase
         $this->assertNotContains(18, $missions);
     }
 
+    public function testGetAvailableMissionsIncludesSalvageOnDebrisTypeWhenPackageExists(): void
+    {
+        $this->fake->salvagePackages[] = [
+            'id' => 1,
+            'universe' => 1,
+            'galaxy' => 3,
+            'system' => 4,
+            'planet' => 5,
+            'metal' => 100,
+            'crystal' => 50,
+            'spawned_at' => TIMESTAMP,
+            'expires_at' => TIMESTAMP + 3600,
+            'tier' => 1,
+            'encounter_seed' => 50,
+        ];
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'galaxy' => 3,
+            'system' => 4,
+            'planet' => 5,
+            'planettype' => 2,
+            'Ship' => [209 => 1],
+        ];
+        $planet = ['id_owner' => 0, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertContains(18, $missions);
+    }
+
     public function testGetFleetMissionsHoldBuildsStayBlock(): void
     {
         $user = ['id' => 1, 'universe' => 1];

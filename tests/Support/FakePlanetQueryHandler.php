@@ -32,6 +32,22 @@ trait FakePlanetQueryHandler
             return $field === false ? $count : ($count[$field] ?? false);
         }
 
+        if (isset($params[':userId']) && str_contains($qry, 'id_owner')) {
+            foreach ($this->planetRowsById as $row) {
+                if ((int) ($row['id_owner'] ?? 0) !== (int) $params[':userId']) {
+                    continue;
+                }
+                if (str_contains($qry, 'planet_type') && (int) ($row['planet_type'] ?? 1) !== 1) {
+                    continue;
+                }
+                if (str_contains($qry, 'destruyed') && (int) ($row['destruyed'] ?? 0) !== 0) {
+                    continue;
+                }
+                return $field === false ? $row : ($row[$field] ?? false);
+            }
+            return $field === false ? null : false;
+        }
+
         if (isset($params[':galaxy'], $params[':system'], $params[':planet'])) {
             foreach ($this->planetRowsById as $row) {
                 if ((int) ($row['galaxy'] ?? 0) !== (int) $params[':galaxy']) {
