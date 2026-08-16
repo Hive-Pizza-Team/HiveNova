@@ -185,16 +185,16 @@ class ShowMarketPlacePage extends AbstractGamePage
 		$F1type = 0;
 		//PRIO for LC
 		if($shipType == 1) {
-			$F1capacity = $pricelist[202]['capacity'] * $factor;
+			$F1capacity = MarketPlaceResource::shipHaulCapacity(202, $USER, $factor);
 			$F1type = 202;
 		}
 		// PRIO for HC
 		else {
-			$F1capacity = $pricelist[203]['capacity'] * $factor;
+			$F1capacity = MarketPlaceResource::shipHaulCapacity(203, $USER, $factor);
 			$F1type = 203;
 		}
 
-		$F1 = min($PLANET[$resource[$F1type]], ceil($amount / $F1capacity));
+		$F1 = min($PLANET[$resource[$F1type]], ceil($amount / max($F1capacity, 1)));
 
 			//taken
 		$amountTMP = $amount - $F1 * $F1capacity;
@@ -205,15 +205,15 @@ class ShowMarketPlacePage extends AbstractGamePage
 		if ($amountTMP > 0) {
 			//We need HC
 			if($shipType == 1) {
-				$F2capacity = $pricelist[203]['capacity'] * $factor;
+				$F2capacity = MarketPlaceResource::shipHaulCapacity(203, $USER, $factor);
 				$F2type = 203;
 			}
 			//We need LC
 			else{
-				$F2capacity = $pricelist[202]['capacity'] * $factor;
+				$F2capacity = MarketPlaceResource::shipHaulCapacity(202, $USER, $factor);
 				$F2type = 202;
 			}
-			$F2 = min($PLANET[$resource[$F2type]], ceil($amountTMP / $F2capacity));
+			$F2 = min($PLANET[$resource[$F2type]], ceil($amountTMP / max($F2capacity, 1)));
 			$amountTMP -= $F2 * $F2capacity;
 		}
 		//------------------------------------------------------------------------
