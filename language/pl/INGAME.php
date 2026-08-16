@@ -1052,6 +1052,7 @@ $LNG['cff_mission_target_bad']				= 'Wroga %s od gracza %s z %s %s %s osiągnie 
 $LNG['cff_mission_target_good']				= 'Wroga %s od gracza %s z %s %s %s osiągnie %s %s %s. Misja: %s';
 $LNG['cff_mission_target_stay']				= 'Przyjazna %s od gracza %s z %s %s %s stoi na orbicie %s %s %s. Misja: %s';
 $LNG['cff_mission_target_mip']				= 'Atak rakietami (%d) od gracza %s z %s %s %s na %s %s %s.';
+$LNG['cff_mission_npc_raid']				= 'Wroga %s (%s) dotrze do %s %s %s. Misja: %s';
 //----------------------------------------------------------------------------//
 // EXTRA LANGUAGE FUNCTIONS
 $LNG['fcm_universe']						= 'Uniwersum';

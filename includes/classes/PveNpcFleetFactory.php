@@ -60,6 +60,18 @@ class PveNpcFleetFactory
 		return 'salvager';
 	}
 
+	public static function familyFromFleetArray(string $fleetArray): string
+	{
+		if (str_contains($fleetArray, '205,') || str_contains($fleetArray, '215,') || str_contains($fleetArray, '213,')) {
+			return 'alien';
+		}
+		if (str_contains($fleetArray, '209,') || str_contains($fleetArray, '219,')) {
+			return 'salvager';
+		}
+
+		return 'pirate';
+	}
+
 	/**
 	 * @return array<string, mixed>
 	 */

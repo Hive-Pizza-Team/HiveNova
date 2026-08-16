@@ -236,14 +236,26 @@ class FlyingFleetsTable
 				else
 					$EventString  = sprintf($LNG['cff_mission_own_2'], $FleetContent, $StartType, $fleetRow['own_planetname'], GetStartAddressLink($fleetRow, $FleetType), $TargetType, $fleetRow['target_planetname'], GetTargetAddressLink($fleetRow, $FleetType), $FleetCapacity);
 			} else {
-				if ($Status == FLEET_HOLD)
-					$Message	= $LNG['cff_mission_target_stay'];
-				elseif(in_array($MissionType, $GoodMissions))
-					$Message	= $LNG['cff_mission_target_good'];
-				else
-					$Message	= $LNG['cff_mission_target_bad'];
+				if ((int) $fleetRow['fleet_owner'] === 0) {
+					$EventString = sprintf(
+						$LNG['cff_mission_npc_raid'] ?? 'A hostile %s (%s) will reach the %s %s %s. Mission: %s',
+						$FleetContent,
+						$this->BuildHostileFleetPlayerLink($fleetRow),
+						$TargetType,
+						$fleetRow['target_planetname'],
+						GetTargetAddressLink($fleetRow, $FleetType),
+						$FleetCapacity
+					);
+				} else {
+					if ($Status == FLEET_HOLD)
+						$Message	= $LNG['cff_mission_target_stay'];
+					elseif(in_array($MissionType, $GoodMissions))
+						$Message	= $LNG['cff_mission_target_good'];
+					else
+						$Message	= $LNG['cff_mission_target_bad'];
 
-				$EventString	= sprintf($Message, $FleetContent, $this->BuildHostileFleetPlayerLink($fleetRow), $StartType, $fleetRow['own_planetname'], GetStartAddressLink($fleetRow, $FleetType), $TargetType, $fleetRow['target_planetname'], GetTargetAddressLink($fleetRow, $FleetType), $FleetCapacity);
+					$EventString	= sprintf($Message, $FleetContent, $this->BuildHostileFleetPlayerLink($fleetRow), $StartType, $fleetRow['own_planetname'], GetStartAddressLink($fleetRow, $FleetType), $TargetType, $fleetRow['target_planetname'], GetTargetAddressLink($fleetRow, $FleetType), $FleetCapacity);
+				}
 			}
 		}
 		$EventString = '<span class="'.$FleetStatus[$Status].' '.$FleetType.'">'.$EventString.'</span>';
@@ -264,6 +276,10 @@ class FlyingFleetsTable
 	private function BuildHostileFleetPlayerLink($fleetRow)
     {
 		global $LNG;
+		if ((int) $fleetRow['fleet_owner'] === 0) {
+			$family = PveNpcFleetFactory::familyFromFleetArray((string) ($fleetRow['fleet_array'] ?? ''));
+			return PveNpcFleetFactory::displayName($family);
+		}
 		return $fleetRow['own_username'].' <a href="#" onclick="return Dialog.PM('.$fleetRow['fleet_owner'].')">'.$LNG['PM'].'</a>';
 	}
 

@@ -132,7 +132,7 @@ HTML;
 		foreach($incomingFleets as $fleetID => $fleetDetail)
 		{
 			if ((int) $fleetDetail['fleet_owner'] === 0) {
-				$family = str_contains((string) $fleetDetail['fleet_array'], '205,') ? 'alien' : 'pirate';
+				$family = \HiveNova\Core\PveNpcFleetFactory::familyFromFleetArray((string) $fleetDetail['fleet_array']);
 				$fleetAttack[$fleetID]['player'] = \HiveNova\Core\PveNpcFleetFactory::syntheticPlayer(
 					\HiveNova\Core\PveNpcFleetFactory::displayName($family)
 				);

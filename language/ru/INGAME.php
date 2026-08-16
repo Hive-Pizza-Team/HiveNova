@@ -1006,6 +1006,7 @@ $LNG['cff_mission_target_bad']            = 'Чужой %s игрока %s ле�
 $LNG['cff_mission_target_good']           = 'Чужой %s игрока %s летит с %s %s %s на %s %s %s. Задание: %s';
 $LNG['cff_mission_target_stay']           = 'Чужой %s игрока %s летит с %s %s %s на орбиту %s %s %s. Задание: %s';
 $LNG['cff_mission_target_mip']            = 'Ракеты (%d) от игрока %s запущены из %s %s %s на %s %s %s.';
+$LNG['cff_mission_npc_raid']              = 'Враждебный %s (%s) достигнет %s %s %s. Миссия: %s';
 
 // Дополнительные языковые ключи
 $LNG['fcm_universe']                      = 'Вселенная';
