@@ -30,30 +30,35 @@ function ShowAchievementsPage()
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && HTTP::_GP('save', 0)) {
         $id = HTTP::_GP('id', 0);
-        $db->update(
-            'UPDATE %%ACHIEVEMENTS%% SET
-            active = :active,
-            hidden = :hidden,
-            reward_type = :rewardType,
-            reward_amount = :rewardAmount,
-            celebration_tier = :tier,
-            trigger_params = :params
-            WHERE id = :id AND universe = :universe;',
-            [
-                ':active'       => HTTP::_GP('active', 0) ? 1 : 0,
-                ':hidden'       => HTTP::_GP('hidden', 0) ? 1 : 0,
-                ':rewardType'   => HTTP::_GP('reward_type', 'none'),
-                ':rewardAmount' => HTTP::_GP('reward_amount', 0),
-                ':tier'         => HTTP::_GP('celebration_tier', 'normal'),
-                ':params'       => HTTP::_GP('trigger_params', '{}'),
-                ':id'           => $id,
-                ':universe'     => $universe,
-            ]
-        );
-        AchievementService::get()->clearDefinitionCache();
-        AchievementService::get()->loadDefinitions($universe);
-        if (empty($message)) {
-            $message = 'Achievement saved.';
+        $params = AchievementService::sanitizeTriggerParams(HTTP::_GP('trigger_params', '{}'));
+        if ($params === null) {
+            $message = 'Achievement not saved: trigger params must be valid JSON.';
+        } else {
+            $db->update(
+                'UPDATE %%ACHIEVEMENTS%% SET
+                active = :active,
+                hidden = :hidden,
+                reward_type = :rewardType,
+                reward_amount = :rewardAmount,
+                celebration_tier = :tier,
+                trigger_params = :params
+                WHERE id = :id AND universe = :universe;',
+                [
+                    ':active'       => HTTP::_GP('active', 0) ? 1 : 0,
+                    ':hidden'       => HTTP::_GP('hidden', 0) ? 1 : 0,
+                    ':rewardType'   => HTTP::_GP('reward_type', 'none'),
+                    ':rewardAmount' => HTTP::_GP('reward_amount', 0),
+                    ':tier'         => HTTP::_GP('celebration_tier', 'normal'),
+                    ':params'       => $params,
+                    ':id'           => $id,
+                    ':universe'     => $universe,
+                ]
+            );
+            AchievementService::get()->clearDefinitionCache();
+            AchievementService::get()->loadDefinitions($universe);
+            if (empty($message)) {
+                $message = 'Achievement saved.';
+            }
         }
     }
 

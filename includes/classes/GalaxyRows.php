@@ -513,7 +513,7 @@ class GalaxyRows
 			'system'    => (int) $this->galaxyRow['system'],
 			'planet'    => (int) $this->galaxyRow['planet'],
 			'buildings' => $shareIntel ? $this->buildCountMap($reslist['build'], $inventoryRow) : new \stdClass(),
-			'fleet'     => $shareIntel ? $this->buildCountMap($reslist['fleet'], $inventoryRow) : new \stdClass(),
+			'fleet'     => ($shareIntel && !$galaxyPreview) ? $this->buildCountMap($reslist['fleet'], $inventoryRow) : new \stdClass(),
 			'defense'   => ($shareIntel && !$galaxyPreview) ? $this->buildCountMap($reslist['defense'], $inventoryRow) : new \stdClass(),
 			'queue'     => array(
 				'building' => 0,

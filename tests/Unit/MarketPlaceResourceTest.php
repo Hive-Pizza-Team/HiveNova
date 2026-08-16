@@ -37,4 +37,15 @@ class MarketPlaceResourceTest extends TestCase
         $this->assertSame(200, MarketPlaceResource::historyLimit(999));
         $this->assertSame(25, MarketPlaceResource::historyLimit(25));
     }
+
+    public function testShipHaulCapacityAppliesLeftoverCargoAndStorage(): void
+    {
+        $GLOBALS['pricelist'][217]['capacity'] = 100;
+        $GLOBALS['requirements'][217][114] = 1;
+        $GLOBALS['resource'][114] = 'hyperspace_tech';
+
+        $player = ['hyperspace_tech' => 10, 'factor' => ['ShipStorage' => 0]];
+        $this->assertEqualsWithDelta(110.0, MarketPlaceResource::shipHaulCapacity(217, $player, 1.0), 1e-9);
+        $this->assertEqualsWithDelta(220.0, MarketPlaceResource::shipHaulCapacity(217, $player, 2.0), 1e-9);
+    }
 }

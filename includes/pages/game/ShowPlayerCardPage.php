@@ -60,6 +60,10 @@ class ShowPlayerCardPage extends AbstractGamePage
 			':playerID'	=> $PlayerID
 		));
 
+		if (!is_array($query)) {
+			$this->printMessage($LNG['page_doesnt_exist']);
+		}
+
 		$totalfights = $query['wons'] + $query['loos'] + $query['draws'];
 		
 		if ($totalfights == 0) {

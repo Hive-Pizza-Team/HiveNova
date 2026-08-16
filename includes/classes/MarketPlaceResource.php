@@ -2,6 +2,8 @@
 
 namespace HiveNova\Core;
 
+use HiveNova\Core\LeftoverBonus;
+
 /**
  * Maps marketplace ex_resource_type (1–3) onto tech IDs 901–903.
  */
@@ -46,5 +48,16 @@ class MarketPlaceResource
 	{
 		$limit = $requested ?? MARKET_TRADE_HISTORY_LIMIT;
 		return max(1, min(200, $limit));
+	}
+
+	/**
+	 * Per-ship cargo used when sizing a market pickup fleet.
+	 * Matches FleetFunctions::GetFleetRoom (leftover hyperspace cargo × storage factor).
+	 *
+	 * @param array<string, mixed> $player
+	 */
+	public static function shipHaulCapacity(int $shipId, array $player, float $storageFactor): float
+	{
+		return LeftoverBonus::shipCapacity($shipId, 1, $player) * $storageFactor;
 	}
 }

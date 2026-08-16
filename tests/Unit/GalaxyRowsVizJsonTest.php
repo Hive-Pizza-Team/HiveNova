@@ -194,6 +194,33 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$this->assertJsContractValidJson($json);
 	}
 
+	public function testGalaxyPreviewOmitsFleetAndDefenseMaps(): void
+	{
+		$json = $this->invokeBuildPlanetVizJson([
+			'image'          => 'normaltempplanet03',
+			'temp_min'       => 30,
+			'temp_max'       => 70,
+			'diameter'       => 12767,
+			'field_current'  => 42,
+			'field_max'      => 163,
+			'terraformer'    => 0,
+			'metal_mine'     => 10,
+			'light_fighter'  => 4,
+			'rocket_launcher'=> 12,
+			'galaxy'         => 1,
+			'system'         => 88,
+			'planet'         => 7,
+			'der_metal'      => 0,
+			'der_crystal'    => 0,
+		], true, './styles/theme/hive/', true);
+		$payload = $this->decodePayload($json);
+
+		$this->assertSame(10, $payload['buildings'][1]);
+		$this->assertSame([], (array) $payload['fleet']);
+		$this->assertSame([], (array) $payload['defense']);
+		$this->assertJsContractValidJson($json);
+	}
+
 	public function testOtherPlanetPayloadIsSparsePublic(): void
 	{
 		$json = $this->invokeBuildPlanetVizJson([
@@ -438,7 +465,8 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$this->assertIsArray($payload);
 		$this->assertTrue($payload['shareIntel']);
 		$this->assertSame(12, $payload['buildings'][1]);
-		$this->assertSame(3, $payload['fleet'][202]);
+		$this->assertSame([], (array) $payload['fleet']);
+		$this->assertSame([], (array) $payload['defense']);
 	}
 
 	public function testGetColonizeSlotStatusPrefersCapWhenBothBlock(): void
