@@ -608,10 +608,7 @@ class ShowAlliancePage extends AbstractGamePage
 		));
 
 		try {
-			$USER    += $db->selectSingle('SELECT total_points FROM %%STATPOINTS%% WHERE id_owner = :userId AND stat_type = :statType', array(
-				':userId'    => $USER['id'],
-				':statType'    => 1
-			));
+			mergeUserStatPoints($USER);
 		} catch (Exception) {
 			$USER['total_points'] = 0;
 		}
@@ -1336,10 +1333,7 @@ class ShowAlliancePage extends AbstractGamePage
 		$memberList	= array();
 
 		try {
-			$USER    += $db->selectSingle('SELECT total_points FROM %%STATPOINTS%% WHERE id_owner = :userId AND stat_type = :statType', array(
-				':userId'    => $USER['id'],
-				':statType'    => 1
-			));
+			mergeUserStatPoints($USER);
 		} catch (Exception) {
 			$USER['total_points'] = 0;
 		}

@@ -55,6 +55,9 @@ class MissionCaseCombatTest extends TestCase
         $this->assertNotEmpty($this->fake->achievement->messages);
         $this->assertNotEmpty($this->fake->fleetUpdates);
         $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertCount(1, $this->fake->achievement->universeEvents);
+        $this->assertSame('battle', $this->fake->achievement->universeEvents[0]['event_type']);
+        $this->assertArrayNotHasKey('rid', $this->fake->achievement->universeEvents[0]);
     }
 
     public function test_destruction_runs_combat_against_planet(): void
@@ -71,6 +74,8 @@ class MissionCaseCombatTest extends TestCase
 
         $this->assertNotEmpty($this->fake->achievement->messages);
         $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertCount(1, $this->fake->achievement->universeEvents);
+        $this->assertSame('battle', $this->fake->achievement->universeEvents[0]['event_type']);
     }
 
     public function test_mip_destroys_defenses_when_missiles_outnumber_interceptors(): void
@@ -91,6 +96,7 @@ class MissionCaseCombatTest extends TestCase
 
         $this->assertSame(1, $mission->kill);
         $this->assertGreaterThanOrEqual(2, count($this->fake->achievement->messages));
+        $this->assertSame([], $this->fake->achievement->universeEvents);
     }
 
     public function test_attack_return_event_restores_fleet_and_notifies_owner(): void

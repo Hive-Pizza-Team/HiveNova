@@ -269,8 +269,34 @@ class GalaxyRowsVizJsonTest extends TestCase
 
 		$this->assertSame(['current' => 0, 'max' => 0], $payload['fields']);
 		$this->assertFalse($payload['shareIntel']);
+		$this->assertSame(0, $payload['tempMin']);
+		$this->assertSame(0, $payload['tempMax']);
+		$this->assertSame(0, $payload['diameter']);
+		$this->assertNull($payload['debris']);
 		$this->assertArrayNotHasKey('vizState', $payload);
 		$this->assertSame([], (array) $payload['buildings']);
+		$this->assertJsContractValidJson($json, ['sparse' => true]);
+	}
+
+	public function testOtherPlanetPayloadOmitsDebrisMap(): void
+	{
+		$json = $this->invokeBuildPlanetVizJson([
+			'image'         => 'wasserplanet04',
+			'temp_min'      => 20,
+			'temp_max'      => 60,
+			'diameter'      => 11800,
+			'field_current' => 99,
+			'field_max'     => 163,
+			'galaxy'        => 2,
+			'system'        => 145,
+			'planet'        => 9,
+			'der_metal'     => 5000,
+			'der_crystal'   => 2500,
+		], false, './styles/theme/hive/');
+		$payload = $this->decodePayload($json);
+
+		$this->assertNull($payload['debris']);
+		$this->assertSame(0, $payload['tempMin']);
 		$this->assertJsContractValidJson($json, ['sparse' => true]);
 	}
 
@@ -380,6 +406,9 @@ class GalaxyRowsVizJsonTest extends TestCase
 
 		$this->assertArrayNotHasKey('vizState', $payload);
 		$this->assertFalse($payload['shareIntel']);
+		$this->assertSame(0, $payload['tempMin']);
+		$this->assertSame(0, $payload['tempMax']);
+		$this->assertSame(0, $payload['diameter']);
 		$this->assertSame([], (array) $payload['buildings']);
 		$this->assertJsContractValidJson($json, ['sparse' => true]);
 	}
@@ -555,6 +584,9 @@ class GalaxyRowsVizJsonTest extends TestCase
 
 		$this->assertIsArray($payload);
 		$this->assertFalse($payload['shareIntel']);
+		$this->assertSame(0, $payload['tempMin']);
+		$this->assertSame(0, $payload['tempMax']);
+		$this->assertSame(0, $payload['diameter']);
 		$this->assertSame([], (array) $payload['buildings']);
 		$this->assertSame([], (array) $payload['fleet']);
 	}

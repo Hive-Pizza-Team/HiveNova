@@ -505,7 +505,7 @@ class GalaxyRows
 
 		$debrisTotal = (int) $this->galaxyRow['der_metal'] + (int) $this->galaxyRow['der_crystal'];
 		$debris = null;
-		if ($debrisTotal > 0) {
+		if ($shareIntel && $debrisTotal > 0) {
 			$debris = array(
 				'metal'   => (int) $this->galaxyRow['der_metal'],
 				'crystal' => (int) $this->galaxyRow['der_crystal'],
@@ -516,9 +516,9 @@ class GalaxyRows
 			'shareIntel' => (bool) $shareIntel,
 			'texture'   => $this->galaxyRow['image'],
 			'type'      => 1,
-			'tempMin'   => (int) $this->galaxyRow['temp_min'],
-			'tempMax'   => (int) $this->galaxyRow['temp_max'],
-			'diameter'  => (int) $this->galaxyRow['diameter'],
+			'tempMin'   => $shareIntel ? (int) $this->galaxyRow['temp_min'] : 0,
+			'tempMax'   => $shareIntel ? (int) $this->galaxyRow['temp_max'] : 0,
+			'diameter'  => $shareIntel ? (int) $this->galaxyRow['diameter'] : 0,
 			'fields'    => array(
 				'current' => $fieldsCurrent,
 				'max'     => $fieldsMax,
@@ -556,9 +556,9 @@ class GalaxyRows
 			'shareIntel' => (bool) $shareIntel,
 			'texture'   => 'mond',
 			'type'      => 3,
-			'tempMin'   => $tempMin,
-			'tempMax'   => $tempMax,
-			'diameter'  => (int) $this->galaxyRow['m_diameter'],
+			'tempMin'   => $shareIntel ? $tempMin : 0,
+			'tempMax'   => $shareIntel ? $tempMax : 0,
+			'diameter'  => $shareIntel ? (int) $this->galaxyRow['m_diameter'] : 0,
 			'fields'    => array(
 				'current' => 0,
 				'max'     => 1,

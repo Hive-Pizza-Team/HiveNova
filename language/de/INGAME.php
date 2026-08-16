@@ -102,6 +102,15 @@ $LNG['lm_battlesim']						= 'Kampfsimulator';
 $LNG['lm_playercard']                       			= 'Spielerinformationen';
 $LNG['lm_info']                     				= 'Informationen';
 $LNG['lm_disclamer']						= 'Impressum';
+$LNG['ef_title']							= 'Universums-Feed';
+$LNG['ef_empty']							= 'Das Universum ist still.';
+$LNG['ef_event_battle']					= 'Kampf';
+$LNG['ef_size_small']						= 'Scharmützel';
+$LNG['ef_size_medium']						= 'Gefecht';
+$LNG['ef_size_large']						= 'Große Schlacht';
+$LNG['ef_outcome_attacker']				= 'Angreifer siegten';
+$LNG['ef_outcome_defender']				= 'Verteidiger hielten stand';
+$LNG['ef_outcome_draw']					= 'Unentschieden';
 	
 //----------------------------------------------------------------------------//
 //OVERVIEW

@@ -82,6 +82,15 @@ class CleanerCronjobTest extends TestCase
         );
     }
 
+    public function testUniverseEventsCleanupIsActive(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/DELETE FROM %%UNIVERSE_EVENTS%%[^;]+`time`[^;]+:time/s',
+            $this->source,
+            'UNIVERSE_EVENTS cleanup must be active and bounded by time / :time'
+        );
+    }
+
     public function testLogShipyardCleanupIsActive(): void
     {
         $this->assertMatchesRegularExpression(

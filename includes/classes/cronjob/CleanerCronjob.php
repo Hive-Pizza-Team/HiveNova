@@ -134,6 +134,11 @@ class CleanerCronjob implements CronjobTask
 			':time'	=> $del_before
 		));
 
+		$sql	= 'DELETE FROM %%UNIVERSE_EVENTS%% WHERE `time` < :time;';
+		Database::get()->delete($sql, array(
+			':time'	=> $del_before
+		));
+
 		$sql	= 'DELETE FROM %%MESSAGES%% WHERE `message_deleted` < :time;';
 		Database::get()->delete($sql, array(
 			':time'	=> $del_messages

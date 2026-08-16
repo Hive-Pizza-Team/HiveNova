@@ -53,10 +53,14 @@ class ShowBuddyListPage extends AbstractGamePage
 
 		$db = Database::get();
 
-		$sql = "SELECT username, galaxy, `system`, planet FROM %%USERS%% WHERE id = :friendID;";
+        $sql = "SELECT username, galaxy, `system`, planet FROM %%USERS%% WHERE id = :friendID;";
         $userData = $db->selectSingle($sql, array(
             ':friendID'  => $id
         ));
+
+		if (!is_array($userData)) {
+			$this->printMessage($LNG['page_doesnt_exist']);
+		}
 
 		$this->assign(array(
 			'username'	=> $userData['username'],

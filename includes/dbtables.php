@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 25);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 26);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -59,6 +59,7 @@ $dbTableNames	= array(
 	'TICKETS_CATEGORY'	=> DB_PREFIX.'ticket_category',
 	'TOPKB'				=> DB_PREFIX.'topkb',
 	'TOPKB_USERS'		=> DB_PREFIX.'users_to_topkb',
+	'UNIVERSE_EVENTS'		=> DB_PREFIX.'universe_events',
 	'USERS'				=> DB_PREFIX.'users',
 	'USERS_ACS'			=> DB_PREFIX.'users_to_acs',
 	'USERS_AUTH'		=> DB_PREFIX.'users_to_extauth',

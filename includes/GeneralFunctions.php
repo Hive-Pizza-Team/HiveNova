@@ -392,6 +392,24 @@ function makebr($text)
 	return (version_compare(PHP_VERSION, "5.3.0", ">=")) ? nl2br((string) $text, false) : strtr($text, array("\r\n" => $BR, "\r" => $BR, "\n" => $BR));
 }
 
+function mergeUserStatPoints(array &$user): void
+{
+	$row = \HiveNova\Core\Database::get()->selectSingle(
+		'SELECT total_points FROM %%STATPOINTS%% WHERE id_owner = :userId AND stat_type = :statType',
+		[
+			':userId'   => $user['id'] ?? 0,
+			':statType' => 1,
+		]
+	);
+
+	if (is_array($row)) {
+		$user += $row;
+		return;
+	}
+
+	$user['total_points'] = $user['total_points'] ?? 0;
+}
+
 function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 {
 	$config	= \HiveNova\Core\Config::get();

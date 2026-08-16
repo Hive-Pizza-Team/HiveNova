@@ -112,6 +112,15 @@ $LNG['lm_battlesim']						= 'Simulator';
 $LNG['lm_playercard']                       = 'Player Profile';
 $LNG['lm_info']                     		= 'Info';
 $LNG['lm_disclamer']						= 'Credits';
+$LNG['ef_title']							= 'Universe feed';
+$LNG['ef_empty']							= 'The universe is quiet.';
+$LNG['ef_event_battle']					= 'Battle';
+$LNG['ef_size_small']						= 'Skirmish';
+$LNG['ef_size_medium']						= 'Clash';
+$LNG['ef_size_large']						= 'Major battle';
+$LNG['ef_outcome_attacker']				= 'Attackers prevailed';
+$LNG['ef_outcome_defender']				= 'Defenders held';
+$LNG['ef_outcome_draw']					= 'Stalemate';
 
 //----------------------------------------------------------------------------//
 // Overview

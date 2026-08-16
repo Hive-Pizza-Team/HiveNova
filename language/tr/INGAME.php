@@ -107,6 +107,15 @@ $LNG['lm_battlesim']						= 'Simülasyon';
 $LNG['lm_playercard']                       = 'Oyuncu Profili';
 $LNG['lm_info']                     		= 'Bilgi';
 $LNG['lm_disclamer']						= 'Iletişim';
+$LNG['ef_title']							= 'Evren akışı';
+$LNG['ef_empty']							= 'Evren sessiz.';
+$LNG['ef_event_battle']					= 'Savaş';
+$LNG['ef_size_small']						= 'Çatışma';
+$LNG['ef_size_medium']						= 'Kapışma';
+$LNG['ef_size_large']						= 'Büyük savaş';
+$LNG['ef_outcome_attacker']				= 'Saldıranlar üstün geldi';
+$LNG['ef_outcome_defender']				= 'Savunanlar dayandı';
+$LNG['ef_outcome_draw']					= 'Berabere';
 
 
 //----------------------------------------------------------------------------//

@@ -4,6 +4,7 @@ namespace HiveNova\Mission;
 
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
+use HiveNova\Core\EventFirehoseWriter;
 use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
@@ -581,6 +582,13 @@ HTML;
 			':universe'	=> $this->_fleet['fleet_universe'],
 			':result'	=> $combatResult['won']
 		));
+
+		EventFirehoseWriter::record(
+			(int) $this->_fleet['fleet_universe'],
+			(int) $this->_fleet['fleet_start_time'],
+			(float) ($combatResult['unitLost']['attacker'] + $combatResult['unitLost']['defender']),
+			(string) $combatResult['won']
+		);
 
 		$sql = 'UPDATE %%USERS%% SET
 		`'.$attackStatus.'` = `'.$attackStatus.'` + 1,
