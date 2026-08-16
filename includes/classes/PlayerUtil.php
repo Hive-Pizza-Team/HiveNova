@@ -103,16 +103,19 @@ class PlayerUtil
 	{
 		$stored = trim((string) ($user['public_message'] ?? ''));
 
-		if (!self::isHiveIdentityPublic($user)) {
+		if ($stored !== '') {
 			return $stored;
+		}
+
+		if (!self::isHiveIdentityPublic($user)) {
+			return '';
 		}
 
 		$fetcher = $hiveAboutFetcher ?? static function (string $account): string {
 			return HiveUtil::getAccountAbout($account);
 		};
-		$about = trim((string) $fetcher((string) $user['hive_account']));
 
-		return $about !== '' ? $about : $stored;
+		return trim((string) $fetcher((string) $user['hive_account']));
 	}
 
 	static public function getPlayerAvatarURL($USER){
