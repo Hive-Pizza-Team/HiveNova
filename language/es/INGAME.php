@@ -1032,6 +1032,7 @@ $LNG['cff_mission_target_bad']				= 'Una %s hostil del jugador %s de %s %s %s es
 $LNG['cff_mission_target_good']				= 'Una %s hostil del jugador %s de %s %s %s espia la posici&oacute;n %s %s %s. Misi&oacute;n: %s';
 $LNG['cff_mission_target_stay']				= 'Una %s pac&iacute;fica del jugador %s de %s %s %s esta en orbita en %s %s %s. Misi&oacute;n: %s';
 $LNG['cff_mission_target_mip']				= 'Ataque con Misiles (%d) del jugador %s de %s %s %s a la posici&oacute;n %s %s %s.';
+$LNG['cff_mission_npc_raid']				= 'Una %s hostil (%s) alcanzar&aacute; el %s %s %s. Misi&oacute;n: %s';
 
 //----------------------------------------------------------------------------//
 // EXTRA LANGUAGE FUNCTIONS

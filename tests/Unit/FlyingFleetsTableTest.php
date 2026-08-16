@@ -247,6 +247,58 @@ class FlyingFleetsTableTest extends TestCase
         $this->assertStringContainsString('No fleet data', $text);
     }
 
+    public function test_get_event_data_npc_raid_uses_display_name_without_pm(): void
+    {
+        $this->seedUsersAndPlanets();
+        $row = $this->fleetRow([
+            'fleet_owner' => 0,
+            'fleet_target_owner' => 1,
+            'fleet_mission' => 1,
+            'fleet_array' => '204,8;202,2;',
+            'own_username' => '',
+            'target_username' => 'player1',
+            'own_planetname' => '',
+            'target_planetname' => 'Colony',
+            'fleet_start_galaxy' => 1,
+            'fleet_start_system' => 50,
+            'fleet_start_planet' => 13,
+            'fleet_end_galaxy' => 1,
+            'fleet_end_system' => 50,
+            'fleet_end_planet' => 13,
+        ]);
+
+        $table = new FlyingFleetsTable();
+        $table->setUser(1);
+        [, $text] = $table->getEventData($row, FLEET_OUTWARD);
+
+        $this->assertStringContainsString('Pirates', $text);
+        $this->assertStringContainsString('Colony', $text);
+        $this->assertStringContainsString('Incoming npc', $text);
+        $this->assertStringNotContainsString('Dialog.PM(0)', $text);
+        $this->assertStringNotContainsString('from player', $text);
+        $this->assertStringNotContainsString('Incoming bad', $text);
+    }
+
+    public function test_get_event_data_npc_alien_raid_names_aliens(): void
+    {
+        $this->seedUsersAndPlanets();
+        $row = $this->fleetRow([
+            'fleet_owner' => 0,
+            'fleet_target_owner' => 1,
+            'fleet_mission' => 1,
+            'fleet_array' => '205,6;203,1;',
+            'own_username' => '',
+            'target_planetname' => 'Colony',
+        ]);
+
+        $table = new FlyingFleetsTable();
+        $table->setUser(1);
+        [, $text] = $table->getEventData($row, FLEET_OUTWARD);
+
+        $this->assertStringContainsString('Aliens', $text);
+        $this->assertStringContainsString('Incoming npc', $text);
+    }
+
     private function bootstrapGlobals(): void
     {
         $GLOBALS['resource'][106] = $GLOBALS['resource'][106] ?? 'spy_tech';
@@ -275,6 +327,7 @@ class FlyingFleetsTableTest extends TestCase
             'cff_mission_target_good' => 'Incoming good %s from %s %s %s %s %s %s %s %s',
             'cff_mission_target_bad' => 'Incoming bad %s from %s %s %s %s %s %s %s %s',
             'cff_mission_target_stay' => 'Incoming stay %s from %s %s %s %s %s %s %s %s',
+            'cff_mission_npc_raid' => 'Incoming npc %s (%s) to %s %s %s. Mission: %s',
             'tech' => [
                 900 => 'Resources',
                 901 => 'Metal',

@@ -1055,6 +1055,7 @@ $LNG['cff_mission_target_bad']				= 'Düşman %s, %s tarafından %s %s %s koordi
 $LNG['cff_mission_target_good']				= 'Dost %s,  %s tarafından  %s %s %s koordinatından %s %s %s koordinatına yaklaşıyor. Görevi: %s';
 $LNG['cff_mission_target_stay']				= 'Dost %s, %s tarafından %s %s %s koordinatından kalktı. Su an %s %s %s yörüngesinde bulunmaktalar. Görevi: %s';
 $LNG['cff_mission_target_mip']				= 'Roket Saldırısı : (%d) adet roket  %s tarafından %s %s %s koordinatlarından ateşlendi. Su an  sizin %s %s %s koordinatlarına yaklaşıyor..';
+$LNG['cff_mission_npc_raid']				= 'Düşman bir %s (%s), %s %s %s konumuna ulaşacak. Görev: %s';
 
 
 //----------------------------------------------------------------------------//
