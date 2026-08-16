@@ -284,12 +284,12 @@ class ShowFleetStep1Page extends AbstractGamePage
                 ':targetType' => (($targetPlanetType == 2) ? 1 : $targetPlanetType),
             ));
 
-            if ($targetPlanetType == 3 && !isset($planetData))
+            if ($targetPlanetType == 3 && !is_array($planetData))
 			{
 				$this->sendJSON($LNG['fl_error_no_moon']);
 			}
 
-			if ($targetPlanetType != 2 && !empty($planetData['urlaubs_modus']) && isVacationMode($planetData))
+			if ($targetPlanetType != 2 && is_array($planetData) && !empty($planetData['urlaubs_modus']) && isVacationMode($planetData))
 			{
 				$this->sendJSON($LNG['fl_in_vacation_player']);
 			}
@@ -306,7 +306,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 				$this->sendJSON($LNG['fl_error_not_avalible']);
 			}
 
-			if($targetPlanetType == 2 && empty($planetData['der_metal']) && empty($planetData['der_crystal']))
+			if($targetPlanetType == 2 && (!is_array($planetData) || (empty($planetData['der_metal']) && empty($planetData['der_crystal']))))
 			{
 				$this->sendJSON($LNG['fl_error_empty_derbis']);
 			}

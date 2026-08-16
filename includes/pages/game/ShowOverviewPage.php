@@ -456,6 +456,9 @@ class ShowOverviewPage extends AbstractGamePage
 							':planetId'	=> $PLANET['id'],
 							':destroyed'=> 0
 						));
+						if (!is_array($NEXT_PLANET)) {
+							$this->sendJSON(array('message' => $LNG['ov_abandon_planet_not_possible']));
+						}
 
 						$sql = "UPDATE %%USERS%% SET id_planet = :new_main_planet_id WHERE id = :userId;";
 						$db->update($sql, array(

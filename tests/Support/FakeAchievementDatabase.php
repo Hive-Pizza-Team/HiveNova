@@ -30,6 +30,8 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public bool $throwOnUniverseEventsInsert = false;
 
+    public bool $throwOnUniverseEventsSelect = false;
+
     /** @var list<array<string, mixed>> */
     public array $messages = [];
 
@@ -149,6 +151,9 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'FROM %%UNIVERSE_EVENTS%%')) {
+            if ($this->throwOnUniverseEventsSelect) {
+                throw new RuntimeException('universe events select failed');
+            }
             $universe = (int) ($params[':universe'] ?? 0);
             $sinceId = (int) ($params[':sinceId'] ?? 0);
             $rows = array_values(array_filter(
@@ -164,7 +169,13 @@ class FakeAchievementDatabase implements DatabaseInterface
                     return true;
                 }
             ));
-            usort($rows, static fn (array $a, array $b): int => (int) $b['id'] <=> (int) $a['id']);
+            $asc = stripos($qry, 'ORDER BY id ASC') !== false;
+            usort(
+                $rows,
+                static fn (array $a, array $b): int => $asc
+                    ? ((int) $a['id'] <=> (int) $b['id'])
+                    : ((int) $b['id'] <=> (int) $a['id'])
+            );
             $limit = 50;
             if (preg_match('/LIMIT\s+(\d+)/i', $qry, $m)) {
                 $limit = (int) $m[1];

@@ -78,6 +78,24 @@ class MissionCaseCombatTest extends TestCase
         $this->assertSame('battle', $this->fake->achievement->universeEvents[0]['event_type']);
     }
 
+    public function test_destruction_on_moon_merges_parent_debris_when_present(): void
+    {
+        $this->fake->planetRowsById[99]['der_metal'] = 40;
+        $this->fake->planetRowsById[99]['der_crystal'] = 20;
+
+        $mission = new MissionCaseDestruction(missionFleetFixture([
+            'fleet_mission' => 9,
+            'fleet_array' => '202,50;',
+            'fleet_amount' => 50,
+            'fleet_target_owner' => 2,
+            'fleet_end_type' => 3,
+        ]));
+        $mission->TargetEvent();
+
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertNotEmpty($this->fake->achievement->messages);
+    }
+
     public function test_mip_destroys_defenses_when_missiles_outnumber_interceptors(): void
     {
         $this->fake->planetRowsById[99]['interplanetary_missile'] = 0;
@@ -97,6 +115,22 @@ class MissionCaseCombatTest extends TestCase
         $this->assertSame(1, $mission->kill);
         $this->assertGreaterThanOrEqual(2, count($this->fake->achievement->messages));
         $this->assertSame([], $this->fake->achievement->universeEvents);
+    }
+
+    public function test_mip_kills_fleet_when_target_planet_is_gone(): void
+    {
+        unset($this->fake->planetRowsById[99]);
+
+        $mission = new MissionCaseMIP(missionFleetFixture([
+            'fleet_mission' => 10,
+            'fleet_amount' => 5,
+            'fleet_target_obj' => 401,
+            'fleet_array' => '503,5;',
+        ]));
+        $mission->TargetEvent();
+
+        $this->assertSame(1, $mission->kill);
+        $this->assertSame([], $this->fake->achievement->messages);
     }
 
     public function test_attack_return_event_restores_fleet_and_notifies_owner(): void

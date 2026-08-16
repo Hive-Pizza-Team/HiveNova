@@ -21,7 +21,7 @@ class EventFirehoseFeed
 			$sql = 'SELECT id, time, event_type, size_bucket, outcome
 				FROM %%UNIVERSE_EVENTS%%
 				WHERE universe = :universe AND id > :sinceId
-				ORDER BY id DESC
+				ORDER BY id ASC
 				LIMIT ' . $limit;
 			$params = [
 				':universe' => $universe,
@@ -38,10 +38,19 @@ class EventFirehoseFeed
 			];
 		}
 
-		$rows = Database::get()->select($sql, $params);
+		try {
+			$rows = Database::get()->select($sql, $params);
+		} catch (\Throwable $e) {
+			error_log('EventFirehoseFeed: ' . $e->getMessage());
+			return [];
+		}
 		$out  = [];
 		foreach ($rows as $row) {
 			$out[] = self::present($row, $LNG, $timezone);
+		}
+
+		if ($sinceId > 0) {
+			$out = array_reverse($out);
 		}
 
 		return $out;

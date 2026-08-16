@@ -66,7 +66,7 @@ class ShowInformationPage extends AbstractGamePage
 			':userID'   => $USER['id']
 		));
 
-		if (!isset($TargetGate) || $TargetPlanet == $PLANET['id'])
+		if (!is_array($TargetGate) || $TargetPlanet == $PLANET['id'])
 		{
 			$this->sendJSON(array(
 				'message' => $LNG['in_jump_gate_doesnt_have_one'],

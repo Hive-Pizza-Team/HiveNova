@@ -72,6 +72,12 @@ class ShowAlliancePage extends AbstractGamePage
 			':allianceId'	=> $allianceId
 		));
 
+		if (!is_array($this->allianceData)) {
+			$this->hasAlliance = false;
+			$this->allianceData = null;
+			return;
+		}
+
 		if ($USER['ally_id'] == $allianceId) {
 			if ($this->allianceData['ally_owner'] == $USER['id']) {
 				$this->rights	= array_combine($this->availableRanks, array_fill(0, count($this->availableRanks), true));
@@ -209,10 +215,12 @@ class ShowAlliancePage extends AbstractGamePage
 		$db	= Database::get();
 		$sql	= "SELECT a.ally_tag FROM %%ALLIANCE_REQUEST%% r INNER JOIN %%ALLIANCE%% a ON a.id = r.allianceId WHERE r.userId = :userId;";
 		$allianceResult = $db->selectSingle($sql, array(
-			':userId'	=> $USER['id_planet']
+			':userId'	=> $USER['id']
 		));
 
-		if(empty($allianceResult['ally_tag'])) { $allianceResult['ally_tag'] = 0; }
+		if (!is_array($allianceResult) || empty($allianceResult['ally_tag'])) {
+			$allianceResult = ['ally_tag' => 0];
+		}
 
 		$this->assign(array(
 			'request_text'	=> sprintf($LNG['al_request_wait_message'], $allianceResult['ally_tag']),
@@ -970,6 +978,9 @@ class ShowAlliancePage extends AbstractGamePage
 			$Rank = $db->selectSingle($sql, array(
 				':LeaderID'	=> $postleader
 			));
+			if (!is_array($Rank)) {
+				$this->redirectToHome();
+			}
 
 			$sql = "UPDATE %%USERS%% SET ally_rank_id = :AllyRank WHERE id = :UserID;";
 			$db->update($sql, array(
@@ -1605,7 +1616,7 @@ class ShowAlliancePage extends AbstractGamePage
 		if (empty($targetAlliance)) {
 			$this->sendJSON(array(
 				'error'		=> true,
-				'message'	=> sprintf($LNG['al_diplo_no_alliance'], $targetAlliance['id']),
+				'message'	=> sprintf($LNG['al_diplo_no_alliance'], $id),
 			));
 		}
 
