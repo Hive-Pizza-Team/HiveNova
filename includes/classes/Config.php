@@ -129,44 +129,98 @@ class Config
 			// Do nothing here.
 			return true;
 		}
-		
+
 		if(is_null($options))
 		{
 			$options	= array();
 		}
-		
+
 		$options	+= array(
 			'noGlobalSave' => false
 		);
-		
-		$updateData = array();
-		$params     = array();
-		foreach ($this->updateRecords as $columnName) {
-			$updateData[]             = '`' . $columnName . '` = :' . $columnName;
-			$params[':' . $columnName] = $this->configData[$columnName];
 
-			//TODO: find a better way ...
-			if(!$options['noGlobalSave'] && in_array($columnName, self::$globalConfigKeys))
-			{
-				foreach(Universe::availableUniverses() as $universeId)
-				{
-					if($universeId != $this->configData['uni'])
-					{
-						$config = Config::get();
-						$config->$columnName = $this->configData[$columnName];
-						$config->save(array('noGlobalSave' => true));
-					}
-				}
+		$columnNames = array_values(array_unique($this->updateRecords));
+		$globalKeys  = array();
+		$localKeys   = array();
+		foreach ($columnNames as $columnName) {
+			if (in_array($columnName, self::$globalConfigKeys, true)) {
+				$globalKeys[] = $columnName;
+			} else {
+				$localKeys[] = $columnName;
 			}
 		}
 
-		$sql = 'UPDATE %%CONFIG%% SET '.implode(', ', $updateData).' WHERE `UNI` = :universe';
-		$params[':universe'] = $this->configData['uni'];
-		$db     = Database::get();
-		$db->update($sql, $params);
-		
+		$fanOutGlobals = !$options['noGlobalSave'] && !empty($globalKeys);
+		$scopedKeys    = $fanOutGlobals ? $localKeys : array_merge($globalKeys, $localKeys);
+
+		$db             = Database::get();
+		$useTransaction = $fanOutGlobals && !empty($scopedKeys);
+
+		try {
+			if ($useTransaction) {
+				$db->beginTransaction();
+			}
+
+			if ($fanOutGlobals) {
+				$this->executeUpdate($db, $globalKeys, false);
+				$this->syncGlobalValuesToOtherInstances($globalKeys);
+			}
+
+			if (!empty($scopedKeys)) {
+				$this->executeUpdate($db, $scopedKeys, true);
+			}
+
+			if ($useTransaction) {
+				$db->commit();
+			}
+		} catch (\Throwable $e) {
+			if ($useTransaction) {
+				$db->rollback();
+			}
+			throw $e;
+		}
+
 		$this->updateRecords = array();
 		return true;
+	}
+
+	/**
+	 * @param list<string> $columnNames
+	 */
+	private function executeUpdate(DatabaseInterface $db, array $columnNames, bool $scopeToUniverse): void
+	{
+		$updateData = array();
+		$params     = array();
+		foreach ($columnNames as $columnName) {
+			$updateData[]              = '`' . $columnName . '` = :' . $columnName;
+			$params[':' . $columnName] = $this->configData[$columnName];
+		}
+
+		$sql = 'UPDATE %%CONFIG%% SET '.implode(', ', $updateData);
+		if ($scopeToUniverse) {
+			$sql .= ' WHERE `UNI` = :universe';
+			$params[':universe'] = $this->configData['uni'];
+		}
+
+		$db->update($sql, $params);
+	}
+
+	/**
+	 * @param list<string> $globalKeys
+	 */
+	private function syncGlobalValuesToOtherInstances(array $globalKeys): void
+	{
+		$uni = $this->configData['uni'];
+		foreach (self::$instances as $instanceUni => $instance) {
+			if ($instance === $this || $instanceUni == $uni) {
+				continue;
+			}
+			foreach ($globalKeys as $key) {
+				if (isset($instance->configData[$key])) {
+					$instance->configData[$key] = $this->configData[$key];
+				}
+			}
+		}
 	}
 
 	static function getAll(): never
