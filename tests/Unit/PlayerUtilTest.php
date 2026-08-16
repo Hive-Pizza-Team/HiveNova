@@ -224,6 +224,22 @@ class PlayerUtilTest extends TestCase
         }));
     }
 
+    public function testResolvePublicMessageIsEmptyWhenStoredBlankAndHiveIsNotPublic(): void
+    {
+        $user = [
+            'username' => 'alice',
+            'hive_account' => 'bob',
+            'public_message' => '   ',
+        ];
+        $fetched = false;
+
+        $this->assertSame('', PlayerUtil::resolvePublicMessage($user, static function () use (&$fetched): string {
+            $fetched = true;
+            return 'Hive bio';
+        }));
+        $this->assertFalse($fetched);
+    }
+
     public function testSanitizePublicMessageStripsImgAndTruncates(): void
     {
         $this->assertSame('evilhello', PlayerUtil::sanitizePublicMessage("  [img]evil.php[/img]hello  "));
