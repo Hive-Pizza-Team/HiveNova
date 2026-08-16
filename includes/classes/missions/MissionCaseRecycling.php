@@ -4,6 +4,7 @@ namespace HiveNova\Mission;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Repository\PlanetRepository;
@@ -68,13 +69,14 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 
 			foreach ($fleetData as $shipId => $shipAmount)
 			{
+				$shipCapacity = LeftoverBonus::shipCapacity((int) $shipId, $shipAmount, $targetUser);
 				if ($shipId == 209 ||  $shipId == 219)
 				{
-					$recyclerStorage   += $pricelist[$shipId]['capacity'] * $shipAmount;
+					$recyclerStorage   += $shipCapacity;
 				}
 				else
 				{
-					$otherFleetStorage += $pricelist[$shipId]['capacity'] * $shipAmount;
+					$otherFleetStorage += $shipCapacity;
 				}
 			}
 			

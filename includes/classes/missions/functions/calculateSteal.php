@@ -16,6 +16,7 @@
  */
 
 use HiveNova\Core\Database;
+use HiveNova\Core\LeftoverBonus;
 
 
 function calculateSteal($attackFleets, $defenderPlanet, $simulate = false)
@@ -42,7 +43,7 @@ function calculateSteal($attackFleets, $defenderPlanet, $simulate = false)
 		
 		foreach($Attacker['unit'] as $Element => $amount)	
 		{
-			$SortFleets[$FleetID]		+= $pricelist[$Element]['capacity'] * $amount;
+			$SortFleets[$FleetID]		+= LeftoverBonus::shipCapacity((int) $Element, $amount, $Attacker['player']);
 		}
 		
 		$SortFleets[$FleetID]	*= (1 + $Attacker['player']['factor']['ShipStorage']);

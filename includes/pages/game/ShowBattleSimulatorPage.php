@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\BattleSimulatorCoords;
 
 /**
@@ -97,7 +98,8 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					'dm_attack' => 0,
 					'dm_defensive' => 0,
 					'universe' => $USER['universe']
-				); 
+				);
+				$attacker['player'] = array_merge($attacker['player'], LeftoverBonus::playerTechsFromBattleInput($BattleSlot[0]));
 				
 				$attacker['player']['factor']	= getFactors($attacker['player'], 'attack');
 				
@@ -128,7 +130,8 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 					'dm_attack' => 0,
 					'dm_defensive' => 0,
 					'universe' => $USER['universe']
-				); 
+				);
+				$defender['player'] = array_merge($defender['player'], LeftoverBonus::playerTechsFromBattleInput($BattleSlot[1]));
 				
 				$defender['player']['factor']	= getFactors($defender['player'], 'attack');
 				
@@ -239,6 +242,10 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		$BattleArray[0][0][109]	= $USER[$resource[109]];
 		$BattleArray[0][0][110]	= $USER[$resource[110]];
 		$BattleArray[0][0][111]	= $USER[$resource[111]];
+		$BattleArray[0][0][114]	= $USER[$resource[114]];
+		$BattleArray[0][0][120]	= $USER[$resource[120]];
+		$BattleArray[0][0][121]	= $USER[$resource[121]];
+		$BattleArray[0][0][122]	= $USER[$resource[122]];
 		
 		if(empty($_REQUEST['battleinput']))
 		{
