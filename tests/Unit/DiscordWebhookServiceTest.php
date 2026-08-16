@@ -124,8 +124,38 @@ class DiscordWebhookServiceTest extends TestCase
 		$payload = json_decode($this->posts[0]['json'], true);
 		$this->assertSame([], $payload['allowed_mentions']['parse']);
 		$this->assertSame('HiveNova', $payload['username']);
-		$this->assertStringContainsString('Incoming Attack to Alice at [1:2:3] (planet)', $payload['content']);
-		$this->assertStringNotContainsString('Bob', $payload['content']);
+		$this->assertSame(
+			'https://moon.hive.pizza/styles/resource/images/login/HiveNova.png',
+			$payload['avatar_url']
+		);
+		$this->assertArrayNotHasKey('content', $payload);
+		$embed = $payload['embeds'][0];
+		$this->assertSame('Incoming Attack', $embed['title']);
+		$this->assertStringContainsString('Incoming Attack to Alice at [1:2:3] (planet)', $embed['description']);
+		$this->assertStringNotContainsString('Bob', $embed['description']);
+		$this->assertSame(0xE74C3C, $embed['color']);
+		$this->assertSame($payload['avatar_url'], $embed['thumbnail']['url']);
+		$this->assertSame('Alice', $embed['fields'][0]['value']);
+		$this->assertSame('[1:2:3] (planet)', $embed['fields'][1]['value']);
+	}
+
+	public function testBuildPayloadUsesLogoAvatarAndEmbedFields(): void
+	{
+		$payload = DiscordWebhookService::buildPayload(
+			'Incoming Attack to Alice at [1:2:3] (planet)',
+			true,
+			'Alice',
+			1,
+			'[1:2:3] (planet)'
+		);
+		$this->assertSame('HiveNova', $payload['username']);
+		$this->assertSame(
+			'https://moon.hive.pizza/styles/resource/images/login/HiveNova.png',
+			$payload['avatar_url']
+		);
+		$this->assertSame($payload['avatar_url'], $payload['embeds'][0]['thumbnail']['url']);
+		$this->assertSame('Incoming Attack', $payload['embeds'][0]['title']);
+		$this->assertSame('Alice', $payload['embeds'][0]['fields'][0]['value']);
 	}
 
 	public function testCombatFormatterDiffersFromIncoming(): void
@@ -171,7 +201,9 @@ class DiscordWebhookServiceTest extends TestCase
 		DiscordWebhookService::notifyCombatResolved(2, 1, 1, 2, 3, 3);
 		$this->assertCount(1, $this->posts);
 		$payload = json_decode($this->posts[0]['json'], true);
-		$this->assertStringContainsString('(moon)', $payload['content']);
+		$this->assertStringContainsString('(moon)', $payload['embeds'][0]['description']);
+		$this->assertSame('Combat resolved — Attack', $payload['embeds'][0]['title']);
+		$this->assertSame(0x3498DB, $payload['embeds'][0]['color']);
 	}
 
 	public function testResolveAdminInputKeepsCurrentWhenBlank(): void
