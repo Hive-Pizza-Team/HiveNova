@@ -132,6 +132,16 @@ DIFF_COVER_RC=${PIPESTATUS[0]}
 set -e
 
 if grep -Fq 'No lines with coverage information in this diff.' "$DIFF_COVER_LOG"; then
+  # Deletion-only class diffs have no new executable lines. diff-cover then
+  # prints the same "no lines" message as a Clover path-mapping miss.
+  added=0
+  if git rev-parse --verify "$COMPARE_BRANCH" >/dev/null 2>&1; then
+    added="$(git diff --numstat "${COMPARE_BRANCH}...HEAD" -- 'includes/classes/*.php' 'includes/classes/**/*.php' | awk '{s+=$1} END {print s+0}')"
+  fi
+  if [[ "$added" -eq 0 ]]; then
+    echo "includes/classes diff has no added lines; coverage gate skipped."
+    exit 0
+  fi
   echo "diff-cover could not match Clover paths to the git diff (vacuous pass)." >&2
   echo "Ensure coverage reports include includes/classes/ with path attributes." >&2
   exit 1
