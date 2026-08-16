@@ -1154,6 +1154,7 @@ $LNG['modul_38']						= 'Sucateiros : Comprador de Frota';
 $LNG['modul_39']						= 'Simulador de batalha';
 $LNG['modul_40']						= 'Atalhos de Frotas';
 $LNG['modul_41']                       = 'Aplicação do Facebook';
+$LNG['modul_47'] = 'Salvage mission';
 $LNG['modul_46']                       = 'Achievements';
 $LNG['mod_module']						= 'Modulos';
 $LNG['mod_info']						= 'Modulos no Jogo';
@@ -1352,6 +1353,7 @@ $LNG['cronName_inactive']		= 'Excluir inativo';
 $LNG['cronName_teamspeak']		= 'Teamspeak data';
 $LNG['cronName_tracking']		= 'Estatísticas Globais';
 $LNG['cronName_databasedump']	= 'Backup de Base de Dados';
+$LNG['cronName_pve_spawn'] = 'PvE spawn';
 $LNG['cronName_pushing'] = 'Detecção de Pushing';
 $LNG['cronName_botdetect'] = 'Detecção de Bots';
 

@@ -539,6 +539,7 @@ $LNG['modul_26']                                       = 'Ara';
 $LNG['modul_27']                                       = 'Destek/Ticket';
 $LNG['modul_28']                                       = 'Teknoloji';
 $LNG['modul_41']                          				= 'Facebook';
+$LNG['modul_47'] = 'Salvage mission';
 $LNG['modul_46']                          				= 'Achievements';
 $LNG['mod_module']                                      = 'Moduller';
 $LNG['mod_info']                                        = 'Oyundaki Moduller';
@@ -576,6 +577,7 @@ $LNG['cronName_inactive']		= 'Inaktifleri Sil';
 $LNG['cronName_teamspeak']		= 'Teamspeak guncelleme';
 $LNG['cronName_tracking']		= 'Global Server Istatistik Guncellemesi';
 $LNG['cronName_databasedump']	= 'Database backup';
+$LNG['cronName_pve_spawn'] = 'PvE spawn';
 $LNG['cronName_pushing'] = 'Pushing Tespiti';
 $LNG['cronName_botdetect'] = 'Bot Tespiti';
 

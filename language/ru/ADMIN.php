@@ -1048,6 +1048,7 @@ $LNG['modul_8']                       = 'Инновационнные разра
 $LNG['modul_9']                       = 'Флот';
 $LNG['modul_10']                      = 'Обработчик флота';
 $LNG['modul_41']                      = 'Маршруты';
+$LNG['modul_47'] = 'Salvage mission';
 $LNG['modul_46']                      = 'Achievements';
 $LNG['modul_11']                      = 'Галактика';
 $LNG['modul_12']                      = 'Зал славы';
@@ -1236,6 +1237,7 @@ $LNG['cronName_inactive']           = 'Удаление неактивных и�
 $LNG['cronName_teamspeak']          = 'Обновление данных Teamspeak';
 $LNG['cronName_tracking']           = 'Отправление статистики Глобальному серверу';
 $LNG['cronName_databasedump']       = 'Резервное копирование БД';
+$LNG['cronName_pve_spawn'] = 'PvE spawn';
 $LNG['cronName_pushing'] = 'Обнаружение Пушинга';
 $LNG['cronName_botdetect'] = 'Обнаружение Ботов';
 

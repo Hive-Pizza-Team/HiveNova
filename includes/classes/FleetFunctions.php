@@ -457,7 +457,26 @@ class FleetFunctions
 		elseif ($MissionInfo['planettype'] == 2) {
 			if ((isset($MissionInfo['Ship'][209]) || isset($MissionInfo['Ship'][219])) && isModuleAvailable(MODULE_MISSION_RECYCLE) && !($GetInfoPlanet['der_metal'] == 0 && $GetInfoPlanet['der_crystal'] == 0))
 				$availableMissions[]	= 8;
+			$package = PvePackageService::findAt(
+				(int) $USER['universe'],
+				(int) $MissionInfo['galaxy'],
+				(int) $MissionInfo['system'],
+				(int) $MissionInfo['planet']
+			);
+			if ($package !== null && isModuleAvailable(MODULE_MISSION_SALVAGE)) {
+				$availableMissions[] = 18;
+			}
 		} else {
+			$package = PvePackageService::findAt(
+				(int) $USER['universe'],
+				(int) ($MissionInfo['galaxy'] ?? 0),
+				(int) ($MissionInfo['system'] ?? 0),
+				(int) $MissionInfo['planet']
+			);
+			if ($package !== null && isModuleAvailable(MODULE_MISSION_SALVAGE)) {
+				$availableMissions[] = 18;
+			}
+
 			if (!$UsedPlanet) {
 				if (isset($MissionInfo['Ship'][208]) && $MissionInfo['planettype'] == 1 && isModuleAvailable(MODULE_MISSION_COLONY))
 					$availableMissions[]	= 7;
@@ -575,7 +594,7 @@ class FleetFunctions
 		$fleetStartPlanetGalaxy, $fleetStartPlanetSystem, $fleetStartPlanetPlanet, $fleetStartPlanetType,
 		$fleetTargetOwner, $fleetTargetPlanetID, $fleetTargetPlanetGalaxy, $fleetTargetPlanetSystem,
 		$fleetTargetPlanetPlanet, $fleetTargetPlanetType, $fleetResource, $fleetStartTime, $fleetStayTime,
-		$fleetEndTime, $fleetGroup = 0, $missileTarget = 0, $fleetNoMReturn = 0, $consumption = 0)
+		$fleetEndTime, $fleetGroup = 0, $missileTarget = 0, $fleetNoMReturn = 0, $consumption = 0, $universe = null)
 	{
 		global $resource;
 		$fleetShipCount	= array_sum($fleetArray);
@@ -599,9 +618,10 @@ class FleetFunctions
 		}
 
 
-		$sql	= 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId;';
-
-		$db->update($sql, $params);
+		if ($fleetStartPlanetID > 0) {
+			$sql	= 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId;';
+			$db->update($sql, $params);
+		}
 
 		$sql	= 'INSERT INTO %%FLEETS%% SET
 		fleet_owner					= :fleetStartOwner,
@@ -657,7 +677,7 @@ class FleetFunctions
 			':fleetGroup'				=> $fleetGroup,
 			':missileTarget'			=> $missileTarget,
 			':timestamp'				=> TIMESTAMP,
-			':universe'	   				=> Universe::current(),
+			':universe'	   				=> $universe ?? Universe::current(),
 		));
 
 		$fleetId	= $db->lastInsertId();
@@ -724,7 +744,7 @@ class FleetFunctions
 			':fleetGroup'				=> $fleetGroup,
 			':missileTarget'			=> $missileTarget,
 			':timestamp'				=> TIMESTAMP,
-			':universe'	   				=> Universe::current(),
+			':universe'	   				=> $universe ?? Universe::current(),
 		));
 
 		FrequentLocationService::tryRecordFromFleet(

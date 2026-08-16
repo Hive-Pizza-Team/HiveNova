@@ -51,6 +51,7 @@ class FleetDispatchServiceTest extends TestCase
             'fl_only_planets_colonizable'   => 'Only planets can be colonized',
             'fl_no_target'                  => 'No target',
             'fl_empty_target'               => 'Empty target',
+            'fl_salvage_gone'               => 'Salvage gone',
             'fl_admin_attack'               => 'Admin attack',
             'fl_player_is_noob'             => 'Player is noob',
             'fl_player_is_strong'           => 'Player is strong',
@@ -109,6 +110,48 @@ class FleetDispatchServiceTest extends TestCase
             ['id' => 1],
             $this->basePlanet()
         );
+    }
+
+    public function testValidateTargetThrowsWhenSalvagePackageMissing(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Salvage gone');
+
+        $params = $this->baseValidateTargetParams([
+            'targetMission' => 18,
+            'targetGalaxy'  => 2,
+            'targetSystem'  => 9,
+            'targetPlanet'  => 4,
+        ]);
+
+        FleetDispatchService::validateTarget($params, ['id' => 1, 'universe' => 1], $this->basePlanet());
+    }
+
+    public function testValidateTargetAcceptsSalvageWhenPackageExists(): void
+    {
+        $this->fake->salvagePackages[] = [
+            'id' => 1,
+            'universe' => 1,
+            'galaxy' => 2,
+            'system' => 9,
+            'planet' => 4,
+            'metal' => 1000,
+            'crystal' => 500,
+            'spawned_at' => TIMESTAMP,
+            'expires_at' => TIMESTAMP + 3600,
+            'tier' => 1,
+            'encounter_seed' => 50,
+        ];
+
+        $params = $this->baseValidateTargetParams([
+            'targetMission' => 18,
+            'targetGalaxy'  => 2,
+            'targetSystem'  => 9,
+            'targetPlanet'  => 4,
+        ]);
+
+        FleetDispatchService::validateTarget($params, ['id' => 1, 'universe' => 1], $this->basePlanet());
+        $this->addToAssertionCount(1);
     }
 
     public function testValidateTargetThrowsOnInvalidCoordinates(): void

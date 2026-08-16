@@ -275,7 +275,7 @@ define('ENABLE_SIMULATOR_LINK'		, true);
 // MODULE_AMOUNT must equal the highest module ID + 1.
 // =============================================================================
 
-define('MODULE_AMOUNT'				, 47);
+define('MODULE_AMOUNT'				, 48);
 define('MODULE_ALLIANCE'			, 0);
 define('MODULE_MISSION_ATTACK'		, 1);
 define('MODULE_BUILDING'			, 2);
@@ -322,6 +322,26 @@ define('MODULE_MISSION_ACS'			, 42);
 define('MODULE_MISSION_TRADE'		, 44);
 define('MODULE_MISSION_TRANSFER'	, 45);
 define('MODULE_ACHIEVEMENTS'		, 46);
+define('MODULE_MISSION_SALVAGE'		, 47);
+
+define('PVE_ONLINE_WINDOW'			, 900);
+define('PVE_SPAWN_BASE'				, 2);
+define('PVE_SPAWN_PER_ONLINE'		, 1);
+define('PVE_SPAWN_HARD_CAP'			, 12);
+define('PVE_PACKAGE_TTL'			, 86400);
+define('PVE_PACKAGE_BASE_METAL'		, 5000);
+define('PVE_PACKAGE_BASE_CRYSTAL'	, 2500);
+define('PVE_PACKAGE_GROWTH_PER_HOUR', 500);
+define('PVE_PACKAGE_CAP_METAL'		, 50000);
+define('PVE_PACKAGE_CAP_CRYSTAL'	, 25000);
+define('PVE_HANGAR_WEAK_FRACTION'	, 0.5);
+define('PVE_ACCUSED_SHIP_FACTOR'	, 1.1);
+define('PVE_ACCUSED_RAID_CHANCE'	, 15);
+define('PVE_RAID_FLIGHT_SECONDS'	, 600);
+define('PVE_ENCOUNTER_CHANCE'		, 40);
+define('PVE_ACCUSED_ENCOUNTER_BONUS', 10);
+define('PVE_OVERLAY_CHANCE'			, 20);
+define('PVE_ACCUSED_OVERLAY_BONUS'	, 15);
 
 // =============================================================================
 // ELEMENT / RESOURCE TYPE FLAGS (bitmask)

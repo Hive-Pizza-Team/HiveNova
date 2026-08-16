@@ -37,6 +37,9 @@ $LNG['type_mission_10']                  = 'Ракетная атака';
 $LNG['type_mission_11']                  = 'Поиск Тёмной материи';
 $LNG['type_mission_15']                  = 'Экспедиция';
 
+$LNG['fl_salvage_gone']						= 'Пакет salvage исчез.';
+$LNG['sys_salvage_collected']				= 'Собрано %s металла и %s кристалла.';
+
 $LNG['type_planet_1']                    = 'Планета';
 $LNG['type_planet_2']                    = 'Поле обломков';
 $LNG['type_planet_3']                    = 'Луна';
@@ -1181,6 +1184,7 @@ $LNG['lo_redirect']                       = 'Перенаправление';
 $LNG['lo_notify']                         = 'Вы будете перенаправлены через <span id="seconds">5</span> секунд';
 $LNG['lo_continue']                       = 'Нажмите здесь, если не хотите ждать';
 $LNG['type_mission_16'] = 'Торговля';
+$LNG['type_mission_18'] 					= 'Salvage';
 $LNG['type_mission_17'] = 'Передача';
 $LNG['lm_marketplace'] = 'Рынок';
 $LNG['ov_online'] = 'Онлайн';

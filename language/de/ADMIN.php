@@ -1120,6 +1120,7 @@ $LNG['modul_8'] = 'DM-Bank';
 $LNG['modul_9'] = 'Flotte';
 $LNG['modul_10'] = 'Flotte - Handler';
 $LNG['modul_41'] = 'Flotten Shourtcuts';
+$LNG['modul_47'] = 'Salvage mission';
 $LNG['modul_46'] = 'Achievements';
 $LNG['modul_11'] = 'Galaxie';
 $LNG['modul_12'] = 'Hall of Fame';
@@ -1314,6 +1315,7 @@ $LNG['cronName_inactive'] = 'Inaktive löschen';
 $LNG['cronName_teamspeak'] = 'Teamspeakdaten aktualisieren';
 $LNG['cronName_tracking'] = 'Statistik an globalen Server senden.';
 $LNG['cronName_databasedump'] = 'Datenbank-Backup';
+$LNG['cronName_pve_spawn'] = 'PvE spawn';
 $LNG['cronName_pushing'] = 'Pushing-Erkennung';
 $LNG['cronName_botdetect'] = 'Bot-Erkennung';
 
