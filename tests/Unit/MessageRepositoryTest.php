@@ -64,6 +64,15 @@ class MessageRepositoryTest extends TestCase
         $this->assertSame('%spyReportLost%', $clause['params'][':lostNeedle']);
     }
 
+    public function testLostFilterClauseMatchesAllInboxLostReports(): void
+    {
+        $clause = MessageRepository::lostFilterClause(100, 'lost');
+        $this->assertStringContainsString('message_text LIKE :lostNeedle', $clause['sql']);
+        $this->assertStringContainsString('message_text LIKE :lostNeedleSpy', $clause['sql']);
+        $this->assertSame('%raportLose%', $clause['params'][':lostNeedle']);
+        $this->assertSame('%spyReportLost%', $clause['params'][':lostNeedleSpy']);
+    }
+
     public function testLostFilterClauseIgnoredForOtherCategories(): void
     {
         $clause = MessageRepository::lostFilterClause(1, 'lost');
@@ -90,11 +99,12 @@ class MessageRepositoryTest extends TestCase
         $this->assertStringNotContainsString('lostNeedle', $this->lastSelectSingle['sql']);
     }
 
-    public function testCountMessagesAllInboxDoesNotAddLostNeedle(): void
+    public function testCountMessagesAllInboxAppliesLostFilter(): void
     {
         $this->stubDatabase();
         MessageRepository::countMessages(9, 100, false, 'lost');
-        $this->assertArrayNotHasKey(':lostNeedle', $this->lastSelectSingle['params']);
+        $this->assertSame('%raportLose%', $this->lastSelectSingle['params'][':lostNeedle']);
+        $this->assertSame('%spyReportLost%', $this->lastSelectSingle['params'][':lostNeedleSpy']);
     }
 
     public function testGetMessagesPagedAppliesLostFilterForSpy(): void
@@ -108,11 +118,13 @@ class MessageRepositoryTest extends TestCase
         $this->assertSame(10, $this->lastSelect['params'][':limit']);
     }
 
-    public function testGetMessagesPagedAllCategoryHasNoLostNeedle(): void
+    public function testGetMessagesPagedAllCategoryAppliesLostFilter(): void
     {
         $this->stubDatabase();
         MessageRepository::getMessagesPaged(9, 100, 5, 10, 'lost');
-        $this->assertArrayNotHasKey(':lostNeedle', $this->lastSelect['params']);
+        $this->assertSame('%raportLose%', $this->lastSelect['params'][':lostNeedle']);
+        $this->assertSame('%spyReportLost%', $this->lastSelect['params'][':lostNeedleSpy']);
+        $this->assertSame(5, $this->lastSelect['params'][':offset']);
     }
 
     public function testGetMessagesPagedOutboxIgnoresLostFilter(): void

@@ -51,6 +51,14 @@ class ShowFleetStep2Page extends AbstractGamePage
 			FleetFunctions::GotoFleetPage();
 		}
 
+		if (!FleetFunctions::HasCompleteTargetCoords($targetGalaxy, $targetSystem, $targetPlanet))
+		{
+			$this->printMessage($LNG['fl_incomplete_coords'], array(array(
+				'label'	=> $LNG['sys_back'],
+				'url'	=> 'game.php?page=fleetTable'
+			)));
+		}
+
 		$fleetArray    				= $_SESSION['fleet'][$token]['fleet'];
 
 		$db = Database::get();
@@ -61,8 +69,11 @@ class ShowFleetStep2Page extends AbstractGamePage
 			':targetSystem' => $targetSystem,
 			':targetPlanet' => $targetPlanet
 		));
+		if (!is_array($targetPlanetData)) {
+			$targetPlanetData = array();
+		}
 
-		if($targetType == 2 && $targetPlanetData['der_metal'] == 0 && $targetPlanetData['der_crystal'] == 0)
+		if($targetType == 2 && ($targetPlanetData['der_metal'] ?? 0) == 0 && ($targetPlanetData['der_crystal'] ?? 0) == 0)
 		{
 			$this->printMessage($LNG['fl_error_empty_derbis'], array(array(
 				'label'	=> $LNG['sys_back'],

@@ -32,7 +32,7 @@
 				</td>
 				<td>
 					{if $ach.reward_type != 'none' && $ach.reward_amount > 0}
-						{$ach.reward_amount|number} {$LNG.tech.921}
+						{$ach.reward_amount|number} {$darkmatterName}
 					{else}
 						&mdash;
 					{/if}

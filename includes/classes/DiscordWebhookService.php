@@ -10,8 +10,8 @@ class DiscordWebhookService
 {
 	private const USER_AGENT = 'DiscordBot (https://github.com/Hive-Pizza-Team/HiveNova, 1.0)';
 	private const USERNAME = 'HiveNova';
-	private const CONNECT_TIMEOUT = 2;
-	private const TIMEOUT = 3;
+	private const CONNECT_TIMEOUT = 1;
+	private const TIMEOUT = 1;
 
 	private const MISSION_NAMES = [
 		1  => 'Attack',

@@ -445,6 +445,7 @@ class FleetFunctions
 
 	public static function GetAvailableMissions($USER, $MissionInfo, $GetInfoPlanet)
 	{
+		$GetInfoPlanet			= is_array($GetInfoPlanet) ? $GetInfoPlanet : array();
 		$YourPlanet				= (!empty($GetInfoPlanet['id_owner']) && $GetInfoPlanet['id_owner'] == $USER['id']) ? true : false;
 		$UsedPlanet				= (!empty($GetInfoPlanet['id_owner'])) ? true : false;
 		$availableMissions		= array();
@@ -696,24 +697,6 @@ class FleetFunctions
 		fleet_target_obj			= :missileTarget,
 		start_time					= :timestamp;';
 
-		if ($fleetTargetOwner > 0 && $fleetStartOwner != $fleetTargetOwner && in_array($fleetMission, [1, 2, 6, 9, 10], true)) {
-			PushNotificationService::notifyIncomingHostileFleet(
-				$fleetTargetOwner,
-				$fleetMission,
-				$fleetTargetPlanetGalaxy,
-				$fleetTargetPlanetSystem,
-				$fleetTargetPlanetPlanet
-			);
-			DiscordWebhookService::notifyIncomingHostile(
-				(int) $fleetTargetOwner,
-				(int) $fleetMission,
-				(int) $fleetTargetPlanetGalaxy,
-				(int) $fleetTargetPlanetSystem,
-				(int) $fleetTargetPlanetPlanet,
-				(int) $fleetTargetPlanetType
-			);
-		}
-
 		$db->insert($sql, array(
 			':fleetId'					=> $fleetId,
 			':fleetStartOwner'			=> $fleetStartOwner,
@@ -752,6 +735,24 @@ class FleetFunctions
 			(int) $fleetTargetPlanetType,
 			(int) $fleetMission
 		);
+
+		if ($fleetTargetOwner > 0 && $fleetStartOwner != $fleetTargetOwner && in_array($fleetMission, [1, 2, 6, 9, 10], true)) {
+			PushNotificationService::notifyIncomingHostileFleet(
+				$fleetTargetOwner,
+				$fleetMission,
+				$fleetTargetPlanetGalaxy,
+				$fleetTargetPlanetSystem,
+				$fleetTargetPlanetPlanet
+			);
+			DiscordWebhookService::notifyIncomingHostile(
+				(int) $fleetTargetOwner,
+				(int) $fleetMission,
+				(int) $fleetTargetPlanetGalaxy,
+				(int) $fleetTargetPlanetSystem,
+				(int) $fleetTargetPlanetPlanet,
+				(int) $fleetTargetPlanetType
+			);
+		}
 
 		return $fleetId;
 	}

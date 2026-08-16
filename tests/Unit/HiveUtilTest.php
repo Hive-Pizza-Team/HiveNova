@@ -115,4 +115,22 @@ class HiveUtilTest extends TestCase
     {
         $this->assertSame('', HiveUtil::getAccountAbout('Not Valid!'));
     }
+
+    public function testRpcNodesToTryCapsRetryBudget(): void
+    {
+        if (!defined('HIVE_RPC_NODES')) {
+            define('HIVE_RPC_NODES', [
+                'https://a.example',
+                'https://b.example',
+                'https://c.example',
+                'https://d.example',
+            ]);
+        }
+
+        $all = HiveUtil::getRpcNodes();
+        $this->assertGreaterThan(3, count($all));
+        $this->assertSame(array_slice($all, 0, 3), HiveUtil::rpcNodesToTry(3));
+        $this->assertSame($all, HiveUtil::rpcNodesToTry(null));
+        $this->assertCount(1, HiveUtil::rpcNodesToTry(0));
+    }
 }
