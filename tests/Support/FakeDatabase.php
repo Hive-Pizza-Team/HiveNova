@@ -368,6 +368,11 @@ class FakeDatabase implements DatabaseInterface
         $this->session->disconnect();
     }
 
+    public function getHandle(): ?\PDO
+    {
+        return null;
+    }
+
     public function beginTransaction(): void
     {
         $this->achievement->beginTransaction();

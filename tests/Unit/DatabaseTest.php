@@ -162,7 +162,7 @@ class DatabaseTest extends TestCase
         $required = ['select', 'selectSingle', 'insert', 'update', 'delete',
                      'replace', 'query', 'nativeQuery',
                      'lastInsertId', 'rowCount', 'getQueryCounter',
-                     'quote', 'disconnect'];
+                     'quote', 'disconnect', 'getHandle'];
 
         foreach ($required as $method) {
             $this->assertTrue($ref->hasMethod($method),

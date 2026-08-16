@@ -93,14 +93,9 @@ if ($command === 'run') {
 
     echo "Applying " . count($pending) . " migration(s)...\n\n";
     foreach ($pending as $m) {
-        echo "[{$m['rev']}] {$m['filename']} ... ";
-        match ($m['extension']) {
-            'sql' => $migrator->applySqlMigration($m),
-            'php' => $migrator->applyPhpMigration($m),
-        };
-        echo "OK\n";
+        echo "[{$m['rev']}] {$m['filename']}\n";
     }
-    $migrator->updateVersion();
+    $migrator->run();
     echo "\nDB version updated to " . DB_VERSION_REQUIRED . ".\n";
     exit(0);
 }
