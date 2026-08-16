@@ -84,4 +84,16 @@ class EventFirehoseFeedTest extends TestCase
 		$rows = EventFirehoseFeed::fetch(1, $this->lng, 'UTC');
 		$this->assertCount(50, $rows);
 	}
+
+	public function test_since_id_returns_oldest_new_events_first(): void
+	{
+		for ($i = 0; $i < 70; $i++) {
+			EventFirehoseWriter::record(1, 100 + $i, 10, 'a');
+		}
+
+		$caughtUp = EventFirehoseFeed::fetch(1, $this->lng, 'UTC', 5);
+		$this->assertCount(50, $caughtUp);
+		$this->assertSame(55, $caughtUp[0]['id']);
+		$this->assertSame(6, $caughtUp[49]['id']);
+	}
 }

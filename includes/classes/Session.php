@@ -197,7 +197,7 @@ class Session
 			[':sessionId' => $sessionId]
 		);
 
-		if (empty($row['userID']) || (int) $row['lastonline'] < TIMESTAMP - SESSION_LIFETIME) {
+		if (empty($row) || !is_array($row) || empty($row['userID']) || (int) $row['lastonline'] < TIMESTAMP - SESSION_LIFETIME) {
 			return null;
 		}
 
@@ -206,7 +206,7 @@ class Session
 			[':userId' => $row['userID']]
 		);
 
-		if (empty($user['id']) || (int) $user['bana'] === 1) {
+		if (empty($user) || !is_array($user) || empty($user['id']) || (int) $user['bana'] === 1) {
 			return null;
 		}
 

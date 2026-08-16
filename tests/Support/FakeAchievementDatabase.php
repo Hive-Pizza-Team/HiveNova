@@ -164,7 +164,13 @@ class FakeAchievementDatabase implements DatabaseInterface
                     return true;
                 }
             ));
-            usort($rows, static fn (array $a, array $b): int => (int) $b['id'] <=> (int) $a['id']);
+            $asc = stripos($qry, 'ORDER BY id ASC') !== false;
+            usort(
+                $rows,
+                static fn (array $a, array $b): int => $asc
+                    ? ((int) $a['id'] <=> (int) $b['id'])
+                    : ((int) $b['id'] <=> (int) $a['id'])
+            );
             $limit = 50;
             if (preg_match('/LIMIT\s+(\d+)/i', $qry, $m)) {
                 $limit = (int) $m[1];

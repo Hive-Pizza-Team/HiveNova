@@ -335,7 +335,9 @@ HTML;
 			$targetDebris	= $db->selectSingle($sql, array(
 				':moonId'	=> $this->_fleet['fleet_end_id']
 			));
-			$targetPlanet 	+= $targetDebris;
+			if (is_array($targetDebris)) {
+				$targetPlanet 	+= $targetDebris;
+			}
 		}
 
 		foreach($debrisResource as $elementID)
