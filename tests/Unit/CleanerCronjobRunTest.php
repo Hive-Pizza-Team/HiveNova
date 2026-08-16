@@ -63,7 +63,7 @@ class CleanerCronjobRunTest extends TestCase
         $this->assertTrue(
             (bool) array_filter(
                 $fake->achievement->deleteLog,
-                static fn (string $sql): bool => str_contains($sql, '%%MESSAGES%%')
+                static fn (string $sql): bool => str_contains($sql, '%%UNIVERSE_EVENTS%%')
             )
         );
     }

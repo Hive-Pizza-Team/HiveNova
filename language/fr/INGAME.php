@@ -88,6 +88,15 @@ $LNG['lm_battlesim']						= 'Simulateur de Combat';
 $LNG['lm_playercard']                       = 'Profil du joueur';
 $LNG['lm_info']                     		= 'Info';
 $LNG['lm_disclamer']						= 'Crédits';
+$LNG['ef_title']							= 'Flux univers';
+$LNG['ef_empty']							= 'L\'univers est calme.';
+$LNG['ef_event_battle']					= 'Bataille';
+$LNG['ef_size_small']						= 'Escarmouche';
+$LNG['ef_size_medium']						= 'Affrontement';
+$LNG['ef_size_large']						= 'Grande bataille';
+$LNG['ef_outcome_attacker']				= 'Les attaquants l\'ont emporté';
+$LNG['ef_outcome_defender']				= 'Les défenseurs ont tenu';
+$LNG['ef_outcome_draw']					= 'Match nul';
 
 //----------------------------------------------------------------------------//
 //OVERVIEW
