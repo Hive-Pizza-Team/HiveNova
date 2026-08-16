@@ -47,6 +47,8 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public int $expeditionCount = 0;
 
+    public bool $missingStatPoints = false;
+
     /** @var array<string, int|string> */
     public array $statPoints = [
         'total_points' => 0,
@@ -248,6 +250,9 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'FROM %%STATPOINTS%%')) {
+            if ($this->missingStatPoints) {
+                return $field === false ? false : null;
+            }
             if (str_contains($qry, 'MAX(') && str_contains($qry, 'total_rank')) {
                 $rank = (int) ($this->statPoints['total_rank'] ?? 0);
                 return $field === 'rank' ? $rank : ['rank' => $rank];

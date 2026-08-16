@@ -77,6 +77,9 @@ class ShowNotesPage extends AbstractGamePage
                 ':userID'   => $USER['id'],
                 ':noteID'   => $noteID
             ));
+			if (!is_array($noteDetail)) {
+				$this->printMessage($LNG['page_doesnt_exist']);
+			}
 		} else {
 			$noteDetail	= array(
 				'id'		=> 0,
