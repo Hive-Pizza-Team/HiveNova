@@ -31,6 +31,10 @@ class MissionCaseStay extends MissionFunctions implements Mission
 	function TargetEvent()
 	{
 		$senderUser			= $this->getUser((int) $this->_fleet['fleet_owner']);
+		if ($senderUser === []) {
+			$this->RestoreFleet(false);
+			return;
+		}
 
 		$senderUser['factor']	= getFactors($senderUser, 'basic', $this->_fleet['fleet_start_time']);
 		

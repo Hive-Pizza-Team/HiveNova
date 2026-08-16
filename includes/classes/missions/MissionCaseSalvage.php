@@ -131,7 +131,7 @@ class MissionCaseSalvage extends MissionFunctions implements Mission
 			'SELECT id_owner FROM %%PLANETS%% WHERE id = :id;',
 			[':id' => $planetId]
 		);
-		if (empty($row['id_owner'])) {
+		if (!is_array($row) || empty($row['id_owner'])) {
 			return false;
 		}
 

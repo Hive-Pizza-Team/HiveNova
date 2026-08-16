@@ -185,11 +185,11 @@ class FleetDispatchService
         if ($mission == 7 || $mission == 15 || $mission == 16 || $mission == 18) {
             // synthetic target already set by caller — nothing to check here
         } else {
-            if (!empty($targetPlanetData['destruyed'])) {
+            if (empty($targetPlanetData)) {
                 throw new \RuntimeException($LNG['fl_no_target']);
             }
 
-            if (empty($targetPlanetData)) {
+            if (!empty($targetPlanetData['destruyed'])) {
                 throw new \RuntimeException($LNG['fl_no_target']);
             }
         }

@@ -100,10 +100,12 @@ function ShowAccountDataPage()
 				$BannedQuery	= Database::get()->selectSingle("SELECT theme,time,longer,author FROM %%BANNED%% WHERE `who` = :username;", [':username' => $UserQuery['username']]);
 				
 				
+				if (is_array($BannedQuery)) {
 				$sus_longer	= _date($LNG['php_tdformat'], $BannedQuery['longer'], $USER['timezone']);
 				$sus_time	= _date($LNG['php_tdformat'], $BannedQuery['time'], $USER['timezone']);
 				$sus_reason	= $BannedQuery['theme'];
 				$sus_author	= $BannedQuery['author'];
+				}
 				
 			}
 			
@@ -114,24 +116,27 @@ function ShowAccountDataPage()
 			stat_type";
 			
 			$StatQuery	= Database::get()->selectSingle("SELECT ".$SpecifyItemsS." FROM %%STATPOINTS%% WHERE `id_owner` = :id AND `stat_type` = 1;", [':id' => $id_u]);
+			if (!is_array($StatQuery)) {
+				$StatQuery = [];
+			}
 
-			$count_tecno	= pretty_number($StatQuery['tech_count']);
-			$count_def		= pretty_number($StatQuery['defs_count']);
-			$count_fleet	= pretty_number($StatQuery['fleet_count']);
-			$count_builds	= pretty_number($StatQuery['build_count']);
+			$count_tecno	= pretty_number($StatQuery['tech_count'] ?? 0);
+			$count_def		= pretty_number($StatQuery['defs_count'] ?? 0);
+			$count_fleet	= pretty_number($StatQuery['fleet_count'] ?? 0);
+			$count_builds	= pretty_number($StatQuery['build_count'] ?? 0);
 				
-			$point_builds	= pretty_number($StatQuery['build_points']);
-			$point_tecno	= pretty_number($StatQuery['tech_points']);
-			$point_def		= pretty_number($StatQuery['defs_points']);
-			$point_fleet	= pretty_number($StatQuery['fleet_points']);
+			$point_builds	= pretty_number($StatQuery['build_points'] ?? 0);
+			$point_tecno	= pretty_number($StatQuery['tech_points'] ?? 0);
+			$point_def		= pretty_number($StatQuery['defs_points'] ?? 0);
+			$point_fleet	= pretty_number($StatQuery['fleet_points'] ?? 0);
 				
 				
-			$ranking_tecno		= $StatQuery['tech_rank'];
-			$ranking_builds	= $StatQuery['build_rank'];
-			$ranking_def		= $StatQuery['defs_rank'];
-			$ranking_fleet		= $StatQuery['fleet_rank'];
+			$ranking_tecno		= $StatQuery['tech_rank'] ?? 0;
+			$ranking_builds	= $StatQuery['build_rank'] ?? 0;
+			$ranking_def		= $StatQuery['defs_rank'] ?? 0;
+			$ranking_fleet		= $StatQuery['fleet_rank'] ?? 0;
 				
-			$total_points	= pretty_number($StatQuery['total_points']);
+			$total_points	= pretty_number($StatQuery['total_points'] ?? 0);
 			
 
 			

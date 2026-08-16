@@ -33,6 +33,11 @@ class MissionCaseColonisation extends MissionFunctions implements Mission
 		$db		= Database::get();
 
 		$senderUser		= $this->getUser((int) $this->_fleet['fleet_owner']);
+		if ($senderUser === []) {
+			$this->setState(FLEET_RETURN);
+			$this->SaveFleet();
+			return;
+		}
 
 		$senderUser['factor']	= getFactors($senderUser, 'basic', $this->_fleet['fleet_start_time']);
 

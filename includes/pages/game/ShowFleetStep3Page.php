@@ -181,9 +181,9 @@ class ShowFleetStep3Page extends AbstractGamePage
 				'authattack'  => 0,
 				'total_points' => 0,
 			);
-		} elseif (isset($targetPlanetData['id_owner']) && $targetPlanetData['id_owner'] == $USER['id']) {
+		} elseif (is_array($targetPlanetData) && isset($targetPlanetData['id_owner']) && $targetPlanetData['id_owner'] == $USER['id']) {
 			$targetPlayerData = $USER;
-		} elseif (!empty($targetPlanetData['id_owner'])) {
+		} elseif (is_array($targetPlanetData) && !empty($targetPlanetData['id_owner'])) {
 			$targetPlayerData = UserRepository::getUserWithStats((int) $targetPlanetData['id_owner']);
 		} else {
 			$targetPlayerData = array();

@@ -117,6 +117,37 @@ class MissionCaseCombatTest extends TestCase
         $this->assertSame([], $this->fake->achievement->universeEvents);
     }
 
+    public function test_attack_returns_when_defender_user_is_gone(): void
+    {
+        unset($this->fake->achievement->users[2]);
+
+        $mission = new MissionCaseAttack(missionFleetFixture([
+            'fleet_mission' => 1,
+            'fleet_array' => '202,10;',
+            'fleet_amount' => 10,
+            'fleet_target_owner' => 2,
+        ]));
+        $mission->TargetEvent();
+
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertEmpty($this->fake->achievement->messages);
+    }
+
+    public function test_attack_on_moon_skips_missing_parent_debris(): void
+    {
+        $mission = new MissionCaseAttack(missionFleetFixture([
+            'fleet_mission' => 1,
+            'fleet_array' => '202,10;',
+            'fleet_amount' => 10,
+            'fleet_target_owner' => 2,
+            'fleet_end_type' => 3,
+        ]));
+        $mission->TargetEvent();
+
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertNotEmpty($this->fake->achievement->messages);
+    }
+
     public function test_mip_kills_fleet_when_target_planet_is_gone(): void
     {
         unset($this->fake->planetRowsById[99]);

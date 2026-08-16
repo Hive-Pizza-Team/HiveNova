@@ -176,4 +176,15 @@ class MissionCaseSalvageTest extends TestCase
         $this->assertSame(1, $mission->kill);
         $this->assertNotEmpty($this->fake->achievement->messages);
     }
+
+    public function testHarvestIgnoresMissingPackagePlanetOwner(): void
+    {
+        $this->fake->salvagePackages[] = $this->package([
+            'planet_id' => 404,
+            'encounter_seed' => 99,
+        ]);
+        $mission = new MissionCaseSalvage($this->salvageFleet());
+        $mission->TargetEvent();
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+    }
 }

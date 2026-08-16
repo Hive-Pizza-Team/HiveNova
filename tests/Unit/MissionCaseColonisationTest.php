@@ -231,4 +231,15 @@ class MissionCaseColonisationTest extends TestCase
             )
         );
     }
+
+    public function test_colonisation_returns_when_owner_is_gone(): void
+    {
+        unset($this->fake->achievement->users[1]);
+
+        $mission = new MissionCaseColonisation($this->colonisationFleet());
+        $mission->TargetEvent();
+
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertEmpty($this->fake->planetInserts);
+    }
 }
