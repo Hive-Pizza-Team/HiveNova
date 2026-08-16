@@ -67,6 +67,7 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 	public function getQueryCounter() { return 0; }
 	public function quote($str) { return "'" . addslashes((string) $str) . "'"; }
 	public function disconnect() {}
+	public function getHandle(): ?\PDO { return null; }
 	public function beginTransaction(): void {}
 	public function commit(): void {}
 	public function rollback(): void {}

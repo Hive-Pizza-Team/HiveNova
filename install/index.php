@@ -101,169 +101,50 @@ switch ($mode) {
 		$ftp->chmod('install', $CHMOD);
 		break;
 	case 'upgrade':
-		// Willkommen zum Update page. Anzeige, von und zu geupdatet wird. Informationen, dass ein backup erstellt wird.
+		$installerUpgrade = new \HiveNova\Core\InstallerUpgrade(
+			\HiveNova\Core\Database::get(),
+			new \HiveNova\Core\SQLDumper(),
+			ROOT_PATH . 'install/migrations/',
+			DB_PREFIX,
+			DB_VERSION_REQUIRED,
+		);
 
-        try {
-            $sql    = "SELECT dbVersion FROM %%SYSTEM%%;";
-
-            $dbVersion  = \HiveNova\Core\Database::get()->selectSingle($sql, array(), 'dbVersion');
-        } catch (Exception $e) {
-            $dbVersion  = 0;
-        }
-
-        $updates = array();
-
-        $fileRevision = 0;
-
-		$directoryIterator = new DirectoryIterator(ROOT_PATH . 'install/migrations/');
-		/** @var $fileInfo DirectoryIterator */
-		foreach ($directoryIterator as $fileInfo) {
-			if (!$fileInfo->isFile() || !preg_match('/^migration_\d+/', $fileInfo->getFilename())) {
-				continue;
-			}
-
-			$fileRevision = substr($fileInfo->getFilename(), 10, -4);
-
-            if ($fileRevision <= $dbVersion || $fileRevision > DB_VERSION_REQUIRED) {
-                continue;
-            }
-
-            $updates[$fileInfo->getPathname()] = makebr(str_replace('%PREFIX%', DB_PREFIX, file_get_contents($fileInfo->getPathname())));
+		$updates = array();
+		foreach ($installerUpgrade->preview() as $file => $content) {
+			$updates[$file] = str_ends_with((string) $file, '.php') ? $content : makebr($content);
 		}
 
 		$template->assign_vars(array(
-			'file_revision' => min(DB_VERSION_REQUIRED, $fileRevision),
-			'sql_revision'  => $dbVersion,
-            'updates'       => $updates,
+			'file_revision' => DB_VERSION_REQUIRED,
+			'sql_revision'  => $installerUpgrade->migrator()->getCurrentVersion(),
+			'updates'       => $updates,
 			'header'        => $LNG['menu_upgrade']
 		));
 
 		$template->show('ins_update.tpl');
 		break;
 	case 'doupgrade':
-		// TODO:Need a rewrite!
 		require 'includes/config.php';
 
-		// Create a Backup
-        $sqlTableRaw  = \HiveNova\Core\Database::get()->nativeQuery("SHOW TABLE STATUS FROM `" . DB_NAME . "`;");
-		$prefixCounts = strlen(DB_PREFIX);
-		$dbTables     = array();
-		foreach($sqlTableRaw as $table)
-		{
-			if (DB_PREFIX == substr($table['Name'], 0, $prefixCounts)) {
-				$dbTables[] = $table['Name'];
-			}
-		}
+		$installerUpgrade = new \HiveNova\Core\InstallerUpgrade(
+			\HiveNova\Core\Database::get(),
+			new \HiveNova\Core\SQLDumper(),
+			ROOT_PATH . 'install/migrations/',
+			DB_PREFIX,
+			DB_VERSION_REQUIRED,
+		);
 
-		if (empty($dbTables))
-		{
-			throw new Exception('No tables found for dump.');
-		}
+		$result = $installerUpgrade->apply(DB_NAME);
 
-        @set_time_limit(600);
-
-		$fileName = '2MoonsBackup_' . date('Y_m_d_H_i_s', TIMESTAMP) . '.sql';
-		$filePath = 'includes/backups/' . $fileName;
-		
-		$dump = new \HiveNova\Core\SQLDumper;
-		$dump->dumpTablesToFile($dbTables, $filePath);
-
-        try {
-            $sql	= "SELECT dbVersion FROM %%SYSTEM%%;";
-
-            $dbVersion	= \HiveNova\Core\Database::get()->selectSingle($sql, array(), 'dbVersion');
-        } catch (Exception $e) {
-            $dbVersion  = 0;
-        }
-
-		$httpRoot = PROTOCOL . HTTP_HOST . str_replace(array('\\', '//'), '/', dirname(dirname($_SERVER['SCRIPT_NAME'])) . '/');
-		$revision = $dbVersion;
-		$fileList = array();
-		$directoryIterator = new DirectoryIterator(ROOT_PATH . 'install/migrations/');
-		/** @var $fileInfo DirectoryIterator */
-		foreach ($directoryIterator as $fileInfo) {
-			if (!$fileInfo->isFile()) {
-				continue;
-			}
-			$fileRevision = substr($fileInfo->getFilename(), 10, -4);
-			if ($fileRevision > $revision && $fileRevision <= DB_VERSION_REQUIRED) {
-				$fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
-				$key           = $fileRevision . ((int)$fileExtension === 'php');
-				$fileList[$key] = array(
-					'fileName'      => $fileInfo->getFilename(),
-					'fileRevision'  => $fileRevision,
-					'fileExtension' => $fileExtension
-				);
-			}
-		}
-		ksort($fileList);
-        foreach ($fileList as $fileInfo) {
-            switch ($fileInfo['fileExtension']) {
-                case 'php':
-                    copy(ROOT_PATH.'install/migrations/' . $fileInfo['fileName'], ROOT_PATH.$fileInfo['fileName']);
-                    $ch = curl_init($httpRoot . $fileInfo['fileName']);
-                    curl_setopt($ch, CURLOPT_HEADER, false);
-                    curl_setopt($ch, CURLOPT_NOBODY, true);
-                    curl_setopt($ch, CURLOPT_MUTE, true);
-                    curl_exec($ch);
-                    if (curl_errno($ch)) {
-                        $errorMessage = 'CURL-Error on update ' . basename($fileInfo['filePath']) . ':' . curl_error($ch);
-                        try {
-                            $dump->restoreDatabase($filePath);
-                            $message = 'Update error.<br><br>' . $errorMessage . '<br><br><b><i>Backup restored.</i></b>';
-                        }
-                        catch (Exception $e) {
-                            $message = 'Update error.<br><br>' . $errorMessage . '<br><br><b><i>Can not restore backup. Your game is maybe broken right now.</i></b><br><br>Restore error:<br>' . $e->getMessage();
-                        }
-                        throw new Exception($message);
-                    }
-                    curl_close($ch);
-                    unlink($fileInfo['fileName']);
-                    break;
-                case 'sql';
-                    $data = file_get_contents(ROOT_PATH . 'install/migrations/' . $fileInfo['fileName']);
-                    try {
-                        $queries	= explode(";\n", str_replace('%PREFIX%', DB_PREFIX, $data));
-                        $queries	= array_filter($queries);
-                        foreach($queries as $query)
-                        {
-							try {
-								// alter table IF NOT EXISTS
-								\HiveNova\Core\Database::get()->nativeQuery(trim($query));
-							}
-							catch (Exception $e) {
-								error_log('Query: [' . $query . '] failed. Error: ' . $e->getMessage() . '. Skipped');
-							}
-                        }
-                    }
-                    catch (Exception $e) {
-                        $errorMessage = $e->getMessage();
-                        try {
-                            $dump->restoreDatabase($filePath);
-                            $message = 'Update error.<br><br>' . $errorMessage . '<br><br><b><i>Backup restored.</i></b>';
-                        }
-                        catch (Exception $e) {
-                            $message = 'Update error.<br><br>' . $errorMessage . '<br><br><b><i>Can not restore backup. Your game is maybe broken right now.</i></b><br><br>Restore error:<br>' . $e->getMessage();
-                        }
-                        throw new Exception($message);
-                    }
-                    break;
-            }
-        }
-        $revision = end($fileList);
-        $revision = $revision['fileRevision'];
-
-        \HiveNova\Core\Database::get()->update("UPDATE %%SYSTEM%% SET dbVersion = " . DB_VERSION_REQUIRED . ";");
-
-        ClearCache();
+		ClearCache();
 
 		$template->assign_vars(array(
-			'update'   => !empty($fileList),
-			'revision' => $revision,
+			'update'   => $result['applied'] !== [],
+			'revision' => $result['revision'],
 			'header'   => $LNG['menu_upgrade'],
-        ));
+		));
 		$template->show('ins_doupdate.tpl');
-        unlink($enableInstallToolFile);
+		unlink($enableInstallToolFile);
 		break;
 	case 'install':
 		$step = \HiveNova\Core\HTTP::_GP('step', 0);
