@@ -31,7 +31,10 @@ class FleetFunctions
 	{
 		global $pricelist;
 
-		return (($Player['impulse_motor_tech'] >= 5 && $Ship == 202) || ($Player['hyperspace_motor_tech'] >= 8 && $Ship == 211)) ? $pricelist[$Ship]['consumption2'] : $pricelist[$Ship]['consumption'];
+		$impulse         = (int) ($Player['impulse_motor_tech'] ?? 0);
+		$hyperspaceMotor = (int) ($Player['hyperspace_motor_tech'] ?? 0);
+
+		return (($impulse >= 5 && $Ship == 202) || ($hyperspaceMotor >= 8 && $Ship == 211)) ? $pricelist[$Ship]['consumption2'] : $pricelist[$Ship]['consumption'];
 	}
 
 	private static function OnlyShipByID($Ships, $ShipID)
@@ -44,35 +47,38 @@ class FleetFunctions
 		global $pricelist;
 
 		$techSpeed	= $pricelist[$Ship]['tech'];
+		$impulse         = (int) ($Player['impulse_motor_tech'] ?? 0);
+		$hyperspaceMotor = (int) ($Player['hyperspace_motor_tech'] ?? 0);
+		$combustion      = (int) ($Player['combustion_tech'] ?? 0);
 
 		if($techSpeed == 4) {
-			$techSpeed = $Player['impulse_motor_tech'] >= 5 ? 2 : 1;
+			$techSpeed = $impulse >= 5 ? 2 : 1;
 		}
 		if($techSpeed == 5) {
-			$techSpeed = $Player['hyperspace_motor_tech'] >= 8 ? 3 : 2;
+			$techSpeed = $hyperspaceMotor >= 8 ? 3 : 2;
 		}
 
 		$base_speed      = $pricelist[$Ship]['speed'];
 
-		if($Player['impulse_motor_tech'] >= 5 && $Ship == 202) {
+		if($impulse >= 5 && $Ship == 202) {
 			$base_speed = $pricelist[$Ship]['speed2'];
 		}
-		if($Player['hyperspace_motor_tech'] >= 8 && $Ship == 211) {
+		if($hyperspaceMotor >= 8 && $Ship == 211) {
 			$base_speed = $pricelist[$Ship]['speed2'];
 		}
-		if($Player['impulse_motor_tech'] >= 17 && $Ship == 209) {
+		if($impulse >= 17 && $Ship == 209) {
 			$base_speed = $pricelist[$Ship]['speed2'];
 		}
-		if($Player['hyperspace_motor_tech'] >= 15 && $Ship == 209) {
+		if($hyperspaceMotor >= 15 && $Ship == 209) {
 			$base_speed = 6000;  // This should be $pricelist[$Ship]['speed3'];
 			// But this needs more changes
 		}
 
 
 		$speed = match ($techSpeed) {
-            1 => $base_speed * (1 + (0.1 * $Player['combustion_tech'])),
-            2 => $base_speed * (1 + (0.2 * $Player['impulse_motor_tech'])),
-            3 => $base_speed * (1 + (0.3 * $Player['hyperspace_motor_tech'])),
+            1 => $base_speed * (1 + (0.1 * $combustion)),
+            2 => $base_speed * (1 + (0.2 * $impulse)),
+            3 => $base_speed * (1 + (0.3 * $hyperspaceMotor)),
             default => 0,
         };
 
