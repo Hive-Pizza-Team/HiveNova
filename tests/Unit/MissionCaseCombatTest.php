@@ -217,6 +217,12 @@ class MissionCaseCombatTest extends TestCase
         $mission = new MissionCaseAttack($fleet);
         $mission->TargetEvent();
         $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $ownerIds = array_map(
+            static fn (array $message): int => (int) ($message[':userId'] ?? 0),
+            $this->fake->achievement->messages
+        );
+        $this->assertNotContains(0, $ownerIds);
+        $this->assertContains(2, $ownerIds);
     }
 
     public function test_attack_with_acs_runs_combat_for_group_fleets(): void

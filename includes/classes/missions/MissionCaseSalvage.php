@@ -45,7 +45,7 @@ class MissionCaseSalvage extends MissionFunctions implements Mission
 			PvePackageService::attachToPlanet($universe, $galaxy, $system, $planet, (int) $colonized['id']);
 		}
 
-		$package = PvePackageService::lockAt($universe, $galaxy, $system, $planet);
+		$package = PvePackageService::findAt($universe, $galaxy, $system, $planet);
 		if ($package === null) {
 			$this->bounceEmpty();
 			return;
@@ -64,7 +64,6 @@ class MissionCaseSalvage extends MissionFunctions implements Mission
 			}
 		}
 
-		$loot = PvePackageService::currentLoot($package);
 		$fleetData = FleetFunctions::unserialize($this->_fleet['fleet_array']);
 		$capacity = 0;
 		foreach ($fleetData as $shipId => $shipAmount) {
@@ -76,13 +75,43 @@ class MissionCaseSalvage extends MissionFunctions implements Mission
 			+ (int) $this->_fleet['fleet_resource_crystal']
 			+ (int) $this->_fleet['fleet_resource_deuterium'];
 		$free = max(0, (int) $capacity - $incoming);
+		$takeMetal = 0;
+		$takeCrystal = 0;
 
-		$totalLoot = $loot['metal'] + $loot['crystal'];
-		$factor = $totalLoot > 0 ? min(1, $free / $totalLoot) : 0;
-		$takeMetal = (int) floor($loot['metal'] * $factor);
-		$takeCrystal = (int) floor($loot['crystal'] * $factor);
+		$db->beginTransaction();
+		try {
+			$locked = PvePackageService::lockAt($universe, $galaxy, $system, $planet);
+			if ($locked === null) {
+				$db->rollback();
+				$this->bounceEmpty();
+				return;
+			}
 
-		PvePackageService::collect((int) $package['id'], $takeMetal, $takeCrystal);
+			$loot = PvePackageService::currentLoot($locked);
+			$totalLoot = $loot['metal'] + $loot['crystal'];
+			$factor = $totalLoot > 0 ? min(1, $free / $totalLoot) : 0;
+			$takeMetal = (int) floor($loot['metal'] * $factor);
+			$takeCrystal = (int) floor($loot['crystal'] * $factor);
+
+			if ($takeMetal > 0 || $takeCrystal > 0) {
+				$collected = PvePackageService::collect(
+					(int) $locked['id'],
+					$takeMetal,
+					$takeCrystal,
+					(int) $locked['metal'],
+					(int) $locked['crystal']
+				);
+				if (!$collected) {
+					$db->rollback();
+					$this->bounceEmpty();
+					return;
+				}
+			}
+			$db->commit();
+		} catch (\Throwable $e) {
+			$db->rollback();
+			throw $e;
+		}
 
 		$this->UpdateFleet('fleet_resource_metal', (int) $this->_fleet['fleet_resource_metal'] + $takeMetal);
 		$this->UpdateFleet('fleet_resource_crystal', (int) $this->_fleet['fleet_resource_crystal'] + $takeCrystal);

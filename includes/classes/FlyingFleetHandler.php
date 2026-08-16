@@ -76,17 +76,26 @@ class FlyingFleetHandler
 			/** @var \HiveNova\Mission\Mission $missionObj */
 			$missionObj	= new $missionName($fleetRow);
 
-			switch($fleetRow['fleet_mess'])
-			{
-				case 0:
-					$missionObj->TargetEvent();
-				break;
-				case 1:
-					$missionObj->ReturnEvent();
-				break;
-				case 2:
-					$missionObj->EndStayEvent();
-				break;
+			try {
+				switch($fleetRow['fleet_mess'])
+				{
+					case 0:
+						$missionObj->TargetEvent();
+					break;
+					case 1:
+						$missionObj->ReturnEvent();
+					break;
+					case 2:
+						$missionObj->EndStayEvent();
+					break;
+				}
+			} catch (\Throwable $e) {
+				error_log(sprintf(
+					'FlyingFleetHandler: fleet %s mission %s: %s',
+					$fleetRow['fleet_id'] ?? '?',
+					$fleetRow['fleet_mission'] ?? '?',
+					$e->getMessage()
+				));
 			}
 		}
 	}

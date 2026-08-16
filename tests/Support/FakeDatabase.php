@@ -33,6 +33,13 @@ class FakeDatabase implements DatabaseInterface
     public int $lastFleetInsertId = 0;
 
     /** @var list<array<string, mixed>> */
+    public array $eventFleets = [];
+
+    public ?int $lastRowCount = null;
+
+    public int $transactionDepth = 0;
+
+    /** @var list<array<string, mixed>> */
     public array $galaxyRows = [];
 
     /** @var list<array{ally_name: string}> */
@@ -72,6 +79,9 @@ class FakeDatabase implements DatabaseInterface
 
     public function select($qry, array $params = [])
     {
+        if (str_contains($qry, '%%FLEETS_EVENT%%')) {
+            return $this->eventFleets;
+        }
         if (str_contains($qry, '%%SALVAGE_PACKAGES%%')) {
             return $this->salvageSelect($qry, $params);
         }
@@ -388,6 +398,7 @@ class FakeDatabase implements DatabaseInterface
     public function update($qry, array $params = [])
     {
         if (str_contains($qry, '%%SALVAGE_PACKAGES%%')) {
+            $this->lastRowCount = 0;
             foreach ($this->salvagePackages as &$row) {
                 if (isset($params[':id']) && (int) $row['id'] !== (int) $params[':id']) {
                     continue;
@@ -400,6 +411,11 @@ class FakeDatabase implements DatabaseInterface
                 )) {
                     continue;
                 }
+                if (isset($params[':expectedMetal'])
+                    && ((int) $row['metal'] !== (int) $params[':expectedMetal']
+                        || (int) $row['crystal'] !== (int) $params[':expectedCrystal'])) {
+                    continue;
+                }
                 if (isset($params[':planetId'])) {
                     $row['planet_id'] = (int) $params[':planetId'];
                 }
@@ -409,6 +425,7 @@ class FakeDatabase implements DatabaseInterface
                 if (isset($params[':crystal'])) {
                     $row['crystal'] = max(0, (int) $row['crystal'] - (int) $params[':crystal']);
                 }
+                $this->lastRowCount++;
             }
             unset($row);
             return true;
@@ -489,7 +506,7 @@ class FakeDatabase implements DatabaseInterface
 
     public function rowCount()
     {
-        return $this->achievement->rowCount();
+        return $this->lastRowCount ?? $this->achievement->rowCount();
     }
 
     public function getQueryCounter()
@@ -515,18 +532,21 @@ class FakeDatabase implements DatabaseInterface
 
     public function beginTransaction(): void
     {
+        $this->transactionDepth++;
         $this->achievement->beginTransaction();
         $this->session->beginTransaction();
     }
 
     public function commit(): void
     {
+        $this->transactionDepth = max(0, $this->transactionDepth - 1);
         $this->achievement->commit();
         $this->session->commit();
     }
 
     public function rollback(): void
     {
+        $this->transactionDepth = max(0, $this->transactionDepth - 1);
         $this->achievement->rollback();
         $this->session->rollback();
     }

@@ -115,23 +115,32 @@ class PvePackageService
 		return is_array($row) ? $row : null;
 	}
 
-	public static function collect(int $id, int $metalTaken, int $crystalTaken): void
+	public static function collect(int $id, int $metalTaken, int $crystalTaken, int $expectedMetal, int $expectedCrystal): bool
 	{
-		Database::get()->update(
+		$db = Database::get();
+		$db->update(
 			'UPDATE %%SALVAGE_PACKAGES%%
 			SET metal = GREATEST(0, metal - :metal), crystal = GREATEST(0, crystal - :crystal)
-			WHERE id = :id;',
+			WHERE id = :id AND metal = :expectedMetal AND crystal = :expectedCrystal;',
 			[
-				':metal'   => $metalTaken,
-				':crystal' => $crystalTaken,
-				':id'      => $id,
+				':metal'          => $metalTaken,
+				':crystal'        => $crystalTaken,
+				':id'             => $id,
+				':expectedMetal'  => $expectedMetal,
+				':expectedCrystal'=> $expectedCrystal,
 			]
 		);
 
-		Database::get()->delete(
+		if ((int) $db->rowCount() === 0) {
+			return false;
+		}
+
+		$db->delete(
 			'DELETE FROM %%SALVAGE_PACKAGES%% WHERE id = :id AND metal <= 0 AND crystal <= 0;',
 			[':id' => $id]
 		);
+
+		return true;
 	}
 
 	public static function attachToPlanet(int $universe, int $galaxy, int $system, int $planet, int $planetId): void

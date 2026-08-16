@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `%PREFIX%salvage_packages` (
   UNIQUE KEY `coords` (`universe`, `galaxy`, `system`, `planet`),
   KEY `expires_at` (`expires_at`),
   KEY `planet_id` (`planet_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `%PREFIX%cronjobs` (`name`, `isActive`, `min`, `hours`, `dom`, `month`, `dow`, `class`, `nextTime`, `lock`)
 VALUES ('pve_spawn', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\PveSpawnCronjob', 0, NULL);
