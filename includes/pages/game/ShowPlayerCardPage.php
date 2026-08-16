@@ -46,7 +46,7 @@ class ShowPlayerCardPage extends AbstractGamePage
 		$PlayerID 	= HTTP::_GP('id', 0);
 
 		$sql = "SELECT 
-				u.username, u.hive_account, u.galaxy, u.system, u.planet, u.wons, u.loos, u.draws, u.kbmetal, u.kbcrystal, u.lostunits, u.desunits, u.ally_id,
+				u.username, u.hive_account, u.public_message, u.galaxy, u.system, u.planet, u.wons, u.loos, u.draws, u.kbmetal, u.kbcrystal, u.lostunits, u.desunits, u.ally_id,
 				p.name,
 				s.tech_rank, s.tech_points, s.build_rank, s.build_points, s.defs_rank, s.defs_points, s.fleet_rank, s.fleet_points, s.total_rank, s.total_points,
 				a.ally_name
@@ -59,6 +59,10 @@ class ShowPlayerCardPage extends AbstractGamePage
 			':universe'	=> Universe::current(),
 			':playerID'	=> $PlayerID
 		));
+
+		if (!is_array($query)) {
+			$this->printMessage($LNG['page_doesnt_exist']);
+		}
 
 		$totalfights = $query['wons'] + $query['loos'] + $query['draws'];
 		
@@ -106,6 +110,7 @@ class ShowPlayerCardPage extends AbstractGamePage
 			'loosprozent'   => round($loosprozent, 2),
 			'drawsprozent'  => round($drawsprozent, 2),
 			'badges'        => PlayerUtil::getPlayerBadges($query) . ' ' . PlayerUtil::getAchievementBadges($PlayerID),
+			'publicMessage' => PlayerUtil::formatPublicMessageHtml(PlayerUtil::resolvePublicMessage($query)),
 		));
 		
 		$this->display('page.playerCard.default.tpl');

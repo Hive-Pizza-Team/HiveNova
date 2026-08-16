@@ -37,6 +37,9 @@ $LNG['type_mission_10']  					= 'Ataque con Misiles';
 $LNG['type_mission_11']  					= 'Investigación Pizzabits';
 $LNG['type_mission_15'] 					= 'Expedición';
 
+$LNG['fl_salvage_gone']						= 'El paquete de salvamento ya no está.';
+$LNG['sys_salvage_collected']				= 'Recogidos %s metal y %s cristal.';
+
 $LNG['type_planet_1']  					= 'Planeta';
 $LNG['type_planet_2']  					= 'Escombros';
 $LNG['type_planet_3']  					= 'Luna';
@@ -98,6 +101,20 @@ $LNG['lm_battlesim']						= "Sim. de Batallas";
 $LNG['lm_playercard']                       = 'Información del Jugador';
 $LNG['lm_info']                     		= 'Información';
 $LNG['lm_disclamer']						= 'Contacto';
+$LNG['ef_title']							= 'Actividad del universo';
+$LNG['ef_empty']							= 'El universo está en calma.';
+$LNG['ef_event_battle']					= 'Batalla';
+$LNG['ef_event_moon']						= 'Luna';
+$LNG['ef_size_small']						= 'Escaramuza';
+$LNG['ef_size_medium']						= 'Choque';
+$LNG['ef_size_large']						= 'Gran batalla';
+$LNG['ef_size_moon_small']					= 'Pequeña';
+$LNG['ef_size_moon_medium']					= 'Mediana';
+$LNG['ef_size_moon_large']					= 'Grande';
+$LNG['ef_outcome_attacker']				= 'Los atacantes prevalecieron';
+$LNG['ef_outcome_defender']				= 'Los defensores resistieron';
+$LNG['ef_outcome_draw']					= 'Empate';
+$LNG['ef_outcome_formed']					= 'Formada';
 
 //----------------------------------------------------------------------------//
 //OVERVIEW
@@ -111,6 +128,7 @@ $LNG['ov_wrong_pass']						= 'Contraseña incorrecta. Intentalo de nuevo!';
 $LNG['ov_wrong_name']						= 'Nombre incorrecta. Intentalo de nuevo!';
 $LNG['ov_have_new_message']					= 'Tienes 1 mensaje nuevo';
 $LNG['ov_have_new_messages']				= 'Tienes %d mensajes nuevos';
+$LNG['ov_attack_alert']						= '¡Estás bajo ataque!';
 $LNG['ov_planetmenu']						= 'Cambiar Nombre/Eliminar';
 $LNG['ov_free']								= 'Libre';
 $LNG['ov_news']								= 'Novedades';
@@ -285,6 +303,7 @@ $LNG['fl_planet_shortcut']					= '(P)';
 $LNG['fl_debris_shortcut']					= '(E)';
 $LNG['fl_moon_shortcut']					= '(L)';
 $LNG['fl_no_shortcuts']						= 'No hay accesos directos';
+$LNG['fl_recent_destinations']				= 'Destinos recientes';
 $LNG['fl_register_shorcut']					= 'Registrar';
 $LNG['fl_shortcuts']						= 'Accesos directos';
 $LNG['fl_dlte_shortcut']					= 'Eliminar';
@@ -354,6 +373,7 @@ $LNG['fl_error_not_avalible']				= '¡No se puede hacer nada con este planeta!';
 $LNG['fl_error_empty_derbis']				= 'No hay escombros.';
 $LNG['fl_error_no_moon']					= 'No hay luna.';
 $LNG['fl_error_same_planet']					= 'Planeta objetivo y de lanzamiento son el mismo.';
+$LNG['fl_incomplete_coords']					= 'Introduce un destino completo antes de enviar la flota.';
 $LNG['fl_invalid_target']					= 'Objetivo no válido';
 $LNG['fl_no_noresource']					= 'No hay materia prima cargada!';
 $LNG['fl_no_target']						= 'Ningún planeta de destino encontrado';
@@ -543,6 +563,8 @@ $LNG['mg_total']							= 'Total';
 $LNG['mg_game_operators']					= 'Operadores del juego';
 $LNG['mg_error']							= '¡Destinatario no encontrado!';
 $LNG['mg_overview']							= 'Resumen';
+$LNG['mg_filter_lost']						= 'Solo derrotas';
+$LNG['mg_filter_all']						= 'Mostrar todas';
 $LNG['mg_send_new']							= 'Escribir un mensaje';
 $LNG['mg_send_to']							= 'Destinatario';
 $LNG['mg_message']							= 'Mensaje';
@@ -664,6 +686,10 @@ $LNG['al_alliance_search']					= 'Buscar una alianza';
 $LNG['al_your_ally']						= 'Tu alianza';
 $LNG['al_rank']								= 'Rango';
 $LNG['al_web_site']							= 'Sitio web';
+$LNG['al_discord_webhook']					= 'Webhook de Discord';
+$LNG['al_discord_webhook_hint']				= 'Pega una URL de webhook de Discord. Déjalo vacío para conservar el valor actual.';
+$LNG['al_discord_webhook_clear']			= 'Quitar webhook (desactivar alertas de Discord)';
+$LNG['al_discord_webhook_invalid']			= 'Esa URL de webhook de Discord no es válida. El resto de ajustes de la alianza se guardaron.';
 $LNG['al_inside_section']					= 'Sección interna';
 $LNG['al_make_alliance']					= 'Fundar una alianza';
 $LNG['al_make_ally_tag_required']			= 'Etiqueta de la alianza (De 3-8 caracteres)';
@@ -955,6 +981,9 @@ $LNG['op_dst_mode_sel'][1]					= 'Si';
 $LNG['op_dst_mode_sel'][2]					= 'Automatico';
 $LNG['op_timezone']							= 'Zona Horaria';
 $LNG['op_block_pm']							= 'Mensajes privados bloqueados';
+$LNG['op_public_message']					= 'Mensaje público del perfil';
+$LNG['op_public_message_desc']				= 'Se muestra en tu perfil de jugador. Si tu cuenta Hive es pública (el nombre coincide), se usa la descripción de tu perfil Hive.';
+$LNG['op_public_message_hive']				= 'Tu usuario de Hive coincide con esta cuenta, así que los visitantes ven la descripción de tu perfil Hive. Este texto solo se usa si esa descripción está vacía.';
 $LNG['number_format_label']					= 'Formato de número';
 $LNG['number_format_auto']					= 'Predeterminado del navegador (ej. 1.234.567)';
 $LNG['number_format_eu']					= 'Europeo (ej. 1.234.567)';
@@ -1018,6 +1047,8 @@ $LNG['sys_module_inactive']        	 		= 'Modulo inactivo';
 $LNG['sys_refferal_from']        	 		= 'Sistema';
 $LNG['sys_refferal_title']        	 		= 'Bonificación por %s';
 $LNG['sys_refferal_text']        	 		= 'El jugador %s que reclutaste ha alcanzado %s puntos.<br><br>Como agradecimiento, que ha reclutado un jugador activo, obtienes %s %s';
+$LNG['sys_refferal_recruit_title']			= 'Bonus por jugar con amigos';
+$LNG['sys_refferal_recruit_text']			= 'Has alcanzado %s puntos tras unirte con una invitación.<br><br>Tu bonus es %s %s';
 $LNG['sys_closed_game']        	 			= 'El universo no está disponible actualmente:';
 $LNG['spec_mail_inactive_title']  			= '%s - Memoria';
 
@@ -1115,6 +1146,7 @@ $LNG['pl_unitslose']    					= 'Unidades Perdidas';
 $LNG['pl_dermetal']    						= 'Total de metal en campos de escombros';
 $LNG['pl_dercrystal']   					= 'Total de cristal en campos de escombros';
 $LNG['pl_etc']   							= 'Otros';
+$LNG['pl_public_message']					= 'Acerca de';
 
 //----------------------------------------------------------------------------//
 // Support
@@ -1201,6 +1233,7 @@ $LNG['lo_continue']							= 'Pulsa aquí si no redirecciona tu navegador.';
 
 // Translated into Spanish by Angelus_ira . All rights reversed (C) 2011
 $LNG['type_mission_16'] = 'Comercio';
+$LNG['type_mission_18'] 					= 'Salvamento';
 $LNG['type_mission_17'] = 'Transferencia';
 $LNG['lm_marketplace'] = 'Mercado';
 $LNG['ov_online'] = 'En línea';

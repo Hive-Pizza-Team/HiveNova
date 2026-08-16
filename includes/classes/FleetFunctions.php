@@ -31,7 +31,10 @@ class FleetFunctions
 	{
 		global $pricelist;
 
-		return (($Player['impulse_motor_tech'] >= 5 && $Ship == 202) || ($Player['hyperspace_motor_tech'] >= 8 && $Ship == 211)) ? $pricelist[$Ship]['consumption2'] : $pricelist[$Ship]['consumption'];
+		$impulse         = (int) ($Player['impulse_motor_tech'] ?? 0);
+		$hyperspaceMotor = (int) ($Player['hyperspace_motor_tech'] ?? 0);
+
+		return (($impulse >= 5 && $Ship == 202) || ($hyperspaceMotor >= 8 && $Ship == 211)) ? $pricelist[$Ship]['consumption2'] : $pricelist[$Ship]['consumption'];
 	}
 
 	private static function OnlyShipByID($Ships, $ShipID)
@@ -44,35 +47,38 @@ class FleetFunctions
 		global $pricelist;
 
 		$techSpeed	= $pricelist[$Ship]['tech'];
+		$impulse         = (int) ($Player['impulse_motor_tech'] ?? 0);
+		$hyperspaceMotor = (int) ($Player['hyperspace_motor_tech'] ?? 0);
+		$combustion      = (int) ($Player['combustion_tech'] ?? 0);
 
 		if($techSpeed == 4) {
-			$techSpeed = $Player['impulse_motor_tech'] >= 5 ? 2 : 1;
+			$techSpeed = $impulse >= 5 ? 2 : 1;
 		}
 		if($techSpeed == 5) {
-			$techSpeed = $Player['hyperspace_motor_tech'] >= 8 ? 3 : 2;
+			$techSpeed = $hyperspaceMotor >= 8 ? 3 : 2;
 		}
 
 		$base_speed      = $pricelist[$Ship]['speed'];
 
-		if($Player['impulse_motor_tech'] >= 5 && $Ship == 202) {
+		if($impulse >= 5 && $Ship == 202) {
 			$base_speed = $pricelist[$Ship]['speed2'];
 		}
-		if($Player['hyperspace_motor_tech'] >= 8 && $Ship == 211) {
+		if($hyperspaceMotor >= 8 && $Ship == 211) {
 			$base_speed = $pricelist[$Ship]['speed2'];
 		}
-		if($Player['impulse_motor_tech'] >= 17 && $Ship == 209) {
+		if($impulse >= 17 && $Ship == 209) {
 			$base_speed = $pricelist[$Ship]['speed2'];
 		}
-		if($Player['hyperspace_motor_tech'] >= 15 && $Ship == 209) {
+		if($hyperspaceMotor >= 15 && $Ship == 209) {
 			$base_speed = 6000;  // This should be $pricelist[$Ship]['speed3'];
 			// But this needs more changes
 		}
 
 
 		$speed = match ($techSpeed) {
-            1 => $base_speed * (1 + (0.1 * $Player['combustion_tech'])),
-            2 => $base_speed * (1 + (0.2 * $Player['impulse_motor_tech'])),
-            3 => $base_speed * (1 + (0.3 * $Player['hyperspace_motor_tech'])),
+            1 => $base_speed * (1 + (0.1 * $combustion)),
+            2 => $base_speed * (1 + (0.2 * $impulse)),
+            3 => $base_speed * (1 + (0.3 * $hyperspaceMotor)),
             default => 0,
         };
 
@@ -113,6 +119,11 @@ class FleetFunctions
 		return 5;
 	}
 
+	public static function HasCompleteTargetCoords($galaxy, $system, $planet)
+	{
+		return (int) $galaxy > 0 && (int) $system > 0 && (int) $planet > 0;
+	}
+
 	public static function GetMissionDuration($SpeedFactor, $MaxFleetSpeed, $Distance, $GameSpeed, $USER)
 	{
 		$SpeedFactor	= (3500 / ($SpeedFactor * 0.1));
@@ -147,13 +158,15 @@ class FleetFunctions
 		return 1 + $USER[$resource[108]] + $USER['factor']['FleetSlots'];
 	}
 
-	public static function GetFleetRoom($Fleet)
+	public static function GetFleetRoom($Fleet, $Player = null)
 	{
-		global $pricelist, $USER;
+		global $USER;
+		$Player = $Player ?? $USER;
+		$storage = 1 + ($Player['factor']['ShipStorage'] ?? 0);
 		$FleetRoom 				= 0;
 		foreach ($Fleet as $ShipID => $amount)
 		{
-			$FleetRoom		   += $pricelist[$ShipID]['capacity'] * $amount * (1 + $USER['factor']['ShipStorage']);
+			$FleetRoom		   += LeftoverBonus::shipCapacity((int) $ShipID, $amount, $Player) * $storage;
 		}
 		return $FleetRoom;
 	}
@@ -438,6 +451,7 @@ class FleetFunctions
 
 	public static function GetAvailableMissions($USER, $MissionInfo, $GetInfoPlanet)
 	{
+		$GetInfoPlanet			= is_array($GetInfoPlanet) ? $GetInfoPlanet : array();
 		$YourPlanet				= (!empty($GetInfoPlanet['id_owner']) && $GetInfoPlanet['id_owner'] == $USER['id']) ? true : false;
 		$UsedPlanet				= (!empty($GetInfoPlanet['id_owner'])) ? true : false;
 		$availableMissions		= array();
@@ -449,7 +463,26 @@ class FleetFunctions
 		elseif ($MissionInfo['planettype'] == 2) {
 			if ((isset($MissionInfo['Ship'][209]) || isset($MissionInfo['Ship'][219])) && isModuleAvailable(MODULE_MISSION_RECYCLE) && !($GetInfoPlanet['der_metal'] == 0 && $GetInfoPlanet['der_crystal'] == 0))
 				$availableMissions[]	= 8;
+			$package = PvePackageService::findAt(
+				(int) $USER['universe'],
+				(int) $MissionInfo['galaxy'],
+				(int) $MissionInfo['system'],
+				(int) $MissionInfo['planet']
+			);
+			if ($package !== null && isModuleAvailable(MODULE_MISSION_SALVAGE)) {
+				$availableMissions[] = 18;
+			}
 		} else {
+			$package = PvePackageService::findAt(
+				(int) $USER['universe'],
+				(int) ($MissionInfo['galaxy'] ?? 0),
+				(int) ($MissionInfo['system'] ?? 0),
+				(int) $MissionInfo['planet']
+			);
+			if ($package !== null && isModuleAvailable(MODULE_MISSION_SALVAGE)) {
+				$availableMissions[] = 18;
+			}
+
 			if (!$UsedPlanet) {
 				if (isset($MissionInfo['Ship'][208]) && $MissionInfo['planettype'] == 1 && isModuleAvailable(MODULE_MISSION_COLONY))
 					$availableMissions[]	= 7;
@@ -487,6 +520,39 @@ class FleetFunctions
 		}
 
 		return $availableMissions;
+	}
+
+	/**
+	 * Choose the pre-selected mission radio on fleet step 2.
+	 *
+	 * When coordinates were typed by hand (no target_mission), a probe-only
+	 * fleet defaults to Spying unless the target is an alliance member.
+	 *
+	 * @param int   $requestedMission Mission from the previous step (0 = none)
+	 * @param int[] $availableMissions
+	 * @param array $fleet            shipId => count
+	 */
+	public static function SuggestDefaultMission($requestedMission, array $availableMissions, array $fleet, $isAllianceMember)
+	{
+		$requestedMission = (int) $requestedMission;
+		$availableMissions = array_map('intval', $availableMissions);
+
+		if ($requestedMission !== 0 && in_array($requestedMission, $availableMissions, true)) {
+			return $requestedMission;
+		}
+
+		$probesOnly = isset($fleet[210]) && count($fleet) === 1;
+		if ($probesOnly && in_array(6, $availableMissions, true)) {
+			if ($isAllianceMember) {
+				if (in_array(3, $availableMissions, true)) {
+					return 3;
+				}
+			} else {
+				return 6;
+			}
+		}
+
+		return $requestedMission;
 	}
 
 	public static function CheckBash($Target)
@@ -534,7 +600,7 @@ class FleetFunctions
 		$fleetStartPlanetGalaxy, $fleetStartPlanetSystem, $fleetStartPlanetPlanet, $fleetStartPlanetType,
 		$fleetTargetOwner, $fleetTargetPlanetID, $fleetTargetPlanetGalaxy, $fleetTargetPlanetSystem,
 		$fleetTargetPlanetPlanet, $fleetTargetPlanetType, $fleetResource, $fleetStartTime, $fleetStayTime,
-		$fleetEndTime, $fleetGroup = 0, $missileTarget = 0, $fleetNoMReturn = 0, $consumption = 0)
+		$fleetEndTime, $fleetGroup = 0, $missileTarget = 0, $fleetNoMReturn = 0, $consumption = 0, $universe = null)
 	{
 		global $resource;
 		$fleetShipCount	= array_sum($fleetArray);
@@ -558,9 +624,10 @@ class FleetFunctions
 		}
 
 
-		$sql	= 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId;';
-
-		$db->update($sql, $params);
+		if ($fleetStartPlanetID > 0) {
+			$sql	= 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId;';
+			$db->update($sql, $params);
+		}
 
 		$sql	= 'INSERT INTO %%FLEETS%% SET
 		fleet_owner					= :fleetStartOwner,
@@ -616,7 +683,7 @@ class FleetFunctions
 			':fleetGroup'				=> $fleetGroup,
 			':missileTarget'			=> $missileTarget,
 			':timestamp'				=> TIMESTAMP,
-			':universe'	   				=> Universe::current(),
+			':universe'	   				=> $universe ?? Universe::current(),
 		));
 
 		$fleetId	= $db->lastInsertId();
@@ -656,16 +723,6 @@ class FleetFunctions
 		fleet_target_obj			= :missileTarget,
 		start_time					= :timestamp;';
 
-		if ($fleetTargetOwner > 0 && $fleetStartOwner != $fleetTargetOwner && in_array($fleetMission, [1, 2, 6, 9, 10], true)) {
-			PushNotificationService::notifyIncomingHostileFleet(
-				$fleetTargetOwner,
-				$fleetMission,
-				$fleetTargetPlanetGalaxy,
-				$fleetTargetPlanetSystem,
-				$fleetTargetPlanetPlanet
-			);
-		}
-
 		$db->insert($sql, array(
 			':fleetId'					=> $fleetId,
 			':fleetStartOwner'			=> $fleetStartOwner,
@@ -693,8 +750,36 @@ class FleetFunctions
 			':fleetGroup'				=> $fleetGroup,
 			':missileTarget'			=> $missileTarget,
 			':timestamp'				=> TIMESTAMP,
-			':universe'	   				=> Universe::current(),
+			':universe'	   				=> $universe ?? Universe::current(),
 		));
+
+		FrequentLocationService::tryRecordFromFleet(
+			(int) $fleetStartOwner,
+			(int) $fleetTargetPlanetGalaxy,
+			(int) $fleetTargetPlanetSystem,
+			(int) $fleetTargetPlanetPlanet,
+			(int) $fleetTargetPlanetType,
+			(int) $fleetMission
+		);
+
+		if ($fleetTargetOwner > 0 && $fleetStartOwner != $fleetTargetOwner && in_array($fleetMission, [1, 2, 6, 9, 10], true)) {
+			PushNotificationService::notifyIncomingHostileFleet(
+				$fleetTargetOwner,
+				$fleetMission,
+				$fleetTargetPlanetGalaxy,
+				$fleetTargetPlanetSystem,
+				$fleetTargetPlanetPlanet
+			);
+			DiscordWebhookService::notifyIncomingHostile(
+				(int) $fleetTargetOwner,
+				(int) $fleetMission,
+				(int) $fleetTargetPlanetGalaxy,
+				(int) $fleetTargetPlanetSystem,
+				(int) $fleetTargetPlanetPlanet,
+				(int) $fleetTargetPlanetType
+			);
+		}
+
 		return $fleetId;
 	}
 }

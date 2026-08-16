@@ -22,6 +22,14 @@
 				<select id="type" name="type" onchange="updateVars()">
 					{html_options options=$typeSelect selected=$type}
 				</select>
+				{if $frequentLocationList}
+				<select id="frequentLocation" name="frequentLocation" onchange="setFrequentLocation(this)">
+					<option value="">{$LNG.fl_recent_destinations}</option>
+					{foreach $frequentLocationList as $recent}
+					<option value="{$recent.galaxy},{$recent.system},{$recent.planet},{$recent.type}">[{$recent.galaxy}:{$recent.system}:{$recent.planet}] {if $recent.type == 1}{$LNG.fl_planet_shortcut}{elseif $recent.type == 2}{$LNG.fl_debris_shortcut}{elseif $recent.type == 3}{$LNG.fl_moon_shortcut}{/if}</option>
+					{/foreach}
+				</select>
+				{/if}
 			</td>
 		</tr>
 		<tr style="height:20px;">
@@ -183,5 +191,6 @@
 data			= {$fleetdata|json};
 shortCutRows	= {$themeSettings.SHORTCUT_ROWS_ON_FLEET1};
 fl_no_shortcuts	= '{$LNG.fl_no_shortcuts}';
+fl_incomplete_coords = '{$LNG.fl_incomplete_coords|escape:'javascript'}';
 </script>
 {/block}

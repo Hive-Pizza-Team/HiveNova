@@ -4,6 +4,7 @@ namespace HiveNova\Mission;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Repository\PlanetRepository;
@@ -53,7 +54,7 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 			':planetId'	=> $this->_fleet['fleet_end_id']
 		));
 
-		if(!empty($targetData['total']))
+		if(is_array($targetData) && !empty($targetData['total']))
 		{
 			$targetUser			= $this->getUser((int) $this->_fleet['fleet_owner']);
 
@@ -68,13 +69,14 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 
 			foreach ($fleetData as $shipId => $shipAmount)
 			{
+				$shipCapacity = LeftoverBonus::shipCapacity((int) $shipId, $shipAmount, $targetUser);
 				if ($shipId == 209 ||  $shipId == 219)
 				{
-					$recyclerStorage   += $pricelist[$shipId]['capacity'] * $shipAmount;
+					$recyclerStorage   += $shipCapacity;
 				}
 				else
 				{
-					$otherFleetStorage += $pricelist[$shipId]['capacity'] * $shipAmount;
+					$otherFleetStorage += $shipCapacity;
 				}
 			}
 			
@@ -95,12 +97,15 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 
 			// fast way
 			$collectFactor	= min(1, $totalStorage / $targetData['total']);
+			$storageLeft	= (int) $totalStorage;
 			foreach($debrisIDs as $debrisID)
 			{
 				$fleetColName	= 'fleet_resource_'.$resource[$debrisID];
 				$debrisColName	= 'der_'.$resource[$debrisID];
 
-				$collectedGoods[$debrisID]			= ceil($targetData[$debrisColName] * $collectFactor);
+				$available					= (int) $targetData[$debrisColName];
+				$collectedGoods[$debrisID]	= (int) min($available, $storageLeft, (int) ceil($available * $collectFactor));
+				$storageLeft				-= $collectedGoods[$debrisID];
 				$collectQuery[]						= $debrisColName.' = GREATEST(0, '.$debrisColName.' - :'.$resource[$debrisID].')';
 				$param[':'.$resource[$debrisID]]	= $collectedGoods[$debrisID];
 

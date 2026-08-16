@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\Cache;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\EventFirehoseWriter;
 use Exception;
 
 /**
@@ -26,6 +27,8 @@ use Exception;
 
 class PlayerUtil
 {
+	public const PUBLIC_MESSAGE_MAX_LENGTH = 2000;
+
 	static public function cryptPassword($password)
 	{
 		return password_hash((string) $password, PASSWORD_BCRYPT, ['cost' => 13]);
@@ -62,22 +65,71 @@ class PlayerUtil
 		}
 	}
 
+	static public function isHiveIdentityPublic(array $user): bool
+	{
+		if (!isset($user['username'], $user['hive_account'])) {
+			return false;
+		}
+
+		$usernameLower = strtolower((string) $user['username']);
+
+		return HiveUtil::isAccountValid($usernameLower) && $usernameLower === (string) $user['hive_account'];
+	}
+
+	static public function sanitizePublicMessage(string $text): string
+	{
+		$text = str_replace(["\r\n", "\r"], "\n", $text);
+		$text = str_replace(['[img]', '.php', '[/img]'], '', $text);
+
+		if (function_exists('mb_substr')) {
+			$text = mb_substr($text, 0, self::PUBLIC_MESSAGE_MAX_LENGTH);
+		} else {
+			$text = substr($text, 0, self::PUBLIC_MESSAGE_MAX_LENGTH);
+		}
+
+		return trim($text);
+	}
+
+	static public function formatPublicMessageHtml(string $text): string
+	{
+		if ($text === '') {
+			return '';
+		}
+
+		return nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8'), false);
+	}
+
+	static public function resolvePublicMessage(array $user, ?callable $hiveAboutFetcher = null): string
+	{
+		$stored = trim((string) ($user['public_message'] ?? ''));
+
+		if (!self::isHiveIdentityPublic($user)) {
+			return $stored;
+		}
+
+		$fetcher = $hiveAboutFetcher ?? static function (string $account): string {
+			return HiveUtil::getAccountAbout($account);
+		};
+		$about = trim((string) $fetcher((string) $user['hive_account']));
+
+		return $about !== '' ? $about : $stored;
+	}
+
 	static public function getPlayerAvatarURL($USER){
-		$usernameLower = strtolower((string) $USER['username']);
-		if (HiveUtil::isAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
-			return 'https://images.hive.blog/u/'.$usernameLower.'/avatar';
+		if (self::isHiveIdentityPublic($USER)) {
+			return 'https://images.hive.blog/u/'.strtolower((string) $USER['username']).'/avatar';
 		}
 
 		return 'styles/resource/images/user.png';
 	}
 
 	static public function getPlayerBadges($USER){
-		$usernameLower = strtolower((string) $USER['username']);
-		if (HiveUtil::isAccountValid($usernameLower) && isset($USER['hive_account']) && $usernameLower === $USER['hive_account']) {
+		if (self::isHiveIdentityPublic($USER)) {
 			return '<a href="https://peakd.com/@'.$USER['hive_account'].'" target="_blank">♦️</a>';
 		}
 
-		if ($USER['hive_account'] !== '' && $usernameLower !== $USER['hive_account']) {
+		$usernameLower = strtolower((string) ($USER['username'] ?? ''));
+		if (($USER['hive_account'] ?? '') !== '' && $usernameLower !== $USER['hive_account']) {
 			return '🔗';
 		}
 
@@ -463,6 +515,8 @@ class PlayerUtil
 			':moonId'	=> $moonId,
 			':planetId'	=> $parentPlanet['id'],
 		));
+
+		EventFirehoseWriter::recordMoon((int) $universe, TIMESTAMP, (float) $diameter);
 
 		return $moonId;
 	}

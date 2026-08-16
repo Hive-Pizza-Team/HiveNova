@@ -3,6 +3,7 @@
 namespace HiveNova\Mission;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Repository\PlanetRepository;
@@ -52,17 +53,22 @@ class MissionCaseMIP extends MissionFunctions implements Mission
 			':planetId'	=> $this->_fleet['fleet_end_id']
 		));
 
+		$sql		= 'SELECT lang, military_tech FROM %%USERS%% WHERE id = :userId;';
+		$senderData	= $db->selectSingle($sql, array(
+			':userId'	=> $this->_fleet['fleet_owner']
+		));
+
+		if (!is_array($targetData) || !is_array($senderData)) {
+			$this->KillFleet();
+			return;
+		}
+
 		if ($this->_fleet['fleet_end_type'] == 3) {
 			$sql	= 'SELECT ' . $resource[502] . ' FROM %%PLANETS%% WHERE id_luna = :moonId;';
 			$targetData[$resource[502]]	= $db->selectSingle($sql, array(
 				':moonId'	=> $this->_fleet['fleet_end_id']
 			), $resource[502]);
 		}
-
-		$sql		= 'SELECT lang, military_tech FROM %%USERS%% WHERE id = :userId;';
-		$senderData	= $db->selectSingle($sql, array(
-			':userId'	=> $this->_fleet['fleet_owner']
-		));
 
 		if (
 			!in_array($this->_fleet['fleet_target_obj'], array_merge($reslist['defense'], $reslist['missile']))
@@ -181,6 +187,17 @@ class MissionCaseMIP extends MissionFunctions implements Mission
 		);
 
 		$this->KillFleet();
+
+		if (is_array($targetData) && !empty($targetData['id_owner'])) {
+			DiscordWebhookService::notifyCombatResolved(
+				(int) $targetData['id_owner'],
+				(int) $this->_fleet['fleet_mission'],
+				(int) $this->_fleet['fleet_end_galaxy'],
+				(int) $this->_fleet['fleet_end_system'],
+				(int) $this->_fleet['fleet_end_planet'],
+				(int) $this->_fleet['fleet_end_type']
+			);
+		}
 	}
 
 	function EndStayEvent()

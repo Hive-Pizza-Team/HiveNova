@@ -148,6 +148,13 @@ class ResourceCalculator
             }
         }
 
+        $slotBonus = PlanetProductionBonus::factors(
+            (int) $this->PLANET['planet_type'],
+            (int) $this->PLANET['planet']
+        );
+        $temp[901]['plus'] *= $slotBonus[901];
+        $temp[902]['plus'] *= $slotBonus[902];
+
         $this->PLANET['metal_max']     = $temp[901]['max'] * $this->config->storage_multiplier * (1 + $this->USER['factor']['ResourceStorage']);
         $this->PLANET['crystal_max']   = $temp[902]['max'] * $this->config->storage_multiplier * (1 + $this->USER['factor']['ResourceStorage']);
         $this->PLANET['deuterium_max'] = $temp[903]['max'] * $this->config->storage_multiplier * (1 + $this->USER['factor']['ResourceStorage']);

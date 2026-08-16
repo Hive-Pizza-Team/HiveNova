@@ -43,6 +43,9 @@ $LNG['type_mission_10']  					= 'Roket Saldırısı';
 $LNG['type_mission_11']  					= 'KM Araştırmak ';
 $LNG['type_mission_15'] 					= 'Keşif Uçusu';
 
+$LNG['fl_salvage_gone']						= 'Salvage paketi yok.';
+$LNG['sys_salvage_collected']				= '%s metal ve %s kristal toplandı.';
+
 $LNG['type_planet_1']  					= 'Gezegen';
 $LNG['type_planet_2']  					= 'Harabe alanı';
 $LNG['type_planet_3']  					= 'Ay';
@@ -104,6 +107,20 @@ $LNG['lm_battlesim']						= 'Simülasyon';
 $LNG['lm_playercard']                       = 'Oyuncu Profili';
 $LNG['lm_info']                     		= 'Bilgi';
 $LNG['lm_disclamer']						= 'Iletişim';
+$LNG['ef_title']							= 'Evren akışı';
+$LNG['ef_empty']							= 'Evren sessiz.';
+$LNG['ef_event_battle']					= 'Savaş';
+$LNG['ef_event_moon']						= 'Ay';
+$LNG['ef_size_small']						= 'Çatışma';
+$LNG['ef_size_medium']						= 'Kapışma';
+$LNG['ef_size_large']						= 'Büyük savaş';
+$LNG['ef_size_moon_small']					= 'Küçük';
+$LNG['ef_size_moon_medium']					= 'Orta';
+$LNG['ef_size_moon_large']					= 'Büyük';
+$LNG['ef_outcome_attacker']				= 'Saldıranlar üstün geldi';
+$LNG['ef_outcome_defender']				= 'Savunanlar dayandı';
+$LNG['ef_outcome_draw']					= 'Berabere';
+$LNG['ef_outcome_formed']					= 'Oluştu';
 
 
 //----------------------------------------------------------------------------//
@@ -118,6 +135,7 @@ $LNG['ov_wrong_pass']						= 'Yanlış şifre girdiniz!';
 $LNG['ov_wrong_name']						= 'Yanlış isim girdiniz!';
 $LNG['ov_have_new_message']					= 'Yeni mesajınız var';
 $LNG['ov_have_new_messages']				= ' <b>(%d)</b> Adet Yeni Mesajınız Var';
+$LNG['ov_attack_alert']						= 'Saldırı altındasın!';
 $LNG['ov_planetmenu']						= 'Yeniden Adlandır ya da Sil';
 $LNG['ov_free']								= 'Uygun';
 $LNG['ov_news']								= 'Duyurular';
@@ -296,6 +314,7 @@ $LNG['fl_planet_shortcut']					= '(G)';
 $LNG['fl_debris_shortcut']					= '(HA)';
 $LNG['fl_moon_shortcut']					= '(A)';
 $LNG['fl_no_shortcuts']						= 'Hiçbir kısayol yok';
+$LNG['fl_recent_destinations']				= 'Son hedefler';
 $LNG['fl_register_shorcut']					= 'Oluştur';
 $LNG['fl_shortcuts']						= 'Kısayollar';
 $LNG['fl_dlte_shortcut']					= 'Sil';
@@ -365,6 +384,7 @@ $LNG['fl_error_not_avalible']				= 'Bu koordinatlarda bir gezegen yok';
 $LNG['fl_error_empty_derbis']				= "Girilen koordinatlarda harabe mevcut değil!";
 $LNG['fl_error_no_moon']					= 'Girilen koordinatlarda AY mevcut değil!';
 $LNG['fl_error_same_planet']				= 'Baslangic ve Varis koortinatlari aynı!';
+$LNG['fl_incomplete_coords']				= 'Filoyu göndermeden önce tam hedef koordinatlarını girin.';
 $LNG['fl_invalid_target']					= 'Hedef bulunamadı';
 $LNG['fl_no_noresource']					= 'Hata : Nakliye edilecek hammadde eklenmedi!';
 $LNG['fl_no_target']						= 'Hedef gezegen bulunamadı';
@@ -552,6 +572,8 @@ $LNG['mg_total']				            = 'Toplam';
 $LNG['mg_game_operators']			        = 'Yöneticiler';
 $LNG['mg_error']                            = 'Alıcı Bulunamadı!';
 $LNG['mg_overview']                         = 'Yöneticilerden Bilgiler';
+$LNG['mg_filter_lost']                      = 'Sadece kayıplar';
+$LNG['mg_filter_all']                       = 'Tümünü göster';
 $LNG['mg_send_new']                         = 'Mesaj Yaz';
 $LNG['mg_send_to']                          = 'Alıcılar';
 $LNG['mg_message']                          = 'Mesaj';
@@ -678,6 +700,10 @@ $LNG['al_alliance_search']					= 'Ittifak Ara';
 $LNG['al_your_ally']						= 'Bağlı bulunduğun ittifak';
 $LNG['al_rank']								= 'Rütben';
 $LNG['al_web_site']							= 'Anasayfa';
+$LNG['al_discord_webhook']					= 'Discord webhook';
+$LNG['al_discord_webhook_hint']				= 'Bir Discord webhook URL\'si yapıştırın. Mevcut değeri korumak için boş bırakın.';
+$LNG['al_discord_webhook_clear']			= 'Webhook\'u kaldır (Discord uyarılarını kapat)';
+$LNG['al_discord_webhook_invalid']			= 'Bu Discord webhook URL\'si geçerli değil. Diğer ittifak ayarları kaydedildi.';
 $LNG['al_inside_section']					= 'Özel Alan';
 $LNG['al_make_alliance']					= 'Ittifak Kur';
 $LNG['al_make_ally_tag_required']			= 'Ittifak Tagı (3-8 karakter)';
@@ -978,6 +1004,9 @@ $LNG['op_dst_mode_sel'][1]					= 'Hayır';
 $LNG['op_dst_mode_sel'][2]					= 'Otomatik';
 $LNG['op_timezone']							= 'Zaman Dilimi';
 $LNG['op_block_pm']							= 'Özel mesajları blokla';
+$LNG['op_public_message']						= 'Herkese açık profil mesajı';
+$LNG['op_public_message_desc']				= 'Oyuncu profilinde gösterilir. Hive hesabın herkese açıksa (kullanıcı adı eşleşirse) Hive profil açıklaması kullanılır.';
+$LNG['op_public_message_hive']				= 'Hive kullanıcı adın bu hesapla eşleşiyor, bu yüzden ziyaretçiler Hive profil açıklamanı görür. Bu metin yalnızca o açıklama boşsa kullanılır.';
 $LNG['number_format_label']					= 'Sayı formatı';
 $LNG['number_format_auto']					= 'Tarayıcı varsayılanı (örn. 1.234.567)';
 $LNG['number_format_eu']					= 'Avrupa (örn. 1.234.567)';
@@ -1042,6 +1071,8 @@ $LNG['sys_module_inactive']        	 		= 'Modül Aktif Değil';
 $LNG['sys_refferal_from']        	 		= 'Sistem';
 $LNG['sys_refferal_title']        	 		= 'Oyuncu Bonusu %s';
 $LNG['sys_refferal_text']        	 		= 'Oyuncu %s sizin tarafınızdan evrene kazandırıldı ve şu an %s puanı var.<br><br> Aktif bir oyuncu davet ettiğiniz için kazandığınız ödül %s %s';
+$LNG['sys_refferal_recruit_title']			= 'Arkadaşlarla oyna bonusu';
+$LNG['sys_refferal_recruit_text']			= 'Davet bağlantısıyla katıldıktan sonra %s puana ulaştınız.<br><br>Bonusunuz %s %s';
 $LNG['sys_closed_game']        	 			= 'Oyun şu an aktif değil:';
 $LNG['spec_mail_inactive_title']  			= '%s - Hatırlatma Mesajı';
 //----------------------------------------------------------------------------//
@@ -1138,6 +1169,7 @@ $LNG['pl_unitslose']						= 'Unite Kaybedildi';
 $LNG['pl_dermetal']							= 'Geri Dönüşümlü Metal';
 $LNG['pl_dercrystal']						= 'Geri Dönüşümlü Kristal';
 $LNG['pl_etc']								= 'Diğerleri ';
+$LNG['pl_public_message']						= 'Hakkında';
 
 //----------------------------------------------------------------------------//
 // Destek
@@ -1222,6 +1254,7 @@ $LNG['lo_continue']							= 'Beklemek istemiyorsanız tıklayınız';
 
 //----------------------------------------------------------------------------//
 $LNG['type_mission_16'] = 'Ticaret';
+$LNG['type_mission_18'] 					= 'Salvage';
 $LNG['type_mission_17'] = 'Transfer';
 $LNG['lm_marketplace'] = 'Pazar Yeri';
 $LNG['ov_online'] = 'Çevrimiçi';

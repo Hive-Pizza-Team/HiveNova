@@ -94,7 +94,7 @@ class Database implements DatabaseInterface
 		$this->dbHandle = NULL;
 	}
 
-	public function getHandle()
+	public function getHandle(): ?PDO
 	{
 		return $this->dbHandle;
 	}

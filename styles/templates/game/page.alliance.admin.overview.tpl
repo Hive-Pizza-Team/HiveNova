@@ -60,6 +60,17 @@
 		<td>{$LNG.al_web_site}</td>
 		<td><input type="text" name="web" value="{$ally_web|htmlspecialchars}" size="70"></td>
 	</tr>
+	{if $AllianceOwner}
+	<tr>
+		<td>{$LNG.al_discord_webhook}</td>
+		<td>
+			<input type="password" name="discord_webhook" value="" size="70" autocomplete="off" placeholder="{$LNG.al_discord_webhook_hint}">
+			{if $discord_webhook_configured}
+			<br><label><input type="checkbox" name="discord_webhook_clear" value="1"> {$LNG.al_discord_webhook_clear}</label>
+			{/if}
+		</td>
+	</tr>
+	{/if}
 	<tr>
 		<td>{$LNG.al_manage_image}</td>
 		<td><input type="text" name="image" value="{$ally_image|htmlspecialchars}" size="70"></td>

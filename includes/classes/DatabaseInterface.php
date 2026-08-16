@@ -2,6 +2,8 @@
 
 namespace HiveNova\Core;
 
+use PDO;
+
 interface DatabaseInterface
 {
 	public function select($qry, array $params = array());
@@ -17,6 +19,7 @@ interface DatabaseInterface
 	public function getQueryCounter();
 	public function quote($str);
 	public function disconnect();
+	public function getHandle(): ?PDO;
 	public function beginTransaction(): void;
 	public function commit(): void;
 	public function rollback(): void;

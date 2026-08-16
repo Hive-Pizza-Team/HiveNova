@@ -565,6 +565,20 @@ class AchievementService
     }
 
     /**
+     * Normalize admin-edited trigger JSON. Returns null when the paste is not a JSON object/array.
+     */
+    public static function sanitizeTriggerParams(string $raw): ?string
+    {
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) {
+            return null;
+        }
+
+        $encoded = json_encode($decoded, JSON_UNESCAPED_UNICODE);
+        return is_string($encoded) ? $encoded : null;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function decodeParams(string $json): array

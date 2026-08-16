@@ -33,6 +33,11 @@ class MissionCaseColonisation extends MissionFunctions implements Mission
 		$db		= Database::get();
 
 		$senderUser		= $this->getUser((int) $this->_fleet['fleet_owner']);
+		if ($senderUser === []) {
+			$this->setState(FLEET_RETURN);
+			$this->SaveFleet();
+			return;
+		}
 
 		$senderUser['factor']	= getFactors($senderUser, 'basic', $this->_fleet['fleet_start_time']);
 
@@ -88,6 +93,13 @@ class MissionCaseColonisation extends MissionFunctions implements Mission
 					else
 					{
 						$this->_fleet['fleet_end_id']	= $NewOwnerPlanet;
+						\HiveNova\Core\PvePackageService::attachToPlanet(
+							(int) $this->_fleet['fleet_universe'],
+							(int) $this->_fleet['fleet_end_galaxy'],
+							(int) $this->_fleet['fleet_end_system'],
+							(int) $this->_fleet['fleet_end_planet'],
+							(int) $NewOwnerPlanet
+						);
 						$message = sprintf($LNG['sys_colo_allisok'], GetTargetAddressLink($this->_fleet, ''));
 						\HiveNova\Core\AchievementHooks::afterColonisation((int) $this->_fleet['fleet_owner']);
 						$this->StoreGoodsToPlanet();

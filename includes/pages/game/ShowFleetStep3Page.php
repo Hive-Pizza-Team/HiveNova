@@ -87,6 +87,10 @@ class ShowFleetStep3Page extends AbstractGamePage
 		$fleetSpeed   = $formData['fleetSpeed'];
 		$ownPlanet    = $formData['ownPlanet'];
 
+		if (!FleetFunctions::HasCompleteTargetCoords($targetGalaxy, $targetSystem, $targetPlanet)) {
+			FleetFunctions::GotoFleetPage(0);
+		}
+
 		if ($ownPlanet != $PLANET['id']) {
 			$this->printMessage($LNG['fl_own_planet_error'], array(array(
 				'label' => $LNG['sys_back'],
@@ -168,7 +172,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 		)) ?: null;
 
 		// Determine target player data
-		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16) {
+		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16 || $targetMission == 18) {
 			$targetPlayerData = array(
 				'id'          => 0,
 				'onlinetime'  => TIMESTAMP,
@@ -177,9 +181,9 @@ class ShowFleetStep3Page extends AbstractGamePage
 				'authattack'  => 0,
 				'total_points' => 0,
 			);
-		} elseif (isset($targetPlanetData['id_owner']) && $targetPlanetData['id_owner'] == $USER['id']) {
+		} elseif (is_array($targetPlanetData) && isset($targetPlanetData['id_owner']) && $targetPlanetData['id_owner'] == $USER['id']) {
 			$targetPlayerData = $USER;
-		} elseif (!empty($targetPlanetData['id_owner'])) {
+		} elseif (is_array($targetPlanetData) && !empty($targetPlanetData['id_owner'])) {
 			$targetPlayerData = UserRepository::getUserWithStats((int) $targetPlanetData['id_owner']);
 		} else {
 			$targetPlayerData = array();
@@ -198,7 +202,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 
 		// For colonize / expedition / market, override targetPlanetData to synthetic after mission check
 		$targetPlanetDataForMission = $targetPlanetData;
-		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16) {
+		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16 || $targetMission == 18) {
 			$targetPlanetDataForMission = array('id' => 0, 'id_owner' => 0, 'planettype' => 1);
 		}
 

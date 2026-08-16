@@ -36,6 +36,24 @@ for arg in "$@"; do
   esac
 done
 
+# Ensure compare ref exists with enough history for a merge-base.
+# A shallow --depth=1 fetch of origin/master leaves no merge-base with HEAD
+# on pull_request checkouts (diff-cover then dies: "no merge base").
+if [[ "$COMPARE_BRANCH" == origin/* ]]; then
+  remote="${COMPARE_BRANCH#origin/}"
+  git fetch --no-tags origin "$remote" 2>/dev/null || true
+fi
+
+# Frontend-only (or other non-class) diffs: diff-cover prints
+# "No lines with coverage information in this diff." which the vacuous-pass
+# check below would treat as a path-mapping failure.
+if git rev-parse --verify "$COMPARE_BRANCH" >/dev/null 2>&1; then
+  if ! git diff --name-only "${COMPARE_BRANCH}...HEAD" | grep -qE '^includes/classes/.+\.php$'; then
+    echo "No includes/classes PHP changes vs ${COMPARE_BRANCH}; coverage gate skipped."
+    exit 0
+  fi
+fi
+
 mkdir -p coverage
 
 if [[ "$FROM_ARTIFACTS" -eq 0 ]]; then
@@ -73,12 +91,6 @@ if ! command -v diff-cover >/dev/null 2>&1; then
   exit 1
 fi
 
-# Ensure compare ref exists (best-effort for local runs).
-if [[ "$COMPARE_BRANCH" == origin/* ]]; then
-  remote="${COMPARE_BRANCH#origin/}"
-  git fetch origin "$remote" --depth=1 2>/dev/null || true
-fi
-
 COV_FILES=(coverage/clover.xml)
 if [[ -f coverage/integration-clover.xml ]]; then
   COV_FILES+=(coverage/integration-clover.xml)
@@ -92,7 +104,7 @@ normalize_clover_for_diff_cover() {
   local dest="$2"
   perl -pe '
     if (!/clover=/) { s/<coverage /<coverage clover="4.5.2" /; }
-    s{<file name="(?:[^"]*/)?(includes/classes/[^"]+)"}{<file path="$1" name="$1"}g;
+    s{<file name="(?:[^"]*/)*?(includes/classes/[^"]+)"}{<file path="$1" name="$1"}g;
   ' "$src" > "$dest"
 }
 
@@ -113,7 +125,8 @@ set +e
 diff-cover "${NORMALIZED[@]}" \
   --compare-branch="$COMPARE_BRANCH" \
   --fail-under="$FAIL_UNDER" \
-  --include='includes/classes/*' \
+  --include='includes/classes/*.php' \
+  --include='includes/classes/**/*.php' \
   --show-uncovered 2>&1 | tee "$DIFF_COVER_LOG"
 DIFF_COVER_RC=${PIPESTATUS[0]}
 set -e

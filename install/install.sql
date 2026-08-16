@@ -39,6 +39,7 @@ CREATE TABLE `%PREFIX%alliance` (
   `ally_register_time` int(11) NOT NULL DEFAULT '0',
   `ally_description` text,
   `ally_web` varchar(255) DEFAULT '',
+  `ally_discord_webhook` varchar(512) NOT NULL DEFAULT '',
   `ally_text` text,
   `ally_image` varchar(255) DEFAULT '',
   `ally_request` varchar(1000) DEFAULT NULL,
@@ -271,6 +272,7 @@ CREATE TABLE `%PREFIX%config` (
   `ttf_file` varchar(128) NOT NULL DEFAULT 'styles/resource/fonts/DroidSansMono.ttf',
   `ref_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `ref_bonus` int(11) unsigned NOT NULL DEFAULT '1000',
+  `ref_bonus_referee` int(11) unsigned NOT NULL DEFAULT '1000',
   `ref_minpoints` bigint(20) unsigned NOT NULL DEFAULT '2000',
   `ref_max_referals` tinyint(1) unsigned NOT NULL DEFAULT '5',
   `del_oldstuff` tinyint(3) unsigned NOT NULL DEFAULT '30',
@@ -641,6 +643,25 @@ CREATE TABLE `%PREFIX%planets` (
   KEY `universe` (`universe`,`galaxy`,`system`,`planet`,`planet_type`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
+CREATE TABLE `%PREFIX%salvage_packages` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `galaxy` int(11) unsigned NOT NULL,
+  `system` int(11) unsigned NOT NULL,
+  `planet` int(11) unsigned NOT NULL,
+  `planet_id` int(11) unsigned DEFAULT NULL,
+  `metal` double(50,0) unsigned NOT NULL DEFAULT '0',
+  `crystal` double(50,0) unsigned NOT NULL DEFAULT '0',
+  `spawned_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `expires_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `tier` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `encounter_seed` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `coords` (`universe`, `galaxy`, `system`, `planet`),
+  KEY `expires_at` (`expires_at`),
+  KEY `planet_id` (`planet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE `%PREFIX%raports` (
   `rid` varchar(32) NOT NULL,
   `raport` longtext NOT NULL,
@@ -677,6 +698,19 @@ CREATE TABLE `%PREFIX%shortcuts` (
   `type` tinyint(1) unsigned NOT NULL,
   PRIMARY KEY (`shortcutID`),
   KEY `ownerID` (`ownerID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `%PREFIX%frequent_locations` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ownerID` int(10) unsigned NOT NULL,
+  `galaxy` tinyint(3) unsigned NOT NULL,
+  `system` smallint(5) unsigned NOT NULL,
+  `planet` tinyint(3) unsigned NOT NULL,
+  `type` tinyint(1) unsigned NOT NULL,
+  `lastUsed` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `owner_coords` (`ownerID`,`galaxy`,`system`,`planet`,`type`),
+  KEY `owner_recent` (`ownerID`,`lastUsed`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%statpoints` (
@@ -752,6 +786,17 @@ CREATE TABLE `%PREFIX%topkb` (
   KEY `time` (`universe`,`rid`,`time`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+CREATE TABLE `%PREFIX%universe_events` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` tinyint(3) unsigned NOT NULL,
+  `time` int(11) NOT NULL,
+  `event_type` varchar(16) NOT NULL,
+  `size_bucket` varchar(16) NOT NULL,
+  `outcome` varchar(16) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `universe_id` (`universe`,`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 CREATE TABLE `%PREFIX%users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(32) NOT NULL DEFAULT '',
@@ -759,6 +804,7 @@ CREATE TABLE `%PREFIX%users` (
   `email` varchar(64) NOT NULL DEFAULT '',
   `email_2` varchar(64) NOT NULL DEFAULT '',
   `hive_account` varchar(16) NOT NULL DEFAULT '',
+  `public_message` varchar(2000) NOT NULL DEFAULT '',
   `lang` varchar(2) NOT NULL DEFAULT 'de',
   `authattack` tinyint(1) NOT NULL DEFAULT '0',
   `authlevel` tinyint(1) NOT NULL DEFAULT '0',
@@ -1005,7 +1051,8 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'databasedump', 1, '30', '1', '*', '*', '1', 'HiveNova\\Cronjob\\DumpCronjob', 0, NULL),
 (NULL, 'tracking', 1, FLOOR(RAND() * 60), FLOOR(RAND() * 24), '*', '*', '0', 'HiveNova\\Cronjob\\TrackingCronjob', 0, NULL),
 (NULL, 'pushing', 1, '0', '0', '*', '*', '0', 'HiveNova\\Cronjob\\PushingDetectionCronjob', 0, NULL),
-(NULL, 'achievement_backfill', 1, '15', '3', '*', '*', '*', 'HiveNova\\Cronjob\\AchievementBackfillCronjob', 0, NULL);
+(NULL, 'achievement_backfill', 1, '15', '3', '*', '*', '*', 'HiveNova\\Cronjob\\AchievementBackfillCronjob', 0, NULL),
+(NULL, 'pve_spawn', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\PveSpawnCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);

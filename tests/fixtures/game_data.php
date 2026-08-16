@@ -31,9 +31,13 @@ $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
 	110 => 'shielding_tech',
 	111 => 'armour_tech',
 	113 => 'energy_tech',
+	114 => 'hyperspace_tech',
 	115 => 'combustion_tech',
 	117 => 'impulse_motor_tech',
 	118 => 'hyperspace_motor_tech',
+	120 => 'laser_tech',
+	121 => 'ionic_tech',
+	122 => 'buster_tech',
 	124 => 'astrophysics_tech',
 
 	202 => 'light_fighter',
@@ -58,8 +62,8 @@ $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
 $GLOBALS['reslist'] = array_replace($GLOBALS['reslist'] ?? [], [
 	'build'     => [1, 2, 3, 4, 6, 12, 14, 15, 21, 22, 23, 24, 31, 33, 34, 41, 42, 43, 44],
 	'tech'      => [106, 108, 109, 110, 111, 113, 114, 115, 117, 118, 120, 121, 122, 123, 124],
-	'fleet'     => [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215],
-	'defense'   => [401, 402, 403, 404, 405, 406, 407, 408],
+	'fleet'     => [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220],
+	'defense'   => [401, 402, 403, 404, 405, 406, 407, 408, 411],
 	'missile'   => [502, 503],
 	'officier'  => [601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615],
 	'dmfunc'    => [701, 702, 703, 704, 705, 706, 707],
@@ -123,6 +127,30 @@ $GLOBALS['pricelist'] = array_replace($GLOBALS['pricelist'] ?? [], [
 		'cost'   => [901 => 1500, 902 => 500, 903 => 0],
 		'factor' => 0,
 	],
+	206 => [
+		'cost'     => [901 => 20000, 902 => 7000, 903 => 2000],
+		'capacity' => 800,
+		'factor'   => 0,
+	],
+	213 => [
+		'cost'     => [901 => 60000, 902 => 50000, 903 => 15000],
+		'capacity' => 2000,
+		'factor'   => 0,
+	],
+	215 => [
+		'cost'     => [901 => 30000, 902 => 40000, 903 => 15000],
+		'capacity' => 750,
+		'factor'   => 0,
+	],
+	217 => [
+		'cost'     => [901 => 35000, 902 => 20000, 903 => 1500],
+		'capacity' => 400000,
+		'factor'   => 0,
+	],
+	404 => [
+		'cost'   => [901 => 20000, 902 => 15000, 903 => 2000],
+		'factor' => 0,
+	],
 ]);
 
 // ---------------------------------------------------------------------------
@@ -133,6 +161,8 @@ $GLOBALS['CombatCaps'] = array_replace($GLOBALS['CombatCaps'] ?? [], [
 	503 => ['attack' => 12000],
 	401 => ['attack' => 80,  'shield' => 20,  'plunder' => 40000],
 	402 => ['attack' => 100, 'shield' => 25,  'plunder' => 20000],
+	206 => ['attack' => 150, 'shield' => 50],
+	404 => ['attack' => 1100, 'shield' => 200],
 ]);
 
 // ---------------------------------------------------------------------------
@@ -142,4 +172,11 @@ $GLOBALS['CombatCaps'] = array_replace($GLOBALS['CombatCaps'] ?? [], [
 $GLOBALS['requirements'] = array_replace($GLOBALS['requirements'] ?? [], [
 	202 => [115 => 1],               // Light Fighter: Combustion Drive lv 1
 	210 => [117 => 6, 118 => 3],     // Bomber: Impulse lv6 + Hyperspace lv3
+	206 => [121 => 2],
+	211 => [122 => 5],
+	213 => [114 => 5],
+	215 => [114 => 5, 120 => 12],
+	217 => [114 => 10],
+	402 => [120 => 3],
+	404 => [109 => 3],
 ]);

@@ -21,6 +21,12 @@
 		<td>{$LNG.pl_ally}</td>
 		<td colspan="2">{if $allyname}<a href="#" onclick="parent.location = 'game.php?page=alliance&amp;mode=info&amp;id={$allyid}';return false;">{$allyname}</a>{else}-{/if}</td>
 	</tr>
+	{if $publicMessage}
+	<tr>
+		<td>{$LNG.pl_public_message}</td>
+		<td colspan="2" style="height:100px">{$publicMessage}</td>
+	</tr>
+	{/if}
 	<tr>
 		<th>&nbsp;</th>
 		<th>{$LNG.pl_points}</th>

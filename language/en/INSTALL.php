@@ -42,7 +42,7 @@ $LNG['upgrade_success']			= 'Update of the database successfully. Database is no
 $LNG['upgrade_nothingtodo']		= 'No action is required. Database is already up to revision %s.';
 $LNG['upgrade_back']			= 'Back';
 $LNG['upgrade_intro_welcome']	= 'Welcome to the database upgrader!';
-$LNG['upgrade_available']		= 'Available updates for your database! The database is at the revision %s and can update to revision %s.<br><br>Please choose from the following menu to the first SQL update to install:';
+$LNG['upgrade_available']		= 'Available updates for your database! The database is at revision %s and can be updated to revision %s.<br><br>Review the pending migrations below, then continue. A backup of prefixed tables is taken before they are applied.';
 $LNG['upgrade_notavailable']	= 'The used revision %s is the latest for your database.';
 $LNG['upgrade_required_rev']	= 'The Updater can work only from revision r2579 (2Moons v1. 7) or later.';
 

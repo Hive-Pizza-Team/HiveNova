@@ -51,6 +51,7 @@ class FleetDispatchServiceTest extends TestCase
             'fl_only_planets_colonizable'   => 'Only planets can be colonized',
             'fl_no_target'                  => 'No target',
             'fl_empty_target'               => 'Empty target',
+            'fl_salvage_gone'               => 'Salvage gone',
             'fl_admin_attack'               => 'Admin attack',
             'fl_player_is_noob'             => 'Player is noob',
             'fl_player_is_strong'           => 'Player is strong',
@@ -109,6 +110,48 @@ class FleetDispatchServiceTest extends TestCase
             ['id' => 1],
             $this->basePlanet()
         );
+    }
+
+    public function testValidateTargetThrowsWhenSalvagePackageMissing(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Salvage gone');
+
+        $params = $this->baseValidateTargetParams([
+            'targetMission' => 18,
+            'targetGalaxy'  => 2,
+            'targetSystem'  => 9,
+            'targetPlanet'  => 4,
+        ]);
+
+        FleetDispatchService::validateTarget($params, ['id' => 1, 'universe' => 1], $this->basePlanet());
+    }
+
+    public function testValidateTargetAcceptsSalvageWhenPackageExists(): void
+    {
+        $this->fake->salvagePackages[] = [
+            'id' => 1,
+            'universe' => 1,
+            'galaxy' => 2,
+            'system' => 9,
+            'planet' => 4,
+            'metal' => 1000,
+            'crystal' => 500,
+            'spawned_at' => TIMESTAMP,
+            'expires_at' => TIMESTAMP + 3600,
+            'tier' => 1,
+            'encounter_seed' => 50,
+        ];
+
+        $params = $this->baseValidateTargetParams([
+            'targetMission' => 18,
+            'targetGalaxy'  => 2,
+            'targetSystem'  => 9,
+            'targetPlanet'  => 4,
+        ]);
+
+        FleetDispatchService::validateTarget($params, ['id' => 1, 'universe' => 1], $this->basePlanet());
+        $this->addToAssertionCount(1);
     }
 
     public function testValidateTargetThrowsOnInvalidCoordinates(): void
@@ -611,6 +654,22 @@ class FleetDispatchServiceTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function testValidateMissionDoesNotFatalWhenStatPointsMissing(): void
+    {
+        $this->fake->achievement->missingStatPoints = true;
+
+        FleetDispatchService::validateMission(
+            ['id' => 10, 'id_owner' => 2, 'destruyed' => 0],
+            ['id' => 2, 'authlevel' => 0, 'authattack' => 0, 'onlinetime' => TIMESTAMP, 'urlaubs_modus' => 0, 'banaday' => 0, 'total_points' => 0, 'ally_id' => 0],
+            1,
+            ['id' => 1, 'authlevel' => 0, 'ally_id' => 0],
+            $this->baseFleetData(['availableMissions' => ['MissionSelector' => [1]]]),
+            Config::get()
+        );
+
+        $this->addToAssertionCount(1);
+    }
+
     // -------------------------------------------------------------------------
     // calculateMetrics
     // -------------------------------------------------------------------------
@@ -684,6 +743,45 @@ class FleetDispatchServiceTest extends TestCase
         $this->assertSame(9900, $planet['metal']);
         $this->assertSame(4950, $planet['crystal']);
         $this->assertSame(2900, $planet['deuterium']);
+    }
+
+    public function testDispatchThrowsWhenLockedPlanetMissing(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Not enough resource');
+
+        $planet = [
+            'id'          => 42,
+            'galaxy'      => 1,
+            'system'      => 5,
+            'planet'      => 8,
+            'planet_type' => 1,
+            'metal'       => 10000,
+            'crystal'     => 5000,
+            'deuterium'   => 3000,
+        ];
+
+        FleetDispatchService::dispatch([
+            'fleetArray'         => [202 => 1],
+            'targetMission'      => 3,
+            'USER'               => ['id' => 1, 'universe' => 1],
+            'targetPlanetData'   => ['id' => 99, 'id_owner' => 2],
+            'targetGalaxy'       => 1,
+            'targetSystem'       => 6,
+            'targetPlanet'       => 3,
+            'targetType'         => 1,
+            'fleetResource'      => [901 => 100, 902 => 50, 903 => 25],
+            'fleetStartTime'     => TIMESTAMP + 3600,
+            'fleetStayTime'      => 0,
+            'fleetEndTime'       => TIMESTAMP + 7200,
+            'fleetGroup'         => 0,
+            'consumption'        => 75,
+            'markettype'         => 0,
+            'WantedResourceType' => 0,
+            'WantedResourceAmount' => 0,
+            'maxFlightTime'      => 0,
+            'visibility'         => 0,
+        ], $planet);
     }
 
     public function testDispatchThrowsWhenLockedPlanetLacksResources(): void

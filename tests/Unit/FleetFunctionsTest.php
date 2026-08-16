@@ -2,6 +2,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\PveNpcFleetFactory;
 
 use PHPUnit\Framework\TestCase;
 
@@ -68,6 +69,15 @@ class FleetFunctionsTest extends TestCase
     // -------------------------------------------------------------------------
     // GetTargetDistance
     // -------------------------------------------------------------------------
+
+    public function testHasCompleteTargetCoordsRequiresPositiveValues(): void
+    {
+        $this->assertTrue(FleetFunctions::HasCompleteTargetCoords(1, 1, 1));
+        $this->assertFalse(FleetFunctions::HasCompleteTargetCoords(0, 1, 1));
+        $this->assertFalse(FleetFunctions::HasCompleteTargetCoords(1, 0, 1));
+        $this->assertFalse(FleetFunctions::HasCompleteTargetCoords(1, 1, 0));
+        $this->assertFalse(FleetFunctions::HasCompleteTargetCoords('', '', ''));
+    }
 
     public function testGetTargetDistanceSamePlanetReturnsFive(): void
     {
@@ -202,6 +212,46 @@ class FleetFunctionsTest extends TestCase
     {
         $GLOBALS['USER'] = ['factor' => ['ShipStorage' => 0]];
         $this->assertEquals(0, FleetFunctions::GetFleetRoom([]));
+    }
+
+    public function testGetFleetRoomIgnoresHyperspaceOnSmallCargo(): void
+    {
+        $GLOBALS['pricelist'][202]['capacity'] = 50;
+        $GLOBALS['requirements'][202] = [115 => 1];
+        $player = ['hyperspace_tech' => 50, 'factor' => ['ShipStorage' => 0]];
+        $this->assertEquals(500.0, FleetFunctions::GetFleetRoom([202 => 10], $player));
+    }
+
+    public function testGetFleetRoomAppliesHyperspaceLeftoverPerShip(): void
+    {
+        $GLOBALS['pricelist'][217]['capacity'] = 400000;
+        $GLOBALS['requirements'][217] = [114 => 10];
+        $player = ['hyperspace_tech' => 10, 'factor' => ['ShipStorage' => 0]];
+        $this->assertEquals(10 * 400000 * 1.10, FleetFunctions::GetFleetRoom([217 => 10], $player));
+    }
+
+    public function testGetFleetRoomMixesLeftoverAndNormalShips(): void
+    {
+        $GLOBALS['pricelist'][202]['capacity'] = 50;
+        $GLOBALS['pricelist'][217]['capacity'] = 400000;
+        $GLOBALS['requirements'][202] = [115 => 1];
+        $GLOBALS['requirements'][217] = [114 => 10];
+        $player = ['hyperspace_tech' => 10, 'factor' => ['ShipStorage' => 0]];
+        $expected = (10 * 50) + (1 * 400000 * 1.10);
+        $this->assertEquals($expected, FleetFunctions::GetFleetRoom([202 => 10, 217 => 1], $player));
+    }
+
+    public function testHyperspaceTechDoesNotChangeCombustionSpeed(): void
+    {
+        $GLOBALS['pricelist'][202]['speed'] = 12500;
+        $GLOBALS['pricelist'][202]['tech']  = 1;
+        $player = [
+            'combustion_tech' => 5,
+            'impulse_motor_tech' => 0,
+            'hyperspace_motor_tech' => 0,
+            'hyperspace_tech' => 20,
+        ];
+        $this->assertEquals(18750.0, FleetFunctions::GetFleetMaxSpeed([202 => 1], $player));
     }
 
     // -------------------------------------------------------------------------
@@ -348,6 +398,42 @@ class FleetFunctionsTest extends TestCase
         $this->assertGreaterThan(1, $mixed);
     }
 
+    public function testGetFleetConsumptionTreatsMissingDriveTechsAsZero(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']        = 12500;
+        $GLOBALS['pricelist'][202]['speed2']       = 17500;
+        $GLOBALS['pricelist'][202]['tech']         = 1;
+        $GLOBALS['pricelist'][202]['consumption']  = 20;
+        $GLOBALS['pricelist'][202]['consumption2'] = 10;
+
+        $missing = [];
+        $zeros   = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+
+        $this->assertSame(
+            FleetFunctions::GetFleetConsumption([202 => 2], 3600, 5000, $zeros, 1),
+            FleetFunctions::GetFleetConsumption([202 => 2], 3600, 5000, $missing, 1)
+        );
+    }
+
+    public function testGetFleetConsumptionAcceptsPveSyntheticPlayer(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']        = 12500;
+        $GLOBALS['pricelist'][202]['speed2']       = 17500;
+        $GLOBALS['pricelist'][202]['tech']         = 1;
+        $GLOBALS['pricelist'][202]['consumption']  = 20;
+        $GLOBALS['pricelist'][202]['consumption2'] = 10;
+
+        $consumption = FleetFunctions::GetFleetConsumption(
+            [202 => 2],
+            3600,
+            5000,
+            PveNpcFleetFactory::syntheticPlayer('Pirates'),
+            1
+        );
+
+        $this->assertGreaterThan(0, $consumption);
+    }
+
     // -------------------------------------------------------------------------
     // GetGameSpeedFactor
     // -------------------------------------------------------------------------
@@ -429,6 +515,34 @@ class FleetFunctionsTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // SuggestDefaultMission — probe-only spy autoselect (issue #221)
+    // -------------------------------------------------------------------------
+
+    public function testSuggestDefaultMissionSelectsSpyForProbeOnlyFleet(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(6, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5], false));
+    }
+
+    public function testSuggestDefaultMissionKeepsTransportForAllianceMember(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(3, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5], true));
+    }
+
+    public function testSuggestDefaultMissionHonorsExplicitMissionFromGalaxy(): void
+    {
+        $available = [3, 6, 1, 5];
+        $this->assertSame(1, FleetFunctions::SuggestDefaultMission(1, $available, [210 => 5], false));
+    }
+
+    public function testSuggestDefaultMissionDoesNotAutoselectWhenFleetIsMixed(): void
+    {
+        $available = [3, 1, 5];
+        $this->assertSame(0, FleetFunctions::SuggestDefaultMission(0, $available, [210 => 5, 202 => 1], false));
+    }
+
+    // -------------------------------------------------------------------------
     // GetACSDuration — empty acsId short-circuit
     // -------------------------------------------------------------------------
 
@@ -474,5 +588,22 @@ class FleetFunctionsTest extends TestCase
         // LF with impulse_motor_tech >= 5: base_speed=speed2=17500, but techSpeed stays 1 (combustion)
         // speed = 17500 * (1 + 0.1 * combustion_tech) = 17500 * 1.5 = 26250
         $this->assertEquals(26250.0, $speed_upgrade);
+    }
+
+    public function testGetFleetMaxSpeedTreatsMissingDriveTechsAsZero(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']  = 12500;
+        $GLOBALS['pricelist'][202]['speed2'] = 17500;
+        $GLOBALS['pricelist'][202]['tech']   = 1;
+        $GLOBALS['pricelist'][210]['speed']  = 4000;
+        $GLOBALS['pricelist'][210]['tech']   = 2;
+
+        $missing = [];
+        $zeros   = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+
+        $this->assertSame(
+            FleetFunctions::GetFleetMaxSpeed([202 => 2, 210 => 1], $zeros),
+            FleetFunctions::GetFleetMaxSpeed([202 => 2, 210 => 1], $missing)
+        );
     }
 }

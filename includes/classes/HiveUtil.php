@@ -13,7 +13,7 @@ class HiveUtil
 {
 	static public function getRpcNodes(): array
 	{
-		return HIVE_RPC_NODES;
+		return \HIVE_RPC_NODES;
 	}
 
 	static public function isRpcError(mixed $result): bool
@@ -25,13 +25,23 @@ class HiveUtil
 		return array_key_exists('code', $result) && array_key_exists('message', $result);
 	}
 
-	static public function rpcCall(string $method, string $params): mixed
+	static public function rpcNodesToTry(?int $maxNodes = null): array
 	{
-		foreach (HiveUtil::getRpcNodes() as $rpcNode) {
+		$nodes = self::getRpcNodes();
+		if ($maxNodes === null) {
+			return $nodes;
+		}
+
+		return array_slice($nodes, 0, max(1, $maxNodes));
+	}
+
+	static public function rpcCall(string $method, string $params, ?int $maxNodes = null): mixed
+	{
+		foreach (HiveUtil::rpcNodesToTry($maxNodes) as $rpcNode) {
 			try {
 				$hive = new Hive([
 					'rpcNodes' => [$rpcNode],
-					'timeout'  => HIVE_RPC_TIMEOUT,
+					'timeout'  => \HIVE_RPC_TIMEOUT,
 				]);
 				$result = $hive->call($method, $params);
 			} catch (\Throwable $e) {
@@ -103,5 +113,44 @@ class HiveUtil
 		$result = HiveUtil::rpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
 
 		return is_array($result) && count($result) > 0;
+	}
+
+	static public function extractProfileAbout(mixed $account): string
+	{
+		if (!is_array($account)) {
+			return '';
+		}
+
+		foreach (['posting_json_metadata', 'json_metadata'] as $field) {
+			if (empty($account[$field]) || !is_string($account[$field])) {
+				continue;
+			}
+
+			$decoded = json_decode($account[$field], true);
+			if (!is_array($decoded)) {
+				continue;
+			}
+
+			$about = $decoded['profile']['about'] ?? null;
+			if (is_string($about) && trim($about) !== '') {
+				return trim($about);
+			}
+		}
+
+		return '';
+	}
+
+	static public function getAccountAbout(string $hiveaccount): string
+	{
+		if (!HiveUtil::isAccountValid($hiveaccount)) {
+			return '';
+		}
+
+		$result = HiveUtil::rpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]', 3);
+		if (!is_array($result) || !isset($result[0])) {
+			return '';
+		}
+
+		return HiveUtil::extractProfileAbout($result[0]);
 	}
 }

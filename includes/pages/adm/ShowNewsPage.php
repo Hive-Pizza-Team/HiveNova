@@ -69,13 +69,15 @@ function ShowNewsPage(){
 			"SELECT id, title, text FROM %%NEWS%% WHERE id = :id;",
 			[':id' => HTTP::_GP('id', 0)]
 		);
-		$template->assign_vars(array(
-			'mode'			=> 1,
-			'nws_head'		=> sprintf($LNG['nws_head_edit'], $News['title']),
-			'news_id'		=> $News['id'],
-			'news_title'	=> $News['title'],
-			'news_text'		=> $News['text'],
-		));
+		if (is_array($News)) {
+			$template->assign_vars(array(
+				'mode'			=> 1,
+				'nws_head'		=> sprintf($LNG['nws_head_edit'], $News['title']),
+				'news_id'		=> $News['id'],
+				'news_title'	=> $News['title'],
+				'news_text'		=> $News['text'],
+			));
+		}
 	} elseif(($_GET['action'] ?? '') == 'create') {
 		$template->assign_vars(array(
 			'mode'			=> 2,

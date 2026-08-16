@@ -149,6 +149,27 @@ class AllianceService
     }
 
     /**
+     * Store a normalized Discord webhook URL, or clear it when $url is empty.
+     *
+     * @throws \RuntimeException if the URL is non-empty and not a Discord webhook
+     */
+    public static function setDiscordWebhook(int $allyId, string $url): void
+    {
+        $url = trim($url);
+        if ($url === '') {
+            self::editAlliance($allyId, ['ally_discord_webhook' => '']);
+            return;
+        }
+
+        $normalized = DiscordWebhookService::normalizeUrl($url);
+        if ($normalized === null) {
+            throw new \RuntimeException('invalid_discord_webhook');
+        }
+
+        self::editAlliance($allyId, ['ally_discord_webhook' => $normalized]);
+    }
+
+    /**
      * Submit an application (request) to join an alliance.
      *
      * @param int    $allyId    Target alliance ID

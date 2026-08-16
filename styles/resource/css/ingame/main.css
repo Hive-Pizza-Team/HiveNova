@@ -658,6 +658,15 @@ div#disclamer {
     text-align: center;
 }
 
+.attack-notification {
+    background: color-mix(in srgb, var(--color-danger) 18%, var(--color-bg-surface));
+    font-weight: 700;
+}
+
+.attack-notification a {
+    color: inherit;
+}
+
 .shortcut-colum {
     position: relative;
 }

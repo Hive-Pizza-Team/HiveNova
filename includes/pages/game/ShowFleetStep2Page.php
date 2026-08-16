@@ -51,18 +51,29 @@ class ShowFleetStep2Page extends AbstractGamePage
 			FleetFunctions::GotoFleetPage();
 		}
 
+		if (!FleetFunctions::HasCompleteTargetCoords($targetGalaxy, $targetSystem, $targetPlanet))
+		{
+			$this->printMessage($LNG['fl_incomplete_coords'], array(array(
+				'label'	=> $LNG['sys_back'],
+				'url'	=> 'game.php?page=fleetTable'
+			)));
+		}
+
 		$fleetArray    				= $_SESSION['fleet'][$token]['fleet'];
 
 		$db = Database::get();
-		$sql = "SELECT id, id_owner, der_metal, der_crystal FROM %%PLANETS%% WHERE universe = :universe AND galaxy = :targetGalaxy AND `system` = :targetSystem AND planet = :targetPlanet AND planet_type = '1';";
+		$sql = "SELECT p.id, p.id_owner, p.der_metal, p.der_crystal, u.ally_id FROM %%PLANETS%% p LEFT JOIN %%USERS%% u ON u.id = p.id_owner WHERE p.universe = :universe AND p.galaxy = :targetGalaxy AND p.`system` = :targetSystem AND p.planet = :targetPlanet AND p.planet_type = '1';";
 		$targetPlanetData = $db->selectSingle($sql, array(
 			':universe' => Universe::current(),
 			':targetGalaxy' => $targetGalaxy,
 			':targetSystem' => $targetSystem,
 			':targetPlanet' => $targetPlanet
 		));
+		if (!is_array($targetPlanetData)) {
+			$targetPlanetData = array();
+		}
 
-		if($targetType == 2 && $targetPlanetData['der_metal'] == 0 && $targetPlanetData['der_crystal'] == 0)
+		if($targetType == 2 && ($targetPlanetData['der_metal'] ?? 0) == 0 && ($targetPlanetData['der_crystal'] ?? 0) == 0)
 		{
 			$this->printMessage($LNG['fl_error_empty_derbis'], array(array(
 				'label'	=> $LNG['sys_back'],
@@ -79,6 +90,19 @@ class ShowFleetStep2Page extends AbstractGamePage
 		$MisInfo['Ship'] 			= $fleetArray;
 
 		$MissionOutput	 			= FleetFunctions::GetFleetMissions($USER, $MisInfo, $targetPlanetData);
+
+		$isAllianceMember = is_array($targetPlanetData)
+			&& !empty($USER['ally_id'])
+			&& !empty($targetPlanetData['ally_id'])
+			&& (int) $USER['ally_id'] === (int) $targetPlanetData['ally_id']
+			&& (int) $targetPlanetData['id_owner'] !== (int) $USER['id'];
+
+		$targetMission = FleetFunctions::SuggestDefaultMission(
+			$targetMission,
+			$MissionOutput['MissionSelector'],
+			$fleetArray,
+			$isAllianceMember
+		);
 
 		if(empty($MissionOutput['MissionSelector']))
 		{

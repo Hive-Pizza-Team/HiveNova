@@ -86,6 +86,9 @@ class ShowFleetMissilePage extends AbstractGamePage
 			$targetUser = array('onlinetime' => 0, 'banaday' => 0, 'urlaubs_modus' => 0, 'authattack' => 0);
 		} else {
 			$targetUser		= GetUserByID($target['id_owner'], array('onlinetime', 'banaday', 'urlaubs_modus', 'authattack'));
+			if (!is_array($targetUser)) {
+				$targetUser = array('onlinetime' => 0, 'banaday' => 0, 'urlaubs_modus' => 0, 'authattack' => 0);
+			}
 		}
 
 		if (Config::get()->adm_attack == 1 && $targetUser['authattack'] > $USER['authlevel'])
@@ -97,15 +100,11 @@ class ShowFleetMissilePage extends AbstractGamePage
         $User2Points = $db->selectSingle($sql, array(
             ':ownerId'  => $target['id_owner']
         ));
+		if (!is_array($User2Points)) {
+			$User2Points = ['total_points' => 0];
+		}
 
-		$sql	= 'SELECT total_points
-		FROM %%STATPOINTS%%
-		WHERE id_owner = :userId AND stat_type = :statType';
-
-		$USER	+= Database::get()->selectSingle($sql, array(
-			':userId'	=> $USER['id'],
-			':statType'	=> 1
-		));
+		mergeUserStatPoints($USER);
 
         $IsNoobProtec	= CheckNoobProtec($USER, $User2Points, $targetUser);
 			

@@ -173,6 +173,30 @@ class MissionCaseColonisationTest extends TestCase
         $this->assertCount(1, $this->fake->achievement->messages);
     }
 
+    public function test_colonisation_attaches_existing_salvage_package(): void
+    {
+        $this->fake->salvagePackages[] = [
+            'id' => 1,
+            'universe' => 1,
+            'galaxy' => 1,
+            'system' => 1,
+            'planet' => 8,
+            'planet_id' => null,
+            'metal' => 1000,
+            'crystal' => 500,
+            'spawned_at' => TIMESTAMP,
+            'expires_at' => TIMESTAMP + 86400,
+            'tier' => 1,
+            'encounter_seed' => 1,
+        ];
+
+        $mission = new MissionCaseColonisation($this->colonisationFleet());
+        $mission->TargetEvent();
+
+        $this->assertSame(200, $mission->_fleet['fleet_end_id']);
+        $this->assertSame(200, $this->fake->salvagePackages[0]['planet_id']);
+    }
+
     public function test_colonisation_end_stay_event_is_noop(): void
     {
         $fleet = $this->colonisationFleet(['fleet_mess' => FLEET_HOLD]);
@@ -206,5 +230,16 @@ class MissionCaseColonisationTest extends TestCase
                 static fn (array $update): bool => !empty($update['delete'])
             )
         );
+    }
+
+    public function test_colonisation_returns_when_owner_is_gone(): void
+    {
+        unset($this->fake->achievement->users[1]);
+
+        $mission = new MissionCaseColonisation($this->colonisationFleet());
+        $mission->TargetEvent();
+
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertEmpty($this->fake->planetInserts);
     }
 }

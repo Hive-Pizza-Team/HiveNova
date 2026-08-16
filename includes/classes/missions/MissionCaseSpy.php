@@ -46,6 +46,12 @@ class MissionCaseSpy extends MissionFunctions implements Mission
 
 		$senderPlanetName	= PlanetRepository::getPlanetName($this->_fleet['fleet_start_id']);
 
+		if (!is_array($targetPlanet) || $senderUser === [] || $targetUser === []) {
+			$this->setState(FLEET_RETURN);
+			$this->SaveFleet();
+			return;
+		}
+
 		$LNG			= $this->getLanguage($senderUser['lang']);
 
 		$senderUser['factor']	= getFactors($senderUser, 'basic', $this->_fleet['fleet_start_time']);

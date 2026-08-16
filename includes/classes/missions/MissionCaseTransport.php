@@ -127,6 +127,11 @@ class MissionCaseTransport extends MissionFunctions implements Mission
 				':id'	=> $this->_fleet['fleet_owner']
 			));
 
+			if (!is_array($originUser)) {
+				$this->KillFleet();
+				return;
+			}
+
 			$this->UpdateFleet('fleet_start_id', $originUser['id_planet']);
 			$this->UpdateFleet('fleet_start_galaxy', $originUser['galaxy']);
 			$this->UpdateFleet('fleet_start_system', $originUser['system']);

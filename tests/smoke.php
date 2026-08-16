@@ -33,9 +33,9 @@ $pages = [
     'buildings',
     'research',
     'shipyard',
-    'fleet',        // FleetStep1
-    'fleettable',
-    'fleetdealer',
+    'fleetTable',
+    'fleetStep1',
+    'fleetDealer',
     'galaxy',
     'alliance',
     'messages',
@@ -50,18 +50,20 @@ $pages = [
     'trader',
     'officier',
     'techtree',
-    'battlesimulator',
-    'battlehall',
+    'battleSimulator',
+    'battleHall',
     'records',
     'changelog',
     'chat',
-    'buddylist',
-    'banlist',
+    'buddyList',
+    'banList',
     'board',
     'questions',
     'ticket',
     'phalanx',
     'viz',
+    'achievements',
+    'eventFirehose',
 ];
 
 $pass = 0;
@@ -137,6 +139,10 @@ function detectErrors(string $body): array {
     if (stripos($body, 'id="stepintro"') !== false
         || preg_match('/<title>[^<]*Installer/i', $body)) {
         $issues[] = 'Redirected to installer (DB unavailable or upgrade required)';
+    }
+    if (stripos($body, 'This page does not exist') !== false
+        || stripos($body, 'page_doesnt_exist') !== false) {
+        $issues[] = 'Missing page (routing slug does not match a controller)';
     }
     return $issues;
 }
@@ -239,6 +245,40 @@ foreach ($pages as $page) {
     }
 }
 
+echo "[ JSON ] attackAlert        ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/game.php?page=attackAlert&ajax=1", $cookieFile);
+$alert = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status >= 400) {
+    echo "FAIL HTTP $status\n";
+    $fail++;
+} elseif (!is_array($alert) || !array_key_exists('count', $alert)) {
+    echo "FAIL expected JSON {count:N}\n";
+    $fail++;
+} else {
+    echo "OK (count=" . (int) $alert['count'] . ")\n";
+    $pass++;
+}
+
+echo "[ JSON ] eventFirehose      ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/game.php?page=eventFirehose&ajax=1", $cookieFile);
+$feed = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status >= 400) {
+    echo "FAIL HTTP $status\n";
+    $fail++;
+} elseif (!is_array($feed) || !array_key_exists('events', $feed) || !is_array($feed['events'])) {
+    echo "FAIL expected JSON {events:[]}\n";
+    $fail++;
+} else {
+    echo "OK (events=" . count($feed['events']) . ")\n";
+    $pass++;
+}
+
 // Extract session ID from cookie jar to supply as ?sid= for CSRF-protected admin pages
 $sid = '';
 foreach (file($cookieFile) ?: [] as $line) {
@@ -291,6 +331,7 @@ $adminPages = [
     'dump',
     'transactions',
     'buildlog',
+    'achievements',
     // skipping: logout (ends session)
 ];
 

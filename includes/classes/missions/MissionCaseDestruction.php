@@ -4,6 +4,8 @@ namespace HiveNova\Mission;
 
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
+use HiveNova\Core\EventFirehoseWriter;
+use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
@@ -333,7 +335,9 @@ HTML;
 			$targetDebris	= $db->selectSingle($sql, array(
 				':moonId'	=> $this->_fleet['fleet_end_id']
 			));
-			$targetPlanet 	+= $targetDebris;
+			if (is_array($targetDebris)) {
+				$targetPlanet 	+= $targetDebris;
+			}
 		}
 
 		foreach($debrisResource as $elementID)
@@ -584,6 +588,13 @@ HTML;
 			':result'	=> $combatResult['won']
 		));
 
+		EventFirehoseWriter::record(
+			(int) $this->_fleet['fleet_universe'],
+			(int) $this->_fleet['fleet_start_time'],
+			(float) ($combatResult['unitLost']['attacker'] + $combatResult['unitLost']['defender']),
+			(string) $combatResult['won']
+		);
+
 		$sql = 'UPDATE %%USERS%% SET
 		`'.$attackStatus.'` = `'.$attackStatus.'` + 1,
 		kbmetal		= kbmetal + :debrisMetal,
@@ -618,6 +629,15 @@ HTML;
 
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
+
+		DiscordWebhookService::notifyCombatResolved(
+			(int) $targetUser['id'],
+			(int) $this->_fleet['fleet_mission'],
+			(int) $this->_fleet['fleet_end_galaxy'],
+			(int) $this->_fleet['fleet_end_system'],
+			(int) $this->_fleet['fleet_end_planet'],
+			(int) $this->_fleet['fleet_end_type']
+		);
 	}
 
 	function EndStayEvent()

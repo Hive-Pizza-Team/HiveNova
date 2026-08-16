@@ -217,25 +217,39 @@ class MigratorTest extends TestCase
         $migrator->applySqlMigration($migration);
     }
 
-    public function testApplySqlMigrationContinuesOnQueryError(): void
+    public function testApplySqlMigrationSkipsDuplicateSchemaErrors(): void
     {
-        $sql = "BAD QUERY;\nGOOD QUERY;\n";
+        $sql = "ALTER TABLE foo ADD COLUMN bar INT;\nGOOD QUERY;\n";
         $this->addMigration(1, $sql);
 
         $pdo = $this->mockPdo();
         $pdo->expects($this->exactly(2))
             ->method('exec')
             ->willReturnOnConsecutiveCalls(
-                $this->throwException(new PDOException('syntax error')),
+                $this->throwException(new PDOException('Duplicate column name \'bar\'')),
                 1
             );
 
         $migrator  = $this->makeMigrator($pdo);
         $migration = $migrator->getPendingMigrations(0)[0];
-
-        // Must not throw — errors are logged and skipped
         $migrator->applySqlMigration($migration);
         $this->addToAssertionCount(1);
+    }
+
+    public function testApplySqlMigrationRethrowsUnexpectedSqlErrors(): void
+    {
+        $sql = "BAD QUERY;\n";
+        $this->addMigration(1, $sql);
+
+        $pdo = $this->mockPdo();
+        $pdo->method('exec')->willThrowException(new PDOException('syntax error'));
+
+        $migrator  = $this->makeMigrator($pdo);
+        $migration = $migrator->getPendingMigrations(0)[0];
+
+        $this->expectException(PDOException::class);
+        $this->expectExceptionMessage('syntax error');
+        $migrator->applySqlMigration($migration);
     }
 
     // -----------------------------------------------------------------------

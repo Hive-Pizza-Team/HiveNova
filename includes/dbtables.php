@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 21);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 28);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -51,6 +51,7 @@ $dbTableNames	= array(
 	'RECORDS'			=> DB_PREFIX.'records',
 	'SESSION'			=> DB_PREFIX.'session',
 	'SHORTCUTS'			=> DB_PREFIX.'shortcuts',
+	'FREQUENT_LOCATIONS'		=> DB_PREFIX.'frequent_locations',
 	'STATPOINTS'		=> DB_PREFIX.'statpoints',
 	'SYSTEM'		    => DB_PREFIX.'system',
 	'TICKETS'			=> DB_PREFIX.'ticket',
@@ -58,6 +59,7 @@ $dbTableNames	= array(
 	'TICKETS_CATEGORY'	=> DB_PREFIX.'ticket_category',
 	'TOPKB'				=> DB_PREFIX.'topkb',
 	'TOPKB_USERS'		=> DB_PREFIX.'users_to_topkb',
+	'UNIVERSE_EVENTS'		=> DB_PREFIX.'universe_events',
 	'USERS'				=> DB_PREFIX.'users',
 	'USERS_ACS'			=> DB_PREFIX.'users_to_acs',
 	'USERS_AUTH'		=> DB_PREFIX.'users_to_extauth',
@@ -74,5 +76,6 @@ $dbTableNames	= array(
 	'USER_ACHIEVEMENT_PROGRESS'	=> DB_PREFIX.'user_achievement_progress',
 	'USER_ACHIEVEMENTS'		=> DB_PREFIX.'user_achievements',
 	'ACHIEVEMENT_GRANTS'	=> DB_PREFIX.'achievement_grants',
+	'SALVAGE_PACKAGES'		=> DB_PREFIX.'salvage_packages',
 );
 // MOD-TABLES

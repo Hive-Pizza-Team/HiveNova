@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\FrequentLocationService;
 
 /**
  *  2Moons 
@@ -52,10 +53,9 @@ class ShowFleetStep1Page extends AbstractGamePage
 			if ($amount < 1 || $ShipID == 212) continue;
 
 			$Fleet[$ShipID]				= $amount;
-			$FleetRoom			   	   += $pricelist[$ShipID]['capacity'] * $amount;
 		}
 		
-		$FleetRoom	*= 1 + $USER['factor']['ShipStorage'];
+		$FleetRoom	= FleetFunctions::GetFleetRoom($Fleet, $USER);
 		
 		if (empty($Fleet))
 			FleetFunctions::GotoFleetPage();
@@ -81,6 +81,10 @@ class ShowFleetStep1Page extends AbstractGamePage
 		$shortcutList	= $this->GetUserShotcut();
 		$colonyList 	= $this->GetColonyList();
 		$ACSList 		= $this->GetAvalibleACS();
+		$frequentLocationList = FrequentLocationService::listForUser(
+			(int) $USER['id'],
+			FrequentLocationService::ownBodiesFromPlanets($USER['PLANETS'] ?? [])
+		);
 		
 		if(!empty($shortcutList)) {
 			$shortcutAmount	= max(array_keys($shortcutList));
@@ -98,6 +102,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 			'mission'		=> $mission,
 			'shortcutList'	=> $shortcutList,
 			'shortcutMax'	=> $shortcutAmount,
+			'frequentLocationList'	=> $frequentLocationList,
 			'colonyList' 	=> $colonyList,
 			'ACSList' 		=> $ACSList,
 			'galaxy' 		=> $targetGalaxy,
@@ -246,6 +251,11 @@ class ShowFleetStep1Page extends AbstractGamePage
 		$targetSystem 		= HTTP::_GP('system', 0);
 		$targetPlanet		= HTTP::_GP('planet', 0);
 		$targetPlanetType	= HTTP::_GP('planet_type', 1);
+
+		if (!FleetFunctions::HasCompleteTargetCoords($targetGalaxy, $targetSystem, $targetPlanet))
+		{
+			$this->sendJSON($LNG['fl_incomplete_coords']);
+		}
 	
 		if($targetGalaxy == $PLANET['galaxy'] && $targetSystem == $PLANET['system'] && $targetPlanet == $PLANET['planet'] && $targetPlanetType == $PLANET['planet_type'])
 		{
@@ -274,12 +284,12 @@ class ShowFleetStep1Page extends AbstractGamePage
                 ':targetType' => (($targetPlanetType == 2) ? 1 : $targetPlanetType),
             ));
 
-            if ($targetPlanetType == 3 && !isset($planetData))
+            if ($targetPlanetType == 3 && !is_array($planetData))
 			{
 				$this->sendJSON($LNG['fl_error_no_moon']);
 			}
 
-			if ($targetPlanetType != 2 && !empty($planetData['urlaubs_modus']) && isVacationMode($planetData))
+			if ($targetPlanetType != 2 && is_array($planetData) && !empty($planetData['urlaubs_modus']) && isVacationMode($planetData))
 			{
 				$this->sendJSON($LNG['fl_in_vacation_player']);
 			}
@@ -296,7 +306,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 				$this->sendJSON($LNG['fl_error_not_avalible']);
 			}
 
-			if($targetPlanetType == 2 && empty($planetData['der_metal']) && empty($planetData['der_crystal']))
+			if($targetPlanetType == 2 && (!is_array($planetData) || (empty($planetData['der_metal']) && empty($planetData['der_crystal']))))
 			{
 				$this->sendJSON($LNG['fl_error_empty_derbis']);
 			}

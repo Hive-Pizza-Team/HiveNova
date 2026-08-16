@@ -4,6 +4,8 @@ namespace HiveNova\Mission;
 
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
+use HiveNova\Core\EventFirehoseWriter;
+use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
@@ -91,6 +93,11 @@ HTML;
 		}
 
 		$targetUser		= $this->getUser((int) $targetPlanet['id_owner']);
+		if ($targetUser === []) {
+			$this->setState(FLEET_RETURN);
+			$this->SaveFleet();
+			return;
+		}
 		$targetUser['factor']	= getFactors($targetUser, 'basic', $this->_fleet['fleet_start_time']);
 
 		$planetUpdater	= new ResourceUpdate();
@@ -124,13 +131,24 @@ HTML;
 		
 		foreach($incomingFleets as $fleetID => $fleetDetail)
 		{
-			$fleetAttack[$fleetID]['player']	= $this->getUser((int) $fleetDetail['fleet_owner']);
+			if ((int) $fleetDetail['fleet_owner'] === 0) {
+				$family = str_contains((string) $fleetDetail['fleet_array'], '205,') ? 'alien' : 'pirate';
+				$fleetAttack[$fleetID]['player'] = \HiveNova\Core\PveNpcFleetFactory::syntheticPlayer(
+					\HiveNova\Core\PveNpcFleetFactory::displayName($family)
+				);
+				$fleetAttack[$fleetID]['player']['universe'] = (int) $this->_fleet['fleet_universe'];
+			} else {
+				$fleetAttack[$fleetID]['player']	= $this->getUser((int) $fleetDetail['fleet_owner']);
+			}
 
 			$fleetAttack[$fleetID]['player']['factor']	= getFactors($fleetAttack[$fleetID]['player'], 'attack', $this->_fleet['fleet_start_time']);
 			$fleetAttack[$fleetID]['fleetDetail']		= $fleetDetail;
 			$fleetAttack[$fleetID]['unit']				= FleetFunctions::unserialize($fleetDetail['fleet_array']);
 			
-			$userAttack[$fleetAttack[$fleetID]['player']['id']]	= $fleetAttack[$fleetID]['player']['username'];
+			$attackerId = (int) $fleetAttack[$fleetID]['player']['id'];
+			if ($attackerId !== 0) {
+				$userAttack[$attackerId] = $fleetAttack[$fleetID]['player']['username'];
+			}
 		}
 
 		$sql	= "SELECT * FROM %%FLEETS%%
@@ -357,8 +375,10 @@ HTML;
 			$targetDebris	= $db->selectSingle($sql, array(
 				':moonId'	=> $this->_fleet['fleet_end_id']
 			));
-			$targetPlanet['der_metal'] += $targetDebris['der_metal'];
-			$targetPlanet['der_crystal'] += $targetDebris['der_crystal'];
+			if (is_array($targetDebris)) {
+				$targetPlanet['der_metal'] += $targetDebris['der_metal'];
+				$targetPlanet['der_crystal'] += $targetDebris['der_crystal'];
+			}
 		}
 		
 		foreach($debrisResource as $elementID)
@@ -532,6 +552,7 @@ HTML;
 			$debrisType	= 'id';
 		}
 		
+		if ((int) $this->_fleet['fleet_owner'] !== 0) {
 		$sql = 'UPDATE %%PLANETS%% SET
 		der_metal	= :metal,
 		der_crystal	= :crystal
@@ -542,6 +563,7 @@ HTML;
 			':crystal'	=> $planetDebris[902],
 			':planetId'	=> $this->_fleet['fleet_end_id']
 		));
+		}
 
 		$sql = 'UPDATE %%PLANETS%% SET
 		metal		= metal - :metal,
@@ -571,20 +593,30 @@ HTML;
 			':result'	=> $combatResult['won']
 		));
 
-		$sql = 'UPDATE %%USERS%% SET
-		`'.$attackStatus.'` = `'.$attackStatus.'` + 1,
-		kbmetal		= kbmetal + :debrisMetal,
-		kbcrystal	= kbcrystal + :debrisCrystal,
-		lostunits	= lostunits + :lostUnits,
-		desunits	= desunits + :destroyedUnits
-		WHERE id IN ('.implode(',', array_keys($userAttack)).');';
+		EventFirehoseWriter::record(
+			(int) $this->_fleet['fleet_universe'],
+			(int) $this->_fleet['fleet_start_time'],
+			(float) ($combatResult['unitLost']['attacker'] + $combatResult['unitLost']['defender']),
+			(string) $combatResult['won']
+		);
 
-		$db->update($sql, array(
-			':debrisMetal'		=> $debris[901],
-			':debrisCrystal'	=> $debris[902],
-			':lostUnits'		=> $combatResult['unitLost']['attacker'],
-			':destroyedUnits'	=> $combatResult['unitLost']['defender']
-	  	));
+		$attackerIds = array_keys($userAttack);
+		if ($attackerIds !== []) {
+			$sql = 'UPDATE %%USERS%% SET
+			`'.$attackStatus.'` = `'.$attackStatus.'` + 1,
+			kbmetal		= kbmetal + :debrisMetal,
+			kbcrystal	= kbcrystal + :debrisCrystal,
+			lostunits	= lostunits + :lostUnits,
+			desunits	= desunits + :destroyedUnits
+			WHERE id IN ('.implode(',', $attackerIds).');';
+
+			$db->update($sql, array(
+				':debrisMetal'		=> $debris[901],
+				':debrisCrystal'	=> $debris[902],
+				':lostUnits'		=> $combatResult['unitLost']['attacker'],
+				':destroyedUnits'	=> $combatResult['unitLost']['defender']
+			));
+		}
 
 		$sql = 'UPDATE %%USERS%% SET
 		`'.$defendStatus.'` = `'.$defendStatus.'` + 1,
@@ -605,6 +637,15 @@ HTML;
 
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
+
+		DiscordWebhookService::notifyCombatResolved(
+			(int) $targetUser['id'],
+			(int) $this->_fleet['fleet_mission'],
+			(int) $this->_fleet['fleet_end_galaxy'],
+			(int) $this->_fleet['fleet_end_system'],
+			(int) $this->_fleet['fleet_end_planet'],
+			(int) $this->_fleet['fleet_end_type']
+		);
 	}
 	
 	function EndStayEvent()
@@ -614,6 +655,11 @@ HTML;
 	
 	function ReturnEvent()
 	{
+		if ((int) $this->_fleet['fleet_owner'] === 0) {
+			$this->KillFleet();
+			return;
+		}
+
 		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
 
 

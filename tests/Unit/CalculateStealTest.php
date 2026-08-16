@@ -26,12 +26,12 @@ class CalculateStealTest extends TestCase
 	 * @param int   $capacity       Raw capacity per ship × count (from pricelist)
 	 * @param float $storageFactor  Player ShipStorage bonus (0 = no bonus)
 	 */
-	private function makeAttacker(int $shipCount, int $shipId = 202, float $storageFactor = 0.0): array
+	private function makeAttacker(int $shipCount, int $shipId = 202, float $storageFactor = 0.0, array $techs = []): array
 	{
 		// pricelist[202]['capacity'] = 50 (set in game_data.php fixture)
 		return [
 			'unit'        => [$shipId => $shipCount],
-			'player'      => ['factor' => ['ShipStorage' => $storageFactor]],
+			'player'      => array_merge(['factor' => ['ShipStorage' => $storageFactor]], $techs),
 			'fleetDetail' => [
 				'fleet_resource_metal'      => 0,
 				'fleet_resource_crystal'    => 0,
@@ -157,5 +157,45 @@ class CalculateStealTest extends TestCase
 			array_sum($steal_bonus),
 			'Storage bonus must increase total loot'
 		);
+	}
+
+	public function testHyperspaceLeftoverIncreasesStealOnRequiringShipsOnly(): void
+	{
+		$GLOBALS['pricelist'][217]['capacity'] = 400000;
+		$GLOBALS['requirements'][217] = [114 => 10];
+		$GLOBALS['requirements'][202] = [115 => 1];
+
+		$planet = $this->makePlanet(['metal' => 1_000_000, 'crystal' => 1_000_000, 'deuterium' => 1_000_000]);
+
+		$smallCargo = [1 => $this->makeAttacker(10, 202, 0.0, ['hyperspace_tech' => 50])];
+		$pathfinder = [1 => $this->makeAttacker(1, 217, 0.0, ['hyperspace_tech' => 10])];
+
+		$stealCargo = calculateSteal($smallCargo, $planet, true);
+		$stealPath  = calculateSteal($pathfinder, $planet, true);
+
+		$this->assertLessThanOrEqual(500.01, array_sum($stealCargo));
+		$this->assertEqualsWithDelta(400000 * 1.10, array_sum($stealPath), 1e-6);
+	}
+
+	public function testMixedFleetStealUsesLeftoverOnlyOnHyperspaceShips(): void
+	{
+		$GLOBALS['pricelist'][202]['capacity'] = 50;
+		$GLOBALS['pricelist'][217]['capacity'] = 400000;
+		$GLOBALS['requirements'][202] = [115 => 1];
+		$GLOBALS['requirements'][217] = [114 => 10];
+
+		$fleets = [1 => [
+			'unit' => [202 => 10, 217 => 1],
+			'player' => ['factor' => ['ShipStorage' => 0], 'hyperspace_tech' => 10],
+			'fleetDetail' => [
+				'fleet_resource_metal' => 0,
+				'fleet_resource_crystal' => 0,
+				'fleet_resource_deuterium' => 0,
+			],
+		]];
+		$planet = $this->makePlanet(['metal' => 1_000_000, 'crystal' => 1_000_000, 'deuterium' => 1_000_000]);
+		$steal = calculateSteal($fleets, $planet, true);
+
+		$this->assertEqualsWithDelta(10 * 50 + 400000 * 1.10, array_sum($steal), 1e-6);
 	}
 }

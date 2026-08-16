@@ -24,6 +24,15 @@ class FakeAchievementDatabase implements DatabaseInterface
     public array $grants = [];
 
     /** @var list<array<string, mixed>> */
+    public array $universeEvents = [];
+
+    public int $universeEventId = 0;
+
+    public bool $throwOnUniverseEventsInsert = false;
+
+    public bool $throwOnUniverseEventsSelect = false;
+
+    /** @var list<array<string, mixed>> */
     public array $messages = [];
 
     /** @var list<array<string, mixed>> */
@@ -39,6 +48,8 @@ class FakeAchievementDatabase implements DatabaseInterface
     public int $planetCount = 1;
 
     public int $expeditionCount = 0;
+
+    public bool $missingStatPoints = false;
 
     /** @var array<string, int|string> */
     public array $statPoints = [
@@ -139,6 +150,40 @@ class FakeAchievementDatabase implements DatabaseInterface
             return $rows;
         }
 
+        if (str_contains($qry, 'FROM %%UNIVERSE_EVENTS%%')) {
+            if ($this->throwOnUniverseEventsSelect) {
+                throw new RuntimeException('universe events select failed');
+            }
+            $universe = (int) ($params[':universe'] ?? 0);
+            $sinceId = (int) ($params[':sinceId'] ?? 0);
+            $rows = array_values(array_filter(
+                $this->universeEvents,
+                static function (array $row) use ($universe, $sinceId): bool {
+                    if ((int) ($row['universe'] ?? 0) !== $universe) {
+                        return false;
+                    }
+                    if ($sinceId > 0 && (int) ($row['id'] ?? 0) <= $sinceId) {
+                        return false;
+                    }
+
+                    return true;
+                }
+            ));
+            $asc = stripos($qry, 'ORDER BY id ASC') !== false;
+            usort(
+                $rows,
+                static fn (array $a, array $b): int => $asc
+                    ? ((int) $a['id'] <=> (int) $b['id'])
+                    : ((int) $b['id'] <=> (int) $a['id'])
+            );
+            $limit = 50;
+            if (preg_match('/LIMIT\s+(\d+)/i', $qry, $m)) {
+                $limit = (int) $m[1];
+            }
+
+            return array_slice($rows, 0, $limit);
+        }
+
         if (str_contains($qry, 'FROM %%USERS%% WHERE id >') && str_contains($qry, 'LIMIT')) {
             return $this->cronUserBatch;
         }
@@ -216,6 +261,9 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'FROM %%STATPOINTS%%')) {
+            if ($this->missingStatPoints) {
+                return $field === false ? false : null;
+            }
             if (str_contains($qry, 'MAX(') && str_contains($qry, 'total_rank')) {
                 $rank = (int) ($this->statPoints['total_rank'] ?? 0);
                 return $field === 'rank' ? $rank : ['rank' => $rank];
@@ -271,6 +319,21 @@ class FakeAchievementDatabase implements DatabaseInterface
 
         if (str_contains($qry, '%%MESSAGES%%')) {
             $this->messages[] = $params;
+        }
+
+        if (str_contains($qry, '%%UNIVERSE_EVENTS%%')) {
+            if ($this->throwOnUniverseEventsInsert) {
+                throw new RuntimeException('universe events insert failed');
+            }
+            $this->universeEventId++;
+            $this->universeEvents[] = [
+                'id' => $this->universeEventId,
+                'universe' => (int) ($params[':universe'] ?? 0),
+                'time' => (int) ($params[':time'] ?? 0),
+                'event_type' => (string) ($params[':eventType'] ?? ''),
+                'size_bucket' => (string) ($params[':sizeBucket'] ?? ''),
+                'outcome' => (string) ($params[':outcome'] ?? ''),
+            ];
         }
 
         if (str_contains($qry, '%%RW%%')) {
@@ -338,6 +401,7 @@ class FakeAchievementDatabase implements DatabaseInterface
     public function getQueryCounter() { return 0; }
     public function quote($str) { return "'" . addslashes((string) $str) . "'"; }
     public function disconnect() {}
+    public function getHandle(): ?\PDO { return null; }
     public function beginTransaction(): void {}
     public function commit(): void {}
     public function rollback(): void {}

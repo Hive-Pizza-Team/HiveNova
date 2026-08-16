@@ -105,6 +105,8 @@ class SQLDumperFakeDatabase implements DatabaseInterface
 
     public function disconnect() {}
 
+    public function getHandle(): ?\PDO { return null; }
+
     public function beginTransaction(): void {}
 
     public function commit(): void {}

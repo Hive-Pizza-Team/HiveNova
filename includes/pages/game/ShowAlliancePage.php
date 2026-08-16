@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\AllianceService;
 use HiveNova\Core\Database;
+use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
@@ -71,6 +72,12 @@ class ShowAlliancePage extends AbstractGamePage
 			':allianceId'	=> $allianceId
 		));
 
+		if (!is_array($this->allianceData)) {
+			$this->hasAlliance = false;
+			$this->allianceData = null;
+			return;
+		}
+
 		if ($USER['ally_id'] == $allianceId) {
 			if ($this->allianceData['ally_owner'] == $USER['id']) {
 				$this->rights	= array_combine($this->availableRanks, array_fill(0, count($this->availableRanks), true));
@@ -82,7 +89,7 @@ class ShowAlliancePage extends AbstractGamePage
 				));
 			}
 
-			if (!isset($this->rights)) {
+			if (!is_array($this->rights)) {
 				$this->rights	= array_combine($this->availableRanks, array_fill(0, count($this->availableRanks), false));
 				$this->rights['EVENTS']    = true; // enable events visibility by default
 			}
@@ -208,10 +215,12 @@ class ShowAlliancePage extends AbstractGamePage
 		$db	= Database::get();
 		$sql	= "SELECT a.ally_tag FROM %%ALLIANCE_REQUEST%% r INNER JOIN %%ALLIANCE%% a ON a.id = r.allianceId WHERE r.userId = :userId;";
 		$allianceResult = $db->selectSingle($sql, array(
-			':userId'	=> $USER['id_planet']
+			':userId'	=> $USER['id']
 		));
 
-		if(empty($allianceResult['ally_tag'])) { $allianceResult['ally_tag'] = 0; }
+		if (!is_array($allianceResult) || empty($allianceResult['ally_tag'])) {
+			$allianceResult = ['ally_tag' => 0];
+		}
 
 		$this->assign(array(
 			'request_text'	=> sprintf($LNG['al_request_wait_message'], $allianceResult['ally_tag']),
@@ -584,7 +593,7 @@ class ShowAlliancePage extends AbstractGamePage
 	public function memberList()
 	{
 		global $USER, $LNG;
-		if (!isset($this->rights) || !$this->rights['MEMBERLIST']) {
+		if (!is_array($this->rights) || !$this->rights['MEMBERLIST']) {
 			$this->redirectToHome();
 		}
 
@@ -607,10 +616,7 @@ class ShowAlliancePage extends AbstractGamePage
 		));
 
 		try {
-			$USER    += $db->selectSingle('SELECT total_points FROM %%STATPOINTS%% WHERE id_owner = :userId AND stat_type = :statType', array(
-				':userId'    => $USER['id'],
-				':statType'    => 1
-			));
+			mergeUserStatPoints($USER);
 		} catch (Exception) {
 			$USER['total_points'] = 0;
 		}
@@ -755,9 +761,10 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminOverview()
 	{
-		global $LNG;
+		global $LNG, $USER;
 		$send 		= HTTP::_GP('send', 0);
 		$textMode  	= HTTP::_GP('textMode', 'external');
+		$webhookInvalid = false;
 
 		if ($send) {
 			if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -837,8 +844,26 @@ class ShowAlliancePage extends AbstractGamePage
 					break;
 			}
 
+			$webhookSql = '';
+			$webhookParams = [];
+			if ((int) $this->allianceData['ally_owner'] === (int) $USER['id']) {
+				$resolvedWebhook = DiscordWebhookService::resolveAdminInput(
+					HTTP::_GP('discord_webhook', ''),
+					HTTP::_GP('discord_webhook_clear', 0) == 1,
+					(string) ($this->allianceData['ally_discord_webhook'] ?? '')
+				);
+				if ($resolvedWebhook === false) {
+					$webhookInvalid = true;
+				} else {
+					$this->allianceData['ally_discord_webhook'] = $resolvedWebhook;
+					$webhookSql = 'ally_discord_webhook = :AllianceDiscordWebhook, ';
+					$webhookParams[':AllianceDiscordWebhook'] = $resolvedWebhook;
+				}
+			}
+
 			$sql = "UPDATE %%ALLIANCE%% SET
 			" . $textSQL . "
+			" . $webhookSql . "
 			ally_tag = :AllianceTag,
 			ally_name = :AllianceName,
 			ally_owner_range = :AllianceOwnerRange,
@@ -852,7 +877,7 @@ class ShowAlliancePage extends AbstractGamePage
 			ally_events = :AllianceEvents
 			WHERE id = :AllianceID;";
 
-			$db->update($sql, array(
+			$db->update($sql, array_merge($webhookParams, array(
 				':AllianceTag'				=> $this->allianceData['ally_tag'],
 				':AllianceName'				=> $this->allianceData['ally_name'],
 				':AllianceOwnerRange'		=> $this->allianceData['ally_owner_range'],
@@ -866,7 +891,14 @@ class ShowAlliancePage extends AbstractGamePage
 				':AllianceEvents'			=> $this->allianceData['ally_events'],
 				':AllianceID'				=> $this->allianceData['id'],
 				':text'						=> $text
-			));
+			)));
+
+			if ($webhookInvalid) {
+				$this->printMessage($LNG['al_discord_webhook_invalid'], array(array(
+					'label'	=> $LNG['sys_back'],
+					'url'	=> 'game.php?page=alliance&mode=admin'
+				)));
+			}
 		} else if (isset($this->allianceData)) {
 			$text = match ($textMode) {
                 'internal' => $this->allianceData['ally_text'],
@@ -893,6 +925,8 @@ class ShowAlliancePage extends AbstractGamePage
 			'ally_tag' 					=> $this->allianceData['ally_tag'],
 			'ally_name'					=> $this->allianceData['ally_name'],
 			'ally_web' 					=> $this->allianceData['ally_web'],
+			'AllianceOwner'				=> (int) $this->allianceData['ally_owner'] === (int) $USER['id'],
+			'discord_webhook_configured'	=> !empty($this->allianceData['ally_discord_webhook']),
 			'ally_image'				=> $this->allianceData['ally_image'],
 			'ally_request_notallow' 	=> $this->allianceData['ally_request_notallow'],
 			'ally_members' 				=> $this->allianceData['ally_members'],
@@ -944,6 +978,9 @@ class ShowAlliancePage extends AbstractGamePage
 			$Rank = $db->selectSingle($sql, array(
 				':LeaderID'	=> $postleader
 			));
+			if (!is_array($Rank)) {
+				$this->redirectToHome();
+			}
 
 			$sql = "UPDATE %%USERS%% SET ally_rank_id = :AllyRank WHERE id = :UserID;";
 			$db->update($sql, array(
@@ -1307,10 +1344,7 @@ class ShowAlliancePage extends AbstractGamePage
 		$memberList	= array();
 
 		try {
-			$USER    += $db->selectSingle('SELECT total_points FROM %%STATPOINTS%% WHERE id_owner = :userId AND stat_type = :statType', array(
-				':userId'    => $USER['id'],
-				':statType'    => 1
-			));
+			mergeUserStatPoints($USER);
 		} catch (Exception) {
 			$USER['total_points'] = 0;
 		}
@@ -1582,7 +1616,7 @@ class ShowAlliancePage extends AbstractGamePage
 		if (empty($targetAlliance)) {
 			$this->sendJSON(array(
 				'error'		=> true,
-				'message'	=> sprintf($LNG['al_diplo_no_alliance'], $targetAlliance['id']),
+				'message'	=> sprintf($LNG['al_diplo_no_alliance'], $id),
 			));
 		}
 

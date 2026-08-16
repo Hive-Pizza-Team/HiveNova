@@ -128,12 +128,13 @@ class ShowResearchPage extends AbstractGamePage
 					continue;
 
 				if($ListIDArray[4] != $PLANET['id']) {
-					$sql = "SELECT :resource6, :resource31, id FROM %%PLANETS%% WHERE id = :id;";
+					$sql = "SELECT `".$resource[6]."`, `".$resource[31]."`, id FROM %%PLANETS%% WHERE id = :id;";
 					$CPLANET = $db->selectSingle($sql, array(
-						':resource6'	=> $resource[6],
-						':resource31'	=> $resource[31],
 						':id'			=> $ListIDArray[4]
 					));
+					if (!is_array($CPLANET)) {
+						continue;
+					}
 				} else
 					$CPLANET		= $PLANET;
 
@@ -194,12 +195,13 @@ class ShowResearchPage extends AbstractGamePage
 				if($ListIDArray[4] != $PLANET['id']) {
 					$db = Database::get();
 
-					$sql = "SELECT :resource6, :resource31, id FROM %%PLANETS%% WHERE id = :id;";
+					$sql = "SELECT `".$resource[6]."`, `".$resource[31]."`, id FROM %%PLANETS%% WHERE id = :id;";
 					$CPLANET = $db->selectSingle($sql, array(
-						':resource6'	=> $resource[6],
-						':resource31'	=> $resource[31],
 						':id'			=> $ListIDArray[4]
 					));
+					if (!is_array($CPLANET)) {
+						continue;
+					}
 				} else
 					$CPLANET				= $PLANET;
 

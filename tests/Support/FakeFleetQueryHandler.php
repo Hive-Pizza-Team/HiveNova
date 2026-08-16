@@ -24,6 +24,8 @@ trait FakeFleetQueryHandler
     /** Expeditions in target system (LOG_FLEETS COUNT … AS total). */
     public int $expeditionLogCount = 0;
 
+    public int $onlineUserCount = 0;
+
     public int $acsGroupMemberCount = 0;
 
     /** @var list<array{sql: string, params: array}> */
@@ -43,6 +45,31 @@ trait FakeFleetQueryHandler
 
     private function fleetSelect(string $qry, array $params): array
     {
+        if (str_contains($qry, '%%FLEETS%%')
+            && str_contains($qry, 'DISTINCT fleet_owner')
+            && str_contains($qry, 'fleet_mission')) {
+            $seen = [];
+            $out = [];
+            foreach ($this->fleetRowsById as $row) {
+                if ((int) ($row['fleet_universe'] ?? 1) !== (int) ($params[':universe'] ?? 1)) {
+                    continue;
+                }
+                if ((int) ($row['fleet_mess'] ?? 0) !== (int) ($params[':outward'] ?? 0)) {
+                    continue;
+                }
+                if (!in_array((int) ($row['fleet_mission'] ?? 0), [1, 2, 9], true)) {
+                    continue;
+                }
+                $owner = (int) ($row['fleet_owner'] ?? 0);
+                if (isset($seen[$owner])) {
+                    continue;
+                }
+                $seen[$owner] = true;
+                $out[] = $row;
+            }
+            return $out;
+        }
+
         if (str_contains($qry, '%%FLEETS%%')
             && str_contains($qry, 'fleet_end_id')
             && str_contains($qry, 'fleet_mission')
@@ -92,6 +119,63 @@ trait FakeFleetQueryHandler
                 return $field === false ? $count : ($count[$field] ?? false);
             }
             $count = ['state' => $this->bashLogCount];
+            return $field === false ? $count : ($count[$field] ?? false);
+        }
+
+        if (str_contains($qry, '%%USERS%%') && str_contains($qry, 'COUNT(*)') && str_contains($qry, 'onlinetime')) {
+            $count = ['total' => $this->onlineUserCount];
+            return $field === false ? $count : ($count[$field] ?? false);
+        }
+
+        if (str_contains($qry, '%%FLEETS%%')
+            && str_contains($qry, 'COUNT(*)')
+            && str_contains($qry, 'fleet_owner = 0')) {
+            $planetId = (int) ($params[':planetId'] ?? 0);
+            $outward = (int) ($params[':outward'] ?? 0);
+            $n = 0;
+            foreach ($this->fleetRowsById as $row) {
+                if ((int) ($row['fleet_end_id'] ?? 0) !== $planetId) {
+                    continue;
+                }
+                if ((int) ($row['fleet_owner'] ?? -1) !== 0) {
+                    continue;
+                }
+                if ((int) ($row['fleet_mission'] ?? 0) !== 1) {
+                    continue;
+                }
+                if ((int) ($row['fleet_mess'] ?? 0) !== $outward) {
+                    continue;
+                }
+                $n++;
+            }
+            $count = ['total' => $n];
+            return $field === false ? $count : ($count[$field] ?? false);
+        }
+
+        if (str_contains($qry, '%%FLEETS%%')
+            && str_contains($qry, 'COUNT(*)')
+            && str_contains($qry, 'fleet_target_owner')) {
+            $targetId = (int) ($params[':targetUserId'] ?? 0);
+            $ownerId = (int) ($params[':ownerId'] ?? $targetId);
+            $outward = (int) ($params[':outward'] ?? 0);
+            $hostile = [1, 2, 6, 9, 10];
+            $incoming = 0;
+            foreach ($this->fleetRowsById as $row) {
+                if ((int) ($row['fleet_target_owner'] ?? 0) !== $targetId) {
+                    continue;
+                }
+                if ((int) ($row['fleet_owner'] ?? 0) === $ownerId) {
+                    continue;
+                }
+                if ((int) ($row['fleet_mess'] ?? 0) !== $outward) {
+                    continue;
+                }
+                if (!in_array((int) ($row['fleet_mission'] ?? 0), $hostile, true)) {
+                    continue;
+                }
+                $incoming++;
+            }
+            $count = ['incoming' => $incoming];
             return $field === false ? $count : ($count[$field] ?? false);
         }
 

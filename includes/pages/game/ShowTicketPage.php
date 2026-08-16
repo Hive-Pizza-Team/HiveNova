@@ -105,10 +105,15 @@ class ShowTicketPage extends AbstractGamePage
 		} else {
 			$db = Database::get();
 
-			$sql = "SELECT status FROM %%TICKETS%% WHERE ticketID = :ticketID;";
+			$sql = "SELECT status FROM %%TICKETS%% WHERE ticketID = :ticketID AND ownerID = :ownerID;";
 			$ticketStatus = $db->selectSingle($sql, array(
-				':ticketID'	=> $ticketID
+				':ticketID'	=> $ticketID,
+				':ownerID'	=> $USER['id']
 			), 'status');
+
+			if ($ticketStatus === false || $ticketStatus === null) {
+				$this->printMessage(sprintf($LNG['ti_not_exist'], $ticketID));
+			}
 
 			if ($ticketStatus == 2)
 			{

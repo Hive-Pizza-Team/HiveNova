@@ -5,6 +5,7 @@ namespace HiveNova\Page\Game;
 use HiveNova\Core\AchievementService;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
+use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PlayerUtil;
@@ -187,6 +188,7 @@ abstract class AbstractGamePage
 			'badges'            => PlayerUtil::getPlayerBadges($USER),
 			'pushAlerts'		=> PushNotificationService::isEnabledForUser((int) $USER['id']) ? 1 : 0,
 			'pushConfigured'	=> PushNotificationService::isConfigured(),
+			'attackAlertCount'	=> IncomingHostileFleetQuery::countForUser((int) $USER['id']),
 		));
 
 		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {

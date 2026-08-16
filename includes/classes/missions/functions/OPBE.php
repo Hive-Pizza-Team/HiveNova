@@ -27,17 +27,19 @@
  * @link https://github.com/jstar88/opbe
  */
 $path = dirname(dirname(dirname(__dir__ ))) . DIRECTORY_SEPARATOR . 'libs'. DIRECTORY_SEPARATOR . 'opbe' . DIRECTORY_SEPARATOR;
-require ($path . 'utils' . DIRECTORY_SEPARATOR . 'includer.php');
+if (!class_exists('DebugManager', false)) {
+    require ($path . 'utils' . DIRECTORY_SEPARATOR . 'includer.php');
+}
 require ('LangImplementation.php');
 
-define('ID_MIN_SHIPS', 100);
-define('ID_MAX_SHIPS', 300);
-define('HOME_FLEET', 0);
-define('DEFENDERS_WON', 'r');
-define('ATTACKERS_WON', 'a');
-define('DRAW', 'w');
-define('METAL_ID', 901);
-define('CRYSTAL_ID', 902);
+if (!defined('ID_MIN_SHIPS')) define('ID_MIN_SHIPS', 100);
+if (!defined('ID_MAX_SHIPS')) define('ID_MAX_SHIPS', 300);
+if (!defined('HOME_FLEET')) define('HOME_FLEET', 0);
+if (!defined('DEFENDERS_WON')) define('DEFENDERS_WON', 'r');
+if (!defined('ATTACKERS_WON')) define('ATTACKERS_WON', 'a');
+if (!defined('DRAW')) define('DRAW', 'w');
+if (!defined('METAL_ID')) define('METAL_ID', 901);
+if (!defined('CRYSTAL_ID')) define('CRYSTAL_ID', 902);
 
 
 /**
@@ -85,7 +87,7 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
         {
             if (empty($amount))
                 continue;
-            $shipType = getShipType($element, $amount);
+            $shipType = getShipType($element, $amount, $player);
             $attackerFleetObj->addShipType($shipType);
         }
         $attackerPlayerObj->addFleet($attackerFleetObj);
@@ -104,7 +106,7 @@ function calculateAttack(&$attackers, &$defenders, $FleetTF, $DefTF)
         {
             if (empty($amount))
                 continue;
-            $shipType = getShipType($element, $amount);
+            $shipType = getShipType($element, $amount, $player);
             $defenderFleetObj->addShipType($shipType);
         }
         $defenderPlayerObj->addFleet($defenderFleetObj);
@@ -282,16 +284,17 @@ function updatePlayers(PlayerGroup $playerGroup, &$players)
  * 
  * @param int $id
  * @param int $count
+ * @param array $player
  * @return ShipType
  */
-function getShipType($id, $count)
+function getShipType($id, $count, $player = array())
 {
     $CombatCaps = $GLOBALS['CombatCaps'];
     $pricelist = $GLOBALS['pricelist'];
     $rf = isset($CombatCaps[$id]['sd']) ? $CombatCaps[$id]['sd'] : 0;
     $shield = $CombatCaps[$id]['shield'];
     $cost = array($pricelist[$id]['cost'][METAL_ID], $pricelist[$id]['cost'][CRYSTAL_ID]);
-    $power = $CombatCaps[$id]['attack'];
+    $power = $CombatCaps[$id]['attack'] * \HiveNova\Core\LeftoverBonus::attackMultiplier((int) $id, $player);
     if ($id > ID_MIN_SHIPS && $id < ID_MAX_SHIPS)
     {
         return new Ship($id, $count, $rf, $shield, $cost, $power);

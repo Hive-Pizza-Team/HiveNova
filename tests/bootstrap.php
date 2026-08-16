@@ -19,6 +19,7 @@ if (!defined('TIMESTAMP'))     define('TIMESTAMP',      time());
 if (!defined('MODE'))          define('MODE',           'INSTALL');
 if (!defined('DEFAULT_LANG'))  define('DEFAULT_LANG',   'en');
 if (!defined('MIN_FLEET_TIME')) define('MIN_FLEET_TIME', 10);
+if (!defined('MARKET_TRADE_HISTORY_LIMIT')) define('MARKET_TRADE_HISTORY_LIMIT', 40);
 if (!defined('INACTIVE'))      define('INACTIVE',       7 * 86400);
 if (!defined('INACTIVE_LONG')) define('INACTIVE_LONG',  28 * 86400);
 if (!defined('ROOT_UNI'))      define('ROOT_UNI',        1);
@@ -27,6 +28,32 @@ require_once __DIR__ . '/../includes/GeneralFunctions.php';
 
 if (!defined('MODULE_ACHIEVEMENTS')) {
     define('MODULE_ACHIEVEMENTS', 46);
+}
+if (!defined('MODULE_MISSION_SALVAGE')) {
+    define('MODULE_MISSION_SALVAGE', 47);
+}
+if (!defined('MODULE_AMOUNT')) {
+    define('MODULE_AMOUNT', 48);
+}
+if (!defined('PVE_ONLINE_WINDOW')) {
+    define('PVE_ONLINE_WINDOW', 900);
+    define('PVE_SPAWN_BASE', 2);
+    define('PVE_SPAWN_PER_ONLINE', 1);
+    define('PVE_SPAWN_HARD_CAP', 12);
+    define('PVE_PACKAGE_TTL', 86400);
+    define('PVE_PACKAGE_BASE_METAL', 5000);
+    define('PVE_PACKAGE_BASE_CRYSTAL', 2500);
+    define('PVE_PACKAGE_GROWTH_PER_HOUR', 500);
+    define('PVE_PACKAGE_CAP_METAL', 50000);
+    define('PVE_PACKAGE_CAP_CRYSTAL', 25000);
+    define('PVE_HANGAR_WEAK_FRACTION', 0.5);
+    define('PVE_ACCUSED_SHIP_FACTOR', 1.1);
+    define('PVE_ACCUSED_RAID_CHANCE', 15);
+    define('PVE_RAID_FLIGHT_SECONDS', 600);
+    define('PVE_ENCOUNTER_CHANCE', 40);
+    define('PVE_ACCUSED_ENCOUNTER_BONUS', 10);
+    define('PVE_OVERLAY_CHANCE', 20);
+    define('PVE_ACCUSED_OVERLAY_BONUS', 15);
 }
 
 if (!defined('DB_PREFIX')) {
@@ -75,6 +102,7 @@ if (!defined('DEFENSE_DEBRIS_FACTOR')) define('DEFENSE_DEBRIS_FACTOR', 0.0);
 require_once OPBEPATH . 'constants/battle_constants.php';
 require_once OPBEPATH . 'utils/GeometricDistribution.php';
 require_once OPBEPATH . 'utils/Gauss.php';
+require_once OPBEPATH . 'utils/DebugManager.php';
 require_once OPBEPATH . 'utils/IterableUtil.php';
 require_once OPBEPATH . 'utils/Math.php';
 require_once OPBEPATH . 'utils/Number.php';

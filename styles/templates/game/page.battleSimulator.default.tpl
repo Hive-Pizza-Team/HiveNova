@@ -57,6 +57,26 @@
 								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.0.111)}{$battleinput.{$smarty.section.content.index}.0.111}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][0][111]"></td>
 								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.1.111)}{$battleinput.{$smarty.section.content.index}.1.111}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][1][111]"></td>
 							</tr>
+							<tr>
+								<td>{$LNG.tech.114}:</td>
+								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.0.114)}{$battleinput.{$smarty.section.content.index}.0.114}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][0][114]"></td>
+								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.1.114)}{$battleinput.{$smarty.section.content.index}.1.114}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][1][114]"></td>
+							</tr>
+							<tr>
+								<td>{$LNG.tech.120}:</td>
+								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.0.120)}{$battleinput.{$smarty.section.content.index}.0.120}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][0][120]"></td>
+								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.1.120)}{$battleinput.{$smarty.section.content.index}.1.120}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][1][120]"></td>
+							</tr>
+							<tr>
+								<td>{$LNG.tech.121}:</td>
+								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.0.121)}{$battleinput.{$smarty.section.content.index}.0.121}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][0][121]"></td>
+								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.1.121)}{$battleinput.{$smarty.section.content.index}.1.121}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][1][121]"></td>
+							</tr>
+							<tr>
+								<td>{$LNG.tech.122}:</td>
+								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.0.122)}{$battleinput.{$smarty.section.content.index}.0.122}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][0][122]"></td>
+								<td><input type="text" inputmode="numeric" size="10" value="{if isset($battleinput.{$smarty.section.content.index}.1.122)}{$battleinput.{$smarty.section.content.index}.1.122}{else}0{/if}" name="battleinput[{$smarty.section.content.index}][1][122]"></td>
+							</tr>
 						</table>
 						<br>
 						<table>

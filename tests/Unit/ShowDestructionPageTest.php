@@ -113,6 +113,11 @@ final class DestructionPageDatabaseStub implements DatabaseInterface
     {
     }
 
+    public function getHandle(): ?\PDO
+    {
+        return null;
+    }
+
     public function beginTransaction(): void
     {
     }

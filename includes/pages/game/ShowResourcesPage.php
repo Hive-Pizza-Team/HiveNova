@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\PlanetProductionBonus;
 use HiveNova\Core\ResourceUpdate;
 
 /**
@@ -151,6 +152,14 @@ class ShowResourcesPage extends AbstractGamePage
 					continue;
 
 				$Production	= eval(ResourceUpdate::getProd($ProdGrid[$ProdID]['production'][$ID], $ProdID));
+
+				if (in_array($ID, array(901, 902), true)) {
+					$Production *= PlanetProductionBonus::forResource(
+						(int) $PLANET['planet_type'],
+						(int) $PLANET['planet'],
+						$ID
+					);
+				}
 
 				if(in_array($ID, $reslist['resstype'][2]))
 				{

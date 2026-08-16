@@ -76,6 +76,13 @@ class ShowLostPasswordPage extends AbstractLoginPage
 			':userID'	=> $userID,
 		));
 
+		if (!is_array($userData)) {
+			$this->printMessage($LNG['passwordValidInValid'], array(array(
+				'label'	=> $LNG['passwordBack'],
+				'url'	=> 'index.php',
+			)));
+		}
+
 		$config			= Config::get($userData['universe']);
 
 		$MailRAW		= $LNG->getTemplate('email_lost_password_changed');
