@@ -353,6 +353,25 @@ class AchievementServiceExtendedTest extends TestCase
         $this->assertCount(0, $fake->grants);
     }
 
+    public function testUnlockMessageNamesPizzabitsNotDarkMatter(): void
+    {
+        $fake = $this->useFake(new FakeAchievementDatabase());
+        $fake->users[1] = $this->sampleUser(1);
+        $fake->users[1]['wons'] = 1;
+        $ach = $this->ach('combat_wins', ['threshold' => 1], 1);
+        $ach['reward_type'] = 'darkmatter';
+        $ach['reward_amount'] = 500;
+        $fake->achievementDefinitions = [$ach];
+
+        AchievementService::get()->processEvent(1, 'combat_wins', [], false);
+
+        $this->assertNotEmpty($fake->messages);
+        $text = (string) $fake->messages[0][':text'];
+        $this->assertStringContainsString('Pizzabits', $text);
+        $this->assertStringNotContainsString('Dark Matter', $text);
+        $this->assertStringContainsString('500', $text);
+    }
+
     public function testIsSchemaReadyTrueWithFake(): void
     {
         $fake = $this->useFake(new FakeAchievementDatabase());
