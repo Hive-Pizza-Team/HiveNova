@@ -40,9 +40,7 @@ class MissionCaseSalvage extends MissionFunctions implements Mission
 				':planet'   => $planet,
 			]
 		);
-		if (!empty($colonized['id']) && (int) $this->_fleet['fleet_end_id'] === 0) {
-			$this->UpdateFleet('fleet_end_id', (int) $colonized['id']);
-			PvePackageService::attachToPlanet($universe, $galaxy, $system, $planet, (int) $colonized['id']);
+		if (is_array($colonized) && !empty($colonized['id']) && (int) $this->_fleet['fleet_end_id'] === 0) {
 			$this->UpdateFleet('fleet_end_id', (int) $colonized['id']);
 			PvePackageService::attachToPlanet($universe, $galaxy, $system, $planet, (int) $colonized['id']);
 		}

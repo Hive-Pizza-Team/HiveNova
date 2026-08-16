@@ -389,12 +389,13 @@ class GalaxyRows
 				? $THEME->getTheme()
 				: '';
 			$vizEnabled = str_contains($themePath, '/hive/');
+			$shareIntel = $this->hasSharedPlanetVizIntel();
 			$this->galaxyData[$this->galaxyRow['planet']]['moon']	= array(
 				'id'		=> $this->galaxyRow['m_id'],
 				'name'		=> htmlspecialchars((string) $this->galaxyRow['m_name'], ENT_QUOTES, "UTF-8"),
-				'temp_min'	=> $this->galaxyRow['m_temp_min'], 
-				'temp_max'	=> $this->galaxyRow['m_temp_max'],
-				'diameter'	=> $this->galaxyRow['m_diameter'],
+				'temp_min'	=> $shareIntel ? $this->galaxyRow['m_temp_min'] : 0, 
+				'temp_max'	=> $shareIntel ? $this->galaxyRow['m_temp_max'] : 0,
+				'diameter'	=> $shareIntel ? $this->galaxyRow['m_diameter'] : 0,
 				'vizRef'	=> $vizEnabled ? ('moon:' . (int) $this->galaxyRow['m_id']) : '',
 			);
 		}

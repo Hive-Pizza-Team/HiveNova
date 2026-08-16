@@ -201,6 +201,19 @@ class PveRaidServiceTest extends TestCase
         $this->assertFalse(PveRaidService::trySpawnRaid(1, 10, $this->outward(['fleet_start_id' => 404]), TIMESTAMP, false));
     }
 
+    public function testRunAccusedIdleSkipsUserWithNoPlanet(): void
+    {
+        $this->fake->accusedDestIds = [404];
+        $this->fake->achievement->users[404] = [
+            'id' => 404,
+            'urlaubs_modus' => 0,
+            'universe' => 1,
+            'lang' => 'en',
+        ];
+
+        $this->assertSame(0, PveRaidService::run(1, TIMESTAMP));
+    }
+
     public function testTrySpawnRaidSkipsAccusedIdleWhenHangarStrong(): void
     {
         global $resource, $reslist, $pricelist;

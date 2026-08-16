@@ -221,6 +221,26 @@ class GalaxyRowsTest extends TestCase
         $this->assertSame('Luna', $data[11]['moon']['name']);
     }
 
+    public function test_get_galaxy_data_hides_stranger_moon_diameter(): void
+    {
+        $this->seedGalaxyRow([
+            'planet' => 13,
+            'buddy' => 0,
+            'm_id' => 502,
+            'm_name' => 'Hidden',
+            'm_temp_min' => -80,
+            'm_temp_max' => 20,
+            'm_diameter' => 8888,
+        ]);
+
+        $data = $this->galaxyRows()->setGalaxy(1)->setSystem(5)->getGalaxyData();
+
+        $this->assertSame(502, $data[13]['moon']['id']);
+        $this->assertSame(0, $data[13]['moon']['diameter']);
+        $this->assertSame(0, $data[13]['moon']['temp_min']);
+        $this->assertSame(0, $data[13]['moon']['temp_max']);
+    }
+
     public function test_get_galaxy_data_without_debris_or_moon(): void
     {
         $this->seedGalaxyRow([

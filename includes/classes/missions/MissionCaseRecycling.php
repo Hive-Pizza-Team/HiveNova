@@ -54,7 +54,7 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 			':planetId'	=> $this->_fleet['fleet_end_id']
 		));
 
-		if(!empty($targetData['total']))
+		if(is_array($targetData) && !empty($targetData['total']))
 		{
 			$targetUser			= $this->getUser((int) $this->_fleet['fleet_owner']);
 

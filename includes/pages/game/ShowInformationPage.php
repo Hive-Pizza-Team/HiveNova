@@ -50,6 +50,14 @@ class ShowInformationPage extends AbstractGamePage
 
 		$NextJumpTime = self::getNextJumpWaitTime($PLANET['last_jump_time']);
 
+		if ((int) ($PLANET['planet_type'] ?? 0) !== 3 || empty($PLANET[$resource[43]]))
+		{
+			$this->sendJSON(array(
+				'message' => $LNG['in_jump_gate_doesnt_have_one'],
+				'error' => true
+			));
+		}
+
 		if (TIMESTAMP < $NextJumpTime)
 		{
 			$this->sendJSON(array(

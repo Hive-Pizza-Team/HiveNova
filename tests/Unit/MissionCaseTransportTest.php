@@ -86,4 +86,15 @@ class MissionCaseTransportTest extends TestCase
         $this->assertCount(1, $this->fake->achievement->messages);
         $this->assertSame(1, $mission->kill);
     }
+
+    public function test_transport_kills_fleet_when_origin_user_is_gone(): void
+    {
+        unset($this->fake->planetRowsById[10], $this->fake->achievement->users[1]);
+
+        $fleet = transportFleetFixture();
+        $mission = new MissionCaseTransport($fleet);
+        $mission->TargetEvent();
+
+        $this->assertSame(1, $mission->kill);
+    }
 }
