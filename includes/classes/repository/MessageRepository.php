@@ -7,10 +7,18 @@ use HiveNova\Core\Database;
 class MessageRepository
 {
     /**
+     * Combat/expedition title class. Win mail still embeds raportLose on the
+     * opponent's loss line, so a bare "%raportLose%" matches every non-draw.
+     */
+    public const LOST_COMBAT_TITLE_LIKE = '%target="_blank"><span class="raportLose">%';
+
+    public const LOST_SPY_LIKE = '%spyReportLost%';
+
+    /**
      * Extra WHERE fragment for the lost-battle / lost-spy list filter.
      *
-     * Combat and expedition reports mark the player's loss with CSS class
-     * raportLose. Spy reports that lose probes use spyReportLost.
+     * Combat and expedition reports mark the player's own result on the
+     * report-link title. Spy reports that lose probes use spyReportLost.
      *
      * @return array{sql: string, params: array<string, string>}
      */
@@ -24,15 +32,15 @@ class MessageRepository
             return [
                 'sql'    => ' AND (message_text LIKE :lostNeedle OR message_text LIKE :lostNeedleSpy)',
                 'params' => [
-                    ':lostNeedle'    => '%raportLose%',
-                    ':lostNeedleSpy' => '%spyReportLost%',
+                    ':lostNeedle'    => self::LOST_COMBAT_TITLE_LIKE,
+                    ':lostNeedleSpy' => self::LOST_SPY_LIKE,
                 ],
             ];
         }
 
         $pattern = match ($category) {
-            0 => '%spyReportLost%',
-            3, 15 => '%raportLose%',
+            0 => self::LOST_SPY_LIKE,
+            3, 15 => self::LOST_COMBAT_TITLE_LIKE,
             default => null,
         };
 
