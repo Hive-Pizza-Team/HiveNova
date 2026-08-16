@@ -48,7 +48,7 @@ trait FakePlanetQueryHandler
             return $field === false ? $row : ($row[$field] ?? false);
         }
 
-        $planetId = (int) ($params[':id'] ?? $planetId);
+        $planetId = (int) ($params[':id'] ?? $params[':moonId'] ?? $planetId);
         $row = $this->planetRowsById[$planetId] ?? null;
         if ($row === null) {
             return $field === false ? null : false;

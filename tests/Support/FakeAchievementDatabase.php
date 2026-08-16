@@ -30,6 +30,8 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public bool $throwOnUniverseEventsInsert = false;
 
+    public bool $throwOnUniverseEventsSelect = false;
+
     /** @var list<array<string, mixed>> */
     public array $messages = [];
 
@@ -149,6 +151,9 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'FROM %%UNIVERSE_EVENTS%%')) {
+            if ($this->throwOnUniverseEventsSelect) {
+                throw new RuntimeException('universe events select failed');
+            }
             $universe = (int) ($params[':universe'] ?? 0);
             $sinceId = (int) ($params[':sinceId'] ?? 0);
             $rows = array_values(array_filter(

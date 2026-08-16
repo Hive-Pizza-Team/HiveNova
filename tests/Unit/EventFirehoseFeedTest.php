@@ -96,4 +96,12 @@ class EventFirehoseFeedTest extends TestCase
 		$this->assertSame(55, $caughtUp[0]['id']);
 		$this->assertSame(6, $caughtUp[49]['id']);
 	}
+
+	public function test_fetch_returns_empty_when_select_throws(): void
+	{
+		EventFirehoseWriter::record(1, 100, 10, 'a');
+		$this->fake->achievement->throwOnUniverseEventsSelect = true;
+
+		$this->assertSame([], EventFirehoseFeed::fetch(1, $this->lng, 'UTC'));
+	}
 }
