@@ -153,7 +153,7 @@ GitHub Actions runs on every push and pull request (`.github/workflows/ci.yaml`)
 
 ### Database Migrations
 
-After pulling new code, apply any pending schema changes with the CLI migration tool:
+After pulling new code, apply pending schema changes with the CLI tool (preferred for operators with shell access):
 
 ```bash
 # Check current version and list pending migrations
@@ -167,6 +167,8 @@ php migrate.php run --dry-run
 ```
 
 Run from the project root. The tool requires `includes/config.php` to exist (created by the web installer).
+
+If the game redirects to `install/index.php?mode=upgrade` (`dbVersion` behind `DB_VERSION_REQUIRED` in `includes/dbtables.php`), either run the CLI commands above or use the web wizard: create `includes/ENABLE_INSTALL_TOOL`, open the upgrade page, and confirm. The wizard dumps prefixed tables to `includes/backups/` then applies the same `install/migrations/` files as the CLI. PHP migrations are included in-process (not copied to the web root).
 
 ### If you run HiveNova on NGINX - Read nginx.md file!
 

@@ -171,19 +171,12 @@ echo "[ 4/4 ] Running migrations ... ";
 
 $migrator       = new \HiveNova\Core\Migrator($pdo, ROOT_PATH . 'install/migrations', DB_PREFIX, DB_VERSION_REQUIRED);
 $currentVersion = $migrator->getCurrentVersion();
-$pending        = $migrator->getPendingMigrations($currentVersion);
+$applied        = $migrator->run();
 
-if (empty($pending)) {
+if ($applied === []) {
     echo "already up to date (v{$currentVersion})\n";
 } else {
-    foreach ($pending as $m) {
-        match ($m['extension']) {
-            'sql' => $migrator->applySqlMigration($m),
-            'php' => $migrator->applyPhpMigration($m),
-        };
-    }
-    $migrator->updateVersion();
-    echo "applied " . count($pending) . " migration(s), now v" . DB_VERSION_REQUIRED . "\n";
+    echo "applied " . count($applied) . " migration(s), now v" . DB_VERSION_REQUIRED . "\n";
 }
 
 echo "\n=== Install complete ===\n";
