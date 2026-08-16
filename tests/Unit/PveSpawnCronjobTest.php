@@ -49,5 +49,6 @@ class PveSpawnCronjobTest extends TestCase
         $job = new PveSpawnCronjob();
         $this->assertTrue($job->run());
         $this->assertNotEmpty($this->fake->salvagePackages);
+        $this->assertSame(1, (int) $this->fake->salvagePackages[0]['universe']);
     }
 }
