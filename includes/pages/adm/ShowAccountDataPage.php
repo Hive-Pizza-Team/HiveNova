@@ -35,7 +35,7 @@ function ShowAccountDataPage()
 	{
 		$OnlyQueryLogin 	= Database::get()->selectSingle("SELECT `id`, `authlevel` FROM %%USERS%% WHERE `id` = :id AND `universe` = :universe;", [':id' => $id_u, ':universe' => Universe::getEmulated()]);
 
-		if(!isset($OnlyQueryLogin))
+		if(!is_array($OnlyQueryLogin))
 		{
 			$template->message($LNG['ac_username_doesnt'], '?page=accoutdata');
 		}

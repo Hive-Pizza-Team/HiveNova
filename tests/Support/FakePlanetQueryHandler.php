@@ -76,11 +76,10 @@ trait FakePlanetQueryHandler
 
         $planetId = (int) ($params[':planetId'] ?? $params[':id'] ?? 0);
         if (str_contains($qry, 'der_') && str_contains($qry, 'AS total')) {
-            $row = $this->planetRowsById[$planetId] ?? [
-                'der_metal' => 0,
-                'der_crystal' => 0,
-                'total' => 0,
-            ];
+            if (!isset($this->planetRowsById[$planetId])) {
+                return $field === false ? null : false;
+            }
+            $row = $this->planetRowsById[$planetId];
             if (!isset($row['total'])) {
                 $row['total'] = (int) ($row['der_metal'] ?? 0) + (int) ($row['der_crystal'] ?? 0);
             }

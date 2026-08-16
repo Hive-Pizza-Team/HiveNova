@@ -74,12 +74,6 @@ class ShowPhalanxPage extends AbstractGamePage
 		}
 
 		$db = Database::get();
-		$sql = "UPDATE %%PLANETS%% SET deuterium = deuterium - :phalanxDeuterium WHERE id = :planetID;";
-		$db->update($sql, array(
-			':phalanxDeuterium'	=> PHALANX_DEUTERIUM,
-			':planetID'			=> $PLANET['id']
-		));
-
 		$sql = "SELECT id, name, id_owner FROM %%PLANETS%% WHERE universe = :universe
 		AND galaxy = :galaxy AND `system` = :system AND planet = :planet AND planet_type = :type;";
 		
@@ -95,6 +89,12 @@ class ShowPhalanxPage extends AbstractGamePage
 		{
 			$this->printMessage($LNG['px_out_of_range']);
 		}
+
+		$sql = "UPDATE %%PLANETS%% SET deuterium = deuterium - :phalanxDeuterium WHERE id = :planetID;";
+		$db->update($sql, array(
+			':phalanxDeuterium'	=> PHALANX_DEUTERIUM,
+			':planetID'			=> $PLANET['id']
+		));
 		
 
 		$fleetTableObj = new FlyingFleetsTable;

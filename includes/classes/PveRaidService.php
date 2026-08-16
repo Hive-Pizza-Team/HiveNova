@@ -59,7 +59,7 @@ class PveRaidService
 				ORDER BY id ASC LIMIT 1;',
 				[':userId' => $userId]
 			);
-			if (empty($planet['id'])) {
+			if (!is_array($planet) || empty($planet['id'])) {
 				continue;
 			}
 			$fake = [
@@ -101,7 +101,7 @@ class PveRaidService
 			'SELECT * FROM %%PLANETS%% WHERE id = :id;',
 			[':id' => $planetId]
 		);
-		if (empty($planet['id'])) {
+		if (!is_array($planet) || empty($planet['id'])) {
 			return false;
 		}
 

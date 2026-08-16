@@ -94,6 +94,21 @@ class MissionCasePhase5Test extends TestCase
         $this->assertNotEmpty($this->fake->achievement->messages);
     }
 
+    public function test_recycling_returns_when_target_planet_is_gone(): void
+    {
+        unset($this->fake->planetRowsById[99]);
+
+        $fleet = missionFleetFixture([
+            'fleet_mission' => 8,
+            'fleet_array' => '209,1;',
+        ]);
+
+        $mission = new MissionCaseRecycling($fleet);
+        $mission->TargetEvent();
+
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+    }
+
     public function test_stay_target_event_sends_message_and_kills_fleet(): void
     {
         $this->fake->planetRowsById[99] = ['id' => 99, 'id_owner' => 2, 'name' => 'Target'];

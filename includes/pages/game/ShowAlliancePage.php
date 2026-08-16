@@ -89,7 +89,7 @@ class ShowAlliancePage extends AbstractGamePage
 				));
 			}
 
-			if (!isset($this->rights)) {
+			if (!is_array($this->rights)) {
 				$this->rights	= array_combine($this->availableRanks, array_fill(0, count($this->availableRanks), false));
 				$this->rights['EVENTS']    = true; // enable events visibility by default
 			}
@@ -593,7 +593,7 @@ class ShowAlliancePage extends AbstractGamePage
 	public function memberList()
 	{
 		global $USER, $LNG;
-		if (!isset($this->rights) || !$this->rights['MEMBERLIST']) {
+		if (!is_array($this->rights) || !$this->rights['MEMBERLIST']) {
 			$this->redirectToHome();
 		}
 

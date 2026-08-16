@@ -253,4 +253,19 @@ class MissionCaseSpyTest extends TestCase
         $this->assertSame(1, $mission->kill);
         $this->assertNotEmpty($this->fake->fleetUpdates);
     }
+
+    public function test_spy_returns_when_target_planet_is_gone(): void
+    {
+        unset($this->fake->planetRowsById[99]);
+
+        $mission = new MissionCaseSpy(missionFleetFixture([
+            'fleet_mission' => 6,
+            'fleet_array' => '210,1;',
+        ]));
+        $mission->TargetEvent();
+
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+        $this->assertSame(0, $mission->kill);
+        $this->assertEmpty($this->fake->achievement->messages);
+    }
 }

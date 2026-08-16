@@ -91,6 +91,9 @@ class ShowBuildingsPage extends AbstractGamePage
         }
 
 		$CurrentQueue  = safe_unserialize($PLANET['b_building_id']);
+		if (!is_array($CurrentQueue)) {
+			return false;
+		}
 		$ActualCount   = count($CurrentQueue);
 		if($ActualCount <= 1) {
 			return $this->CancelBuildingFromQueue();
