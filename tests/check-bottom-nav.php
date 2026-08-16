@@ -65,7 +65,7 @@ $fullPages = [
     'alliance', 'messages', 'statistics', 'search', 'settings',
     'imperium', 'marketplace', 'trader', 'officier', 'techtree',
     'battlesimulator', 'battlehall', 'records', 'changelog', 'chat',
-    'buddylist', 'banlist', 'board', 'questions', 'ticket', 'viz',
+    'buddylist', 'banlist', 'board', 'questions', 'ticket', 'viz', 'eventFirehose',
 ];
 
 $popupPages = [

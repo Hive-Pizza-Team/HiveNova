@@ -98,6 +98,15 @@ $LNG['lm_battlesim']						= "Sim. de Batallas";
 $LNG['lm_playercard']                       = 'Información del Jugador';
 $LNG['lm_info']                     		= 'Información';
 $LNG['lm_disclamer']						= 'Contacto';
+$LNG['ef_title']							= 'Actividad del universo';
+$LNG['ef_empty']							= 'El universo está en calma.';
+$LNG['ef_event_battle']					= 'Batalla';
+$LNG['ef_size_small']						= 'Escaramuza';
+$LNG['ef_size_medium']						= 'Choque';
+$LNG['ef_size_large']						= 'Gran batalla';
+$LNG['ef_outcome_attacker']				= 'Los atacantes prevalecieron';
+$LNG['ef_outcome_defender']				= 'Los defensores resistieron';
+$LNG['ef_outcome_draw']					= 'Empate';
 
 //----------------------------------------------------------------------------//
 //OVERVIEW

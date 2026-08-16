@@ -63,6 +63,7 @@ $pages = [
     'phalanx',
     'viz',
     'achievements',
+    'eventFirehose',
 ];
 
 $pass = 0;
@@ -258,6 +259,23 @@ if ($curlErr) {
     $fail++;
 } else {
     echo "OK (count=" . (int) $alert['count'] . ")\n";
+    $pass++;
+}
+
+echo "[ JSON ] eventFirehose      ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/game.php?page=eventFirehose&ajax=1", $cookieFile);
+$feed = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status >= 400) {
+    echo "FAIL HTTP $status\n";
+    $fail++;
+} elseif (!is_array($feed) || !array_key_exists('events', $feed) || !is_array($feed['events'])) {
+    echo "FAIL expected JSON {events:[]}\n";
+    $fail++;
+} else {
+    echo "OK (events=" . count($feed['events']) . ")\n";
     $pass++;
 }
 

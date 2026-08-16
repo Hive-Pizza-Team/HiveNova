@@ -766,6 +766,17 @@ CREATE TABLE `%PREFIX%topkb` (
   KEY `time` (`universe`,`rid`,`time`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+CREATE TABLE `%PREFIX%universe_events` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` tinyint(3) unsigned NOT NULL,
+  `time` int(11) NOT NULL,
+  `event_type` varchar(16) NOT NULL,
+  `size_bucket` varchar(16) NOT NULL,
+  `outcome` varchar(16) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `universe_id` (`universe`,`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 CREATE TABLE `%PREFIX%users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(32) NOT NULL DEFAULT '',
