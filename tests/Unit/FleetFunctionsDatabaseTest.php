@@ -132,6 +132,7 @@ class FleetFunctionsDatabaseTest extends TestCase
             'MODULE_MISSION_TRADE' => 44,
             'MODULE_MISSION_TRANSFER' => 45,
             'MODULE_MISSION_DARKMATTER' => 31,
+            'MODULE_MISSION_SALVAGE' => 47,
         ];
         foreach ($modules as $name => $value) {
             if (!defined($name)) {
@@ -326,6 +327,54 @@ class FleetFunctionsDatabaseTest extends TestCase
 
         $this->assertContains(4, $missions);
         $this->assertNotContains(1, $missions, 'Attack is not offered on your own planet');
+    }
+
+    public function testGetAvailableMissionsIncludesSalvageWhenPackageExists(): void
+    {
+        $this->fake->salvagePackages[] = [
+            'id' => 1,
+            'universe' => 1,
+            'galaxy' => 1,
+            'system' => 1,
+            'planet' => 8,
+            'metal' => 1000,
+            'crystal' => 500,
+            'spawned_at' => TIMESTAMP,
+            'expires_at' => TIMESTAMP + 3600,
+            'tier' => 1,
+            'encounter_seed' => 50,
+        ];
+
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'galaxy' => 1,
+            'system' => 1,
+            'planet' => 8,
+            'planettype' => 1,
+            'Ship' => [202 => 1],
+        ];
+        $planet = ['id_owner' => 0, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertContains(18, $missions);
+    }
+
+    public function testGetAvailableMissionsExcludesSalvageWithoutPackage(): void
+    {
+        $user = ['id' => 1, 'universe' => 1];
+        $misInfo = [
+            'galaxy' => 1,
+            'system' => 1,
+            'planet' => 8,
+            'planettype' => 1,
+            'Ship' => [202 => 1],
+        ];
+        $planet = ['id_owner' => 0, 'der_metal' => 0, 'der_crystal' => 0];
+
+        $missions = FleetFunctions::GetAvailableMissions($user, $misInfo, $planet);
+
+        $this->assertNotContains(18, $missions);
     }
 
     public function testGetFleetMissionsHoldBuildsStayBlock(): void

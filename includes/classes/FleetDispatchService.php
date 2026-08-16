@@ -49,6 +49,21 @@ class FleetDispatchService
         $fleetStorage       = $params['fleetStorage'];
         $consumption        = $params['consumption'];
 
+        if ($targetMission == 18) {
+            if (!isModuleAvailable(MODULE_MISSION_SALVAGE)) {
+                throw new \RuntimeException($LNG['fl_invalid_mission']);
+            }
+            $package = PvePackageService::findAt(
+                (int) $USER['universe'],
+                (int) $targetGalaxy,
+                (int) $targetSystem,
+                (int) $targetPlanet
+            );
+            if ($package === null) {
+                throw new \RuntimeException($LNG['fl_salvage_gone'] ?? $LNG['fl_no_target']);
+            }
+        }
+
         // Same planet
         if ($PLANET['galaxy'] == $targetGalaxy && $PLANET['system'] == $targetSystem &&
             $PLANET['planet'] == $targetPlanet && $PLANET['planet_type'] == $targetType) {
@@ -167,7 +182,7 @@ class FleetDispatchService
         }
 
         // For colonize / expedition / market the planet not existing is expected
-        if ($mission == 7 || $mission == 15 || $mission == 16) {
+        if ($mission == 7 || $mission == 15 || $mission == 16 || $mission == 18) {
             // synthetic target already set by caller — nothing to check here
         } else {
             if (!empty($targetPlanetData['destruyed'])) {
@@ -179,8 +194,8 @@ class FleetDispatchService
             }
         }
 
-        // Empty target player
-        if (empty($targetPlayerData)) {
+        // Empty target player (salvage on empty slot has no owner)
+        if (empty($targetPlayerData) && $mission != 18) {
             throw new \RuntimeException($LNG['fl_empty_target']);
         }
 
@@ -189,8 +204,8 @@ class FleetDispatchService
             throw new \RuntimeException($LNG['fl_invalid_mission']);
         }
 
-        // Vacation mode (except espionage = 8)
-        if ($mission != 8 && IsVacationMode($targetPlayerData)) {
+        // Vacation mode (except recycle and salvage)
+        if ($mission != 8 && $mission != 18 && !empty($targetPlayerData) && IsVacationMode($targetPlayerData)) {
             throw new \RuntimeException($LNG['fl_target_exists']);
         }
 

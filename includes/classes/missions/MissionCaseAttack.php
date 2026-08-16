@@ -125,7 +125,14 @@ HTML;
 		
 		foreach($incomingFleets as $fleetID => $fleetDetail)
 		{
-			$fleetAttack[$fleetID]['player']	= $this->getUser((int) $fleetDetail['fleet_owner']);
+			if ((int) $fleetDetail['fleet_owner'] === 0) {
+				$family = str_contains((string) $fleetDetail['fleet_array'], '205,') ? 'alien' : 'pirate';
+				$fleetAttack[$fleetID]['player'] = \HiveNova\Core\PveNpcFleetFactory::syntheticPlayer(
+					\HiveNova\Core\PveNpcFleetFactory::displayName($family)
+				);
+			} else {
+				$fleetAttack[$fleetID]['player']	= $this->getUser((int) $fleetDetail['fleet_owner']);
+			}
 
 			$fleetAttack[$fleetID]['player']['factor']	= getFactors($fleetAttack[$fleetID]['player'], 'attack', $this->_fleet['fleet_start_time']);
 			$fleetAttack[$fleetID]['fleetDetail']		= $fleetDetail;
@@ -533,6 +540,7 @@ HTML;
 			$debrisType	= 'id';
 		}
 		
+		if ((int) $this->_fleet['fleet_owner'] !== 0) {
 		$sql = 'UPDATE %%PLANETS%% SET
 		der_metal	= :metal,
 		der_crystal	= :crystal
@@ -543,6 +551,7 @@ HTML;
 			':crystal'	=> $planetDebris[902],
 			':planetId'	=> $this->_fleet['fleet_end_id']
 		));
+		}
 
 		$sql = 'UPDATE %%PLANETS%% SET
 		metal		= metal - :metal,
@@ -624,6 +633,11 @@ HTML;
 	
 	function ReturnEvent()
 	{
+		if ((int) $this->_fleet['fleet_owner'] === 0) {
+			$this->KillFleet();
+			return;
+		}
+
 		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
 
 

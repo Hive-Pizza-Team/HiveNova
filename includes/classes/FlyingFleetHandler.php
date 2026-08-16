@@ -38,6 +38,7 @@ class FlyingFleetHandler
 		15	=> 'HiveNova\\Mission\\MissionCaseExpedition',
 		16	=> 'HiveNova\\Mission\\MissionCaseTrade',
 		17	=> 'HiveNova\\Mission\\MissionCaseTransfer',
+		18	=> 'HiveNova\\Mission\\MissionCaseSalvage',
 	);
 
 	function setToken($token)

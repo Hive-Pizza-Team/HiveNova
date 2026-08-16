@@ -38,6 +38,9 @@ $LNG['type_mission_10']  					= 'Atak Rakietowy';
 $LNG['type_mission_11']  					= 'Żniwa Czarnej Materii';
 $LNG['type_mission_15'] 					= 'Ekspedycja';
 
+$LNG['fl_salvage_gone']						= 'Paczka salvage zniknęła.';
+$LNG['sys_salvage_collected']				= 'Zebrano %s metalu i %s kryształu.';
+
 $LNG['type_planet_1']  					= 'Planeta';
 $LNG['type_planet_2']  					= 'Pole zniszczeń';
 $LNG['type_planet_3']  					= 'Księżyc';
@@ -1236,6 +1239,7 @@ $LNG['lo_continue']						= 'Kliknij tutaj, jeśli nie chcesz zostać przeniesion
 // Translated into Polish by Sirgomo . All rights reversed (C) 2012
 // Edited by TheRavikin. All rights resteemed (C) 2018
 $LNG['type_mission_16'] = 'Handel';
+$LNG['type_mission_18'] 					= 'Salvage';
 $LNG['type_mission_17'] = 'Transfer';
 $LNG['lm_marketplace'] = 'Targ';
 $LNG['ov_online'] = 'Online';

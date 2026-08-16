@@ -31,6 +31,8 @@ class GalaxyRows
 	private $System;
 	private $galaxyData;
 	private $galaxyRow;
+	/** @var array<int, array<string, mixed>> */
+	private $salvageByPlanet = [];
 	
 	const PLANET_DESTROYED = false;
 	
@@ -82,7 +84,12 @@ class GalaxyRows
 			':galaxy'			=> $this->Galaxy,
 			':system'			=> $this->System,
 			':planetTypePlanet'	=> 1,
-	  	));
+		));
+
+		$this->salvageByPlanet = [];
+		foreach (PvePackageService::inSystem(Universe::current(), (int) $this->Galaxy, (int) $this->System) as $pkg) {
+			$this->salvageByPlanet[(int) $pkg['planet']] = $pkg;
+		}
 
 		foreach ($galaxyResult as $galaxyRow)
 		{
@@ -195,6 +202,7 @@ class GalaxyRows
 			8	=> isModuleAvailable(MODULE_MISSION_RECYCLE),
 			9	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && $PLANET[$resource[214]] > 0 && isModuleAvailable(MODULE_MISSION_DESTROY),
 			10	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && $PLANET[$resource[503]] > 0 && isModuleAvailable(MODULE_MISSION_ATTACK) && isModuleAvailable(MODULE_MISSILEATTACK) && $this->inMissileRange(),
+			18	=> isModuleAvailable(MODULE_MISSION_SALVAGE) && isset($this->salvageByPlanet[(int) $this->galaxyRow['planet']]),
 		);
 	}
 
@@ -291,12 +299,18 @@ class GalaxyRows
 	protected function getDebrisData()
 	{
 		$total		= $this->galaxyRow['der_metal'] + $this->galaxyRow['der_crystal'];
+		$pkg = $this->salvageByPlanet[(int) $this->galaxyRow['planet']] ?? null;
+		if ($pkg !== null) {
+			$loot = PvePackageService::currentLoot($pkg);
+			$total += $loot['metal'] + $loot['crystal'];
+			$this->galaxyData[$this->galaxyRow['planet']]['salvage'] = $this->salvageHint($pkg);
+		}
 		if($total == 0) {
 			$this->galaxyData[$this->galaxyRow['planet']]['debris']	= false;
 		} else {
 			$this->galaxyData[$this->galaxyRow['planet']]['debris']	= array(
-				'metal'			=> $this->galaxyRow['der_metal'],
-				'crystal'		=> $this->galaxyRow['der_crystal'],
+				'metal'			=> $this->galaxyRow['der_metal'] + (int) ($loot['metal'] ?? 0),
+				'crystal'		=> $this->galaxyRow['der_crystal'] + (int) ($loot['crystal'] ?? 0),
 			);
 		}
 	}
@@ -573,15 +587,25 @@ class GalaxyRows
 
 		$vizEnabled = str_contains($themePath, '/hive/');
 		$hasCapacity = PlayerUtil::hasColonizationCapacity($USER);
+		if ($this->salvageByPlanet === []) {
+			foreach (PvePackageService::inSystem(Universe::current(), $galaxy, $system) as $pkg) {
+				$this->salvageByPlanet[(int) $pkg['planet']] = $pkg;
+			}
+		}
 		for ($position = 1; $position <= $maxPlanets; $position++) {
 			if (isset($galaxyData[$position])) {
 				continue;
 			}
 			$colonizeStatus = $this->getColonizeSlotStatus($position, $hasCapacity);
+			$pkg = $this->salvageByPlanet[$position] ?? null;
 			$galaxyData[$position] = array(
 				'uncolonized'             => true,
 				'canColonize'             => $colonizeStatus['canColonize'],
 				'colonizeBlockedReason'   => $colonizeStatus['colonizeBlockedReason'],
+				'salvage'                 => $pkg !== null ? $this->salvageHint($pkg) : null,
+				'missions'                => array(
+					18 => $pkg !== null && isModuleAvailable(MODULE_MISSION_SALVAGE),
+				),
 				'planet'                  => array(
 					'image'   => 'unknown',
 					'vizRef'  => $vizEnabled
@@ -599,12 +623,13 @@ class GalaxyRows
 		}
 
 		if (preg_match('/^slot:(\d+):(\d+):(\d+)$/', $ref, $matches)) {
-			$json = $this->buildUncolonizedPlanetVizJson(
-				(int) $matches[1],
-				(int) $matches[2],
-				(int) $matches[3],
-				$themePath
-			);
+			$galaxy = (int) $matches[1];
+			$system = (int) $matches[2];
+			$planet = (int) $matches[3];
+			$package = PvePackageService::findAt(Universe::current(), $galaxy, $system, $planet);
+			global $USER, $resource;
+			$spyTech = (int) ($USER[$resource[106] ?? 'spy_tech'] ?? $USER['spy_tech'] ?? 0);
+			$json = $this->buildUncolonizedPlanetVizJson($galaxy, $system, $planet, $themePath, $package, $spyTech);
 
 			return json_decode($json, true);
 		}
@@ -697,8 +722,19 @@ class GalaxyRows
 		return is_array($row) ? $row : null;
 	}
 
-	public function buildUncolonizedPlanetVizJson(int $galaxy, int $system, int $planet, string $dpath): string
+	public function buildUncolonizedPlanetVizJson(int $galaxy, int $system, int $planet, string $dpath, ?array $package = null, int $spyTech = 0): string
 	{
+		$debris = null;
+		$salvage = null;
+		if ($package !== null) {
+			$loot = PvePackageService::currentLoot($package);
+			$debris = array(
+				'metal'   => $loot['metal'],
+				'crystal' => $loot['crystal'],
+			);
+			$salvage = $this->salvageHint($package, $spyTech);
+		}
+
 		$payload = array(
 			'shareIntel' => false,
 			'vizState'  => 'unknown',
@@ -722,10 +758,25 @@ class GalaxyRows
 				'hangar'   => 0,
 			),
 			'moon'      => null,
-			'debris'    => null,
+			'debris'    => $debris,
+			'salvage'   => $salvage,
 			'dpath'     => $dpath,
 		);
 
 		return json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+	}
+
+	/**
+	 * @param array<string, mixed> $package
+	 * @return array<string, mixed>
+	 */
+	public function salvageHint(array $package, ?int $spyTech = null): array
+	{
+		global $USER, $resource;
+		if ($spyTech === null) {
+			$spyTech = (int) ($USER[$resource[106] ?? 'spy_tech'] ?? $USER['spy_tech'] ?? 0);
+		}
+
+		return PvePackageService::spyHint($package, $spyTech);
 	}
 }

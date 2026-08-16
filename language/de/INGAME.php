@@ -38,6 +38,9 @@ $LNG['type_mission_10']  					= 'Raketenangriff';
 $LNG['type_mission_11']  					= 'DM Untersuchung';
 $LNG['type_mission_15'] 					= 'Expedition';
 
+$LNG['fl_salvage_gone']						= 'Das Bergungspaket ist weg.';
+$LNG['sys_salvage_collected']				= '%s Metall und %s Kristall geborgen.';
+
 $LNG['type_planet_1']  						= 'Planet';
 $LNG['type_planet_2']  						= 'Trümmerfeld';
 $LNG['type_planet_3']  						= 'Mond';
@@ -1257,6 +1260,7 @@ $LNG['lo_continue']						= 'Klicken Sie hier, um nicht zu warten';
 
 // Translated into German by Jan . All rights reversed (C) 2011
 $LNG['type_mission_16'] = 'Handel';
+$LNG['type_mission_18'] 					= 'Bergen';
 $LNG['type_mission_17'] = 'Übertrag';
 $LNG['gl_trade_space'] = 'Handelszone';
 $LNG['fl_transfer_alert_message'] = 'Warnung! Die Flottenherrschaft wird auf den Zielspieler übertragen!';

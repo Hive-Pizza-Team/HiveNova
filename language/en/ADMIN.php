@@ -1154,6 +1154,7 @@ $LNG['modul_26'] = 'Search';
 $LNG['modul_27'] = 'Support Tickets';
 $LNG['modul_28'] = 'Techtree';
 $LNG['modul_41'] = 'Facebook Application';
+$LNG['modul_47'] = 'Salvage mission';
 $LNG['modul_46'] = 'Achievements';
 $LNG['mod_module'] = 'Modules';
 $LNG['mod_info'] = 'Modules in the Game';
@@ -1316,6 +1317,7 @@ $LNG['cronName_inactive'] = 'Delete inactive';
 $LNG['cronName_teamspeak'] = 'Teamspeak data update';
 $LNG['cronName_tracking'] = 'Send global server statistics';
 $LNG['cronName_databasedump'] = 'Database backup';
+$LNG['cronName_pve_spawn'] = 'PvE spawn';
 $LNG['cronName_pushing'] = 'Pushing Detection';
 $LNG['cronName_botdetect'] = 'Bot Detection';
 
