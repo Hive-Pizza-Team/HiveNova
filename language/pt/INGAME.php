@@ -42,6 +42,9 @@ $LNG['type_mission_10']  					= 'Ataque de Misseis';
 $LNG['type_mission_11']  					= 'Investigação de Pizzabits';
 $LNG['type_mission_15'] 					= 'Expedição';
 
+$LNG['fl_salvage_gone']						= 'O pacote de salvage desapareceu.';
+$LNG['sys_salvage_collected']				= 'Recolhidos %s metal e %s cristal.';
+
 $LNG['type_planet_1']  					= 'Planeta';
 $LNG['type_planet_2']  					= 'Campo de Destroços';
 $LNG['type_planet_3']  					= 'Lua';
@@ -1235,6 +1238,7 @@ $LNG['lo_continue']							= 'Clica aqui para não esperar';
 
 // Translated into Portuguese by QwataKayean . All rights reversed (C) 2012
 $LNG['type_mission_16'] = 'Comércio';
+$LNG['type_mission_18'] 					= 'Salvage';
 $LNG['type_mission_17'] = 'Transferência';
 $LNG['lm_marketplace'] = 'Mercado';
 $LNG['ov_online'] = 'Online';

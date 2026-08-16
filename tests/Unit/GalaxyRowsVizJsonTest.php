@@ -4,11 +4,18 @@ use HiveNova\Core\Config;
 use HiveNova\Core\GalaxyRows;
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/../Support/FakeDatabase.php';
+require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+
 /**
  * Validates GalaxyRows planet/moon vizJson payloads.
  */
 class GalaxyRowsVizJsonTest extends TestCase
 {
+	use SwapDatabaseInstance;
+
+	private FakeDatabase $fake;
+
 	protected function setUp(): void
 	{
 		if (!defined('FIELDS_BY_TERRAFORMER')) {
@@ -17,6 +24,27 @@ class GalaxyRowsVizJsonTest extends TestCase
 		if (!defined('FIELDS_BY_MOONBASIS_LEVEL')) {
 			define('FIELDS_BY_MOONBASIS_LEVEL', 3);
 		}
+
+		$this->fake = new FakeDatabase();
+		$this->swapDatabaseInstance($this->fake);
+
+		$available = new ReflectionProperty(\HiveNova\Core\Universe::class, 'availableUniverses');
+		$available->setAccessible(true);
+		$available->setValue([1]);
+		$current = new ReflectionProperty(\HiveNova\Core\Universe::class, 'currentUniverse');
+		$current->setAccessible(true);
+		$current->setValue(1);
+	}
+
+	protected function tearDown(): void
+	{
+		foreach (['availableUniverses', 'currentUniverse', 'emulatedUniverse'] as $prop) {
+			$ref = new ReflectionProperty(\HiveNova\Core\Universe::class, $prop);
+			$ref->setAccessible(true);
+			$ref->setValue(null);
+		}
+		$this->restoreDatabaseInstance();
+		parent::tearDown();
 	}
 
 	private function invokeBuildPlanetVizJson(array $galaxyRow, bool $shareIntel, string $themePath, bool $galaxyPreview = false): string
@@ -400,6 +428,29 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$this->assertJsContractValidJson($json);
 	}
 
+	public function testUncolonizedVizJsonIncludesPackageDebrisAndSalvage(): void
+	{
+		$json = (new GalaxyRows())->buildUncolonizedPlanetVizJson(
+			1,
+			88,
+			4,
+			'./styles/theme/hive/',
+			[
+				'metal' => 8000,
+				'crystal' => 3000,
+				'spawned_at' => TIMESTAMP,
+				'encounter_seed' => 10,
+				'tier' => 2,
+			],
+			8
+		);
+		$payload = $this->decodePayload($json);
+
+		$this->assertSame(['metal' => 8000, 'crystal' => 3000], $payload['debris']);
+		$this->assertSame('pirate', $payload['salvage']['family']);
+		$this->assertSame(2, $payload['salvage']['tier']);
+	}
+
 	private function makeColonizeConfig(array $overrides = []): Config
 	{
 		return new Config(array_merge([
@@ -452,6 +503,60 @@ class GalaxyRowsVizJsonTest extends TestCase
 		$rows->fillUncolonizedSlots($data, 15, 2, 145, './styles/theme/hive/');
 		$this->assertFalse($data[1]['canColonize']);
 		$this->assertTrue($data[8]['canColonize']);
+	}
+
+	public function testFillUncolonizedSlotsAddsSalvageHintWhenPackagePresent(): void
+	{
+		global $USER, $resource;
+
+		Config::setInstance($this->makeColonizeConfig(['moduls' => implode(';', array_fill(0, 50, 1))]), 1);
+		$resource = array_replace($resource ?? [], [124 => 'astrophysics_tech', 106 => 'spy_tech']);
+		$USER = [
+			'universe'          => 1,
+			'astrophysics_tech' => 8,
+			'spy_tech'          => 8,
+			'factor'            => ['Planets' => 0],
+		];
+
+		$this->fake->salvagePackages[] = [
+			'id' => 1,
+			'universe' => 1,
+			'galaxy' => 2,
+			'system' => 145,
+			'planet' => 4,
+			'metal' => 5000,
+			'crystal' => 2500,
+			'spawned_at' => TIMESTAMP,
+			'expires_at' => TIMESTAMP + 86400,
+			'tier' => 2,
+			'encounter_seed' => 10,
+		];
+
+		$rows = new GalaxyRows();
+		$data = [];
+		$rows->fillUncolonizedSlots($data, 5, 2, 145, './styles/theme/hive/');
+
+		$this->assertNotNull($data[4]['salvage']);
+		$this->assertSame(5000, $data[4]['salvage']['metal']);
+		$this->assertSame('pirate', $data[4]['salvage']['family']);
+		$this->assertSame(2, $data[4]['salvage']['tier']);
+		$this->assertTrue($data[4]['missions'][18]);
+		$this->assertNull($data[1]['salvage']);
+	}
+
+	public function testSalvageHintOmitsFamilyBelowSpyTechFour(): void
+	{
+		$rows = new GalaxyRows();
+		$hint = $rows->salvageHint([
+			'metal' => 1000,
+			'crystal' => 500,
+			'spawned_at' => TIMESTAMP,
+			'encounter_seed' => 10,
+			'tier' => 1,
+		], 3);
+
+		$this->assertArrayNotHasKey('family', $hint);
+		$this->assertArrayNotHasKey('tier', $hint);
 	}
 
 	public function testHasSharedPlanetVizIntelRequiresAcceptedBuddyNotPendingRequest(): void

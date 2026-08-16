@@ -642,6 +642,25 @@ CREATE TABLE `%PREFIX%planets` (
   KEY `universe` (`universe`,`galaxy`,`system`,`planet`,`planet_type`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
+CREATE TABLE `%PREFIX%salvage_packages` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `galaxy` int(11) unsigned NOT NULL,
+  `system` int(11) unsigned NOT NULL,
+  `planet` int(11) unsigned NOT NULL,
+  `planet_id` int(11) unsigned DEFAULT NULL,
+  `metal` double(50,0) unsigned NOT NULL DEFAULT '0',
+  `crystal` double(50,0) unsigned NOT NULL DEFAULT '0',
+  `spawned_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `expires_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `tier` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `encounter_seed` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `coords` (`universe`, `galaxy`, `system`, `planet`),
+  KEY `expires_at` (`expires_at`),
+  KEY `planet_id` (`planet_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 CREATE TABLE `%PREFIX%raports` (
   `rid` varchar(32) NOT NULL,
   `raport` longtext NOT NULL,
@@ -1031,7 +1050,8 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'databasedump', 1, '30', '1', '*', '*', '1', 'HiveNova\\Cronjob\\DumpCronjob', 0, NULL),
 (NULL, 'tracking', 1, FLOOR(RAND() * 60), FLOOR(RAND() * 24), '*', '*', '0', 'HiveNova\\Cronjob\\TrackingCronjob', 0, NULL),
 (NULL, 'pushing', 1, '0', '0', '*', '*', '0', 'HiveNova\\Cronjob\\PushingDetectionCronjob', 0, NULL),
-(NULL, 'achievement_backfill', 1, '15', '3', '*', '*', '*', 'HiveNova\\Cronjob\\AchievementBackfillCronjob', 0, NULL);
+(NULL, 'achievement_backfill', 1, '15', '3', '*', '*', '*', 'HiveNova\\Cronjob\\AchievementBackfillCronjob', 0, NULL),
+(NULL, 'pve_spawn', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\PveSpawnCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);

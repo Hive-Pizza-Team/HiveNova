@@ -44,7 +44,11 @@ $LNG['type_mission_10']  					= 'Missile attack';
 $LNG['type_mission_11']  					= 'Research Pizzabits';
 $LNG['type_mission_15'] 					= 'Expedition';
 $LNG['type_mission_16'] 					= 'Trade';
+$LNG['type_mission_18'] 					= 'Salvage';
 $LNG['type_mission_17'] 					= 'Transfer';
+
+$LNG['fl_salvage_gone']						= 'The salvage package is gone.';
+$LNG['sys_salvage_collected']				= 'Collected %s metal and %s crystal.';
 
 $LNG['type_planet_1']  					= 'Planet';
 $LNG['type_planet_2']  					= 'Debris Field';

@@ -28,6 +28,9 @@ $LNG['type_mission_10']  					= 'MIP - Attaque missile interplanétaire';
 $LNG['type_mission_11']  					= 'Recherche de Matière Noire';
 $LNG['type_mission_15'] 					= 'Expédition';
 
+$LNG['fl_salvage_gone']						= 'Le colis de salvage a disparu.';
+$LNG['sys_salvage_collected']				= 'Collecté %s métal et %s cristal.';
+
 $LNG['type_planet_1']  						= 'Planète';
 $LNG['type_planet_2']	  					= 'Champ de débris';
 $LNG['type_planet_3']  						= 'Lune';
@@ -1208,6 +1211,7 @@ $LNG['lo_notify']						= 'Vous serez redirigé dans <span id="seconds"> 5 </ spa
 $LNG['lo_continue']						= 'Cliquez ici pour être redirigé immédiatement.';
 
 $LNG['type_mission_16'] = 'Commerce';
+$LNG['type_mission_18'] 					= 'Salvage';
 $LNG['type_mission_17'] = 'Transfert';
 $LNG['lm_marketplace'] = 'Marché';
 $LNG['ov_online'] = 'En ligne';

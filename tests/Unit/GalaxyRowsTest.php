@@ -95,6 +95,39 @@ class GalaxyRowsTest extends TestCase
         $this->assertTrue($data[6]['action']['buddy']);
     }
 
+    public function test_get_galaxy_data_includes_salvage_on_occupied_slot(): void
+    {
+        $this->fake->salvagePackages[] = [
+            'id' => 1,
+            'universe' => 1,
+            'galaxy' => 1,
+            'system' => 5,
+            'planet' => 6,
+            'metal' => 4000,
+            'crystal' => 2000,
+            'spawned_at' => TIMESTAMP,
+            'expires_at' => TIMESTAMP + 86400,
+            'tier' => 1,
+            'encounter_seed' => 10,
+            'planet_id' => 100,
+        ];
+        $this->seedGalaxyRow([
+            'planet' => 6,
+            'id_owner' => 2,
+            'userid' => 2,
+            'username' => 'rival',
+            'buddy' => 0,
+            'der_metal' => 0,
+            'der_crystal' => 0,
+        ]);
+
+        $data = $this->galaxyRows()->setGalaxy(1)->setSystem(5)->getGalaxyData();
+
+        $this->assertNotNull($data[6]['salvage']);
+        $this->assertSame(4000, $data[6]['salvage']['metal']);
+        $this->assertTrue($data[6]['missions'][18]);
+    }
+
     public function test_get_galaxy_data_escapes_player_and_planet_names(): void
     {
         $this->seedGalaxyRow([
@@ -467,6 +500,7 @@ class GalaxyRowsTest extends TestCase
             'MODULE_MISSION_SPY' => 24,
             'MODULE_MISSION_RECYCLE' => 32,
             'MODULE_MISSION_DESTROY' => 29,
+            'MODULE_MISSION_SALVAGE' => 47,
             'MODULE_BUDDYLIST' => 6,
             'MODULE_MESSAGES' => 16,
             'MODULE_PHALANX' => 19,

@@ -89,6 +89,17 @@ class IncomingHostileFleetQueryTest extends TestCase
         $this->assertSame(4, IncomingHostileFleetQuery::countForUser(99));
     }
 
+    public function testNpcOwnerZeroAttackCountsAsHostile(): void
+    {
+        $this->fake->fleetRowsById[1] = $this->fleet([
+            'fleet_owner' => 0,
+            'fleet_target_owner' => 99,
+            'fleet_mission' => 1,
+            'fleet_mess' => FLEET_OUTWARD,
+        ]);
+        $this->assertSame(1, IncomingHostileFleetQuery::countForUser(99));
+    }
+
     public function testAcsTargetingSomeoneElseIsIgnored(): void
     {
         $this->fake->fleetRowsById[1] = $this->fleet([

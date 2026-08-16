@@ -43,6 +43,9 @@ $LNG['type_mission_10']  					= 'Roket Saldırısı';
 $LNG['type_mission_11']  					= 'KM Araştırmak ';
 $LNG['type_mission_15'] 					= 'Keşif Uçusu';
 
+$LNG['fl_salvage_gone']						= 'Salvage paketi yok.';
+$LNG['sys_salvage_collected']				= '%s metal ve %s kristal toplandı.';
+
 $LNG['type_planet_1']  					= 'Gezegen';
 $LNG['type_planet_2']  					= 'Harabe alanı';
 $LNG['type_planet_3']  					= 'Ay';
@@ -1244,6 +1247,7 @@ $LNG['lo_continue']							= 'Beklemek istemiyorsanız tıklayınız';
 
 //----------------------------------------------------------------------------//
 $LNG['type_mission_16'] = 'Ticaret';
+$LNG['type_mission_18'] 					= 'Salvage';
 $LNG['type_mission_17'] = 'Transfer';
 $LNG['lm_marketplace'] = 'Pazar Yeri';
 $LNG['ov_online'] = 'Çevrimiçi';

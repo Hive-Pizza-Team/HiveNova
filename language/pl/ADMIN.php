@@ -1110,6 +1110,7 @@ $LNG['modul_8']						= 'DM-Bank';
 $LNG['modul_9']						= 'Flota';
 $LNG['modul_10']						= 'Handlarz Floty';
 $LNG['modul_41']						= 'Skróty floty';
+$LNG['modul_47'] = 'Salvage mission';
 $LNG['modul_46']						= 'Achievements';
 $LNG['modul_11']						= 'Galaktyka';
 $LNG['modul_12']						= 'Hala Sław';
@@ -1303,6 +1304,7 @@ $LNG['cronName_inactive']		= 'Usuń nie aktywnych';
 $LNG['cronName_teamspeak']		= 'Aktualizacja ustawień Teamspeak';
 $LNG['cronName_tracking']		= 'Wyślij statystyki na główny serwer.';
 $LNG['cronName_databasedump']	= 'Backup bazy danych';
+$LNG['cronName_pve_spawn'] = 'PvE spawn';
 $LNG['cronName_pushing'] = 'Wykrywanie Pushingu';
 $LNG['cronName_botdetect'] = 'Wykrywanie Botów';
 

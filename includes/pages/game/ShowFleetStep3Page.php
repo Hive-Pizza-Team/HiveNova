@@ -172,7 +172,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 		)) ?: null;
 
 		// Determine target player data
-		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16) {
+		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16 || $targetMission == 18) {
 			$targetPlayerData = array(
 				'id'          => 0,
 				'onlinetime'  => TIMESTAMP,
@@ -202,7 +202,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 
 		// For colonize / expedition / market, override targetPlanetData to synthetic after mission check
 		$targetPlanetDataForMission = $targetPlanetData;
-		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16) {
+		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16 || $targetMission == 18) {
 			$targetPlanetDataForMission = array('id' => 0, 'id_owner' => 0, 'planettype' => 1);
 		}
 
