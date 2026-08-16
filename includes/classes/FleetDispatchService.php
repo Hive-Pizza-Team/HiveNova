@@ -224,8 +224,7 @@ class FleetDispatchService
                 throw new \RuntimeException($LNG['fl_admin_attack']);
             }
 
-            $sql = 'SELECT total_points FROM %%STATPOINTS%% WHERE id_owner = :userId AND stat_type = :statType';
-            $USER += Database::get()->selectSingle($sql, [':userId' => $USER['id'], ':statType' => 1]);
+            mergeUserStatPoints($USER);
 
             $IsNoobProtec = CheckNoobProtec($USER, $targetPlayerData, $targetPlayerData);
 
@@ -351,6 +350,10 @@ class FleetDispatchService
                 [':id' => $PLANET['id']]
             );
             $deutNeeded = $fleetResource[903] + $consumption;
+            if (!is_array($lockedPlanet)) {
+                $db->rollback();
+                throw new \RuntimeException($LNG['fl_not_enough_resource']);
+            }
             if ($lockedPlanet[$resource[901]] < $fleetResource[901] ||
                 $lockedPlanet[$resource[902]] < $fleetResource[902] ||
                 $lockedPlanet[$resource[903]] < $deutNeeded) {

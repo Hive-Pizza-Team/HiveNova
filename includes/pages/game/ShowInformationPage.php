@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\PlanetProductionBonus;
 use HiveNova\Core\ResourceUpdate;
 
@@ -286,9 +287,9 @@ class ShowInformationPage extends AbstractGamePage
 			$FleetInfo	= array(
 				'structure'		=> $pricelist[$elementID]['cost'][901] + $pricelist[$elementID]['cost'][902],
 				'tech'			=> $pricelist[$elementID]['tech'],
-				'attack'		=> $CombatCaps[$elementID]['attack'],
+				'attack'		=> $CombatCaps[$elementID]['attack'] * LeftoverBonus::attackMultiplier((int) $elementID, $USER),
 				'shield'		=> $CombatCaps[$elementID]['shield'],
-				'capacity'		=> $pricelist[$elementID]['capacity'],
+				'capacity'		=> LeftoverBonus::shipCapacity((int) $elementID, 1, $USER),
 				'speed1'		=> $pricelist[$elementID]['speed'],
 				'speed2'		=> $pricelist[$elementID]['speed2'],
 				'consumption1'	=> $pricelist[$elementID]['consumption'],
@@ -316,7 +317,7 @@ class ShowInformationPage extends AbstractGamePage
 		{
 			$FleetInfo	= array(
 				'structure'		=> $pricelist[$elementID]['cost'][901] + $pricelist[$elementID]['cost'][902],
-				'attack'		=> $CombatCaps[$elementID]['attack'],
+				'attack'		=> $CombatCaps[$elementID]['attack'] * LeftoverBonus::attackMultiplier((int) $elementID, $USER),
 				'shield'		=> $CombatCaps[$elementID]['shield'],
 				'rapidfire'		=> array(
 					'from'	=> array(),

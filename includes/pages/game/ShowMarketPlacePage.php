@@ -222,6 +222,14 @@ class ShowMarketPlacePage extends AbstractGamePage
 			return $LNG['market_p_msg_more_ships_is_needed'];
 		}
 
+		$sql = "SELECT * FROM %%USERS%% WHERE id = :userId;";
+		$USER_2   = Database::get()->selectSingle($sql, array(
+			':userId'       => $fleetResult['fleet_owner']
+		));
+		if (!is_array($USER_2)) {
+			return $LNG['market_p_msg_not_found'];
+		}
+
 		$fleetArrayTMP = array();
 		$fleetArrayTMP = array($F1type => $F1, $F2type => $F2);
 		$fleetArray = $fleetArrayTMP;
@@ -257,10 +265,6 @@ class ShowMarketPlacePage extends AbstractGamePage
 
 		/////////////////////////////////////////////////////////////////////////////
 		/// SEND/
-		$sql = "SELECT * FROM %%USERS%% WHERE id = :userId;";
-		$USER_2   = Database::get()->selectSingle($sql, array(
-			':userId'       => $fleetResult['fleet_owner']
-		));
 		$fleetArray						= FleetFunctions::unserialize($fleetResult['fleet_array']);
 		$SpeedFactor    	= FleetFunctions::GetGameSpeedFactor();
 		$Distance    		= FleetFunctions::GetTargetDistance(array($PLANET['galaxy'], $PLANET['system'], $PLANET['planet']), array($fleetResult['fleet_end_galaxy'], $fleetResult['fleet_end_system'], $fleetResult['fleet_end_planet']));

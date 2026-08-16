@@ -167,14 +167,8 @@ class ShowFleetAjaxPage extends AbstractGamePage
 			if (IsVacationMode($targetData)) {
 				$this->sendData(605, $LNG['fa_vacation_mode']);
 			}
-			$sql	= 'SELECT total_points
-			FROM %%STATPOINTS%%
-			WHERE id_owner = :userId AND stat_type = :statType';
 
-			$USER	+= Database::get()->selectSingle($sql, array(
-				':userId'	=> $USER['id'],
-				':statType'	=> 1
-			));
+			mergeUserStatPoints($USER);
 
 			$IsNoobProtec	= CheckNoobProtec($USER, $targetData, $targetData);
 
