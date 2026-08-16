@@ -494,6 +494,8 @@ $LNG['se_ref_active']					= 'Aktywuj linki polecające';
 $LNG['se_ref_active_info']				= 'Linki polecające, dają graczom możliwość zapraszania innych graczy w zamian za jakiś bonus lub bez.';
 $LNG['se_ref_bonus']					= 'Bonus za rejstrację z linku polecającego';
 $LNG['se_ref_bonus_info']				= 'Ilość Czarnej materii, jaką otrzyma gracz po zaproszeniu nowego aktywnego gracza.';
+$LNG['se_ref_bonus_referee']				= 'Bonus dla zaproszonego';
+$LNG['se_ref_bonus_referee_info']		= 'Czarna materia dla zaproszonego gracza po osiągnięciu progu punktów. 0 = tylko polecający dostaje nagrodę.';
 $LNG['se_ref_minpoints']				= 'Min. punktów dla bonusu';
 $LNG['se_ref_minpoints_info']			= 'Określa jaką liczbę punktów musi zdobyć nowy użytkownik, by osoba zapraszająca otrzymała bonus!.';
 $LNG['se_ref_max_referals']				= 'Ma Graczy poleconych';

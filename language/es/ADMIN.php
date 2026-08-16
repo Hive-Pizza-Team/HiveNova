@@ -399,6 +399,8 @@ $LNG['se_ref_active'] = 'Activar enlace de referido';
 $LNG['se_ref_active_info'] = 'El enlace de referido, o enlace de invitación, da a los jugadores la oportunidad de referir, o atraer e invitar más amigos. Esto dará una bonificación de pizzabits para los jugadores.';
 $LNG['se_ref_bonus'] = 'Bonificación de enlace de referido';
 $LNG['se_ref_bonus_info'] = 'Cantidad de pizzabits que recibe el usuario por reclutar al usuario.';
+$LNG['se_ref_bonus_referee'] = 'Bonificación del reclutado';
+$LNG['se_ref_bonus_referee_info'] = 'Pizzabits para el jugador reclutado al alcanzar el umbral de puntos. 0 = solo cobra quien invitó.';
 $LNG['se_ref_minpoints'] = 'Límite de bonificación';
 $LNG['se_ref_minpoints_info'] = 'El usuario llegó a este límite para que el usuario reciba su bonificación promocional.';
 $LNG['se_ref_max_referals'] = 'Referidos máximos';

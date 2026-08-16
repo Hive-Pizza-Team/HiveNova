@@ -92,6 +92,7 @@ function ShowConfigUniPage()
 			'deuterium_cost_galaxy'	=> $config->deuterium_cost_galaxy,
 			'ref_active'			=> $config->ref_active,
 			'ref_bonus'				=> $config->ref_bonus,
+			'ref_bonus_referee'		=> $config->ref_bonus_referee,
 			'ref_minpoints'			=> $config->ref_minpoints,
 			'ref_max_referals'		=> $config->ref_max_referals,
 			'silo_factor'			=> $config->silo_factor,
@@ -160,6 +161,7 @@ function ShowConfigUniPage()
 		$deuterium_cost_galaxy	= HTTP::_GP('deuterium_cost_galaxy', 0);
 		$max_fleet_per_build	= max(0, round(HTTP::_GP('max_fleet_per_build', 0.0)));
 		$ref_bonus				= HTTP::_GP('ref_bonus', 0);
+		$ref_bonus_referee		= HTTP::_GP('ref_bonus_referee', 0);
 		$ref_minpoints			= HTTP::_GP('ref_minpoints', 0);
 		$silo_factor			= HTTP::_GP('silo_factor', 0);
 		$ref_max_referals		= HTTP::_GP('ref_max_referals', 0);
@@ -267,6 +269,7 @@ function ShowConfigUniPage()
 			'deuterium_cost_galaxy'	=> $deuterium_cost_galaxy,
 			'ref_active'			=> $ref_active,
 			'ref_bonus'				=> $ref_bonus,
+			'ref_bonus_referee'		=> $ref_bonus_referee,
 			'ref_minpoints'			=> $ref_minpoints,
 			'ref_max_referals'		=> $ref_max_referals,
 			'silo_factor'			=> $silo_factor,
@@ -478,6 +481,8 @@ function ShowConfigUniPage()
 		'se_ref_max_referals_info'		=> $LNG['se_ref_max_referals_info'],
 		'se_ref_bonus'					=> $LNG['se_ref_bonus'],
 		'se_ref_bonus_info'				=> $LNG['se_ref_bonus_info'],
+		'se_ref_bonus_referee'			=> $LNG['se_ref_bonus_referee'],
+		'se_ref_bonus_referee_info'		=> $LNG['se_ref_bonus_referee_info'],
 		'se_ref_minpoints'				=> $LNG['se_ref_minpoints'],
 		'se_ref_minpoints_info'			=> $LNG['se_ref_minpoints_info'],
 		'se_silo_factor'				=> $LNG['se_silo_factor'],
@@ -559,6 +564,7 @@ function ShowConfigUniPage()
 		'deuterium_cost_galaxy'			=> $config->deuterium_cost_galaxy,
 		'ref_active'					=> $config->ref_active,
 		'ref_bonus'						=> $config->ref_bonus,
+		'ref_bonus_referee'				=> $config->ref_bonus_referee,
 		'ref_minpoints'					=> $config->ref_minpoints,
 		'ref_max_referals'				=> $config->ref_max_referals,
 		'silo_factor'					=> $config->silo_factor,

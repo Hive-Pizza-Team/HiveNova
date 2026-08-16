@@ -425,6 +425,8 @@ $LNG['se_ref_active']					= 'Ativar Referallink';
 $LNG['se_ref_active_info']				= 'Referral Link , ou o link de Convite dá aos jogadores a oportunidade de referir, ou atrair e convidar mais amigos. Isto vai dar bônus para os jogadores.';
 $LNG['se_ref_bonus']					= 'Referral Link bonus';
 $LNG['se_ref_bonus_info']				= 'Número de Pizzabits que o usuário recebe por recrutamento de um novo usuário.';
+$LNG['se_ref_bonus_referee']				= 'Bónus do recruta';
+$LNG['se_ref_bonus_referee_info']		= 'Pizzabits pagos ao jogador convidado ao atingir o limiar de pontos. 0 = só o convite recebe.';
 $LNG['se_ref_minpoints']				= 'Limite de bonus';
 $LNG['se_ref_minpoints_info']			= 'O usuário chegou a esses limite para que o usuário recebe o seu bonus promocional.';
 $LNG['se_ref_max_referals']				= 'Máximo de Referência';
