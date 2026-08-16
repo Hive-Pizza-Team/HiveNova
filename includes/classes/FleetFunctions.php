@@ -776,7 +776,9 @@ class FleetFunctions
 				(int) $fleetTargetPlanetGalaxy,
 				(int) $fleetTargetPlanetSystem,
 				(int) $fleetTargetPlanetPlanet,
-				(int) $fleetTargetPlanetType
+				(int) $fleetTargetPlanetType,
+				(int) $fleetStartOwner,
+				implode(';', $fleetData)
 			);
 		}
 

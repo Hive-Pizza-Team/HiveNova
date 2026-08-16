@@ -644,7 +644,9 @@ HTML;
 			(int) $this->_fleet['fleet_end_galaxy'],
 			(int) $this->_fleet['fleet_end_system'],
 			(int) $this->_fleet['fleet_end_planet'],
-			(int) $this->_fleet['fleet_end_type']
+			(int) $this->_fleet['fleet_end_type'],
+			(int) $this->_fleet['fleet_owner'],
+			(string) $this->_fleet['fleet_array']
 		);
 	}
 	
