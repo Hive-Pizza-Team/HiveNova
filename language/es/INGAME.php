@@ -104,12 +104,17 @@ $LNG['lm_disclamer']						= 'Contacto';
 $LNG['ef_title']							= 'Actividad del universo';
 $LNG['ef_empty']							= 'El universo está en calma.';
 $LNG['ef_event_battle']					= 'Batalla';
+$LNG['ef_event_moon']						= 'Luna';
 $LNG['ef_size_small']						= 'Escaramuza';
 $LNG['ef_size_medium']						= 'Choque';
 $LNG['ef_size_large']						= 'Gran batalla';
+$LNG['ef_size_moon_small']					= 'Pequeña';
+$LNG['ef_size_moon_medium']					= 'Mediana';
+$LNG['ef_size_moon_large']					= 'Grande';
 $LNG['ef_outcome_attacker']				= 'Los atacantes prevalecieron';
 $LNG['ef_outcome_defender']				= 'Los defensores resistieron';
 $LNG['ef_outcome_draw']					= 'Empate';
+$LNG['ef_outcome_formed']					= 'Formada';
 
 //----------------------------------------------------------------------------//
 //OVERVIEW

@@ -105,12 +105,17 @@ $LNG['lm_disclamer']						= 'Impressum';
 $LNG['ef_title']							= 'Universums-Feed';
 $LNG['ef_empty']							= 'Das Universum ist still.';
 $LNG['ef_event_battle']					= 'Kampf';
+$LNG['ef_event_moon']						= 'Mond';
 $LNG['ef_size_small']						= 'Scharmützel';
 $LNG['ef_size_medium']						= 'Gefecht';
 $LNG['ef_size_large']						= 'Große Schlacht';
+$LNG['ef_size_moon_small']					= 'Klein';
+$LNG['ef_size_moon_medium']					= 'Mittel';
+$LNG['ef_size_moon_large']					= 'Groß';
 $LNG['ef_outcome_attacker']				= 'Angreifer siegten';
 $LNG['ef_outcome_defender']				= 'Verteidiger hielten stand';
 $LNG['ef_outcome_draw']					= 'Unentschieden';
+$LNG['ef_outcome_formed']					= 'Entstanden';
 	
 //----------------------------------------------------------------------------//
 //OVERVIEW

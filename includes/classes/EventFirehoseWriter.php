@@ -8,6 +8,8 @@ class EventFirehoseWriter
 {
 	public const EVENT_BATTLE = 'battle';
 
+	public const EVENT_MOON = 'moon';
+
 	public const SIZE_SMALL = 'small';
 
 	public const SIZE_MEDIUM = 'medium';
@@ -20,9 +22,15 @@ class EventFirehoseWriter
 
 	public const OUTCOME_DRAW = 'draw';
 
+	public const OUTCOME_FORMED = 'formed';
+
 	public const SMALL_MAX = 1_000_000;
 
 	public const MEDIUM_MAX = 100_000_000;
+
+	public const MOON_SMALL_MAX = 6000;
+
+	public const MOON_MEDIUM_MAX = 8000;
 
 	public static function sizeBucket(float $totalUnitsLost): string
 	{
@@ -30,6 +38,18 @@ class EventFirehoseWriter
 			return self::SIZE_SMALL;
 		}
 		if ($totalUnitsLost < self::MEDIUM_MAX) {
+			return self::SIZE_MEDIUM;
+		}
+
+		return self::SIZE_LARGE;
+	}
+
+	public static function moonSizeBucket(float $diameter): string
+	{
+		if ($diameter < self::MOON_SMALL_MAX) {
+			return self::SIZE_SMALL;
+		}
+		if ($diameter < self::MOON_MEDIUM_MAX) {
 			return self::SIZE_MEDIUM;
 		}
 
@@ -47,6 +67,28 @@ class EventFirehoseWriter
 
 	public static function record(int $universe, int $time, float $totalUnitsLost, string $won): void
 	{
+		self::insert(
+			$universe,
+			$time,
+			self::EVENT_BATTLE,
+			self::sizeBucket($totalUnitsLost),
+			self::outcome($won)
+		);
+	}
+
+	public static function recordMoon(int $universe, int $time, float $diameter): void
+	{
+		self::insert(
+			$universe,
+			$time,
+			self::EVENT_MOON,
+			self::moonSizeBucket($diameter),
+			self::OUTCOME_FORMED
+		);
+	}
+
+	private static function insert(int $universe, int $time, string $eventType, string $sizeBucket, string $outcome): void
+	{
 		try {
 			Database::get()->insert(
 				'INSERT INTO %%UNIVERSE_EVENTS%% SET
@@ -58,9 +100,9 @@ class EventFirehoseWriter
 				[
 					':universe'		=> $universe,
 					':time'			=> $time,
-					':eventType'	=> self::EVENT_BATTLE,
-					':sizeBucket'	=> self::sizeBucket($totalUnitsLost),
-					':outcome'		=> self::outcome($won),
+					':eventType'	=> $eventType,
+					':sizeBucket'	=> $sizeBucket,
+					':outcome'		=> $outcome,
 				]
 			);
 		} catch (Throwable $e) {

@@ -72,7 +72,7 @@ class EventFirehoseFeed
 			'id'        => (int) ($row['id'] ?? 0),
 			'time'      => _date($LNG['php_tdformat'] ?? 'd. M Y, H:i:s', $time, $timezone),
 			'eventType' => (string) ($LNG['ef_event_' . $eventType] ?? $LNG['ef_event_battle'] ?? 'Battle'),
-			'size'      => (string) ($LNG['ef_size_' . $size] ?? $size),
+			'size'      => (string) ($LNG['ef_size_' . $eventType . '_' . $size] ?? $LNG['ef_size_' . $size] ?? $size),
 			'outcome'   => (string) ($LNG['ef_outcome_' . $outcome] ?? $outcome),
 		];
 	}

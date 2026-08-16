@@ -107,12 +107,17 @@ $LNG['lm_disclamer']						= 'Kontakt';
 $LNG['ef_title']							= 'Kanał uniwersum';
 $LNG['ef_empty']							= 'Uniwersum jest ciche.';
 $LNG['ef_event_battle']					= 'Bitwa';
+$LNG['ef_event_moon']						= 'Księżyc';
 $LNG['ef_size_small']						= 'Potyczka';
 $LNG['ef_size_medium']						= 'Starcie';
 $LNG['ef_size_large']						= 'Wielka bitwa';
+$LNG['ef_size_moon_small']					= 'Mały';
+$LNG['ef_size_moon_medium']					= 'Średni';
+$LNG['ef_size_moon_large']					= 'Duży';
 $LNG['ef_outcome_attacker']				= 'Atakujący zwyciężyli';
 $LNG['ef_outcome_defender']				= 'Obrońcy się utrzymali';
 $LNG['ef_outcome_draw']					= 'Remis';
+$LNG['ef_outcome_formed']					= 'Powstał';
 	
 //----------------------------------------------------------------------------//
 //OVERVIEW
