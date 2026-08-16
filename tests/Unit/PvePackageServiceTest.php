@@ -68,8 +68,28 @@ class PvePackageServiceTest extends TestCase
             'tier' => 1,
             'encounter_seed' => 1,
         ];
-        PvePackageService::collect(1, 100, 50);
+        $this->assertTrue(PvePackageService::collect(1, 100, 50, 100, 50));
         $this->assertSame([], $this->fake->salvagePackages);
+    }
+
+    public function testCollectRejectsStaleSnapshot(): void
+    {
+        $this->fake->salvagePackages[] = [
+            'id' => 1,
+            'universe' => 1,
+            'galaxy' => 1,
+            'system' => 1,
+            'planet' => 4,
+            'metal' => 40,
+            'crystal' => 20,
+            'spawned_at' => TIMESTAMP,
+            'expires_at' => TIMESTAMP + 100,
+            'tier' => 1,
+            'encounter_seed' => 1,
+        ];
+        $this->assertFalse(PvePackageService::collect(1, 100, 50, 100, 50));
+        $this->assertSame(40, $this->fake->salvagePackages[0]['metal']);
+        $this->assertSame(20, $this->fake->salvagePackages[0]['crystal']);
     }
 
     public function testAttachToPlanetSetsPlanetId(): void

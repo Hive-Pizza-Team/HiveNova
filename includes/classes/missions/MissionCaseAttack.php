@@ -145,7 +145,10 @@ HTML;
 			$fleetAttack[$fleetID]['fleetDetail']		= $fleetDetail;
 			$fleetAttack[$fleetID]['unit']				= FleetFunctions::unserialize($fleetDetail['fleet_array']);
 			
-			$userAttack[$fleetAttack[$fleetID]['player']['id']]	= $fleetAttack[$fleetID]['player']['username'];
+			$attackerId = (int) $fleetAttack[$fleetID]['player']['id'];
+			if ($attackerId !== 0) {
+				$userAttack[$attackerId] = $fleetAttack[$fleetID]['player']['username'];
+			}
 		}
 
 		$sql	= "SELECT * FROM %%FLEETS%%
@@ -597,20 +600,23 @@ HTML;
 			(string) $combatResult['won']
 		);
 
-		$sql = 'UPDATE %%USERS%% SET
-		`'.$attackStatus.'` = `'.$attackStatus.'` + 1,
-		kbmetal		= kbmetal + :debrisMetal,
-		kbcrystal	= kbcrystal + :debrisCrystal,
-		lostunits	= lostunits + :lostUnits,
-		desunits	= desunits + :destroyedUnits
-		WHERE id IN ('.implode(',', array_keys($userAttack)).');';
+		$attackerIds = array_keys($userAttack);
+		if ($attackerIds !== []) {
+			$sql = 'UPDATE %%USERS%% SET
+			`'.$attackStatus.'` = `'.$attackStatus.'` + 1,
+			kbmetal		= kbmetal + :debrisMetal,
+			kbcrystal	= kbcrystal + :debrisCrystal,
+			lostunits	= lostunits + :lostUnits,
+			desunits	= desunits + :destroyedUnits
+			WHERE id IN ('.implode(',', $attackerIds).');';
 
-		$db->update($sql, array(
-			':debrisMetal'		=> $debris[901],
-			':debrisCrystal'	=> $debris[902],
-			':lostUnits'		=> $combatResult['unitLost']['attacker'],
-			':destroyedUnits'	=> $combatResult['unitLost']['defender']
-	  	));
+			$db->update($sql, array(
+				':debrisMetal'		=> $debris[901],
+				':debrisCrystal'	=> $debris[902],
+				':lostUnits'		=> $combatResult['unitLost']['attacker'],
+				':destroyedUnits'	=> $combatResult['unitLost']['defender']
+			));
+		}
 
 		$sql = 'UPDATE %%USERS%% SET
 		`'.$defendStatus.'` = `'.$defendStatus.'` + 1,

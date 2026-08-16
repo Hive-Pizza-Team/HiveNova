@@ -86,6 +86,7 @@ class MissionCaseSalvageTest extends TestCase
         $this->assertSame(5000, (int) $mission->_fleet['fleet_resource_metal']);
         $this->assertSame(2500, (int) $mission->_fleet['fleet_resource_crystal']);
         $this->assertSame([], $this->fake->salvagePackages);
+        $this->assertSame(0, $this->fake->transactionDepth);
         $this->assertNotEmpty($this->fake->achievement->messages);
     }
 
@@ -100,6 +101,7 @@ class MissionCaseSalvageTest extends TestCase
         $this->assertSame(FLEET_RETURN, $second->_fleet['fleet_mess']);
         $this->assertSame(0, (int) $second->_fleet['fleet_resource_metal']);
         $this->assertGreaterThan(1, count($this->fake->achievement->messages));
+        $this->assertSame(0, $this->fake->transactionDepth);
     }
 
     public function testBounceWhenNoPackage(): void

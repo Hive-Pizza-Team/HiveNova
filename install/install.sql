@@ -660,7 +660,7 @@ CREATE TABLE `%PREFIX%salvage_packages` (
   UNIQUE KEY `coords` (`universe`, `galaxy`, `system`, `planet`),
   KEY `expires_at` (`expires_at`),
   KEY `planet_id` (`planet_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%raports` (
   `rid` varchar(32) NOT NULL,
