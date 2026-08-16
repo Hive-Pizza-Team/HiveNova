@@ -97,12 +97,15 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 
 			// fast way
 			$collectFactor	= min(1, $totalStorage / $targetData['total']);
+			$storageLeft	= (int) $totalStorage;
 			foreach($debrisIDs as $debrisID)
 			{
 				$fleetColName	= 'fleet_resource_'.$resource[$debrisID];
 				$debrisColName	= 'der_'.$resource[$debrisID];
 
-				$collectedGoods[$debrisID]			= ceil($targetData[$debrisColName] * $collectFactor);
+				$available					= (int) $targetData[$debrisColName];
+				$collectedGoods[$debrisID]	= (int) min($available, $storageLeft, (int) ceil($available * $collectFactor));
+				$storageLeft				-= $collectedGoods[$debrisID];
 				$collectQuery[]						= $debrisColName.' = GREATEST(0, '.$debrisColName.' - :'.$resource[$debrisID].')';
 				$param[':'.$resource[$debrisID]]	= $collectedGoods[$debrisID];
 

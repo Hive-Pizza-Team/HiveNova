@@ -109,6 +109,31 @@ class MissionCasePhase5Test extends TestCase
         $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
     }
 
+    public function test_recycling_does_not_collect_more_than_storage(): void
+    {
+        $GLOBALS['pricelist'][209]['capacity'] = 1;
+        $this->fake->planetRowsById[99] = [
+            'der_metal' => 1,
+            'der_crystal' => 1,
+            'total' => 2,
+        ];
+
+        $fleet = missionFleetFixture([
+            'fleet_mission' => 8,
+            'fleet_array' => '209,1;',
+            'fleet_resource_metal' => 0,
+            'fleet_resource_crystal' => 0,
+        ]);
+
+        $mission = new MissionCaseRecycling($fleet);
+        $mission->TargetEvent();
+
+        $this->assertLessThanOrEqual(
+            1,
+            (int) $mission->_fleet['fleet_resource_metal'] + (int) $mission->_fleet['fleet_resource_crystal']
+        );
+    }
+
     public function test_stay_target_event_sends_message_and_kills_fleet(): void
     {
         $this->fake->planetRowsById[99] = ['id' => 99, 'id_owner' => 2, 'name' => 'Target'];
@@ -124,6 +149,21 @@ class MissionCasePhase5Test extends TestCase
 
         $this->assertSame(1, $mission->kill);
         $this->assertNotEmpty($this->fake->achievement->messages);
+    }
+
+    public function test_stay_deploys_when_owner_is_gone(): void
+    {
+        unset($this->fake->achievement->users[1]);
+        $this->fake->planetRowsById[99] = ['id' => 99, 'id_owner' => 2, 'name' => 'Target'];
+
+        $mission = new MissionCaseStay(missionFleetFixture([
+            'fleet_mission' => 5,
+            'fleet_array' => '202,5;',
+            'fleet_target_owner' => 2,
+        ]));
+        $mission->TargetEvent();
+
+        $this->assertSame(1, $mission->kill);
     }
 
     private function defineMissionModules(): void

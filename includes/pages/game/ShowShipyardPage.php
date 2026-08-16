@@ -38,6 +38,9 @@ class ShowShipyardPage extends AbstractGamePage
 	{
 		global $USER, $PLANET, $resource;
 		$ElementQueue = safe_unserialize($PLANET['b_hangar_id']);
+		if (!is_array($ElementQueue)) {
+			return false;
+		}
 		
 		$CancelArray	= HTTP::_GP('auftr', array());
 		
@@ -168,11 +171,13 @@ class ShowShipyardPage extends AbstractGamePage
 		if (!empty($PLANET['b_building_id']))
 		{
 			$CurrentQueue 	= safe_unserialize($PLANET['b_building_id']);
-			foreach($CurrentQueue as $ElementArray)
-			{
-				if($ElementArray[0] == 21 || $ElementArray[0] == 15) {
-					$NotBuilding = false;
-					break;
+			if (is_array($CurrentQueue)) {
+				foreach($CurrentQueue as $ElementArray)
+				{
+					if($ElementArray[0] == 21 || $ElementArray[0] == 15) {
+						$NotBuilding = false;
+						break;
+					}
 				}
 			}
 		}

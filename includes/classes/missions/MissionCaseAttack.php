@@ -93,6 +93,11 @@ HTML;
 		}
 
 		$targetUser		= $this->getUser((int) $targetPlanet['id_owner']);
+		if ($targetUser === []) {
+			$this->setState(FLEET_RETURN);
+			$this->SaveFleet();
+			return;
+		}
 		$targetUser['factor']	= getFactors($targetUser, 'basic', $this->_fleet['fleet_start_time']);
 
 		$planetUpdater	= new ResourceUpdate();
@@ -367,8 +372,10 @@ HTML;
 			$targetDebris	= $db->selectSingle($sql, array(
 				':moonId'	=> $this->_fleet['fleet_end_id']
 			));
-			$targetPlanet['der_metal'] += $targetDebris['der_metal'];
-			$targetPlanet['der_crystal'] += $targetDebris['der_crystal'];
+			if (is_array($targetDebris)) {
+				$targetPlanet['der_metal'] += $targetDebris['der_metal'];
+				$targetPlanet['der_crystal'] += $targetDebris['der_crystal'];
+			}
 		}
 		
 		foreach($debrisResource as $elementID)
