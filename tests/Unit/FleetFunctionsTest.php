@@ -2,6 +2,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\PveNpcFleetFactory;
 
 use PHPUnit\Framework\TestCase;
 
@@ -397,6 +398,42 @@ class FleetFunctionsTest extends TestCase
         $this->assertGreaterThan(1, $mixed);
     }
 
+    public function testGetFleetConsumptionTreatsMissingDriveTechsAsZero(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']        = 12500;
+        $GLOBALS['pricelist'][202]['speed2']       = 17500;
+        $GLOBALS['pricelist'][202]['tech']         = 1;
+        $GLOBALS['pricelist'][202]['consumption']  = 20;
+        $GLOBALS['pricelist'][202]['consumption2'] = 10;
+
+        $missing = [];
+        $zeros   = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+
+        $this->assertSame(
+            FleetFunctions::GetFleetConsumption([202 => 2], 3600, 5000, $zeros, 1),
+            FleetFunctions::GetFleetConsumption([202 => 2], 3600, 5000, $missing, 1)
+        );
+    }
+
+    public function testGetFleetConsumptionAcceptsPveSyntheticPlayer(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']        = 12500;
+        $GLOBALS['pricelist'][202]['speed2']       = 17500;
+        $GLOBALS['pricelist'][202]['tech']         = 1;
+        $GLOBALS['pricelist'][202]['consumption']  = 20;
+        $GLOBALS['pricelist'][202]['consumption2'] = 10;
+
+        $consumption = FleetFunctions::GetFleetConsumption(
+            [202 => 2],
+            3600,
+            5000,
+            PveNpcFleetFactory::syntheticPlayer('Pirates'),
+            1
+        );
+
+        $this->assertGreaterThan(0, $consumption);
+    }
+
     // -------------------------------------------------------------------------
     // GetGameSpeedFactor
     // -------------------------------------------------------------------------
@@ -551,5 +588,22 @@ class FleetFunctionsTest extends TestCase
         // LF with impulse_motor_tech >= 5: base_speed=speed2=17500, but techSpeed stays 1 (combustion)
         // speed = 17500 * (1 + 0.1 * combustion_tech) = 17500 * 1.5 = 26250
         $this->assertEquals(26250.0, $speed_upgrade);
+    }
+
+    public function testGetFleetMaxSpeedTreatsMissingDriveTechsAsZero(): void
+    {
+        $GLOBALS['pricelist'][202]['speed']  = 12500;
+        $GLOBALS['pricelist'][202]['speed2'] = 17500;
+        $GLOBALS['pricelist'][202]['tech']   = 1;
+        $GLOBALS['pricelist'][210]['speed']  = 4000;
+        $GLOBALS['pricelist'][210]['tech']   = 2;
+
+        $missing = [];
+        $zeros   = ['combustion_tech' => 0, 'impulse_motor_tech' => 0, 'hyperspace_motor_tech' => 0];
+
+        $this->assertSame(
+            FleetFunctions::GetFleetMaxSpeed([202 => 2, 210 => 1], $zeros),
+            FleetFunctions::GetFleetMaxSpeed([202 => 2, 210 => 1], $missing)
+        );
     }
 }

@@ -39,6 +39,9 @@ class PveNpcFleetFactoryTest extends TestCase
         $this->assertSame(0, $player['id']);
         $this->assertSame('Aliens', $player['username']);
         $this->assertSame(7, $player['military_tech']);
+        $this->assertSame(0, $player['combustion_tech']);
+        $this->assertSame(0, $player['impulse_motor_tech']);
+        $this->assertSame(0, $player['hyperspace_motor_tech']);
     }
 
     public function testDisplayNameMapsFamily(): void
