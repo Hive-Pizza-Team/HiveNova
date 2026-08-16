@@ -181,12 +181,28 @@ class PlayerUtilTest extends TestCase
         }));
     }
 
-    public function testResolvePublicMessageUsesHiveAboutWhenIdentityIsPublic(): void
+    public function testResolvePublicMessagePrefersStoredTextOverHiveAbout(): void
     {
         $user = [
             'username' => 'alice',
             'hive_account' => 'alice',
-            'public_message' => 'in-game fallback',
+            'public_message' => 'in-game message',
+        ];
+        $fetched = false;
+
+        $this->assertSame('in-game message', PlayerUtil::resolvePublicMessage($user, static function () use (&$fetched): string {
+            $fetched = true;
+            return 'Hive bio';
+        }));
+        $this->assertFalse($fetched, 'Hive about must not be fetched when the profile message is set');
+    }
+
+    public function testResolvePublicMessageUsesHiveAboutWhenStoredIsEmpty(): void
+    {
+        $user = [
+            'username' => 'alice',
+            'hive_account' => 'alice',
+            'public_message' => '',
         ];
 
         $this->assertSame('Hive bio', PlayerUtil::resolvePublicMessage($user, static function (string $account): string {
@@ -195,15 +211,15 @@ class PlayerUtilTest extends TestCase
         }));
     }
 
-    public function testResolvePublicMessageFallsBackToStoredWhenHiveAboutEmpty(): void
+    public function testResolvePublicMessageIsEmptyWhenNeitherSourceHasText(): void
     {
         $user = [
             'username' => 'alice',
             'hive_account' => 'alice',
-            'public_message' => 'in-game fallback',
+            'public_message' => '',
         ];
 
-        $this->assertSame('in-game fallback', PlayerUtil::resolvePublicMessage($user, static function (): string {
+        $this->assertSame('', PlayerUtil::resolvePublicMessage($user, static function (): string {
             return '';
         }));
     }
