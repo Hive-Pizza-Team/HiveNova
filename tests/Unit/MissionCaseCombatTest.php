@@ -379,9 +379,11 @@ class MissionCaseCombatTest extends TestCase
 
         $this->assertCount(1, $posts);
         $payload = json_decode($posts[0]['json'], true);
-        $this->assertStringContainsString('Combat resolved', $payload['content']);
-        $this->assertStringContainsString('player2', $payload['content']);
-        $this->assertStringNotContainsString('player1', $payload['content']);
+        $this->assertSame('HiveNova', $payload['username']);
+        $this->assertNotEmpty($payload['avatar_url']);
+        $this->assertStringContainsString('Combat resolved', $payload['embeds'][0]['description']);
+        $this->assertStringContainsString('player2', $payload['embeds'][0]['description']);
+        $this->assertStringNotContainsString('player1', $payload['embeds'][0]['description']);
     }
 
     public function test_destruction_posts_combat_discord(): void

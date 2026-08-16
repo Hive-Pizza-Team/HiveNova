@@ -10,6 +10,9 @@ class DiscordWebhookService
 {
 	private const USER_AGENT = 'DiscordBot (https://github.com/Hive-Pizza-Team/HiveNova, 1.0)';
 	private const USERNAME = 'HiveNova';
+	private const AVATAR_URL = 'https://moon.hive.pizza/styles/resource/images/login/HiveNova.png';
+	private const COLOR_INCOMING = 0xE74C3C;
+	private const COLOR_COMBAT = 0x3498DB;
 	private const CONNECT_TIMEOUT = 1;
 	private const TIMEOUT = 1;
 
@@ -166,11 +169,12 @@ class DiscordWebhookService
 			}
 
 			$username = (string) ($row['username'] ?? 'Unknown');
+			$coords   = self::coords($galaxy, $system, $planet, $planetType);
 			$content  = $incoming
 				? self::formatIncoming($username, $mission, $galaxy, $system, $planet, $planetType)
 				: self::formatCombat($username, $mission, $galaxy, $system, $planet, $planetType);
 
-			self::post($webhook, $content);
+			self::post($webhook, self::buildPayload($content, $incoming, $username, $mission, $coords));
 		} catch (\Throwable $e) {
 			return;
 		}
@@ -197,16 +201,52 @@ class DiscordWebhookService
 		return $row;
 	}
 
-	private static function post(string $url, string $content): void
-	{
-		$payload = json_encode([
+	/**
+	 * @return array{
+	 *   username: string,
+	 *   avatar_url: string,
+	 *   allowed_mentions: array{parse: list<string>},
+	 *   embeds: list<array<string, mixed>>
+	 * }
+	 */
+	public static function buildPayload(
+		string $description,
+		bool $incoming,
+		string $username,
+		int $mission,
+		string $coords
+	): array {
+		$missionName = self::missionName($mission);
+		$title = $incoming
+			? ('Incoming ' . $missionName)
+			: ('Combat resolved — ' . $missionName);
+
+		return [
 			'username'         => self::USERNAME,
+			'avatar_url'       => self::AVATAR_URL,
 			'allowed_mentions' => ['parse' => []],
-			'content'          => $content,
-		], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+			'embeds'           => [[
+				'title'       => $title,
+				'description' => $description,
+				'color'       => $incoming ? self::COLOR_INCOMING : self::COLOR_COMBAT,
+				'thumbnail'   => ['url' => self::AVATAR_URL],
+				'fields'      => [
+					['name' => 'Player', 'value' => $username, 'inline' => true],
+					['name' => 'Location', 'value' => $coords, 'inline' => true],
+				],
+			]],
+		];
+	}
+
+	/**
+	 * @param array<string, mixed> $payload
+	 */
+	private static function post(string $url, array $payload): void
+	{
+		$json = json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
 
 		$poster = self::$poster ?? self::defaultPoster(...);
-		$poster($url, $payload);
+		$poster($url, $json);
 	}
 
 	private static function defaultPoster(string $url, string $json): int
