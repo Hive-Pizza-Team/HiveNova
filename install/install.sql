@@ -280,6 +280,12 @@ CREATE TABLE `%PREFIX%config` (
   `del_user_automatic` tinyint(3) unsigned NOT NULL DEFAULT '90',
   `del_user_sendmail` tinyint(3) unsigned NOT NULL DEFAULT '21',
   `sendmail_inactive` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `hive_inactive_memo_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `hive_inactive_memo_armed` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `hive_inactive_memo_account` varchar(16) NOT NULL DEFAULT '',
+  `hive_inactive_memo_active_key` varchar(80) NOT NULL DEFAULT '',
+  `hive_inactive_memo_asset` varchar(4) NOT NULL DEFAULT 'HIVE',
+  `hive_inactive_memo_amount` decimal(10,3) unsigned NOT NULL DEFAULT '0.003',
   `silo_factor` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/London',
   `dst` enum('0','1','2') NOT NULL DEFAULT '2',
@@ -899,6 +905,7 @@ CREATE TABLE `%PREFIX%users` (
   `ref_id` int(11) NOT NULL DEFAULT '0',
   `ref_bonus` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `inactive_mail` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `inactive_hive_memo_onlinetime` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `authlevel` (`authlevel`),
   KEY `ref_bonus` (`ref_bonus`),
@@ -1052,7 +1059,8 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'tracking', 1, FLOOR(RAND() * 60), FLOOR(RAND() * 24), '*', '*', '0', 'HiveNova\\Cronjob\\TrackingCronjob', 0, NULL),
 (NULL, 'pushing', 1, '0', '0', '*', '*', '0', 'HiveNova\\Cronjob\\PushingDetectionCronjob', 0, NULL),
 (NULL, 'achievement_backfill', 1, '15', '3', '*', '*', '*', 'HiveNova\\Cronjob\\AchievementBackfillCronjob', 0, NULL),
-(NULL, 'pve_spawn', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\PveSpawnCronjob', 0, NULL);
+(NULL, 'pve_spawn', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\PveSpawnCronjob', 0, NULL),
+(NULL, 'hive_inactive_memo', 1, '0', '4', '*', '*', '*', 'HiveNova\\Cronjob\\InactiveHiveMemoCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);

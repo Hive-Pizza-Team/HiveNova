@@ -1452,3 +1452,12 @@ $LNG['dest_msg_subject_galaxy']       = 'Событие уничтожения: 
 $LNG['dest_result_title']             = 'Уничтожение завершено';
 $LNG['dest_result_done']              = 'Все шаги успешно выполнены. Зона уничтожена.';
 $LNG['dest_result_skipped']           = 'Предупреждение: %d игрок(ов) не удалось переселить, у них нет планет. Требуется ручное вмешательство.';
+
+$LNG['se_hive_inactive_memo'] = 'Hive inactive memo';
+$LNG['se_hive_inactive_memo_info'] = 'Sends a wallet transfer memo when a linked player becomes long-term inactive. Default off.';
+$LNG['se_hive_inactive_memo_active'] = 'Enable Hive inactive memos';
+$LNG['se_hive_inactive_memo_account'] = 'Game Hive account';
+$LNG['se_hive_inactive_memo_amount'] = 'Transfer amount';
+$LNG['se_hive_inactive_memo_asset'] = 'Asset';
+$LNG['se_hive_inactive_memo_active_key'] = 'Active key';
+$LNG['se_hive_inactive_memo_active_key_info'] = 'Leave blank to keep the stored key. The key is never shown again.';

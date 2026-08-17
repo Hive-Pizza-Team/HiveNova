@@ -17,6 +17,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\InactiveHiveMemoAdminConfig;
 use HiveNova\Core\Log;
 use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
@@ -121,6 +122,30 @@ function ShowConfigBasicPage()
 		{
 			$config->$key	= $value;
 		}
+
+		if (isset($config->hive_inactive_memo_active)) {
+			$memoPosted = array(
+				'hive_inactive_memo_active'     => isset($_POST['hive_inactive_memo_active']) ? $_POST['hive_inactive_memo_active'] : '',
+				'hive_inactive_memo_account'    => HTTP::_GP('hive_inactive_memo_account', ''),
+				'hive_inactive_memo_asset'      => HTTP::_GP('hive_inactive_memo_asset', 'HIVE'),
+				'hive_inactive_memo_amount'     => HTTP::_GP('hive_inactive_memo_amount', '0.003'),
+				'hive_inactive_memo_active_key' => HTTP::_GP('hive_inactive_memo_active_key', ''),
+			);
+			$memoStored = array(
+				'hive_inactive_memo_active'     => $config->hive_inactive_memo_active,
+				'hive_inactive_memo_account'    => $config->hive_inactive_memo_account,
+				'hive_inactive_memo_asset'      => $config->hive_inactive_memo_asset,
+				'hive_inactive_memo_amount'     => $config->hive_inactive_memo_amount,
+				'hive_inactive_memo_active_key' => $config->hive_inactive_memo_active_key,
+			);
+			$memoResult = InactiveHiveMemoAdminConfig::applyPosted($memoStored, $memoPosted);
+			foreach ($memoResult['apply'] as $key => $value) {
+				$config->$key = $value;
+			}
+			$config_before = array_merge($config_before, $memoResult['log_old']);
+			$config_after  = array_merge($config_after, $memoResult['log_new']);
+		}
+
 		$config->save();
 
 		$LOG = new Log(3);
@@ -160,11 +185,16 @@ function ShowConfigBasicPage()
 		'dst'           				=> $config->dst,
 		'message_delete_behavior'  		=> $config->message_delete_behavior,
 		'message_delete_days'         	=> $config->message_delete_days,
+		'hive_inactive_memo_active'		=> isset($config->hive_inactive_memo_active) ? $config->hive_inactive_memo_active : 0,
+		'hive_inactive_memo_account'	=> isset($config->hive_inactive_memo_account) ? $config->hive_inactive_memo_account : '',
+		'hive_inactive_memo_asset'		=> isset($config->hive_inactive_memo_asset) ? $config->hive_inactive_memo_asset : 'HIVE',
+		'hive_inactive_memo_amount'		=> isset($config->hive_inactive_memo_amount) ? $config->hive_inactive_memo_amount : '0.003',
 		'Selector'						=> array(
 		    'timezone' => $TimeZones,
             'mail' => $LNG['se_mail_sel'],
             'encry' => array('' => $LNG['se_smtp_ssl_1'], 'ssl' => $LNG['se_smtp_ssl_2'], 'tls' => $LNG['se_smtp_ssl_3']),
             'message_delete_behavior' => array(0 => $LNG['se_message_delete_behavior_0'], 1 => $LNG['se_message_delete_behavior_1']),
+            'hive_memo_asset' => array('HIVE' => 'HIVE', 'HBD' => 'HBD'),
         ),
 	));
 	

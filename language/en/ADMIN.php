@@ -1491,3 +1491,12 @@ $LNG['admin_se_dm_energie'] = 'Energy Upgrade';
 $LNG['admin_se_dm_fleettime'] = 'Fleet Upgrade';
 $LNG['admin_se_cost'] = 'Cost (Pizzabits)';
 $LNG['admin_se_power'] = 'Power (% bonus per level)';
+
+$LNG['se_hive_inactive_memo'] = 'Hive inactive memo';
+$LNG['se_hive_inactive_memo_info'] = 'Sends a wallet transfer memo when a linked player becomes long-term inactive. Default off.';
+$LNG['se_hive_inactive_memo_active'] = 'Enable Hive inactive memos';
+$LNG['se_hive_inactive_memo_account'] = 'Game Hive account';
+$LNG['se_hive_inactive_memo_amount'] = 'Transfer amount';
+$LNG['se_hive_inactive_memo_asset'] = 'Asset';
+$LNG['se_hive_inactive_memo_active_key'] = 'Active key';
+$LNG['se_hive_inactive_memo_active_key_info'] = 'Leave blank to keep the stored key. The key is never shown again.';
