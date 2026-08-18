@@ -38,6 +38,9 @@ class PveRaidService
 
 		$count = 0;
 		foreach ($rows as $row) {
+			if (mt_rand(1, 100) > PVE_COMBAT_OUT_RAID_CHANCE) {
+				continue;
+			}
 			if (self::trySpawnRaid($universe, (int) $row['fleet_owner'], $row, $now, false)) {
 				$count++;
 			}
@@ -94,6 +97,9 @@ class PveRaidService
 
 		$planetId = (int) $outward['fleet_start_id'];
 		if (self::hasInboundNpc($planetId)) {
+			return false;
+		}
+		if (self::isOnCooldown($planetId, $now)) {
 			return false;
 		}
 
@@ -163,6 +169,27 @@ class PveRaidService
 		);
 
 		return (int) ($row['total'] ?? 0) > 0;
+	}
+
+	private static function isOnCooldown(int $planetId, int $now): bool
+	{
+		$since = $now - PVE_RAID_COOLDOWN_SECONDS;
+		foreach (['%%LOG_FLEETS%%', '%%FLEETS%%'] as $table) {
+			$row = Database::get()->selectSingle(
+				'SELECT COUNT(*) AS total FROM ' . $table . '
+				WHERE fleet_end_id = :planetId AND fleet_owner = 0 AND fleet_mission = 1
+				  AND start_time >= :since;',
+				[
+					':planetId' => $planetId,
+					':since'    => $since,
+				]
+			);
+			if ((int) ($row['total'] ?? 0) > 0) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

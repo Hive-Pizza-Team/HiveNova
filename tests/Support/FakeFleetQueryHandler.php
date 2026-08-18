@@ -24,6 +24,9 @@ trait FakeFleetQueryHandler
     /** Expeditions in target system (LOG_FLEETS COUNT … AS total). */
     public int $expeditionLogCount = 0;
 
+    /** @var list<array<string, mixed>> */
+    public array $logFleetRows = [];
+
     public int $onlineUserCount = 0;
 
     public int $acsGroupMemberCount = 0;
@@ -114,6 +117,10 @@ trait FakeFleetQueryHandler
         }
 
         if (str_contains($qry, '%%LOG_FLEETS%%') && str_contains($qry, 'COUNT(*)')) {
+            if (isset($params[':since']) && str_contains($qry, 'fleet_owner = 0')) {
+                $count = ['total' => $this->countRecentNpcRaids($this->logFleetRows, $params)];
+                return $field === false ? $count : ($count[$field] ?? false);
+            }
             if (str_contains($qry, 'fleet_end_galaxy') || str_contains($qry, 'AS total')) {
                 $count = ['total' => $this->expeditionLogCount];
                 return $field === false ? $count : ($count[$field] ?? false);
@@ -130,6 +137,10 @@ trait FakeFleetQueryHandler
         if (str_contains($qry, '%%FLEETS%%')
             && str_contains($qry, 'COUNT(*)')
             && str_contains($qry, 'fleet_owner = 0')) {
+            if (isset($params[':since'])) {
+                $count = ['total' => $this->countRecentNpcRaids($this->fleetRowsById, $params)];
+                return $field === false ? $count : ($count[$field] ?? false);
+            }
             $planetId = (int) ($params[':planetId'] ?? 0);
             $outward = (int) ($params[':outward'] ?? 0);
             $n = 0;
@@ -205,6 +216,34 @@ trait FakeFleetQueryHandler
         }
 
         return $field === false ? null : false;
+    }
+
+    /**
+     * @param iterable<int|string, array<string, mixed>> $rows
+     * @param array<string, mixed> $params
+     */
+    private function countRecentNpcRaids(iterable $rows, array $params): int
+    {
+        $planetId = (int) ($params[':planetId'] ?? 0);
+        $since = (int) ($params[':since'] ?? 0);
+        $n = 0;
+        foreach ($rows as $row) {
+            if ((int) ($row['fleet_end_id'] ?? 0) !== $planetId) {
+                continue;
+            }
+            if ((int) ($row['fleet_owner'] ?? -1) !== 0) {
+                continue;
+            }
+            if ((int) ($row['fleet_mission'] ?? 0) !== 1) {
+                continue;
+            }
+            if ((int) ($row['start_time'] ?? 0) < $since) {
+                continue;
+            }
+            $n++;
+        }
+
+        return $n;
     }
 
     private function fleetUpdate(string $qry, array $params)

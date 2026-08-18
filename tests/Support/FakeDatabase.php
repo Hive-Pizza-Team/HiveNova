@@ -346,6 +346,17 @@ class FakeDatabase implements DatabaseInterface
                 'fleet_end_id' => (int) ($params[':fleetTargetPlanetID'] ?? 0),
                 'fleet_mess' => FLEET_OUTWARD,
                 'fleet_universe' => (int) ($params[':universe'] ?? 1),
+                'start_time' => (int) ($params[':timestamp'] ?? TIMESTAMP),
+            ];
+            return true;
+        }
+
+        if (str_contains($qry, '%%LOG_FLEETS%%') && str_contains($qry, 'INSERT')) {
+            $this->logFleetRows[] = [
+                'fleet_owner' => (int) ($params[':fleetStartOwner'] ?? 0),
+                'fleet_mission' => (int) ($params[':fleetMission'] ?? 0),
+                'fleet_end_id' => (int) ($params[':fleetTargetPlanetID'] ?? 0),
+                'start_time' => (int) ($params[':timestamp'] ?? TIMESTAMP),
             ];
             return true;
         }
