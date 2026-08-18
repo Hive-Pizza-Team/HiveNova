@@ -60,13 +60,13 @@ class ShowEventFirehosePageTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function test_page_is_not_in_main_menus(): void
+	public function test_page_is_in_main_menu_not_bottom_nav(): void
 	{
 		$nav = file_get_contents(__DIR__ . '/../../styles/templates/game/main.navigation.tpl');
 		$bottom = file_get_contents(__DIR__ . '/../../styles/templates/game/main.bottomnav.tpl');
-		$this->assertStringNotContainsString('eventFirehose', $nav);
+		$this->assertStringContainsString('game.php?page=eventFirehose', $nav);
+		$this->assertStringContainsString('ef_title', $nav);
 		$this->assertStringNotContainsString('eventFirehose', $bottom);
-		$this->assertStringNotContainsString('ef_title', $nav);
 		$this->assertStringNotContainsString('ef_title', $bottom);
 	}
 
