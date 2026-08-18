@@ -49,6 +49,8 @@ if (!defined('PVE_ONLINE_WINDOW')) {
     define('PVE_HANGAR_WEAK_FRACTION', 0.5);
     define('PVE_ACCUSED_SHIP_FACTOR', 1.1);
     define('PVE_ACCUSED_RAID_CHANCE', 15);
+    define('PVE_COMBAT_OUT_RAID_CHANCE', 20);
+    define('PVE_RAID_COOLDOWN_SECONDS', 7200);
     define('PVE_RAID_FLIGHT_SECONDS', 600);
     define('PVE_ENCOUNTER_CHANCE', 40);
     define('PVE_ACCUSED_ENCOUNTER_BONUS', 10);

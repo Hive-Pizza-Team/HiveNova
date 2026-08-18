@@ -131,6 +131,43 @@ class PveRaidServiceTest extends TestCase
         $this->assertFalse(PveRaidService::trySpawnRaid(1, 10, $this->outward(), TIMESTAMP, false));
     }
 
+    public function testSkipsWhenPlanetOnRaidCooldown(): void
+    {
+        $this->fake->logFleetRows[] = [
+            'fleet_owner' => 0,
+            'fleet_end_id' => 55,
+            'fleet_mission' => 1,
+            'start_time' => TIMESTAMP - 60,
+        ];
+        $this->assertFalse(PveRaidService::trySpawnRaid(1, 10, $this->outward(), TIMESTAMP, false));
+        $this->assertSame(0, $this->fake->lastFleetInsertId);
+    }
+
+    public function testSkipsWhenReturningNpcIsWithinCooldown(): void
+    {
+        $this->fake->fleetRowsById[9] = [
+            'fleet_owner' => 0,
+            'fleet_end_id' => 55,
+            'fleet_mission' => 1,
+            'fleet_mess' => FLEET_RETURN,
+            'start_time' => TIMESTAMP - 120,
+        ];
+        $this->assertFalse(PveRaidService::trySpawnRaid(1, 10, $this->outward(), TIMESTAMP, false));
+        $this->assertSame(0, $this->fake->lastFleetInsertId);
+    }
+
+    public function testSpawnsWhenRaidCooldownExpired(): void
+    {
+        $this->fake->logFleetRows[] = [
+            'fleet_owner' => 0,
+            'fleet_end_id' => 55,
+            'fleet_mission' => 1,
+            'start_time' => TIMESTAMP - PVE_RAID_COOLDOWN_SECONDS - 1,
+        ];
+        $this->assertTrue(PveRaidService::trySpawnRaid(1, 10, $this->outward(), TIMESTAMP, false));
+        $this->assertSame(99, $this->fake->lastFleetInsertId);
+    }
+
     public function testHangarPowerSumsFleetAndDefenseAttack(): void
     {
         global $resource, $reslist, $pricelist;
@@ -155,20 +192,49 @@ class PveRaidServiceTest extends TestCase
 
     public function testRunSpawnsFromOutwardCombatFleet(): void
     {
-        $this->fake->fleetRowsById[3] = [
-            'fleet_owner' => 10,
-            'fleet_start_id' => 55,
-            'fleet_start_galaxy' => 1,
-            'fleet_start_system' => 2,
-            'fleet_start_planet' => 3,
-            'fleet_start_type' => 1,
-            'fleet_amount' => 40,
-            'fleet_mission' => 1,
-            'fleet_mess' => FLEET_OUTWARD,
-            'fleet_universe' => 1,
-        ];
+        $this->seedCombatOutChanceHit();
+        $this->fake->fleetRowsById[3] = $this->combatOutFleet();
         $this->assertSame(1, PveRaidService::run(1, TIMESTAMP));
         $this->assertSame(99, $this->fake->lastFleetInsertId);
+    }
+
+    public function testRunCombatOutSkipsWhenChanceMisses(): void
+    {
+        $this->seedCombatOutChanceMiss();
+        $this->fake->fleetRowsById[3] = $this->combatOutFleet();
+        $this->assertSame(0, PveRaidService::run(1, TIMESTAMP));
+        $this->assertSame(0, $this->fake->lastFleetInsertId);
+    }
+
+    public function testRunAccusedIdleSkipsWhenPlanetOnCooldown(): void
+    {
+        $this->fake->accusedDestIds = range(200, 280);
+        foreach ($this->fake->accusedDestIds as $id) {
+            $this->fake->achievement->users[$id] = [
+                'id' => $id,
+                'urlaubs_modus' => 0,
+                'universe' => 1,
+                'lang' => 'en',
+            ];
+            $this->fake->planetRowsById[$id] = [
+                'id' => $id,
+                'id_owner' => $id,
+                'galaxy' => 1,
+                'system' => 1,
+                'planet' => 1,
+                'planet_type' => 1,
+                'universe' => 1,
+                'destruyed' => 0,
+            ];
+            $this->fake->logFleetRows[] = [
+                'fleet_owner' => 0,
+                'fleet_end_id' => $id,
+                'fleet_mission' => 1,
+                'start_time' => TIMESTAMP - 30,
+            ];
+        }
+        $this->assertSame(0, PveRaidService::run(1, TIMESTAMP));
+        $this->assertSame(0, $this->fake->lastFleetInsertId);
     }
 
     public function testRunAccusedIdlePathSpawnsWhenChanceHits(): void
@@ -223,5 +289,46 @@ class PveRaidServiceTest extends TestCase
         $pricelist[204]['attack'] = 50;
         $this->fake->planetRowsById[55]['light_hunter'] = 20;
         $this->assertFalse(PveRaidService::trySpawnRaid(1, 10, $this->outward(['fleet_amount' => 10]), TIMESTAMP, true));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function combatOutFleet(): array
+    {
+        return [
+            'fleet_owner' => 10,
+            'fleet_start_id' => 55,
+            'fleet_start_galaxy' => 1,
+            'fleet_start_system' => 2,
+            'fleet_start_planet' => 3,
+            'fleet_start_type' => 1,
+            'fleet_amount' => 40,
+            'fleet_mission' => 1,
+            'fleet_mess' => FLEET_OUTWARD,
+            'fleet_universe' => 1,
+        ];
+    }
+
+    private function seedCombatOutChanceHit(): void
+    {
+        $this->seedMtRand(1, 100, static fn (int $roll): bool => $roll <= PVE_COMBAT_OUT_RAID_CHANCE);
+    }
+
+    private function seedCombatOutChanceMiss(): void
+    {
+        $this->seedMtRand(1, 100, static fn (int $roll): bool => $roll > PVE_COMBAT_OUT_RAID_CHANCE);
+    }
+
+    private function seedMtRand(int $min, int $max, callable $predicate): void
+    {
+        for ($seed = 1; $seed < 50000; $seed++) {
+            mt_srand($seed);
+            if ($predicate(mt_rand($min, $max))) {
+                mt_srand($seed);
+                return;
+            }
+        }
+        $this->fail('Unable to find an mt_srand seed for the requested roll');
     }
 }
