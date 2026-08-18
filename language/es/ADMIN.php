@@ -1500,3 +1500,12 @@ $LNG['dest_msg_subject_galaxy']       = 'Evento de destrucción: Galaxia %d';
 $LNG['dest_result_title']             = 'Destrucción completada';
 $LNG['dest_result_done']              = 'Todos los pasos se completaron con éxito. La zona ha sido destruida.';
 $LNG['dest_result_skipped']           = 'Advertencia: %d jugador(es) no pudieron ser reubicados y no tienen planetas. Se requiere seguimiento manual.';
+
+$LNG['se_hive_inactive_memo'] = 'Hive inactive memo';
+$LNG['se_hive_inactive_memo_info'] = 'Sends a wallet transfer memo when a linked player becomes long-term inactive. Default off.';
+$LNG['se_hive_inactive_memo_active'] = 'Enable Hive inactive memos';
+$LNG['se_hive_inactive_memo_account'] = 'Game Hive account';
+$LNG['se_hive_inactive_memo_amount'] = 'Transfer amount';
+$LNG['se_hive_inactive_memo_asset'] = 'Asset';
+$LNG['se_hive_inactive_memo_active_key'] = 'Active key';
+$LNG['se_hive_inactive_memo_active_key_info'] = 'Leave blank to keep the stored key. The key is never shown again.';

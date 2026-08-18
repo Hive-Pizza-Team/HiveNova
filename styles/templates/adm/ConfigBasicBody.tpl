@@ -42,6 +42,29 @@
 	<td><input name="del_user_sendmail" maxlength="3" size="2" value="{$del_user_sendmail}" type="text"> {$LNG.se_days}</td>
 	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_del_user_sendmail_info}"></td>
 </tr><tr>
+	<th colspan="2">{$LNG.se_hive_inactive_memo}</th>
+	<th><center><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_hive_inactive_memo_info}"></center></th>
+</tr><tr>
+	<td>{$LNG.se_hive_inactive_memo_active}</td>
+	<td><input name="hive_inactive_memo_active"{if $hive_inactive_memo_active} checked="checked"{/if} type="checkbox"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_hive_inactive_memo_account}</td>
+	<td><input name="hive_inactive_memo_account" maxlength="16" size="20" value="{$hive_inactive_memo_account}" type="text" autocomplete="off"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_hive_inactive_memo_asset}</td>
+	<td>{html_options name=hive_inactive_memo_asset options=$Selector.hive_memo_asset selected=$hive_inactive_memo_asset}</td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_hive_inactive_memo_amount}</td>
+	<td><input name="hive_inactive_memo_amount" size="10" value="{$hive_inactive_memo_amount}" type="text"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_hive_inactive_memo_active_key}</td>
+	<td><input name="hive_inactive_memo_active_key" size="40" value="" type="password" autocomplete="off"></td>
+	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_hive_inactive_memo_active_key_info}"></td>
+</tr><tr>
 	<th colspan="2">{$LNG.se_recaptcha_head}</th><th>&nbsp;</th>
 </tr><tr>
 	<td>{$LNG.se_recaptcha_active}<br></td>

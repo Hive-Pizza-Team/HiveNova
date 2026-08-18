@@ -40,7 +40,10 @@ class Config
 										   'chat_socket_active', 'chat_socket_host', 'chat_socket_ip', 'chat_socket_port',
 										   'chat_socket_chatid', 'ttf_file', 'sendmail_inactive', 'del_user_sendmail',
 										   'del_user_automatic', 'del_oldstuff', 'del_user_manually', 'ref_max_referals',
-										   'disclamerAddress','disclamerPhone','disclamerMail','disclamerNotice');
+										   'disclamerAddress','disclamerPhone','disclamerMail','disclamerNotice',
+										   'hive_inactive_memo_active', 'hive_inactive_memo_armed',
+										   'hive_inactive_memo_account', 'hive_inactive_memo_active_key',
+										   'hive_inactive_memo_asset', 'hive_inactive_memo_amount');
 
 	public static function getGlobalConfigKeys()
 	{

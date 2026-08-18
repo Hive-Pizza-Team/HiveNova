@@ -1294,3 +1294,6 @@ $LNG['lo_notify']							= 'Will be redirected in <span id="seconds">5</span> sec
 $LNG['lo_continue']							= 'Click to continue.';
 
 //----------------------------------------------------------------------------//
+
+$LNG['hive_inactive_memo_status'] = 'You are long-term inactive (I) in %s. Log in to keep your empire.';
+$LNG['hive_inactive_memo_wipe'] = ' If you stay gone, this empire will be removed.';

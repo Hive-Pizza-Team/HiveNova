@@ -1299,3 +1299,6 @@ $LNG['market_msg_trade_sold'] = 'Filonuz %s\'a %s %s, %s %s, %s %s ile uçuyor.'
 $LNG['market_buyable_only_trade_partners'] = 'Yalnızca ortaklar';
 $LNG['market_buyable_no_enemies'] = 'Düşman yok';
 $LNG['market_buyable_no_tech'] = 'Çok zayıf';
+
+$LNG['hive_inactive_memo_status'] = 'You are long-term inactive (I) in %s. Log in to keep your empire.';
+$LNG['hive_inactive_memo_wipe'] = ' If you stay gone, this empire will be removed.';

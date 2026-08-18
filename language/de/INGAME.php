@@ -1289,3 +1289,6 @@ $LNG['fl_mt_resources'] = 'Rohstoffmarkt';
 $LNG['fl_stronger_techs'] = 'Dein Angriff/Verteidigung/Schild ist zu niedrig.';
 $LNG['market_fleet'] = 'Flotte';
 $LNG['market_buyable_no_tech'] = 'Zu schwach';
+
+$LNG['hive_inactive_memo_status'] = 'You are long-term inactive (I) in %s. Log in to keep your empire.';
+$LNG['hive_inactive_memo_wipe'] = ' If you stay gone, this empire will be removed.';

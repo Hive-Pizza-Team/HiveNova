@@ -1290,3 +1290,6 @@ $LNG['market_msg_trade_sold'] = 'Sua frota está voando para %s com %s %s, %s %s
 $LNG['market_buyable_only_trade_partners'] = 'Apenas parceiros';
 $LNG['market_buyable_no_enemies'] = 'Sem inimigos';
 $LNG['market_buyable_no_tech'] = 'Muito fraco';
+
+$LNG['hive_inactive_memo_status'] = 'You are long-term inactive (I) in %s. Log in to keep your empire.';
+$LNG['hive_inactive_memo_wipe'] = ' If you stay gone, this empire will be removed.';
