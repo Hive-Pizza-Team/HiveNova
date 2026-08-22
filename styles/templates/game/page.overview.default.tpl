@@ -75,6 +75,9 @@ $("#tn3").hide();
 		
 			<a style="color:lime">{$fleetsOnline}</a> {$LNG.ov_moving_fleets}
 <br>{$LNG.ov_points} {$rankInfo|default:''}
+{if !empty($featBanner.show)}
+<div class="feat-banner" style="margin:8px 0;padding:8px;border:1px solid #fc0;color:#fc0;">{$featBanner.text}</div>
+{/if}
 {if $is_news}
 
                 <div class="hidden-div" id="hidden-div">

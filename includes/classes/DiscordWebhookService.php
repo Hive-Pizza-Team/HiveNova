@@ -184,6 +184,42 @@ class DiscordWebhookService
 		self::notify($targetUserId, $mission, $galaxy, $system, $planet, $planetType, false, $attackerOwnerId, $fleetArray);
 	}
 
+	public static function notifyFeatClaimed(int $universe, string $featKey, int $userId): void
+	{
+		try {
+			$raw = (string) (Config::get($universe)->discord_feat_webhook ?? '');
+			$webhook = self::normalizeUrl($raw);
+			if ($webhook === null) {
+				return;
+			}
+
+			$username = Database::get()->selectSingle(
+				'SELECT username FROM %%USERS%% WHERE id = :id;',
+				[':id' => $userId],
+				'username'
+			);
+			$player = is_string($username) && $username !== '' ? $username : '#' . $userId;
+
+			self::post($webhook, [
+				'username'         => self::USERNAME,
+				'avatar_url'       => self::AVATAR_URL,
+				'allowed_mentions' => ['parse' => []],
+				'embeds'           => [[
+					'title'       => 'Feat of Strength',
+					'description' => $player . ' claimed ' . $featKey,
+					'color'       => 0xF1C40F,
+					'thumbnail'   => ['url' => self::AVATAR_URL],
+					'fields'      => [
+						['name' => 'Player', 'value' => $player, 'inline' => true],
+						['name' => 'Feat', 'value' => $featKey, 'inline' => true],
+					],
+				]],
+			]);
+		} catch (\Throwable) {
+			return;
+		}
+	}
+
 	private static function npcName(int $attackerOwnerId, string $fleetArray): ?string
 	{
 		if ($attackerOwnerId !== 0) {

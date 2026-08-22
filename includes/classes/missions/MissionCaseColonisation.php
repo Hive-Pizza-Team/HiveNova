@@ -101,7 +101,10 @@ class MissionCaseColonisation extends MissionFunctions implements Mission
 							(int) $NewOwnerPlanet
 						);
 						$message = sprintf($LNG['sys_colo_allisok'], GetTargetAddressLink($this->_fleet, ''));
-						\HiveNova\Core\AchievementHooks::afterColonisation((int) $this->_fleet['fleet_owner']);
+						\HiveNova\Core\AchievementHooks::afterColonisationInUniverse(
+							(int) $this->_fleet['fleet_owner'],
+							(int) $this->_fleet['fleet_universe']
+						);
 						$this->StoreGoodsToPlanet();
 						if ($this->_fleet['fleet_amount'] == 1) {
 							$this->KillFleet();

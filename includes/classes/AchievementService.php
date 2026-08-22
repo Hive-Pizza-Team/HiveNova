@@ -603,7 +603,7 @@ class AchievementService
             FROM %%ACHIEVEMENTS%% a
             LEFT JOIN %%USER_ACHIEVEMENT_PROGRESS%% p ON p.achievement_id = a.id AND p.user_id = :userId
             LEFT JOIN %%USER_ACHIEVEMENTS%% ua ON ua.achievement_id = a.id AND ua.user_id = :userId
-            WHERE a.universe = :universe AND a.active = 1
+            WHERE a.universe = :universe AND a.active = 1 AND a.hof_only = 0
             ORDER BY a.category ASC, a.sort_order ASC, a.id ASC;';
 
         $rows = Database::get()->select($sql, [

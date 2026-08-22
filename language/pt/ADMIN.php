@@ -1541,3 +1541,7 @@ $LNG['se_hive_inactive_memo_amount'] = 'Transfer amount';
 $LNG['se_hive_inactive_memo_asset'] = 'Asset';
 $LNG['se_hive_inactive_memo_active_key'] = 'Active key';
 $LNG['se_hive_inactive_memo_active_key_info'] = 'Leave blank to keep the stored key. The key is never shown again.';
+
+$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
+$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements.';
+

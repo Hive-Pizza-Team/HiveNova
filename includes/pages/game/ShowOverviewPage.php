@@ -311,6 +311,7 @@ class ShowOverviewPage extends AbstractGamePage
 			'rankInfo'					=> $rankInfo,
 			'is_news'					=> $config->OverviewNewsFrame,
 			'news'						=> makebr($config->OverviewNewsText),
+			'featBanner'				=> $this->featBannerAssign($config, $USER, $LNG),
 			'usersOnline'				=> $usersOnline,
 			'fleetsOnline'				=> $fleetsOnline,
 			'planetname'				=> $PLANET['name'],
@@ -467,6 +468,7 @@ class ShowOverviewPage extends AbstractGamePage
 						));
 						// refresh the page
 						Session::load()->planetId     = $NEXT_PLANET['id'];
+						\HiveNova\Core\FeatHooks::afterAbandonPlanet((int) $USER['universe'], (int) $USER['id'], true);
 						$this->sendJSON(array('ok' => true, 'message' => $LNG['ov_planet_abandoned']));
 					}
                 } else {
@@ -481,8 +483,33 @@ class ShowOverviewPage extends AbstractGamePage
                 }
 
                 Session::load()->planetId     = $USER['id_planet'];
+				\HiveNova\Core\FeatHooks::afterAbandonPlanet((int) $USER['universe'], (int) $USER['id'], false);
 				$this->sendJSON(array('ok' => true, 'message' => $LNG['ov_planet_abandoned']));
 			}
 		}
+	}
+
+	/**
+	 * @param array<string, mixed> $USER
+	 * @return array{show: bool, text: string}
+	 */
+	private function featBannerAssign(Config $config, array $USER, $LNG): array
+	{
+		$key = (string) ($config->feat_banner_key ?? '');
+		$userId = (int) ($config->feat_banner_user_id ?? 0);
+		if ($key === '' || $userId <= 0) {
+			return ['show' => false, 'text' => ''];
+		}
+
+		$username = Database::get()->selectSingle(
+			'SELECT username FROM %%USERS%% WHERE id = :id;',
+			[':id' => $userId],
+			'username'
+		);
+		$player = is_string($username) && $username !== '' ? $username : '#' . $userId;
+		$featName = $LNG[$key . '_name'] ?? $key;
+		$text = sprintf($LNG['feat_banner_text'] ?? '%s claimed %s', $player, $featName);
+
+		return ['show' => true, 'text' => $text];
 	}
 }

@@ -430,6 +430,11 @@ HTML;
 				$targetUser['id'],
 				$chanceCreateMoon
 			);
+			\HiveNova\Core\FeatHooks::afterMoonCreated(
+				(int) $this->_fleet['fleet_universe'],
+				(int) $targetUser['id'],
+				(int) $this->_fleet['fleet_owner']
+			);
 			
 			if(Config::get($this->_fleet['fleet_universe'])->debris_moon == 1)
 			{
@@ -633,7 +638,17 @@ HTML;
 			':destroyedUnits'	=> $combatResult['unitLost']['attacker']
 		));
 
-		\HiveNova\Core\AchievementHooks::afterCombat($userAttack, $userDefend, $attackStatus, $defendStatus);
+		\HiveNova\Core\AchievementHooks::afterCombatWithFeats(
+			$userAttack,
+			$userDefend,
+			$attackStatus,
+			$defendStatus,
+			(int) $this->_fleet['fleet_universe'],
+			\HiveNova\Core\FeatHooks::attackerShipCount((string) ($this->_fleet['fleet_array'] ?? '')),
+			\HiveNova\Core\FeatHooks::planetDefenseCount($targetPlanet),
+			\HiveNova\Core\FeatHooks::fleetHasDeathstar((string) ($this->_fleet['fleet_array'] ?? '')),
+			\HiveNova\Core\FeatHooks::planetHasDeathstar($targetPlanet)
+		);
 
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
