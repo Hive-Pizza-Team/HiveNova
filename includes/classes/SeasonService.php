@@ -110,7 +110,8 @@ class SeasonService
 	 *   wipe_seconds: int,
 	 *   wipe_live: bool,
 	 *   wipe_urgent: bool,
-	 *   entry_pizza: string
+	 *   entry_pizza: string,
+	 *   wallet: string
 	 * }
 	 */
 	public function loginPanel(Config $config): array
@@ -131,6 +132,7 @@ class SeasonService
 			'wipe_live'    => $seasonal && $status === self::STATUS_RUNNING && $remaining > 0,
 			'wipe_urgent'  => $seasonal && $status === self::STATUS_RUNNING && $remaining > 0 && $remaining <= $preclose,
 			'entry_pizza'  => $seasonal ? (string) ($config->season_entry_pizza ?? '0') : '',
+			'wallet'       => $seasonal ? (string) ($config->season_wallet_account ?? '') : '',
 		];
 	}
 
@@ -264,15 +266,21 @@ class SeasonService
 	public function confirmTx(Config $config, array $user, string $txid): array
 	{
 		$parsed = $this->engine->getTransaction($txid);
-		if ($parsed === null) {
-			return ['ok' => false, 'reason' => 'missing_tx'];
-		}
-		$transfer = HiveEngineClient::parseTransfer($parsed);
-		if ($transfer === null) {
-			return ['ok' => false, 'reason' => 'not_transfer'];
+		if ($parsed !== null) {
+			$transfer = HiveEngineClient::parseTransfer($parsed);
+			if ($transfer === null) {
+				return ['ok' => false, 'reason' => 'not_transfer'];
+			}
+
+			return $this->acceptTransfer($config, $user, $transfer, false);
 		}
 
-		return $this->acceptTransfer($config, $user, $transfer, false);
+		$this->ingestWallet($config);
+		if ($this->hasEntry($user, $config)) {
+			return ['ok' => true, 'reason' => ''];
+		}
+
+		return ['ok' => false, 'reason' => 'missing_tx'];
 	}
 
 	public function ingestWallet(Config $config, bool $closing = false): int

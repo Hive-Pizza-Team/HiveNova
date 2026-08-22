@@ -306,20 +306,44 @@ class SeasonServiceTest extends TestCase
 	{
 		HiveEngineClient::setFetcher(static function () {
 			return json_encode([
-				'action' => 'transfer',
-				'sender' => 'playerone',
-				'payload' => [
-					'to' => 'season.wallet',
-					'symbol' => 'PIZZA',
-					'quantity' => '2.000',
-					'memo' => 'hn-s2-1-10',
+				'jsonrpc' => '2.0',
+				'id' => 1,
+				'result' => [
+					'action' => 'transfer',
+					'sender' => 'playerone',
+					'payload' => '{"to":"season.wallet","symbol":"PIZZA","quantity":"2.000","memo":"hn-s2-1-10"}',
+					'transactionId' => 'deadbeef',
+					'timestamp' => 1700000010,
 				],
-				'transactionId' => 'deadbeef',
-				'timestamp' => 1700000010,
 			]);
 		});
 		$config = $this->makeConfig();
 		$result = $this->service()->confirmTx($config, ['id' => 10, 'hive_account' => 'playerone'], 'deadbeef');
+		$this->assertTrue($result['ok']);
+		$this->assertNotNull($this->store->findEntry(2, 1, 10));
+	}
+
+	public function testConfirmTxFallsBackToWalletHistory(): void
+	{
+		HiveEngineClient::setFetcher(static function (string $url) {
+			if (str_contains($url, 'accountHistory')) {
+				return json_encode([[
+					'operation' => 'tokens_transfer',
+					'from' => 'playerone',
+					'to' => 'season.wallet',
+					'symbol' => 'PIZZA',
+					'quantity' => '1.000',
+					'memo' => 'hn-s2-1-10',
+					'transactionId' => 'hist1',
+					'timestamp' => 1700000010,
+				]]);
+			}
+
+			return json_encode(['jsonrpc' => '2.0', 'id' => 1, 'result' => null]);
+		});
+		$config = $this->makeConfig();
+		$this->store->users[10] = ['id' => 10, 'hive_account' => 'playerone', 'universe' => 2, 'authlevel' => 0];
+		$result = $this->service()->confirmTx($config, ['id' => 10, 'hive_account' => 'playerone'], 'hist1');
 		$this->assertTrue($result['ok']);
 		$this->assertNotNull($this->store->findEntry(2, 1, 10));
 	}
@@ -397,6 +421,7 @@ class SeasonServiceTest extends TestCase
 		$this->assertFalse($panel['seasonal']);
 		$this->assertFalse($panel['wipe_live']);
 		$this->assertSame('', $panel['entry_pizza']);
+		$this->assertSame('', $panel['wallet']);
 		$this->assertSame(0, $panel['season_id']);
 	}
 
@@ -410,6 +435,7 @@ class SeasonServiceTest extends TestCase
 		$this->assertSame(1, $panel['season_id']);
 		$this->assertSame(604800, $panel['wipe_seconds']);
 		$this->assertSame('1.000', $panel['entry_pizza']);
+		$this->assertSame('season.wallet', $panel['wallet']);
 	}
 
 	public function testLoginPanelMarksWipeUrgentInsidePrecloseWindow(): void

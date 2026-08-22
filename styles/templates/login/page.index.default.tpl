@@ -116,7 +116,12 @@
 						<div class="uni-stats-config-item uni-stats-config-item--paired">
 							<div class="uni-stats-config-term">{$LNG.uni_info_entry}</div>
 							<div class="uni-stats-config-desc">{$stats.entry_label|escape}</div>
-							<div class="uni-stats-config-note">{$LNG.uni_info_season_hive}</div>
+							<div class="uni-stats-config-note">{$LNG.uni_info_entry_token}</div>
+						</div>
+						<div class="uni-stats-config-item uni-stats-config-item--paired">
+							<div class="uni-stats-config-term">{$LNG.uni_info_entry_wallet}</div>
+							<div class="uni-stats-config-desc">{if $stats.entry_wallet != ''}@{$stats.entry_wallet|escape}{else}—{/if}</div>
+							<div class="uni-stats-config-note">{$LNG.uni_info_entry_note}</div>
 						</div>
 						<div class="uni-stats-config-item uni-stats-config-item--wide uni-stats-config-item--paired">
 							<div class="uni-stats-config-term">{$LNG.uni_info_fullness}</div>

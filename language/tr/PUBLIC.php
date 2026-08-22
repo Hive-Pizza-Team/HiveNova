@@ -73,6 +73,9 @@ $LNG['uni_info_wipe_hold']				= 'Sıfırlama gecikti';
 $LNG['uni_info_wipe_starting']			= 'Yakında';
 $LNG['uni_info_entry']					= 'Giriş';
 $LNG['uni_info_entry_pizza']			= '%s PIZZA';
+$LNG['uni_info_entry_token']			= 'Hive Engine PIZZA, not HIVE';
+$LNG['uni_info_entry_wallet']			= 'Send to';
+$LNG['uni_info_entry_note']				= 'Hive signup required. After login you get a unique memo.';
 $LNG['uni_info_season_hive']			= 'Hive hesabı gerekli';
 $LNG['uni_info_season_entries_closed']	= 'Giriş kapalı';
 
