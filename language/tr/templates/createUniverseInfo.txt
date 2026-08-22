@@ -9,4 +9,7 @@ Ilave olarak, mod_rewrite modu gerekli.</p>
 <p>Eger nginx Server kullaniyorsaniz, chost ayarlari direk olarak rewrite(yeniden yazilabilir) seklinde ayarlanmalidir:</p>
 <p><code>{NGINX-CODE}</code></p>
 <p>Bu konudu kullanabilirsiniz "server_name".</p>
+<h3>Caddy</h3>
+<p>Caddy <code>/uniN/</code> yolunu dahili olarak yeniden yazar ve HTTP 200 döner (302 değil). Ekleyin:</p>
+<p><pre>{CADDY-CODE}</pre></p>
 </div>

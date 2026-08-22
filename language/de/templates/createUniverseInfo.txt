@@ -9,4 +9,7 @@ Außerdem wird mod_rewrite benötigt.</p>
 <p>Wenn man bei ein nginx-Server als Backendserver läuft, die vhost Konfiguration direkt um rewrite Regel erweitern:</p>
 <p><code>{NGINX-CODE}</code></p>
 <p>Einfachsten den Codeschnipsel unter die Zeile mit "server_name" einfügen.</p>
+<h3>Caddy</h3>
+<p>Caddy schreibt <code>/uniN/</code> intern um und liefert HTTP 200 (kein 302). Ergänzen:</p>
+<p><pre>{CADDY-CODE}</pre></p>
 </div>

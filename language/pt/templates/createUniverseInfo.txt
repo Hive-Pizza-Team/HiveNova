@@ -9,4 +9,7 @@ Além disso, o mod_rewrite será necessário.</p>
 <p>Se ele será executado em um servidor nginx, a configuração de vhost é direta para reescrever a regra:</p>
 <p><code>{NGINX-CODE}</code></p>
 <p>Basta colocar o texto de código abaixo da linha com o "server_name".</p>
+<h3>Caddy</h3>
+<p>O Caddy reescreve <code>/uniN/</code> internamente e devolve HTTP 200 (não 302). Adicione:</p>
+<p><pre>{CADDY-CODE}</pre></p>
 </div>

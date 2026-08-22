@@ -1202,6 +1202,7 @@ $LNG['uvs_upload']						= 'Załaduj';
 $LNG['uvs_error']						= 'Niepoprawny lub błędny plik!';
 $LNG['uvs_reload']						= 'Załaduj ponownie';
 $LNG['uvs_back']						= 'Powrót';
+$LNG['uvs_create_anyway']				= 'Utwórz uniwersum mimo to';
 
 //Update Page
 $LNG['up_weiter']						= 'Dalej';

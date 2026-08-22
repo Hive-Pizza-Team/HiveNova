@@ -1186,6 +1186,7 @@ $LNG['uvs_upload'] = 'Subir';
 $LNG['uvs_error'] = 'Error al importar el archivo';
 $LNG['uvs_reload'] = 'Recargando';
 $LNG['uvs_back'] = 'Atrás';
+$LNG['uvs_create_anyway'] = 'Crear universo de todos modos';
 
 // Página de actualización
 $LNG['up_weiter'] = 'Siguiente';

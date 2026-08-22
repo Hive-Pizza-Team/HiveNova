@@ -8,4 +8,7 @@
 	<p>Если у вас сервер Nginx, необходимо переписать правила:</p>
 	<p><code>{NGINX-CODE}</code></p>
 	<p>Вставить этот фрагмент кода ниже строки "server_name".</p>
+	<h3>Caddy</h3>
+	<p>Caddy делает внутренний rewrite пути <code>/uniN/</code> и отвечает HTTP 200 (не 302). Добавьте:</p>
+	<p><pre>{CADDY-CODE}</pre></p>
 </div>

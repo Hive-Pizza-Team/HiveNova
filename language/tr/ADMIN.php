@@ -1361,6 +1361,7 @@ $LNG['uvs_upload']						= 'Upload';
 $LNG['uvs_error']						= 'Hata: Dosya yuklenemedi';
 $LNG['uvs_reload']						= 'Yeniden yukleniyor.. ';
 $LNG['uvs_back']						= 'Geri';
+$LNG['uvs_create_anyway']				= 'Evreni yine de ekle';
 
 
 // Guncelleme

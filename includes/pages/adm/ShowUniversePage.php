@@ -21,6 +21,7 @@ use HiveNova\Core\Language;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
+use HiveNova\Core\UniverseRewriteProbe;
 use HiveNova\Core\Template;
 
  
@@ -105,39 +106,31 @@ function ShowUniversePage() {
 			break;
 			case 'create':
 				$universeCount = count(Universe::availableUniverses());
-				// Check Multiuniverse Support
-				$ch	= curl_init();
-				curl_setopt($ch, CURLOPT_URL, PROTOCOL.HTTP_HOST.HTTP_BASE."uni".ROOT_UNI."/");
-				curl_setopt($ch, CURLOPT_HTTPGET, true);
-				curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (compatible; 2Moons/".Config::get()->VERSION."; +http://2moons.cc)");
-				curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-					"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-					"Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3",
-					"Accept-Language: de-DE,de;q=0.8,en-US;q=0.6,en;q=0.4",
-				));
-				curl_exec($ch);
-				$httpCode	= curl_getinfo($ch, CURLINFO_HTTP_CODE);
-				curl_close($ch);
+				$skipRewriteCheck = HTTP::_GP('skip_rewrite_check', 0) === 1;
 
-				if($httpCode != 302)
-				{
-					$template = new Template();
-					$template->message(str_replace(
-						array(
-							'{NGINX-CODE}'
-						), 
-						array(
-							#'rewrite '.HTTP_ROOT.'uni[0-9]+/?(.*)?$ '.HTTP_ROOT.'$2 break;'
-							'rewrite /(.*)/?uni[0-9]+/?(.*) /$1/$2 break;'
-						),
-						$LNG->getTemplate('createUniverseInfo')
-					)
-					.'<a href="javascript:window.history.back();"><button>'.$LNG['uvs_back'].'</button></a>'
-					.'<a href="javascript:window.location.reload();"><button>'.$LNG['uvs_reload'].'</button></a>');
-					exit;
+				if (!$skipRewriteCheck && UniverseRewriteProbe::isRequired($universeCount, UNIS_WILDCAST)) {
+					$probeUrl	= UniverseRewriteProbe::url(PROTOCOL, HTTP_HOST, HTTP_BASE, ROOT_UNI);
+					$httpCode	= UniverseRewriteProbe::fetchStatus($probeUrl);
+
+					if (!UniverseRewriteProbe::rewriteLooksConfigured($httpCode)) {
+						$sid		= htmlspecialchars(session_id(), ENT_QUOTES, 'UTF-8');
+						$template	= new Template();
+						$template->message(str_replace(
+							array('{NGINX-CODE}', '{CADDY-CODE}'),
+							array(
+								'rewrite /(.*)/?uni[0-9]+/?(.*) /$1/$2 break;',
+								'@uni path_regexp uni ^/uni[0-9]+(/.*)$'."\n".'rewrite @uni {re.uni.1}',
+							),
+							$LNG->getTemplate('createUniverseInfo')
+						)
+						.'<form method="post" action="?page=universe&amp;sid='.$sid.'&amp;reload=t" style="display:inline;">'
+						.'<input type="hidden" name="action" value="create">'
+						.'<input type="hidden" name="skip_rewrite_check" value="1">'
+						.'<button type="submit">'.$LNG['uvs_create_anyway'].'</button>'
+						.'</form>'
+						.'<a href="?page=universe&amp;sid='.$sid.'"><button type="button">'.$LNG['uvs_back'].'</button></a>');
+						exit;
+					}
 				}
 
 				$config	= Config::get();

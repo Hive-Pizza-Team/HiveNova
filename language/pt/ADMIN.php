@@ -66,6 +66,7 @@ $LNG['email2_reg']			= 'Email (2a vez)';
 $LNG['lang_reg']			= 'Língua';
 $LNG['uvs_reload']						= 'Recarregar';
 $LNG['uvs_back']						= 'Voltar';
+$LNG['uvs_create_anyway']				= 'Criar universo mesmo assim';
 $LNG['log_disclamersettings']			= 'Contatos';
 
 //---------------	Sim ou não	------------------------// 

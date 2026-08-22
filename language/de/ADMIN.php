@@ -1210,6 +1210,7 @@ $LNG['uvs_upload'] = 'Hochladen';
 $LNG['uvs_error'] = 'Ungültige oder Fehlerhafte Importfile!';
 $LNG['uvs_reload'] = 'Neuladen';
 $LNG['uvs_back'] = 'Zurück';
+$LNG['uvs_create_anyway'] = 'Universum trotzdem erstellen';
 
 //Update Page
 $LNG['up_weiter'] = 'Weiter';

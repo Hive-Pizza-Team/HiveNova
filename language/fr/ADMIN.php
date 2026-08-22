@@ -1238,6 +1238,7 @@ $LNG['uvs_upload']						= 'Envoyer';
 $LNG['uvs_error']						= 'Importer un fichier non valide!';
 $LNG['uvs_reload']						= 'Rechargement';
 $LNG['uvs_back']						= 'Retour';
+$LNG['uvs_create_anyway']				= 'Créer l\'univers malgré tout';
 /*
 $LNG['uvs_import']						= 'Importer un Univers';
 */
