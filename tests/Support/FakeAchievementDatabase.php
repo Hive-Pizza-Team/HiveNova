@@ -249,6 +249,13 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public function selectSingle($qry, array $params = array(), $field = false)
     {
+        if (str_contains($qry, 'graviton_tech')) {
+            return 0;
+        }
+        if (str_contains($qry, 'hyperspace_tech')) {
+            return 0;
+        }
+
         if (str_contains($qry, 'FROM %%FEAT_STATES%%') && str_contains($qry, 'COUNT(*)')) {
             $universe = (int) ($params[':universe'] ?? 0);
             $n = 0;
@@ -471,6 +478,10 @@ class FakeAchievementDatabase implements DatabaseInterface
                     'claimed_at' => (int) ($params[':at'] ?? 0),
                 ];
             }
+            return true;
+        }
+
+        if (str_contains($qry, '%%CONFIG%%')) {
             return true;
         }
 
