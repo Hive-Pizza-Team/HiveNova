@@ -65,6 +65,17 @@
 	<td><input name="hive_inactive_memo_active_key" size="40" value="" type="password" autocomplete="off"></td>
 	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_hive_inactive_memo_active_key_info}"></td>
 </tr><tr>
+	<th colspan="2">{$LNG.se_hive_social_memo}</th>
+	<th><center><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_hive_social_memo_info}"></center></th>
+</tr><tr>
+	<td>{$LNG.se_hive_social_memo_active}</td>
+	<td><input name="hive_social_memo_active"{if $hive_social_memo_active} checked="checked"{/if} type="checkbox"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_hive_social_memo_memo_key}</td>
+	<td><input name="hive_social_memo_memo_key" size="40" value="" type="password" autocomplete="off"></td>
+	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_hive_social_memo_memo_key_info}"></td>
+</tr><tr>
 	<th colspan="2">{$LNG.se_recaptcha_head}</th><th>&nbsp;</th>
 </tr><tr>
 	<td>{$LNG.se_recaptcha_active}<br></td>

@@ -18,6 +18,7 @@
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\InactiveHiveMemoAdminConfig;
+use HiveNova\Core\SocialHiveMemoAdminConfig;
 use HiveNova\Core\Log;
 use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
@@ -146,6 +147,23 @@ function ShowConfigBasicPage()
 			$config_after  = array_merge($config_after, $memoResult['log_new']);
 		}
 
+		if (isset($config->hive_social_memo_active)) {
+			$socialPosted = array(
+				'hive_social_memo_active'   => isset($_POST['hive_social_memo_active']) ? $_POST['hive_social_memo_active'] : '',
+				'hive_social_memo_memo_key' => HTTP::_GP('hive_social_memo_memo_key', ''),
+			);
+			$socialStored = array(
+				'hive_social_memo_active'   => $config->hive_social_memo_active,
+				'hive_social_memo_memo_key' => $config->hive_social_memo_memo_key,
+			);
+			$socialResult = SocialHiveMemoAdminConfig::applyPosted($socialStored, $socialPosted);
+			foreach ($socialResult['apply'] as $key => $value) {
+				$config->$key = $value;
+			}
+			$config_before = array_merge($config_before, $socialResult['log_old']);
+			$config_after  = array_merge($config_after, $socialResult['log_new']);
+		}
+
 		$config->save();
 
 		$LOG = new Log(3);
@@ -189,6 +207,7 @@ function ShowConfigBasicPage()
 		'hive_inactive_memo_account'	=> isset($config->hive_inactive_memo_account) ? $config->hive_inactive_memo_account : '',
 		'hive_inactive_memo_asset'		=> isset($config->hive_inactive_memo_asset) ? $config->hive_inactive_memo_asset : 'HIVE',
 		'hive_inactive_memo_amount'		=> isset($config->hive_inactive_memo_amount) ? $config->hive_inactive_memo_amount : '0.003',
+		'hive_social_memo_active'		=> isset($config->hive_social_memo_active) ? $config->hive_social_memo_active : 0,
 		'Selector'						=> array(
 		    'timezone' => $TimeZones,
             'mail' => $LNG['se_mail_sel'],

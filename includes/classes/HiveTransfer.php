@@ -23,7 +23,7 @@ class HiveTransfer
 	/**
 	 * @return array{ok: bool, trx_id: string}
 	 */
-	public function send(string $from, string $to, float $amount, string $asset, string $memo, string $wif): array
+	public function send(string $from, string $to, float $amount, string $asset, string $memo, string $wif, bool $encrypted = false): array
 	{
 		try {
 			$asset = strtoupper(trim($asset));
@@ -36,7 +36,11 @@ class HiveTransfer
 			if ($wif === '' || !HiveUtil::isAccountValid($from) || !HiveUtil::isAccountValid($to)) {
 				return self::fail();
 			}
-			if (str_starts_with($memo, '#')) {
+			if ($encrypted) {
+				if (!str_starts_with($memo, '#') || strlen($memo) < 2 || strlen($memo) > HiveMemo::MAX_MEMO_BYTES) {
+					return self::fail();
+				}
+			} elseif (str_starts_with($memo, '#')) {
 				return self::fail();
 			}
 

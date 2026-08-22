@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\SocialHiveMemoService;
 use HiveNova\Repository\MessageRepository;
 
 /**
@@ -234,6 +235,10 @@ class ShowMessagesPage extends AbstractGamePage
 		$session->messageToken = NULL;
 
 		PlayerUtil::sendMessage($receiverID, $USER['id'], $senderName, 1, $subject, $text, TIMESTAMP);
+		try {
+			(new SocialHiveMemoService())->notifyPrivateMessage((int) $receiverID, (string) $USER['username']);
+		} catch (\Throwable $e) {
+		}
         $this->sendJSON($LNG['mg_message_send']);
     }
 

@@ -1297,3 +1297,6 @@ $LNG['lo_continue']							= 'Click to continue.';
 
 $LNG['hive_inactive_memo_status'] = 'You are long-term inactive (I) in %s. Log in to keep your empire.';
 $LNG['hive_inactive_memo_wipe'] = ' If you stay gone, this empire will be removed.';
+
+$LNG['hive_social_memo_buddy'] = '%s sent you a friend request in %s. Log in to respond.';
+$LNG['hive_social_memo_pm'] = '%s sent you a private message in %s. Log in to read it.';
