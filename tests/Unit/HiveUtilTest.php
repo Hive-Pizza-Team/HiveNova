@@ -116,6 +116,20 @@ class HiveUtilTest extends TestCase
         $this->assertSame('', HiveUtil::getAccountAbout('Not Valid!'));
     }
 
+    public function testExtractMemoKeyAcceptsStmWif(): void
+    {
+        $key = 'STM8LbCRyqtXk5VKbdFwK1YBgiafqprAd7yysN49PnDwAsyoMqQME';
+        $this->assertSame($key, HiveUtil::extractMemoKey(['memo_key' => $key]));
+    }
+
+    public function testExtractMemoKeyRejectsInvalidValues(): void
+    {
+        $this->assertSame('', HiveUtil::extractMemoKey(null));
+        $this->assertSame('', HiveUtil::extractMemoKey(['memo_key' => '']));
+        $this->assertSame('', HiveUtil::extractMemoKey(['memo_key' => 'not-a-key']));
+        $this->assertSame('', HiveUtil::getMemoPublicKey('Not Valid!'));
+    }
+
     public function testRpcNodesToTryCapsRetryBudget(): void
     {
         if (!defined('HIVE_RPC_NODES')) {
