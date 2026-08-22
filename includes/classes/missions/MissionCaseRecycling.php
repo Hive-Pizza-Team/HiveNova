@@ -127,6 +127,13 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 		PlayerUtil::sendMessage($this->_fleet['fleet_owner'], 0, $LNG['sys_mess_tower'], 5,
 			$LNG['sys_recy_report'], $Message, $this->_fleet['fleet_start_time'], NULL, 1, $this->_fleet['fleet_universe']);
 
+		\HiveNova\Core\DirectiveHooks::afterRecycle(
+			(int) $this->_fleet['fleet_owner'],
+			(int) ($collectedGoods[901] ?? 0),
+			(int) ($collectedGoods[902] ?? 0),
+			(int) $this->_fleet['fleet_universe']
+		);
+
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
 	}

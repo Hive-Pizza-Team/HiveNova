@@ -245,3 +245,9 @@ $LNG['sys_transfer_mess_user'] = $LNG['sys_tran_mess_user'];
 $LNG['sys_trade_mess_back'] = 'Один из ваших торговых флотов возвращается на планету %s %s без успеха.';
 $LNG['type_mission_16'] = 'Торговля';
 $LNG['type_mission_17'] = 'Передача';
+
+$LNG['fl_expedition_stance'] = 'Expedition stance';
+$LNG['fl_stance_cautious'] = 'Cautious';
+$LNG['fl_stance_balanced'] = 'Balanced';
+$LNG['fl_stance_aggressive'] = 'Aggressive';
+$LNG['fl_invalid_stance'] = 'Invalid expedition stance';

@@ -43,6 +43,9 @@ $("#tn3").hide();
 </style>	
 
 <div>
+{if $commanderEnabled}
+	{include file="partials/commander.briefing.tpl"}
+{/if}
 {if $messages}
 <div class="overview-mobile-shortcuts mobile">
 	<a href="game.php?page=messages">{$LNG.lm_messages}</a>

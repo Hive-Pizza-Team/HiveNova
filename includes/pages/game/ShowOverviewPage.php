@@ -9,6 +9,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\DirectiveService;
 use HiveNova\Core\FlyingFleetsTable;
 use HiveNova\Core\PlayerUtil;
 
@@ -307,6 +308,13 @@ class ShowOverviewPage extends AbstractGamePage
 			FROM %%FLEETS%%'
 		)['COUNT(*)'];
 
+		$commanderBriefing = null;
+		$commanderEnabled = defined('MODULE_COMMANDER') && isModuleAvailable(MODULE_COMMANDER);
+		if ($commanderEnabled) {
+			$this->tplObj->loadscript('commander-briefing.js');
+			$commanderBriefing = DirectiveService::getBriefingData((int) $USER['id'], (int) Universe::current());
+		}
+
 		$this->assign(array(
 			'rankInfo'					=> $rankInfo,
 			'is_news'					=> $config->OverviewNewsFrame,
@@ -345,6 +353,8 @@ class ShowOverviewPage extends AbstractGamePage
 				JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
 			),
 			'planetVizEnabled'			=> str_contains($THEME->getTheme(), '/hive/'),
+			'commanderEnabled'			=> $commanderEnabled,
+			'commanderBriefing'			=> $commanderBriefing,
 		));
 		
 		$this->display('page.overview.default.tpl');

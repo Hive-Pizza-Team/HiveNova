@@ -245,3 +245,9 @@ $LNG['sys_expe_depleted_max_3'] = 'Entrada do diário do navio do oficial de com
 $LNG['sys_trade_mess_back'] = 'Uma de suas frotas comerciais retorna ao planeta %s %s sem sucesso.';
 $LNG['type_mission_16'] = 'Comércio';
 $LNG['type_mission_17'] = 'Transferência';
+
+$LNG['fl_expedition_stance'] = 'Expedition stance';
+$LNG['fl_stance_cautious'] = 'Cautious';
+$LNG['fl_stance_balanced'] = 'Balanced';
+$LNG['fl_stance_aggressive'] = 'Aggressive';
+$LNG['fl_invalid_stance'] = 'Invalid expedition stance';

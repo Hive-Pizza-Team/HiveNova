@@ -1547,6 +1547,9 @@ $LNG['se_hive_social_memo_info'] = 'Sends an encrypted Hive wallet memo when a l
 $LNG['se_hive_social_memo_active'] = 'Enable Hive social memos';
 $LNG['se_hive_social_memo_memo_key'] = 'Memo key';
 $LNG['se_hive_social_memo_memo_key_info'] = 'Private memo key for the game Hive account. Leave blank to keep the stored key. The key is never shown again.';
+$LNG['modul_44'] = 'Mission - Trade';
+$LNG['modul_45'] = 'Mission - Transfer';
+$LNG['modul_48'] = 'Commander';
 $LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
 $LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements.';
 

@@ -164,6 +164,8 @@ class ShowFleetStep2Page extends AbstractGamePage
 			'fl_dm_alert_message'			=> sprintf($LNG['fl_dm_alert_message'], $LNG['type_mission_11'], $LNG['tech'][921]),
 			'fl_continue'					=> $LNG['fl_continue'],
 			'token' 						=> $token,
+			'showExpeditionStance'			=> in_array(15, $MissionOutput['MissionSelector'] ?? [], true)
+				&& isModuleAvailable(MODULE_MISSION_EXPEDITION),
 		));
 
 		$this->display('page.fleetStep2.default.tpl');
