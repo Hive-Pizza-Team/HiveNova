@@ -235,7 +235,10 @@ class ShowMessagesPage extends AbstractGamePage
 		$session->messageToken = NULL;
 
 		PlayerUtil::sendMessage($receiverID, $USER['id'], $senderName, 1, $subject, $text, TIMESTAMP);
-		(new SocialHiveMemoService())->notifyPrivateMessage((int) $receiverID, (string) $USER['username']);
+		try {
+			(new SocialHiveMemoService())->notifyPrivateMessage((int) $receiverID, (string) $USER['username']);
+		} catch (\Throwable $e) {
+		}
         $this->sendJSON($LNG['mg_message_send']);
     }
 
