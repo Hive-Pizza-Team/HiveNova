@@ -211,6 +211,61 @@ class PushNotificationService
 		}
 	}
 
+	/**
+	 * @return array{title: string, body: string, data: array<string, mixed>}
+	 */
+	public static function expeditionResultMessage(bool $hasChoice): array
+	{
+		global $LNG;
+		$title = $LNG['push_expedition_title'] ?? 'Expedition complete';
+		$body = $hasChoice
+			? ($LNG['push_expedition_choice_body'] ?? 'Your expedition returned with a choice to review.')
+			: ($LNG['push_expedition_body'] ?? 'Your expedition has returned.');
+
+		return [
+			'title' => $title,
+			'body' => $body,
+			'data' => [
+				'url' => 'game.php?page=overview#commander',
+				'type' => 'expedition_result',
+				'choice' => $hasChoice,
+			],
+		];
+	}
+
+	public static function notifyExpeditionResult(int $userId, bool $hasChoice): void
+	{
+		if ($userId <= 0) {
+			return;
+		}
+
+		$message = self::expeditionResultMessage($hasChoice);
+		self::notifyUser($userId, $message['title'], $message['body'], $message['data']);
+	}
+
+	public static function notifyDirectiveMilestone(int $userId, string $type, int $periodEnd = 0): void
+	{
+		if ($userId <= 0) {
+			return;
+		}
+
+		global $LNG;
+		if ($type === 'directive_period_ending') {
+			$title = $LNG['push_directive_ending_title'] ?? 'Directive period ending';
+			$body = $LNG['push_directive_ending_body'] ?? 'Your empire directive period ends soon.';
+		} else {
+			$title = $LNG['push_directive_complete_title'] ?? 'Directive complete';
+			$body = $LNG['push_directive_complete_body'] ?? 'Your empire directive is ready to claim.';
+			$type = 'directive_completable';
+		}
+
+		self::notifyUser($userId, $title, $body, [
+			'url' => 'game.php?page=overview#commander',
+			'type' => $type,
+			'period_end' => $periodEnd,
+		]);
+	}
+
 	public static function notifyIncomingHostileFleet(int $targetUserId, int $mission, int $galaxy, int $system, int $planet): void
 	{
 		if ($targetUserId <= 0) {

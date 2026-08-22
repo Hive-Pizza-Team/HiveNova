@@ -242,3 +242,9 @@ $LNG['sys_expe_depleted_max_3'] = 'Wpis z dziennika oficera łączności: Może 
 $LNG['sys_trade_mess_back'] = 'Jedna z twoich flot handlowych wraca na planetę %s %s bez powodzenia.';
 $LNG['type_mission_16'] = 'Handel';
 $LNG['type_mission_17'] = 'Transfer';
+
+$LNG['fl_expedition_stance'] = 'Expedition stance';
+$LNG['fl_stance_cautious'] = 'Cautious';
+$LNG['fl_stance_balanced'] = 'Balanced';
+$LNG['fl_stance_aggressive'] = 'Aggressive';
+$LNG['fl_invalid_stance'] = 'Invalid expedition stance';

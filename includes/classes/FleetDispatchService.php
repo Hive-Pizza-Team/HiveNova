@@ -29,6 +29,19 @@ class FleetDispatchService
      * @param array $PLANET
      * @throws \RuntimeException
      */
+    public static function normalizeExpeditionStance(?string $stance, int $mission): ?string
+    {
+        if ($mission != 15) {
+            return null;
+        }
+        $normalized = ExpeditionChoiceService::normalizeStance($stance);
+        if ($stance !== null && $stance !== '' && !ExpeditionChoiceService::isValidStance(strtolower(trim($stance)))) {
+            throw new \RuntimeException($GLOBALS['LNG']['fl_invalid_stance'] ?? 'Invalid expedition stance');
+        }
+
+        return $normalized;
+    }
+
     public static function validateTarget(array $params, array $USER, array $PLANET): void
     {
         global $resource, $LNG;
@@ -390,6 +403,13 @@ class FleetDispatchService
                 ]
             );
 
+            $fleetMeta = $fleetData['fleetMeta'] ?? null;
+            if ($targetMission == 15 && is_array($fleetMeta) && isset($fleetMeta['stance'])) {
+                $fleetMeta['stance'] = ExpeditionChoiceService::normalizeStance((string) $fleetMeta['stance']);
+            } elseif ($targetMission != 15) {
+                $fleetMeta = null;
+            }
+
             $fleet_id = FleetFunctions::sendFleet(
                 $fleetArray, $targetMission,
                 $USER['id'], $PLANET['id'],
@@ -398,7 +418,7 @@ class FleetDispatchService
                 $targetGalaxy, $targetSystem, $targetPlanet, $targetType,
                 $fleetResource,
                 $fleetStartTime, $fleetStayTime, $fleetEndTime,
-                $fleetGroup, 0
+                $fleetGroup, 0, 0, 0, null, $fleetMeta
             );
 
             if ($targetMission == 16) {
@@ -424,6 +444,10 @@ class FleetDispatchService
         } catch (\Exception $e) {
             $db->rollback();
             throw $e;
+        }
+
+        if ($targetMission == 15 && DirectiveHooks::enabled()) {
+            DirectiveHooks::afterExpeditionDispatch((int) $USER['id'], (int) ($USER['universe'] ?? Universe::current()));
         }
 
         // Update the in-memory planet array to reflect the deduction

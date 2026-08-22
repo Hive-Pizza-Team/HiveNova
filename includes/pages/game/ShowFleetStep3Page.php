@@ -53,6 +53,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 		$maxFlightTime        = HTTP::_GP('maxFlightTime', 0);
 		$stayTime             = HTTP::_GP('staytime', 0);
 		$token                = HTTP::_GP('token', '');
+		$expeditionStance     = HTTP::_GP('expedition_stance', 'balanced');
 
 		$config = Config::get();
 
@@ -257,6 +258,19 @@ class ShowFleetStep3Page extends AbstractGamePage
 		$fleetStayTime = $fleetStartTime + $StayDuration;
 		$fleetEndTime  = $fleetStayTime + $duration;
 
+		$fleetMeta = null;
+		if ($targetMission == 15) {
+			try {
+				$normalizedStance = FleetDispatchService::normalizeExpeditionStance($expeditionStance, 15);
+				$fleetMeta = ['stance' => $normalizedStance ?? 'balanced'];
+			} catch (\RuntimeException $e) {
+				$this->printMessage($e->getMessage(), array(array(
+					'label' => $LNG['sys_back'],
+					'url'   => 'game.php?page=fleetStep1'
+				)));
+			}
+		}
+
 		// --- Dispatch ---
 		try {
 			$fleet_id = FleetDispatchService::dispatch([
@@ -279,6 +293,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 				'WantedResourceAmount' => $WantedResourceAmount,
 				'maxFlightTime'       => $maxFlightTime,
 				'visibility'          => $visibility,
+				'fleetMeta'           => $fleetMeta,
 			], $PLANET);
 		} catch (\RuntimeException $e) {
 			$this->printMessage($e->getMessage(), array(array(

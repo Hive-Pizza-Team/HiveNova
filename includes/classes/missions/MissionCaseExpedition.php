@@ -6,10 +6,12 @@ use HiveNova\Core\ArrayUtil;
 use HiveNova\Core\BuildFunctions;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
+use HiveNova\Core\ExpeditionChoiceService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\PushNotificationService;
 
 /**
  *  2Moons 
@@ -88,6 +90,7 @@ class MissionCaseExpedition extends MissionFunctions implements Mission
 		$GetEvent -= $holdTime * 10;
 
 		$Message = $LNG['sys_expe_nothing_'.mt_rand(1,8)];
+		$pendingChoice = false;
 
 		// Depletion check
 		if ($expeditionsCount <= 10) {
@@ -198,8 +201,22 @@ class MissionCaseExpedition extends MissionFunctions implements Mission
 			if ($fleetPoints < $maxFactor)
 				$logbook = $LNG['sys_expe_found_ress_logbook_'.mt_rand(1,4)].'<br>'.$logbook;
 
-			$fleetColName	= 'fleet_resource_'.$resource[$resourceId];
-			$this->UpdateFleet($fleetColName, $this->_fleet[$fleetColName] + $founded);
+			$resourceReward = ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+			if ($resourceId == 901) {
+				$resourceReward['metal'] = (int) $founded;
+			} elseif ($resourceId == 902) {
+				$resourceReward['crystal'] = (int) $founded;
+			} else {
+				$resourceReward['deuterium'] = (int) $founded;
+			}
+
+			if (ExpeditionChoiceService::maybeDeferOutcome($this->_fleet, 'resource_find', $resourceReward, $fleetArray)) {
+				$pendingChoice = true;
+				$Message = ($LNG['sys_expe_choice_pending'] ?? $Message) . '<br><a href="game.php?page=overview#commander">'.$LNG['cm_pending_choice'].'</a>';
+			} else {
+				$fleetColName	= 'fleet_resource_'.$resource[$resourceId];
+				$this->UpdateFleet($fleetColName, $this->_fleet[$fleetColName] + $founded);
+			}
 		}
 		
 		// Find Pizzabits: 9%. Values from 2Moons
@@ -384,9 +401,19 @@ class MissionCaseExpedition extends MissionFunctions implements Mission
 			}
 			
 			$Message .= $FoundShipMess;
-						
-			$this->UpdateFleet('fleet_array', $NewFleetArray);
-			$this->UpdateFleet('fleet_amount', array_sum($fleetArray));
+
+			if (ExpeditionChoiceService::maybeDeferOutcome($this->_fleet, 'ship_salvage', [
+				'metal' => 0,
+				'crystal' => 0,
+				'deuterium' => 0,
+				'ships' => $Found,
+			], $fleetArray)) {
+				$pendingChoice = true;
+				$Message = ($LNG['sys_expe_choice_pending'] ?? $Message) . '<br><a href="game.php?page=overview#commander">'.$LNG['cm_pending_choice'].'</a>';
+			} else {
+				$this->UpdateFleet('fleet_array', $NewFleetArray);
+				$this->UpdateFleet('fleet_amount', array_sum($fleetArray));
+			}
 		}
 		
 		// Find pirates or aliens: 8,4% - 5.8% pirates or 2.6% aliens.
@@ -691,6 +718,8 @@ HTML;
 
 		PlayerUtil::sendMessage($this->_fleet['fleet_owner'], 0, $LNG['sys_mess_tower'], 15,
 			$LNG['sys_expe_report'], $Message, $this->_fleet['fleet_end_stay'], NULL, 1, $this->_fleet['fleet_universe']);
+
+		PushNotificationService::notifyExpeditionResult((int) $this->_fleet['fleet_owner'], $pendingChoice);
 
 		\HiveNova\Core\AchievementHooks::afterExpedition((int) $this->_fleet['fleet_owner']);
 

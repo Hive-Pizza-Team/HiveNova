@@ -230,3 +230,9 @@ $LNG['sys_trade_mess_back'] = 'L\'une de vos flottes commerciales retourne vers 
 $LNG['sys_lost'] = 'Pertes';
 $LNG['type_mission_16'] = 'Commerce';
 $LNG['type_mission_17'] = 'Transfert';
+
+$LNG['fl_expedition_stance'] = 'Expedition stance';
+$LNG['fl_stance_cautious'] = 'Cautious';
+$LNG['fl_stance_balanced'] = 'Balanced';
+$LNG['fl_stance_aggressive'] = 'Aggressive';
+$LNG['fl_invalid_stance'] = 'Invalid expedition stance';

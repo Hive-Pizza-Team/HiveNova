@@ -36,6 +36,10 @@ class MissionCaseStayAlly extends MissionFunctions implements Mission
 	
 	function EndStayEvent()
 	{
+		\HiveNova\Core\DirectiveHooks::afterHoldSuccess(
+			(int) $this->_fleet['fleet_owner'],
+			(int) $this->_fleet['fleet_universe']
+		);
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
 	}

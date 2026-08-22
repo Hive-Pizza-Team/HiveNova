@@ -241,9 +241,15 @@ class ShowFleetTablePage extends AbstractGamePage
 				$returnTime	= $fleetsRow['fleet_end_time'];
 			}
 
+			$stance = '';
+			if ((int) $fleetsRow['fleet_mission'] === 15) {
+				$stance = \HiveNova\Core\ExpeditionChoiceService::stanceFromMeta($fleetsRow['fleet_meta'] ?? null);
+			}
+
 			$FlyingFleetList[]	= array(
 				'id'			=> $fleetsRow['fleet_id'],
 				'mission'		=> $fleetsRow['fleet_mission'],
+				'stance'		=> $stance,
 				'state'			=> $fleetsRow['fleet_mess'],
 				'no_returnable'			=> $fleetsRow['fleet_no_m_return'],
 				'startGalaxy'	=> $fleetsRow['fleet_start_galaxy'],

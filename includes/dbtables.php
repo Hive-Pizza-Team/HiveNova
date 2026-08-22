@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 30);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 31);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -78,5 +78,8 @@ $dbTableNames	= array(
 	'ACHIEVEMENT_GRANTS'	=> DB_PREFIX.'achievement_grants',
 	'SALVAGE_PACKAGES'		=> DB_PREFIX.'salvage_packages',
 	'HIVE_SOCIAL_MEMO_QUEUE'	=> DB_PREFIX.'hive_social_memo_queue',
+	'DIRECTIVE_PERIODS'		=> DB_PREFIX.'directive_periods',
+	'USER_DIRECTIVES'		=> DB_PREFIX.'user_directives',
+	'EXPEDITION_PENDING_CHOICES'	=> DB_PREFIX.'expedition_pending_choices',
 );
 // MOD-TABLES
