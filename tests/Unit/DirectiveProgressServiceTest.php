@@ -78,5 +78,15 @@ class DirectiveProgressServiceTest extends TestCase
 	{
 		$this->assertFalse(DirectiveProgressService::targetsMet(['a' => 1], ['a' => 2, 'b' => 1]));
 		$this->assertTrue(DirectiveProgressService::targetsMet(['a' => 2, 'b' => 1], ['a' => 2, 'b' => 1]));
+		$this->assertFalse(DirectiveProgressService::targetsMet([], []));
+	}
+
+	public function testRecordRecoversFromInvalidProgressJson(): void
+	{
+		DirectiveService::selectDirective(3, 1, DirectiveCatalog::EXPLORATION);
+		$this->db->userDirectives[0]['progress_json'] = 'not-json';
+		DirectiveProgressService::record(3, 'expedition_dispatch', ['universe' => 1]);
+		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
+		$this->assertSame(1, $progress['expedition_dispatch']);
 	}
 }

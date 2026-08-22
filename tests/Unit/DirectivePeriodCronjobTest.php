@@ -56,4 +56,17 @@ class DirectivePeriodCronjobTest extends TestCase
 		$this->assertNotEmpty($this->db->pendingChoices[8]['resolved_at']);
 		$this->assertNotNull(DirectiveService::getCurrentPeriod(1));
 	}
+
+	public function testRunSwallowsUnexpectedFailures(): void
+	{
+		$throwing = new class extends CommanderDatabaseStub {
+			public function select($qry, array $params = array())
+			{
+				throw new RuntimeException('boom');
+			}
+		};
+		$this->swapDatabaseInstance($throwing);
+		(new DirectivePeriodCronjob())->run();
+		$this->assertTrue(true);
+	}
 }

@@ -286,6 +286,8 @@ CREATE TABLE `%PREFIX%config` (
   `hive_inactive_memo_active_key` varchar(80) NOT NULL DEFAULT '',
   `hive_inactive_memo_asset` varchar(4) NOT NULL DEFAULT 'HIVE',
   `hive_inactive_memo_amount` decimal(10,3) unsigned NOT NULL DEFAULT '0.003',
+  `hive_social_memo_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `hive_social_memo_memo_key` varchar(80) NOT NULL DEFAULT '',
   `silo_factor` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/London',
   `dst` enum('0','1','2') NOT NULL DEFAULT '2',
@@ -952,6 +954,21 @@ CREATE TABLE `%PREFIX%users` (
   KEY `ally_id` (`ally_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
+CREATE TABLE `%PREFIX%hive_social_memo_queue` (
+  `queue_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL,
+  `kind` varchar(8) NOT NULL,
+  `sender_name` varchar(32) NOT NULL,
+  `lang` varchar(2) NOT NULL DEFAULT 'en',
+  `created` int(11) unsigned NOT NULL,
+  `claimed` int(11) unsigned DEFAULT NULL,
+  `sent_at` int(11) unsigned DEFAULT NULL,
+  `attempts` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`queue_id`),
+  KEY `pending` (`sent_at`, `attempts`, `claimed`),
+  KEY `user_kind` (`user_id`, `kind`, `sent_at`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 CREATE TABLE `%PREFIX%users_to_acs` (
   `userID` int(10) unsigned NOT NULL,
   `acsID` int(10) unsigned NOT NULL,
@@ -1100,6 +1117,7 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'achievement_backfill', 1, '15', '3', '*', '*', '*', 'HiveNova\\Cronjob\\AchievementBackfillCronjob', 0, NULL),
 (NULL, 'pve_spawn', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\PveSpawnCronjob', 0, NULL),
 (NULL, 'hive_inactive_memo', 1, '0', '4', '*', '*', '*', 'HiveNova\\Cronjob\\InactiveHiveMemoCronjob', 0, NULL),
+(NULL, 'hive_social_memo', 1, '*/5', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SocialHiveMemoCronjob', 0, NULL),
 (NULL, 'directive_period', 1, '0', '*', '*', '*', '*', 'HiveNova\\Cronjob\\DirectivePeriodCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES

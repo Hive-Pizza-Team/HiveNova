@@ -43,7 +43,8 @@ class Config
 										   'disclamerAddress','disclamerPhone','disclamerMail','disclamerNotice',
 										   'hive_inactive_memo_active', 'hive_inactive_memo_armed',
 										   'hive_inactive_memo_account', 'hive_inactive_memo_active_key',
-										   'hive_inactive_memo_asset', 'hive_inactive_memo_amount');
+										   'hive_inactive_memo_asset', 'hive_inactive_memo_amount',
+										   'hive_social_memo_active', 'hive_social_memo_memo_key');
 
 	public static function getGlobalConfigKeys()
 	{

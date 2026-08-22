@@ -47,8 +47,17 @@ class DirectiveProgressHooksTest extends TestCase
 	{
 		DirectiveService::selectDirective(8, 1, DirectiveCatalog::INDUSTRIAL);
 		DirectiveHooks::afterBuildCompleted([1 => 2], ['id' => 8, 'universe' => 1]);
+		DirectiveHooks::afterBuildCompleted([106 => 1], ['id' => 8, 'universe' => 1]);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
-		$this->assertSame(2, $progress['build_complete']);
+		$this->assertSame(3, $progress['build_complete']);
+	}
+
+	public function testUnknownDefenseIdFallsBackWhenOver400(): void
+	{
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::DEFENSIVE);
+		DirectiveHooks::afterBuildCompleted([499 => 1], ['id' => 8, 'universe' => 1]);
+		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
+		$this->assertSame(1, $progress['defense_complete']);
 	}
 
 	public function testDefenseCompletionIncrementsDefensive(): void

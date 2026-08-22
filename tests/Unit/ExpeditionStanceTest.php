@@ -86,6 +86,17 @@ class ExpeditionStanceTest extends TestCase
 		$this->assertSame('cautious', ExpeditionChoiceService::stanceFromMeta($row['fleet_meta']));
 	}
 
+	public function testEncodeFleetMetaHandlesInvalidInput(): void
+	{
+		$this->assertNull(FleetFunctions::encodeFleetMeta(null));
+		$this->assertNull(FleetFunctions::encodeFleetMeta(''));
+		$this->assertNull(FleetFunctions::encodeFleetMeta('not-json'));
+		$this->assertNull(FleetFunctions::encodeFleetMeta(12));
+		$json = FleetFunctions::encodeFleetMeta(['stance' => 'cautious']);
+		$this->assertIsString($json);
+		$this->assertSame($json, FleetFunctions::encodeFleetMeta($json));
+	}
+
 	public function testCautiousVersusAggressivePreviewCurves(): void
 	{
 		$base = ['metal' => 1000, 'crystal' => 0, 'deuterium' => 0, 'ships' => [202 => 10]];

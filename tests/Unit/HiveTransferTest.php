@@ -108,4 +108,29 @@ class HiveTransferTest extends TestCase
 		$this->assertFalse($result['ok']);
 		$this->assertSame([], $this->calls);
 	}
+
+	public function testEncryptedMemoIsBroadcastWhenFlagSet(): void
+	{
+		HiveTransfer::setBroadcaster(function (...$args) {
+			$this->calls[] = $args;
+			return ['trx_id' => 'enc1'];
+		});
+
+		$result = (new HiveTransfer())->send('gameacct', 'playerone', 0.003, 'HIVE', '#7w8Nh1ibx', '5Ktestwif', true);
+
+		$this->assertTrue($result['ok']);
+		$this->assertSame('#7w8Nh1ibx', $this->calls[0][3]);
+	}
+
+	public function testEncryptedFlagRejectsPlaintextMemo(): void
+	{
+		HiveTransfer::setBroadcaster(function (...$args) {
+			$this->calls[] = $args;
+			return ['trx_id' => 'x'];
+		});
+
+		$result = (new HiveTransfer())->send('gameacct', 'playerone', 0.003, 'HIVE', 'hello', '5Ktestwif', true);
+		$this->assertFalse($result['ok']);
+		$this->assertSame([], $this->calls);
+	}
 }

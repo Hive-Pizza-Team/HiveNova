@@ -204,8 +204,11 @@ class PushNotificationServiceTest extends TestCase
 
 	public function testNotifySkippedWhenNotConfigured(): void
 	{
+		PushNotificationService::notifyExpeditionResult(0, true);
 		PushNotificationService::notifyExpeditionResult(42, true);
+		PushNotificationService::notifyDirectiveMilestone(0, 'directive_completable');
 		PushNotificationService::notifyDirectiveMilestone(42, 'directive_completable');
+		PushNotificationService::notifyDirectiveMilestone(42, 'directive_period_ending', TIMESTAMP);
 		$this->assertFalse(PushNotificationService::isConfigured());
 	}
 

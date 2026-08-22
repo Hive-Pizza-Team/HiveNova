@@ -133,4 +133,78 @@ class ExpeditionChoiceServiceTest extends TestCase
 		$this->assertTrue(ExpeditionChoiceService::isValidStance('cautious'));
 		$this->assertFalse(ExpeditionChoiceService::isValidStance('turbo'));
 	}
+
+	public function testRollUsesInjectedRngAndDefault(): void
+	{
+		ExpeditionChoiceService::setRng(static fn (int $min, int $max): int => 7);
+		$this->assertSame(7, ExpeditionChoiceService::roll(1, 10));
+		ExpeditionChoiceService::setRng(null);
+		$n = ExpeditionChoiceService::roll(1, 1);
+		$this->assertSame(1, $n);
+	}
+
+	public function testStanceFromMetaVariants(): void
+	{
+		$this->assertSame('aggressive', ExpeditionChoiceService::stanceFromMeta(['stance' => 'aggressive']));
+		$this->assertSame('balanced', ExpeditionChoiceService::stanceFromMeta(''));
+		$this->assertSame('balanced', ExpeditionChoiceService::stanceFromMeta('not-json'));
+		$this->assertSame('cautious', ExpeditionChoiceService::stanceFromMeta('{"stance":"cautious"}'));
+		$encoded = ExpeditionChoiceService::encodeMeta('aggressive', ['note' => 'x']);
+		$this->assertSame('aggressive', ExpeditionChoiceService::stanceFromMeta($encoded));
+	}
+
+	public function testMaybeDeferOutcomeCreatesPendingWhenEligible(): void
+	{
+		ExpeditionChoiceService::setRng(static fn (int $min, int $max): int => 1);
+		$created = ExpeditionChoiceService::maybeDeferOutcome([
+			'fleet_id' => 90,
+			'fleet_owner' => 4,
+			'fleet_start_id' => 3,
+			'fleet_meta' => '{"stance":"cautious"}',
+		], 'resource_find', ['metal' => 100, 'crystal' => 0, 'deuterium' => 0], [202 => 2]);
+		$this->assertTrue($created);
+		$this->assertArrayHasKey(90, $this->db->pendingChoices);
+
+		$this->assertFalse(ExpeditionChoiceService::maybeDeferOutcome([
+			'fleet_id' => 91,
+			'fleet_owner' => 4,
+			'fleet_start_id' => 3,
+		], 'nothing', ['metal' => 1], []));
+	}
+
+	public function testResolveBranchNotFound(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage(ExpeditionChoiceService::ERROR_NOT_FOUND);
+		ExpeditionChoiceService::resolveBranch(999, 1, 'balanced');
+	}
+
+	public function testAutoResolveSkipsBrokenRows(): void
+	{
+		ExpeditionChoiceService::createPendingBranch(12, 1, 3, 'resource_find', 'balanced', [
+			'metal' => 10,
+			'crystal' => 0,
+			'deuterium' => 0,
+		], []);
+		$this->db->pendingChoices[12]['created_at'] = TIMESTAMP - 200000;
+		$this->db->pendingChoices[12]['options_json'] = 'broken';
+		$this->assertSame(0, ExpeditionChoiceService::autoResolveExpired());
+	}
+
+	public function testPendingForUserAndShipDeltas(): void
+	{
+		$this->db->planets[8] = ['id' => 8, 'metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+		ExpeditionChoiceService::createPendingBranch(15, 2, 8, 'ship_salvage', 'aggressive', [
+			'metal' => 0,
+			'crystal' => 0,
+			'deuterium' => 0,
+			'ships' => [202 => 10],
+		], [202 => 10]);
+		$pending = ExpeditionChoiceService::pendingForUser(2);
+		$this->assertCount(1, $pending);
+		$choice = ExpeditionChoiceService::resolveBranch(15, 2, 'aggressive');
+		$this->assertNotEmpty($choice['ships']);
+		$this->assertNotEmpty($choice['loss_ships']);
+		$this->assertGreaterThan(0, $this->db->planets[8]['ship_delta']);
+	}
 }
