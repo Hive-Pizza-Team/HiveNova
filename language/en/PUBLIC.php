@@ -70,7 +70,7 @@ $LNG['uni_info_wipe_hold']				= 'Wipe delayed';
 $LNG['uni_info_wipe_starting']			= 'Starting soon';
 $LNG['uni_info_entry']					= 'Entry';
 $LNG['uni_info_entry_pizza']			= '%s PIZZA';
-$LNG['uni_info_season_hive']			= 'Hive required';
+$LNG['uni_info_season_hive']			= 'Hive account required';
 $LNG['uni_info_season_entries_closed']	= 'Entries closed';
 
 // Button

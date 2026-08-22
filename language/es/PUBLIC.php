@@ -70,7 +70,7 @@ $LNG['uni_info_wipe_hold']				= 'Reinicio retrasado';
 $LNG['uni_info_wipe_starting']			= 'Empieza pronto';
 $LNG['uni_info_entry']					= 'Entrada';
 $LNG['uni_info_entry_pizza']			= '%s PIZZA';
-$LNG['uni_info_season_hive']			= 'Hive obligatorio';
+$LNG['uni_info_season_hive']			= 'Cuenta Hive obligatoria';
 $LNG['uni_info_season_entries_closed']	= 'Entradas cerradas';
 
 // Button
