@@ -100,8 +100,8 @@ Element IDs: hyperspace `114` (`LeftoverBonus::CARGO_TECH_ID`), graviton `199`, 
 - **Goal:** Persist feat catalog, per-universe tracking flag, webhook, banner fields, and initial `unknown`/`open` states.
 - **Requirements:** R1, R6–R9, R16
 - **Dependencies:** none
-- **Files:** `install/migrations/migration_30.sql`, `install/migrations/migration_30.php` (snapshot), `install/install.sql`, `includes/dbtables.php`, `includes/classes/Config.php` (only if a new key must be global — webhook/banner/flag are per-universe columns, not `$globalConfigKeys`), `tests/Unit/FeatSnapshotTest.php`
-- **Approach:** Add `feat_tracking_from_start`, `discord_feat_webhook`, `feat_banner_key`, `feat_banner_user_id`, `feat_banner_at` on `%%CONFIG%%`. Add `%%FEAT_STATES%%` (`universe`, `feat_key`, `status`, `winner_id`, `claimed_at`) and `%%FEAT_CLAIMS%%` (`universe`, `feat_key`, `user_id`, `claimed_at`) with PK `(universe, feat_key)`. Add `hof_only` tinyint on `%%ACHIEVEMENTS%%`. Seed one `hof_only` achievement per feat key per universe (`points` 0, `reward_type` none, `hidden` 0). PHP snapshot implements R8. Bump `DB_VERSION_REQUIRED` to 30. Fresh install: `feat_tracking_from_start = 1` and all feats open.
+- **Files:** `install/migrations/migration_31.sql`, `install/install.sql`, `includes/dbtables.php`, `includes/classes/Config.php` (only if a new key must be global — webhook/banner/flag are per-universe columns, not `$globalConfigKeys`), `tests/Unit/FeatSnapshotTest.php`
+- **Approach:** Add `feat_tracking_from_start`, `discord_feat_webhook`, `feat_banner_key`, `feat_banner_user_id`, `feat_banner_at` on `%%CONFIG%%`. Add `%%FEAT_STATES%%` (`universe`, `feat_key`, `status`, `winner_id`, `claimed_at`) and `%%FEAT_CLAIMS%%` (`universe`, `feat_key`, `user_id`, `claimed_at`) with PK `(universe, feat_key)`. Add `hof_only` tinyint on `%%ACHIEVEMENTS%%`. Seed one `hof_only` achievement per feat key per universe (`points` 0, `reward_type` none, `hidden` 0). PHP snapshot implements R8. Bump `DB_VERSION_REQUIRED` to 31. Fresh install: `feat_tracking_from_start = 1` and all feats open.
 - **Patterns to follow:** `install/migrations/migration_29.sql` (config columns), `install/migrations/migration_20.php` (PHP migration), `install/migrations/migration_21.sql` (achievement seed).
 - **Test scenarios:**
   - Existing universe row after migrate has `feat_tracking_from_start = 0`; graviton open only when no user has tech 199.
@@ -222,7 +222,7 @@ Element IDs: hyperspace `114` (`LeftoverBonus::CARGO_TECH_ID`), graviton `199`, 
 
 ## Operational / Rollout Notes
 
-- Run `php migrate.php run` (version 30). Existing universes show most feats as unknown; graviton/hyperspace/first-moon only if the snapshot says open.
+- Run `php migrate.php run` (version 31). Existing universes show most feats as unknown; graviton/hyperspace/first-moon only if the snapshot says open.
 - Operators paste the Discord webhook on the universe config page before they care about shouts. In-game hall works without it.
 - Creating a new universe after migrate is the way to get opening-day races (first ship, first colony, …).
 

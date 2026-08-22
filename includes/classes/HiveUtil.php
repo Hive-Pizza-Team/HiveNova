@@ -153,4 +153,32 @@ class HiveUtil
 
 		return HiveUtil::extractProfileAbout($result[0]);
 	}
+
+	static public function extractMemoKey(mixed $account): string
+	{
+		if (!is_array($account) || empty($account['memo_key']) || !is_string($account['memo_key'])) {
+			return '';
+		}
+
+		$key = trim($account['memo_key']);
+		if (!preg_match('/^STM[1-9A-HJ-NP-Za-km-z]{40,80}$/', $key)) {
+			return '';
+		}
+
+		return $key;
+	}
+
+	static public function getMemoPublicKey(string $hiveaccount): string
+	{
+		if (!HiveUtil::isAccountValid($hiveaccount)) {
+			return '';
+		}
+
+		$result = HiveUtil::rpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]', 3);
+		if (!is_array($result) || !isset($result[0])) {
+			return '';
+		}
+
+		return HiveUtil::extractMemoKey($result[0]);
+	}
 }

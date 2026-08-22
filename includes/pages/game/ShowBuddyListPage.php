@@ -7,6 +7,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\SocialHiveMemoService;
 use HiveNova\Repository\BuddyRepository;
 
 /**
@@ -126,6 +127,10 @@ class ShowBuddyListPage extends AbstractGamePage
 		}
 		
         PlayerUtil::sendMessage($id, $USER['id'], $USER['username'], 4, $Friend_LNG['bu_new_request_title'], sprintf($Friend_LNG['bu_new_request_body'], $row['username'], $USER['username']), TIMESTAMP);
+		try {
+			(new SocialHiveMemoService())->notifyBuddyRequest((int) $id, (string) $USER['username']);
+		} catch (\Throwable $e) {
+		}
 
 		$this->printMessage($LNG['bu_request_send']);
 	}
