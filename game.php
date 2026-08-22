@@ -24,7 +24,10 @@ require 'includes/common.php';
 /** @var $LNG Language */
 
 use HiveNova\Page\Game\ShowErrorPage;
+use HiveNova\Core\Config;
+use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Language;
+use HiveNova\Core\SeasonService;
 
 
 $page 		= \HiveNova\Core\HTTP::_GP('page', 'overview');
@@ -33,6 +36,14 @@ $page		= str_replace(array('_', '\\', '/', '.', "\0"), '', $page);
 $pageClass	= 'Show'.ucwords($page).'Page';
 
 $fqcn		= 'HiveNova\\Page\\Game\\' . $pageClass;
+
+$uniConfig = Config::get();
+if (isset($uniConfig->season_mode) && (int) $uniConfig->season_mode === 1 && isset($USER) && !empty($USER['id']) && (int) $USER['authlevel'] === AUTH_USR) {
+	$seasonGate = new SeasonService(new DatabaseSeasonStore());
+	if ($seasonGate->mustRedirect($USER, $uniConfig, $page)) {
+		\HiveNova\Core\HTTP::redirectTo('game.php?page=season');
+	}
+}
 
 if(!class_exists($fqcn)) {
 	ShowErrorPage::printError($LNG['page_doesnt_exist']);

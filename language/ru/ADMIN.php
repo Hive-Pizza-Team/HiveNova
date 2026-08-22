@@ -1473,3 +1473,15 @@ $LNG['modul_48'] = 'Commander';
 $LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
 $LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements.';
 
+$LNG['se_season'] = 'Short-lived season';
+$LNG['se_season_info'] = 'Dedicated weekly universe: Hive + Pizza entry, prize payouts, then wipe progress. Set 8× speeds on this universe. House cut, min points, entry amount, and length are operator-set.';
+$LNG['se_season_mode'] = 'Enable seasonal universe';
+$LNG['se_season_length'] = 'Season length (seconds)';
+$LNG['se_season_preclose'] = 'Pre-close reminder (seconds)';
+$LNG['se_season_house_cut'] = 'House cut percent';
+$LNG['se_season_min_points'] = 'Min points for payout';
+$LNG['se_season_entry_pizza'] = 'Entry Pizza amount';
+$LNG['se_season_wallet'] = 'Season Hive wallet';
+$LNG['se_season_wallet_key'] = 'Season wallet active key';
+$LNG['se_season_wallet_key_info'] = 'Leave blank to keep the stored key. The key is never shown again.';
+$LNG['se_season_status'] = 'Season status';

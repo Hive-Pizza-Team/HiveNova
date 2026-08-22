@@ -183,3 +183,5 @@ $LNG['disclamerLabelAddress']		= 'Game Address:';
 $LNG['disclamerLabelPhone']			= 'Telephone Nr.:';
 $LNG['disclamerLabelMail']			= 'Support Email:';
 $LNG['disclamerLabelNotice']		= 'More information';
+
+$LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';

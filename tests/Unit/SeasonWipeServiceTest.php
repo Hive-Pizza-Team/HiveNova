@@ -1,0 +1,83 @@
+<?php
+
+use HiveNova\Core\Config;
+use HiveNova\Core\Database;
+use HiveNova\Core\SeasonWipeService;
+
+use PHPUnit\Framework\TestCase;
+
+require_once __DIR__ . '/../Support/RecordingDatabase.php';
+require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+
+class SeasonWipeServiceTest extends TestCase
+{
+	use SwapDatabaseInstance;
+
+	private RecordingDatabase $db;
+
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->db = new RecordingDatabase();
+		$this->swapDatabaseInstance($this->db);
+	}
+
+	protected function tearDown(): void
+	{
+		$this->restoreDatabaseInstance();
+		parent::tearDown();
+	}
+
+	public function testFromGlobalsIncludesBuildingAndTechColumns(): void
+	{
+		$config = new Config([
+			'uni' => 2,
+			'metal_start' => 500,
+			'crystal_start' => 400,
+			'deuterium_start' => 0,
+			'darkmatter_start' => 10,
+		]);
+		$wipe = SeasonWipeService::fromGlobals($GLOBALS['reslist'], $GLOBALS['resource'], $config);
+		$this->assertStringContainsString('`metal_mine` = \'0\'', $wipe->planetSetSql());
+		$this->assertStringContainsString('`metal` = :metal', $wipe->planetSetSql());
+		$this->assertStringContainsString('`darkmatter` = :darkmatter', $wipe->userSetSql());
+		$this->assertStringContainsString('`b_tech_queue` = \'\'', $wipe->userSetSql());
+	}
+
+	public function testWipeDeletesFleetsExtraPlanetsAndStats(): void
+	{
+		$config = new Config([
+			'uni' => 2,
+			'metal_start' => 500,
+			'crystal_start' => 400,
+			'deuterium_start' => 0,
+			'darkmatter_start' => 10,
+		]);
+		$wipe = new SeasonWipeService('`metal` = :metal', '`darkmatter` = :darkmatter');
+		$wipe->wipe(2, $config);
+
+		$deleteSql = array_column($this->db->deletes, 0);
+		$this->assertTrue($this->containsHay($deleteSql, '%%FLEETS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%PLANETS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%STATPOINTS%%'));
+
+		$updateSql = array_column($this->db->updates, 0);
+		$this->assertTrue($this->containsHay($updateSql, '%%PLANETS%%'));
+		$this->assertTrue($this->containsHay($updateSql, '%%USERS%%'));
+		$this->assertSame(0, $this->db->transactionDepth);
+	}
+
+	/**
+	 * @param list<string> $haystacks
+	 */
+	private function containsHay(array $haystacks, string $needle): bool
+	{
+		foreach ($haystacks as $sql) {
+			if (str_contains($sql, $needle)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
