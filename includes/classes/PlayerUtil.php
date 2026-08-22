@@ -78,7 +78,8 @@ class PlayerUtil
 
 	static public function sanitizePublicMessage(string $text): string
 	{
-		$text = str_replace(["\r\n", "\r"], "\n", $text);
+		$text = str_replace(["\r\n", "\r", "\0"], "\n", $text);
+		$text = self::decodePublicMessageEntities($text);
 		$text = str_replace(['[img]', '.php', '[/img]'], '', $text);
 
 		if (function_exists('mb_substr')) {
@@ -90,13 +91,50 @@ class PlayerUtil
 		return trim($text);
 	}
 
+	/**
+	 * Read the profile bio from a request without HTTP::_GP quoting.
+	 * _GP applies htmlspecialchars(), and saving that value re-encodes
+	 * apostrophes on every settings submit.
+	 *
+	 * @param array<string, mixed>|null $request
+	 */
+	static public function publicMessageFromRequest(?array $request = null): string
+	{
+		$request ??= $_REQUEST;
+		if (!isset($request['publicMessage']) || !is_string($request['publicMessage'])) {
+			return '';
+		}
+
+		$text = $request['publicMessage'];
+		if ($text !== '' && !preg_match('/^./u', $text)) {
+			return '';
+		}
+
+		return self::sanitizePublicMessage($text);
+	}
+
 	static public function formatPublicMessageHtml(string $text): string
 	{
+		$text = self::decodePublicMessageEntities($text);
 		if ($text === '') {
 			return '';
 		}
 
 		return nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8'), false);
+	}
+
+	/**
+	 * Undo htmlspecialchars() layers stored by earlier settings saves.
+	 */
+	static public function decodePublicMessageEntities(string $text): string
+	{
+		$previous = null;
+		for ($i = 0; $i < 5 && $text !== $previous; $i++) {
+			$previous = $text;
+			$text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		}
+
+		return $text;
 	}
 
 	static public function resolvePublicMessage(array $user, ?callable $hiveAboutFetcher = null): string

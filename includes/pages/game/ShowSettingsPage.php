@@ -234,7 +234,7 @@ class ShowSettingsPage extends AbstractGamePage
 
 		$hiveAccount		= HTTP::_GP('hiveAccount', '');
 		$hivesign           = HTTP::_GP('hivesign', '');
-		$publicMessage		= PlayerUtil::sanitizePublicMessage(HTTP::_GP('publicMessage', '', true));
+		$publicMessage		= PlayerUtil::publicMessageFromRequest();
 		
 		$timezone			= HTTP::_GP('timezone', '');	
 		$language			= HTTP::_GP('language', '');	
