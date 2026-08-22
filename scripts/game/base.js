@@ -405,6 +405,20 @@ const DepositPizzaTokens = async (hiveaccount, universe) => {
 	}
 }
 
+const extractHiveTxId = (response) => {
+	if (!response || !response.success) {
+		return '';
+	}
+	const result = response.result;
+	if (typeof result === 'string') {
+		return result;
+	}
+	if (result && typeof result === 'object') {
+		return result.tx_id || result.id || result.txid || '';
+	}
+	return '';
+}
+
 const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
 	if (typeof(hive_keychain) == "undefined") {
 		alert('You must install HiveKeychain extension first');
@@ -418,7 +432,11 @@ const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
 		}
 		hive_keychain.requestSendToken(hiveaccount, wallet, qty.toFixed(3), memo, 'PIZZA', (response) => {
 			console.debug(JSON.stringify(response));
-			if (response && response.success && response.result && response.result.tx_id) {
+			const txid = extractHiveTxId(response);
+			if (!txid) {
+				return;
+			}
+			window.setTimeout(() => {
 				const form = document.createElement('form');
 				form.method = 'post';
 				form.action = 'game.php?page=season';
@@ -428,11 +446,11 @@ const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
 				form.appendChild(mode);
 				const tx = document.createElement('input');
 				tx.name = 'txid';
-				tx.value = response.result.tx_id;
+				tx.value = txid;
 				form.appendChild(tx);
 				document.body.appendChild(form);
 				form.submit();
-			}
+			}, 2000);
 		});
 	} catch (error) {
 		alert(error.message);

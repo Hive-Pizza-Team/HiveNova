@@ -43,16 +43,27 @@ class ShowSeasonPage extends AbstractGamePage
 
 		$closesAt = isset($config->season_closes_at) ? (int) $config->season_closes_at : 0;
 		$countdown = $closesAt > TIMESTAMP ? max(0, $closesAt - TIMESTAMP) : 0;
+		$entryAmount = isset($config->season_entry_pizza) ? (string) $config->season_entry_pizza : '0.100';
+		$wallet = isset($config->season_wallet_account) ? (string) $config->season_wallet_account : '';
+		$hiveAccount = (string) ($USER['hive_account'] ?? '');
+		$memo = $service->entryMemo((int) $config->uni, (int) ($config->season_id ?? 0), (int) $USER['id']);
+		$payInstruction = sprintf(
+			(string) ($LNG['page_season_pay_instruction'] ?? 'Send %s PIZZA (Hive Engine token) from @%s to @%s with the memo below.'),
+			$entryAmount,
+			$hiveAccount,
+			$wallet
+		);
 
 		$this->assign([
 			'seasonMessage'   => $message,
 			'hasHive'         => $hasHive,
 			'hasEntry'        => $hasEntry,
 			'canEnter'        => $service->canEnter($config),
-			'entryAmount'     => isset($config->season_entry_pizza) ? $config->season_entry_pizza : '0.100',
-			'wallet'          => isset($config->season_wallet_account) ? $config->season_wallet_account : '',
-			'memo'            => $service->entryMemo((int) $config->uni, (int) ($config->season_id ?? 0), (int) $USER['id']),
-			'hiveAccount'     => (string) ($USER['hive_account'] ?? ''),
+			'entryAmount'     => $entryAmount,
+			'wallet'          => $wallet,
+			'memo'            => $memo,
+			'hiveAccount'     => $hiveAccount,
+			'payInstruction'  => $payInstruction,
 			'seasonId'        => (int) ($config->season_id ?? 0),
 			'countdownLabel'  => $countdown > 0 ? pretty_time($countdown) : '',
 			'canPlay'         => $service->canPlay($USER, $config),

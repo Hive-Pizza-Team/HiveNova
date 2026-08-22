@@ -46,14 +46,70 @@ class HiveEngineClientTest extends TestCase
 		]));
 	}
 
-	public function testGetTransactionUsesFetcher(): void
+	public function testGetTransactionUsesJsonRpc(): void
 	{
-		HiveEngineClient::setFetcher(function (string $url) {
-			$this->assertStringContainsString('txid=deadbeef', $url);
-			return json_encode(['from' => 'alice', 'to' => 'bob', 'symbol' => 'PIZZA', 'quantity' => 1, 'memo' => 'x', 'transactionId' => 'deadbeef']);
+		HiveEngineClient::setFetcher(function (string $url, ?string $body = null) {
+			$this->assertSame(HiveEngineClient::RPC_URL, $url);
+			$this->assertIsString($body);
+			$this->assertStringContainsString('"getTransactionInfo"', $body);
+			$this->assertStringContainsString('deadbeef', $body);
+			return json_encode([
+				'jsonrpc' => '2.0',
+				'id' => 1,
+				'result' => [
+					'sender' => 'alice',
+					'action' => 'transfer',
+					'payload' => '{"symbol":"PIZZA","to":"bob","quantity":"1.000","memo":"x"}',
+					'transactionId' => 'deadbeef',
+				],
+			]);
 		});
 		$row = (new HiveEngineClient())->getTransaction('deadbeef');
-		$this->assertSame('alice', $row['from']);
+		$this->assertSame('alice', $row['sender']);
+		$parsed = HiveEngineClient::parseTransfer($row);
+		$this->assertSame('alice', $parsed['from']);
+		$this->assertSame('bob', $parsed['to']);
+		$this->assertSame('deadbeef', $parsed['trx_id']);
+	}
+
+	public function testGetTransactionNullResultIsMissing(): void
+	{
+		HiveEngineClient::setFetcher(static fn () => json_encode(['jsonrpc' => '2.0', 'id' => 1, 'result' => null]));
+		$this->assertNull((new HiveEngineClient())->getTransaction('deadbeef'));
+	}
+
+	public function testParseTransferFromHistoryTokensTransfer(): void
+	{
+		$parsed = HiveEngineClient::parseTransfer([
+			'operation' => 'tokens_transfer',
+			'from' => 'playerone',
+			'to' => 'season.wallet',
+			'symbol' => 'PIZZA',
+			'quantity' => '1.000',
+			'memo' => 'hn-s2-1-10',
+			'transactionId' => 'hist1',
+			'timestamp' => 1700000010,
+		]);
+		$this->assertNotNull($parsed);
+		$this->assertSame('playerone', $parsed['from']);
+		$this->assertSame('season.wallet', $parsed['to']);
+		$this->assertSame('hist1', $parsed['trx_id']);
+	}
+
+	public function testParseTransferFromStringPayload(): void
+	{
+		$parsed = HiveEngineClient::parseTransfer([
+			'action' => 'transfer',
+			'sender' => 'xanuri',
+			'payload' => '{"symbol":"PIZZA","to":"moon.deposit","quantity":"2.000","memo":"hn-s2-1-10"}',
+			'transactionId' => '0e7b5e0b95c137e8b3887f7d8da3a486cdb001e0',
+			'timestamp' => '2026-08-22T23:18:09',
+		]);
+		$this->assertNotNull($parsed);
+		$this->assertSame('xanuri', $parsed['from']);
+		$this->assertSame('moon.deposit', $parsed['to']);
+		$this->assertSame(2.0, $parsed['quantity']);
+		$this->assertSame('hn-s2-1-10', $parsed['memo']);
 	}
 
 	public function testGetTransactionRejectsEmptyId(): void

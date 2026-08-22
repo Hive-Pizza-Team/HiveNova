@@ -9,10 +9,10 @@ use Throwable;
  */
 class HiveEngineClient
 {
-	public const TX_URL = 'https://api.hive-engine.com/blockchain/getTransactionInfo?txid=';
+	public const RPC_URL = 'https://api.hive-engine.com/rpc/blockchain';
 	public const HISTORY_URL = 'https://history.hive-engine.com/accountHistory?account=';
 
-	/** @var callable|null fn(string $url): string|false */
+	/** @var callable|null fn(string $url, ?string $body = null): string|false */
 	private static $fetcher = null;
 
 	public static function setFetcher(?callable $fetcher): void
@@ -30,12 +30,25 @@ class HiveEngineClient
 			return null;
 		}
 
-		$raw = $this->fetch(self::TX_URL . urlencode($txid));
+		$body = json_encode([
+			'jsonrpc' => '2.0',
+			'id'      => 1,
+			'method'  => 'getTransactionInfo',
+			'params'  => ['txid' => $txid],
+		], JSON_UNESCAPED_SLASHES);
+		$raw = $this->fetch(self::RPC_URL, is_string($body) ? $body : null);
 		if ($raw === null) {
 			return null;
 		}
 		$decoded = json_decode($raw, true);
-		return is_array($decoded) ? $decoded : null;
+		if (!is_array($decoded)) {
+			return null;
+		}
+		if (array_key_exists('result', $decoded)) {
+			return is_array($decoded['result']) ? $decoded['result'] : null;
+		}
+
+		return $decoded;
 	}
 
 	/**
@@ -66,6 +79,16 @@ class HiveEngineClient
 	 */
 	public static function parseTransfer(array $row): ?array
 	{
+		foreach (['payload', 'contractPayload'] as $payloadKey) {
+			if (!isset($row[$payloadKey]) || !is_string($row[$payloadKey]) || $row[$payloadKey] === '') {
+				continue;
+			}
+			$decodedPayload = json_decode($row[$payloadKey], true);
+			if (is_array($decodedPayload)) {
+				$row[$payloadKey] = $decodedPayload;
+			}
+		}
+
 		$payload = $row;
 		if (isset($row['payload']) && is_array($row['payload'])) {
 			$payload = $row['payload'];
@@ -73,8 +96,8 @@ class HiveEngineClient
 			$payload = $row['contractPayload'];
 		}
 
-		$action = (string) ($row['action'] ?? $row['operation'] ?? $row['contractAction'] ?? '');
-		if ($action !== '' && strtolower($action) !== 'transfer') {
+		$action = strtolower((string) ($row['action'] ?? $row['operation'] ?? $row['contractAction'] ?? ''));
+		if ($action !== '' && $action !== 'transfer' && $action !== 'tokens_transfer') {
 			return null;
 		}
 
@@ -115,21 +138,26 @@ class HiveEngineClient
 		return 0;
 	}
 
-	private function fetch(string $url): ?string
+	private function fetch(string $url, ?string $body = null): ?string
 	{
 		try {
 			$fn = self::$fetcher;
 			if ($fn !== null) {
-				$raw = $fn($url);
+				$raw = $fn($url, $body);
 				return is_string($raw) && $raw !== '' ? $raw : null;
 			}
 
-			$ctx = stream_context_create([
-				'http' => [
-					'timeout' => 8,
-					'ignore_errors' => true,
-				],
-			]);
+			$http = [
+				'timeout'       => 8,
+				'ignore_errors' => true,
+				'header'        => "User-Agent: HiveNova\r\nAccept: application/json\r\n",
+			];
+			if ($body !== null) {
+				$http['method'] = 'POST';
+				$http['header'] .= "Content-Type: application/json\r\n";
+				$http['content'] = $body;
+			}
+			$ctx = stream_context_create(['http' => $http]);
 			$raw = @file_get_contents($url, false, $ctx);
 			return is_string($raw) && $raw !== '' ? $raw : null;
 		} catch (Throwable $e) {

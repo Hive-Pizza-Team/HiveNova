@@ -112,6 +112,7 @@ class ShowIndexPage extends AbstractLoginPage
 				'entry_label'         => $seasonPanel['seasonal']
 					? sprintf($LNG['uni_info_entry_pizza'], $seasonPanel['entry_pizza'])
 					: '',
+				'entry_wallet'        => $seasonPanel['wallet'],
 			);
 		}
 
