@@ -2,6 +2,7 @@
 {block name="title" prepend}{$LNG.siteTitleRegister}{/block}
 {block name="content"}
 <div class="reg-tabs-wrapper">
+	<script type="application/json" id="reg-seasonal-unis">{$universeSeasonal|json}</script>
 	<div class="reg-tab-nav" role="tablist">
 		<button class="reg-tab-btn active" data-tab="reg-email" role="tab" aria-selected="true" aria-controls="reg-email">
 			&#9993;&nbsp; {$registerTabEmail}
@@ -14,6 +15,9 @@
 	<div class="reg-tab-panel active" id="reg-email" role="tabpanel">
 		<form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register">
 		<input type="hidden" value="send" name="mode">
+		<div class="rowForm reg-season-hive-notice" hidden>
+			<p>{$LNG.registerErrorHiveRequiredSeason}</p>
+		</div>
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
 		<input type="hidden" value="{$referralData.id}" name="referralID">
@@ -111,6 +115,7 @@
 		<input type="hidden" value="{$referralData.id}" name="referralID">
 			<div class="rowForm reg-hive-info">
 				<p>{$registerHiveKeychainInfo}</p>
+				<p class="reg-season-hive-notice" hidden>{$LNG.registerErrorHiveRequiredSeason}</p>
 			</div>
 			<div class="rowForm">
 				<label for="reg-hive-universe">{$LNG.universe}</label>

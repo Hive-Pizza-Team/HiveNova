@@ -73,7 +73,7 @@ $LNG['uni_info_entry_pizza']			= '%s PIZZA';
 $LNG['uni_info_entry_token']			= 'Hive Engine PIZZA, not HIVE';
 $LNG['uni_info_entry_wallet']			= 'Send to';
 $LNG['uni_info_entry_note']				= 'Hive signup required. After login you get a unique memo.';
-$LNG['uni_info_season_hive']			= 'Hive required';
+$LNG['uni_info_season_hive']			= 'Hive account required';
 $LNG['uni_info_season_entries_closed']	= 'Entries closed';
 
 // Button

@@ -37,7 +37,8 @@ class ShowRegisterPage extends AbstractLoginPage
 	function show()
 	{
 		global $LNG;
-		$universeSelect	= array();	
+		$universeSelect	= array();
+		$universeSeasonal	= array();
 		$referralData	= array('id' => 0, 'name' => '');
 		$accountName	= "";
 		
@@ -48,6 +49,7 @@ class ShowRegisterPage extends AbstractLoginPage
 		{
 			$config = Config::get($uniId);
 			$universeSelect[$uniId]	= $config->uni_name.($config->game_disable == 0 || $config->reg_closed == 1 ? $LNG['uni_closed'] : '');
+			$universeSeasonal[$uniId]	= isset($config->season_mode) && (int) $config->season_mode === 1 ? 1 : 0;
 		}
 		
 		if(!isset($externalAuth['account'], $externalAuth['method']))
@@ -102,6 +104,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			'accountName'		=> $accountName,
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,
+			'universeSeasonal'	=> $universeSeasonal,
 			'defaultUniverse'	=> $this->getDefaultUniverseId(true),
 			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], 6),
 			'registerRulesDesc'			=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),

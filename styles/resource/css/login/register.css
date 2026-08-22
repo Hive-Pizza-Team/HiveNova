@@ -50,6 +50,19 @@
     border-color: #E31337;
 }
 
+.reg-tab-btn.disabled,
+.reg-tab-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    color: #8aa8be;
+}
+
+.reg-season-hive-notice p {
+    margin: 0 0 10px;
+    color: #e8b0ba;
+    font-size: 12px;
+}
+
 .reg-tab-icon {
     width: 14px;
     height: 14px;

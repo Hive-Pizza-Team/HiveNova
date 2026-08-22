@@ -2,29 +2,95 @@
 document.addEventListener('DOMContentLoaded', function() {
 	var btns = document.querySelectorAll('.reg-tab-btn');
 	var panels = document.querySelectorAll('.reg-tab-panel');
+	var seasonalUnis = {};
+	var seasonalNode = document.getElementById('reg-seasonal-unis');
+	if (seasonalNode) {
+		try {
+			seasonalUnis = JSON.parse(seasonalNode.textContent || '{}') || {};
+		} catch (e) {
+			seasonalUnis = {};
+		}
+	}
+
+	function activateTab(target) {
+		btns.forEach(function(b) {
+			b.classList.remove('active');
+			b.setAttribute('aria-selected', 'false');
+		});
+		panels.forEach(function(p) { p.classList.remove('active'); });
+		var btn = document.querySelector('.reg-tab-btn[data-tab="' + target + '"]');
+		var panel = document.getElementById(target);
+		if (btn) {
+			btn.classList.add('active');
+			btn.setAttribute('aria-selected', 'true');
+		}
+		if (panel) {
+			panel.classList.add('active');
+		}
+	}
+
+	function isSeasonalUni(uniId) {
+		return seasonalUnis[uniId] == 1 || seasonalUnis[String(uniId)] == 1;
+	}
+
+	function currentUniId() {
+		var activePanel = document.querySelector('.reg-tab-panel.active');
+		var sel = activePanel ? activePanel.querySelector('.changeAction') : document.querySelector('.changeAction');
+		return sel ? sel.value : '';
+	}
+
+	function applySeasonalRegister(uniId) {
+		var seasonal = isSeasonalUni(uniId);
+		document.querySelectorAll('.reg-season-hive-notice').forEach(function(el) {
+			if (seasonal) {
+				el.removeAttribute('hidden');
+			} else {
+				el.setAttribute('hidden', 'hidden');
+			}
+		});
+		var emailBtn = document.querySelector('.reg-tab-btn[data-tab="reg-email"]');
+		var emailSubmit = document.querySelector('#registerForm .submitButton');
+		if (emailBtn) {
+			emailBtn.disabled = seasonal;
+			emailBtn.classList.toggle('disabled', seasonal);
+			emailBtn.setAttribute('aria-disabled', seasonal ? 'true' : 'false');
+		}
+		if (emailSubmit) {
+			emailSubmit.disabled = seasonal;
+		}
+		if (seasonal) {
+			activateTab('reg-hive');
+		}
+	}
 
 	btns.forEach(function(btn) {
 		btn.addEventListener('click', function() {
-			var target = btn.getAttribute('data-tab');
-
-			btns.forEach(function(b) {
-				b.classList.remove('active');
-				b.setAttribute('aria-selected', 'false');
-			});
-			panels.forEach(function(p) { p.classList.remove('active'); });
-
-			btn.classList.add('active');
-			btn.setAttribute('aria-selected', 'true');
-			document.getElementById(target).classList.add('active');
+			if (btn.disabled || (btn.getAttribute('data-tab') === 'reg-email' && isSeasonalUni(currentUniId()))) {
+				return;
+			}
+			activateTab(btn.getAttribute('data-tab'));
 		});
 	});
+
+	document.querySelectorAll('.changeAction').forEach(function(sel) {
+		sel.addEventListener('change', function() {
+			var val = this.value;
+			document.querySelectorAll('.changeAction').forEach(function(s) { s.value = val; });
+			applySeasonalRegister(val);
+		});
+	});
+
+	applySeasonalRegister(currentUniId());
 
 	// If Hive Keychain is available, select that tab by default
 	// Extensions inject after DOMContentLoaded, so we wait briefly
 	setTimeout(function() {
+		if (isSeasonalUni(currentUniId())) {
+			applySeasonalRegister(currentUniId());
+			return;
+		}
 		if (typeof hive_keychain !== 'undefined') {
-			var keychainBtn = document.querySelector('.reg-tab-btn[data-tab="reg-hive"]');
-			if (keychainBtn) keychainBtn.click();
+			activateTab('reg-hive');
 		}
 	}, 300);
 });
