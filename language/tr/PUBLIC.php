@@ -190,3 +190,5 @@ $LNG['disclamerLabelNotice']		= 'Ayrıntılı bilgi';
  $LNG['Browser']				= 'Önerilen browser.';
 $LNG['loginHiveAccount'] = 'Hive Hesabı';
 $LNG['loginKeychainButton'] = 'Keychain ile giriş yap';
+
+$LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';

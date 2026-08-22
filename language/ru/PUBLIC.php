@@ -180,3 +180,5 @@ $LNG['disclamerLabelMail']          = 'Электронная почта:';
 $LNG['disclamerLabelNotice']        = 'Дополнительная информация';
 $LNG['loginHiveAccount'] = 'Учётная запись Hive';
 $LNG['loginKeychainButton'] = 'Войти через Keychain';
+
+$LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';

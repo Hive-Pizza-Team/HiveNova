@@ -293,6 +293,19 @@ CREATE TABLE `%PREFIX%config` (
   `feat_banner_key` varchar(64) NOT NULL DEFAULT '',
   `feat_banner_user_id` int(11) unsigned NOT NULL DEFAULT '0',
   `feat_banner_at` int(11) NOT NULL DEFAULT '0',
+  `season_mode` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `season_length_seconds` int(10) unsigned NOT NULL DEFAULT '604800',
+  `season_preclose_seconds` int(10) unsigned NOT NULL DEFAULT '14400',
+  `season_house_cut_percent` decimal(5,2) unsigned NOT NULL DEFAULT '10.00',
+  `season_min_points` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `season_entry_pizza` decimal(10,3) unsigned NOT NULL DEFAULT '0.100',
+  `season_wallet_account` varchar(16) NOT NULL DEFAULT '',
+  `season_wallet_active_key` varchar(80) NOT NULL DEFAULT '',
+  `season_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `season_starts_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `season_closes_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `season_status` varchar(16) NOT NULL DEFAULT 'idle',
+  `season_last_reminder` varchar(128) NOT NULL DEFAULT '',
   `silo_factor` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/London',
   `dst` enum('0','1','2') NOT NULL DEFAULT '2',
@@ -714,6 +727,61 @@ CREATE TABLE `%PREFIX%expedition_pending_choices` (
   KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `%PREFIX%season_weeks` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) NOT NULL,
+  `season_id` int(10) unsigned NOT NULL,
+  `starts_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `closes_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `status` varchar(16) NOT NULL DEFAULT 'running',
+  `pool_pizza` decimal(20,3) unsigned NOT NULL DEFAULT '0.000',
+  `house_cut_pizza` decimal(20,3) unsigned NOT NULL DEFAULT '0.000',
+  `payout_budget` decimal(20,3) unsigned NOT NULL DEFAULT '0.000',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `universe_season` (`universe`,`season_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%season_entries` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) NOT NULL,
+  `season_id` int(10) unsigned NOT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `hive_account` varchar(16) NOT NULL DEFAULT '',
+  `pizza_amount` decimal(20,3) unsigned NOT NULL DEFAULT '0.000',
+  `trx_id` varchar(80) NOT NULL DEFAULT '',
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `universe_season_user` (`universe`,`season_id`,`user_id`),
+  KEY `trx` (`universe`,`trx_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%season_snapshots` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) NOT NULL,
+  `season_id` int(10) unsigned NOT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `hive_account` varchar(16) NOT NULL DEFAULT '',
+  `rank` int(10) unsigned NOT NULL DEFAULT '0',
+  `points` bigint(20) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `universe_season_user` (`universe`,`season_id`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%season_payouts` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) NOT NULL,
+  `season_id` int(10) unsigned NOT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `hive_account` varchar(16) NOT NULL DEFAULT '',
+  `rank` int(10) unsigned NOT NULL DEFAULT '0',
+  `points` bigint(20) NOT NULL DEFAULT '0',
+  `pizza_amount` decimal(20,3) unsigned NOT NULL DEFAULT '0.000',
+  `trx_id` varchar(80) NOT NULL DEFAULT '',
+  `status` varchar(16) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`id`),
+  KEY `universe_season_status` (`universe`,`season_id`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `%PREFIX%raports` (
   `rid` varchar(32) NOT NULL,
   `raport` longtext NOT NULL,
@@ -1123,7 +1191,8 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'pve_spawn', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\PveSpawnCronjob', 0, NULL),
 (NULL, 'hive_inactive_memo', 1, '0', '4', '*', '*', '*', 'HiveNova\\Cronjob\\InactiveHiveMemoCronjob', 0, NULL),
 (NULL, 'hive_social_memo', 1, '*/5', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SocialHiveMemoCronjob', 0, NULL),
-(NULL, 'directive_period', 1, '0', '*', '*', '*', '*', 'HiveNova\\Cronjob\\DirectivePeriodCronjob', 0, NULL);
+(NULL, 'directive_period', 1, '0', '*', '*', '*', '*', 'HiveNova\\Cronjob\\DirectivePeriodCronjob', 0, NULL),
+(NULL, 'season', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SeasonCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);

@@ -404,3 +404,37 @@ const DepositPizzaTokens = async (hiveaccount, universe) => {
 		alert(error.message);
 	}
 }
+
+const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
+	if (typeof(hive_keychain) == "undefined") {
+		alert('You must install HiveKeychain extension first');
+		return;
+	}
+
+	try {
+		const qty = parseFloat(amount);
+		if (isNaN(qty) || qty <= 0 || !wallet) {
+			return;
+		}
+		hive_keychain.requestSendToken(hiveaccount, wallet, qty.toFixed(3), memo, 'PIZZA', (response) => {
+			console.debug(JSON.stringify(response));
+			if (response && response.success && response.result && response.result.tx_id) {
+				const form = document.createElement('form');
+				form.method = 'post';
+				form.action = 'game.php?page=season';
+				const mode = document.createElement('input');
+				mode.name = 'mode';
+				mode.value = 'confirm';
+				form.appendChild(mode);
+				const tx = document.createElement('input');
+				tx.name = 'txid';
+				tx.value = response.result.tx_id;
+				form.appendChild(tx);
+				document.body.appendChild(form);
+				form.submit();
+			}
+		});
+	} catch (error) {
+		alert(error.message);
+	}
+}

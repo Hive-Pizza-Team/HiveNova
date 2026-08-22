@@ -419,6 +419,46 @@
 </tr>
 
 <tr>
+	<th colspan="2">{$LNG.se_season}</th>
+	<th><center><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_season_info}"></center></th>
+</tr><tr>
+	<td>{$LNG.se_season_mode}</td>
+	<td><input name="season_mode"{if $season_mode} checked="checked"{/if} type="checkbox"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_season_length}</td>
+	<td><input name="season_length_seconds" value="{$season_length_seconds}" type="text"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_season_preclose}</td>
+	<td><input name="season_preclose_seconds" value="{$season_preclose_seconds}" type="text"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_season_house_cut}</td>
+	<td><input name="season_house_cut_percent" value="{$season_house_cut_percent}" type="text"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_season_min_points}</td>
+	<td><input name="season_min_points" value="{$season_min_points}" type="text"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_season_entry_pizza}</td>
+	<td><input name="season_entry_pizza" value="{$season_entry_pizza}" type="text"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_season_wallet}</td>
+	<td><input name="season_wallet_account" value="{$season_wallet_account}" type="text" maxlength="16" autocomplete="off"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_season_wallet_key}</td>
+	<td><input name="season_wallet_active_key" value="" type="password" autocomplete="off"></td>
+	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_season_wallet_key_info}"></td>
+</tr><tr>
+	<td>{$LNG.se_season_status}</td>
+	<td>{$season_status} (#{$season_id})</td>
+	<td>&nbsp;</td>
+</tr>
+<tr>
 	<th colspan="2">{$se_news_head}</th><th>&nbsp;</th>
 </tr><tr>
     <td>{$se_news_active}</td>

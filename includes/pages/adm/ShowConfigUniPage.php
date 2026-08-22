@@ -16,8 +16,11 @@
  */
 
 use HiveNova\Core\Config;
+use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Log;
+use HiveNova\Core\SeasonAdminConfig;
+use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
@@ -338,7 +341,48 @@ function ShowConfigUniPage()
 		foreach ($config_after as $key => $value) {
 			$config->$key	= $value;
 		}
+
+		if (isset($config->season_mode)) {
+			$seasonPosted = array(
+				'season_mode'              => isset($_POST['season_mode']) ? $_POST['season_mode'] : '',
+				'season_length_seconds'    => HTTP::_GP('season_length_seconds', 604800),
+				'season_preclose_seconds'  => HTTP::_GP('season_preclose_seconds', 14400),
+				'season_house_cut_percent' => HTTP::_GP('season_house_cut_percent', '10.00'),
+				'season_min_points'        => HTTP::_GP('season_min_points', 0),
+				'season_entry_pizza'       => HTTP::_GP('season_entry_pizza', '0.100'),
+				'season_wallet_account'    => HTTP::_GP('season_wallet_account', ''),
+				'season_wallet_active_key' => HTTP::_GP('season_wallet_active_key', ''),
+			);
+			$seasonStored = array(
+				'season_mode'              => $config->season_mode,
+				'season_length_seconds'    => $config->season_length_seconds,
+				'season_preclose_seconds'  => $config->season_preclose_seconds,
+				'season_house_cut_percent' => $config->season_house_cut_percent,
+				'season_min_points'        => $config->season_min_points,
+				'season_entry_pizza'       => $config->season_entry_pizza,
+				'season_wallet_account'    => $config->season_wallet_account,
+				'season_wallet_active_key' => $config->season_wallet_active_key,
+				'game_speed'               => $config->game_speed,
+				'fleet_speed'              => $config->fleet_speed,
+				'resource_multiplier'      => $config->resource_multiplier,
+				'season_status'            => $config->season_status,
+				'season_id'                => $config->season_id,
+			);
+			$seasonResult = SeasonAdminConfig::applyPosted($seasonStored, $seasonPosted);
+			foreach ($seasonResult['apply'] as $key => $value) {
+				$config->$key = $value;
+			}
+			$config_before = array_merge($config_before, $seasonResult['log_old']);
+			$config_after  = array_merge($config_after, $seasonResult['log_new']);
+		}
+
 		$config->save();
+
+		if (isset($config->season_mode) && (int) $config->season_mode === 1
+			&& (string) $config->season_status === SeasonService::STATUS_IDLE) {
+			$seasonService = new SeasonService(new DatabaseSeasonStore());
+			$seasonService->startWeek($config);
+		}
 
 		$LOG = new Log(3);
 		$LOG->target = 1;
@@ -627,6 +671,15 @@ function ShowConfigUniPage()
 		'se_dm_energie_power'		=> $config->dm_energie_power,
 		'se_dm_fleettime_cost'		=> $config->dm_fleettime_cost,
 		'se_dm_fleettime_power'		=> $config->dm_fleettime_power,
+		'season_mode'				=> isset($config->season_mode) ? (int) $config->season_mode : 0,
+		'season_length_seconds'		=> isset($config->season_length_seconds) ? (int) $config->season_length_seconds : 604800,
+		'season_preclose_seconds'	=> isset($config->season_preclose_seconds) ? (int) $config->season_preclose_seconds : 14400,
+		'season_house_cut_percent'	=> isset($config->season_house_cut_percent) ? $config->season_house_cut_percent : '10.00',
+		'season_min_points'			=> isset($config->season_min_points) ? (int) $config->season_min_points : 0,
+		'season_entry_pizza'		=> isset($config->season_entry_pizza) ? $config->season_entry_pizza : '0.100',
+		'season_wallet_account'		=> isset($config->season_wallet_account) ? $config->season_wallet_account : '',
+		'season_status'				=> isset($config->season_status) ? $config->season_status : 'idle',
+		'season_id'					=> isset($config->season_id) ? (int) $config->season_id : 0,
 	));
 
 	$template->show('ConfigBodyUni.tpl');
