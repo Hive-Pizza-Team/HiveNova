@@ -70,7 +70,7 @@ $LNG['uni_info_wipe_hold']				= 'Вайп отложен';
 $LNG['uni_info_wipe_starting']			= 'Скоро старт';
 $LNG['uni_info_entry']					= 'Взнос';
 $LNG['uni_info_entry_pizza']			= '%s PIZZA';
-$LNG['uni_info_season_hive']			= 'Нужен Hive';
+$LNG['uni_info_season_hive']			= 'Нужен аккаунт Hive';
 $LNG['uni_info_season_entries_closed']	= 'Взнос закрыт';
 
 // Кнопки

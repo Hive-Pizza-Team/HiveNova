@@ -68,7 +68,7 @@ $LNG['uni_info_wipe_hold']				= 'Reset opóźniony';
 $LNG['uni_info_wipe_starting']			= 'Wkrótce';
 $LNG['uni_info_entry']					= 'Wpisowe';
 $LNG['uni_info_entry_pizza']			= '%s PIZZA';
-$LNG['uni_info_season_hive']			= 'Wymagane Hive';
+$LNG['uni_info_season_hive']			= 'Wymagane konto Hive';
 $LNG['uni_info_season_entries_closed']	= 'Wpis zamknięty';
 
 // Button
