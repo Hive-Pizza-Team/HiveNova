@@ -158,6 +158,32 @@
     color: #e8b0ba;
 }
 
+.uni-stats-badges .uni-badge--season {
+    border-color: rgba(232, 160, 64, 0.65);
+    color: #f3d5a4;
+}
+
+.uni-stats-row--season .uni-stats-wipe {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.2px;
+}
+
+.uni-stats-row--season .uni-stats-wipe--urgent {
+    color: #ffb3c0;
+}
+
+.uni-stats-config-note {
+    margin: 2px 0 0;
+    color: #8aa8be;
+    font-size: 10px;
+    font-weight: normal;
+    letter-spacing: 0.3px;
+}
+
+.uni-stats-config-item--wide {
+    grid-column: 1 / -1;
+}
+
 /* Inner blocks — match login form fields (dark fill, red border) */
 .uni-stats-field {
     background-color: #212529;

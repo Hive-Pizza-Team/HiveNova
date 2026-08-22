@@ -62,10 +62,19 @@
 
 		<div id="uni-stats" class="uni-stats">
 			{foreach $universeStats as $uniId => $stats}
-			<div class="contentbox uni-stats-row{if $uniId == $defaultUniverse} active{/if}" data-uni="{$uniId}">
+			<div class="contentbox uni-stats-row{if $uniId == $defaultUniverse} active{/if}{if $stats.seasonal} uni-stats-row--season{/if}" data-uni="{$uniId}">
 				<h2>{$stats.name|escape}</h2>
-				{if !$stats.open || !$stats.reg_open}
+				{if $stats.seasonal || !$stats.open || !$stats.reg_open}
 				<ul class="uni-stats-badges">
+					{if $stats.seasonal}
+					<li class="uni-badge uni-badge--season">{$LNG.uni_info_season_badge}</li>
+					{if $stats.season_number != ''}
+					<li class="uni-badge">{$stats.season_number|escape}</li>
+					{/if}
+					{if !$stats.season_can_enter}
+					<li class="uni-badge uni-badge--warn">{$LNG.uni_info_season_entries_closed}</li>
+					{/if}
+					{/if}
 					{if !$stats.open}
 					<li class="uni-badge uni-badge--warn">{$LNG.uni_info_status_closed}</li>
 					{elseif !$stats.reg_open}
@@ -99,6 +108,29 @@
 							<div class="uni-stats-config-term">{$LNG.uni_info_moon_chance}</div>
 							<div class="uni-stats-config-desc">{$stats.moon_chance}%</div>
 						</div>
+						{if $stats.seasonal}
+						<div class="uni-stats-config-item uni-stats-config-item--paired">
+							<div class="uni-stats-config-term">{$LNG.uni_info_wipe}</div>
+							<div class="uni-stats-config-desc uni-stats-wipe{if $stats.wipe_live} uni-stats-wipe--live{/if}{if $stats.wipe_urgent} uni-stats-wipe--urgent{/if}"{if $stats.wipe_live} data-closes-at="{$stats.closes_at}" data-closed-label="{$LNG.uni_info_wipe_now|escape}"{/if}>{$stats.wipe_label|escape}</div>
+						</div>
+						<div class="uni-stats-config-item uni-stats-config-item--paired">
+							<div class="uni-stats-config-term">{$LNG.uni_info_entry}</div>
+							<div class="uni-stats-config-desc">{$stats.entry_label|escape}</div>
+							<div class="uni-stats-config-note">{$LNG.uni_info_season_hive}</div>
+						</div>
+						<div class="uni-stats-config-item uni-stats-config-item--wide uni-stats-config-item--paired">
+							<div class="uni-stats-config-term">{$LNG.uni_info_fullness}</div>
+							<div class="uni-stats-config-desc uni-stats-vacancy">
+								<div class="uni-stats-capacity-row">
+									<div class="uni-stats-capacity" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{$stats.vacancy_pct}" aria-label="{$stats.vacancy_label|escape}">
+										<div class="uni-stats-capacity-bar uni-stats-capacity-bar--{$stats.vacancy_level|escape}" style="--fill: {$stats.vacancy_pct}%;"></div>
+									</div>
+									<span class="uni-stats-capacity-pct">{$stats.vacancy_pct}%</span>
+								</div>
+								<span class="uni-stats-capacity-label">{$stats.vacancy_label|escape}</span>
+							</div>
+						</div>
+						{else}
 						<div class="uni-stats-config-item uni-stats-config-item--paired">
 							<div class="uni-stats-config-term">{$LNG.uni_info_age}</div>
 							<div class="uni-stats-config-desc">{$stats.age|escape}</div>
@@ -115,6 +147,7 @@
 								<span class="uni-stats-capacity-label">{$stats.vacancy_label|escape}</span>
 							</div>
 						</div>
+						{/if}
 					</div>
 				</div>
 				<div class="uni-stats-field uni-stats-live">
@@ -209,6 +242,37 @@ document.addEventListener('DOMContentLoaded', function() {
 			showUniStats(val);
 		});
 	});
+
+	function padWipe(n) {
+		return (n < 10 ? '0' : '') + n;
+	}
+	function formatWipeCountdown(seconds) {
+		seconds = Math.max(0, Math.floor(seconds));
+		var d = Math.floor(seconds / 86400);
+		var h = Math.floor(seconds / 3600) % 24;
+		var m = Math.floor(seconds / 60) % 60;
+		var s = seconds % 60;
+		var time = padWipe(h) + {$LNG.short_hour|json} + ' ' + padWipe(m) + {$LNG.short_minute|json} + ' ' + padWipe(s) + {$LNG.short_second|json};
+		return d > 0 ? d + {$LNG.short_day|json} + ' ' + time : time;
+	}
+	function tickSeasonWipes() {
+		var now = Math.floor(Date.now() / 1000);
+		document.querySelectorAll('.uni-stats-wipe--live').forEach(function(el) {
+			var closes = parseInt(el.getAttribute('data-closes-at'), 10);
+			if (!closes) {
+				return;
+			}
+			var left = closes - now;
+			if (left <= 0) {
+				el.textContent = el.getAttribute('data-closed-label') || '';
+				el.classList.remove('uni-stats-wipe--live');
+				return;
+			}
+			el.textContent = formatWipeCountdown(left);
+		});
+	}
+	tickSeasonWipes();
+	setInterval(tickSeasonWipes, 1000);
 
 	// Init stats for current universe
 	var initSel = getActiveUniSelect();

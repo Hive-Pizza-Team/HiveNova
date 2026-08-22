@@ -3,8 +3,10 @@
 namespace HiveNova\Page\Login;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
 
 /**
@@ -44,6 +46,7 @@ class ShowIndexPage extends AbstractLoginPage
 		$universeStats	= array();
 
 		$db = Database::get();
+		$seasonService = new SeasonService(new DatabaseSeasonStore());
 
 		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
@@ -76,6 +79,7 @@ class ShowIndexPage extends AbstractLoginPage
 				(int) $uniConfig->max_system
 			);
 			$vacantSystems = calculate_universe_vacant_systems($occupiedSystems, $totalSystems);
+			$seasonPanel = $seasonService->loginPanel($uniConfig);
 
 			$universeStats[$uniId] = array(
 				'name'                => $uniConfig->uni_name,
@@ -93,6 +97,21 @@ class ShowIndexPage extends AbstractLoginPage
 				'vacancy_label'       => format_universe_vacancy_label($vacantSystems, $totalSystems),
 				'players'             => (int) $uniConfig->users_amount,
 				'fleets'              => (int) $fleetCount,
+				'seasonal'            => $seasonPanel['seasonal'],
+				'season_id'           => $seasonPanel['season_id'],
+				'season_number'       => ($seasonPanel['seasonal'] && $seasonPanel['season_id'] > 0)
+					? sprintf($LNG['uni_info_season_number'], $seasonPanel['season_id'])
+					: '',
+				'season_can_enter'    => $seasonPanel['can_enter'],
+				'closes_at'           => $seasonPanel['closes_at'],
+				'wipe_live'           => $seasonPanel['wipe_live'],
+				'wipe_urgent'         => $seasonPanel['wipe_urgent'],
+				'wipe_label'          => $seasonPanel['seasonal']
+					? format_universe_season_wipe_label($seasonPanel['status'], $seasonPanel['wipe_seconds'])
+					: '',
+				'entry_label'         => $seasonPanel['seasonal']
+					? sprintf($LNG['uni_info_entry_pizza'], $seasonPanel['entry_pizza'])
+					: '',
 			);
 		}
 

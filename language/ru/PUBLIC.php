@@ -61,6 +61,17 @@ $LNG['uni_info_reg_open']			= 'Регистрация открыта';
 $LNG['uni_info_reg_closed']			= 'Регистрация закрыта';
 $LNG['uni_info_players']			= 'Игроки';
 $LNG['uni_info_fleets']				= 'Флоты в полёте';
+$LNG['uni_info_season_badge']			= 'Краткий сезон';
+$LNG['uni_info_season_number']			= 'Сезон %s';
+$LNG['uni_info_wipe']					= 'Вайп';
+$LNG['uni_info_wipe_now']				= 'Закрывается';
+$LNG['uni_info_wipe_paying']			= 'Выплата призов';
+$LNG['uni_info_wipe_hold']				= 'Вайп отложен';
+$LNG['uni_info_wipe_starting']			= 'Скоро старт';
+$LNG['uni_info_entry']					= 'Взнос';
+$LNG['uni_info_entry_pizza']			= '%s PIZZA';
+$LNG['uni_info_season_hive']			= 'Нужен Hive';
+$LNG['uni_info_season_entries_closed']	= 'Взнос закрыт';
 
 // Кнопки
 $LNG['buttonRegister']              = 'Зарегистрироваться';

@@ -98,6 +98,42 @@ class SeasonService
 		return $this->now() < (int) ($config->season_closes_at ?? 0);
 	}
 
+	/**
+	 * Login-card facts for a universe. No store reads.
+	 *
+	 * @return array{
+	 *   seasonal: bool,
+	 *   season_id: int,
+	 *   status: string,
+	 *   can_enter: bool,
+	 *   closes_at: int,
+	 *   wipe_seconds: int,
+	 *   wipe_live: bool,
+	 *   wipe_urgent: bool,
+	 *   entry_pizza: string
+	 * }
+	 */
+	public function loginPanel(Config $config): array
+	{
+		$seasonal = $this->isSeasonal($config);
+		$status = $seasonal ? (string) ($config->season_status ?? self::STATUS_IDLE) : '';
+		$closesAt = $seasonal ? (int) ($config->season_closes_at ?? 0) : 0;
+		$remaining = $seasonal ? max(0, $closesAt - $this->now()) : 0;
+		$preclose = max(60, (int) ($config->season_preclose_seconds ?? self::DEFAULT_PRECLOSE));
+
+		return [
+			'seasonal'     => $seasonal,
+			'season_id'    => $seasonal ? (int) ($config->season_id ?? 0) : 0,
+			'status'       => $status,
+			'can_enter'    => $seasonal && $this->canEnter($config),
+			'closes_at'    => $closesAt,
+			'wipe_seconds' => $remaining,
+			'wipe_live'    => $seasonal && $status === self::STATUS_RUNNING && $remaining > 0,
+			'wipe_urgent'  => $seasonal && $status === self::STATUS_RUNNING && $remaining > 0 && $remaining <= $preclose,
+			'entry_pizza'  => $seasonal ? (string) ($config->season_entry_pizza ?? '0') : '',
+		];
+	}
+
 	public function entryMemo(int $universe, int $seasonId, int $userId): string
 	{
 		return sprintf('hn-s%d-%d-%d', $universe, $seasonId, $userId);

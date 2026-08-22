@@ -61,6 +61,17 @@ $LNG['uni_info_reg_open']			= 'Registration open';
 $LNG['uni_info_reg_closed']			= 'Registration closed';
 $LNG['uni_info_players']			= 'Players';
 $LNG['uni_info_fleets']				= 'Fleets in flight';
+$LNG['uni_info_season_badge']			= 'Short-lived';
+$LNG['uni_info_season_number']			= 'Season %s';
+$LNG['uni_info_wipe']					= 'Wipe';
+$LNG['uni_info_wipe_now']				= 'Closing now';
+$LNG['uni_info_wipe_paying']			= 'Paying prizes';
+$LNG['uni_info_wipe_hold']				= 'Wipe delayed';
+$LNG['uni_info_wipe_starting']			= 'Starting soon';
+$LNG['uni_info_entry']					= 'Entry';
+$LNG['uni_info_entry_pizza']			= '%s PIZZA';
+$LNG['uni_info_season_hive']			= 'Hive required';
+$LNG['uni_info_season_entries_closed']	= 'Entries closed';
 
 // Button
 $LNG['buttonRegister']				= 'Register!';
