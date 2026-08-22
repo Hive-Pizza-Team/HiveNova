@@ -72,7 +72,6 @@ $LNG['uni_info_wipe_hold']				= 'Reset atrasado';
 $LNG['uni_info_wipe_starting']			= 'Começa em breve';
 $LNG['uni_info_entry']					= 'Entrada';
 $LNG['uni_info_entry_pizza']			= '%s PIZZA';
-$LNG['uni_info_entry_token']			= 'Hive Engine PIZZA, not HIVE';
 $LNG['uni_info_entry_wallet']			= 'Send to';
 $LNG['uni_info_entry_note']				= 'Hive signup required. After login you get a unique memo.';
 $LNG['uni_info_season_hive']			= 'Conta Hive obrigatória';
