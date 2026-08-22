@@ -252,3 +252,9 @@ $LNG['sys_expe_depleted_max_2'] = 'Eintrag aus dem Offizierstagebuch: Wenn das s
 $LNG['sys_expe_depleted_max_3'] = 'Offizierstagebuch-Eintrag: Vielleicht wäre es sinnvoller, hier einen Souvenirshop zu eröffnen als noch eine Expedition zu schicken.';
 $LNG['type_mission_16'] = 'Handel';
 $LNG['type_mission_17'] = 'Übertrag';
+
+$LNG['fl_expedition_stance'] = 'Expedition stance';
+$LNG['fl_stance_cautious'] = 'Cautious';
+$LNG['fl_stance_balanced'] = 'Balanced';
+$LNG['fl_stance_aggressive'] = 'Aggressive';
+$LNG['fl_invalid_stance'] = 'Invalid expedition stance';

@@ -116,6 +116,13 @@ class MissionCaseTransport extends MissionFunctions implements Mission
 			}
 
 			$this->StoreGoodsToPlanet();
+			\HiveNova\Core\DirectiveHooks::afterTransport(
+				(int) $this->_fleet['fleet_owner'],
+				(int) $this->_fleet['fleet_resource_metal'],
+				(int) $this->_fleet['fleet_resource_crystal'],
+				(int) $this->_fleet['fleet_resource_deuterium'],
+				(int) $this->_fleet['fleet_universe']
+			);
 		}
 
 		/**

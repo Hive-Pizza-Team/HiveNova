@@ -1534,3 +1534,7 @@ $LNG['se_hive_inactive_memo_amount'] = 'Transfer amount';
 $LNG['se_hive_inactive_memo_asset'] = 'Asset';
 $LNG['se_hive_inactive_memo_active_key'] = 'Active key';
 $LNG['se_hive_inactive_memo_active_key_info'] = 'Leave blank to keep the stored key. The key is never shown again.';
+
+$LNG['modul_44'] = 'Mission - Trade';
+$LNG['modul_45'] = 'Mission - Transfer';
+$LNG['modul_48'] = 'Commander';

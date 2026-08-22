@@ -596,11 +596,31 @@ class FleetFunctions
 		return $Count['state'] >= BASH_COUNT;
 	}
 
+	/**
+	 * @param mixed $fleetMeta
+	 */
+	public static function encodeFleetMeta($fleetMeta): ?string
+	{
+		if ($fleetMeta === null || $fleetMeta === '') {
+			return null;
+		}
+		if (is_string($fleetMeta)) {
+			json_decode($fleetMeta, true);
+			return json_last_error() === JSON_ERROR_NONE ? $fleetMeta : null;
+		}
+		if (!is_array($fleetMeta)) {
+			return null;
+		}
+		$encoded = json_encode($fleetMeta);
+
+		return $encoded === false ? null : $encoded;
+	}
+
 	public static function sendFleet($fleetArray, $fleetMission, $fleetStartOwner, $fleetStartPlanetID,
 		$fleetStartPlanetGalaxy, $fleetStartPlanetSystem, $fleetStartPlanetPlanet, $fleetStartPlanetType,
 		$fleetTargetOwner, $fleetTargetPlanetID, $fleetTargetPlanetGalaxy, $fleetTargetPlanetSystem,
 		$fleetTargetPlanetPlanet, $fleetTargetPlanetType, $fleetResource, $fleetStartTime, $fleetStayTime,
-		$fleetEndTime, $fleetGroup = 0, $missileTarget = 0, $fleetNoMReturn = 0, $consumption = 0, $universe = null)
+		$fleetEndTime, $fleetGroup = 0, $missileTarget = 0, $fleetNoMReturn = 0, $consumption = 0, $universe = null, $fleetMeta = null)
 	{
 		global $resource;
 		$fleetShipCount	= array_sum($fleetArray);
@@ -655,7 +675,10 @@ class FleetFunctions
 		fleet_no_m_return = :fleetNoMReturn,
 		fleet_group					= :fleetGroup,
 		fleet_target_obj			= :missileTarget,
-		start_time					= :timestamp;';
+		start_time					= :timestamp,
+		fleet_meta					= :fleetMeta;';
+
+		$metaJson = self::encodeFleetMeta($fleetMeta);
 
 		$db->insert($sql, array(
 			':fleetStartOwner'			=> $fleetStartOwner,
@@ -684,6 +707,7 @@ class FleetFunctions
 			':missileTarget'			=> $missileTarget,
 			':timestamp'				=> TIMESTAMP,
 			':universe'	   				=> $universe ?? Universe::current(),
+			':fleetMeta'				=> $metaJson,
 		));
 
 		$fleetId	= $db->lastInsertId();
@@ -721,7 +745,8 @@ class FleetFunctions
 		fleet_no_m_return = :fleetNoMReturn,
 		fleet_group					= :fleetGroup,
 		fleet_target_obj			= :missileTarget,
-		start_time					= :timestamp;';
+		start_time					= :timestamp,
+		fleet_meta					= :fleetMeta;';
 
 		$db->insert($sql, array(
 			':fleetId'					=> $fleetId,
@@ -751,6 +776,7 @@ class FleetFunctions
 			':missileTarget'			=> $missileTarget,
 			':timestamp'				=> TIMESTAMP,
 			':universe'	   				=> $universe ?? Universe::current(),
+			':fleetMeta'				=> $metaJson,
 		));
 
 		FrequentLocationService::tryRecordFromFleet(

@@ -347,6 +347,7 @@ class FakeDatabase implements DatabaseInterface
                 'fleet_mess' => FLEET_OUTWARD,
                 'fleet_universe' => (int) ($params[':universe'] ?? 1),
                 'start_time' => (int) ($params[':timestamp'] ?? TIMESTAMP),
+                'fleet_meta' => $params[':fleetMeta'] ?? null,
             ];
             return true;
         }

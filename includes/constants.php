@@ -275,7 +275,7 @@ define('ENABLE_SIMULATOR_LINK'		, true);
 // MODULE_AMOUNT must equal the highest module ID + 1.
 // =============================================================================
 
-define('MODULE_AMOUNT'				, 48);
+define('MODULE_AMOUNT'				, 49);
 define('MODULE_ALLIANCE'			, 0);
 define('MODULE_MISSION_ATTACK'		, 1);
 define('MODULE_BUILDING'			, 2);
@@ -323,6 +323,7 @@ define('MODULE_MISSION_TRADE'		, 44);
 define('MODULE_MISSION_TRANSFER'	, 45);
 define('MODULE_ACHIEVEMENTS'		, 46);
 define('MODULE_MISSION_SALVAGE'		, 47);
+define('MODULE_COMMANDER'			, 48);
 
 define('PVE_ONLINE_WINDOW'			, 900);
 define('PVE_SPAWN_BASE'				, 2);

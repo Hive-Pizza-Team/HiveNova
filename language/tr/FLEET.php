@@ -243,3 +243,9 @@ $LNG['sys_expe_depleted_max_3'] = 'Haberleşme subayının gemi günlüğü giri
 $LNG['sys_trade_mess_back'] = 'Ticaret filosunuzdan biri %s %s gezegenine başarısız şekilde geri dönüyor.';
 $LNG['type_mission_16'] = 'Ticaret';
 $LNG['type_mission_17'] = 'Transfer';
+
+$LNG['fl_expedition_stance'] = 'Expedition stance';
+$LNG['fl_stance_cautious'] = 'Cautious';
+$LNG['fl_stance_balanced'] = 'Balanced';
+$LNG['fl_stance_aggressive'] = 'Aggressive';
+$LNG['fl_invalid_stance'] = 'Invalid expedition stance';

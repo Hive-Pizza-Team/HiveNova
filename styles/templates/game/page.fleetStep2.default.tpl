@@ -121,6 +121,18 @@
 			</td>
 		</tr>
 		{/if}
+		{if $showExpeditionStance}
+		<tr style="height:20px;">
+			<th>{$LNG.fl_expedition_stance}</th>
+		</tr>
+		<tr style="height:20px;">
+			<td>
+				<label><input type="radio" name="expedition_stance" value="cautious"> {$LNG.fl_stance_cautious}</label>
+				<label><input type="radio" name="expedition_stance" value="balanced" checked="checked"> {$LNG.fl_stance_balanced}</label>
+				<label><input type="radio" name="expedition_stance" value="aggressive"> {$LNG.fl_stance_aggressive}</label>
+			</td>
+		</tr>
+		{/if}
         <tr style="height:20px;">
         	<td colspan="2"><input value="{$LNG.fl_continue}" type="submit" /></td>
         </tr>

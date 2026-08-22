@@ -239,3 +239,9 @@ $LNG['type_planet_short_3']  				= 'L';
 $LNG['type_planet_1']  						= 'Planeta';
 $LNG['type_planet_2']  						= 'Escombros';
 $LNG['type_planet_3']  						= 'Luna';
+
+$LNG['fl_expedition_stance'] = 'Expedition stance';
+$LNG['fl_stance_cautious'] = 'Cautious';
+$LNG['fl_stance_balanced'] = 'Balanced';
+$LNG['fl_stance_aggressive'] = 'Aggressive';
+$LNG['fl_invalid_stance'] = 'Invalid expedition stance';

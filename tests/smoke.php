@@ -262,6 +262,23 @@ if ($curlErr) {
     $pass++;
 }
 
+echo "[ JSON ] commanderAjax      ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/game.php?page=commanderAjax&mode=status&ajax=1", $cookieFile);
+$commander = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status >= 400) {
+    echo "FAIL HTTP $status\n";
+    $fail++;
+} elseif (!is_array($commander) || !array_key_exists('ok', $commander)) {
+    echo "FAIL expected JSON {ok:...}\n";
+    $fail++;
+} else {
+    echo "OK (enabled=" . (!empty($commander['enabled']) ? '1' : '0') . ")\n";
+    $pass++;
+}
+
 echo "[ JSON ] eventFirehose      ";
 [$status, $body, $curlErr] = curl_get("$baseUrl/game.php?page=eventFirehose&ajax=1", $cookieFile);
 $feed = is_string($body) ? json_decode($body, true) : null;
