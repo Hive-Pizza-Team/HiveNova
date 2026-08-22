@@ -7,18 +7,22 @@ use HiveNova\Core\Database;
 class MessageRepository
 {
     /**
-     * Combat/expedition title class. Win mail still embeds raportLose on the
-     * opponent's loss line, so a bare "%raportLose%" matches every non-draw.
+     * Combat/expedition unit-loss line (fleet + defenses).
+     *
+     * Matches a non-zero attacker or defender loss inside a raportWin/Lose/Draw
+     * span. Resource steal/debris use reportSteal/reportDebris (or raportSteal
+     * on expedition mail), so they do not match. pretty_number may emit a bare
+     * EU-formatted digit or wrap it in an ln span.
      */
-    public const LOST_COMBAT_TITLE_LIKE = '%target="_blank"><span class="raportLose">%';
+    public const COMBAT_UNIT_LOSS_REGEXP = 'class="raport(Win|Lose|Draw)">[^<]*: ((<span class=\'ln\' data-n=\'[1-9][0-9]*\'>)|[1-9])';
 
     public const LOST_SPY_LIKE = '%spyReportLost%';
 
     /**
-     * Extra WHERE fragment for the lost-battle / lost-spy list filter.
+     * Extra WHERE fragment for the unit-loss / lost-spy list filter.
      *
-     * Combat and expedition reports mark the player's own result on the
-     * report-link title. Spy reports that lose probes use spyReportLost.
+     * Combat and expedition reports match when either side lost fleet or
+     * defense units. Spy reports that lose probes use spyReportLost.
      *
      * @return array{sql: string, params: array<string, string>}
      */
@@ -30,28 +34,37 @@ class MessageRepository
 
         if ($category === 100) {
             return [
-                'sql'    => ' AND (message_text LIKE :lostNeedle OR message_text LIKE :lostNeedleSpy)',
+                'sql'    => ' AND (message_text REGEXP :lostNeedle OR message_text LIKE :lostNeedleSpy)',
                 'params' => [
-                    ':lostNeedle'    => self::LOST_COMBAT_TITLE_LIKE,
+                    ':lostNeedle'    => self::COMBAT_UNIT_LOSS_REGEXP,
                     ':lostNeedleSpy' => self::LOST_SPY_LIKE,
                 ],
             ];
         }
 
-        $pattern = match ($category) {
-            0 => self::LOST_SPY_LIKE,
-            3, 15 => self::LOST_COMBAT_TITLE_LIKE,
-            default => null,
-        };
-
-        if ($pattern === null) {
-            return ['sql' => '', 'params' => []];
+        if ($category === 0) {
+            return [
+                'sql'    => ' AND message_text LIKE :lostNeedle',
+                'params' => [':lostNeedle' => self::LOST_SPY_LIKE],
+            ];
         }
 
-        return [
-            'sql'    => ' AND message_text LIKE :lostNeedle',
-            'params' => [':lostNeedle' => $pattern],
-        ];
+        if ($category === 3 || $category === 15) {
+            return [
+                'sql'    => ' AND message_text REGEXP :lostNeedle',
+                'params' => [':lostNeedle' => self::COMBAT_UNIT_LOSS_REGEXP],
+            ];
+        }
+
+        return ['sql' => '', 'params' => []];
+    }
+
+    /**
+     * Whether stored combat-mail HTML reports any fleet or defense losses.
+     */
+    public static function combatMessageHasUnitLosses(string $html): bool
+    {
+        return preg_match('/' . self::COMBAT_UNIT_LOSS_REGEXP . '/', $html) === 1;
     }
 
     /**
