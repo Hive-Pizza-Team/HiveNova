@@ -24,7 +24,7 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
  
-if ($USER['authlevel'] != AUTH_ADM || ($_GET['sid'] ?? '') != session_id())
+if ($USER['authlevel'] != AUTH_ADM || HTTP::_GP('sid', '') != session_id())
 {
 	throw new Exception("Permission error!");
 }
@@ -36,7 +36,7 @@ function ShowUniversePage() {
 	$action		= HTTP::_GP('action', '');
 	$universe	= HTTP::_GP('uniID', 0);
 	
-	if ($_POST) {
+	if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 		switch($action)
 		{
 			case 'open':

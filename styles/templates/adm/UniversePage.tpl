@@ -23,9 +23,37 @@
 		<td>{$uniRow.planet|number}</td>
 		<td>{$uniRow.inactive|number}</td>
 		<td>{if $uniRow.game_disable == 1}<span style="color:lime;">{$LNG.uvs_on}</span>{else}<span style="color:red;">{$LNG.uvs_off}</span>{/if}</td>
-		<td>{if $uniRow.game_disable == 1}<a href="?page=universe&amp;action=closed&amp;uniID={$uniID}&amp;sid={$SID}&amp;reload=t"><img src="styles/resource/images/icons/closed.png" alt=""></a>{else}<a href="?page=universe&amp;action=open&amp;uniID={$uniID}&amp;sid={$SID}&amp;reload=t"><img src="styles/resource/images/icons/open.png" alt=""></a>{/if}{if $uniID != $smarty.const.ROOT_UNI}<a href="?page=universe&amp;action=delete&amp;uniID={$uniID}&amp;sid={$SID}&amp;reload=t" onclick="return confirm('{$LNG.uvs_delete}');" title="{$LNG.uvs_delete}"><img src="styles/resource/images/false.png" alt=""></a>{/if}</td>
+		<td>
+			{if $uniRow.game_disable == 1}
+			<form action="?page=universe&amp;sid={$SID}&amp;reload=t" method="post" style="display:inline;">
+				<input type="hidden" name="action" value="closed">
+				<input type="hidden" name="uniID" value="{$uniID}">
+				<button type="submit" style="background:none;border:0;padding:0;cursor:pointer;"><img src="styles/resource/images/icons/closed.png" alt=""></button>
+			</form>
+			{else}
+			<form action="?page=universe&amp;sid={$SID}&amp;reload=t" method="post" style="display:inline;">
+				<input type="hidden" name="action" value="open">
+				<input type="hidden" name="uniID" value="{$uniID}">
+				<button type="submit" style="background:none;border:0;padding:0;cursor:pointer;"><img src="styles/resource/images/icons/open.png" alt=""></button>
+			</form>
+			{/if}
+			{if $uniID != $smarty.const.ROOT_UNI}
+			<form action="?page=universe&amp;sid={$SID}&amp;reload=t" method="post" style="display:inline;" onsubmit="return confirm('{$LNG.uvs_delete}');">
+				<input type="hidden" name="action" value="delete">
+				<input type="hidden" name="uniID" value="{$uniID}">
+				<button type="submit" title="{$LNG.uvs_delete}" style="background:none;border:0;padding:0;cursor:pointer;"><img src="styles/resource/images/false.png" alt=""></button>
+			</form>
+			{/if}
+		</td>
 	</tr>
 	{/foreach}
-	<tr><td colspan="12"><a href="?page=universe&action=create&amp;sid={$SID}&amp;reload=t">{$LNG.uvs_new}</a></td></tr>
+	<tr>
+		<td colspan="12">
+			<form action="?page=universe&amp;sid={$SID}&amp;reload=t" method="post">
+				<input type="hidden" name="action" value="create">
+				<input type="submit" value="{$LNG.uvs_new}">
+			</form>
+		</td>
+	</tr>
 </table>
 {include file="overall_footer.tpl"}
