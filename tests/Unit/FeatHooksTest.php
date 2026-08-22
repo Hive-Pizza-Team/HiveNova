@@ -16,10 +16,18 @@ class FeatHooksTest extends TestCase
 
     private FakeDatabase $fake;
 
+    /** @var mixed */
+    private $savedReslist;
+
+    /** @var mixed */
+    private $savedResource;
+
     protected function setUp(): void
     {
         $this->fake = new FakeDatabase();
         $this->swapDatabaseInstance($this->fake);
+        $this->savedReslist = $GLOBALS['reslist'] ?? null;
+        $this->savedResource = $GLOBALS['resource'] ?? null;
         $GLOBALS['reslist'] = [
             'fleet'   => [202, 204, FeatCatalog::DEATHSTAR_ID],
             'defense' => [401, 402],
@@ -39,6 +47,16 @@ class FeatHooksTest extends TestCase
 
     protected function tearDown(): void
     {
+        if (is_array($this->savedReslist)) {
+            $GLOBALS['reslist'] = $this->savedReslist;
+        } else {
+            unset($GLOBALS['reslist']);
+        }
+        if (is_array($this->savedResource)) {
+            $GLOBALS['resource'] = $this->savedResource;
+        } else {
+            unset($GLOBALS['resource']);
+        }
         $this->restoreDatabaseInstance();
         parent::tearDown();
     }
