@@ -10,6 +10,8 @@ class EventFirehoseWriter
 
 	public const EVENT_MOON = 'moon';
 
+	public const EVENT_FEAT = 'feat';
+
 	public const SIZE_SMALL = 'small';
 
 	public const SIZE_MEDIUM = 'medium';
@@ -83,6 +85,17 @@ class EventFirehoseWriter
 			$time,
 			self::EVENT_MOON,
 			self::moonSizeBucket($diameter),
+			self::OUTCOME_FORMED
+		);
+	}
+
+	public static function recordFeat(int $universe, int $time): void
+	{
+		self::insert(
+			$universe,
+			$time,
+			self::EVENT_FEAT,
+			self::SIZE_SMALL,
 			self::OUTCOME_FORMED
 		);
 	}

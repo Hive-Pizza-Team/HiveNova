@@ -78,6 +78,12 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public bool $cronjobLockCleared = false;
 
+    /** @var array<string, array{status: string, winner_id: int, claimed_at: int}> */
+    public array $featStates = [];
+
+    /** @var array<string, array{user_id: int, claimed_at: int}> */
+    public array $featClaims = [];
+
     /** @var list<array<string, mixed>> */
     public array $cronjobRows = [
         ['cronjobID' => 12, 'min' => '0', 'hours' => '0', 'dom' => '*', 'month' => '*', 'dow' => '*'],
@@ -207,11 +213,76 @@ class FakeAchievementDatabase implements DatabaseInterface
             return $this->cronjobRows;
         }
 
+        if (str_contains($qry, 'FROM %%FEAT_STATES%%') && str_contains($qry, 'SELECT s.feat_key')) {
+            $universe = (int) ($params[':universe'] ?? 0);
+            $rows = [];
+            foreach ($this->featStates as $compound => $state) {
+                if (!str_starts_with($compound, $universe . ':')) {
+                    continue;
+                }
+                $key = substr($compound, strlen((string) $universe) + 1);
+                $userId = (int) $state['winner_id'];
+                $rows[] = [
+                    'feat_key'   => $key,
+                    'status'     => $state['status'],
+                    'winner_id'  => $userId,
+                    'claimed_at' => $state['claimed_at'],
+                    'username'   => $this->users[$userId]['username'] ?? '',
+                ];
+            }
+            return $rows;
+        }
+
+        if (str_contains($qry, 'FROM %%USERS%%') && str_contains($qry, 'universe =')) {
+            $universe = (int) ($params[':universe'] ?? 0);
+            $rows = [];
+            foreach ($this->users as $id => $user) {
+                if ((int) ($user['universe'] ?? 1) === $universe) {
+                    $rows[] = ['id' => $id, 'lang' => $user['lang'] ?? 'en'];
+                }
+            }
+            return $rows;
+        }
+
         return [];
     }
 
     public function selectSingle($qry, array $params = array(), $field = false)
     {
+        if (str_contains($qry, 'graviton_tech')) {
+            return 0;
+        }
+        if (str_contains($qry, 'hyperspace_tech')) {
+            return 0;
+        }
+
+        if (str_contains($qry, 'FROM %%FEAT_STATES%%') && str_contains($qry, 'COUNT(*)')) {
+            $universe = (int) ($params[':universe'] ?? 0);
+            $n = 0;
+            foreach (array_keys($this->featStates) as $compound) {
+                if (str_starts_with($compound, $universe . ':')) {
+                    $n++;
+                }
+            }
+            return $n;
+        }
+
+        if (str_contains($qry, 'FROM %%FEAT_STATES%%') && str_contains($qry, 'status')) {
+            $compound = ($params[':universe'] ?? 0) . ':' . ($params[':featKey'] ?? '');
+            $status = $this->featStates[$compound]['status'] ?? null;
+            return $field === 'status' ? $status : ($status === null ? null : ['status' => $status]);
+        }
+
+        if (str_contains($qry, 'FROM %%ACHIEVEMENTS%%') && str_contains($qry, '`key`')) {
+            $key = $params[':key'] ?? '';
+            $universe = (int) ($params[':universe'] ?? 0);
+            foreach ($this->achievementDefinitions as $def) {
+                if ($def['key'] === $key && (int) ($def['universe'] ?? 1) === $universe) {
+                    return $field === false ? $def : ($def[$field] ?? $def['id']);
+                }
+            }
+            return $field === false ? null : false;
+        }
         if (str_contains($qry, 'dbVersion') || (str_contains($qry, '%%SYSTEM%%') && str_contains($qry, 'dbVersion'))) {
             $version = $this->schemaReady ? 19 : 0;
             return $field === 'dbVersion' ? $version : ['dbVersion' => $version];
@@ -303,6 +374,51 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public function insert($qry, array $params = array())
     {
+        if (str_contains($qry, '%%FEAT_CLAIMS%%')) {
+            $compound = ($params[':universe'] ?? 0) . ':' . ($params[':featKey'] ?? '');
+            if (isset($this->featClaims[$compound])) {
+                throw new RuntimeException('duplicate feat claim');
+            }
+            $this->featClaims[$compound] = [
+                'user_id'    => (int) ($params[':userId'] ?? 0),
+                'claimed_at' => (int) ($params[':at'] ?? 0),
+            ];
+            return true;
+        }
+
+        if (str_contains($qry, '%%FEAT_STATES%%')) {
+            $compound = ($params[':universe'] ?? 0) . ':' . ($params[':featKey'] ?? '');
+            if (!isset($this->featStates[$compound])) {
+                $this->featStates[$compound] = [
+                    'status'     => (string) ($params[':status'] ?? 'unknown'),
+                    'winner_id'  => 0,
+                    'claimed_at' => 0,
+                ];
+            }
+            return true;
+        }
+
+        if (str_contains($qry, '%%ACHIEVEMENTS%%') && str_contains($qry, 'hof_only')) {
+            $this->addAchievement([
+                'id'               => count($this->achievementDefinitions) + 1,
+                'key'              => $params[':key'] ?? '',
+                'category'         => $params[':category'] ?? 'empire',
+                'name_key'         => $params[':nameKey'] ?? '',
+                'desc_key'         => $params[':descKey'] ?? '',
+                'trigger_type'     => 'universe_first',
+                'trigger_params'   => $params[':params'] ?? '{}',
+                'reward_type'      => 'none',
+                'reward_amount'    => 0,
+                'points'           => 0,
+                'celebration_tier' => 'normal',
+                'hidden'           => 0,
+                'active'           => 1,
+                'universe'         => (int) ($params[':universe'] ?? 1),
+                'hof_only'         => 1,
+            ]);
+            return true;
+        }
+
         if (str_contains($qry, 'USER_ACHIEVEMENT_PROGRESS%%')) {
             $key = $params[':userId'] . ':' . $params[':achievementId'];
             $this->progress[$key] = (int) $params[':progress'];
@@ -353,6 +469,22 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public function update($qry, array $params = array())
     {
+        if (str_contains($qry, '%%FEAT_STATES%%')) {
+            $compound = ($params[':universe'] ?? 0) . ':' . ($params[':featKey'] ?? '');
+            if (isset($this->featStates[$compound]) && ($this->featStates[$compound]['status'] ?? '') === ($params[':open'] ?? 'open')) {
+                $this->featStates[$compound] = [
+                    'status'     => (string) ($params[':status'] ?? 'claimed'),
+                    'winner_id'  => (int) ($params[':userId'] ?? 0),
+                    'claimed_at' => (int) ($params[':at'] ?? 0),
+                ];
+            }
+            return true;
+        }
+
+        if (str_contains($qry, '%%CONFIG%%')) {
+            return true;
+        }
+
         if (str_contains($qry, 'darkmatter')) {
             $this->darkmatter += (float) ($params[':amount'] ?? 0);
         }

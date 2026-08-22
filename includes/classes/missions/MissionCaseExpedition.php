@@ -721,7 +721,10 @@ HTML;
 
 		PushNotificationService::notifyExpeditionResult((int) $this->_fleet['fleet_owner'], $pendingChoice);
 
-		\HiveNova\Core\AchievementHooks::afterExpedition((int) $this->_fleet['fleet_owner']);
+		\HiveNova\Core\AchievementHooks::afterExpeditionInUniverse(
+			(int) $this->_fleet['fleet_owner'],
+			(int) $this->_fleet['fleet_universe']
+		);
 
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();

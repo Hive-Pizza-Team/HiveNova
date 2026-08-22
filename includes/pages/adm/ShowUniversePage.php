@@ -156,6 +156,10 @@ function ShowUniversePage() {
 				$newUniverse	= $GLOBALS['DATABASE']->GetInsertID();
 
 				Config::reload();
+				$newConfig = Config::get($newUniverse);
+				$newConfig->feat_tracking_from_start = 1;
+				$newConfig->save();
+				\HiveNova\Core\FeatService::seedUniverse((int) $newUniverse, true);
 
 				list($userID, $planetID) = PlayerUtil::createPlayer($newUniverse, $USER['username'], '', $USER['email'], '', $USER['lang'], 1, 1, 1, NULL, AUTH_ADM);
 				$GLOBALS['DATABASE']->query("UPDATE ".USERS." SET password = '".$USER['password']."' WHERE id = ".$userID.";");

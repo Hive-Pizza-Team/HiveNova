@@ -288,6 +288,11 @@ CREATE TABLE `%PREFIX%config` (
   `hive_inactive_memo_amount` decimal(10,3) unsigned NOT NULL DEFAULT '0.003',
   `hive_social_memo_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `hive_social_memo_memo_key` varchar(80) NOT NULL DEFAULT '',
+  `feat_tracking_from_start` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `discord_feat_webhook` varchar(512) NOT NULL DEFAULT '',
+  `feat_banner_key` varchar(64) NOT NULL DEFAULT '',
+  `feat_banner_user_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `feat_banner_at` int(11) NOT NULL DEFAULT '0',
   `silo_factor` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/London',
   `dst` enum('0','1','2') NOT NULL DEFAULT '2',
@@ -1580,9 +1585,28 @@ CREATE TABLE `%PREFIX%achievements` (
   `reward_amount` double(50,0) NOT NULL DEFAULT '0',
   `points` smallint(5) unsigned NOT NULL DEFAULT '10',
   `celebration_tier` varchar(16) NOT NULL DEFAULT 'normal',
+  `hof_only` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `universe_key` (`universe`, `key`),
   KEY `trigger_type` (`trigger_type`, `active`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `%PREFIX%feat_states` (
+  `universe` tinyint(3) unsigned NOT NULL,
+  `feat_key` varchar(64) NOT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'unknown',
+  `winner_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `claimed_at` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`universe`, `feat_key`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `%PREFIX%feat_claims` (
+  `universe` tinyint(3) unsigned NOT NULL,
+  `feat_key` varchar(64) NOT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `claimed_at` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`universe`, `feat_key`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%user_achievement_progress` (

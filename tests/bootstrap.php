@@ -1,6 +1,11 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+$loader = require __DIR__ . '/../vendor/autoload.php';
+if ($loader instanceof \Composer\Autoload\ClassLoader) {
+    $loader->setPsr4('HiveNova\\Core\\', [dirname(__DIR__) . '/includes/classes/']);
+    $loader->setPsr4('HiveNova\\Mission\\', [dirname(__DIR__) . '/includes/classes/missions/']);
+    $loader->setPsr4('HiveNova\\Page\\Game\\', [dirname(__DIR__) . '/includes/pages/game/']);
+}
 
 if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(__DIR__) . '/');

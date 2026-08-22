@@ -43,6 +43,13 @@
 	<td><input name="forum_url" size="60" maxlength="254" value="{$forum_url}" type="text"></td>
 	<td>&nbsp;</td>
 </tr><tr>
+	<td>{$se_feat_discord_webhook}<br><small>{$se_feat_discord_webhook_hint}</small></td>
+	<td>
+		<input name="discord_feat_webhook" size="60" maxlength="512" value="" type="text" placeholder="https://discord.com/api/webhooks/...">
+		<br><label><input name="discord_feat_webhook_clear" type="checkbox"> Clear webhook</label>
+	</td>
+	<td>&nbsp;</td>
+</tr><tr>
 	<td>{$se_server_op_close}<br></td>
 	<td><input name="closed"{if $game_disable == '1'} checked="checked"{/if} type="checkbox"></td>
 	<td>&nbsp;</td>

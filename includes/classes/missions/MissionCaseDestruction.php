@@ -419,6 +419,10 @@ HTML;
 					PlayerUtil::deletePlanet($targetPlanet['id']);
 
 					$reportInfo['moonDestroySuccess'] = 1;
+					\HiveNova\Core\FeatHooks::afterMoonDestroyed(
+						(int) $this->_fleet['fleet_universe'],
+						(int) $this->_fleet['fleet_owner']
+					);
 				} else {
 					$reportInfo['moonDestroySuccess'] = 0;
 				}
@@ -625,7 +629,17 @@ HTML;
 			':destroyedUnits'	=> $combatResult['unitLost']['attacker']
 		));
 
-		\HiveNova\Core\AchievementHooks::afterCombat($userAttack, $userDefend, $attackStatus, $defendStatus);
+		\HiveNova\Core\AchievementHooks::afterCombatWithFeats(
+			$userAttack,
+			$userDefend,
+			$attackStatus,
+			$defendStatus,
+			(int) $this->_fleet['fleet_universe'],
+			\HiveNova\Core\FeatHooks::attackerShipCount((string) ($this->_fleet['fleet_array'] ?? '')),
+			\HiveNova\Core\FeatHooks::planetDefenseCount($targetPlanet),
+			\HiveNova\Core\FeatHooks::fleetHasDeathstar((string) ($this->_fleet['fleet_array'] ?? '')),
+			\HiveNova\Core\FeatHooks::planetHasDeathstar($targetPlanet)
+		);
 
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();

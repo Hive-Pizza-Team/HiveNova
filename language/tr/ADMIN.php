@@ -1571,3 +1571,6 @@ $LNG['se_hive_social_memo_memo_key_info'] = 'Private memo key for the game Hive 
 $LNG['modul_44'] = 'Mission - Trade';
 $LNG['modul_45'] = 'Mission - Transfer';
 $LNG['modul_48'] = 'Commander';
+$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
+$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements.';
+

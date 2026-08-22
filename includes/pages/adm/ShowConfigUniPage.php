@@ -117,6 +117,15 @@ function ShowConfigUniPage()
 		$close_reason			= HTTP::_GP('close_reason', '', true);
 		$uni_name				= HTTP::_GP('uni_name', '', true);
 		$forum_url 				= HTTP::_GP('forum_url', '', true);
+		$discordFeatRaw			= HTTP::_GP('discord_feat_webhook', '', true);
+		if (isset($_POST['discord_feat_webhook_clear'])) {
+			$discord_feat_webhook = '';
+		} elseif ($discordFeatRaw === '') {
+			$discord_feat_webhook = (string) ($config->discord_feat_webhook ?? '');
+		} else {
+			$normalized = \HiveNova\Core\DiscordWebhookService::normalizeUrl($discordFeatRaw);
+			$discord_feat_webhook = $normalized ?? (string) ($config->discord_feat_webhook ?? '');
+		}
 		$game_speed 			= (2500 * HTTP::_GP('game_speed', 0.0));
 		$fleet_speed 			= (2500 * HTTP::_GP('fleet_speed', 0.0));
 		$resource_multiplier	= HTTP::_GP('resource_multiplier', 0.0);
@@ -225,6 +234,7 @@ function ShowConfigUniPage()
 			'OverviewNewsText'		=> $OverviewNewsText,
 			'uni_name'				=> $uni_name,
 			'forum_url'				=> $forum_url,
+			'discord_feat_webhook'	=> $discord_feat_webhook,
 			'game_speed'			=> $game_speed,
 			'fleet_speed'			=> $fleet_speed,
 			'resource_multiplier'	=> $resource_multiplier,
@@ -498,6 +508,9 @@ function ShowConfigUniPage()
 		'halt_speed'					=> $config->halt_speed,
 		'energySpeed'					=> $config->energySpeed,
 		'forum_url'						=> $config->forum_url,
+		'discord_feat_webhook'			=> $config->discord_feat_webhook ?? '',
+		'se_feat_discord_webhook'		=> $LNG['adm_feat_discord_webhook'] ?? 'Feats Discord webhook',
+		'se_feat_discord_webhook_hint'	=> $LNG['adm_feat_discord_webhook_hint'] ?? '',
 		'initial_fields'				=> $config->initial_fields,
 		'metal_basic_income'			=> $config->metal_basic_income,
 		'crystal_basic_income'			=> $config->crystal_basic_income,

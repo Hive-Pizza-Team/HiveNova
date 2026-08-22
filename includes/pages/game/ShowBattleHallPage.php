@@ -3,6 +3,8 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\FeatService;
+use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 
 /**
@@ -32,6 +34,26 @@ class ShowBattleHallPage extends AbstractGamePage
 	function show()
 	{
 		global $USER, $LNG;
+
+		$tab = HTTP::_GP('tab', 'battles');
+		if ($tab === 'feats') {
+			$LNG->includeData(['INGAME']);
+			$feats = FeatService::listForUniverse(Universe::current());
+			foreach ($feats as &$feat) {
+				$feat['name'] = $LNG[$feat['name_key']] ?? $feat['feat_key'];
+				$feat['date'] = $feat['claimed_at'] > 0
+					? _date($LNG['php_tdformat'], $feat['claimed_at'], $USER['timezone'])
+					: '';
+			}
+			unset($feat);
+			$this->assign([
+				'battleHallTab' => 'feats',
+				'FeatList'      => $feats,
+				'TopKBList'     => [],
+			]);
+			$this->display('page.battleHall.default.tpl');
+			return;
+		}
 
 		$db = Database::get();
 		$sql = "SELECT *, (
@@ -69,6 +91,8 @@ class ShowBattleHallPage extends AbstractGamePage
 
 		$this->assign(array(
 			'TopKBList'		=> $TopKBList,
+			'battleHallTab'	=> 'battles',
+			'FeatList'		=> [],
 		));
 
 		$this->display('page.battleHall.default.tpl');
