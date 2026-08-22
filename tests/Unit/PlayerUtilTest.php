@@ -249,10 +249,48 @@ class PlayerUtilTest extends TestCase
         );
     }
 
+    public function testSanitizePublicMessageDecodesRepeatedHtmlEntities(): void
+    {
+        $this->assertSame("It's", PlayerUtil::sanitizePublicMessage("It's"));
+        $this->assertSame("It's", PlayerUtil::sanitizePublicMessage("It&#039;s"));
+        $this->assertSame("It's", PlayerUtil::sanitizePublicMessage("It&amp;#039;s"));
+        $this->assertSame("It's", PlayerUtil::sanitizePublicMessage("It&amp;amp;#039;s"));
+    }
+
+    public function testPublicMessageFromRequestSkipsHttpGpQuoting(): void
+    {
+        $this->assertSame("It's mine", PlayerUtil::publicMessageFromRequest([
+            'publicMessage' => "It's mine",
+        ]));
+        $this->assertSame("It's mine", PlayerUtil::publicMessageFromRequest([
+            'publicMessage' => "It&#039;s mine",
+        ]));
+        $this->assertSame('', PlayerUtil::publicMessageFromRequest([]));
+        $this->assertSame('', PlayerUtil::publicMessageFromRequest(['publicMessage' => ['x']]));
+        $this->assertSame('', PlayerUtil::publicMessageFromRequest(['publicMessage' => "\x80"]));
+    }
+
+    public function testPublicMessageFromRequestUsesRequestSuperglobal(): void
+    {
+        $_REQUEST['publicMessage'] = "It&#039;s";
+        try {
+            $this->assertSame("It's", PlayerUtil::publicMessageFromRequest());
+        } finally {
+            unset($_REQUEST['publicMessage']);
+        }
+    }
+
     public function testFormatPublicMessageHtmlEscapesAndKeepsLineBreaks(): void
     {
         $this->assertSame('', PlayerUtil::formatPublicMessageHtml(''));
         $this->assertSame("a&lt;b&gt;<br>\nc", PlayerUtil::formatPublicMessageHtml("a<b>\nc"));
+    }
+
+    public function testFormatPublicMessageHtmlDecodesStoredApostrophesOnce(): void
+    {
+        $this->assertSame("It&#039;s", PlayerUtil::formatPublicMessageHtml("It's"));
+        $this->assertSame("It&#039;s", PlayerUtil::formatPublicMessageHtml("It&#039;s"));
+        $this->assertSame("It&#039;s", PlayerUtil::formatPublicMessageHtml("It&amp;#039;s"));
     }
 
     // -------------------------------------------------------------------------
