@@ -9,16 +9,19 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/CommanderDatabaseStub.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+require_once __DIR__ . '/../Support/RestoreGameGlobals.php';
 
 class DirectiveProgressHooksTest extends TestCase
 {
 	use SwapDatabaseInstance;
+	use RestoreGameGlobals;
 
 	private CommanderDatabaseStub $db;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
+		$this->snapshotGameGlobals();
 		$this->db = new CommanderDatabaseStub();
 		$this->swapDatabaseInstance($this->db);
 		Config::setInstance(new Config([
@@ -35,9 +38,7 @@ class DirectiveProgressHooksTest extends TestCase
 
 	protected function tearDown(): void
 	{
-		$ref = new ReflectionProperty(Config::class, 'instances');
-		$ref->setAccessible(true);
-		$ref->setValue(null, []);
+		$this->restoreGameGlobals();
 		$this->restoreDatabaseInstance();
 		parent::tearDown();
 	}

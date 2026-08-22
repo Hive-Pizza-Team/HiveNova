@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/CommanderDatabaseStub.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+require_once __DIR__ . '/../Support/RestoreGameGlobals.php';
 
 final class TestableShowCommanderAjaxPage extends ShowCommanderAjaxPage
 {
@@ -30,12 +31,14 @@ final class TestableShowCommanderAjaxPage extends ShowCommanderAjaxPage
 class ShowCommanderAjaxPageTest extends TestCase
 {
 	use SwapDatabaseInstance;
+	use RestoreGameGlobals;
 
 	private CommanderDatabaseStub $db;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
+		$this->snapshotGameGlobals();
 		global $USER, $PLANET, $LNG;
 		$USER = ['id' => 4, 'universe' => 1];
 		$PLANET = ['id' => 9];
@@ -59,12 +62,7 @@ class ShowCommanderAjaxPageTest extends TestCase
 
 	protected function tearDown(): void
 	{
-		unset($GLOBALS['USER'], $GLOBALS['PLANET'], $GLOBALS['LNG']);
-		$_SESSION = [];
-		$_REQUEST = [];
-		$ref = new ReflectionProperty(Config::class, 'instances');
-		$ref->setAccessible(true);
-		$ref->setValue(null, []);
+		$this->restoreGameGlobals();
 		$this->restoreDatabaseInstance();
 		parent::tearDown();
 	}

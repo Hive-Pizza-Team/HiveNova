@@ -181,16 +181,25 @@ class PushNotificationServiceTest extends TestCase
 
 	public function testExpeditionChoicePushMentionsReview(): void
 	{
+		$previousLng = $GLOBALS['LNG'] ?? null;
 		$GLOBALS['LNG'] = [
 			'push_expedition_title' => 'Expedition complete',
 			'push_expedition_body' => 'Your expedition has returned.',
 			'push_expedition_choice_body' => 'Your expedition returned with a choice to review.',
 		];
-		$plain = PushNotificationService::expeditionResultMessage(false);
-		$choice = PushNotificationService::expeditionResultMessage(true);
-		$this->assertStringNotContainsString('choice', strtolower($plain['body']));
-		$this->assertStringContainsString('choice', strtolower($choice['body']));
-		$this->assertTrue($choice['data']['choice']);
+		try {
+			$plain = PushNotificationService::expeditionResultMessage(false);
+			$choice = PushNotificationService::expeditionResultMessage(true);
+			$this->assertStringNotContainsString('choice', strtolower($plain['body']));
+			$this->assertStringContainsString('choice', strtolower($choice['body']));
+			$this->assertTrue($choice['data']['choice']);
+		} finally {
+			if ($previousLng === null) {
+				unset($GLOBALS['LNG']);
+			} else {
+				$GLOBALS['LNG'] = $previousLng;
+			}
+		}
 	}
 
 	public function testNotifySkippedWhenNotConfigured(): void

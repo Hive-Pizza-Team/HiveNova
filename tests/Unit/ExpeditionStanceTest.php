@@ -8,16 +8,19 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/FakeDatabase.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+require_once __DIR__ . '/../Support/RestoreGameGlobals.php';
 
 class ExpeditionStanceTest extends TestCase
 {
 	use SwapDatabaseInstance;
+	use RestoreGameGlobals;
 
 	private FakeDatabase $fake;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
+		$this->snapshotGameGlobals();
 		$this->fake = new FakeDatabase();
 		$this->swapDatabaseInstance($this->fake);
 		Config::setInstance(new Config([
@@ -31,9 +34,7 @@ class ExpeditionStanceTest extends TestCase
 
 	protected function tearDown(): void
 	{
-		$ref = new ReflectionProperty(Config::class, 'instances');
-		$ref->setAccessible(true);
-		$ref->setValue(null, []);
+		$this->restoreGameGlobals();
 		$this->restoreDatabaseInstance();
 		parent::tearDown();
 	}
