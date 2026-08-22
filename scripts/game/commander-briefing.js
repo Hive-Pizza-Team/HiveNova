@@ -7,7 +7,7 @@ $(function () {
 	$(root).on('click', '.commander-briefing__toggle', function () {
 		var expanded = this.getAttribute('aria-expanded') !== 'false';
 		this.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-		$(root).find('.commander-briefing__body').toggle(!expanded);
+		root.classList.toggle('is-collapsed', expanded);
 	});
 
 	function post(mode, data) {
