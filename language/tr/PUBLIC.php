@@ -64,6 +64,17 @@ $LNG['uni_info_reg_open']			= 'Kayıt açık';
 $LNG['uni_info_reg_closed']			= 'Kayıt kapalı';
 $LNG['uni_info_players']			= 'Oyuncular';
 $LNG['uni_info_fleets']				= 'Uçuşta filolar';
+$LNG['uni_info_season_badge']			= 'Kısa ömürlü';
+$LNG['uni_info_season_number']			= 'Sezon %s';
+$LNG['uni_info_wipe']					= 'Sıfırlama';
+$LNG['uni_info_wipe_now']				= 'Kapanıyor';
+$LNG['uni_info_wipe_paying']			= 'Ödüller ödeniyor';
+$LNG['uni_info_wipe_hold']				= 'Sıfırlama gecikti';
+$LNG['uni_info_wipe_starting']			= 'Yakında';
+$LNG['uni_info_entry']					= 'Giriş';
+$LNG['uni_info_entry_pizza']			= '%s PIZZA';
+$LNG['uni_info_season_hive']			= 'Hive gerekli';
+$LNG['uni_info_season_entries_closed']	= 'Giriş kapalı';
 
 // Button
 $LNG['buttonRegister']				= 'Kayıt Ol!';

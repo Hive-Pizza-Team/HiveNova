@@ -260,6 +260,18 @@ function format_universe_age_label(int $startedAt): string
 	return sprintf($LNG['uni_info_age_days'], pretty_number($ageDays));
 }
 
+function format_universe_season_wipe_label(string $status, int $wipeSeconds): string
+{
+	global $LNG;
+
+	return match ($status) {
+		'paying'       => (string) $LNG['uni_info_wipe_paying'],
+		'payout_hold'  => (string) $LNG['uni_info_wipe_hold'],
+		'idle'         => (string) $LNG['uni_info_wipe_starting'],
+		default        => $wipeSeconds > 0 ? pretty_time($wipeSeconds) : (string) $LNG['uni_info_wipe_now'],
+	};
+}
+
 function calculate_universe_system_capacity(int $maxGalaxy, int $maxSystem): int
 {
 	// Vacancy is measured per solar system (empty vs at least one planet).

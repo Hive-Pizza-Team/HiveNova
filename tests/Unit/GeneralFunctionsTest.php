@@ -284,6 +284,10 @@ class GeneralFunctionsTest extends TestCase
             'uni_info_age_one_day' => '1 day',
             'uni_info_age_days'    => '%s days',
             'uni_info_fullness_format' => '%s / %s systems vacant',
+            'uni_info_wipe_now'    => 'Closing now',
+            'uni_info_wipe_paying' => 'Paying prizes',
+            'uni_info_wipe_hold'   => 'Wipe delayed',
+            'uni_info_wipe_starting' => 'Starting soon',
         ];
     }
 
@@ -393,6 +397,19 @@ class GeneralFunctionsTest extends TestCase
     public function testFormatUniverseAgeLabelReturnsDayCount(): void
     {
         $this->assertSame('5 days', format_universe_age_label(TIMESTAMP - (5 * 86400)));
+    }
+
+    public function testFormatUniverseSeasonWipeLabelUsesPrettyTimeWhileRunning(): void
+    {
+        $this->assertSame('01h 00m 00s', format_universe_season_wipe_label('running', 3600));
+    }
+
+    public function testFormatUniverseSeasonWipeLabelUsesStatusCopy(): void
+    {
+        $this->assertSame('Paying prizes', format_universe_season_wipe_label('paying', 0));
+        $this->assertSame('Wipe delayed', format_universe_season_wipe_label('payout_hold', 99));
+        $this->assertSame('Starting soon', format_universe_season_wipe_label('idle', 0));
+        $this->assertSame('Closing now', format_universe_season_wipe_label('running', 0));
     }
 
     // -------------------------------------------------------------------------

@@ -390,4 +390,45 @@ class SeasonServiceTest extends TestCase
 		$sum = array_sum(array_column($out, 'pizza_amount'));
 		$this->assertEqualsWithDelta(1.000, $sum, 0.0001);
 	}
+
+	public function testLoginPanelIsEmptyForLongRunningUniverse(): void
+	{
+		$panel = $this->service()->loginPanel($this->makeConfig(['season_mode' => 0]));
+		$this->assertFalse($panel['seasonal']);
+		$this->assertFalse($panel['wipe_live']);
+		$this->assertSame('', $panel['entry_pizza']);
+		$this->assertSame(0, $panel['season_id']);
+	}
+
+	public function testLoginPanelShowsLiveWipeCountdownWhileRunning(): void
+	{
+		$panel = $this->service()->loginPanel($this->makeConfig());
+		$this->assertTrue($panel['seasonal']);
+		$this->assertTrue($panel['can_enter']);
+		$this->assertTrue($panel['wipe_live']);
+		$this->assertFalse($panel['wipe_urgent']);
+		$this->assertSame(1, $panel['season_id']);
+		$this->assertSame(604800, $panel['wipe_seconds']);
+		$this->assertSame('1.000', $panel['entry_pizza']);
+	}
+
+	public function testLoginPanelMarksWipeUrgentInsidePrecloseWindow(): void
+	{
+		$panel = $this->service($this->now + 604800 - 3600)->loginPanel($this->makeConfig());
+		$this->assertTrue($panel['wipe_live']);
+		$this->assertTrue($panel['wipe_urgent']);
+		$this->assertSame(3600, $panel['wipe_seconds']);
+	}
+
+	public function testLoginPanelStopsCountdownAfterClose(): void
+	{
+		$panel = $this->service()->loginPanel($this->makeConfig([
+			'season_status' => SeasonService::STATUS_PAYING,
+			'season_closes_at' => $this->now - 10,
+		]));
+		$this->assertFalse($panel['can_enter']);
+		$this->assertFalse($panel['wipe_live']);
+		$this->assertSame(SeasonService::STATUS_PAYING, $panel['status']);
+		$this->assertSame(0, $panel['wipe_seconds']);
+	}
 }
