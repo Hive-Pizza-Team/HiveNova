@@ -1214,6 +1214,7 @@ $LNG['uvs_upload'] = 'Upload';
 $LNG['uvs_error'] = 'Failed to import the file';
 $LNG['uvs_reload'] = 'Reloading';
 $LNG['uvs_back'] = 'Back';
+$LNG['uvs_create_anyway'] = 'Create universe anyway';
 
 
 // Página de actualização
