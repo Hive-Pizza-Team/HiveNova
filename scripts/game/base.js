@@ -266,12 +266,43 @@ var Dialog	= {
 	}
 }
 
+function showGameToast(text, className, durationMs) {
+	var tip = $('#tooltip');
+	if (!tip.length) {
+		return;
+	}
+	var extra = className || 'notify-toast';
+	var isError = extra.indexOf('notify-error') !== -1;
+	tip.stop(true, true);
+	tip.text(String(text == null ? '' : text))
+		.removeClass('tooltip-mobile-active tooltip_sticky_div notify notify-error notify-toast notify-success')
+		.addClass('notify ' + extra)
+		.css({
+			position: 'fixed',
+			top: isError ? '50%' : 'auto',
+			left: '50%',
+			right: 'auto',
+			bottom: isError ? 'auto' : 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)',
+			transform: isError ? 'translate(-50%, -50%)' : 'translateX(-50%)',
+			zIndex: 400,
+			maxWidth: 'calc(100vw - 32px)',
+			textAlign: 'center'
+		})
+		.show();
+	window.setTimeout(function () {
+		tip.fadeOut(400, function () {
+			tip.removeClass('notify notify-error notify-toast notify-success').css({
+				transform: '',
+				zIndex: '',
+				bottom: '',
+				top: ''
+			});
+		});
+	}, durationMs || 2500);
+}
+
 function NotifyBox(text) {
-	tip = $('#tooltip')
-	tip.html(text).addClass('notify').css({
-		left : (($(window).width() - $('#leftmenu').width()) / 2 - tip.outerWidth() / 2) + $('#leftmenu').width(),
-	}).show();
-	window.setTimeout(function(){tip.fadeOut(1000, function() {tip.removeClass('notify')})}, 500);
+	showGameToast(text, 'notify-toast', 2500);
 }
 
 
