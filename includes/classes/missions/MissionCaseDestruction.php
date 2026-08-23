@@ -148,7 +148,7 @@ HTML;
 		$targetFleetsResult = $db->select($sql, array(
 			':mission'		=> 5,
 			':fleetEndId'	=> $this->_fleet['fleet_end_id'],
-			':timeStamp'	=> TIMESTAMP
+			':timeStamp'	=> $this->_fleet['fleet_start_time']
 		));
 
 		foreach($targetFleetsResult as $fleetDetail)

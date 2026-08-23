@@ -33,4 +33,17 @@ class CalculateMIPAttackTest extends TestCase
 
         $this->assertSame($without, $withLaser);
     }
+
+    public function testHigherArmourTechReducesDestroyedCount(): void
+    {
+        $GLOBALS['pricelist'][401]['cost'] = [901 => 2000, 902 => 0];
+        $GLOBALS['CombatCaps'][503]['attack'] = 12000;
+
+        $noArmour = calculateMIPAttack(0, 0, 1, [401 => 100], 401, 0);
+        $armour = calculateMIPAttack(10, 0, 1, [401 => 100], 401, 0);
+
+        $this->assertArrayHasKey(401, $noArmour);
+        $this->assertArrayHasKey(401, $armour);
+        $this->assertLessThan($noArmour[401], $armour[401]);
+    }
 }

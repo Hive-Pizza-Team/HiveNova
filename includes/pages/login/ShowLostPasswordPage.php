@@ -85,6 +85,13 @@ class ShowLostPasswordPage extends AbstractLoginPage
 
 		$config			= Config::get($userData['universe']);
 
+		if(empty($config->smtp_host)) {
+			$this->printMessage($LNG['passwordResetMailRequired'] ?? $LNG['passwordValidInValid'], array(array(
+				'label'	=> $LNG['passwordBack'],
+				'url'	=> 'index.php',
+			)));
+		}
+
 		$MailRAW		= $LNG->getTemplate('email_lost_password_changed');
 		$MailContent	= str_replace(array(
 			'{USERNAME}',
@@ -104,16 +111,8 @@ class ShowLostPasswordPage extends AbstractLoginPage
 			':newPassword'	=> PlayerUtil::cryptPassword($newPassword)
 		));
 
-		if(!empty($config->smtp_host)) {
-			
-			$subject	= sprintf($LNG['passwordChangedMailTitle'], $config->game_name);
-			Mail::send($userData['mail'], $userData['username'], $subject, $MailContent);
-		} else {
-			$this->printMessage(nl2br($MailContent), array(array(
-				'label'	=> $LNG['passwordNext'],
-				'url'	=> 'index.php',
-			)));
-		}
+		$subject	= sprintf($LNG['passwordChangedMailTitle'], $config->game_name);
+		Mail::send($userData['mail'], $userData['username'], $subject, $MailContent);
 
 		$sql = "UPDATE %%LOSTPASSWORD%% SET hasChanged = 1 WHERE userID = :userID AND `key` = :validationKey;";
 		$db->update($sql, array(
@@ -211,14 +210,15 @@ class ShowLostPasswordPage extends AbstractLoginPage
 			HTTP_PATH.'index.php?page=lostPassword&mode=newPassword&u='.$userID.'&k='.$validationKey,
 		), $MailRAW);
 		
-		if(!empty($config->smtp_host)) {
-			
-			$subject	= sprintf($LNG['passwordValidMailTitle'], $config->game_name);
-			Mail::send($mail, $username, $subject, $MailContent);
-		} else {
-			$validurl = HTTP_PATH.'index.php?page=lostPassword&mode=newPassword&u='.$userID.'&k='.$validationKey;
-			echo '<meta http-equiv="refresh" content="0; url='.$validurl.'"/>';
+		if(empty($config->smtp_host)) {
+			$this->printMessage($LNG['passwordResetMailRequired'] ?? $LNG['passwordValidInValid'], array(array(
+				'label'	=> $LNG['passwordBack'],
+				'url'	=> 'index.php?page=lostPassword',
+			)));
 		}
+
+		$subject	= sprintf($LNG['passwordValidMailTitle'], $config->game_name);
+		Mail::send($mail, $username, $subject, $MailContent);
 
 		$sql = "INSERT INTO %%LOSTPASSWORD%% SET userID = :userID, `key` = :validationKey, `time` = :timestamp, fromIP = :remoteAddr;";
 		$db->insert($sql, array(

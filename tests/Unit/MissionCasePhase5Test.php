@@ -92,6 +92,7 @@ class MissionCasePhase5Test extends TestCase
         $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
         $this->assertGreaterThan(0, $mission->_fleet['fleet_resource_metal']);
         $this->assertNotEmpty($this->fake->achievement->messages);
+        $this->assertSame(0, $this->fake->transactionDepth);
     }
 
     public function test_recycling_returns_when_target_planet_is_gone(): void

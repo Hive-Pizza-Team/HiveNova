@@ -123,10 +123,12 @@ class ShowIndexPage extends AbstractLoginPage
 			$loginErrorMessage	= $LNG['login_error_'.$Code];
 		}
 
-		$sql = "SELECT capaktiv, cappublic, capprivate FROM uni1_config";
-		$verkey = $db->selectSingle($sql);
-
 		$config				= Config::get();
+		$verkey = array(
+			'capaktiv'	=> $config->capaktiv ?? 0,
+			'cappublic'	=> $config->cappublic ?? '',
+			'capprivate'	=> $config->capprivate ?? '',
+		);
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
 			'defaultUniverse'		=> $this->getDefaultUniverseId(),

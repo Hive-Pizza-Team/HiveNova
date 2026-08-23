@@ -28,7 +28,7 @@ function ShowFlyingFleetPage()
 	global $LNG;
 	
 	$id	= HTTP::_GP('id', 0);
-	if(!empty($id)){
+	if(!empty($id) && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'){
 		$lock	= HTTP::_GP('lock', 0);
 		$GLOBALS['DATABASE']->query("UPDATE ".FLEETS." SET `fleet_busy` = '".$lock."' WHERE `fleet_id` = '".$id."' AND `fleet_universe` = '".Universe::getEmulated()."';");
 		

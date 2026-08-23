@@ -169,6 +169,7 @@ $LNG['passwordErrorOnePerDay']		= 'Password reset limit for this user account re
 
 $LNG['passwordValidMailTitle']		= 'Forgot my password on the game: %s';
 $LNG['passwordValidMailSend']		= 'You will receive an email shortly with further information.';
+$LNG['passwordResetMailRequired']	= 'Password reset requires email to be configured. Contact an administrator.';
 
 $LNG['passwordValidInValid']		= 'Invalid Request!';
 $LNG['passwordChangedMailSend']		= 'You will receive an email shortly with your new password.';

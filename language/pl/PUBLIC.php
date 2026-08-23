@@ -166,6 +166,7 @@ $LNG['passwordErrorOnePerDay']		= 'W ciągu ostatnich 24h zostało zmienione has
 
 $LNG['passwordValidMailTitle']		= 'Przypomnienie hasła dla strony: %s';
 $LNG['passwordValidMailSend']		= 'Otrzymasz maila z informacjami, co dalej.';
+$LNG['passwordResetMailRequired']	= 'Reset hasła wymaga skonfigurowanej poczty. Skontaktuj się z administratorem.';
 
 $LNG['passwordValidInValid']		= 'Niepoprawne zapytanie!';
 $LNG['passwordChangedMailSend']		= 'Wkrótce otrzymasz e-maila z nowym hasłem.';

@@ -165,6 +165,7 @@ $LNG['passwordErrorOnePerDay']		= 'Das Kennwort für dieses Benutzerkonto wurde 
 
 $LNG['passwordValidMailTitle']		= 'Kennwort vergessen auf der Website: %s';
 $LNG['passwordValidMailSend']		= 'Du erhälst in Kürze eine E-Mail mit weiteren Informationen.';
+$LNG['passwordResetMailRequired']	= 'Das Zurücksetzen des Passworts erfordert eine konfigurierte E-Mail. Kontaktiere einen Administrator.';
 
 $LNG['passwordValidInValid']		= 'Ungültiger Anfrage!';
 $LNG['passwordChangedMailSend']		= 'Du erhälst in Kürze eine E-Mail mit deinem neuen Kennwort.';

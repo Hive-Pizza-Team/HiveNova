@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Login;
 
+use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
@@ -51,8 +52,12 @@ class ShowLoginPage extends AbstractLoginPage
 			':username'	=> $username
 		));
 
-		$sql = "SELECT capaktiv, cappublic, capprivate FROM uni1_config";
-		$verkey = $db->selectSingle($sql);
+		$uniConfig = Config::get(Universe::current());
+		$verkey = array(
+			'capaktiv'	=> $uniConfig->capaktiv ?? 0,
+			'cappublic'	=> $uniConfig->cappublic ?? '',
+			'capprivate'	=> $uniConfig->capprivate ?? '',
+		);
 
 		if (!empty($verkey["capaktiv"]) && !empty($verkey["cappublic"]) && !empty($verkey["capprivate"])) {
 			require 'includes/libs/reCAPTCHA/invisible/Recaptcha.php';
