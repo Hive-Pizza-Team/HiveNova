@@ -272,7 +272,7 @@ class ShowMessagesPage extends AbstractGamePage
 
         Session::load()->messageToken = md5($USER['id'].'|'.$receiverID);
 
-        $this->tplObj->loadscript('message-write');
+        $this->tplObj->loadscript('message-write.js');
         $this->assign(array(
             'subject'		=> $Subject,
             'id'			=> $receiverID,

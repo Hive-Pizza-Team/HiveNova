@@ -163,6 +163,14 @@ class TemplateTest extends TestCase
         $this->assertSame(['scripts/game'], $template->jsscript);
     }
 
+    public function testLoadscriptKeepsNameWithoutJsSuffix(): void
+    {
+        $template = new Template();
+        $template->loadscript('message-write');
+
+        $this->assertSame(['message-write'], $template->jsscript);
+    }
+
     public function testExecscriptAppendsRawScript(): void
     {
         $template = new Template();
