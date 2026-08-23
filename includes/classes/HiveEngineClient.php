@@ -11,6 +11,7 @@ class HiveEngineClient
 {
 	public const RPC_URL = 'https://api.hive-engine.com/rpc/blockchain';
 	public const HISTORY_URL = 'https://history.hive-engine.com/accountHistory?account=';
+	public const HISTORY_MAX_PAGES = 20;
 
 	/** @var callable|null fn(string $url, ?string $body = null): string|false */
 	private static $fetcher = null;
@@ -60,15 +61,30 @@ class HiveEngineClient
 			return [];
 		}
 		$limit = max(1, min(500, $limit));
-		$url = self::HISTORY_URL . urlencode($account)
-			. '&limit=' . $limit
-			. '&offset=0&type=user&symbol=' . urlencode($symbol);
-		$raw = $this->fetch($url);
-		if ($raw === null) {
-			return [];
+		$out = [];
+		$offset = 0;
+		for ($page = 0; $page < self::HISTORY_MAX_PAGES; $page++) {
+			$url = self::HISTORY_URL . urlencode($account)
+				. '&limit=' . $limit
+				. '&offset=' . $offset
+				. '&type=user&symbol=' . urlencode($symbol);
+			$raw = $this->fetch($url);
+			if ($raw === null) {
+				break;
+			}
+			$decoded = json_decode($raw, true);
+			if (!is_array($decoded) || $decoded === []) {
+				break;
+			}
+			$chunk = array_values($decoded);
+			$out = array_merge($out, $chunk);
+			if (count($chunk) < $limit) {
+				break;
+			}
+			$offset += $limit;
 		}
-		$decoded = json_decode($raw, true);
-		return is_array($decoded) ? array_values($decoded) : [];
+
+		return $out;
 	}
 
 	/**

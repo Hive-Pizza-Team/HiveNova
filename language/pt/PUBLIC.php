@@ -171,6 +171,7 @@ $LNG['passwordErrorOnePerDay']		= 'Limite de redefinição de palavra-passe atin
 
 $LNG['passwordValidMailTitle']		= 'Esqueci a minha palavra-passe no jogo: %s';
 $LNG['passwordValidMailSend']		= 'Receberás em breve um email com mais informações.';
+$LNG['passwordResetMailRequired']	= 'A reposição da palavra-passe requer email configurado. Contacta um administrador.';
 
 $LNG['passwordValidInValid']		= 'Pedido inválido!';
 $LNG['passwordChangedMailSend']		= 'Receberás em breve um email com a sua nova palavra-passe.';

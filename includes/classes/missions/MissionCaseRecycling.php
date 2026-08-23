@@ -47,16 +47,19 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 			$resQuery[]	= 'der_'.$resource[$debrisID];
 		}
 
-		$sql	= 'SELECT '.implode(',', $resQuery).', ('.implode(' + ', $resQuery).') as total
-		FROM %%PLANETS%% WHERE id = :planetId';
+		$db	= Database::get();
+		$db->beginTransaction();
+		try {
+			$sql	= 'SELECT '.implode(',', $resQuery).', ('.implode(' + ', $resQuery).') as total
+			FROM %%PLANETS%% WHERE id = :planetId FOR UPDATE';
 
-		$targetData	= Database::get()->selectSingle($sql, array(
-			':planetId'	=> $this->_fleet['fleet_end_id']
-		));
+			$targetData	= $db->selectSingle($sql, array(
+				':planetId'	=> $this->_fleet['fleet_end_id']
+			));
 
-		if(is_array($targetData) && !empty($targetData['total']))
-		{
-			$targetUser			= $this->getUser((int) $this->_fleet['fleet_owner']);
+			if(is_array($targetData) && !empty($targetData['total']))
+			{
+				$targetUser			= $this->getUser((int) $this->_fleet['fleet_owner']);
 
 			$targetUserFactors	= getFactors($targetUser);
 			$shipStorageFactor	= 1 + $targetUserFactors['ShipStorage'];
@@ -114,7 +117,12 @@ class MissionCaseRecycling extends MissionFunctions implements Mission
 
 			$sql	= 'UPDATE %%PLANETS%% SET '.implode(',', $collectQuery).' WHERE id = :planetId;';
 
-			Database::get()->update($sql, $param);
+			$db->update($sql, $param);
+		}
+			$db->commit();
+		} catch (\Throwable $e) {
+			$db->rollback();
+			throw $e;
 		}
 		
 		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);

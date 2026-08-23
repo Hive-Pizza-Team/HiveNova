@@ -170,6 +170,7 @@ $LNG['passwordErrorOnePerDay']		= 'Bu hesap için şifre son 24 saat içinde tal
 
 $LNG['passwordValidMailTitle']		= 'Şifremi unuttum : %s';
 $LNG['passwordValidMailSend']		= 'Email gönderildi.';
+$LNG['passwordResetMailRequired']	= 'Şifre sıfırlama için e-posta yapılandırılmalıdır. Bir yöneticiyle iletişime geçin.';
 
 $LNG['passwordValidInValid']		= 'Hatalı Islem!';
 $LNG['passwordChangedMailSend']		= 'Yeni şifrenizi mail adresinize gönderdik.';

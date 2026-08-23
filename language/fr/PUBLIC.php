@@ -154,6 +154,7 @@ $LNG['passwordErrorOnePerDay']		= 'Le mot de passe de ce compte a été demandé
 
 $LNG['passwordValidMailTitle']		= 'J\'ai oublié mon mot de passe: %s';
 $LNG['passwordValidMailSend']		= 'Vous recevrez sous peu un e-mail contenant des informations complémentaires.';
+$LNG['passwordResetMailRequired']	= 'La réinitialisation du mot de passe nécessite un e-mail configuré. Contactez un administrateur.';
 
 $LNG['passwordValidInValid']		= 'Requête invalide!';
 $LNG['passwordChangedMailSend']		= 'Vous recevrez sous peu un e-mail contenant votre mot de passe.';

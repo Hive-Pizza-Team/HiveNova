@@ -169,6 +169,7 @@ $LNG['passwordErrorOnePerDay']		= 'Límite de restablecimiento de contraseña pa
 
 $LNG['passwordValidMailTitle']		= 'Olvidé mi contraseña en el juego: %s';
 $LNG['passwordValidMailSend']		= 'Recibirás un correo electrónico en breve con más información.';
+$LNG['passwordResetMailRequired']	= 'El restablecimiento de contraseña requiere el correo configurado. Contacta a un administrador.';
 
 $LNG['passwordValidInValid']		= '¡Solicitud inválida!';
 $LNG['passwordChangedMailSend']		= 'Recibirás un correo electrónico en breve con tu nueva contraseña.';

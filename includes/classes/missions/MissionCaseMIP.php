@@ -43,7 +43,7 @@ class MissionCaseMIP extends MissionFunctions implements Mission
 			$sqlFields[]	= '%%PLANETS%%.`' . $resource[$elementID] . '`';
 		}
 
-		$sql = 'SELECT lang, shield_tech,
+		$sql = 'SELECT lang, defence_tech,
 		%%PLANETS%%.id, name, id_owner, ' . implode(', ', $sqlFields) . '
 		FROM %%PLANETS%%
 		INNER JOIN %%USERS%% ON id_owner = %%USERS%%.id
@@ -121,7 +121,7 @@ class MissionCaseMIP extends MissionFunctions implements Mission
 			if (!empty($targetDefensive)) {
 				require_once 'includes/classes/missions/functions/calculateMIPAttack.php';
 				$result   	= calculateMIPAttack(
-					$targetData["shield_tech"],
+					$targetData["defence_tech"],
 					$senderData["military_tech"],
 					$this->_fleet['fleet_amount'],
 					$targetDefensive,

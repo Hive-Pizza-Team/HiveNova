@@ -132,6 +132,31 @@ class HiveEngineClientTest extends TestCase
 		$this->assertCount(1, $rows);
 	}
 
+	public function testAccountHistoryPaginatesUntilShortPage(): void
+	{
+		$calls = [];
+		HiveEngineClient::setFetcher(function (string $url) use (&$calls) {
+			$calls[] = $url;
+			if (str_contains($url, 'offset=0')) {
+				return json_encode([
+					['from' => 'alice', 'quantity' => 1],
+					['from' => 'bob', 'quantity' => 1],
+				]);
+			}
+			if (str_contains($url, 'offset=2')) {
+				return json_encode([
+					['from' => 'carol', 'quantity' => 1],
+				]);
+			}
+			return json_encode([]);
+		});
+		$rows = (new HiveEngineClient())->accountHistory('season.wallet', 'PIZZA', 2);
+		$this->assertCount(3, $rows);
+		$this->assertCount(2, $calls);
+		$this->assertStringContainsString('offset=0', $calls[0]);
+		$this->assertStringContainsString('offset=2', $calls[1]);
+	}
+
 	public function testMillisTimestampIsConverted(): void
 	{
 		$parsed = HiveEngineClient::parseTransfer([

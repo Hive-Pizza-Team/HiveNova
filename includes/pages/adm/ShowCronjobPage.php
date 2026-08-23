@@ -116,23 +116,34 @@ function ShowCronjobEdit($post_id)
 	}
 }
 
+function cronjobRequirePost(): void
+{
+	if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+		HTTP::redirectTo('admin.php?page=cronjob');
+	}
+}
+
 function ShowCronjobDelete($cronjobId) {
+    cronjobRequirePost();
     $GLOBALS['DATABASE']->query("DELETE FROM ".CRONJOBS." WHERE cronjobID = ".$cronjobId.";");
     $GLOBALS['DATABASE']->query("DELETE FROM ".CRONJOBS_LOG." WHERE cronjobId = ".$cronjobId.";");
     HTTP::redirectTo('admin.php?page=cronjob');
 }
 
 function ShowCronjobLock($cronjobId) {
+    cronjobRequirePost();
     $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = MD5(UNIX_TIMESTAMP()) WHERE cronjobID = ".$cronjobId.";");
     HTTP::redirectTo('admin.php?page=cronjob');
 }
 
 function ShowCronjobUnlock($cronjobId) {
+    cronjobRequirePost();
     $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = NULL WHERE cronjobID = ".$cronjobId.";");
     HTTP::redirectTo('admin.php?page=cronjob');
 }
 
 function ShowCronjobEnable($cronjobId) {
+    cronjobRequirePost();
     $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `isActive` = ".HTTP::_GP('enable', 0)." WHERE cronjobID = ".$cronjobId.";");
     HTTP::redirectTo('admin.php?page=cronjob');
 }
