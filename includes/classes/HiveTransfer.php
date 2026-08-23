@@ -15,9 +15,17 @@ class HiveTransfer
 	/** @var callable|null fn(string $from, string $to, string $amountAsset, string $memo, string $wif): mixed */
 	private static $broadcaster = null;
 
+	/** @var callable|null fn(string $message): void */
+	private static $errorLogger = null;
+
 	public static function setBroadcaster(?callable $broadcaster): void
 	{
 		self::$broadcaster = $broadcaster;
+	}
+
+	public static function setErrorLogger(?callable $logger): void
+	{
+		self::$errorLogger = $logger;
 	}
 
 	/**
@@ -48,11 +56,13 @@ class HiveTransfer
 			$result = $this->broadcast($from, $to, $amountAsset, $memo, $wif);
 			$trxId = self::extractTrxId($result);
 			if ($trxId === '') {
+				self::logResourceCreditFailure($from, $to, HiveUtil::rpcErrorMessage($result));
 				return self::fail();
 			}
 
 			return ['ok' => true, 'trx_id' => $trxId];
 		} catch (Throwable $e) {
+			self::logResourceCreditFailure($from, $to, $e->getMessage());
 			return self::fail();
 		}
 	}
@@ -111,5 +121,20 @@ class HiveTransfer
 	private static function fail(): array
 	{
 		return ['ok' => false, 'trx_id' => ''];
+	}
+
+	private static function logResourceCreditFailure(string $from, string $to, string $detail): void
+	{
+		if (!HiveUtil::isResourceCreditError($detail)) {
+			return;
+		}
+
+		$line = 'HiveTransfer: resource credits exhausted for ' . $from . ' -> ' . $to . ': ' . $detail;
+		if (self::$errorLogger !== null) {
+			(self::$errorLogger)($line);
+			return;
+		}
+
+		error_log($line);
 	}
 }

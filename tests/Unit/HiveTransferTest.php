@@ -14,11 +14,13 @@ class HiveTransferTest extends TestCase
 		parent::setUp();
 		$this->calls = [];
 		HiveTransfer::setBroadcaster(null);
+		HiveTransfer::setErrorLogger(null);
 	}
 
 	protected function tearDown(): void
 	{
 		HiveTransfer::setBroadcaster(null);
+		HiveTransfer::setErrorLogger(null);
 		parent::tearDown();
 	}
 
@@ -132,5 +134,64 @@ class HiveTransferTest extends TestCase
 		$result = (new HiveTransfer())->send('gameacct', 'playerone', 0.003, 'HIVE', 'hello', '5Ktestwif', true);
 		$this->assertFalse($result['ok']);
 		$this->assertSame([], $this->calls);
+	}
+
+	public function testResourceCreditRpcErrorIsLoggedWithoutWif(): void
+	{
+		$logs = [];
+		HiveTransfer::setErrorLogger(static function (string $line) use (&$logs): void {
+			$logs[] = $line;
+		});
+		HiveTransfer::setBroadcaster(static function () {
+			return [
+				'code' => -32003,
+				'message' => 'Assert Exception:account.has_mana',
+				'data' => [
+					'message' => 'Account: moon.notify has 5044277700 RC, needs 9000000000 RC. Please wait to transact, or power up HIVE.',
+				],
+			];
+		});
+
+		$result = (new HiveTransfer())->send('moon.notify', 'alkalineyo', 0.003, 'HIVE', 'memo', '5Ktestwifxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+
+		$this->assertFalse($result['ok']);
+		$this->assertCount(1, $logs);
+		$this->assertStringContainsString('resource credits exhausted', $logs[0]);
+		$this->assertStringContainsString('moon.notify -> alkalineyo', $logs[0]);
+		$this->assertStringContainsString('5044277700 RC', $logs[0]);
+		$this->assertStringNotContainsString('5Ktestwif', $logs[0]);
+	}
+
+	public function testNonRcRpcErrorIsNotLogged(): void
+	{
+		$logs = [];
+		HiveTransfer::setErrorLogger(static function (string $line) use (&$logs): void {
+			$logs[] = $line;
+		});
+		HiveTransfer::setBroadcaster(static function () {
+			return ['code' => -32000, 'message' => 'Internal Error'];
+		});
+
+		$result = (new HiveTransfer())->send('moon.notify', 'alkalineyo', 0.003, 'HIVE', 'memo', '5Ktestwif');
+
+		$this->assertFalse($result['ok']);
+		$this->assertSame([], $logs);
+	}
+
+	public function testResourceCreditExceptionIsLogged(): void
+	{
+		$logs = [];
+		HiveTransfer::setErrorLogger(static function (string $line) use (&$logs): void {
+			$logs[] = $line;
+		});
+		HiveTransfer::setBroadcaster(static function () {
+			throw new RuntimeException('Account: moon.notify has 1 RC, needs 2 RC. Please wait to transact, or power up HIVE.');
+		});
+
+		$result = (new HiveTransfer())->send('moon.notify', 'hivetrending', 0.003, 'HIVE', 'memo', '5Ktestwif');
+
+		$this->assertFalse($result['ok']);
+		$this->assertCount(1, $logs);
+		$this->assertStringContainsString('moon.notify -> hivetrending', $logs[0]);
 	}
 }

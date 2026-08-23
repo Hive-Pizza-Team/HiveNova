@@ -25,6 +25,55 @@ class HiveUtil
 		return array_key_exists('code', $result) && array_key_exists('message', $result);
 	}
 
+	static public function rpcErrorMessage(mixed $result): string
+	{
+		$parts = [];
+		self::collectErrorMessages($result, $parts, 0);
+
+		return trim(implode(' ', $parts));
+	}
+
+	static public function isResourceCreditError(string $message): bool
+	{
+		$text = strtolower($message);
+		if ($text === '') {
+			return false;
+		}
+		if (str_contains($text, 'resource credit')) {
+			return true;
+		}
+		if (str_contains($text, 'rc_needed') || str_contains($text, 'has_mana')) {
+			return true;
+		}
+
+		return (bool) preg_match('/\bhas\b.+\brc\b.+\bneeds\b.+\brc\b/s', $text);
+	}
+
+	/**
+	 * @param list<string> $parts
+	 */
+	private static function collectErrorMessages(mixed $value, array &$parts, int $depth): void
+	{
+		if ($depth > 6 || count($parts) >= 8) {
+			return;
+		}
+		if (is_string($value)) {
+			$trimmed = trim($value);
+			if ($trimmed !== '') {
+				$parts[] = $trimmed;
+			}
+			return;
+		}
+		if (!is_array($value)) {
+			return;
+		}
+		foreach (['message', 'data'] as $key) {
+			if (array_key_exists($key, $value)) {
+				self::collectErrorMessages($value[$key], $parts, $depth + 1);
+			}
+		}
+	}
+
 	static public function rpcNodesToTry(?int $maxNodes = null): array
 	{
 		$nodes = self::getRpcNodes();
