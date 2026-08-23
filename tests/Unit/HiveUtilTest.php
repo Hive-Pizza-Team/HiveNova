@@ -23,6 +23,29 @@ class HiveUtilTest extends TestCase
         ];
     }
 
+    public function testRpcErrorMessageReadsNestedDataMessage(): void
+    {
+        $message = HiveUtil::rpcErrorMessage([
+            'code' => -32003,
+            'message' => 'Assert Exception:account.has_mana',
+            'data' => [
+                'name' => 'plugin_exception',
+                'message' => 'Account: moon.notify has 5044277700 RC, needs 9000000000 RC. Please wait to transact, or power up HIVE.',
+            ],
+        ]);
+
+        $this->assertStringContainsString('has 5044277700 RC', $message);
+        $this->assertTrue(HiveUtil::isResourceCreditError($message));
+    }
+
+    public function testIsResourceCreditErrorRejectsUnrelatedFailures(): void
+    {
+        $this->assertFalse(HiveUtil::isResourceCreditError('Internal Error'));
+        $this->assertFalse(HiveUtil::isResourceCreditError('missing required active authority'));
+        $this->assertFalse(HiveUtil::isResourceCreditError(''));
+        $this->assertTrue(HiveUtil::isResourceCreditError('not enough resource credits to broadcast'));
+    }
+
     /** @dataProvider validHiveAccountProvider */
     public function testIsAccountValidAcceptsValidAccounts(string $account): void
     {
