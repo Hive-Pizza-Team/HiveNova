@@ -1,51 +1,9 @@
 function showGalaxyToast(message, className, durationMs) {
-	var tip = $('#tooltip');
-	tip.stop(true, true);
-	tip.html(message)
-		.removeClass('tooltip-mobile-active tooltip_sticky_div notify notify-error notify-toast')
-		.addClass('notify ' + (className || 'notify-toast'))
-		.css({
-			position: 'fixed',
-			top: 'auto',
-			left: '50%',
-			right: 'auto',
-			bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)',
-			transform: 'translateX(-50%)',
-			zIndex: 400,
-			maxWidth: 'calc(100vw - 32px)',
-			textAlign: 'center'
-		})
-		.show();
-	window.setTimeout(function () {
-		tip.fadeOut(400, function () {
-			tip.removeClass('notify notify-error notify-toast').css({ transform: '', zIndex: '', bottom: '' });
-		});
-	}, durationMs || 4500);
+	showGameToast(message, className || 'notify-toast', durationMs || 4500);
 }
 
 function showGalaxyFleetAlert(message) {
-	var tip = $('#tooltip');
-	tip.stop(true, true);
-	tip.html(message)
-		.removeClass('tooltip-mobile-active tooltip_sticky_div notify notify-toast')
-		.addClass('notify notify-error')
-		.css({
-			position: 'fixed',
-			top: '50%',
-			left: '50%',
-			transform: 'translate(-50%, -50%)',
-			right: 'auto',
-			bottom: 'auto',
-			zIndex: 400,
-			maxWidth: 'calc(100vw - 32px)',
-			textAlign: 'center'
-		})
-		.show();
-	window.setTimeout(function () {
-		tip.fadeOut(400, function () {
-			tip.removeClass('notify notify-error notify-toast').css({ transform: '', zIndex: '', bottom: '' });
-		});
-	}, 4000);
+	showGameToast(message, 'notify-error', 4000);
 }
 
 function doit(missionID, planetID) {

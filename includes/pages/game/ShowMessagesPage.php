@@ -229,7 +229,7 @@ class ShowMessagesPage extends AbstractGamePage
 
         if (empty($receiverID) || empty($text) || !isset($session->messageToken) || $session->messageToken != md5($USER['id'].'|'.$receiverID))
         {
-            $this->sendJSON($LNG['mg_error']);
+            $this->sendJSON(['ok' => false, 'message' => $LNG['mg_error']]);
         }
 
 		$session->messageToken = NULL;
@@ -239,7 +239,7 @@ class ShowMessagesPage extends AbstractGamePage
 			(new SocialHiveMemoService())->notifyPrivateMessage((int) $receiverID, (string) $USER['username']);
 		} catch (\Throwable $e) {
 		}
-        $this->sendJSON($LNG['mg_message_send']);
+        $this->sendJSON(['ok' => true, 'message' => $LNG['mg_message_send']]);
     }
 
     function write()
@@ -272,6 +272,7 @@ class ShowMessagesPage extends AbstractGamePage
 
         Session::load()->messageToken = md5($USER['id'].'|'.$receiverID);
 
+        $this->tplObj->loadscript('message-write');
         $this->assign(array(
             'subject'		=> $Subject,
             'id'			=> $receiverID,
