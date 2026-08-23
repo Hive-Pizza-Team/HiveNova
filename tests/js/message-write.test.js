@@ -59,6 +59,34 @@ describe('HiveNovaMessageWrite', () => {
 		assert.equal(write.payloadMessage({ ok: true, message: 'Message Sent!' }), 'Message Sent!');
 	});
 
+	it('reads the send URL from action when data-url is missing', async () => {
+		const posts = [];
+		const form = {
+			id: 'message',
+			getAttribute(name) {
+				if (name === 'data-message-write') return '1';
+				if (name === 'action') return 'game.php?page=messages&mode=send&id=7&ajax=1';
+				return '';
+			},
+			addEventListener(type, fn) { this.submit = fn; }
+		};
+		const doc = {
+			getElementById(id) {
+				if (id === 'message') return form;
+				if (id === 'submit') return { type: 'submit', disabled: false, addEventListener() {} };
+				if (id === 'text') return { value: 'hello' };
+				if (id === 'message-write-error') return errorEl();
+				return null;
+			}
+		};
+		const bound = write.init(doc, { parent: {} }, (url) => {
+			posts.push(url);
+			return Promise.resolve({ ok: true, message: 'Message Sent!' });
+		});
+		await bound.onSubmit({ preventDefault() {} });
+		assert.deepEqual(posts, ['game.php?page=messages&mode=send&id=7&ajax=1']);
+	});
+
 	it('does not post an empty compose and does not alert', async () => {
 		const posts = [];
 		const alerts = [];

@@ -1,6 +1,6 @@
 {block name="title" prepend}{$LNG.write_message}{/block}
 {block name="content"}
-<form name="message" id="message" action="" data-message-write="1" data-empty="{$LNG.mg_empty_text|escape:'html'}" data-url="game.php?page=messages&amp;mode=send&amp;id={$id}&amp;ajax=1">
+<form name="message" id="message" method="post" action="game.php?page=messages&amp;mode=send&amp;id={$id}&amp;ajax=1" data-message-write="1" data-empty="{$LNG.mg_empty_text|escape:'html'}" data-url="game.php?page=messages&amp;mode=send&amp;id={$id}&amp;ajax=1">
 	<table style="width:95%;">
 		<tr>
 			<th colspan="2">{$LNG.mg_send_new}</th>

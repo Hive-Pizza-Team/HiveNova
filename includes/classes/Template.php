@@ -80,7 +80,11 @@ class Template extends Smarty
 
 	public function loadscript($script)
 	{
-		$this->jsscript[]			= substr((string) $script, 0, -3);
+		$name = (string) $script;
+		if (str_ends_with($name, '.js')) {
+			$name = substr($name, 0, -3);
+		}
+		$this->jsscript[] = $name;
 	}
 
 	public function execscript($script)
