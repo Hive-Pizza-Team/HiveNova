@@ -14,6 +14,12 @@ class DirectiveCatalog
 
 	public const TRADE_CARGO_THRESHOLD = 10000;
 
+	/** Catalog reward amounts are the payout at this many total points. */
+	public const REWARD_REFERENCE_POINTS = 10000;
+
+	/** Floor so a day-one empire (0–500 points) is not given the full stockpile. */
+	public const REWARD_MIN_FACTOR = 0.05;
+
 	/**
 	 * @return array<string, array<string, mixed>>
 	 */
@@ -87,6 +93,28 @@ class DirectiveCatalog
 	public static function exists(string $key): bool
 	{
 		return isset(self::all()[$key]);
+	}
+
+	public static function rewardFactor(int $points): float
+	{
+		$points = max(0, $points);
+
+		return max(self::REWARD_MIN_FACTOR, $points / self::REWARD_REFERENCE_POINTS);
+	}
+
+	/**
+	 * @param array{metal?: int, crystal?: int, deuterium?: int} $reward
+	 * @return array{metal: int, crystal: int, deuterium: int}
+	 */
+	public static function scaledReward(array $reward, int $points): array
+	{
+		$factor = self::rewardFactor($points);
+
+		return [
+			'metal' => (int) floor(((int) ($reward['metal'] ?? 0)) * $factor),
+			'crystal' => (int) floor(((int) ($reward['crystal'] ?? 0)) * $factor),
+			'deuterium' => (int) floor(((int) ($reward['deuterium'] ?? 0)) * $factor),
+		];
 	}
 
 	/**

@@ -203,7 +203,8 @@ class DirectiveService
 			}
 
 			$catalog = DirectiveCatalog::get((string) $row['directive_key']);
-			$reward = is_array($catalog) ? $catalog['reward'] : ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+			$base = is_array($catalog) ? $catalog['reward'] : ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+			$reward = DirectiveCatalog::scaledReward($base, self::playerPoints($userId));
 
 			$db->update(
 				'UPDATE %%PLANETS%% SET
@@ -238,6 +239,22 @@ class DirectiveService
 			$db->rollback();
 			throw $e;
 		}
+	}
+
+	public static function playerPoints(int $userId): int
+	{
+		$row = Database::get()->selectSingle(
+			'SELECT total_points FROM %%STATPOINTS%% WHERE id_owner = :userId AND stat_type = :type',
+			[
+				':userId' => $userId,
+				':type' => 1,
+			]
+		);
+		if (!is_array($row)) {
+			return 0;
+		}
+
+		return (int) ($row['total_points'] ?? 0);
 	}
 
 	public static function issueCsrfToken(): string
@@ -288,7 +305,12 @@ class DirectiveService
 		$period = self::ensureCurrentPeriod($universe);
 		$userDirective = self::getUserDirective($userId, (int) $period['id']);
 		$remaining = max(0, (int) $period['period_end'] - TIMESTAMP);
-		$catalog = DirectiveCatalog::all();
+		$points = self::playerPoints($userId);
+		$catalog = [];
+		foreach (DirectiveCatalog::all() as $key => $def) {
+			$def['reward'] = DirectiveCatalog::scaledReward($def['reward'] ?? [], $points);
+			$catalog[$key] = $def;
+		}
 		$selected = null;
 		if (is_array($userDirective)) {
 			$def = DirectiveCatalog::get((string) $userDirective['directive_key']);
@@ -306,7 +328,7 @@ class DirectiveService
 				'progress' => $progress,
 				'completed' => !empty($userDirective['completed_at']),
 				'claimed' => !empty($userDirective['reward_claimed_at']),
-				'reward' => $def['reward'] ?? [],
+				'reward' => DirectiveCatalog::scaledReward($def['reward'] ?? [], $points),
 			];
 		}
 

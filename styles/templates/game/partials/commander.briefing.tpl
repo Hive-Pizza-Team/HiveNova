@@ -22,6 +22,9 @@
 					{/if}
 				</div>
 				<p class="commander-briefing__directive-desc">{$LNG[$commanderBriefing.directive.desc_key]}</p>
+				{if $commanderBriefing.directive.reward}
+					<p class="commander-briefing__reward">{$LNG.tech.901}: {$commanderBriefing.directive.reward.metal} · {$LNG.tech.902}: {$commanderBriefing.directive.reward.crystal} · {$LNG.tech.903}: {$commanderBriefing.directive.reward.deuterium}</p>
+				{/if}
 				<p class="commander-briefing__suggestion">{$LNG.cm_suggestion}: {$LNG[$commanderBriefing.directive.suggestion_key]} ({$LNG["cm_stance_{$commanderBriefing.directive.recommended_stance}"]})</p>
 				<ul class="commander-briefing__progress">
 					{foreach $commanderBriefing.directive.targets as $counter => $need}
