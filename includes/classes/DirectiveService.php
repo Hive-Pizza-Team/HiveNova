@@ -219,6 +219,7 @@ class DirectiveService
 					':planetId' => $planetId,
 				]
 			);
+			self::addResourcesToSessionPlanet($planetId, $reward);
 			$db->update(
 				'UPDATE %%USER_DIRECTIVES%% SET reward_claimed_at = :claimed WHERE id = :id AND reward_claimed_at IS NULL',
 				[
@@ -238,6 +239,27 @@ class DirectiveService
 		} catch (\Throwable $e) {
 			$db->rollback();
 			throw $e;
+		}
+	}
+
+	/**
+	 * Keep the in-memory planet in sync. AbstractGamePage::sendJSON() calls
+	 * ResourceUpdate::SavePlanetToDB() with absolute $PLANET amounts, which
+	 * would otherwise overwrite this SQL increment.
+	 *
+	 * @param array{metal?: int, crystal?: int, deuterium?: int} $reward
+	 */
+	public static function addResourcesToSessionPlanet(int $planetId, array $reward): void
+	{
+		if (!isset($GLOBALS['PLANET']) || !is_array($GLOBALS['PLANET'])) {
+			return;
+		}
+		if ((int) ($GLOBALS['PLANET']['id'] ?? 0) !== $planetId) {
+			return;
+		}
+
+		foreach (['metal', 'crystal', 'deuterium'] as $res) {
+			$GLOBALS['PLANET'][$res] = (float) ($GLOBALS['PLANET'][$res] ?? 0) + (int) ($reward[$res] ?? 0);
 		}
 	}
 

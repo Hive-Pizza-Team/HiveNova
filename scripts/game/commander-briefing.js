@@ -12,7 +12,7 @@ $(function () {
 
 	function post(mode, data) {
 		return $.ajax({
-			url: 'game.php?page=commanderAjax&mode=' + mode,
+			url: 'game.php?page=commanderAjax&mode=' + mode + '&ajax=1',
 			type: 'POST',
 			dataType: 'json',
 			data: data
