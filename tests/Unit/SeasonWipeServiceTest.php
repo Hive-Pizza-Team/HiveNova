@@ -40,6 +40,7 @@ class SeasonWipeServiceTest extends TestCase
 		$wipe = SeasonWipeService::fromGlobals($GLOBALS['reslist'], $GLOBALS['resource'], $config);
 		$this->assertStringContainsString('`metal_mine` = \'0\'', $wipe->planetSetSql());
 		$this->assertStringContainsString('`metal` = :metal', $wipe->planetSetSql());
+		$this->assertStringContainsString('`last_update` = :now', $wipe->planetSetSql());
 		$this->assertStringContainsString('`darkmatter` = :darkmatter', $wipe->userSetSql());
 		$this->assertStringContainsString('`b_tech_queue` = \'\'', $wipe->userSetSql());
 	}
@@ -60,6 +61,9 @@ class SeasonWipeServiceTest extends TestCase
 		$this->assertTrue($this->containsHay($deleteSql, '%%FLEETS%%'));
 		$this->assertTrue($this->containsHay($deleteSql, '%%PLANETS%%'));
 		$this->assertTrue($this->containsHay($deleteSql, '%%STATPOINTS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%USER_DIRECTIVES%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%EXPEDITION_PENDING_CHOICES%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%DIRECTIVE_PERIODS%%'));
 
 		$updateSql = array_column($this->db->updates, 0);
 		$this->assertTrue($this->containsHay($updateSql, '%%PLANETS%%'));

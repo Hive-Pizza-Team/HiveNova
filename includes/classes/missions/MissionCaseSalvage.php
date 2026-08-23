@@ -205,7 +205,7 @@ class MissionCaseSalvage extends MissionFunctions implements Mission
 
 		require_once 'includes/classes/missions/functions/calculateAttack.php';
 		$config = Config::get($this->_fleet['fleet_universe']);
-		$combatResult = calculateAttack($fleetAttack, $fleetDefend, $config->Fleet_Cdr, $config->Defs_Cdr);
+		$combatResult = calculateAttack($fleetAttack, $fleetDefend, $config->Fleet_Cdr / 100, $config->Defs_Cdr / 100);
 
 		$fleetString = '';
 		$totalCount = 0;

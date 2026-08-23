@@ -85,4 +85,20 @@ class DirectiveProgressHooksTest extends TestCase
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
 		$this->assertSame(1, $progress['trade_run']);
 	}
+
+	public function testShipyardUnitsDoNotCountTowardIndustrial(): void
+	{
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::INDUSTRIAL);
+		DirectiveHooks::afterBuildCompleted([202 => 8], ['id' => 8, 'universe' => 1]);
+		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
+		$this->assertSame(0, $progress['build_complete']);
+	}
+
+	public function testDemolitionDoesNotCountTowardIndustrial(): void
+	{
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::INDUSTRIAL);
+		DirectiveHooks::afterBuildCompleted([1 => -1], ['id' => 8, 'universe' => 1]);
+		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
+		$this->assertSame(0, $progress['build_complete']);
+	}
 }

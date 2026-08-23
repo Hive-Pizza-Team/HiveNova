@@ -78,16 +78,17 @@ class DatabaseSeasonStore implements SeasonStore
 		return (float) $sum;
 	}
 
-	public function rankingRows(int $universe): array
+	public function rankingRows(int $universe, int $seasonId): array
 	{
 		$rows = Database::get()->select(
 			'SELECT u.`id` AS `user_id`, u.`hive_account`, u.`authlevel`,
 				COALESCE(s.`total_points`, 0) AS `points`, COALESCE(s.`total_rank`, 0) AS `rank`
 			FROM %%USERS%% u
+			INNER JOIN %%SEASON_ENTRIES%% e ON e.`user_id` = u.`id` AND e.`universe` = u.`universe` AND e.`season_id` = :sid
 			LEFT JOIN %%STATPOINTS%% s ON s.`id_owner` = u.`id` AND s.`stat_type` = 1 AND s.`universe` = u.`universe`
 			WHERE u.`universe` = :uni AND u.`authlevel` = :auth
 			ORDER BY `points` DESC, u.`id` ASC',
-			[':uni' => $universe, ':auth' => AUTH_USR]
+			[':uni' => $universe, ':sid' => $seasonId, ':auth' => AUTH_USR]
 		);
 
 		$out = [];
@@ -133,7 +134,7 @@ class DatabaseSeasonStore implements SeasonStore
 		$db = Database::get();
 		foreach ($rows as $row) {
 			$db->insert(
-				'INSERT INTO %%SEASON_PAYOUTS%% SET
+				'INSERT IGNORE INTO %%SEASON_PAYOUTS%% SET
 				`universe` = :uni, `season_id` = :sid, `user_id` = :uid, `hive_account` = :hive,
 				`rank` = :rank, `points` = :points, `pizza_amount` = :amt, `trx_id` = :trx, `status` = :status',
 				[

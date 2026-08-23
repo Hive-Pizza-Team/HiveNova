@@ -38,14 +38,18 @@ class DirectiveHooks
 
 		foreach ($builded as $elementId => $count) {
 			$elementId = (int) $elementId;
-			$times = max(1, (int) $count);
-			$event = 'building_complete';
-			if (in_array($elementId, $defense, true)) {
-				$event = 'defense_complete';
-			} elseif (in_array($elementId, $tech, true)) {
+			$times = (int) $count;
+			if ($times <= 0) {
+				continue;
+			}
+			if (in_array($elementId, $tech, true)) {
 				$event = 'research_complete';
-			} elseif (!in_array($elementId, $build, true) && $elementId >= 400) {
+			} elseif (in_array($elementId, $build, true)) {
+				$event = 'building_complete';
+			} elseif (in_array($elementId, $defense, true) || $elementId >= 400) {
 				$event = 'defense_complete';
+			} else {
+				continue;
 			}
 			for ($i = 0; $i < $times; $i++) {
 				DirectiveProgressService::record($userId, $event, ['universe' => $universe, 'element' => $elementId]);

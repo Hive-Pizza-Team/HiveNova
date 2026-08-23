@@ -762,6 +762,9 @@ class ShowAlliancePage extends AbstractGamePage
 	protected function adminOverview()
 	{
 		global $LNG, $USER;
+		if (empty($this->rights['ADMIN'])) {
+			$this->redirectToHome();
+		}
 		$send 		= HTTP::_GP('send', 0);
 		$textMode  	= HTTP::_GP('textMode', 'external');
 		$webhookInvalid = false;

@@ -30,7 +30,7 @@ class SQLDumperFakeDatabase implements DatabaseInterface
     public function select($qry, array $params = [])
     {
         if (preg_match('/SELECT \* FROM (\S+)/', $qry, $match)) {
-            $table = $match[1];
+            $table = trim($match[1], '`;');
 
             return $this->rows[$table] ?? [];
         }
@@ -62,13 +62,13 @@ class SQLDumperFakeDatabase implements DatabaseInterface
         $this->nativeQueries[] = $qry;
 
         if (preg_match('/^SHOW CREATE TABLE (\S+)/', $qry, $match)) {
-            $table = $match[1];
+            $table = trim($match[1], '`;');
 
             return $this->createTables[$table] ?? ['Create Table' => 'CREATE TABLE `' . $table . '` (id int)'];
         }
 
         if (preg_match('/SELECT COUNT\(\*\) as state FROM (\S+)/', $qry, $match)) {
-            $table = rtrim($match[1], ';');
+            $table = trim(rtrim($match[1], ';'), '`');
 
             return [['state' => $this->rowCounts[$table] ?? 0]];
         }
@@ -402,5 +402,19 @@ PHP;
                 unlink($file);
             }
         }
+    }
+
+    public function testFilterAllowedTablesDropsUnknownAndUnsafeNames(): void
+    {
+        $allowed = ['uni1_users', 'uni1_config'];
+        $requested = ['uni1_users', 'mysql.user', 'uni1_users; DROP TABLE', 'uni1_missing'];
+        $this->assertSame(['uni1_users'], SQLDumper::filterAllowedTables($requested, $allowed));
+    }
+
+    public function testQuoteIdentifierRejectsUnsafeNames(): void
+    {
+        $this->assertSame('`uni1_users`', SQLDumper::quoteIdentifier('uni1_users'));
+        $this->expectException(Exception::class);
+        SQLDumper::quoteIdentifier('uni1_users`; DROP TABLE x; --');
     }
 }

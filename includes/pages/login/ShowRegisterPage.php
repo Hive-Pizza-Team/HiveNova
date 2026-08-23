@@ -152,14 +152,13 @@ class ShowRegisterPage extends AbstractLoginPage
 		}
 		$hiveAccount   = HTTP::_GP('hiveAccount', '');
 
+		$errors 	= array();
+
 		if ($hiveAccount !== '') {
-			// validate hive signature
-			if (!HiveUtil::isSignValid($hiveAccount,$password)) {
-				$errors[]	= $LNG['registerErrorPasswordSame'];
+			if (!HiveUtil::isSignValid($hiveAccount, $password)) {
+				$errors[]	= $LNG['registerErrorHiveSignature'] ?? $LNG['registerErrorHiveAccountInvalid'];
 			}
 		}
-		
-		$errors 	= array();
 		
 		if(empty($userName)) {
 			$errors[]	= $LNG['registerErrorUsernameEmpty'];

@@ -134,6 +134,7 @@ $LNG['registerErrorMailExist']      = 'Указанный адрес элект�
 $LNG['registerErrorRules']          = 'Вы не приняли правила игры.';
 $LNG['registerErrorCaptcha']        = 'Защитный код введён неправильно.';
 $LNG['registerErrorHiveAccountInvalid']	= 'Вы должны ввести действующую учетную запись Hive.';
+$LNG['registerErrorHiveSignature']	= 'Подпись Hive Keychain отсутствует или недействительна!';
 $LNG['registerErrorHiveAccountExist']	= 'Учетная запись Hive уже зарегистрирована.';
 
 $LNG['registerMailVertifyTitle']    = 'Активация аккаунта на сайте %s';

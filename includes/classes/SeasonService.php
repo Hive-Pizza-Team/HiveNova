@@ -172,14 +172,8 @@ class SeasonService
 
 		$out = [];
 		$allocated = 0.0;
-		$last = count($eligible) - 1;
-		foreach ($eligible as $i => $row) {
-			if ($i === $last) {
-				$amount = round($budget - $allocated, 3);
-			} else {
-				$amount = floor($budget * ((int) $row['points']) / $totalPoints * 1000) / 1000;
-				$allocated += $amount;
-			}
+		foreach ($eligible as $row) {
+			$amount = floor($budget * ((int) $row['points']) / $totalPoints * 1000) / 1000;
 			if ($amount < HiveEngineTransfer::MIN_AMOUNT) {
 				continue;
 			}
@@ -190,6 +184,18 @@ class SeasonService
 				'points'       => (int) $row['points'],
 				'pizza_amount' => $amount,
 			];
+			$allocated += $amount;
+		}
+
+		if ($out !== []) {
+			$last = count($out) - 1;
+			$allocated -= $out[$last]['pizza_amount'];
+			$remainder = round($budget - $allocated, 3);
+			if ($remainder >= HiveEngineTransfer::MIN_AMOUNT) {
+				$out[$last]['pizza_amount'] = $remainder;
+			} else {
+				array_pop($out);
+			}
 		}
 
 		return $out;
@@ -390,7 +396,7 @@ class SeasonService
 		$seasonId = (int) $config->season_id;
 		$this->ingestWallet($config, true);
 
-		$ranking = $this->store->rankingRows($uni);
+		$ranking = $this->store->rankingRows($uni, $seasonId);
 		$snapshots = [];
 		foreach ($ranking as $row) {
 			$snapshots[] = [

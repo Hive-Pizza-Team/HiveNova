@@ -78,7 +78,7 @@ class InMemorySeasonStore implements SeasonStore
 		return $sum;
 	}
 
-	public function rankingRows(int $universe): array
+	public function rankingRows(int $universe, int $seasonId): array
 	{
 		return $this->ranking;
 	}

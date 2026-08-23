@@ -137,6 +137,7 @@ $LNG['registerErrorMailExist']		= 'Bu email zaten kayıtlı!';
 $LNG['registerErrorRules']			= 'Oyuna başlamadan önce kuralları kabul etmelisiniz!';
 $LNG['registerErrorCaptcha']		= 'Güvenlik kodu doğru değil!';
 $LNG['registerErrorHiveAccountInvalid']	= 'Geçerli bir Hive hesabı girmelisiniz!';
+$LNG['registerErrorHiveSignature']	= 'Hive Keychain imzası eksik veya geçersiz!';
 $LNG['registerErrorHiveAccountExist']	= 'Hive hesabı zaten kayıtlı!';
 
 $LNG['registerMailVertifyTitle']	= 'Activation of registration on the game: %s';
