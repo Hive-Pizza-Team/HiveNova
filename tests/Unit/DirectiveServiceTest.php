@@ -72,15 +72,47 @@ class DirectiveServiceTest extends TestCase
 		DirectiveService::selectDirective(10, 1, DirectiveCatalog::INDUSTRIAL);
 		$this->db->userDirectives[0]['completed_at'] = TIMESTAMP;
 		$this->db->planets[5] = ['id' => 5, 'metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+		$this->db->statpoints[10] = DirectiveCatalog::REWARD_REFERENCE_POINTS;
 
 		$first = DirectiveService::claimReward(10, 1, 5);
-		$this->assertGreaterThanOrEqual(50000, $first['metal']);
-		$this->assertGreaterThanOrEqual(25000, $first['crystal']);
+		$this->assertSame(50000, $first['metal']);
+		$this->assertSame(25000, $first['crystal']);
 		$this->assertSame(50000, $this->db->planets[5]['metal']);
 
 		$this->expectException(RuntimeException::class);
 		$this->expectExceptionMessage(DirectiveService::ERROR_CLAIMED);
 		DirectiveService::claimReward(10, 1, 5);
+	}
+
+	public function testClaimRewardScalesDownForDayOnePoints(): void
+	{
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::INDUSTRIAL);
+		$this->db->userDirectives[0]['completed_at'] = TIMESTAMP;
+		$this->db->planets[5] = ['id' => 5, 'metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+
+		$reward = DirectiveService::claimReward(10, 1, 5);
+		$expected = DirectiveCatalog::scaledReward(
+			DirectiveCatalog::get(DirectiveCatalog::INDUSTRIAL)['reward'],
+			0
+		);
+		$this->assertSame($expected, $reward);
+		$this->assertSame(2500, $reward['metal']);
+		$this->assertSame(1250, $this->db->planets[5]['crystal']);
+	}
+
+	public function testRewardFactorFloorsThenTracksPoints(): void
+	{
+		$this->assertSame(0.05, DirectiveCatalog::rewardFactor(0));
+		$this->assertSame(0.05, DirectiveCatalog::rewardFactor(500));
+		$this->assertSame(1.0, DirectiveCatalog::rewardFactor(10000));
+		$this->assertSame(2.0, DirectiveCatalog::rewardFactor(20000));
+		$this->assertSame(
+			['metal' => 80000, 'crystal' => 40000, 'deuterium' => 30000],
+			DirectiveCatalog::scaledReward(
+				DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['reward'],
+				20000
+			)
+		);
 	}
 
 	public function testModuleDisabledRejectsSelect(): void
@@ -175,6 +207,9 @@ class DirectiveServiceTest extends TestCase
 		$data = DirectiveService::getBriefingData(10, 1);
 		$this->assertTrue($data['enabled']);
 		$this->assertSame(DirectiveCatalog::EXPLORATION, $data['directive']['key']);
+		$this->assertSame(1500, $data['directive']['reward']['metal']);
+		$this->assertSame(1500, $data['directive']['reward']['crystal']);
+		$this->assertSame(1000, $data['directive']['reward']['deuterium']);
 		$this->assertFalse($data['directive']['completed']);
 		$this->assertNotEmpty($data['csrf']);
 		$this->assertCount(1, $data['expeditions']);
