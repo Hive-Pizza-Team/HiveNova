@@ -117,15 +117,19 @@ class ExpeditionChoiceService
 		$crystal = (int) ($baseReward['crystal'] ?? 0);
 		$deuterium = (int) ($baseReward['deuterium'] ?? 0);
 		$ships = is_array($baseReward['ships'] ?? null) ? $baseReward['ships'] : [];
+		$riskShips = is_array($baseReward['fleet_array'] ?? null) ? $baseReward['fleet_array'] : [];
+		if ($riskShips === []) {
+			$riskShips = $ships;
+		}
 
 		$scale = static function (int $amount, float $factor) use ($yield): int {
 			return (int) floor($amount * $factor * $yield);
 		};
 
 		$lossShips = [];
-		if ($loss > 0 && $ships !== []) {
-			$firstId = (int) array_key_first($ships);
-			$have = (int) $ships[$firstId];
+		if ($loss > 0 && $riskShips !== []) {
+			$firstId = (int) array_key_first($riskShips);
+			$have = (int) $riskShips[$firstId];
 			$lossAmount = max(1, (int) floor($have * $loss));
 			$lossShips[$firstId] = min($have, $lossAmount);
 		}
@@ -216,10 +220,12 @@ class ExpeditionChoiceService
 		array $baseReward,
 		array $fleetArray
 	): void {
+		$reward = $baseReward;
+		$reward['fleet_array'] = $fleetArray;
 		$options = [
 			'fleet_array' => $fleetArray,
 			'planet_id' => $fleetStartId,
-			'branches' => self::buildOptions($encounterKey, $stance, $baseReward),
+			'branches' => self::buildOptions($encounterKey, $stance, $reward),
 		];
 		Database::get()->insert(
 			'INSERT INTO %%EXPEDITION_PENDING_CHOICES%%
@@ -273,7 +279,7 @@ class ExpeditionChoiceService
 
 			$choice = $branches[$branchKey];
 			$planetId = (int) ($payload['planet_id'] ?? $row['fleet_start_id']);
-			self::applyPlanetDeltas($db, $planetId, $choice);
+			self::applyChoiceDeltas($db, (int) $row['fleet_id'], $planetId, $choice, is_array($payload) ? $payload : []);
 
 			$db->update(
 				'UPDATE %%EXPEDITION_PENDING_CHOICES%% SET resolved_at = :resolved WHERE fleet_id = :fleetId AND resolved_at IS NULL',
@@ -343,6 +349,74 @@ class ExpeditionChoiceService
 		}
 
 		return $out;
+	}
+
+	/**
+	 * @param array<string, mixed> $choice
+	 * @param array<string, mixed> $payload
+	 */
+	private static function applyChoiceDeltas(DatabaseInterface $db, int $fleetId, int $planetId, array $choice, array $payload): void
+	{
+		$fleet = $db->selectSingle(
+			'SELECT fleet_id, fleet_array, fleet_resource_metal, fleet_resource_crystal, fleet_resource_deuterium
+			FROM %%FLEETS%% WHERE fleet_id = :fleetId',
+			[':fleetId' => $fleetId]
+		);
+		if (is_array($fleet) && !empty($fleet['fleet_id'])) {
+			self::applyFleetDeltas($db, $fleet, $choice);
+			return;
+		}
+
+		self::applyPlanetDeltas($db, $planetId, $choice);
+	}
+
+	/**
+	 * @param array<string, mixed> $fleet
+	 * @param array<string, mixed> $choice
+	 */
+	private static function applyFleetDeltas(DatabaseInterface $db, array $fleet, array $choice): void
+	{
+		$ships = FleetFunctions::unserialize((string) ($fleet['fleet_array'] ?? ''));
+		foreach (is_array($choice['ships'] ?? null) ? $choice['ships'] : [] as $id => $count) {
+			$id = (int) $id;
+			$ships[$id] = (int) ($ships[$id] ?? 0) + (int) $count;
+		}
+		foreach (is_array($choice['loss_ships'] ?? null) ? $choice['loss_ships'] : [] as $id => $count) {
+			$id = (int) $id;
+			$ships[$id] = max(0, (int) ($ships[$id] ?? 0) - (int) $count);
+			if ($ships[$id] === 0) {
+				unset($ships[$id]);
+			}
+		}
+
+		$parts = [];
+		$total = 0;
+		foreach ($ships as $id => $count) {
+			$count = (int) $count;
+			if ($count <= 0) {
+				continue;
+			}
+			$parts[] = ((int) $id) . ',' . $count;
+			$total += $count;
+		}
+
+		$db->update(
+			'UPDATE %%FLEETS%% SET
+				fleet_array = :fleetArray,
+				fleet_amount = :amount,
+				fleet_resource_metal = fleet_resource_metal + :metal,
+				fleet_resource_crystal = fleet_resource_crystal + :crystal,
+				fleet_resource_deuterium = fleet_resource_deuterium + :deuterium
+			WHERE fleet_id = :fleetId',
+			[
+				':fleetArray' => $parts === [] ? '' : implode(';', $parts) . ';',
+				':amount' => $total,
+				':metal' => (int) ($choice['metal'] ?? 0),
+				':crystal' => (int) ($choice['crystal'] ?? 0),
+				':deuterium' => (int) ($choice['deuterium'] ?? 0),
+				':fleetId' => (int) $fleet['fleet_id'],
+			]
+		);
 	}
 
 	/**

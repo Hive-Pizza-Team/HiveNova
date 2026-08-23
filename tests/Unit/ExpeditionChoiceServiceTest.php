@@ -207,4 +207,38 @@ class ExpeditionChoiceServiceTest extends TestCase
 		$this->assertNotEmpty($choice['loss_ships']);
 		$this->assertGreaterThan(0, $this->db->planets[8]['ship_delta']);
 	}
+
+	public function testResolveBranchAppliesDeltasToLivingFleet(): void
+	{
+		$this->db->planets[8] = ['id' => 8, 'metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+		$this->db->fleets[] = [
+			'fleet_id' => 21,
+			'fleet_owner' => 2,
+			'fleet_array' => '202,10;',
+			'fleet_amount' => 10,
+			'fleet_resource_metal' => 0,
+			'fleet_resource_crystal' => 0,
+			'fleet_resource_deuterium' => 0,
+		];
+		ExpeditionChoiceService::createPendingBranch(21, 2, 8, 'resource_find', 'balanced', [
+			'metal' => 1000,
+			'crystal' => 0,
+			'deuterium' => 0,
+		], [202 => 10]);
+		$choice = ExpeditionChoiceService::resolveBranch(21, 2, 'balanced');
+		$this->assertSame($choice['metal'], $this->db->fleets[0]['fleet_resource_metal']);
+		$this->assertSame(0, $this->db->planets[8]['metal']);
+	}
+
+	public function testAggressiveBranchRisksExpeditionFleetShips(): void
+	{
+		$options = ExpeditionChoiceService::buildOptions('resource_find', 'aggressive', [
+			'metal' => 100,
+			'crystal' => 0,
+			'deuterium' => 0,
+			'fleet_array' => [202 => 10],
+		]);
+		$this->assertNotEmpty($options['aggressive']['loss_ships']);
+		$this->assertSame(202, array_key_first($options['aggressive']['loss_ships']));
+	}
 }

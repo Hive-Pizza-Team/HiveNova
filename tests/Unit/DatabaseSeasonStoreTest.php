@@ -59,10 +59,11 @@ class DatabaseSeasonStoreTest extends TestCase
 			['user_id' => 10, 'hive_account' => 'aliceaaa', 'authlevel' => 0, 'points' => 9, 'rank' => 0],
 			['user_id' => 11, 'hive_account' => 'bobbbbbb', 'authlevel' => 0, 'points' => 3, 'rank' => 0],
 		];
-		$rows = (new DatabaseSeasonStore())->rankingRows(2);
+		$rows = (new DatabaseSeasonStore())->rankingRows(2, 1);
 		$this->assertSame(1, $rows[0]['rank']);
 		$this->assertSame(2, $rows[1]['rank']);
 		$this->assertStringContainsString('%%STATPOINTS%%', $this->db->selects[0][0]);
+		$this->assertStringContainsString('%%SEASON_ENTRIES%%', $this->db->selects[0][0]);
 	}
 
 	public function testPayoutLifecycleSql(): void

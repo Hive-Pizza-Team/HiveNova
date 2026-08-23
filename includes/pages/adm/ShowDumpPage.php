@@ -20,7 +20,7 @@ use HiveNova\Core\SQLDumper;
 use HiveNova\Core\Template;
 
 
-if ($USER['authlevel'] == AUTH_USR)
+if ($USER['authlevel'] < AUTH_ADM)
 {
 	throw new PagePermissionException("Permission error!");
 }
@@ -155,7 +155,7 @@ function ShowDumpPage()
 	switch($_POST['action'])
 	{
 		case 'dump':
-			$dbTables	= HTTP::_GP('dbtables', array());
+			$dbTables	= SQLDumper::filterAllowedTables(HTTP::_GP('dbtables', array()), dumpPageGetTableNames());
 			if(empty($dbTables)) {
 				$template	= new Template();
 				$template->message($LNG['du_not_tables_selected']);

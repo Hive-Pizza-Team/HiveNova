@@ -22,7 +22,42 @@ use Exception;
  */
 
 class SQLDumper
-{	
+{
+	/**
+	 * @param list<mixed> $requested
+	 * @param list<string> $allowed
+	 * @return list<string>
+	 */
+	public static function filterAllowedTables(array $requested, array $allowed): array
+	{
+		$allow = [];
+		foreach ($allowed as $name) {
+			$name = (string) $name;
+			if ($name !== '' && preg_match('/^[A-Za-z0-9_]+$/', $name) === 1) {
+				$allow[$name] = true;
+			}
+		}
+
+		$out = [];
+		foreach ($requested as $name) {
+			$name = (string) $name;
+			if (isset($allow[$name])) {
+				$out[] = $name;
+			}
+		}
+
+		return $out;
+	}
+
+	public static function quoteIdentifier(string $name): string
+	{
+		if (preg_match('/^[A-Za-z0-9_]+$/', $name) !== 1) {
+			throw new Exception('Invalid SQL identifier.');
+		}
+
+		return '`' . $name . '`';
+	}
+
 	public function dumpTablesToFile($dbTables, $filePath)
 	{
 		if($this->canNative('mysqldump'))
@@ -97,14 +132,15 @@ class SQLDumper
 
 		foreach($dbTables as $dbTable)
 		{
+			$quotedTable	= self::quoteIdentifier((string) $dbTable);
 			$numColumns	= array();
 			$firstRow	= true;
 
-			fwrite($fp, "--\n-- Table structure for table `{$dbTable}`\n--\n\nDROP TABLE IF EXISTS `{$dbTable}`;
+			fwrite($fp, "--\n-- Table structure for table {$quotedTable}\n--\n\nDROP TABLE IF EXISTS {$quotedTable};
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;\n\n");
 
-			$createTable	= $db->nativeQuery("SHOW CREATE TABLE ".$dbTable);
+			$createTable	= $db->nativeQuery("SHOW CREATE TABLE ".$quotedTable);
             $createTableSql = isset($createTable['Create Table']) ?
                 $createTable['Create Table'] : (
                 #old mysql clients
@@ -120,26 +156,26 @@ class SQLDumper
 			fwrite($fp, $createTableSql.';');
 			fwrite($fp, "\n\n/*!40101 SET character_set_client = @saved_cs_client */;");
 
-			$sql = "SELECT COUNT(*) as state FROM ".$dbTable.";";
+			$sql = "SELECT COUNT(*) as state FROM ".$quotedTable.";";
 
 			$count	= $db->nativeQuery($sql);
 			if($count[0]['state'] == 0)
 			{
-				fwrite($fp, "\n\n--\n-- No data for table `{$dbTable}`\n--\n\n");
+				fwrite($fp, "\n\n--\n-- No data for table {$quotedTable}\n--\n\n");
 				continue;
 			}
 
 			fwrite($fp, "
 			
 --
--- Dumping data for table `{$dbTable}`
+-- Dumping data for table {$quotedTable}
 --
 
-LOCK TABLES `{$dbTable}` WRITE;
+LOCK TABLES {$quotedTable} WRITE;
 /*!40000 ALTER TABLE `{$dbTable}` DISABLE KEYS */;
 
 ");
-			$columnsData	= $db->nativeQuery("SHOW COLUMNS FROM `".$dbTable."`");
+			$columnsData	= $db->nativeQuery("SHOW COLUMNS FROM ".$quotedTable);
 			$columnNames	= array();
 			foreach($columnsData as $columnData)
 			{
@@ -154,11 +190,11 @@ LOCK TABLES `{$dbTable}` WRITE;
 				}
 			}
 			
-			$insertInto	= "INSERT INTO `{$dbTable}` (`".implode("`, `", $columnNames)."`) VALUES\r\n";
+			$insertInto	= "INSERT INTO ".$quotedTable." (`".implode("`, `", $columnNames)."`) VALUES\r\n";
 			
 			fwrite($fp, $insertInto);
 			$i = 0;
-			$tableData	= $db->select("SELECT * FROM ".$dbTable);
+			$tableData	= $db->select("SELECT * FROM ".$quotedTable);
 			foreach($tableData as $tableRow)
 			{
 				$rowData = array();

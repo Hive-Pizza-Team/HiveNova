@@ -92,6 +92,11 @@ HTML;
 		}
 
 		$targetUser		= $this->getUser((int) $targetPlanet['id_owner']);
+		if ($targetUser === []) {
+			$this->setState(FLEET_RETURN);
+			$this->SaveFleet();
+			return;
+		}
 		$targetUser['factor']	= getFactors($targetUser, 'basic', $this->_fleet['fleet_start_time']);
 
 		$planetUpdater	= new ResourceUpdate();
@@ -183,8 +188,8 @@ HTML;
 
 		require_once 'includes/classes/missions/functions/calculateAttack.php';
 
-		$fleetIntoDebris	= Config::get($this->_fleet['fleet_universe'])->Fleet_Cdr;
-		$defIntoDebris		= Config::get($this->_fleet['fleet_universe'])->Defs_Cdr;
+		$fleetIntoDebris	= Config::get($this->_fleet['fleet_universe'])->Fleet_Cdr / 100;
+		$defIntoDebris		= Config::get($this->_fleet['fleet_universe'])->Defs_Cdr / 100;
 
 		$combatResult 		= calculateAttack($fleetAttack, $fleetDefend, $fleetIntoDebris, $defIntoDebris);
 
@@ -359,11 +364,18 @@ HTML;
 			'fleetDestroySuccess'	=> false,
 		);
 
+		$destroyedMoonParentId	= null;
+
 		switch($combatResult['won'])
 		{
 			// Win
 			case "a":
-				$moonDestroyChance	= round((100 - sqrt($targetPlanet['diameter'])) * sqrt($fleetAttack[$this->_fleet['fleet_id']]['unit'][214]), 1);
+				$deathstars	= 0.0;
+				foreach ($fleetAttack as $attackFleetDetail)
+				{
+					$deathstars	+= (float) ($attackFleetDetail['unit'][214] ?? 0);
+				}
+				$moonDestroyChance	= round((100 - sqrt((float) ($targetPlanet['diameter'] ?? 0))) * sqrt($deathstars), 1);
 
 				// Max 100% | Min 0%
 				$moonDestroyChance	= min($moonDestroyChance, 100);
@@ -390,9 +402,9 @@ HTML;
 
 					$sql		= 'UPDATE %%FLEETS%% SET
 					fleet_end_type	= 1,
-					fleet_end_id	= :moonId,
+					fleet_end_id	= :planetId,
 					fleet_mission	= IF(fleet_mission = 9, 1, fleet_mission)
-					WHERE fleet_end_id = :planetId
+					WHERE fleet_end_id = :moonId
 					AND fleet_id != :fleetId;';
 
 					$db->update($sql, array(
@@ -417,6 +429,7 @@ HTML;
 					));
 
 					PlayerUtil::deletePlanet($targetPlanet['id']);
+					$destroyedMoonParentId	= $planetID;
 
 					$reportInfo['moonDestroySuccess'] = 1;
 					\HiveNova\Core\FeatHooks::afterMoonDestroyed(
@@ -553,6 +566,13 @@ HTML;
 			$debrisType	= 'id';
 		}
 
+		$debrisPlanetId	= $this->_fleet['fleet_end_id'];
+		if (!empty($destroyedMoonParentId))
+		{
+			$debrisType		= 'id';
+			$debrisPlanetId	= $destroyedMoonParentId;
+		}
+
 		$sql = 'UPDATE %%PLANETS%% SET
 		der_metal	= :metal,
 		der_crystal	= :crystal
@@ -561,7 +581,7 @@ HTML;
 		$db->update($sql, array(
 			':metal'	=> $planetDebris[901],
 			':crystal'	=> $planetDebris[902],
-			':planetId'	=> $this->_fleet['fleet_end_id']
+			':planetId'	=> $debrisPlanetId
 		));
 
 		$sql = 'UPDATE %%PLANETS%% SET

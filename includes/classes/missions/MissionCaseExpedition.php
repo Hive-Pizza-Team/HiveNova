@@ -412,7 +412,7 @@ class MissionCaseExpedition extends MissionFunctions implements Mission
 				$Message = ($LNG['sys_expe_choice_pending'] ?? $Message) . '<br><a href="game.php?page=overview#commander">'.$LNG['cm_pending_choice'].'</a>';
 			} else {
 				$this->UpdateFleet('fleet_array', $NewFleetArray);
-				$this->UpdateFleet('fleet_amount', array_sum($fleetArray));
+				$this->UpdateFleet('fleet_amount', array_sum(\HiveNova\Core\FleetFunctions::unserialize($NewFleetArray)));
 			}
 		}
 		
@@ -554,7 +554,7 @@ HTML;
 			$fleetDefend[0]['unit']		= $targetFleetData;
 
 			require_once 'includes/classes/missions/functions/calculateAttack.php';
-			$combatResult	= calculateAttack($fleetAttack, $fleetDefend, $config->Fleet_Cdr, $config->Defs_Cdr);
+			$combatResult	= calculateAttack($fleetAttack, $fleetDefend, $config->Fleet_Cdr / 100, $config->Defs_Cdr / 100);
 
 			$fleetArray = '';
 			$totalCount = 0;

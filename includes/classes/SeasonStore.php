@@ -26,7 +26,7 @@ interface SeasonStore
 	/**
 	 * @return list<array{user_id: int, hive_account: string, authlevel: int, points: int, rank: int}>
 	 */
-	public function rankingRows(int $universe): array;
+	public function rankingRows(int $universe, int $seasonId): array;
 
 	/**
 	 * @param list<array{user_id: int, hive_account: string, rank: int, points: int}> $rows

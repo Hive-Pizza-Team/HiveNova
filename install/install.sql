@@ -779,6 +779,7 @@ CREATE TABLE `%PREFIX%season_payouts` (
   `trx_id` varchar(80) NOT NULL DEFAULT '',
   `status` varchar(16) NOT NULL DEFAULT 'pending',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `universe_season_user` (`universe`,`season_id`,`user_id`),
   KEY `universe_season_status` (`universe`,`season_id`,`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

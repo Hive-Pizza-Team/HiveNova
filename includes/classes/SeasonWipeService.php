@@ -36,6 +36,13 @@ class SeasonWipeService
 		$planet[] = '`metal` = :metal';
 		$planet[] = '`crystal` = :crystal';
 		$planet[] = '`deuterium` = :deuterium';
+		$planet[] = '`last_update` = :now';
+		$planet[] = '`eco_hash` = \'\'';
+		$planet[] = '`metal_perhour` = \'0\'';
+		$planet[] = '`crystal_perhour` = \'0\'';
+		$planet[] = '`deuterium_perhour` = \'0\'';
+		$planet[] = '`energy` = \'0\'';
+		$planet[] = '`energy_used` = \'0\'';
 
 		$user = [];
 		foreach (['tech', 'officier', 'dmfunc'] as $group) {
@@ -74,15 +81,19 @@ class SeasonWipeService
 				[':uni' => $universe, ':uni2' => $universe]
 			);
 
-			$planetSql = $this->planetSetSql !== '' ? $this->planetSetSql : '`metal` = :metal, `crystal` = :crystal, `deuterium` = :deuterium';
+			$planetSql = $this->planetSetSql !== '' ? $this->planetSetSql : '`metal` = :metal, `crystal` = :crystal, `deuterium` = :deuterium, `last_update` = :now';
+			$planetParams = [
+				':uni'       => $universe,
+				':metal'     => (int) $config->metal_start,
+				':crystal'   => (int) $config->crystal_start,
+				':deuterium' => (int) $config->deuterium_start,
+			];
+			if (str_contains($planetSql, ':now')) {
+				$planetParams[':now'] = defined('TIMESTAMP') ? TIMESTAMP : time();
+			}
 			$db->update(
 				'UPDATE %%PLANETS%% SET ' . $planetSql . ' WHERE `universe` = :uni',
-				[
-					':uni'       => $universe,
-					':metal'     => (int) $config->metal_start,
-					':crystal'   => (int) $config->crystal_start,
-					':deuterium' => (int) $config->deuterium_start,
-				]
+				$planetParams
 			);
 
 			$userSql = $this->userSetSql !== '' ? $this->userSetSql : '`darkmatter` = :darkmatter';
@@ -97,6 +108,15 @@ class SeasonWipeService
 			$db->delete('DELETE FROM %%STATPOINTS%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%TOPKB%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%NOTES%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete(
+				'DELETE FROM %%USER_DIRECTIVES%% WHERE `user_id` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%EXPEDITION_PENDING_CHOICES%% WHERE `user_id` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete('DELETE FROM %%DIRECTIVE_PERIODS%% WHERE `universe` = :uni', $paramsUni);
 			$db->commit();
 		} catch (\Throwable $e) {
 			$db->rollback();

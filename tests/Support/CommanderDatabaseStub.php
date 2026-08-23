@@ -85,9 +85,15 @@ class CommanderDatabaseStub implements DatabaseInterface
 		}
 		if (str_contains($qry, '%%FLEETS%%')) {
 			$userId = (int) ($params[':userId'] ?? 0);
+			$fleetId = (int) ($params[':fleetId'] ?? 0);
 			return array_values(array_filter(
 				$this->fleets,
-				static fn (array $row): bool => $userId === 0 || (int) $row['fleet_owner'] === $userId
+				static function (array $row) use ($userId, $fleetId): bool {
+					if ($fleetId !== 0 && (int) $row['fleet_id'] !== $fleetId) {
+						return false;
+					}
+					return $userId === 0 || (int) $row['fleet_owner'] === $userId;
+				}
 			));
 		}
 
@@ -198,6 +204,29 @@ class CommanderDatabaseStub implements DatabaseInterface
 			$fleetId = (int) ($params[':fleetId'] ?? 0);
 			if (isset($this->pendingChoices[$fleetId])) {
 				$this->pendingChoices[$fleetId]['resolved_at'] = $params[':resolved'] ?? TIMESTAMP;
+				$this->lastRowCount = 1;
+			}
+			return true;
+		}
+		if (str_contains($qry, '%%FLEETS%%')) {
+			$fleetId = (int) ($params[':fleetId'] ?? 0);
+			foreach ($this->fleets as $i => $row) {
+				if ((int) $row['fleet_id'] !== $fleetId) {
+					continue;
+				}
+				if (isset($params[':fleetArray'])) {
+					$this->fleets[$i]['fleet_array'] = $params[':fleetArray'];
+				}
+				if (isset($params[':amount'])) {
+					$this->fleets[$i]['fleet_amount'] = $params[':amount'];
+				}
+				foreach (['metal', 'crystal', 'deuterium'] as $res) {
+					$key = ':' . $res;
+					if (isset($params[$key])) {
+						$field = 'fleet_resource_' . $res;
+						$this->fleets[$i][$field] = (int) ($this->fleets[$i][$field] ?? 0) + (int) $params[$key];
+					}
+				}
 				$this->lastRowCount = 1;
 			}
 			return true;

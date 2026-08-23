@@ -133,6 +133,7 @@ $LNG['registerErrorMailExist']		= 'Taki e-mail jest już używany!';
 $LNG['registerErrorRules']			= 'Musisz zaakceptować regulamin!';
 $LNG['registerErrorCaptcha']		= 'Podałeś zły kod!';
 $LNG['registerErrorHiveAccountInvalid']	= 'Musisz podać prawidłowe konto Hive!';
+$LNG['registerErrorHiveSignature']	= 'Podpis Hive Keychain jest nieobecny lub nieprawidłowy!';
 $LNG['registerErrorHiveAccountExist']	= 'Konto Hive jest już zarejestrowane!';
 
 $LNG['registerMailVertifyTitle']	= 'Musisz potwierdzić rejestrację: %s';

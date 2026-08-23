@@ -47,12 +47,17 @@ class Cronjob
 			throw new Exception(sprintf("Unknown cronjob %s or cronjob is deactive!", $cronjobID));
 		}
 		
-		$sql = 'UPDATE %%CRONJOBS%% SET `lock` = :lock WHERE cronjobID = :cronjobId;';
+		$sql = 'UPDATE %%CRONJOBS%% SET `lock` = :lock WHERE cronjobID = :cronjobId AND `lock` IS NULL;';
 
 		$db->update($sql, array(
 			':lock'			=> $lockToken,
 			':cronjobId'	=> $cronjobID
 		));
+
+		if ($db->rowCount() < 1)
+		{
+			throw new Exception(sprintf("Cronjob %s is already locked!", $cronjobID));
+		}
 		
 		/** @var \HiveNova\Cronjob\CronjobTask $cronjobObj */
 		$cronjobObj			= new $cronjobClassName;

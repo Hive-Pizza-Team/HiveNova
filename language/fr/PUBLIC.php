@@ -122,6 +122,7 @@ $LNG['registerErrorMailExist']		= 'L\'adresse e-mail est dèjà enregistrè!';
 $LNG['registerErrorRules']			= 'Vous devez accepter les règles!';
 $LNG['registerErrorCaptcha']		= 'Le code de sècuritè est incorrect!';
 $LNG['registerErrorHiveAccountInvalid']	= 'Vous devez entrer un compte Hive valide!';
+$LNG['registerErrorHiveSignature']	= 'La signature Hive Keychain est manquante ou invalide!';
 $LNG['registerErrorHiveAccountExist']	= 'Le compte Hive est déjà enregistré!';
 
 $LNG['registerMailVertifyTitle']	= 'Activation de l\'enregistrement sur le jeu: %s';
