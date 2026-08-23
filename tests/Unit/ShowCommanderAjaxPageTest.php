@@ -124,6 +124,25 @@ class ShowCommanderAjaxPageTest extends TestCase
 		$this->assertSame('cross_origin', $page->jsonResponse['error']);
 	}
 
+	public function testClaimRewardCreditsSessionPlanet(): void
+	{
+		DirectiveService::selectDirective(4, 1, DirectiveCatalog::INDUSTRIAL);
+		$this->db->userDirectives[0]['completed_at'] = TIMESTAMP;
+		$this->db->planets[9] = ['id' => 9, 'metal' => 100, 'crystal' => 50, 'deuterium' => 25];
+		$GLOBALS['PLANET'] = ['id' => 9, 'metal' => 100, 'crystal' => 50, 'deuterium' => 25];
+		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
+
+		$page = $this->page();
+		$page->claimReward();
+
+		$this->assertTrue($page->jsonResponse['ok']);
+		$reward = $page->jsonResponse['reward'];
+		$this->assertEquals(100 + $reward['metal'], $GLOBALS['PLANET']['metal']);
+		$this->assertEquals(50 + $reward['crystal'], $GLOBALS['PLANET']['crystal']);
+		$this->assertEquals(25 + $reward['deuterium'], $GLOBALS['PLANET']['deuterium']);
+		$this->assertEquals(100 + $reward['metal'], $this->db->planets[9]['metal']);
+	}
+
 	public function testResolveBranchHttpLayer(): void
 	{
 		$this->db->planets[9] = ['id' => 9, 'metal' => 0, 'crystal' => 0, 'deuterium' => 0];

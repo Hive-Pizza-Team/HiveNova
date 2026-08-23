@@ -81,9 +81,11 @@ class ExpeditionChoiceServiceTest extends TestCase
 			'deuterium' => 0,
 		], [202 => 5]);
 
+		$GLOBALS['PLANET'] = ['id' => 12, 'metal' => 0, 'crystal' => 0, 'deuterium' => 0, 'light_cargo' => 5];
 		$choice = ExpeditionChoiceService::resolveBranch(77, 4, 'aggressive');
 		$this->assertGreaterThan(1000, $choice['metal']);
 		$this->assertSame($choice['metal'], $this->db->planets[12]['metal']);
+		$this->assertEquals($choice['metal'], $GLOBALS['PLANET']['metal']);
 		$this->assertNotEmpty($this->db->pendingChoices[77]['resolved_at']);
 
 		$this->expectException(RuntimeException::class);

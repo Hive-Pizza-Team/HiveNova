@@ -12,6 +12,8 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 {
 	public static $requireModule = 0;
 
+	protected $disableEcoSystem = true;
+
 	public function __construct()
 	{
 		parent::__construct();

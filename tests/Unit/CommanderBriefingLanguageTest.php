@@ -25,4 +25,10 @@ class CommanderBriefingLanguageTest extends TestCase
 		$this->assertStringContainsString('cm_stance_{$commanderBriefing.directive.recommended_stance}', $tpl);
 		$this->assertStringContainsString('cm_stance_{$expe.stance}', $tpl);
 	}
+
+	public function testClaimPostsAsAjaxSoEcoSaveDoesNotRun(): void
+	{
+		$js = (string) file_get_contents(ROOT_PATH . 'scripts/game/commander-briefing.js');
+		$this->assertStringContainsString("page=commanderAjax&mode=' + mode + '&ajax=1'", $js);
+	}
 }

@@ -84,6 +84,42 @@ class DirectiveServiceTest extends TestCase
 		DirectiveService::claimReward(10, 1, 5);
 	}
 
+	public function testClaimRewardUpdatesSessionPlanetSoEcoSaveCannotClobber(): void
+	{
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::INDUSTRIAL);
+		$this->db->userDirectives[0]['completed_at'] = TIMESTAMP;
+		$this->db->planets[5] = ['id' => 5, 'metal' => 100, 'crystal' => 50, 'deuterium' => 25];
+		$GLOBALS['PLANET'] = ['id' => 5, 'metal' => 100, 'crystal' => 50, 'deuterium' => 25];
+
+		$reward = DirectiveService::claimReward(10, 1, 5);
+
+		$this->assertEquals(100 + $reward['metal'], $GLOBALS['PLANET']['metal']);
+		$this->assertEquals(50 + $reward['crystal'], $GLOBALS['PLANET']['crystal']);
+		$this->assertEquals(25 + $reward['deuterium'], $GLOBALS['PLANET']['deuterium']);
+
+		// AbstractGamePage::sendJSON() writes absolute session amounts back to DB.
+		$this->db->planets[5]['metal'] = $GLOBALS['PLANET']['metal'];
+		$this->db->planets[5]['crystal'] = $GLOBALS['PLANET']['crystal'];
+		$this->db->planets[5]['deuterium'] = $GLOBALS['PLANET']['deuterium'];
+		$this->assertEquals(100 + $reward['metal'], $this->db->planets[5]['metal']);
+		$this->assertEquals(50 + $reward['crystal'], $this->db->planets[5]['crystal']);
+		$this->assertEquals(25 + $reward['deuterium'], $this->db->planets[5]['deuterium']);
+	}
+
+	public function testClaimRewardDoesNotMutateUnrelatedSessionPlanet(): void
+	{
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::INDUSTRIAL);
+		$this->db->userDirectives[0]['completed_at'] = TIMESTAMP;
+		$this->db->planets[5] = ['id' => 5, 'metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+		$GLOBALS['PLANET'] = ['id' => 99, 'metal' => 10, 'crystal' => 10, 'deuterium' => 10];
+
+		DirectiveService::claimReward(10, 1, 5);
+
+		$this->assertSame(10, $GLOBALS['PLANET']['metal']);
+		$this->assertSame(10, $GLOBALS['PLANET']['crystal']);
+		$this->assertSame(10, $GLOBALS['PLANET']['deuterium']);
+	}
+
 	public function testClaimRewardScalesDownForDayOnePoints(): void
 	{
 		DirectiveService::selectDirective(10, 1, DirectiveCatalog::INDUSTRIAL);

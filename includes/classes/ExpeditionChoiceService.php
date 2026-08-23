@@ -352,6 +352,10 @@ class ExpeditionChoiceService
 	{
 		global $resource;
 
+		$metal = (int) ($choice['metal'] ?? 0);
+		$crystal = (int) ($choice['crystal'] ?? 0);
+		$deuterium = (int) ($choice['deuterium'] ?? 0);
+
 		$db->update(
 			'UPDATE %%PLANETS%% SET
 				metal = metal + :metal,
@@ -359,9 +363,9 @@ class ExpeditionChoiceService
 				deuterium = deuterium + :deuterium
 			WHERE id = :planetId',
 			[
-				':metal' => (int) ($choice['metal'] ?? 0),
-				':crystal' => (int) ($choice['crystal'] ?? 0),
-				':deuterium' => (int) ($choice['deuterium'] ?? 0),
+				':metal' => $metal,
+				':crystal' => $crystal,
+				':deuterium' => $deuterium,
 				':planetId' => $planetId,
 			]
 		);
@@ -391,6 +395,35 @@ class ExpeditionChoiceService
 					[':delta' => abs($delta), ':planetId' => $planetId]
 				);
 			}
+		}
+
+		DirectiveService::addResourcesToSessionPlanet($planetId, [
+			'metal' => $metal,
+			'crystal' => $crystal,
+			'deuterium' => $deuterium,
+		]);
+		self::addShipsToSessionPlanet($planetId, $net);
+	}
+
+	/**
+	 * @param array<int, int> $net
+	 */
+	private static function addShipsToSessionPlanet(int $planetId, array $net): void
+	{
+		global $resource;
+
+		if (!isset($GLOBALS['PLANET']) || !is_array($GLOBALS['PLANET'])) {
+			return;
+		}
+		if ((int) ($GLOBALS['PLANET']['id'] ?? 0) !== $planetId) {
+			return;
+		}
+		foreach ($net as $id => $delta) {
+			$col = $resource[$id] ?? null;
+			if (!is_string($col) || $col === '' || $delta === 0) {
+				continue;
+			}
+			$GLOBALS['PLANET'][$col] = max(0, (int) ($GLOBALS['PLANET'][$col] ?? 0) + $delta);
 		}
 	}
 }
