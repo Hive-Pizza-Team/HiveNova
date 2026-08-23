@@ -22,7 +22,7 @@
 					{/if}
 				</div>
 				<p class="commander-briefing__directive-desc">{$LNG[$commanderBriefing.directive.desc_key]}</p>
-				<p class="commander-briefing__suggestion">{$LNG.cm_suggestion}: {$LNG[$commanderBriefing.directive.suggestion_key]} ({$LNG["fl_stance_{$commanderBriefing.directive.recommended_stance}"]})</p>
+				<p class="commander-briefing__suggestion">{$LNG.cm_suggestion}: {$LNG[$commanderBriefing.directive.suggestion_key]} ({$LNG["cm_stance_{$commanderBriefing.directive.recommended_stance}"]})</p>
 				<ul class="commander-briefing__progress">
 					{foreach $commanderBriefing.directive.targets as $counter => $need}
 						{assign var="have" value=$commanderBriefing.directive.progress[$counter]|default:0}
@@ -66,7 +66,7 @@
 				<h4 class="commander-briefing__section-title">{$LNG.cm_expeditions}</h4>
 				<ul>
 					{foreach $commanderBriefing.expeditions as $expe}
-						<li><span class="commander-briefing__fleet">#{$expe.fleet_id}</span> {$LNG.cm_stance}: {$LNG["fl_stance_{$expe.stance}"]}</li>
+						<li><span class="commander-briefing__fleet">#{$expe.fleet_id}</span> {$LNG.cm_stance}: {$LNG["cm_stance_{$expe.stance}"]}</li>
 					{/foreach}
 				</ul>
 			</div>
