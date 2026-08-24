@@ -103,16 +103,21 @@ class MissionFunctions
 
 		foreach ($fleetData as $shipId => $shipAmount)
 		{
-			$updateQuery[]	= "p.`".$resource[$shipId]."` = p.`".$resource[$shipId]."` + :".$resource[$shipId];
-			$param[':'.$resource[$shipId]]	= $shipAmount;
+			$col = $resource[$shipId] ?? null;
+			if (!is_string($col) || $col === '') {
+				continue;
+			}
+			$updateQuery[]	= "p.`".$col."` = p.`".$col."` + :".$col;
+			$param[':'.$col]	= $shipAmount;
 		}
 
+		$updateQuery[]	= 'p.`metal` = p.`metal` + :metal';
+		$updateQuery[]	= 'p.`crystal` = p.`crystal` + :crystal';
+		$updateQuery[]	= 'p.`deuterium` = p.`deuterium` + :deuterium';
+		$updateQuery[]	= 'u.`darkmatter` = u.`darkmatter` + :darkmatter';
+
 		$sql	= 'UPDATE %%PLANETS%% as p, %%USERS%% as u SET
-		'.implode(', ', $updateQuery).',
-		p.`metal` = p.`metal` + :metal,
-		p.`crystal` = p.`crystal` + :crystal,
-		p.`deuterium` = p.`deuterium` + :deuterium,
-		u.`darkmatter` = u.`darkmatter` + :darkmatter
+		'.implode(', ', $updateQuery).'
 		WHERE p.`id` = :planetId AND u.id = p.id_owner;';
 
 		Database::get()->update($sql, $param);
