@@ -63,6 +63,67 @@ class PlayerUtilBadgesTest extends TestCase
         $this->assertStringContainsString('combat_first_win', $html);
     }
 
+    public function test_getAchievementBadges_prefers_showcase_order(): void
+    {
+        $fake = new FakeDatabase();
+        $this->swapDatabaseInstance($fake);
+        $ach = $fake->achievement;
+        $ach->addAchievement([
+            'id'               => 2,
+            'key'              => 'low_points_pick',
+            'category'         => 'combat',
+            'name_key'         => 'n',
+            'desc_key'         => 'd',
+            'trigger_type'     => 'combat_wins',
+            'trigger_params'   => '{"threshold":2}',
+            'reward_type'      => 'none',
+            'reward_amount'    => 0,
+            'points'           => 1,
+            'celebration_tier' => 'normal',
+            'hidden'           => 0,
+            'active'           => 1,
+            'universe'         => 1,
+        ]);
+        $ach->unlocked['7:1'] = true;
+        $ach->unlocked['7:2'] = true;
+        $ach->showcase['7:2'] = 1;
+
+        $html = PlayerUtil::getAchievementBadges(7, 5);
+
+        $this->assertStringContainsString('low_points_pick', $html);
+        $this->assertStringNotContainsString('combat_first_win', $html);
+    }
+
+    public function test_getAchievementBadges_falls_back_to_points_when_no_showcase(): void
+    {
+        $fake = new FakeDatabase();
+        $this->swapDatabaseInstance($fake);
+        $ach = $fake->achievement;
+        $ach->addAchievement([
+            'id'               => 2,
+            'key'              => 'high_points',
+            'category'         => 'combat',
+            'name_key'         => 'n',
+            'desc_key'         => 'd',
+            'trigger_type'     => 'combat_wins',
+            'trigger_params'   => '{"threshold":2}',
+            'reward_type'      => 'none',
+            'reward_amount'    => 0,
+            'points'           => 100,
+            'celebration_tier' => 'normal',
+            'hidden'           => 0,
+            'active'           => 1,
+            'universe'         => 1,
+        ]);
+        $ach->unlocked['7:1'] = true;
+        $ach->unlocked['7:2'] = true;
+
+        $html = PlayerUtil::getAchievementBadges(7, 1);
+
+        $this->assertStringContainsString('high_points', $html);
+        $this->assertStringNotContainsString('combat_first_win', $html);
+    }
+
     public function test_getAchievementBadges_returns_empty_when_module_disabled(): void
     {
         $modules = array_fill(0, 50, '1');

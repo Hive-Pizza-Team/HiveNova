@@ -1693,9 +1693,11 @@ CREATE TABLE `%PREFIX%user_achievements` (
   `achievement_id` int(11) unsigned NOT NULL,
   `unlocked_at` int(11) NOT NULL DEFAULT '0',
   `celebrated` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `showcase_order` tinyint(1) unsigned DEFAULT NULL,
   PRIMARY KEY (`user_id`, `achievement_id`),
   KEY `achievement_id` (`achievement_id`),
-  KEY `celebrated` (`user_id`, `celebrated`)
+  KEY `celebrated` (`user_id`, `celebrated`),
+  KEY `showcase` (`user_id`, `showcase_order`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%achievement_grants` (

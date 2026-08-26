@@ -318,6 +318,61 @@ class AchievementServiceExtendedTest extends TestCase
         $this->assertCount(1, $list);
         $this->assertTrue($list[0]['hidden']);
         $this->assertSame('???', $list[0]['name']);
+        $this->assertNull($list[0]['showcase_order']);
+    }
+
+    public function testSetShowcaseCapsAtFiveAndSkipsLocked(): void
+    {
+        $fake = $this->useFake(new FakeAchievementDatabase());
+        $fake->achievementDefinitions = [];
+        for ($i = 1; $i <= 7; $i++) {
+            $fake->addAchievement(array_merge(
+                $this->ach('combat_wins', ['threshold' => $i], $i, 'ach_' . $i),
+                ['points' => $i * 10]
+            ));
+            $fake->unlocked['1:' . $i] = true;
+        }
+        // id 8 not unlocked
+        $fake->addAchievement(array_merge(
+            $this->ach('combat_wins', ['threshold' => 8], 8, 'ach_8'),
+            ['points' => 80]
+        ));
+
+        $count = AchievementService::get()->setShowcase(1, [3, 1, 8, 2, 5, 4, 6, 7]);
+
+        $this->assertSame(5, $count);
+        $this->assertSame(1, $fake->showcase['1:3']);
+        $this->assertSame(2, $fake->showcase['1:1']);
+        $this->assertSame(3, $fake->showcase['1:2']);
+        $this->assertSame(4, $fake->showcase['1:5']);
+        $this->assertSame(5, $fake->showcase['1:4']);
+        $this->assertArrayNotHasKey('1:8', $fake->showcase);
+        $this->assertArrayNotHasKey('1:6', $fake->showcase);
+        $this->assertArrayNotHasKey('1:7', $fake->showcase);
+    }
+
+    public function testSetShowcaseClearsWhenEmpty(): void
+    {
+        $fake = $this->useFake(new FakeAchievementDatabase());
+        $fake->unlocked['1:1'] = true;
+        $fake->showcase['1:1'] = 1;
+
+        $count = AchievementService::get()->setShowcase(1, []);
+
+        $this->assertSame(0, $count);
+        $this->assertArrayNotHasKey('1:1', $fake->showcase);
+    }
+
+    public function testGetAchievementsForUserIncludesShowcaseOrder(): void
+    {
+        $fake = $this->useFake(new FakeAchievementDatabase());
+        $fake->unlocked['1:1'] = true;
+        $fake->showcase['1:1'] = 2;
+
+        $list = AchievementService::get()->getAchievementsForUser(1, 1);
+
+        $this->assertTrue($list[0]['unlocked']);
+        $this->assertSame(2, $list[0]['showcase_order']);
     }
 
     public function testGetPendingCelebrationsReturnsRows(): void
