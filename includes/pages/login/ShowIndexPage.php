@@ -110,7 +110,7 @@ class ShowIndexPage extends AbstractLoginPage
 					? format_universe_season_wipe_label($seasonPanel['status'], $seasonPanel['wipe_seconds'])
 					: '',
 				'entry_label'         => $seasonPanel['seasonal']
-					? sprintf($LNG['uni_info_entry_pizza'], $seasonPanel['entry_pizza'])
+					? sprintf($LNG['uni_info_entry_pizza'], number_format((float) $seasonPanel['entry_pizza'], 2, '.', ''))
 					: '',
 				'entry_wallet'        => $seasonPanel['wallet'],
 			);
