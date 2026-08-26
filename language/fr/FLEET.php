@@ -69,6 +69,8 @@ $LNG['sys_colo_badpos']  					= 'Une de vos flottes atteint les coordonnées %s.
 $LNG['sys_colo_notfree'] 					= 'Une de vos flottes atteint les coordonnées %s. Lorsque les colons arrivent aux coordonnées souhaitées, ils réalisent que la planète est déjà colonisée. Complètement démoralisés, ils décident de revenir.';
 
 $LNG['sys_expe_report'] 					= 'Rapport d\'expédition';
+$LNG['sys_expe_choice_pending']				= 'The expedition found something that needs your decision before it is recovered.';
+$LNG['cm_pending_choice']					= 'Expedition choice waiting';
 $LNG['sys_recy_report'] 					= 'Rapport de recyclage';
 $LNG['sys_expe_found_ships_nothing']		= 'Aucun vaisseau n\'a pu être trouvé';
 $LNG['sys_expe_blackholl_1'] 				= 'Votre flotte a rencontre un tou noir et a ete partiellement detruite !';

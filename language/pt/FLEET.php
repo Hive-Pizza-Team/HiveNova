@@ -90,6 +90,8 @@ $LNG['sys_colo_badpos']  				= "A nave de colonização chegou às coordenadas %
 $LNG['sys_colo_notfree'] 				= "A nave de colonização chegou às coordenadas %s, A nave de colonização não descobriu um planeta desabitado. O Comandante foi obrigado a ordenar o regresso imediato, viajam cansados e desmoralizados ...";
 
 $LNG['sys_expe_report'] 				= "Relatório de expedição";
+$LNG['sys_expe_choice_pending']			= 'The expedition found something that needs your decision before it is recovered.';
+$LNG['cm_pending_choice']				= 'Expedition choice waiting';
 $LNG['sys_recy_report'] 				= "Relatório de reciclagem";
 $LNG['sys_expe_blackholl_1'] 			= "A frota foi sugada por um buraco negro, e foi praticamente toda destruída.";
 $LNG['sys_expe_blackholl_2'] 			= "A frota foi sugada por um buraco negro, e foi completamente destruída!";

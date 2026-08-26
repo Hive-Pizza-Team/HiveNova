@@ -82,6 +82,8 @@ $LNG['sys_colo_badpos']  					= "One of your fleets reaches the coordinates %s. 
 $LNG['sys_colo_notfree'] 					= "One of your fleets reaches the coordinates %s. When your settlers arrived at the coordinates they found that there is already a colony there. Completely demoralized they return home. ";
 
 $LNG['sys_expe_report'] 					= "Expedition report";
+$LNG['sys_expe_choice_pending']				= 'The expedition found something that needs your decision before it is recovered.';
+$LNG['cm_pending_choice']					= 'Expedition choice waiting';
 $LNG['sys_recy_report'] 					= "Recycling Report";
 $LNG['sys_expe_found_ships_nothing']		= 'No ships could be found.';
 $LNG['sys_expe_blackholl_1'] 				= "Your fleet encountered a black hole and was partly destroyed! ";
