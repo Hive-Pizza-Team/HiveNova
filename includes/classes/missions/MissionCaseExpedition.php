@@ -89,7 +89,7 @@ class MissionCaseExpedition extends MissionFunctions implements Mission
 		$GetEvent = mt_rand(0, 1000);
 		$GetEvent -= $holdTime * 10;
 
-		$Message = $LNG['sys_expe_nothing_'.mt_rand(1,8)];
+		$Message = $LNG['sys_expe_nothing_'.mt_rand(1,9)];
 		$pendingChoice = false;
 
 		// Depletion check
