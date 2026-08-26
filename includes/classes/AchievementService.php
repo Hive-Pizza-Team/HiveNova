@@ -447,12 +447,23 @@ class AchievementService
     }
 
     /**
+     * Required progress for unlock. Seeds historically used "level" for element_level;
+     * all other triggers use "threshold".
+     *
+     * @param array<string, mixed> $params
+     */
+    private function resolveThreshold(array $params): int
+    {
+        return (int) ($params['threshold'] ?? $params['level'] ?? 1);
+    }
+
+    /**
      * @param array<string, mixed> $user
      * @param array<string, mixed> $achievement
      */
     private function applyProgress(array $user, array $achievement, int $value, bool $celebrate): ?int
     {
-        $threshold = (int) ($achievement['trigger_params']['threshold'] ?? 1);
+        $threshold = $this->resolveThreshold($achievement['trigger_params']);
         $userId = (int) $user['id'];
         $achievementId = (int) $achievement['id'];
 
@@ -666,7 +677,7 @@ class AchievementService
         $result = [];
         foreach ($rows as $row) {
             $params = $this->decodeParams($row['trigger_params']);
-            $threshold = (int) ($params['threshold'] ?? 1);
+            $threshold = $this->resolveThreshold($params);
             $hidden = (int) $row['hidden'] === 1 && !(int) $row['unlocked'];
             $showcaseOrder = isset($row['showcase_order']) && $row['showcase_order'] !== null
                 ? (int) $row['showcase_order']

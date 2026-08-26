@@ -34,6 +34,16 @@ class AchievementServiceTest extends TestCase
         $this->assertSame(['threshold' => 5], $this->invokePrivate($service, 'decodeParams', ['{"threshold":5}']));
     }
 
+    public function testResolveThresholdPrefersThresholdThenLevel(): void
+    {
+        $service = AchievementService::get();
+
+        $this->assertSame(1, $this->invokePrivate($service, 'resolveThreshold', [[]]));
+        $this->assertSame(5, $this->invokePrivate($service, 'resolveThreshold', [['threshold' => 5]]));
+        $this->assertSame(10, $this->invokePrivate($service, 'resolveThreshold', [['level' => 10]]));
+        $this->assertSame(5, $this->invokePrivate($service, 'resolveThreshold', [['threshold' => 5, 'level' => 10]]));
+    }
+
     public function testSanitizeTriggerParamsRejectsInvalidJson(): void
     {
         $this->assertNull(AchievementService::sanitizeTriggerParams('not-json'));

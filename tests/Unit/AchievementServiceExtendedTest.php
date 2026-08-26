@@ -199,6 +199,29 @@ class AchievementServiceExtendedTest extends TestCase
         $this->assertSame(3, $fake->progress['6:20'] ?? 0);
     }
 
+    public function testElementLevelHonorsSeedLevelParamNotDefaultThreshold(): void
+    {
+        $fake = $this->useFake(new FakeAchievementDatabase());
+        // Production seed historically used "level" instead of "threshold".
+        $fake->addAchievement($this->ach('element_level', ['element_id' => 1, 'level' => 5], 21, 'economy_metal_mine_5'));
+        $fake->users[8] = $this->sampleUser(8);
+
+        $below = AchievementService::get()->processEvent(8, 'element_level', [
+            'element_id' => 1,
+            'level'      => 1,
+        ], false);
+        $this->assertSame([], $below);
+        $this->assertSame(1, $fake->progress['8:21'] ?? 0);
+        $this->assertArrayNotHasKey('8:21', $fake->unlocked);
+
+        $atThreshold = AchievementService::get()->processEvent(8, 'element_level', [
+            'element_id' => 1,
+            'level'      => 5,
+        ], false);
+        $this->assertSame([21], $atThreshold);
+        $this->assertArrayHasKey('8:21', $fake->unlocked);
+    }
+
     public function testResolveEventValueAllTriggerTypes(): void
     {
         $service = AchievementService::get();
