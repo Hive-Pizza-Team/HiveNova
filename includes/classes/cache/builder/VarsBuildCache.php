@@ -140,7 +140,8 @@ class VarsBuildCache implements BuildCache
 				case 100: 
 					$reslist['tech'][]	= $varsRow['elementID'];
 				break;
-				case 200: 
+				case 200:
+				case 201:
 					$reslist['fleet'][]	= $varsRow['elementID'];
 				break;
 				case 400: 

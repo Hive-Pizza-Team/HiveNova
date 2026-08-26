@@ -40,7 +40,11 @@ class ShowBattleHallPage extends AbstractGamePage
 			$LNG->includeData(['INGAME']);
 			$feats = FeatService::listForUniverse(Universe::current());
 			foreach ($feats as &$feat) {
-				$feat['name'] = $LNG[$feat['name_key']] ?? $feat['feat_key'];
+				$isHiddenUnclaimed = !empty($feat['hidden'])
+					&& ($feat['status'] ?? '') !== 'claimed';
+				$feat['name'] = $isHiddenUnclaimed
+					? ($LNG['feat_hidden_name'] ?? '???')
+					: ($LNG[$feat['name_key']] ?? $feat['feat_key']);
 				$feat['date'] = $feat['claimed_at'] > 0
 					? _date($LNG['php_tdformat'], $feat['claimed_at'], $USER['timezone'])
 					: '';

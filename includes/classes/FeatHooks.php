@@ -15,8 +15,6 @@ class FeatHooks
             return;
         }
 
-        global $reslist;
-
         foreach ($builded as $elementId => $count) {
             if (empty($count)) {
                 continue;
@@ -28,11 +26,9 @@ class FeatHooks
             if ($elementId === FeatCatalog::HYPERSPACE_TECH_ID) {
                 FeatService::tryClaim($universe, FeatCatalog::FIRST_HYPERSPACE, $userId);
             }
-            if ($elementId === FeatCatalog::DEATHSTAR_ID) {
-                FeatService::tryClaim($universe, FeatCatalog::FIRST_DEATHSTAR, $userId);
-            }
-            $fleet = $reslist['fleet'] ?? [];
-            if (in_array($elementId, $fleet, true)) {
+            $shipFeat = FeatCatalog::shipFeatKeys()[$elementId] ?? null;
+            if ($shipFeat !== null) {
+                FeatService::tryClaim($universe, $shipFeat, $userId);
                 FeatService::tryClaim($universe, FeatCatalog::FIRST_SHIP, $userId);
             }
         }
