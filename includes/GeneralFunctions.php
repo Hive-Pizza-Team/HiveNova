@@ -363,6 +363,16 @@ function BuildPlanetAddressLink($CurrentPlanet)
 	return '<a href="game.php?page=galaxy&amp;galaxy=' . $CurrentPlanet['galaxy'] . '&amp;system=' . $CurrentPlanet['system'] . '">[' . $CurrentPlanet['galaxy'] . ':' . $CurrentPlanet['system'] . ':' . $CurrentPlanet['planet'] . ']</a>';
 }
 
+/**
+ * Parse a posted ship/unit count that may include locale thousand separators.
+ * Strips non-digits so "1,692" / "1.692" become 1692; empty input becomes 0.
+ */
+function parse_ship_amount($value): int
+{
+	$raw = preg_replace('/[^\d]/', '', (string) $value);
+	return max(0, (int) $raw);
+}
+
 function pretty_number_plain($n, $dec = 0)
 {
 	return number_format(floatToString($n, $dec), $dec, ',', '.');

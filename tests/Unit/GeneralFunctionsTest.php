@@ -248,6 +248,30 @@ class GeneralFunctionsTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // parse_ship_amount
+    // -------------------------------------------------------------------------
+
+    public function testParseShipAmountStripsCommaThousands(): void
+    {
+        $this->assertSame(1692, parse_ship_amount('1,692'));
+    }
+
+    public function testParseShipAmountStripsDotThousands(): void
+    {
+        $this->assertSame(1692, parse_ship_amount('1.692'));
+    }
+
+    public function testParseShipAmountEmptyIsZero(): void
+    {
+        $this->assertSame(0, parse_ship_amount(''));
+    }
+
+    public function testParseShipAmountPlainInteger(): void
+    {
+        $this->assertSame(250, parse_ship_amount('250'));
+    }
+
+    // -------------------------------------------------------------------------
     // BuildPlanetAddressLink
     // -------------------------------------------------------------------------
 

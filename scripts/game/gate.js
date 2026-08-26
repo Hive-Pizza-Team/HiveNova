@@ -1,6 +1,11 @@
 var Gate	= {
 	max: function(ID) {
-		$('#ship'+ID+'_input').val($('#ship'+ID+'_value').text().replace(/\./g, ""));
+		var $el = $('#ship'+ID+'_value');
+		var amount = $el.attr('data-n');
+		if (amount == null || amount === '') {
+			amount = $el.text().replace(/[.,]/g, '');
+		}
+		$('#ship'+ID+'_input').val(amount);
 	},
 	
 	submit: function() {
