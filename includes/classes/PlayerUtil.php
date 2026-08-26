@@ -188,7 +188,7 @@ class PlayerUtil
 		try {
 			$db = \HiveNova\Core\Database::get();
 			$rows = $db->select(
-				'SELECT a.`key`, a.points FROM %%USER_ACHIEVEMENTS%% ua
+				'SELECT a.`key`, a.name_key, a.points FROM %%USER_ACHIEVEMENTS%% ua
 				INNER JOIN %%ACHIEVEMENTS%% a ON a.id = ua.achievement_id
 				WHERE ua.user_id = :userId AND ua.showcase_order IS NOT NULL
 				ORDER BY ua.showcase_order ASC
@@ -198,7 +198,7 @@ class PlayerUtil
 
 			if (empty($rows)) {
 				$rows = $db->select(
-					'SELECT a.`key`, a.points FROM %%USER_ACHIEVEMENTS%% ua
+					'SELECT a.`key`, a.name_key, a.points FROM %%USER_ACHIEVEMENTS%% ua
 					INNER JOIN %%ACHIEVEMENTS%% a ON a.id = ua.achievement_id
 					WHERE ua.user_id = :userId
 					ORDER BY a.points DESC, ua.unlocked_at DESC
@@ -214,9 +214,12 @@ class PlayerUtil
 			return '';
 		}
 
+		global $LNG;
+
 		$icons = [];
 		foreach ($rows as $row) {
-			$icons[] = '<span class="achievement-badge" title="' . htmlspecialchars((string) $row['key']) . '">🏅</span>';
+			$label = $LNG[$row['name_key']] ?? $row['name_key'];
+			$icons[] = '<span class="achievement-badge" title="' . htmlspecialchars((string) $label) . '">🏅</span>';
 		}
 
 		return implode(' ', $icons);
