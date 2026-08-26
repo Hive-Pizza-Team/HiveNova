@@ -97,6 +97,7 @@ class FeatService
                 'claimed_at' => isset($row['claimed_at']) ? (int) $row['claimed_at'] : 0,
                 'name_key'   => $def['name_key'],
                 'desc_key'   => $def['desc_key'],
+                'hidden'     => $def['hidden'],
             ];
         }
 
@@ -105,13 +106,14 @@ class FeatService
 
     public static function ensureSeeded(int $universe): void
     {
-        $count = (int) Database::get()->selectSingle(
-            'SELECT COUNT(*) FROM %%FEAT_STATES%% WHERE universe = :universe;',
-            [':universe' => $universe],
-            'COUNT(*)'
+        $db = Database::get();
+        $existing = $db->select(
+            'SELECT feat_key FROM %%FEAT_STATES%% WHERE universe = :universe;',
+            [':universe' => $universe]
         );
-        if ($count > 0) {
-            return;
+        $have = [];
+        foreach ($existing as $row) {
+            $have[$row['feat_key']] = true;
         }
 
         $fromStart = false;
@@ -120,15 +122,38 @@ class FeatService
         } catch (Throwable) {
             $fromStart = false;
         }
-        self::seedUniverse($universe, $fromStart);
+
+        if ($have === []) {
+            self::seedUniverse($universe, $fromStart);
+
+            return;
+        }
+
+        $missing = [];
+        foreach (FeatCatalog::keys() as $key) {
+            if (!isset($have[$key])) {
+                $missing[] = $key;
+            }
+        }
+        if ($missing === []) {
+            return;
+        }
+
+        self::seedUniverse($universe, $fromStart, $missing);
     }
 
-    public static function seedUniverse(int $universe, bool $trackingFromStart): void
+    /**
+     * @param list<string>|null $onlyKeys When set, only insert these catalog keys (missing-key backfill).
+     */
+    public static function seedUniverse(int $universe, bool $trackingFromStart, ?array $onlyKeys = null): void
     {
         $db = Database::get();
         $hasGraviton = false;
         $hasHyperspace = false;
         $hasMoon = false;
+        $hasShipByFeatKey = [];
+
+        $keys = $onlyKeys ?? FeatCatalog::keys();
 
         if (!$trackingFromStart) {
             $hasGraviton = (int) $db->selectSingle(
@@ -146,23 +171,29 @@ class FeatService
                 [':universe' => $universe],
                 'COUNT(*)'
             ) > 0;
+            $hasShipByFeatKey = self::shipOwnershipByFeatKey($universe, $keys);
         }
 
-        foreach (FeatCatalog::keys() as $key) {
+        foreach ($keys as $key) {
+            if (!in_array($key, FeatCatalog::keys(), true)) {
+                continue;
+            }
             $status = FeatCatalog::initialStatus(
                 $key,
                 $trackingFromStart,
                 $hasGraviton,
                 $hasHyperspace,
-                $hasMoon
+                $hasMoon,
+                $hasShipByFeatKey
             );
             $def = FeatCatalog::definition($key);
+            $hidden = $def['hidden'] ? 1 : 0;
             $db->insert(
                 'INSERT INTO %%ACHIEVEMENTS%% (universe, `key`, category, name_key, desc_key, trigger_type, trigger_params,
                 sort_order, hidden, active, reward_type, reward_amount, points, celebration_tier, hof_only)
                 VALUES (:universe, :key, :category, :nameKey, :descKey, :triggerType, :params,
-                :sortOrder, 0, 1, :rewardType, 0, 0, :tier, 1)
-                ON DUPLICATE KEY UPDATE hof_only = 1, points = 0, reward_type = :rewardType;',
+                :sortOrder, :hidden, 1, :rewardType, 0, 0, :tier, 1)
+                ON DUPLICATE KEY UPDATE hof_only = 1, points = 0, reward_type = :rewardType, hidden = :hidden;',
                 [
                     ':universe'    => $universe,
                     ':key'         => $key,
@@ -172,6 +203,7 @@ class FeatService
                     ':triggerType' => 'universe_first',
                     ':params'      => '{"feat_key":"' . $key . '"}',
                     ':sortOrder'   => $def['sort_order'],
+                    ':hidden'      => $hidden,
                     ':rewardType'  => 'none',
                     ':tier'        => 'normal',
                 ]
@@ -187,6 +219,44 @@ class FeatService
                 ]
             );
         }
+    }
+
+    /**
+     * @param list<string> $keys
+     * @return array<string, bool>
+     */
+    private static function shipOwnershipByFeatKey(int $universe, array $keys): array
+    {
+        global $resource;
+
+        $wanted = [];
+        foreach (FeatCatalog::shipFeatKeys() as $elementId => $featKey) {
+            if (in_array($featKey, $keys, true)) {
+                $wanted[$elementId] = $featKey;
+            }
+        }
+        if ($wanted === []) {
+            return [];
+        }
+
+        $db = Database::get();
+        $owned = [];
+        foreach ($wanted as $elementId => $featKey) {
+            $column = $resource[$elementId] ?? null;
+            if (!is_string($column) || $column === '' || !preg_match('/^[a-zA-Z0-9_]+$/', $column)) {
+                // Cannot verify ownership without a known column — keep unclaimable.
+                $owned[$featKey] = true;
+                continue;
+            }
+            $sum = (int) $db->selectSingle(
+                'SELECT COALESCE(SUM(`' . $column . '`), 0) AS total FROM %%PLANETS%% WHERE universe = :universe;',
+                [':universe' => $universe],
+                'total'
+            );
+            $owned[$featKey] = $sum > 0;
+        }
+
+        return $owned;
     }
 
     private static function unlockHofAchievement(int $universe, string $featKey, int $userId, int $at): void

@@ -21,6 +21,11 @@ trait FakePlanetQueryHandler
 
     private function planetSelectSingle(string $qry, array $params, $field = false)
     {
+        if (str_contains($qry, 'SUM(') && preg_match('/SUM\(`([a-zA-Z0-9_]+)`\)/', $qry, $m)) {
+            $total = (int) ($this->achievement->planetShipTotals[$m[1]] ?? 0);
+            return $field === 'total' ? $total : ['total' => $total];
+        }
+
         if (str_contains($qry, 'COUNT(*)') && str_contains($qry, 'record')) {
             $count = ['record' => $this->planetPositionCount];
             return $field === false ? $count : ($count[$field] ?? false);

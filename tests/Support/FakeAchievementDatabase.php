@@ -87,6 +87,9 @@ class FakeAchievementDatabase implements DatabaseInterface
     /** @var array<string, array{user_id: int, claimed_at: int}> */
     public array $featClaims = [];
 
+    /** @var array<string, int> planet column => universe-wide ship count for SUM queries */
+    public array $planetShipTotals = [];
+
     /** @var list<array<string, mixed>> */
     public array $cronjobRows = [
         ['cronjobID' => 12, 'min' => '0', 'hours' => '0', 'dom' => '*', 'month' => '*', 'dow' => '*'],
@@ -255,6 +258,20 @@ class FakeAchievementDatabase implements DatabaseInterface
             return $rows;
         }
 
+        if (str_contains($qry, 'FROM %%FEAT_STATES%%') && str_contains($qry, 'SELECT feat_key')) {
+            $universe = (int) ($params[':universe'] ?? 0);
+            $rows = [];
+            foreach (array_keys($this->featStates) as $compound) {
+                if (!str_starts_with($compound, $universe . ':')) {
+                    continue;
+                }
+                $rows[] = [
+                    'feat_key' => substr($compound, strlen((string) $universe) + 1),
+                ];
+            }
+            return $rows;
+        }
+
         if (str_contains($qry, 'FROM %%USERS%%') && str_contains($qry, 'universe =')) {
             $universe = (int) ($params[':universe'] ?? 0);
             $rows = [];
@@ -287,6 +304,14 @@ class FakeAchievementDatabase implements DatabaseInterface
                 }
             }
             return $n;
+        }
+
+        if (str_contains($qry, 'FROM %%PLANETS%%') && str_contains($qry, 'SUM(')) {
+            if (preg_match('/SUM\\(`([a-zA-Z0-9_]+)`\\)/', $qry, $m)) {
+                $total = (int) ($this->planetShipTotals[$m[1]] ?? 0);
+                return $field === 'total' ? $total : ['total' => $total];
+            }
+            return $field === 'total' ? 0 : ['total' => 0];
         }
 
         if (str_contains($qry, 'FROM %%FEAT_STATES%%') && str_contains($qry, 'status')) {
@@ -421,9 +446,22 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, '%%ACHIEVEMENTS%%') && str_contains($qry, 'hof_only')) {
+            $key = $params[':key'] ?? '';
+            $universe = (int) ($params[':universe'] ?? 1);
+            foreach ($this->achievementDefinitions as &$existing) {
+                if (($existing['key'] ?? '') === $key && (int) ($existing['universe'] ?? 1) === $universe) {
+                    $existing['hof_only'] = 1;
+                    $existing['points'] = 0;
+                    $existing['reward_type'] = 'none';
+                    $existing['hidden'] = (int) ($params[':hidden'] ?? 0);
+                    unset($existing);
+                    return true;
+                }
+            }
+            unset($existing);
             $this->addAchievement([
                 'id'               => count($this->achievementDefinitions) + 1,
-                'key'              => $params[':key'] ?? '',
+                'key'              => $key,
                 'category'         => $params[':category'] ?? 'empire',
                 'name_key'         => $params[':nameKey'] ?? '',
                 'desc_key'         => $params[':descKey'] ?? '',
@@ -433,9 +471,9 @@ class FakeAchievementDatabase implements DatabaseInterface
                 'reward_amount'    => 0,
                 'points'           => 0,
                 'celebration_tier' => 'normal',
-                'hidden'           => 0,
+                'hidden'           => (int) ($params[':hidden'] ?? 0),
                 'active'           => 1,
-                'universe'         => (int) ($params[':universe'] ?? 1),
+                'universe'         => $universe,
                 'hof_only'         => 1,
             ]);
             return true;

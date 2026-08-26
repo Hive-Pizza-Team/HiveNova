@@ -81,6 +81,7 @@ class FeatHooksTest extends TestCase
         $this->open(FeatCatalog::FIRST_GRAVITON);
         $this->open(FeatCatalog::FIRST_HYPERSPACE);
         $this->open(FeatCatalog::FIRST_DEATHSTAR);
+        $this->open(FeatCatalog::FIRST_LIGHT_FIGHTER);
         $this->open(FeatCatalog::FIRST_SHIP);
         FeatHooks::afterBuildCompleted(
             [
@@ -95,6 +96,17 @@ class FeatHooksTest extends TestCase
         $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_GRAVITON, $this->fake->achievement->featClaims);
         $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_HYPERSPACE, $this->fake->achievement->featClaims);
         $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_DEATHSTAR, $this->fake->achievement->featClaims);
+        $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_LIGHT_FIGHTER, $this->fake->achievement->featClaims);
+        $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_SHIP, $this->fake->achievement->featClaims);
+        $this->assertArrayNotHasKey('1:' . FeatCatalog::FIRST_SMALL_CARGO, $this->fake->achievement->featClaims);
+    }
+
+    public function testBuildCompletedClaimsSpecialShipFeat(): void
+    {
+        $this->open(FeatCatalog::FIRST_BLACK_MOON);
+        $this->open(FeatCatalog::FIRST_SHIP);
+        FeatHooks::afterBuildCompleted([216 => 1], ['id' => 7, 'universe' => 1]);
+        $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_BLACK_MOON, $this->fake->achievement->featClaims);
         $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_SHIP, $this->fake->achievement->featClaims);
     }
 
