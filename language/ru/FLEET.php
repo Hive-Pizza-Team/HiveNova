@@ -82,6 +82,8 @@ $LNG['sys_colo_notfree']              = 'Один из Ваших флотов �
 $LNG['sys_colo_notech']               = 'Один из Ваших флотов достигает координат %s. Когда поселенцы приблизились к планете, они обнаружили, что их оборудование не подходит для преобладающих климатических условий. Необходимо сильнее развивать технологии. Разочарованные, поселенцы возвращаются домой.';
 
 $LNG['sys_expe_report']               = "Доклад экспедиции";
+$LNG['sys_expe_choice_pending']       = 'The expedition found something that needs your decision before it is recovered.';
+$LNG['cm_pending_choice']             = 'Expedition choice waiting';
 $LNG['sys_recy_report']               = "Доклад переработчиков";
 $LNG['sys_expe_found_ships_nothing']  = 'Ни один корабль не подлежит ремонту.';
 $LNG['sys_expe_blackholl_1']          = "Часть Вашего флота засосало в чёрную дыру.";

@@ -82,6 +82,8 @@ $LNG['sys_colo_badpos']  					= "Una de tus flotas alcanza las coordenadas %s. N
 $LNG['sys_colo_notfree'] 					= "Una de tus flotas alcanza las coordenadas %s. Cuando tus colonos llegaron a las coordenadas encontraron que ya hay una colonia allí. Completamente desmoralizados regresan a casa. ";
 
 $LNG['sys_expe_report'] 					= "Reporte de expedición";
+$LNG['sys_expe_choice_pending']				= 'The expedition found something that needs your decision before it is recovered.';
+$LNG['cm_pending_choice']					= 'Expedition choice waiting';
 $LNG['sys_recy_report'] 					= "Reporte de reciclaje";
 $LNG['sys_expe_found_ships_nothing']		= 'No se pudieron encontrar naves.';
 $LNG['sys_expe_blackholl_1'] 				= "¡Tu flota encontró un agujero negro y fue parcialmente destruida! ";

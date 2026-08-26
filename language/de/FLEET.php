@@ -82,6 +82,8 @@ $LNG['sys_colo_badpos']  					= 'Eine deiner Flotten erreicht die Koordinaten %s
 $LNG['sys_colo_notfree'] 					= 'Eine deiner Flotten erreicht die Koordinaten %s. Als deine Siedler auf den Koordinaten ankamen, mussten sie feststellen das es dort bereits eine Kolonie gibt. Völlig demoralisiert kehrten sie um.';
 
 $LNG['sys_expe_report'] 					= "Expeditionsbericht";
+$LNG['sys_expe_choice_pending']				= 'The expedition found something that needs your decision before it is recovered.';
+$LNG['cm_pending_choice']					= 'Expedition choice waiting';
 $LNG['sys_recy_report'] 					= "Recyclerbericht";
 $LNG['sys_expe_found_ships_nothing']		= '- Es konnten keine Schiffe repariert werden.';
 $LNG['sys_expe_blackholl_1'] 				= "Deine Flotte traf auf ein schwarzes Loch und wurde teilweise zerst&ouml;rt!";
