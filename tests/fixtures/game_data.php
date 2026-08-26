@@ -143,8 +143,8 @@ $GLOBALS['pricelist'] = array_replace($GLOBALS['pricelist'] ?? [], [
 		'factor'   => 0,
 	],
 	217 => [
-		'cost'     => [901 => 35000, 902 => 20000, 903 => 1500],
-		'capacity' => 400000,
+		'cost'     => [901 => 120000, 902 => 80000, 903 => 20000],
+		'capacity' => 2500000,
 		'factor'   => 0,
 	],
 	404 => [

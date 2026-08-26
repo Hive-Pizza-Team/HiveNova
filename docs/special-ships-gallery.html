@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Special Ships 216–220</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #141e30;
+      --border: #2a3a55;
+      --text: #e8eef8;
+      --muted: #9aacc4;
+      --accent: #5ec8ff;
+      --metal: #c9a66b;
+      --crystal: #7eb8ff;
+      --deut: #8fd4a0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: radial-gradient(ellipse at top, #152238, var(--bg));
+      color: var(--text);
+      line-height: 1.45;
+      padding: 2rem 1.25rem 3rem;
+    }
+    h1 { margin: 0 0 0.25rem; font-size: 1.75rem; }
+    .sub { color: var(--muted); margin-bottom: 1.75rem; font-size: 0.95rem; }
+    .controls { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    select { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; }
+    .gallery { display: grid; gap: 1.25rem; max-width: 1100px; }
+    .card { display: grid; grid-template-columns: 180px 1fr; gap: 1.25rem; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem; }
+    @media (max-width: 720px) { .card { grid-template-columns: 1fr; } }
+    .art { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .art img { width: 160px; height: 160px; object-fit: contain; background: #0a101c; border: 1px solid var(--border); border-radius: 8px; }
+    .id-badge { font-family: ui-monospace, monospace; font-size: 0.85rem; color: var(--accent); background: #0a1528; border: 1px solid var(--border); border-radius: 999px; padding: 0.15rem 0.65rem; }
+    .title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.85rem; margin-bottom: 0.35rem; }
+    .title-row h2 { margin: 0; font-size: 1.35rem; }
+    .code { color: var(--muted); font-family: ui-monospace, monospace; font-size: 0.85rem; }
+    .desc { color: var(--muted); margin: 0 0 0.9rem; font-size: 0.95rem; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem; }
+    .box { background: #0d1626; border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.8rem; }
+    .box h3 { margin: 0 0 0.45rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .box ul { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+    .box dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.7rem; font-size: 0.9rem; }
+    .box dt { color: var(--muted); }
+    .box dd { margin: 0; font-variant-numeric: tabular-nums; }
+    .c-metal { color: var(--metal); }
+    .c-crystal { color: var(--crystal); }
+    .c-deut { color: var(--deut); }
+    .note { margin-top: 1.5rem; color: var(--muted); font-size: 0.85rem; max-width: 1100px; }
+  </style>
+</head>
+<body>
+  <h1>Special Ships 216–220</h1>
+  <p class="sub">HiveNova class <code>201</code> fleet after rebalance (migration 38). Stats from <code>install/install.sql</code>.</p>
+  <div class="controls">
+    <label for="theme">Theme art</label>
+    <select id="theme"><option value="hive" selected>hive</option><option value="nova">nova</option><option value="gow">gow</option></select>
+  </div>
+  <div class="gallery" id="gallery"></div>
+  <p class="note"><strong>Drive</strong> is the speed formula engine type (<code>speedTech 3</code> = Hyperspace Engine), not the build unlock. See <strong>How to unlock</strong> for research gates.</p>
+  <script>
+    const TECH = { 21:'Shipyard',106:'Spy Technology',109:'Weapons Technology',110:'Shield Technology',111:'Armor Technology',114:'Hyperspace Technology',117:'Impulse Engine',118:'Hyperspace Engine',120:'Laser Technology',199:'Graviton Research' };
+    const ships = [
+      { id:216, name:'Black Moon', code:'lune_noir', desc:'The successor of the popular death star, faster but not as strong.', cost:{metal:8000000,crystal:2000000,deut:1500000}, consumption:250, speed:900, capacity:15000000, attack:150000, defend:70000, unlock:[[106,12],[21,15],[109,14],[110,14],[111,15],[114,10],[120,20],[199,3]], notes:['Unchanged in rebalance.'] },
+      { id:217, name:'Battle Transporter', code:'ev_transporter', desc:'Development of the large cargo with more capacity and speed.', cost:{metal:120000,crystal:80000,deut:20000}, consumption:90, speed:6000, capacity:2500000, attack:50, defend:120, unlock:[[111,10],[21,15],[114,10],[110,14],[117,15]], notes:['Was 400M capacity / ~56.5k cost.'] },
+      { id:218, name:'Avatar', code:'star_crasher', desc:'The absolute worst case scenario, albeit very slowly.', cost:{metal:275000000,crystal:130000000,deut:60000000}, consumption:10000, speed:10, capacity:50000000, attack:35000000, defend:2000000, unlock:[[21,18],[109,20],[110,20],[111,20],[114,15],[118,20],[120,25],[199,8]], notes:['Unchanged prestige sink.'] },
+      { id:219, name:'Battle Recycler', code:'giga_recykler', desc:'Huge cargo and fast engines for debris fields.', cost:{metal:1500000,crystal:900000,deut:300000}, consumption:300, speed:7500, capacity:5000000, attack:1, defend:1000, unlock:[[21,15],[109,15],[110,15],[111,15],[118,8]], notes:['Was 200M capacity.'] },
+      { id:220, name:'Pizzabits Collector', code:'dm_ship', desc:'Collect pizzabits from your moon. Success scraps collectors; whammy loses them with no payout.', cost:{metal:8000000,crystal:8000000,deut:4000000}, consumption:100000, speed:100, capacity:6000000, attack:5, defend:50000, unlock:[[21,15],[114,10],[118,8],[199,3]], driveNote:'Hyperspace speed formula; build gate HE8 + HT10 + Graviton 3', notes:['Mission 11, own moon, collectors only.','Roll: ~10% whammy / success band min(50%, 30%+0.25%×ships) / else nothing.'] },
+    ];
+    const fmt = n => n.toLocaleString('en-US');
+    const reqList = u => u.map(([id,lvl]) => `<li>${TECH[id]||('#'+id)} <strong>Lv ${lvl}</strong></li>`).join('');
+    const driveLabel = s => s.driveNote || 'Hyperspace Engine speed formula (speedTech 3)';
+    const card = (ship, theme) => `<article class="card"><div class="art"><img src="../styles/theme/${theme}/gebaeude/${ship.id}.gif" alt="${ship.name}" width="160" height="160"><span class="id-badge">ID ${ship.id}</span></div><div><div class="title-row"><h2>${ship.name}</h2><span class="code">${ship.code}</span></div><p class="desc">${ship.desc}</p><div class="meta"><div class="box"><h3>Construction cost</h3><dl><dt class="c-metal">Metal</dt><dd class="c-metal">${fmt(ship.cost.metal)}</dd><dt class="c-crystal">Silicon</dt><dd class="c-crystal">${fmt(ship.cost.crystal)}</dd><dt class="c-deut">Uranium</dt><dd class="c-deut">${fmt(ship.cost.deut)}</dd></dl></div><div class="box"><h3>Combat &amp; flight</h3><dl><dt>Attack</dt><dd>${fmt(ship.attack)}</dd><dt>Shield</dt><dd>${fmt(ship.defend)}</dd><dt>Speed</dt><dd>${fmt(ship.speed)}</dd><dt>Fuel</dt><dd>${fmt(ship.consumption)}</dd><dt>Capacity</dt><dd>${fmt(ship.capacity)}</dd><dt>Drive</dt><dd>${driveLabel(ship)}</dd></dl></div><div class="box"><h3>How to unlock</h3><ul>${reqList(ship.unlock)}</ul></div><div class="box"><h3>Notes</h3><ul>${ship.notes.map(n=>`<li>${n}</li>`).join('')}</ul></div></div></div></article>`;
+    const gallery = document.getElementById('gallery');
+    const themeSelect = document.getElementById('theme');
+    const render = () => { gallery.innerHTML = ships.map(s => card(s, themeSelect.value)).join(''); };
+    themeSelect.addEventListener('change', render);
+    render();
+  </script>
+</body>
+</html>

@@ -249,7 +249,7 @@ $LNG['shortDescription'] = array(
 217 => 'Is a development of the large cargo, it has more carry capacity and flies faster with the right techonology.',
 218 => 'The absolute worst case scenario, albeit very slowly.',
 219 => 'Is a huge cargo space and new engines, enable it to fly faster and gather more in debris fields .',
-220 => 'After long years of research pizzabits is now collectable from the moon.',
+220 => 'After long years of research pizzabits is now collectable from the moon. Success scraps the collectors for a payout; failure can return safely — or destroy the fleet with nothing.',
 
 401 => 'The Rocket Launcher is a simple but cost-effective defense.',
 402 => 'Light Lasers are simple ground based defense weapons. They use special targeting systems to track and attack enemy ships. They fire a high intensity laser, designed to cut through the hull of the target.',
@@ -356,7 +356,7 @@ $LNG['longDescription'] = array(
 217 => 'Is a development of the large cargo, it has more carry capacity and flies faster with the right techonology.',
 218 => 'The absolute worst case scenario, albeit very slowly.',
 219 => 'Is a huge cargo space and new engines, enable it to fly faster and gather more in debris fields .',
-220 => 'After long years of research pizzabits is now collectable from the moon.',
+220 => 'After long years of research pizzabits is now collectable from the moon. Success scraps the collectors for a payout; failure can return safely — or destroy the fleet with nothing.',
 
 401 => 'The Rocket Launcher is a simple but cost-effective defense.',
 402 => 'Light Lasers are simple ground based weapons that utilize special targeting systems to track the enemy and fire a high intensity laser designed to cut through the hull of the target.',
