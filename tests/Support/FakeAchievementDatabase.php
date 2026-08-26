@@ -15,6 +15,9 @@ class FakeAchievementDatabase implements DatabaseInterface
     /** @var array<int, true> */
     public array $unlocked = [];
 
+    /** @var array<string, int> showcase key "userId:achievementId" => order */
+    public array $showcase = [];
+
     /** @var array<string, int> progress key "userId:achievementId" */
     public array $progress = [];
 
@@ -127,9 +130,10 @@ class FakeAchievementDatabase implements DatabaseInterface
                 $aid = (int) $def['id'];
                 $key = $userId . ':' . $aid;
                 $rows[] = array_merge($def, [
-                    'progress'    => $this->progress[$key] ?? 0,
-                    'unlocked'    => isset($this->unlocked[$key]) ? 1 : 0,
-                    'unlocked_at' => isset($this->unlocked[$key]) ? TIMESTAMP : 0,
+                    'progress'       => $this->progress[$key] ?? 0,
+                    'unlocked'       => isset($this->unlocked[$key]) ? 1 : 0,
+                    'unlocked_at'    => isset($this->unlocked[$key]) ? TIMESTAMP : 0,
+                    'showcase_order' => $this->showcase[$key] ?? null,
                 ]);
             }
             return $rows;
@@ -144,6 +148,7 @@ class FakeAchievementDatabase implements DatabaseInterface
             if ($userId <= 0) {
                 return [];
             }
+            $showcaseOnly = str_contains($qry, 'showcase_order IS NOT NULL');
             $rows = [];
             foreach ($this->achievementDefinitions as $def) {
                 $aid = (int) $def['id'];
@@ -151,9 +156,25 @@ class FakeAchievementDatabase implements DatabaseInterface
                 if (!isset($this->unlocked[$key])) {
                     continue;
                 }
-                $rows[] = ['key' => $def['key'], 'points' => (int) ($def['points'] ?? 0)];
+                if ($showcaseOnly && !isset($this->showcase[$key])) {
+                    continue;
+                }
+                $rows[] = [
+                    'key'            => $def['key'],
+                    'points'         => (int) ($def['points'] ?? 0),
+                    'showcase_order' => $this->showcase[$key] ?? null,
+                ];
             }
-            return $rows;
+            if ($showcaseOnly) {
+                usort($rows, static fn (array $a, array $b): int => ((int) $a['showcase_order']) <=> ((int) $b['showcase_order']));
+            } else {
+                usort($rows, static fn (array $a, array $b): int => ((int) $b['points']) <=> ((int) $a['points']));
+            }
+            $limit = 5;
+            if (preg_match('/LIMIT\s+(\d+)/i', $qry, $m)) {
+                $limit = (int) $m[1];
+            }
+            return array_slice($rows, 0, $limit);
         }
 
         if (str_contains($qry, 'FROM %%UNIVERSE_EVENTS%%')) {
@@ -490,6 +511,24 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'celebrated = 1')) {
+            return true;
+        }
+
+        if (str_contains($qry, 'showcase_order = NULL') && str_contains($qry, 'USER_ACHIEVEMENTS%%')) {
+            $userId = (int) ($params[':userId'] ?? 0);
+            foreach (array_keys($this->showcase) as $key) {
+                if (str_starts_with($key, $userId . ':')) {
+                    unset($this->showcase[$key]);
+                }
+            }
+            return true;
+        }
+
+        if (str_contains($qry, 'SET showcase_order = :order') && str_contains($qry, 'USER_ACHIEVEMENTS%%')) {
+            $key = ($params[':userId'] ?? 0) . ':' . ($params[':achievementId'] ?? 0);
+            if (isset($this->unlocked[$key])) {
+                $this->showcase[$key] = (int) ($params[':order'] ?? 0);
+            }
             return true;
         }
 

@@ -1,10 +1,18 @@
 {block name="title"}{$LNG.ach_page_title} - {$uni_name} - {$game_name}{/block}
 {block name="content"}
-<div id="achievementsPage" class="achievements-page">
+<div id="achievementsPage" class="achievements-page"
+	data-showcase-limit="{$showcaseLimit}"
+	data-showcase-max-msg="{$achShowcaseMaxMsg|escape:'html'}"
+	data-showcase-saved-msg="{$achShowcaseSavedMsg|escape:'html'}">
 	<h1>{$LNG.ach_page_title}</h1>
 	<div class="achievements-summary">
 		<span>{$LNG.ach_unlocked_count}: <strong>{$unlockedCount} / {$totalCount}</strong></span>
 		<span>{$LNG.ach_points_total}: <strong>{$pointsTotal|number}</strong></span>
+		<span>{$LNG.ach_showcase_label}: <strong id="achShowcaseCount">{$showcaseCount}</strong> / {$showcaseLimit}</span>
+	</div>
+	<div class="achievements-showcase-actions">
+		<button type="button" class="btn btn-primary" id="achShowcaseSave">{$LNG.ach_showcase_save}</button>
+		<span id="achShowcaseStatus" class="achievements-showcase-status" aria-live="polite"></span>
 	</div>
 
 	{foreach $achievementsByCategory as $category => $items}
@@ -12,6 +20,7 @@
 		<h2>{$categoryLabels.$category|default:$category}</h2>
 		<table class="table519">
 			<tr>
+				<th class="achievements-col-showcase">{$LNG.ach_showcase_column}</th>
 				<th>{$LNG.ach_page_title}</th>
 				<th>{$LNG.ach_progress}</th>
 				<th>{$LNG.ach_reward}</th>
@@ -19,6 +28,18 @@
 			</tr>
 			{foreach $items as $ach}
 			<tr class="achievements-row{if $ach.unlocked} achievements-row--unlocked{/if}{if $ach.hidden} achievements-row--hidden{/if}">
+				<td class="achievements-col-showcase">
+					{if $ach.unlocked}
+					<input type="checkbox"
+						class="ach-showcase-cb"
+						name="showcase[]"
+						value="{$ach.id}"
+						{if $ach.showcase_order}checked{/if}
+						aria-label="{$LNG.ach_showcase_column}: {$ach.name|escape:'html'}">
+					{else}
+					<input type="checkbox" disabled aria-hidden="true">
+					{/if}
+				</td>
 				<td>
 					<strong>{$ach.name}</strong>
 					{if !$ach.hidden}<br><span class="achievements-desc">{$ach.description}</span>{/if}

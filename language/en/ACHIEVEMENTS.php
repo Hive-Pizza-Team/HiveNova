@@ -29,6 +29,12 @@ $LNG['ach_celebration_tier_normal'] = 'Achievement';
 $LNG['ach_celebration_tier_epic'] = 'Epic Achievement';
 $LNG['ach_celebration_tier_legendary'] = 'Legendary Achievement';
 
+$LNG['ach_showcase_label'] = 'Profile showcase';
+$LNG['ach_showcase_column'] = 'Profile';
+$LNG['ach_showcase_save'] = 'Save showcase';
+$LNG['ach_showcase_max'] = 'You can show at most 5 achievements on your profile.';
+$LNG['ach_showcase_saved'] = 'Profile showcase saved.';
+
 $LNG['ach_combat_first_win_name'] = 'First Blood';
 $LNG['ach_combat_first_win_desc'] = 'Win your first battle.';
 $LNG['ach_combat_wins_10_name'] = 'Skirmisher';
