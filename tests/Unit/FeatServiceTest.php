@@ -138,45 +138,54 @@ class FeatServiceTest extends TestCase
 
     public function testEnsureSeededInsertsMissingShipFeats(): void
     {
-        $GLOBALS['resource'] = [
+        $savedResource = $GLOBALS['resource'] ?? null;
+        $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
             202 => 'small_ship_cargo',
             214 => 'dearth_star',
             216 => 'lune_noir',
-        ];
-        $this->fake->achievement->featStates = [
-            '1:' . FeatCatalog::FIRST_SHIP => [
-                'status' => FeatCatalog::STATUS_OPEN,
-                'winner_id' => 0,
-                'claimed_at' => 0,
-            ],
-        ];
-        $this->fake->achievement->planetShipTotals = [
-            'small_ship_cargo' => 5,
-            'dearth_star' => 0,
-            'lune_noir' => 0,
-        ];
-        Config::setInstance(new Config([
-            'uni' => 1,
-            'feat_tracking_from_start' => 0,
-        ]), 1);
+        ]);
+        try {
+            $this->fake->achievement->featStates = [
+                '1:' . FeatCatalog::FIRST_SHIP => [
+                    'status' => FeatCatalog::STATUS_OPEN,
+                    'winner_id' => 0,
+                    'claimed_at' => 0,
+                ],
+            ];
+            $this->fake->achievement->planetShipTotals = [
+                'small_ship_cargo' => 5,
+                'dearth_star' => 0,
+                'lune_noir' => 0,
+            ];
+            Config::setInstance(new Config([
+                'uni' => 1,
+                'feat_tracking_from_start' => 0,
+            ]), 1);
 
-        FeatService::ensureSeeded(1);
+            FeatService::ensureSeeded(1);
 
-        $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_SMALL_CARGO, $this->fake->achievement->featStates);
-        $this->assertSame(
-            FeatCatalog::STATUS_UNKNOWN,
-            $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_SMALL_CARGO]['status']
-        );
-        $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_DEATHSTAR, $this->fake->achievement->featStates);
-        $this->assertSame(
-            FeatCatalog::STATUS_OPEN,
-            $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_DEATHSTAR]['status']
-        );
-        $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_BLACK_MOON, $this->fake->achievement->featStates);
-        $this->assertSame(
-            FeatCatalog::STATUS_OPEN,
-            $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_BLACK_MOON]['status']
-        );
+            $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_SMALL_CARGO, $this->fake->achievement->featStates);
+            $this->assertSame(
+                FeatCatalog::STATUS_UNKNOWN,
+                $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_SMALL_CARGO]['status']
+            );
+            $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_DEATHSTAR, $this->fake->achievement->featStates);
+            $this->assertSame(
+                FeatCatalog::STATUS_OPEN,
+                $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_DEATHSTAR]['status']
+            );
+            $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_BLACK_MOON, $this->fake->achievement->featStates);
+            $this->assertSame(
+                FeatCatalog::STATUS_OPEN,
+                $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_BLACK_MOON]['status']
+            );
+        } finally {
+            if (is_array($savedResource)) {
+                $GLOBALS['resource'] = $savedResource;
+            } else {
+                unset($GLOBALS['resource']);
+            }
+        }
     }
 
     public function testUnlockWithoutAchievementRowIsSilent(): void
