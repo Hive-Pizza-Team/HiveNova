@@ -2,6 +2,7 @@
 
 namespace HiveNova\Mission;
 
+use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
 use HiveNova\Core\PlayerUtil;
 
@@ -22,33 +23,40 @@ use HiveNova\Core\PlayerUtil;
 
 class MissionCaseFoundDM extends MissionFunctions implements Mission
 {
-	const CHANCE = 30; 
-	const CHANCE_SHIP = 0.25; 
-	const MIN_FOUND = 423; 
-	const MAX_FOUND = 1278; 
-	const MAX_CHANCE = 50; 
-		
+	const CHANCE = 30;
+	const CHANCE_SHIP = 0.25;
+	const MIN_FOUND = 423;
+	const MAX_FOUND = 1278;
+	const MAX_CHANCE = 50;
+	const WHAMMY_CHANCE = 10;
+
 	function __construct($Fleet)
 	{
 		$this->_fleet	= $Fleet;
 	}
-	
+
 	function TargetEvent()
 	{
 		$this->setState(FLEET_HOLD);
 		$this->SaveFleet();
 	}
-	
+
 	function EndStayEvent()
 	{
 		$LNG	= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
-		$chance	= mt_rand(0, 100);
-		if($chance <= min(self::MAX_CHANCE, (self::CHANCE + $this->_fleet['fleet_amount'] * self::CHANCE_SHIP))) {
-			$FoundDark 	= mt_rand(self::MIN_FOUND, self::MAX_FOUND);
+		$roll	= $this->rollPercent();
+		$successChance = min(self::MAX_CHANCE, (self::CHANCE + $this->_fleet['fleet_amount'] * self::CHANCE_SHIP));
+
+		if ($roll <= self::WHAMMY_CHANCE) {
+			$this->UpdateFleet('fleet_array', '220,0;');
+			$this->UpdateFleet('fleet_amount', 0);
+			$Message = $LNG['sys_expe_dm_whammy_'.$this->rollMessageVariant(1, 3)];
+		} elseif ($roll <= self::WHAMMY_CHANCE + $successChance) {
+			$FoundDark 	= $this->rollFoundAmount();
 			$this->UpdateFleet('fleet_resource_darkmatter', $FoundDark);
-			$Message 	= $LNG['sys_expe_found_dm_'.mt_rand(1, 3).'_'.mt_rand(1, 2).''];
+			$Message 	= $LNG['sys_expe_found_dm_'.$this->rollMessageVariant(1, 3).'_'.$this->rollMessageVariant(1, 2)];
 		} else {
-			$Message 	= $LNG['sys_expe_nothing_'.mt_rand(1, 9)];
+			$Message 	= $LNG['sys_expe_nothing_'.$this->rollMessageVariant(1, 9)];
 		}
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
@@ -56,7 +64,7 @@ class MissionCaseFoundDM extends MissionFunctions implements Mission
 		PlayerUtil::sendMessage($this->_fleet['fleet_owner'], 0, $LNG['sys_mess_tower'], 15,
 			$LNG['sys_expe_report'], $Message, $this->_fleet['fleet_end_stay'], NULL, 1, $this->_fleet['fleet_universe']);
 	}
-	
+
 	function ReturnEvent()
 	{
 		$LNG	= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
@@ -69,6 +77,11 @@ class MissionCaseFoundDM extends MissionFunctions implements Mission
 			);
 
 			$this->UpdateFleet('fleet_array', '220,0;');
+			$this->UpdateFleet('fleet_amount', 0);
+		}
+		elseif ($this->fleetHasNoShips())
+		{
+			$message	= $LNG['sys_expe_back_home_whammy_dm'];
 		}
 		else
 		{
@@ -79,5 +92,50 @@ class MissionCaseFoundDM extends MissionFunctions implements Mission
 			$message, $this->_fleet['fleet_end_time'], NULL, 1, $this->_fleet['fleet_universe']);
 
 		$this->RestoreFleet();
+	}
+
+	/**
+	 * @return int 1–100 inclusive
+	 */
+	protected function rollPercent()
+	{
+		return mt_rand(1, 100);
+	}
+
+	/**
+	 * @return int
+	 */
+	protected function rollFoundAmount()
+	{
+		return mt_rand(self::MIN_FOUND, self::MAX_FOUND);
+	}
+
+	/**
+	 * @param int $min
+	 * @param int $max
+	 * @return int
+	 */
+	protected function rollMessageVariant($min, $max)
+	{
+		return mt_rand($min, $max);
+	}
+
+	/**
+	 * @return bool
+	 */
+	protected function fleetHasNoShips()
+	{
+		if ((int) $this->_fleet['fleet_amount'] === 0) {
+			return true;
+		}
+
+		$ships = FleetFunctions::unserialize($this->_fleet['fleet_array']);
+		foreach ($ships as $amount) {
+			if ((int) $amount > 0) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
