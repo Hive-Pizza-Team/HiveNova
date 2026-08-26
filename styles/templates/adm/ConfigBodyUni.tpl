@@ -454,6 +454,14 @@
 	<td><input name="season_wallet_active_key" value="" type="password" autocomplete="off"></td>
 	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_season_wallet_key_info}"></td>
 </tr><tr>
+	<td>{$LNG.se_season_blog}</td>
+	<td><input name="season_blog_account" value="{$season_blog_account}" type="text" maxlength="16" autocomplete="off"></td>
+	<td>&nbsp;</td>
+</tr><tr>
+	<td>{$LNG.se_season_blog_key}</td>
+	<td><input name="season_blog_posting_key" value="" type="password" autocomplete="off"></td>
+	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_season_blog_key_info}"></td>
+</tr><tr>
 	<td>{$LNG.se_season_status}</td>
 	<td>{$season_status} (#{$season_id})</td>
 	<td>&nbsp;</td>

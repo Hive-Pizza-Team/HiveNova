@@ -145,4 +145,33 @@ class DatabaseSeasonStoreTest extends TestCase
 		$this->assertStringContainsString('%%SEASON_SNAPSHOTS%%', $this->db->deletes[0][0]);
 		$this->assertStringContainsString('%%SEASON_SNAPSHOTS%%', $this->db->inserts[0][0]);
 	}
+
+	public function testReportQueriesSql(): void
+	{
+		$store = new DatabaseSeasonStore();
+		$this->db->selectResult = [
+			['rank' => 1, 'hive_account' => 'aliceaaa', 'points' => 9, 'username' => 'Alice', 'pizza_amount' => '1.5'],
+		];
+		$rows = $store->reportRanking(2, 1, 20);
+		$this->assertSame('Alice', $rows[0]['username']);
+		$this->assertStringContainsString('%%SEASON_SNAPSHOTS%%', $this->db->selects[0][0]);
+		$this->assertStringContainsString('%%SEASON_PAYOUTS%%', $this->db->selects[0][0]);
+
+		$this->db->selectResult = [
+			['units' => 100, 'result' => 'awon', 'attacker' => 'A', 'defender' => 'B'],
+		];
+		$hof = $store->reportHallOfFame(2, 10);
+		$this->assertSame(100, $hof[0]['units']);
+		$this->assertStringContainsString('%%TOPKB%%', $this->db->selects[1][0]);
+
+		$this->db->selectResult = [
+			['feat_key' => 'feat_first_ship', 'claimed_at' => 50, 'username' => 'Sam', 'hive_account' => 'samacct'],
+		];
+		$feats = $store->reportFeats(2, 1, 100);
+		$this->assertSame('feat_first_ship', $feats[0]['feat_key']);
+		$this->assertStringContainsString('%%FEAT_STATES%%', $this->db->selects[2][0]);
+
+		$this->db->selectSingleResult = ['c' => 4];
+		$this->assertSame(4, $store->countEntries(2, 1));
+	}
 }

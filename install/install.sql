@@ -301,6 +301,8 @@ CREATE TABLE `%PREFIX%config` (
   `season_entry_pizza` decimal(10,3) unsigned NOT NULL DEFAULT '0.100',
   `season_wallet_account` varchar(16) NOT NULL DEFAULT '',
   `season_wallet_active_key` varchar(80) NOT NULL DEFAULT '',
+  `season_blog_account` varchar(16) NOT NULL DEFAULT '',
+  `season_blog_posting_key` varchar(80) NOT NULL DEFAULT '',
   `season_id` int(10) unsigned NOT NULL DEFAULT '0',
   `season_starts_at` int(11) unsigned NOT NULL DEFAULT '0',
   `season_closes_at` int(11) unsigned NOT NULL DEFAULT '0',
@@ -737,6 +739,8 @@ CREATE TABLE `%PREFIX%season_weeks` (
   `pool_pizza` decimal(20,3) unsigned NOT NULL DEFAULT '0.000',
   `house_cut_pizza` decimal(20,3) unsigned NOT NULL DEFAULT '0.000',
   `payout_budget` decimal(20,3) unsigned NOT NULL DEFAULT '0.000',
+  `blog_permlink` varchar(255) NOT NULL DEFAULT '',
+  `blog_trx_id` varchar(80) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `universe_season` (`universe`,`season_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

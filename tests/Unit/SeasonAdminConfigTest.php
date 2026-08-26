@@ -9,32 +9,37 @@ class SeasonAdminConfigTest extends TestCase
 	public function testEmptyPostedKeyIsOmitted(): void
 	{
 		$result = SeasonAdminConfig::applyPosted(
-			['season_wallet_active_key' => '5KEXISTING', 'season_mode' => 0],
-			['season_mode' => 'on', 'season_wallet_active_key' => '']
+			['season_wallet_active_key' => '5KEXISTING', 'season_blog_posting_key' => '5KBLOGOLD', 'season_mode' => 0],
+			['season_mode' => 'on', 'season_wallet_active_key' => '', 'season_blog_posting_key' => '']
 		);
 		$this->assertArrayNotHasKey('season_wallet_active_key', $result['apply']);
+		$this->assertArrayNotHasKey('season_blog_posting_key', $result['apply']);
 		$this->assertSame(1, $result['apply']['season_mode']);
 	}
 
 	public function testPostedKeyReplacesStoredKey(): void
 	{
 		$result = SeasonAdminConfig::applyPosted(
-			['season_wallet_active_key' => '5KOLD'],
-			['season_wallet_active_key' => '5KNEW']
+			['season_wallet_active_key' => '5KOLD', 'season_blog_posting_key' => '5KBLOGOLD'],
+			['season_wallet_active_key' => '5KNEW', 'season_blog_posting_key' => '5KBLOGNEW']
 		);
 		$this->assertSame('5KNEW', $result['apply']['season_wallet_active_key']);
+		$this->assertSame('5KBLOGNEW', $result['apply']['season_blog_posting_key']);
 	}
 
 	public function testLogNeverContainsRawWif(): void
 	{
 		$result = SeasonAdminConfig::applyPosted(
-			['season_wallet_active_key' => '5KSECRETOLD'],
-			['season_wallet_active_key' => '5KSECRETNEW']
+			['season_wallet_active_key' => '5KSECRETOLD', 'season_blog_posting_key' => '5KBLOGSECRETOLD'],
+			['season_wallet_active_key' => '5KSECRETNEW', 'season_blog_posting_key' => '5KBLOGSECRETNEW']
 		);
 		$blob = json_encode([$result['log_old'], $result['log_new'], $result['template']]);
 		$this->assertStringNotContainsString('5KSECRETOLD', (string) $blob);
 		$this->assertStringNotContainsString('5KSECRETNEW', (string) $blob);
+		$this->assertStringNotContainsString('5KBLOGSECRETOLD', (string) $blob);
+		$this->assertStringNotContainsString('5KBLOGSECRETNEW', (string) $blob);
 		$this->assertSame('', $result['template']['season_wallet_active_key']);
+		$this->assertSame('', $result['template']['season_blog_posting_key']);
 	}
 
 	public function testCutAndEntryBounds(): void
@@ -46,11 +51,13 @@ class SeasonAdminConfigTest extends TestCase
 			'season_length_seconds' => '604800',
 			'season_preclose_seconds' => '14400',
 			'season_wallet_account' => 'season.wallet',
+			'season_blog_account' => 'Season.Blog',
 		]);
 		$this->assertSame('12.50', $result['apply']['season_house_cut_percent']);
 		$this->assertSame('0.250', $result['apply']['season_entry_pizza']);
 		$this->assertSame(100, $result['apply']['season_min_points']);
 		$this->assertSame('season.wallet', $result['apply']['season_wallet_account']);
+		$this->assertSame('season.blog', $result['apply']['season_blog_account']);
 	}
 
 	public function testInvalidCutIsRejected(): void

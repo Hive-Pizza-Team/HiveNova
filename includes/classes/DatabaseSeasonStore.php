@@ -247,6 +247,8 @@ class DatabaseSeasonStore implements SeasonStore
 			'pool_pizza'       => 'pool_pizza',
 			'house_cut_pizza'  => 'house_cut_pizza',
 			'payout_budget'    => 'payout_budget',
+			'blog_permlink'    => 'blog_permlink',
+			'blog_trx_id'      => 'blog_trx_id',
 		];
 		foreach ($map as $field => $col) {
 			if (array_key_exists($field, $fields)) {
@@ -261,6 +263,109 @@ class DatabaseSeasonStore implements SeasonStore
 			'UPDATE %%SEASON_WEEKS%% SET ' . implode(', ', $set) . ' WHERE `universe` = :uni AND `season_id` = :sid',
 			$params
 		);
+	}
+
+	public function reportRanking(int $universe, int $seasonId, int $limit = 20): array
+	{
+		$limit = max(1, min(100, $limit));
+		$rows = Database::get()->select(
+			'SELECT s.`rank`, s.`hive_account`, s.`points`, COALESCE(u.`username`, \'\') AS `username`,
+				p.`pizza_amount` AS `pizza_amount`
+			FROM %%SEASON_SNAPSHOTS%% s
+			LEFT JOIN %%USERS%% u ON u.`id` = s.`user_id`
+			LEFT JOIN %%SEASON_PAYOUTS%% p ON p.`universe` = s.`universe` AND p.`season_id` = s.`season_id`
+				AND p.`user_id` = s.`user_id` AND p.`status` = \'sent\'
+			WHERE s.`universe` = :uni AND s.`season_id` = :sid
+			ORDER BY s.`rank` ASC
+			LIMIT ' . $limit,
+			[':uni' => $universe, ':sid' => $seasonId]
+		);
+		$out = [];
+		foreach ($rows as $row) {
+			$out[] = [
+				'rank'         => (int) $row['rank'],
+				'username'     => (string) $row['username'],
+				'hive_account' => (string) $row['hive_account'],
+				'points'       => (int) $row['points'],
+				'pizza_amount' => isset($row['pizza_amount']) && $row['pizza_amount'] !== null
+					? (float) $row['pizza_amount']
+					: null,
+			];
+		}
+
+		return $out;
+	}
+
+	public function reportHallOfFame(int $universe, int $limit = 10): array
+	{
+		$limit = max(1, min(100, $limit));
+		$sql = 'SELECT %%TOPKB%%.`units`, %%TOPKB%%.`result`, (
+			SELECT DISTINCT
+			IF(%%TOPKB_USERS%%.username = \'\', GROUP_CONCAT(%%USERS%%.username SEPARATOR \' & \'), GROUP_CONCAT(%%TOPKB_USERS%%.username SEPARATOR \' & \'))
+			FROM %%TOPKB_USERS%%
+			LEFT JOIN %%USERS%% ON uid = %%USERS%%.id
+			WHERE %%TOPKB_USERS%%.rid = %%TOPKB%%.rid AND role = 1
+		) AS attacker,
+		(
+			SELECT DISTINCT
+			IF(%%TOPKB_USERS%%.username = \'\', GROUP_CONCAT(%%USERS%%.username SEPARATOR \' & \'), GROUP_CONCAT(%%TOPKB_USERS%%.username SEPARATOR \' & \'))
+			FROM %%TOPKB_USERS%% INNER JOIN %%USERS%% ON uid = id
+			WHERE %%TOPKB_USERS%%.rid = %%TOPKB%%.`rid` AND `role` = 2
+		) AS defender
+		FROM %%TOPKB%% WHERE universe = :universe ORDER BY %%TOPKB%%.units DESC LIMIT ' . $limit;
+		$rows = Database::get()->select($sql, [':universe' => $universe]);
+		$out = [];
+		foreach ($rows as $row) {
+			$out[] = [
+				'units'    => (int) $row['units'],
+				'result'   => (string) ($row['result'] ?? ''),
+				'attacker' => (string) ($row['attacker'] ?? ''),
+				'defender' => (string) ($row['defender'] ?? ''),
+			];
+		}
+
+		return $out;
+	}
+
+	public function reportFeats(int $universe, int $startsAt, int $closesAt): array
+	{
+		$rows = Database::get()->select(
+			'SELECT s.`feat_key`, s.`claimed_at`, COALESCE(u.`username`, \'\') AS `username`,
+				COALESCE(u.`hive_account`, \'\') AS `hive_account`
+			FROM %%FEAT_STATES%% s
+			LEFT JOIN %%USERS%% u ON u.`id` = s.`winner_id`
+			WHERE s.`universe` = :uni AND s.`status` = :claimed
+				AND s.`claimed_at` >= :start AND s.`claimed_at` <= :close
+			ORDER BY s.`claimed_at` ASC',
+			[
+				':uni'     => $universe,
+				':claimed' => FeatCatalog::STATUS_CLAIMED,
+				':start'   => $startsAt,
+				':close'   => $closesAt,
+			]
+		);
+		$out = [];
+		foreach ($rows as $row) {
+			$out[] = [
+				'feat_key'     => (string) $row['feat_key'],
+				'username'     => (string) $row['username'],
+				'hive_account' => (string) $row['hive_account'],
+				'claimed_at'   => (int) $row['claimed_at'],
+			];
+		}
+
+		return $out;
+	}
+
+	public function countEntries(int $universe, int $seasonId): int
+	{
+		$count = Database::get()->selectSingle(
+			'SELECT COUNT(*) AS `c` FROM %%SEASON_ENTRIES%% WHERE `universe` = :uni AND `season_id` = :sid',
+			[':uni' => $universe, ':sid' => $seasonId],
+			'c'
+		);
+
+		return (int) $count;
 	}
 
 	public function wipeProgress(int $universe, Config $config): void

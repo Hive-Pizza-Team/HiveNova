@@ -8,6 +8,7 @@ class SeasonService
 	public const STATUS_RUNNING = 'running';
 	public const STATUS_PAYING = 'paying';
 	public const STATUS_PAYOUT_HOLD = 'payout_hold';
+	public const STATUS_BLOG_HOLD = 'blog_hold';
 	public const TOKEN = 'PIZZA';
 	public const DEFAULT_LENGTH = 604800;
 	public const DEFAULT_PRECLOSE = 14400;
@@ -23,6 +24,8 @@ class SeasonService
 		private readonly HiveEngineTransfer $transfer = new HiveEngineTransfer(),
 		private readonly HiveEngineClient $engine = new HiveEngineClient(),
 		private readonly ?int $now = null,
+		private readonly HiveCommentPoster $poster = new HiveCommentPoster(),
+		private readonly SeasonReportComposer $composer = new SeasonReportComposer(),
 	) {
 	}
 
@@ -233,6 +236,10 @@ class SeasonService
 
 		if ($status === self::STATUS_PAYING || $status === self::STATUS_PAYOUT_HOLD) {
 			return $this->retryPayouts($config, $lng);
+		}
+
+		if ($status === self::STATUS_BLOG_HOLD) {
+			return $this->publishAndWipe($config, $lng);
 		}
 
 		return $status;
@@ -496,10 +503,80 @@ class SeasonService
 		}
 
 		$this->store->updateWeek($uni, $seasonId, ['status' => 'paid']);
+
+		return $this->publishAndWipe($config, $lng);
+	}
+
+	/**
+	 * Publish the season Hive blog (idempotent), then wipe and start the next week.
+	 */
+	public function publishAndWipe(Config $config, array $lng = []): string
+	{
+		$uni = (int) $config->uni;
+		$seasonId = (int) $config->season_id;
+		$week = $this->store->getWeek($uni, $seasonId) ?? [];
+
+		if (trim((string) ($week['blog_trx_id'] ?? '')) !== '') {
+			$this->store->wipeProgress($uni, $config);
+			$this->startWeek($config, $lng);
+
+			return 'wiped';
+		}
+
+		$author = strtolower(trim((string) ($config->season_blog_account ?? '')));
+		$wif = (string) ($config->season_blog_posting_key ?? '');
+		if ($author === '' || $wif === '' || !HiveUtil::isAccountValid($author)) {
+			return $this->enterBlogHold($config, $uni, $seasonId);
+		}
+
+		$startsAt = (int) ($week['starts_at'] ?? $config->season_starts_at ?? 0);
+		$closesAt = (int) ($week['closes_at'] ?? $config->season_closes_at ?? 0);
+		$report = $this->composer->compose(
+			[
+				'universe'         => $uni,
+				'season_id'        => $seasonId,
+				'starts_at'        => $startsAt,
+				'closes_at'        => $closesAt,
+				'pool_pizza'       => (float) ($week['pool_pizza'] ?? 0),
+				'house_cut_pizza'  => (float) ($week['house_cut_pizza'] ?? 0),
+				'payout_budget'    => (float) ($week['payout_budget'] ?? 0),
+				'entrants'         => $this->store->countEntries($uni, $seasonId),
+			],
+			$this->store->reportRanking($uni, $seasonId, SeasonReportComposer::RANKING_LIMIT),
+			$this->store->reportFeats($uni, $startsAt, $closesAt),
+			$this->store->reportHallOfFame($uni, SeasonReportComposer::HOF_LIMIT)
+		);
+
+		$result = $this->poster->post(
+			$author,
+			$report['permlink'],
+			$report['title'],
+			$report['body'],
+			$report['tags'],
+			$wif
+		);
+		if (!$result['ok']) {
+			return $this->enterBlogHold($config, $uni, $seasonId);
+		}
+
+		$this->store->updateWeek($uni, $seasonId, [
+			'status'        => 'paid',
+			'blog_permlink' => $report['permlink'],
+			'blog_trx_id'   => $result['trx_id'],
+		]);
 		$this->store->wipeProgress($uni, $config);
 		$this->startWeek($config, $lng);
 
 		return 'wiped';
+	}
+
+	private function enterBlogHold(Config $config, int $uni, int $seasonId): string
+	{
+		$config->season_status = self::STATUS_BLOG_HOLD;
+		$config->save();
+		$this->store->updateWeek($uni, $seasonId, ['status' => self::STATUS_BLOG_HOLD]);
+
+		return self::STATUS_BLOG_HOLD;
 	}
 
 	public function fireReminders(Config $config, array $lng = []): void

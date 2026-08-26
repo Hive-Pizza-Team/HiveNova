@@ -62,5 +62,28 @@ interface SeasonStore
 
 	public function updateWeek(int $universe, int $seasonId, array $fields): void;
 
+	/**
+	 * Top ranking rows for the season blog (username + prize when sent).
+	 *
+	 * @return list<array{rank: int, username: string, hive_account: string, points: int, pizza_amount: float|null}>
+	 */
+	public function reportRanking(int $universe, int $seasonId, int $limit = 20): array;
+
+	/**
+	 * Top combat Hall of Fame rows for the season blog.
+	 *
+	 * @return list<array{units: int, result: string, attacker: string, defender: string}>
+	 */
+	public function reportHallOfFame(int $universe, int $limit = 10): array;
+
+	/**
+	 * Feats claimed in the season time window.
+	 *
+	 * @return list<array{feat_key: string, username: string, hive_account: string, claimed_at: int}>
+	 */
+	public function reportFeats(int $universe, int $startsAt, int $closesAt): array;
+
+	public function countEntries(int $universe, int $seasonId): int;
+
 	public function wipeProgress(int $universe, Config $config): void;
 }

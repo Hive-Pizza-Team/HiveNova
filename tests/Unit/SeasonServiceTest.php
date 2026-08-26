@@ -2,6 +2,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
+use HiveNova\Core\HiveCommentPoster;
 use HiveNova\Core\HiveEngineClient;
 use HiveNova\Core\HiveEngineTransfer;
 use HiveNova\Core\SeasonService;
@@ -24,7 +25,12 @@ class SeasonServiceTest extends TestCase
 	/** @var list<array{0: string, 1: string, 2: string, 3: string, 4: string, 5: string}> */
 	private array $sends = [];
 
+	/** @var list<array{0: string, 1: string, 2: string, 3: string, 4: string, 5: string, 6: string, 7: string}> */
+	private array $blogPosts = [];
+
 	private bool $sendFail = false;
+
+	private bool $blogFail = false;
 
 	/** @var list<array{0: int, 1: string, 2: string, 3: int}> */
 	private array $messages = [];
@@ -43,7 +49,9 @@ class SeasonServiceTest extends TestCase
 		$this->db = new RecordingDatabase();
 		$this->swapDatabaseInstance($this->db);
 		$this->sends = [];
+		$this->blogPosts = [];
 		$this->sendFail = false;
+		$this->blogFail = false;
 		$this->messages = [];
 
 		HiveEngineTransfer::setBroadcaster(function (...$args) {
@@ -52,6 +60,15 @@ class SeasonServiceTest extends TestCase
 			}
 			$this->sends[] = $args;
 			return ['trx_id' => 'pay' . count($this->sends)];
+		});
+		HiveCommentPoster::setBroadcaster(function (...$args) {
+			$this->blogPosts[] = $args;
+			if ($this->blogFail) {
+				return ['error' => 'blog_fail'];
+			}
+			return ['trx_id' => 'blog' . count($this->blogPosts)];
+		});
+		HiveCommentPoster::setErrorLogger(static function (): void {
 		});
 		HiveEngineClient::setFetcher(null);
 
@@ -63,6 +80,8 @@ class SeasonServiceTest extends TestCase
 	protected function tearDown(): void
 	{
 		HiveEngineTransfer::setBroadcaster(null);
+		HiveCommentPoster::setBroadcaster(null);
+		HiveCommentPoster::setErrorLogger(null);
 		HiveEngineClient::setFetcher(null);
 		$ref = new ReflectionProperty(Config::class, 'instances');
 		$ref->setAccessible(true);
@@ -86,6 +105,8 @@ class SeasonServiceTest extends TestCase
 			'season_entry_pizza' => '1.000',
 			'season_wallet_account' => 'season.wallet',
 			'season_wallet_active_key' => '5Ktestwifxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+			'season_blog_account' => 'season.blog',
+			'season_blog_posting_key' => '5Kblogwifxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 			'season_id' => 1,
 			'season_starts_at' => $this->now,
 			'season_closes_at' => $this->now + 604800,
@@ -218,6 +239,10 @@ class SeasonServiceTest extends TestCase
 		$this->assertEqualsWithDelta($budget * 300 / 600, $byUser[10], 0.001);
 		$this->assertEqualsWithDelta($budget * 200 / 600, $byUser[11], 0.001);
 		$this->assertSame(3, count($this->sends));
+		$this->assertSame(1, count($this->blogPosts));
+		$this->assertSame('hivenova-u2-season-1', $this->blogPosts[0][3]);
+		$week = $this->store->getWeek(2, 1);
+		$this->assertSame('blog1', $week['blog_trx_id']);
 		$this->assertSame(2, (int) $config->season_id);
 		$this->assertSame(SeasonService::STATUS_RUNNING, $config->season_status);
 	}
@@ -456,5 +481,82 @@ class SeasonServiceTest extends TestCase
 		$this->assertFalse($panel['wipe_live']);
 		$this->assertSame(SeasonService::STATUS_PAYING, $panel['status']);
 		$this->assertSame(0, $panel['wipe_seconds']);
+	}
+
+	public function testFailedBlogDoesNotWipe(): void
+	{
+		$config = $this->makeConfig();
+		$svc = $this->service();
+		$svc->acceptTransfer($config, ['id' => 10, 'hive_account' => 'aliceaaa'], $this->transferFor(10, 'aliceaaa', 10));
+		$this->store->ranking = [
+			['user_id' => 10, 'hive_account' => 'aliceaaa', 'authlevel' => 0, 'points' => 100, 'rank' => 1],
+		];
+		$this->blogFail = true;
+		$result = $svc->closeWeek($config);
+		$this->assertSame(SeasonService::STATUS_BLOG_HOLD, $result);
+		$this->assertSame([], $this->store->wiped);
+		$this->assertSame(1, (int) $config->season_id);
+		$this->assertSame(SeasonService::STATUS_BLOG_HOLD, $config->season_status);
+		$this->assertSame(1, count($this->sends));
+		$this->assertSame(1, count($this->blogPosts));
+	}
+
+	public function testRetryBlogAfterHoldWipesAndStartsNextWeek(): void
+	{
+		$config = $this->makeConfig();
+		$svc = $this->service();
+		$svc->acceptTransfer($config, ['id' => 10, 'hive_account' => 'aliceaaa'], $this->transferFor(10, 'aliceaaa', 10));
+		$this->store->ranking = [
+			['user_id' => 10, 'hive_account' => 'aliceaaa', 'authlevel' => 0, 'points' => 100, 'rank' => 1],
+		];
+		$this->blogFail = true;
+		$svc->closeWeek($config);
+		$this->blogFail = false;
+		$result = $svc->tickUniverse($config);
+		$this->assertSame('wiped', $result);
+		$this->assertSame([2], $this->store->wiped);
+		$this->assertSame(2, (int) $config->season_id);
+		$this->assertSame(2, count($this->blogPosts));
+		$week = $this->store->getWeek(2, 1);
+		$this->assertSame('blog2', $week['blog_trx_id']);
+	}
+
+	public function testExistingBlogReceiptSkipsSecondBroadcast(): void
+	{
+		$config = $this->makeConfig(['season_status' => SeasonService::STATUS_BLOG_HOLD]);
+		$this->store->upsertWeek([
+			'universe' => 2,
+			'season_id' => 1,
+			'starts_at' => $this->now,
+			'closes_at' => $this->now + 604800,
+			'status' => SeasonService::STATUS_BLOG_HOLD,
+			'pool_pizza' => 1,
+			'house_cut_pizza' => 0.1,
+			'payout_budget' => 0.9,
+			'blog_permlink' => 'hivenova-u2-season-1',
+			'blog_trx_id' => 'already-posted',
+		]);
+		$result = $this->service()->publishAndWipe($config);
+		$this->assertSame('wiped', $result);
+		$this->assertSame([2], $this->store->wiped);
+		$this->assertSame([], $this->blogPosts);
+		$this->assertSame(2, (int) $config->season_id);
+	}
+
+	public function testMissingBlogCredentialsEnterBlogHold(): void
+	{
+		$config = $this->makeConfig([
+			'season_blog_account' => '',
+			'season_blog_posting_key' => '',
+		]);
+		$svc = $this->service();
+		$svc->acceptTransfer($config, ['id' => 10, 'hive_account' => 'aliceaaa'], $this->transferFor(10, 'aliceaaa', 10));
+		$this->store->ranking = [
+			['user_id' => 10, 'hive_account' => 'aliceaaa', 'authlevel' => 0, 'points' => 100, 'rank' => 1],
+		];
+		$result = $svc->closeWeek($config);
+		$this->assertSame(SeasonService::STATUS_BLOG_HOLD, $result);
+		$this->assertSame([], $this->store->wiped);
+		$this->assertSame([], $this->blogPosts);
 	}
 }
