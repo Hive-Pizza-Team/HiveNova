@@ -298,14 +298,18 @@ class ShowOverviewPage extends AbstractGamePage
 				$statData['total_rank'], $statData['total_rank'], $LNG['ov_of'], $config->users_amount);
 		}
 		
+		$universe = Universe::current();
+
 		$usersOnline = Database::get()->selectSingle(
 			'SELECT COUNT(*)
-			FROM %%USERS%% WHERE onlinetime >= UNIX_TIMESTAMP(NOW() - INTERVAL 15 MINUTE)'
+			FROM %%USERS%% WHERE universe = :universe AND onlinetime >= UNIX_TIMESTAMP(NOW() - INTERVAL 15 MINUTE)',
+			array(':universe' => $universe)
 		)['COUNT(*)'];
 
 		$fleetsOnline = Database::get()->selectSingle(
 			'SELECT COUNT(*)
-			FROM %%FLEETS%%'
+			FROM %%FLEETS%% WHERE fleet_universe = :universe',
+			array(':universe' => $universe)
 		)['COUNT(*)'];
 
 		$commanderBriefing = null;
