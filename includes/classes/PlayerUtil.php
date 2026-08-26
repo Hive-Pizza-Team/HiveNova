@@ -183,15 +183,29 @@ class PlayerUtil
 			return '';
 		}
 
+		$limit = max(1, (int) $limit);
+
 		try {
-			$rows = \HiveNova\Core\Database::get()->select(
-			'SELECT a.`key`, a.points FROM %%USER_ACHIEVEMENTS%% ua
-			INNER JOIN %%ACHIEVEMENTS%% a ON a.id = ua.achievement_id
-			WHERE ua.user_id = :userId
-			ORDER BY a.points DESC, ua.unlocked_at DESC
-			LIMIT ' . (int) $limit . ';',
-			[':userId' => $userId]
+			$db = \HiveNova\Core\Database::get();
+			$rows = $db->select(
+				'SELECT a.`key`, a.points FROM %%USER_ACHIEVEMENTS%% ua
+				INNER JOIN %%ACHIEVEMENTS%% a ON a.id = ua.achievement_id
+				WHERE ua.user_id = :userId AND ua.showcase_order IS NOT NULL
+				ORDER BY ua.showcase_order ASC
+				LIMIT ' . $limit . ';',
+				[':userId' => $userId]
 			);
+
+			if (empty($rows)) {
+				$rows = $db->select(
+					'SELECT a.`key`, a.points FROM %%USER_ACHIEVEMENTS%% ua
+					INNER JOIN %%ACHIEVEMENTS%% a ON a.id = ua.achievement_id
+					WHERE ua.user_id = :userId
+					ORDER BY a.points DESC, ua.unlocked_at DESC
+					LIMIT ' . $limit . ';',
+					[':userId' => $userId]
+				);
+			}
 		} catch (\Throwable) {
 			return '';
 		}

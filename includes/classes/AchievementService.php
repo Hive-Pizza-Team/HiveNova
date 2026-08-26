@@ -243,6 +243,58 @@ class AchievementService
     }
 
     /**
+     * Set the player's profile showcase to the given unlocked achievement IDs (max 5).
+     * Order in $achievementIds becomes showcase_order 1..n.
+     *
+     * @param list<int> $achievementIds
+     * @return int Number of achievements actually showcased
+     */
+    public function setShowcase(int $userId, array $achievementIds): int
+    {
+        $db = Database::get();
+
+        $normalized = [];
+        foreach ($achievementIds as $id) {
+            $id = (int) $id;
+            if ($id <= 0 || in_array($id, $normalized, true)) {
+                continue;
+            }
+            if (!$this->isUnlocked($userId, $id)) {
+                continue;
+            }
+            $normalized[] = $id;
+            if (count($normalized) >= 5) {
+                break;
+            }
+        }
+
+        $db->update(
+            'UPDATE %%USER_ACHIEVEMENTS%% SET showcase_order = NULL WHERE user_id = :userId;',
+            [':userId' => $userId]
+        );
+
+        if ($normalized === []) {
+            return 0;
+        }
+
+        $order = 0;
+        foreach ($normalized as $achievementId) {
+            $order++;
+            $db->update(
+                'UPDATE %%USER_ACHIEVEMENTS%% SET showcase_order = :order
+                WHERE user_id = :userId AND achievement_id = :achievementId;',
+                [
+                    ':order'          => $order,
+                    ':userId'         => $userId,
+                    ':achievementId'  => $achievementId,
+                ]
+            );
+        }
+
+        return $order;
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     private function loadUser(int $userId): ?array
@@ -610,7 +662,7 @@ class AchievementService
         $this->loadDefinitions($universe);
 
         $sql = 'SELECT a.*, COALESCE(p.progress, 0) AS progress,
-                (ua.achievement_id IS NOT NULL) AS unlocked, ua.unlocked_at
+                (ua.achievement_id IS NOT NULL) AS unlocked, ua.unlocked_at, ua.showcase_order
             FROM %%ACHIEVEMENTS%% a
             LEFT JOIN %%USER_ACHIEVEMENT_PROGRESS%% p ON p.achievement_id = a.id AND p.user_id = :userId
             LEFT JOIN %%USER_ACHIEVEMENTS%% ua ON ua.achievement_id = a.id AND ua.user_id = :userId
@@ -627,6 +679,9 @@ class AchievementService
             $params = $this->decodeParams($row['trigger_params']);
             $threshold = $this->resolveThreshold($params);
             $hidden = (int) $row['hidden'] === 1 && !(int) $row['unlocked'];
+            $showcaseOrder = isset($row['showcase_order']) && $row['showcase_order'] !== null
+                ? (int) $row['showcase_order']
+                : null;
 
             $result[] = [
                 'id'                => (int) $row['id'],
@@ -638,6 +693,7 @@ class AchievementService
                 'threshold'         => $threshold,
                 'unlocked'          => (bool) $row['unlocked'],
                 'unlocked_at'       => (int) ($row['unlocked_at'] ?? 0),
+                'showcase_order'    => $showcaseOrder,
                 'reward_type'       => $row['reward_type'],
                 'reward_amount'     => (float) $row['reward_amount'],
                 'points'            => (int) $row['points'],

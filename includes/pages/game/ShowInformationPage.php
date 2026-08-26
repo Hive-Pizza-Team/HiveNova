@@ -102,7 +102,7 @@ class ShowInformationPage extends AbstractGamePage
 			if(!isset($Ships[$Ship]) || $Ship == 212)
 				continue;
 
-			$ShipArray[$Ship]	= max(0, min($Ships[$Ship], $PLANET[$resource[$Ship]]));
+			$ShipArray[$Ship]	= min(parse_ship_amount($Ships[$Ship]), (int) $PLANET[$resource[$Ship]]);
 
 			if(empty($ShipArray[$Ship]))
 				continue;

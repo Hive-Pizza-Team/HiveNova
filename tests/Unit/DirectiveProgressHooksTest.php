@@ -70,12 +70,30 @@ class DirectiveProgressHooksTest extends TestCase
 		$this->assertSame(1, $progress['hold_success']);
 	}
 
-	public function testExpeditionDispatchIncrementsExploration(): void
+	public function testExpeditionCompletionHookIncrementsExploration(): void
 	{
 		DirectiveService::selectDirective(8, 1, DirectiveCatalog::EXPLORATION);
 		DirectiveHooks::afterExpeditionDispatch(8, 1);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
 		$this->assertSame(1, $progress['expedition_dispatch']);
+	}
+
+	public function testExpeditionCreditIsWiredFromEndStayNotDispatch(): void
+	{
+		$dispatchSource = file_get_contents(ROOT_PATH . 'includes/classes/FleetDispatchService.php');
+		$missionSource = file_get_contents(ROOT_PATH . 'includes/classes/missions/MissionCaseExpedition.php');
+		$this->assertIsString($dispatchSource);
+		$this->assertIsString($missionSource);
+		$this->assertStringNotContainsString(
+			'afterExpeditionDispatch',
+			$dispatchSource,
+			'Dispatch must not credit exploration — recall/resend would farm the directive'
+		);
+		$this->assertStringContainsString(
+			'afterExpeditionDispatch',
+			$missionSource,
+			'EndStay completion must credit exploration so recalled fleets never count'
+		);
 	}
 
 	public function testTransportAboveThresholdIncrementsTrade(): void

@@ -81,6 +81,8 @@ $LNG['sys_colo_notfree'] 					= "Jedna z twoich flot osiągnęła koordynaty %s.
 $LNG['sys_colo_notech'] 					= 'Jedna z twoich flot doleciała na %s. I okazało się, że nie możemy zasiedlić tej planety. Nasza znajomość Astrofizyki jest zbyt niska, żebyśmy mogli żyć w tak niesprzyjających warunkach!';
 
 $LNG['sys_expe_report'] 					= "Raport ekspedycji";
+$LNG['sys_expe_choice_pending']				= 'The expedition found something that needs your decision before it is recovered.';
+$LNG['cm_pending_choice']					= 'Expedition choice waiting';
 $LNG['sys_recy_report'] 					= "Raport zbierania";
 $LNG['sys_expe_blackholl_1'] 				= "Twoja flota przelatywała zbyt blisko czarnej dziury, dzięki zręczności i opanowaniu Twojego Admirała tylko część jednostek uległa zniszczeniu!";
 $LNG['sys_expe_blackholl_2'] 				= "Twoja flota wyszła z nadprzestrzeniu wprost w czarną dziurę, nic nie dało się już zrobić, wszystkie jednostki zostały stracone bezpowrotnie!";

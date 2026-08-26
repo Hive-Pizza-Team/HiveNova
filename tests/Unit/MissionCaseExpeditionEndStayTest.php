@@ -76,4 +76,25 @@ class MissionCaseExpeditionEndStayTest extends TestCase
         $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
         $this->assertNotEmpty($this->fake->achievement->messages);
     }
+
+    public function test_end_stay_invokes_directive_hook_when_commander_enabled(): void
+    {
+        $modules = array_fill(0, 50, '0');
+        $modules[MODULE_COMMANDER] = '1';
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'Fleet_Cdr' => 0.3,
+            'Defs_Cdr' => 0.0,
+            'moduls' => implode(';', $modules),
+        ]), 1);
+
+        $this->assertTrue(\HiveNova\Core\DirectiveHooks::enabled());
+
+        mt_srand(2000);
+        $fleet = expeditionFleetLongHold(['fleet_array' => '202,10;']);
+        $mission = new MissionCaseExpedition($fleet);
+        $mission->EndStayEvent();
+
+        $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
+    }
 }

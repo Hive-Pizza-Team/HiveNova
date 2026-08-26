@@ -7,6 +7,41 @@
 	gap: 1.5rem;
 	margin-bottom: 1.25rem;
 	color: var(--color-text-muted);
+	flex-wrap: wrap;
+}
+
+.achievements-showcase-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 1.25rem;
+}
+
+.achievements-showcase-status {
+	font-size: 0.9em;
+	color: var(--color-text-muted);
+}
+
+.achievements-showcase-status.is-ok {
+	color: var(--color-accent);
+}
+
+.achievements-showcase-status.is-error {
+	color: #c44;
+}
+
+.achievements-col-showcase {
+	width: 3rem;
+	text-align: center;
+}
+
+.achievements-col-showcase input[type="checkbox"] {
+	cursor: pointer;
+}
+
+.achievements-col-showcase input[type="checkbox"]:disabled {
+	cursor: not-allowed;
+	opacity: 0.35;
 }
 
 .achievements-category {

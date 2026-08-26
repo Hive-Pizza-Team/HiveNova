@@ -3,13 +3,14 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\AchievementService;
-use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 
 class ShowAchievementsPage extends AbstractGamePage
 {
     public static $requireModule = MODULE_ACHIEVEMENTS;
+
+    public const SHOWCASE_LIMIT = 5;
 
     public function __construct()
     {
@@ -30,6 +31,7 @@ class ShowAchievementsPage extends AbstractGamePage
         $byCategory = [];
         $unlockedCount = 0;
         $pointsTotal = 0;
+        $showcaseCount = 0;
 
         foreach ($achievements as $row) {
             $cat = $row['category'];
@@ -40,6 +42,9 @@ class ShowAchievementsPage extends AbstractGamePage
             if ($row['unlocked']) {
                 $unlockedCount++;
                 $pointsTotal += $row['points'];
+            }
+            if (!empty($row['showcase_order'])) {
+                $showcaseCount++;
             }
         }
 
@@ -54,13 +59,19 @@ class ShowAchievementsPage extends AbstractGamePage
             'hive'        => $LNG['ach_category_hive'],
         ];
 
+        $this->tplObj->loadscript('achievements-showcase.js');
+
         $this->assign([
             'achievementsByCategory' => $byCategory,
             'categoryLabels'         => $categoryLabels,
             'unlockedCount'          => $unlockedCount,
             'totalCount'             => count($achievements),
             'pointsTotal'            => $pointsTotal,
+            'showcaseCount'          => $showcaseCount,
+            'showcaseLimit'          => self::SHOWCASE_LIMIT,
             'darkmatterName'         => $LNG['tech'][921] ?? '',
+            'achShowcaseMaxMsg'      => $LNG['ach_showcase_max'] ?? '',
+            'achShowcaseSavedMsg'    => $LNG['ach_showcase_saved'] ?? '',
         ]);
 
         $this->display('page.achievements.default.tpl');
@@ -78,8 +89,22 @@ class ShowAchievementsPage extends AbstractGamePage
             AchievementService::get()->markCelebrated((int) $USER['id'], $achievementId);
         }
 
-        header('Content-Type: application/json');
-        echo json_encode(['ok' => true]);
-        exit;
+        $this->sendJSON(['ok' => true]);
+    }
+
+    public function showcase()
+    {
+        global $USER;
+
+        $this->setWindow('ajax');
+
+        $ids = HTTP::_GP('ids', []);
+        if (!is_array($ids)) {
+            $ids = [];
+        }
+
+        $count = AchievementService::get()->setShowcase((int) $USER['id'], $ids);
+
+        $this->sendJSON(['ok' => true, 'count' => $count]);
     }
 }

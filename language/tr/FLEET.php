@@ -85,6 +85,8 @@ $LNG['sys_colo_badpos']  					= "Filolarınız kolonileştirme işlemi  için %s
 $LNG['sys_colo_notfree'] 					= "Filolarınız kolonileştirme işlemi  için %s koordinatlarına ulaştı. Ancak mevcut gezegende zaten mevcut kolonileştirme işlemi olduğunu görüp büyük bir moral bozukluğu ile geldikleri gezegene geri dönüyorlar.";
 
 $LNG['sys_expe_report'] 					= "Keşif Raporu";
+$LNG['sys_expe_choice_pending']				= 'The expedition found something that needs your decision before it is recovered.';
+$LNG['cm_pending_choice']					= 'Expedition choice waiting';
 $LNG['sys_recy_report'] 					= "Geri Dönüşüm Raporu";
 $LNG['sys_expe_found_ships_nothing']		= 'Gemi bulunamadı.';
 $LNG['sys_expe_blackholl_1'] 				= "Keşif filonuz kara deliğe yakalandı ve kara delik filonuzun bir kısmını içine çekti. Maalesef kaybolan filo ile irtibat kesildi.! ";
