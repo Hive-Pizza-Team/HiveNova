@@ -430,6 +430,10 @@ td.fleet-ship-bulk-actions {
     background-color: #DDD;
 }
 
+.planetImage>a>img {
+    cursor: pointer;
+}
+
 #resources_mobile {
     /* new */
     display: flex;
