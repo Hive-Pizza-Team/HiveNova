@@ -59,8 +59,12 @@ class DiscordFeatNotifyTest extends TestCase
 
         DiscordWebhookService::notifyFeatClaimed(1, 'feat_first_ship', 4);
         $this->assertCount(1, $this->posts);
-        $this->assertStringContainsString('Nova claimed feat_first_ship', $this->posts[0]['json']);
-        $this->assertStringContainsString('Feat of Strength', $this->posts[0]['json']);
+        $json = $this->posts[0]['json'];
+        $this->assertStringContainsString('Feat of Strength', $json);
+        $this->assertStringContainsString('First completed shipyard unit.', $json);
+        $this->assertStringContainsString('First ship', $json);
+        $this->assertStringContainsString('Nova', $json);
+        $this->assertStringNotContainsString('feat_first_ship', $json);
     }
 
     public function testNotifyFeatClaimedSkipsInvalidWebhook(): void
@@ -82,6 +86,10 @@ class DiscordFeatNotifyTest extends TestCase
         ]), 1);
         DiscordWebhookService::notifyFeatClaimed(1, 'feat_first_moon', 99);
         $this->assertCount(1, $this->posts);
-        $this->assertStringContainsString('#99 claimed feat_first_moon', $this->posts[0]['json']);
+        $json = $this->posts[0]['json'];
+        $this->assertStringContainsString('#99', $json);
+        $this->assertStringContainsString('First moon', $json);
+        $this->assertStringContainsString('First player to own a moon.', $json);
+        $this->assertStringNotContainsString('feat_first_moon', $json);
     }
 }

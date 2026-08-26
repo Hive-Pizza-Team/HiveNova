@@ -200,18 +200,27 @@ class DiscordWebhookService
 			);
 			$player = is_string($username) && $username !== '' ? $username : '#' . $userId;
 
+			$lang = new Language('en');
+			$lang->includeData(['INGAME']);
+			$def = FeatCatalog::definition($featKey);
+			$featName = $lang[$def['name_key']] ?? $featKey;
+			$featDesc = $lang[$def['desc_key']] ?? '';
+			$description = $featDesc !== ''
+				? $featDesc
+				: sprintf($lang['feat_banner_text'] ?? '%s claimed %s', $player, $featName);
+
 			self::post($webhook, [
 				'username'         => self::USERNAME,
 				'avatar_url'       => self::AVATAR_URL,
 				'allowed_mentions' => ['parse' => []],
 				'embeds'           => [[
-					'title'       => 'Feat of Strength',
-					'description' => $player . ' claimed ' . $featKey,
+					'title'       => $lang['feat_inbox_subject'] ?? 'Feat of Strength',
+					'description' => $description,
 					'color'       => 0xF1C40F,
 					'thumbnail'   => ['url' => self::AVATAR_URL],
 					'fields'      => [
 						['name' => 'Player', 'value' => $player, 'inline' => true],
-						['name' => 'Feat', 'value' => $featKey, 'inline' => true],
+						['name' => 'Feat', 'value' => $featName, 'inline' => true],
 					],
 				]],
 			]);
