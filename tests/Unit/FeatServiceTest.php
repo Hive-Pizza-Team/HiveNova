@@ -104,8 +104,16 @@ class FeatServiceTest extends TestCase
         $this->assertSame(FeatCatalog::STATUS_CLAIMED, $ship['status']);
         $this->assertSame('alice', $ship['username']);
         $this->assertSame(99, $ship['claimed_at']);
-        $colony = $list[1];
-        $this->assertSame(FeatCatalog::STATUS_UNKNOWN, $colony['status']);
+        $this->assertFalse($ship['hidden']);
+        $blackMoon = null;
+        foreach ($list as $row) {
+            if ($row['feat_key'] === FeatCatalog::FIRST_BLACK_MOON) {
+                $blackMoon = $row;
+                break;
+            }
+        }
+        $this->assertNotNull($blackMoon);
+        $this->assertTrue($blackMoon['hidden']);
     }
 
     public function testSeedUniverseOpensAllWhenTrackingFromStart(): void
@@ -117,6 +125,66 @@ class FeatServiceTest extends TestCase
                 FeatCatalog::STATUS_OPEN,
                 $this->fake->achievement->featStates['2:' . $key]['status']
             );
+        }
+        $hiddenKeys = [];
+        foreach ($this->fake->achievement->achievementDefinitions as $def) {
+            if ((int) ($def['universe'] ?? 0) === 2 && (int) ($def['hidden'] ?? 0) === 1) {
+                $hiddenKeys[] = $def['key'];
+            }
+        }
+        $this->assertContains(FeatCatalog::FIRST_BLACK_MOON, $hiddenKeys);
+        $this->assertContains(FeatCatalog::FIRST_AVATAR, $hiddenKeys);
+    }
+
+    public function testEnsureSeededInsertsMissingShipFeats(): void
+    {
+        $savedResource = $GLOBALS['resource'] ?? null;
+        $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
+            202 => 'small_ship_cargo',
+            214 => 'dearth_star',
+            216 => 'lune_noir',
+        ]);
+        try {
+            $this->fake->achievement->featStates = [
+                '1:' . FeatCatalog::FIRST_SHIP => [
+                    'status' => FeatCatalog::STATUS_OPEN,
+                    'winner_id' => 0,
+                    'claimed_at' => 0,
+                ],
+            ];
+            $this->fake->achievement->planetShipTotals = [
+                'small_ship_cargo' => 5,
+                'dearth_star' => 0,
+                'lune_noir' => 0,
+            ];
+            Config::setInstance(new Config([
+                'uni' => 1,
+                'feat_tracking_from_start' => 0,
+            ]), 1);
+
+            FeatService::ensureSeeded(1);
+
+            $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_SMALL_CARGO, $this->fake->achievement->featStates);
+            $this->assertSame(
+                FeatCatalog::STATUS_UNKNOWN,
+                $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_SMALL_CARGO]['status']
+            );
+            $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_DEATHSTAR, $this->fake->achievement->featStates);
+            $this->assertSame(
+                FeatCatalog::STATUS_OPEN,
+                $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_DEATHSTAR]['status']
+            );
+            $this->assertArrayHasKey('1:' . FeatCatalog::FIRST_BLACK_MOON, $this->fake->achievement->featStates);
+            $this->assertSame(
+                FeatCatalog::STATUS_OPEN,
+                $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_BLACK_MOON]['status']
+            );
+        } finally {
+            if (is_array($savedResource)) {
+                $GLOBALS['resource'] = $savedResource;
+            } else {
+                unset($GLOBALS['resource']);
+            }
         }
     }
 
