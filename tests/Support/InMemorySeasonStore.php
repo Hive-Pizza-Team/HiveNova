@@ -29,6 +29,12 @@ class InMemorySeasonStore implements SeasonStore
 	/** @var list<int> */
 	public array $wiped = [];
 
+	/** @var list<array{units: int, result: string, attacker: string, defender: string}> */
+	public array $hallOfFame = [];
+
+	/** @var list<array{feat_key: string, username: string, hive_account: string, claimed_at: int}> */
+	public array $feats = [];
+
 	public int $nextPayoutId = 1;
 
 	public function findUser(int $userId): ?array
@@ -155,6 +161,70 @@ class InMemorySeasonStore implements SeasonStore
 	{
 		$key = $universe . ':' . $seasonId;
 		$this->weeks[$key] = array_merge($this->weeks[$key] ?? [], $fields);
+	}
+
+	public function reportRanking(int $universe, int $seasonId, int $limit = 20): array
+	{
+		$out = [];
+		foreach ($this->snapshots as $row) {
+			if ((int) ($row['universe'] ?? 0) !== $universe || (int) ($row['season_id'] ?? 0) !== $seasonId) {
+				continue;
+			}
+			$userId = (int) ($row['user_id'] ?? 0);
+			$username = (string) ($this->users[$userId]['username'] ?? '');
+			$pizza = null;
+			foreach ($this->payouts as $payout) {
+				if ((int) $payout['universe'] === $universe
+					&& (int) $payout['season_id'] === $seasonId
+					&& (int) $payout['user_id'] === $userId
+					&& ($payout['status'] ?? '') === 'sent'
+				) {
+					$pizza = (float) $payout['pizza_amount'];
+					break;
+				}
+			}
+			$out[] = [
+				'rank'         => (int) $row['rank'],
+				'username'     => $username,
+				'hive_account' => (string) $row['hive_account'],
+				'points'       => (int) $row['points'],
+				'pizza_amount' => $pizza,
+			];
+		}
+		usort($out, static fn ($a, $b) => $a['rank'] <=> $b['rank']);
+
+		return array_slice($out, 0, max(1, $limit));
+	}
+
+	public function reportHallOfFame(int $universe, int $limit = 10): array
+	{
+		return array_slice($this->hallOfFame, 0, max(1, $limit));
+	}
+
+	public function reportFeats(int $universe, int $startsAt, int $closesAt): array
+	{
+		$out = [];
+		foreach ($this->feats as $feat) {
+			$at = (int) ($feat['claimed_at'] ?? 0);
+			if ($at < $startsAt || ($closesAt > 0 && $at > $closesAt)) {
+				continue;
+			}
+			$out[] = $feat;
+		}
+
+		return $out;
+	}
+
+	public function countEntries(int $universe, int $seasonId): int
+	{
+		$count = 0;
+		foreach ($this->entries as $row) {
+			if ((int) $row['universe'] === $universe && (int) $row['season_id'] === $seasonId) {
+				$count++;
+			}
+		}
+
+		return $count;
 	}
 
 	public function wipeProgress(int $universe, Config $config): void

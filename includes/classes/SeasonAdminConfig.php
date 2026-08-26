@@ -8,6 +8,7 @@ namespace HiveNova\Core;
 class SeasonAdminConfig
 {
 	public const KEY_FIELD = 'season_wallet_active_key';
+	public const BLOG_KEY_FIELD = 'season_blog_posting_key';
 	public const REDACTED = 'CHANGED';
 	public const SPEED_BASE = 2500;
 	public const SPEED_FACTOR = 8;
@@ -58,6 +59,16 @@ class SeasonAdminConfig
 			$apply[self::KEY_FIELD] = $postedKey;
 		}
 
+		$blogAccount = strtolower(trim((string) ($posted['season_blog_account'] ?? '')));
+		if ($blogAccount === '' || HiveUtil::isAccountValid($blogAccount)) {
+			$apply['season_blog_account'] = $blogAccount;
+		}
+
+		$postedBlogKey = trim((string) ($posted[self::BLOG_KEY_FIELD] ?? ''));
+		if ($postedBlogKey !== '') {
+			$apply[self::BLOG_KEY_FIELD] = $postedBlogKey;
+		}
+
 		$wasOn = (int) ($stored['season_mode'] ?? 0) === 1;
 		$nowOn = (int) $apply['season_mode'] === 1;
 		if ($nowOn && !$wasOn) {
@@ -77,10 +88,12 @@ class SeasonAdminConfig
 
 		$logOld = $stored;
 		$logNew = array_merge($stored, $apply);
-		$logOld[self::KEY_FIELD] = self::redact((string) ($stored[self::KEY_FIELD] ?? ''));
-		$logNew[self::KEY_FIELD] = isset($apply[self::KEY_FIELD])
-			? self::REDACTED
-			: self::redact((string) ($stored[self::KEY_FIELD] ?? ''));
+		foreach ([self::KEY_FIELD, self::BLOG_KEY_FIELD] as $secretField) {
+			$logOld[$secretField] = self::redact((string) ($stored[$secretField] ?? ''));
+			$logNew[$secretField] = isset($apply[$secretField])
+				? self::REDACTED
+				: self::redact((string) ($stored[$secretField] ?? ''));
+		}
 
 		$template = [
 			'season_mode'                => (int) ($apply['season_mode'] ?? $stored['season_mode'] ?? 0),
@@ -91,6 +104,8 @@ class SeasonAdminConfig
 			'season_entry_pizza'         => (string) ($apply['season_entry_pizza'] ?? $stored['season_entry_pizza'] ?? '0.100'),
 			'season_wallet_account'      => (string) ($apply['season_wallet_account'] ?? $stored['season_wallet_account'] ?? ''),
 			'season_wallet_active_key'   => '',
+			'season_blog_account'        => (string) ($apply['season_blog_account'] ?? $stored['season_blog_account'] ?? ''),
+			'season_blog_posting_key'    => '',
 			'season_status'              => (string) ($stored['season_status'] ?? 'idle'),
 			'season_id'                  => (int) ($stored['season_id'] ?? 0),
 		];

@@ -352,6 +352,8 @@ function ShowConfigUniPage()
 				'season_entry_pizza'       => HTTP::_GP('season_entry_pizza', '0.100'),
 				'season_wallet_account'    => HTTP::_GP('season_wallet_account', ''),
 				'season_wallet_active_key' => HTTP::_GP('season_wallet_active_key', ''),
+				'season_blog_account'      => HTTP::_GP('season_blog_account', ''),
+				'season_blog_posting_key'  => HTTP::_GP('season_blog_posting_key', ''),
 			);
 			$seasonStored = array(
 				'season_mode'              => $config->season_mode,
@@ -362,6 +364,8 @@ function ShowConfigUniPage()
 				'season_entry_pizza'       => $config->season_entry_pizza,
 				'season_wallet_account'    => $config->season_wallet_account,
 				'season_wallet_active_key' => $config->season_wallet_active_key,
+				'season_blog_account'      => isset($config->season_blog_account) ? $config->season_blog_account : '',
+				'season_blog_posting_key'  => isset($config->season_blog_posting_key) ? $config->season_blog_posting_key : '',
 				'game_speed'               => $config->game_speed,
 				'fleet_speed'              => $config->fleet_speed,
 				'resource_multiplier'      => $config->resource_multiplier,
@@ -678,6 +682,7 @@ function ShowConfigUniPage()
 		'season_min_points'			=> isset($config->season_min_points) ? (int) $config->season_min_points : 0,
 		'season_entry_pizza'		=> isset($config->season_entry_pizza) ? $config->season_entry_pizza : '0.100',
 		'season_wallet_account'		=> isset($config->season_wallet_account) ? $config->season_wallet_account : '',
+		'season_blog_account'		=> isset($config->season_blog_account) ? $config->season_blog_account : '',
 		'season_status'				=> isset($config->season_status) ? $config->season_status : 'idle',
 		'season_id'					=> isset($config->season_id) ? (int) $config->season_id : 0,
 	));

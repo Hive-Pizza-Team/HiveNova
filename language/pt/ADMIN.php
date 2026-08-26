@@ -1566,3 +1566,6 @@ $LNG['se_season_wallet'] = 'Season Hive wallet';
 $LNG['se_season_wallet_key'] = 'Season wallet active key';
 $LNG['se_season_wallet_key_info'] = 'Leave blank to keep the stored key. The key is never shown again.';
 $LNG['se_season_status'] = 'Season status';
+$LNG['se_season_blog'] = 'Season blog Hive account';
+$LNG['se_season_blog_key'] = 'Season blog posting key';
+$LNG['se_season_blog_key_info'] = 'Leave blank to keep the stored key. Used to publish the end-of-season Hive post. The key is never shown again.';
