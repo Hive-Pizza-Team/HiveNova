@@ -1316,7 +1316,7 @@ $LNG['cm_claim'] = 'Claim reward';
 $LNG['cm_claimed'] = 'Reward claimed';
 $LNG['cm_completed'] = 'Directive complete';
 $LNG['cm_suggestion'] = 'Suggested focus';
-$LNG['cm_pending_choice'] = 'Expedition choice waiting';
+$LNG['cm_pending_choice'] = 'Review expedition choice';
 $LNG['cm_expeditions'] = 'Active expeditions';
 $LNG['cm_stance'] = 'Stance';
 $LNG['cm_stance_cautious'] = 'Cautious';
@@ -1359,7 +1359,7 @@ $LNG['push_directive_complete_title'] = 'Directive complete';
 $LNG['push_directive_complete_body'] = 'Your empire directive is ready to claim.';
 $LNG['push_directive_ending_title'] = 'Directive period ending';
 $LNG['push_directive_ending_body'] = 'Your empire directive period ends soon.';
-$LNG['sys_expe_choice_pending'] = 'The expedition found something that needs your decision before it is recovered.';
+$LNG['sys_expe_choice_pending'] = 'The expedition flagged a find that cannot be secured until you choose how to recover it.';
 // Feats of Strength
 
 $LNG['feat_tab'] = 'Feats of Strength';
