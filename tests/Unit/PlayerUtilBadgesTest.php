@@ -23,6 +23,13 @@ class PlayerUtilBadgesTest extends TestCase
         $modules = array_fill(0, 50, '1');
         $modules[46] = '1';
         Config::setInstance(new Config(['uni' => 1, 'moduls' => implode(';', $modules)]), 1);
+
+        $GLOBALS['LNG'] = array_merge($GLOBALS['LNG'] ?? [], [
+            'ach_combat_first_win_name' => 'First Blood',
+            'ach_low_points_pick_name'  => 'Low Points Pick',
+            'ach_high_points_name'      => 'High Points',
+            'ach_economy_metal_mine_5_name' => 'Ore Digger',
+        ]);
     }
 
     protected function tearDown(): void
@@ -60,7 +67,8 @@ class PlayerUtilBadgesTest extends TestCase
         $html = PlayerUtil::getAchievementBadges(7, 5);
 
         $this->assertStringContainsString('achievement-badge', $html);
-        $this->assertStringContainsString('combat_first_win', $html);
+        $this->assertStringContainsString('title="First Blood"', $html);
+        $this->assertStringNotContainsString('title="combat_first_win"', $html);
     }
 
     public function test_getAchievementBadges_prefers_showcase_order(): void
@@ -72,7 +80,7 @@ class PlayerUtilBadgesTest extends TestCase
             'id'               => 2,
             'key'              => 'low_points_pick',
             'category'         => 'combat',
-            'name_key'         => 'n',
+            'name_key'         => 'ach_low_points_pick_name',
             'desc_key'         => 'd',
             'trigger_type'     => 'combat_wins',
             'trigger_params'   => '{"threshold":2}',
@@ -90,8 +98,9 @@ class PlayerUtilBadgesTest extends TestCase
 
         $html = PlayerUtil::getAchievementBadges(7, 5);
 
-        $this->assertStringContainsString('low_points_pick', $html);
-        $this->assertStringNotContainsString('combat_first_win', $html);
+        $this->assertStringContainsString('title="Low Points Pick"', $html);
+        $this->assertStringNotContainsString('title="First Blood"', $html);
+        $this->assertStringNotContainsString('title="low_points_pick"', $html);
     }
 
     public function test_getAchievementBadges_falls_back_to_points_when_no_showcase(): void
@@ -103,7 +112,7 @@ class PlayerUtilBadgesTest extends TestCase
             'id'               => 2,
             'key'              => 'high_points',
             'category'         => 'combat',
-            'name_key'         => 'n',
+            'name_key'         => 'ach_high_points_name',
             'desc_key'         => 'd',
             'trigger_type'     => 'combat_wins',
             'trigger_params'   => '{"threshold":2}',
@@ -120,8 +129,37 @@ class PlayerUtilBadgesTest extends TestCase
 
         $html = PlayerUtil::getAchievementBadges(7, 1);
 
-        $this->assertStringContainsString('high_points', $html);
-        $this->assertStringNotContainsString('combat_first_win', $html);
+        $this->assertStringContainsString('title="High Points"', $html);
+        $this->assertStringNotContainsString('title="First Blood"', $html);
+        $this->assertStringNotContainsString('title="high_points"', $html);
+    }
+
+    public function test_getAchievementBadges_uses_localized_name_not_raw_key(): void
+    {
+        $fake = new FakeDatabase();
+        $this->swapDatabaseInstance($fake);
+        $fake->achievement->addAchievement([
+            'id'               => 21,
+            'key'              => 'economy_metal_mine_5',
+            'category'         => 'economy',
+            'name_key'         => 'ach_economy_metal_mine_5_name',
+            'desc_key'         => 'ach_economy_metal_mine_5_desc',
+            'trigger_type'     => 'element_level',
+            'trigger_params'   => '{"element_id":1,"threshold":5}',
+            'reward_type'      => 'none',
+            'reward_amount'    => 0,
+            'points'           => 10,
+            'celebration_tier' => 'normal',
+            'hidden'           => 0,
+            'active'           => 1,
+            'universe'         => 1,
+        ]);
+        $fake->achievement->unlocked['7:21'] = true;
+
+        $html = PlayerUtil::getAchievementBadges(7, 5);
+
+        $this->assertStringContainsString('title="Ore Digger"', $html);
+        $this->assertStringNotContainsString('economy_metal_mine_5', $html);
     }
 
     public function test_getAchievementBadges_returns_empty_when_module_disabled(): void

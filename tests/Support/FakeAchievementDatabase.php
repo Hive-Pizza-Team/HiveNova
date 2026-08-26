@@ -161,6 +161,7 @@ class FakeAchievementDatabase implements DatabaseInterface
                 }
                 $rows[] = [
                     'key'            => $def['key'],
+                    'name_key'       => $def['name_key'] ?? '',
                     'points'         => (int) ($def['points'] ?? 0),
                     'showcase_order' => $this->showcase[$key] ?? null,
                 ];
