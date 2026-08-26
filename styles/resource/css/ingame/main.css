@@ -145,6 +145,17 @@ body.popup {
     min-width: 0;
 }
 
+/* Dark Fancybox chrome — avoid white flash on iframe dialogs (playercard, PM, etc.) */
+#fancybox-outer {
+    background: var(--color-bg-page);
+}
+#fancybox-content {
+    border-color: var(--color-bg-page);
+}
+#fancybox-frame {
+    background: var(--color-bg-page);
+}
+
 :focus {
     outline: none
 }
