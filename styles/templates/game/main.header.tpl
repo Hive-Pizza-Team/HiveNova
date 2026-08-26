@@ -15,6 +15,9 @@
 	<meta http-equiv="refresh" content="{$gotoinsec};URL={$goto}">
 	{/if}
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	{if $bodyclass == 'popup'}
+	<style>{literal}html,body{background:var(--color-bg-page,#0d0d0d);color-scheme:dark}{/literal}</style>
+	{/if}
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/boilerplate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/main.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/achievements.css?v={$REV}">
