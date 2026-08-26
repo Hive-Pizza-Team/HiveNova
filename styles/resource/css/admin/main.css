@@ -19,6 +19,11 @@ table {
     margin: auto;
 }
 
+/* Zebra striping: even rows slightly lighter than theme td surface */
+table tr:nth-child(even) td {
+    background: rgba(33, 40, 48, 0.95);
+}
+
 .yes {
     color: #0F0;
 }
