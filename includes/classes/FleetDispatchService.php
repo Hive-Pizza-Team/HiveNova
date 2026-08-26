@@ -446,10 +446,6 @@ class FleetDispatchService
             throw $e;
         }
 
-        if ($targetMission == 15 && DirectiveHooks::enabled()) {
-            DirectiveHooks::afterExpeditionDispatch((int) $USER['id'], (int) ($USER['universe'] ?? Universe::current()));
-        }
-
         // Update the in-memory planet array to reflect the deduction
         $PLANET[$resource[901]] -= $fleetResource[901];
         $PLANET[$resource[902]] -= $fleetResource[902];

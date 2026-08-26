@@ -726,6 +726,13 @@ HTML;
 			(int) $this->_fleet['fleet_universe']
 		);
 
+		if (\HiveNova\Core\DirectiveHooks::enabled()) {
+			\HiveNova\Core\DirectiveHooks::afterExpeditionDispatch(
+				(int) $this->_fleet['fleet_owner'],
+				(int) $this->_fleet['fleet_universe']
+			);
+		}
+
 		$this->setState(FLEET_RETURN);
 		$this->SaveFleet();
 	}
