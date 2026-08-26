@@ -81,7 +81,6 @@ class StatBanner {
 		}
 
 		imagejpeg($image);
-		imagedestroy($image);
 	}
 	
 	function BannerError($Message): never {
@@ -90,7 +89,6 @@ class StatBanner {
 		$text_color = imagecolorallocate($im, 233, 14, 91);
 		imagestring($im, 3, 5, 5, (string) $Message, $text_color);
 		imagejpeg($im);
-		imagedestroy($im);
 		exit;
 	}
 }
