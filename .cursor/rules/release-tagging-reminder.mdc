@@ -1,0 +1,38 @@
+---
+description: Remind to tag a SemVer release when master has moved and the latest release tag is older than 7 days
+alwaysApply: true
+---
+
+# Release tagging reminder
+
+At session start (and before wrapping significant merge/deploy work), check whether a release tag is overdue.
+
+## When to remind
+
+Remind once per session if **both** are true:
+
+1. **Stale tag** — latest SemVer tag (`vX.Y.Z`) on the repo is older than **7 days**, or there are no SemVer tags
+2. **Code velocity** — `master` has moved since that tag (commits or merged PRs on `origin/master` after the tag)
+
+Quick check:
+
+```bash
+git fetch origin master --tags --quiet
+git tag -l 'v*' --sort=-v:refname | head -1
+git log -1 --format='%ci %s' "$(git tag -l 'v*' --sort=-v:refname | head -1)" 2>/dev/null
+git log -1 --format='%ci %s' origin/master
+git rev-list --count <latest-tag>..origin/master 2>/dev/null
+```
+
+## How to remind
+
+Keep it short (1–2 sentences). Point to `docs/releasing.md` and `./scripts/release.sh`. Do not create a tag or open a release unless the user asks.
+
+Example: “`origin/master` is N commits past `v1.0.0` (tagged >7 days ago). Want to cut a release with `./scripts/release.sh`?”
+
+## When not to remind
+
+- Latest SemVer tag is ≤7 days old
+- No commits on `master` since the latest SemVer tag
+- User already declined a release reminder this session
+- Current work is docs-only / rule-only with no intent to deploy
