@@ -28,9 +28,23 @@ if($db->rowCount() !== 0) {
 	
 	$fleetObj	= new \HiveNova\Core\FlyingFleetHandler();
 	$fleetObj->setToken($token);
-	$fleetObj->run();
+	$failedFleetIds = $fleetObj->run();
 
-	$db->update("UPDATE %%FLEETS_EVENT%% SET `lock` = NULL WHERE `lock` = :token;", array(
-		':token' => $token
-	));
+	if ($failedFleetIds === []) {
+		$db->update("UPDATE %%FLEETS_EVENT%% SET `lock` = NULL WHERE `lock` = :token;", array(
+			':token' => $token
+		));
+	} else {
+		$placeholders = array();
+		$params = array(':token' => $token);
+		foreach ($failedFleetIds as $index => $fleetId) {
+			$key = ':failed'.$index;
+			$placeholders[] = $key;
+			$params[$key] = $fleetId;
+		}
+		$db->update(
+			'UPDATE %%FLEETS_EVENT%% SET `lock` = NULL WHERE `lock` = :token AND fleetID NOT IN ('.implode(', ', $placeholders).')',
+			$params
+		);
+	}
 }

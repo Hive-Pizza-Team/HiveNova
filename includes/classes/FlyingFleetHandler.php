@@ -49,6 +49,7 @@ class FlyingFleetHandler
 	function run()
 	{
 		$db	= Database::get();
+		$failedFleetIds = array();
 
 		$sql = 'SELECT %%FLEETS%%.*
 		FROM %%FLEETS_EVENT%%
@@ -96,7 +97,10 @@ class FlyingFleetHandler
 					$fleetRow['fleet_mission'] ?? '?',
 					$e->getMessage()
 				));
+				$failedFleetIds[] = (int) $fleetRow['fleet_id'];
 			}
 		}
+
+		return $failedFleetIds;
 	}
 }
