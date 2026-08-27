@@ -162,11 +162,37 @@ trait FakePlanetQueryHandler
 
     private function planetUpdate(string $qry, array $params): bool
     {
-        if (str_contains($qry, '%%PLANETS%%') && str_contains($qry, 'der_')) {
-            $planetId = (int) ($params[':planetId'] ?? 0);
-            if (!isset($this->planetRowsById[$planetId])) {
-                $this->planetRowsById[$planetId] = ['id' => $planetId];
+        if (!str_contains($qry, '%%PLANETS%%')) {
+            return true;
+        }
+
+        $planetId = (int) ($params[':planetId'] ?? 0);
+        if ($planetId <= 0) {
+            if (property_exists($this, 'lastRowCount')) {
+                $this->lastRowCount = 0;
             }
+            return true;
+        }
+
+        if (!isset($this->planetRowsById[$planetId])) {
+            $this->planetRowsById[$planetId] = ['id' => $planetId];
+        }
+
+        foreach ($params as $key => $value) {
+            if ($key === ':planetId') {
+                continue;
+            }
+            $col = ltrim($key, ':');
+            if (str_contains($qry, $col.' >= '.$key)
+                && (float) ($this->planetRowsById[$planetId][$col] ?? 0) < (float) $value) {
+                if (property_exists($this, 'lastRowCount')) {
+                    $this->lastRowCount = 0;
+                }
+                return true;
+            }
+        }
+
+        if (str_contains($qry, 'der_')) {
             foreach (['metal', 'crystal', 'deuterium'] as $res) {
                 if (isset($params[':' . $res])) {
                     $this->planetRowsById[$planetId]['der_' . $res] = max(
@@ -175,7 +201,20 @@ trait FakePlanetQueryHandler
                     );
                 }
             }
-            return true;
+        } else {
+            foreach ($params as $key => $value) {
+                if ($key === ':planetId') {
+                    continue;
+                }
+                $col = ltrim($key, ':');
+                if (str_contains($qry, $col.' = '.$col.' - '.$key)) {
+                    $this->planetRowsById[$planetId][$col] = (float) ($this->planetRowsById[$planetId][$col] ?? 0) - (float) $value;
+                }
+            }
+        }
+
+        if (property_exists($this, 'lastRowCount')) {
+            $this->lastRowCount = 1;
         }
 
         return true;

@@ -712,9 +712,10 @@ class FleetDispatchServiceTest extends TestCase
         ];
 
         $this->fake->planetRowsById[42] = [
-            'metal'     => 10000,
-            'crystal'   => 5000,
-            'deuterium' => 3000,
+            'metal'         => 10000,
+            'crystal'       => 5000,
+            'deuterium'     => 3000,
+            'light_fighter' => 10,
         ];
 
         $fleetId = FleetDispatchService::dispatch([
@@ -844,9 +845,10 @@ class FleetDispatchServiceTest extends TestCase
         ];
 
         $this->fake->planetRowsById[42] = [
-            'metal'     => 10000,
-            'crystal'   => 5000,
-            'deuterium' => 3000,
+            'metal'         => 10000,
+            'crystal'       => 5000,
+            'deuterium'     => 3000,
+            'light_fighter' => 5,
         ];
 
         $fleetId = FleetDispatchService::dispatch([

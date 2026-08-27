@@ -645,8 +645,71 @@ class FleetFunctions
 
 
 		if ($fleetStartPlanetID > 0) {
-			$sql	= 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId;';
-			$db->update($sql, $params);
+			$handle = $db->getHandle();
+			if ($handle instanceof \PDO) {
+				$ownsTransaction = !$handle->inTransaction();
+
+				if ($ownsTransaction) {
+					$db->beginTransaction();
+				}
+
+				try {
+					$selectCols = array();
+					foreach (array_keys($fleetArray) as $ShipID) {
+						$selectCols[] = $resource[$ShipID];
+					}
+					if ($consumption > 0) {
+						$selectCols[] = $resource[903];
+					}
+					$selectCols = array_unique($selectCols);
+
+					$lockedPlanet = $db->selectSingle(
+						'SELECT '.implode(', ', $selectCols).' FROM %%PLANETS%% WHERE id = :planetId FOR UPDATE',
+						array(':planetId' => $fleetStartPlanetID)
+					);
+
+					if (!is_array($lockedPlanet)) {
+						throw new \RuntimeException('Planet not found for fleet dispatch');
+					}
+
+					foreach ($fleetArray as $ShipID => $ShipCount) {
+						$col = $resource[$ShipID];
+						if ((float) ($lockedPlanet[$col] ?? 0) < (float) $ShipCount) {
+							throw new \RuntimeException('Insufficient ships on planet');
+						}
+					}
+					if ($consumption > 0 && (float) ($lockedPlanet[$resource[903]] ?? 0) < (float) $consumption) {
+						throw new \RuntimeException('Insufficient deuterium on planet');
+					}
+
+					$whereGuards = array();
+					foreach ($fleetArray as $ShipID => $ShipCount) {
+						$whereGuards[] = $resource[$ShipID].' >= :'.$resource[$ShipID];
+					}
+					if ($consumption > 0) {
+						$whereGuards[] = $resource[903].' >= :'.$resource[903];
+					}
+
+					$sql	= 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId AND '.implode(' AND ', $whereGuards).';';
+					$db->update($sql, $params);
+
+					if ($db->rowCount() < 1) {
+						throw new \RuntimeException('Insufficient ships or deuterium on planet');
+					}
+
+					if ($ownsTransaction) {
+						$db->commit();
+					}
+				} catch (\Throwable $e) {
+					if ($ownsTransaction) {
+						$db->rollback();
+					}
+					throw $e;
+				}
+			} else {
+				$sql	= 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId;';
+				$db->update($sql, $params);
+			}
 		}
 
 		$sql	= 'INSERT INTO %%FLEETS%% SET
