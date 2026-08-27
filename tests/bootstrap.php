@@ -40,8 +40,11 @@ if (!defined('MODULE_MISSION_SALVAGE')) {
 if (!defined('MODULE_COMMANDER')) {
     define('MODULE_COMMANDER', 48);
 }
+if (!defined('MODULE_FEATS')) {
+    define('MODULE_FEATS', 49);
+}
 if (!defined('MODULE_AMOUNT')) {
-    define('MODULE_AMOUNT', 49);
+    define('MODULE_AMOUNT', 50);
 }
 if (!defined('PVE_ONLINE_WINDOW')) {
     define('PVE_ONLINE_WINDOW', 900);

@@ -36,7 +36,7 @@ class ShowBattleHallPage extends AbstractGamePage
 		global $USER, $LNG;
 
 		$tab = HTTP::_GP('tab', 'battles');
-		if ($tab === 'feats') {
+		if ($tab === 'feats' && isModuleAvailable(MODULE_FEATS)) {
 			$LNG->includeData(['INGAME']);
 			$feats = FeatService::listForUniverse(Universe::current());
 			foreach ($feats as &$feat) {

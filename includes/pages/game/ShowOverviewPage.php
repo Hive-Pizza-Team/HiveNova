@@ -509,6 +509,10 @@ class ShowOverviewPage extends AbstractGamePage
 	 */
 	private function featBannerAssign(Config $config, array $USER, $LNG): array
 	{
+		if (!isModuleAvailable(MODULE_FEATS)) {
+			return ['show' => false, 'text' => ''];
+		}
+
 		$key = (string) ($config->feat_banner_key ?? '');
 		$userId = (int) ($config->feat_banner_user_id ?? 0);
 		if ($key === '' || $userId <= 0) {
