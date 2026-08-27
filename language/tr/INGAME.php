@@ -533,6 +533,8 @@ $LNG['in_missilestype']   					= 'Roket Türü';
 $LNG['in_missilesamount']    				= 'Mevcut roketler';
 $LNG['in_engine'] 							= 'Motor Türü';
 $LNG['in_bonus'] 							= 'Bonus:';
+$LNG['in_pizzabits_deposit_help']			= 'To deposit PIZZA for Pizzabits, link a Hive account under Settings → User data.';
+$LNG['in_pizzabits_open_settings']			= 'Open Settings to link Hive';
 
 //----------------------------------------------------------------------------//
 // Mesajlar
@@ -996,6 +998,11 @@ $LNG['op_block_pm']							= 'Özel mesajları blokla';
 $LNG['op_public_message']						= 'Herkese açık profil mesajı';
 $LNG['op_public_message_desc']				= 'Oyuncu profilinde gösterilir. Bu alan boşsa ve Hive hesabın herkese açıksa (kullanıcı adı eşleşirse) Hive profil açıklaması kullanılır.';
 $LNG['op_public_message_hive']				= 'Hive kullanıcı adın bu hesapla eşleşiyor. Ziyaretçiler bu metni yazdıysan onu görür; yoksa Hive profil açıklamanı görür.';
+$LNG['op_hive_account']						= 'Hive Account';
+$LNG['op_link_hive_account']				= 'Link Hive Account';
+$LNG['op_deposit_pizza']					= 'Deposit $PIZZA';
+$LNG['op_pizza_pizzabits_ratio']			= '1 PIZZA = 10 Pizzabits';
+$LNG['js_need_hive_for_deposit']			= 'Link a Hive account in Settings before you can deposit PIZZA.';
 $LNG['number_format_label']					= 'Sayı formatı';
 $LNG['number_format_auto']					= 'Tarayıcı varsayılanı (örn. 1.234.567)';
 $LNG['number_format_eu']					= 'Avrupa (örn. 1.234.567)';

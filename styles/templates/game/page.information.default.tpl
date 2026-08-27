@@ -11,6 +11,14 @@
 				<tr>
 					
 					<td class="transparent left"><p>{$LNG.longDescription.$elementID}</p>
+					{if $elementID == 921}
+					<p><strong>{$LNG.op_pizza_pizzabits_ratio}</strong></p>
+					<p>{$LNG.in_pizzabits_deposit_help}</p>
+					<p><a href="game.php?page=settings" target="_parent">{$LNG.in_pizzabits_open_settings}</a></p>
+					<p>
+						<button type="button" onclick="DepositPizzaTokens('{$hiveAccount}', '{$universe}', '{$depositWallet}')" class="button" title="{$LNG.op_deposit_pizza}"{if $disableDepositButton} disabled{/if}>{$LNG.op_deposit_pizza}</button>
+					</p>
+					{/if}
 					{if !empty($Bonus)}<p>
 					<b>{$LNG.in_bonus}</b><br>
 					{foreach $Bonus as $BonusName => $elementBouns}{if $elementBouns[0] < 0}-{else}+{/if}{if $elementBouns[1] == 0}{$_v=$elementBouns[0]*100}{$_v|abs}%{else}{$elementBouns[0]|floatval}{/if} {$LNG.bonus.$BonusName}<br>{/foreach}

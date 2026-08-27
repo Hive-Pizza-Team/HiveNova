@@ -4,11 +4,13 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
 use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\PlanetProductionBonus;
 use HiveNova\Core\ResourceUpdate;
+use HiveNova\Core\SeasonService;
 
 /**
  *  2Moons 
@@ -375,6 +377,18 @@ class ShowInformationPage extends AbstractGamePage
 			'FleetInfo'			=> $FleetInfo,
 			'gateData'			=> $gateData,
 		));
+
+		if ((int) $elementID === 921) {
+			$hiveAccount = (string) ($USER['hive_account'] ?? '');
+			$depositWallet = (new SeasonService(new DatabaseSeasonStore()))->depositWallet(Config::get());
+			$this->assign(array(
+				'hiveAccount'			=> $hiveAccount,
+				'universe'				=> $USER['universe'],
+				'hasHiveAccount'		=> $hiveAccount !== '',
+				'depositWallet'			=> $depositWallet,
+				'disableDepositButton'	=> ($USER['universe'] === '1' || $hiveAccount === ''),
+			));
+		}
 		
         	if($elementID <= 900 || $elementID >=930)
         	{
