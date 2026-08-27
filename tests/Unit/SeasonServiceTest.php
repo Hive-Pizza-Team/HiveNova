@@ -156,6 +156,30 @@ class SeasonServiceTest extends TestCase
 		$this->assertSame('skip', $svc->tickUniverse($config));
 	}
 
+	public function testDepositWalletUsesSeasonFeeWalletWhenConfigured(): void
+	{
+		$svc = $this->service();
+		$config = $this->makeConfig(['season_wallet_account' => 'moon.uni.three']);
+		$this->assertSame('moon.uni.three', $svc->depositWallet($config));
+	}
+
+	public function testDepositWalletFallsBackWhenSeasonWalletEmpty(): void
+	{
+		$svc = $this->service();
+		$config = $this->makeConfig(['season_wallet_account' => '  ']);
+		$this->assertSame('moon.deposit', $svc->depositWallet($config));
+	}
+
+	public function testDepositWalletFallsBackForNonSeasonalUniverse(): void
+	{
+		$svc = $this->service();
+		$config = $this->makeConfig([
+			'season_mode' => 0,
+			'season_wallet_account' => 'moon.uni.three',
+		]);
+		$this->assertSame('moon.deposit', $svc->depositWallet($config));
+	}
+
 	public function testPlayerNeedsHiveAndEntry(): void
 	{
 		$config = $this->makeConfig();

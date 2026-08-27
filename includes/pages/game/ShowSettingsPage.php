@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
@@ -11,6 +12,7 @@ use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\Theme;
 use HiveNova\Core\PushNotificationService;
+use HiveNova\Core\SeasonService;
 
 /**
  *  2Moons 
@@ -51,6 +53,8 @@ class ShowSettingsPage extends AbstractGamePage
 		}
 		else
 		{
+			$depositWallet = (new SeasonService(new DatabaseSeasonStore()))->depositWallet(Config::get());
+
 			$this->assign(array(
 				'Selectors'			=> array(
 					'timezones' => get_timezone_selector(), 
@@ -77,6 +81,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'universe'			=> $USER['universe'],
 				'isHiveKeychainAct' => (str_ends_with((string) $USER['email'], '@hive.blog')),
 				'disableDepositButton' => ($USER['universe'] === "1"),
+				'depositWallet'		=> $depositWallet,
 				'userLang'			=> $USER['lang'],
 				'theme'				=> $USER['dpath'],
 				'planetSort'		=> $USER['planet_sort'],

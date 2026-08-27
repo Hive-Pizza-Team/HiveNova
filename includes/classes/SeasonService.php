@@ -44,6 +44,20 @@ class SeasonService
 		return isset($config->season_mode) && (int) $config->season_mode === 1;
 	}
 
+	/**
+	 * Destination for Settings → Deposit $PIZZA (pizzabit top-ups).
+	 * Short-lived universes with a configured fee wallet use that wallet; otherwise moon.deposit.
+	 */
+	public function depositWallet(Config $config): string
+	{
+		if (!$this->isSeasonal($config)) {
+			return 'moon.deposit';
+		}
+
+		$wallet = strtolower(trim((string) ($config->season_wallet_account ?? '')));
+		return $wallet !== '' ? $wallet : 'moon.deposit';
+	}
+
 	public function canPlay(array $user, Config $config): bool
 	{
 		if (!$this->isSeasonal($config)) {
