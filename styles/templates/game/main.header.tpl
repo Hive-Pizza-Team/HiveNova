@@ -21,7 +21,9 @@
 	{/if}
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/boilerplate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/main.css?v={$REV}">
+	{if $loadAchievementsCss|default:false}
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/achievements.css?v={$REV}">
+	{/if}
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/tokens.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="{$dpath}formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/buttons.css?v={$REV}">
@@ -60,7 +62,7 @@
 	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/tooltip.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}" defer></script>
 	{foreach item=scriptname from=$scripts}
 	<script type="text/javascript" src="./scripts/game/{$scriptname}.js?v={$REV}"></script>
 	{/foreach}

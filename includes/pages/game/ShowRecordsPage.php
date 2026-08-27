@@ -46,30 +46,33 @@ class ShowRecordsPage extends AbstractGamePage
 			':universe'	=> Universe::current()
 		));
 
-		$defenseList	= array_fill_keys($reslist['defense'], array());
-		$fleetList		= array_fill_keys($reslist['fleet'], array());
-		$researchList	= array_fill_keys($reslist['tech'], array());
-		$buildList		= array_fill_keys($reslist['build'], array());
-		$officerList		= array_fill_keys($reslist['officier'], array());
+		$defenseIds = array_fill_keys(array_merge($reslist['defense'], $reslist['missile']), true);
+		$fleetIds = array_fill_keys($reslist['fleet'], true);
+		$researchIds = array_fill_keys($reslist['tech'], true);
+		$buildIds = array_fill_keys($reslist['build'], true);
+		$officerIds = array_fill_keys($reslist['officier'], true);
+
+		$defenseList	= array();
+		$fleetList		= array();
+		$researchList	= array();
+		$buildList		= array();
+		$officerList	= array();
 		
 		foreach($recordResult as $recordRow) {
-			if (in_array($recordRow['elementID'], $reslist['defense'])) {
-				$defenseList[$recordRow['elementID']][]		= $recordRow;
-			} elseif (in_array($recordRow['elementID'], $reslist['fleet'])) {
-				$fleetList[$recordRow['elementID']][]		= $recordRow;
-			} elseif (in_array($recordRow['elementID'], $reslist['tech'])) {
-				$researchList[$recordRow['elementID']][]	= $recordRow;
-			} elseif (in_array($recordRow['elementID'], $reslist['build'])) {
-				$buildList[$recordRow['elementID']][]		= $recordRow;
-			} elseif (in_array($recordRow['elementID'], $reslist['officier'])) {
-				$officerList[$recordRow['elementID']][]		= $recordRow;
-			} elseif (in_array($recordRow['elementID'], $reslist['missile'])) {
-				$defenseList[$recordRow['elementID']][]		= $recordRow; 
+			$elementId = $recordRow['elementID'];
+			if (isset($defenseIds[$elementId])) {
+				$defenseList[$elementId][] = $recordRow;
+			} elseif (isset($fleetIds[$elementId])) {
+				$fleetList[$elementId][] = $recordRow;
+			} elseif (isset($researchIds[$elementId])) {
+				$researchList[$elementId][] = $recordRow;
+			} elseif (isset($buildIds[$elementId])) {
+				$buildList[$elementId][] = $recordRow;
+			} elseif (isset($officerIds[$elementId])) {
+				$officerList[$elementId][] = $recordRow;
 			}
 		}
 
-		
-		
 		$this->assign(array(
 			'defenseList'	=> $defenseList,
 			'fleetList'		=> $fleetList,
@@ -82,4 +85,3 @@ class ShowRecordsPage extends AbstractGamePage
 		$this->display('page.records.default.tpl');
 	}
 }
- 

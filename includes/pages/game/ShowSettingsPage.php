@@ -57,7 +57,6 @@ class ShowSettingsPage extends AbstractGamePage
 
 			$this->assign(array(
 				'Selectors'			=> array(
-					'timezones' => get_timezone_selector(), 
 					'Sort' => array(
 						0 => $LNG['op_sort_normal'], 
 						1 => $LNG['op_sort_koords'],
@@ -107,6 +106,11 @@ class ShowSettingsPage extends AbstractGamePage
 			
 			$this->display('page.settings.default.tpl');
 		}
+	}
+
+	public function timezones()
+	{
+		$this->sendJSON(get_timezone_selector());
 	}
 	
 	private function CheckVMode()

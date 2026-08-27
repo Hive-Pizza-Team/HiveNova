@@ -114,9 +114,6 @@
 					<th colspan='2'>{$LNG.gl_planet} {$currentPlanet.planet.name} [{$galaxy}:{$system}:{$planet}]</th>
 				</tr>
 				<tr>
-					<td style='width:80px' class='galaxy-viz-host'>
-						{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt='' preferLite=true}
-					</td>
 					<td>
 						{if $currentPlanet.missions.6}
 							<a href='javascript:doit(6,{$currentPlanet.planet.id});'>{$LNG["type_mission_6"]}</a><br><br>
@@ -170,9 +167,6 @@
 					<th colspan='2'>{$LNG.gl_moon} {$currentPlanet.moon.name} [{$galaxy}:{$system}:{$planet}]</th>
 				</tr>
 				<tr>
-					<td style='width:80px' class='galaxy-viz-host'>
-						{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt='' preferLite=true}
-					</td>
 					<td>
 						<table style='width:100%'>
 							<tr>
