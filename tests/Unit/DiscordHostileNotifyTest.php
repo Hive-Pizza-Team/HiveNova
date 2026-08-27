@@ -167,15 +167,17 @@ class DiscordHostileNotifyTest extends TestCase
 
 	public function testAttackAndDestructionCallCombatNotifyAfterSave(): void
 	{
+		$combat = $this->missionSource('MissionCaseCombat.php');
 		$attack = $this->missionSource('MissionCaseAttack.php');
 		$destroy = $this->missionSource('MissionCaseDestruction.php');
 		$mip = $this->missionSource('MissionCaseMIP.php');
-		$this->assertStringContainsString('notifyCombatResolved', $attack);
-		$this->assertStringContainsString('notifyCombatResolved', $destroy);
+		$this->assertStringContainsString('extends MissionCaseCombat', $attack);
+		$this->assertStringContainsString('extends MissionCaseCombat', $destroy);
+		$this->assertStringContainsString('notifyCombatResolved', $combat);
 		$this->assertStringContainsString('notifyCombatResolved', $mip);
 		$this->assertGreaterThan(
-			strpos($attack, 'SaveFleet'),
-			strpos($attack, 'notifyCombatResolved')
+			strpos($combat, 'SaveFleet'),
+			strpos($combat, 'notifyCombatResolved')
 		);
 	}
 }

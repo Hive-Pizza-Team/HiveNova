@@ -2,8 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
-use HiveNova\Core\Config;
-use HiveNova\Core\HTTP;
+use HiveNova\Core\BoardRedirect;
 
 /**
  *  2Moons 
@@ -33,13 +32,7 @@ class ShowBoardPage extends AbstractGamePage
 	function show() 
 	{
 		global $LNG;
-		$boardUrl	= Config::get()->forum_url;
-		if(filter_var($boardUrl, FILTER_VALIDATE_URL))
-		{
-			HTTP::sendHeader('Location', $boardUrl);
-		}
-		else
-		{
+		if (!BoardRedirect::redirectIfConfigured()) {
 			$this->printMessage($LNG['bad_forum_url']);
 		}
 	}

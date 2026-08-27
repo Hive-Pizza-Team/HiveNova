@@ -95,6 +95,12 @@ if (!defined('FLEET_MISSION_EXPEDITION'))    define('FLEET_MISSION_EXPEDITION', 
 if (!defined('FLEET_MISSION_TRADE'))         define('FLEET_MISSION_TRADE',         16);
 if (!defined('FLEET_MISSION_TRANSFER'))      define('FLEET_MISSION_TRANSFER',      17);
 if (!defined('FLEET_MISSION_SALVAGE'))       define('FLEET_MISSION_SALVAGE',       18);
+if (!defined('SHIP_COLONY_SHIP'))           define('SHIP_COLONY_SHIP',           208);
+if (!defined('SHIP_RECYCLER'))              define('SHIP_RECYCLER',              209);
+if (!defined('SHIP_ESPIONAGE_PROBE'))       define('SHIP_ESPIONAGE_PROBE',       210);
+if (!defined('SHIP_DEATHSTAR'))             define('SHIP_DEATHSTAR',             214);
+if (!defined('SHIP_PATHFINDER'))            define('SHIP_PATHFINDER',            219);
+if (!defined('SHIP_DARK_MATTER'))           define('SHIP_DARK_MATTER',           220);
 
 // Shared game-data fixture (populates $pricelist, $resource, $reslist, $requirements, $CombatCaps)
 require_once __DIR__ . '/fixtures/game_data.php';
