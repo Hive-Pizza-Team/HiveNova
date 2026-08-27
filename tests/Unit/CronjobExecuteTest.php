@@ -15,6 +15,9 @@ class CronjobExecuteTest extends TestCase
 
     protected function setUp(): void
     {
+        ReferralCronjobExecuteStub::$ran = false;
+        ReferralCronjobExecuteStub::$throwOnRun = false;
+
         $fake = new FakeDatabase();
         $fake->achievement->cronjobClass = ReferralCronjobExecuteStub::class;
         $fake->achievement->cronjobActive = true;
@@ -48,6 +51,24 @@ class CronjobExecuteTest extends TestCase
         $this->assertInstanceOf(FakeDatabase::class, $fake);
         $this->assertTrue($fake->achievement->cronjobLockCleared);
     }
+
+    public function test_execute_clears_lock_when_task_throws(): void
+    {
+        ReferralCronjobExecuteStub::$ran = false;
+        ReferralCronjobExecuteStub::$throwOnRun = true;
+
+        try {
+            Cronjob::execute(12);
+            $this->fail('Expected exception from cronjob task');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('cron task failed', $e->getMessage());
+        }
+
+        $fake = Database::get();
+        $this->assertInstanceOf(FakeDatabase::class, $fake);
+        $this->assertTrue($fake->achievement->cronjobLockCleared);
+        $this->assertFalse(ReferralCronjobExecuteStub::$ran);
+    }
 }
 
 /**
@@ -56,9 +77,13 @@ class CronjobExecuteTest extends TestCase
 class ReferralCronjobExecuteStub implements \HiveNova\Cronjob\CronjobTask
 {
     public static bool $ran = false;
+    public static bool $throwOnRun = false;
 
     public function run()
     {
+        if (self::$throwOnRun) {
+            throw new \RuntimeException('cron task failed');
+        }
         self::$ran = true;
     }
 }

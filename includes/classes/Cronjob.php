@@ -61,23 +61,27 @@ class Cronjob
 		
 		/** @var \HiveNova\Cronjob\CronjobTask $cronjobObj */
 		$cronjobObj			= new $cronjobClassName;
-		$cronjobObj->run();
 
-		self::reCalculateCronjobs($cronjobID);
-		$sql = 'UPDATE %%CRONJOBS%% SET `lock` = NULL WHERE cronjobID = :cronjobId;';
+		try {
+			$cronjobObj->run();
 
-		$db->update($sql, array(
-			':cronjobId'	=> $cronjobID
-		));
+			self::reCalculateCronjobs($cronjobID);
 
-		$sql = 'INSERT INTO %%CRONJOBS_LOG%% SET `cronjobId` = :cronjobId,
-		`executionTime` = :executionTime, `lockToken` = :lockToken';
+			$sql = 'INSERT INTO %%CRONJOBS_LOG%% SET `cronjobId` = :cronjobId,
+			`executionTime` = :executionTime, `lockToken` = :lockToken';
 
-		$db->insert($sql, array(
-			':cronjobId'		=> $cronjobID,
-			':executionTime'	=> Database::formatDate(TIMESTAMP),
-			':lockToken'		=> $lockToken
-		));
+			$db->insert($sql, array(
+				':cronjobId'		=> $cronjobID,
+				':executionTime'	=> Database::formatDate(TIMESTAMP),
+				':lockToken'		=> $lockToken
+			));
+		} finally {
+			$sql = 'UPDATE %%CRONJOBS%% SET `lock` = NULL WHERE cronjobID = :cronjobId;';
+
+			$db->update($sql, array(
+				':cronjobId'	=> $cronjobID
+			));
+		}
 	}
 	
 	static function getNeedTodoExecutedJobs()

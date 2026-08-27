@@ -602,17 +602,38 @@ HTML;
 			$debrisPlanetId	= $destroyedMoonParentId;
 		}
 
-		$sql = 'UPDATE %%PLANETS%% SET
-		der_metal	= :metal,
-		der_crystal	= :crystal
-		WHERE '.$debrisType.' = :planetId;';
+		$db->beginTransaction();
+		try {
+			if ($debrisType === 'id_luna') {
+				$lockedDebris = $db->selectSingle(
+					'SELECT der_metal, der_crystal FROM %%PLANETS%% WHERE id_luna = :moonId FOR UPDATE',
+					array(':moonId' => $debrisPlanetId)
+				);
+			} else {
+				$lockedDebris = $db->selectSingle(
+					'SELECT der_metal, der_crystal FROM %%PLANETS%% WHERE id = :planetId FOR UPDATE',
+					array(':planetId' => $debrisPlanetId)
+				);
+			}
+			$derMetal = is_array($lockedDebris) ? (int) $lockedDebris['der_metal'] + (int) $debris[901] : (int) $planetDebris[901];
+			$derCrystal = is_array($lockedDebris) ? (int) $lockedDebris['der_crystal'] + (int) $debris[902] : (int) $planetDebris[902];
 
-		$db->update($sql, array(
-			':metal'	=> $planetDebris[901],
-			':crystal'	=> $planetDebris[902],
-			':planetId'	=> $debrisPlanetId
-		));
+			$sql = 'UPDATE %%PLANETS%% SET
+			der_metal	= :metal,
+			der_crystal	= :crystal
+			WHERE '.$debrisType.' = :planetId;';
 
+			$db->update($sql, array(
+				':metal'	=> $derMetal,
+				':crystal'	=> $derCrystal,
+				':planetId'	=> $debrisPlanetId
+			));
+
+			$db->commit();
+		} catch (\Throwable $e) {
+			$db->rollback();
+			throw $e;
+		}
 		$sql = 'INSERT INTO %%TOPKB%% SET
 		units 		= :units,
 		rid			= :reportId,

@@ -585,18 +585,42 @@ HTML;
 		{
 			$debrisType	= 'id';
 		}
-		
-		if ((int) $this->_fleet['fleet_owner'] !== 0) {
-		$sql = 'UPDATE %%PLANETS%% SET
-		der_metal	= :metal,
-		der_crystal	= :crystal
-		WHERE '.$debrisType.' = :planetId;';
 
-		$db->update($sql, array(
-			':metal'	=> $planetDebris[901],
-			':crystal'	=> $planetDebris[902],
-			':planetId'	=> $this->_fleet['fleet_end_id']
-		));
+		$db->beginTransaction();
+		try {
+			if ((int) $this->_fleet['fleet_owner'] !== 0) {
+				if ($debrisType === 'id_luna') {
+					$lockedDebris = $db->selectSingle(
+						'SELECT der_metal, der_crystal FROM %%PLANETS%% WHERE id_luna = :moonId FOR UPDATE',
+						array(':moonId' => $this->_fleet['fleet_end_id'])
+					);
+					$derMetal = is_array($lockedDebris) ? (int) $lockedDebris['der_metal'] + (int) $debris[901] : (int) $planetDebris[901];
+					$derCrystal = is_array($lockedDebris) ? (int) $lockedDebris['der_crystal'] + (int) $debris[902] : (int) $planetDebris[902];
+				} else {
+					$lockedDebris = $db->selectSingle(
+						'SELECT der_metal, der_crystal FROM %%PLANETS%% WHERE id = :planetId FOR UPDATE',
+						array(':planetId' => $this->_fleet['fleet_end_id'])
+					);
+					$derMetal = is_array($lockedDebris) ? (int) $lockedDebris['der_metal'] + (int) $debris[901] : (int) $planetDebris[901];
+					$derCrystal = is_array($lockedDebris) ? (int) $lockedDebris['der_crystal'] + (int) $debris[902] : (int) $planetDebris[902];
+				}
+
+				$sql = 'UPDATE %%PLANETS%% SET
+				der_metal	= :metal,
+				der_crystal	= :crystal
+				WHERE '.$debrisType.' = :planetId;';
+
+				$db->update($sql, array(
+					':metal'	=> $derMetal,
+					':crystal'	=> $derCrystal,
+					':planetId'	=> $this->_fleet['fleet_end_id']
+				));
+			}
+
+			$db->commit();
+		} catch (\Throwable $e) {
+			$db->rollback();
+			throw $e;
 		}
 
 		$sql = 'INSERT INTO %%TOPKB%% SET
