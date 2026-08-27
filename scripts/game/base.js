@@ -502,3 +502,60 @@ const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
 		alert(error.message);
 	}
 }
+
+const HiveKeychainShareBattle = (draft, destination, callback) => {
+	if (typeof hive_keychain === 'undefined') {
+		if (typeof callback === 'function') {
+			callback('Keychain missing');
+		}
+		return;
+	}
+	if (!draft || !draft.hive_account || !draft.permlink || !draft.body) {
+		if (typeof callback === 'function') {
+			callback('Invalid draft');
+		}
+		return;
+	}
+
+	let parentAuthor = draft.parent_author || '';
+	let parentPermlink = draft.parent_permlink || 'hivenova';
+	if (destination && destination.type === 'community') {
+		parentAuthor = destination.parent_author || '';
+		parentPermlink = destination.parent_permlink || '';
+		if (!parentAuthor || !parentPermlink) {
+			if (typeof callback === 'function') {
+				callback('Community required');
+			}
+			return;
+		}
+	}
+
+	const comment = {
+		parent_author: parentAuthor,
+		parent_permlink: parentPermlink,
+		author: draft.hive_account,
+		permlink: draft.permlink,
+		title: draft.title || '',
+		body: draft.body,
+		json_metadata: draft.json_metadata || JSON.stringify({ tags: draft.tags || ['hivenova'], app: 'hivenova/battle-share' }),
+	};
+
+	hive_keychain.requestBroadcast(
+		draft.hive_account,
+		[['comment', comment]],
+		'Posting',
+		(response) => {
+			if (!response || !response.success) {
+				const err = (response && response.message) ? response.message : (response && response.error) ? response.error : 'Broadcast failed';
+				if (typeof callback === 'function') {
+					callback(err);
+				}
+				return;
+			}
+			const txid = extractHiveTxId(response);
+			if (typeof callback === 'function') {
+				callback(null, txid);
+			}
+		}
+	);
+};

@@ -1465,3 +1465,21 @@ $LNG['season_news_daily'] = 'Season %d countdown: %d day(s) until close.';
 $LNG['season_news_preclose'] = 'Season %d closes in about %d hour(s).';
 $LNG['season_news_close'] = 'Season %d is closing. Rankings are locked for Pizza payouts.';
 $LNG['season_msg_subject'] = 'Season';
+
+$LNG['battle_share_button'] = 'Share to Hive';
+$LNG['battle_share_modal_title'] = 'Share battle on Hive';
+$LNG['battle_share_dest_blog'] = 'My blog';
+$LNG['battle_share_dest_community'] = 'Hive community';
+$LNG['battle_share_community_hint'] = 'Choose a community';
+$LNG['battle_share_community_custom'] = 'Custom community…';
+$LNG['battle_share_community_required'] = 'Enter a community account and id (e.g. hive-123456 hive-gaming).';
+$LNG['battle_share_confirm'] = 'Publish with Keychain';
+$LNG['battle_share_cancel'] = 'Cancel';
+$LNG['battle_share_keychain_missing'] = 'Install the Hive Keychain browser extension to share battles.';
+$LNG['battle_share_success'] = 'Battle shared on Hive.';
+$LNG['battle_share_failure'] = 'Could not publish to Hive.';
+$LNG['battle_share_cta'] = 'Play Moon on HiveNova';
+$LNG['battle_share_footer'] = 'Shared via HiveNova';
+$LNG['battle_share_result_label'] = 'Result';
+$LNG['battle_share_vs'] = 'vs';
+

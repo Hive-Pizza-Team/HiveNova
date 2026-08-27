@@ -746,6 +746,120 @@ div#disclamer {
     margin: 0 auto;
 }
 
+.battle-report__share {
+    margin-bottom: 12px;
+    text-align: right;
+}
+
+.battle-report__share-btn {
+    background: var(--color-accent, #e31337);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.battle-report__share-btn:hover {
+    filter: brightness(1.08);
+}
+
+.battle-report__share-status {
+    margin-top: 8px;
+    font-size: 13px;
+    text-align: right;
+}
+
+.battle-report__share-status.is-error {
+    color: var(--color-danger);
+}
+
+.battle-report__share-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 16px;
+}
+
+.battle-report__share-modal[hidden] {
+    display: none !important;
+}
+
+.battle-report__share-modal-inner {
+    background: var(--color-bg-surface, #1a1a2e);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 16px;
+    max-width: 420px;
+    width: 100%;
+    text-align: left;
+}
+
+.battle-report__share-modal-title {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+.battle-report__share-preview {
+    margin: 0 0 12px;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.battle-report__share-dest {
+    border: none;
+    margin: 0 0 12px;
+    padding: 0;
+}
+
+.battle-report__share-option {
+    display: block;
+    margin-bottom: 6px;
+    cursor: pointer;
+}
+
+.battle-report__share-community label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.battle-report__share-community select,
+.battle-report__share-community input[type="text"] {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-page);
+    color: inherit;
+}
+
+.battle-report__share-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.battle-report__share-cancel,
+.battle-report__share-confirm {
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+}
+
+.battle-report__share-confirm {
+    background: var(--color-accent, #e31337);
+    color: #fff;
+    border-color: transparent;
+}
+
 .battle-report__players {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);

@@ -2,6 +2,8 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\BattleShareComposer;
+use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 
@@ -31,6 +33,49 @@ class ShowRaportPage extends AbstractGamePage
 		parent::__construct();
 	}
 	
+	private function resolveParticipantNames(array $combatReport, string $idList): string
+	{
+		if ($idList === '') {
+			return '';
+		}
+
+		$names = [];
+		foreach (explode(',', $idList) as $rawId) {
+			$id = (int) trim($rawId);
+			if ($id <= 0) {
+				continue;
+			}
+			if (!empty($combatReport['players'][$id]['name'])) {
+				$names[] = (string) $combatReport['players'][$id]['name'];
+			}
+		}
+
+		return implode(' & ', $names);
+	}
+
+	private function battleShareLabels(): array
+	{
+		global $LNG;
+
+		return [
+			'result_attacker' => $LNG['sys_attacker_won'],
+			'result_defender' => $LNG['sys_defender_won'],
+			'result_draw'     => $LNG['sys_both_won'],
+			'result_label'    => $LNG['battle_share_result_label'],
+			'time_label'      => $LNG['sys_br_time'],
+			'attacker_lost'   => $LNG['sys_attacker_lostunits'],
+			'defender_lost'   => $LNG['sys_defender_lostunits'],
+			'debris'          => $LNG['debree_field_1'],
+			'steal'           => $LNG['sys_stealed_ressources'],
+			'vs'              => $LNG['battle_share_vs'],
+			'cta'             => $LNG['battle_share_cta'],
+			'footer'          => $LNG['battle_share_footer'],
+			'resource_901'    => $LNG['tech'][901],
+			'resource_902'    => $LNG['tech'][902],
+			'resource_903'    => $LNG['tech'][903],
+		];
+	}
+
 	private function isStealUnprofitable(array $combatReport): bool
 	{
 		if ($combatReport['result'] !== 'a') return false;
@@ -143,7 +188,7 @@ class ShowRaportPage extends AbstractGamePage
 	{
 		global $LNG, $USER;
 		
-		$LNG->includeData(array('FLEET'));		
+		$LNG->includeData(array('FLEET', 'TECH'));		
 		$this->setWindow('popup');
 
 		$db = Database::get();
@@ -178,14 +223,43 @@ class ShowRaportPage extends AbstractGamePage
 			$this->printMessage($LNG['sys_raport_lost_contact']);
 		}
 
-		$combatReport['time']	= _date($LNG['php_tdformat'], $combatReport['time'], $USER['timezone']);
 		$combatReport			= $this->BCWrapperPreRev2321($combatReport);
 		$combatReport['stealUnprofitable'] = $this->isStealUnprofitable($combatReport);
+
+		$rawTime = (int) ($combatReport['time'] ?? 0);
+		$formattedTime = _date($LNG['php_tdformat'], $rawTime, $USER['timezone']);
+		$combatReport['time'] = $formattedTime;
+
+		$attackerName = $this->resolveParticipantNames($combatReport, (string) ($reportData['attacker'] ?? ''));
+		$defenderName = $this->resolveParticipantNames($combatReport, (string) ($reportData['defender'] ?? ''));
+		$shareContext = (new BattleShareComposer())->compose(
+			$combatReport + ['time' => $rawTime],
+			$RID,
+			(int) $USER['id'],
+			(string) ($USER['hive_account'] ?? ''),
+			(int) Config::get()->ref_active === 1,
+			PROTOCOL . HTTP_HOST . HTTP_ROOT,
+			$attackerName,
+			$defenderName,
+			$formattedTime,
+			$this->battleShareLabels()
+		);
 
 		$this->assign(array(
 			'Raport'	=> $combatReport,
 			'pageTitle'	=> $LNG['sys_mess_attack_report'],
 			'hideSidebarMenu' => true,
+			'canShareToHive' => $shareContext['canShare'],
+			'shareDraft' => $shareContext['draft'],
+			'shareDraftJson' => $shareContext['draft'] !== null
+				? json_encode($shareContext['draft'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)
+				: '',
+			'suggestedCommunities' => $shareContext['suggestedCommunities'],
+			'suggestedCommunitiesJson' => json_encode(
+				$shareContext['suggestedCommunities'],
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
+			),
+			'hiveAccount' => (string) ($USER['hive_account'] ?? ''),
 		));
 		
 		$this->display('shared.mission.raport.tpl');
