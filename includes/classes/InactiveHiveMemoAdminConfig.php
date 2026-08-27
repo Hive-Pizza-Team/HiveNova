@@ -39,7 +39,7 @@ class InactiveHiveMemoAdminConfig
 
 		$postedKey = trim((string) ($posted[self::KEY_FIELD] ?? ''));
 		if ($postedKey !== '') {
-			$apply[self::KEY_FIELD] = $postedKey;
+			$apply[self::KEY_FIELD] = ConfigSecret::seal($postedKey);
 		}
 
 		$logOld = $stored;

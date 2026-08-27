@@ -18,3 +18,4 @@ reports/
 node_modules/
 package-lock.json
 swarm-state.md
+templates_c/

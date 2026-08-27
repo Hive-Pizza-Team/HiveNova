@@ -22,7 +22,7 @@ class InactiveHiveMemoService
 		if (!HiveUtil::isAccountValid((string) $config->hive_inactive_memo_account)) {
 			return false;
 		}
-		if (trim((string) $config->hive_inactive_memo_active_key) === '') {
+		if (!ConfigSecret::isPresent(ConfigSecret::ENV_INACTIVE_ACTIVE_KEY, $config->hive_inactive_memo_active_key ?? '')) {
 			return false;
 		}
 		$asset = strtoupper((string) $config->hive_inactive_memo_asset);
@@ -100,7 +100,7 @@ class InactiveHiveMemoService
 	{
 		$db = Database::get();
 		$from = (string) $config->hive_inactive_memo_account;
-		$wif = (string) $config->hive_inactive_memo_active_key;
+		$wif = ConfigSecret::resolve(ConfigSecret::ENV_INACTIVE_ACTIVE_KEY, $config->hive_inactive_memo_active_key ?? '');
 		$asset = strtoupper((string) $config->hive_inactive_memo_asset);
 		$amount = (float) $config->hive_inactive_memo_amount;
 		$threshold = TIMESTAMP - INACTIVE_LONG;

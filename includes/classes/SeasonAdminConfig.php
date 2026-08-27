@@ -56,7 +56,7 @@ class SeasonAdminConfig
 
 		$postedKey = trim((string) ($posted[self::KEY_FIELD] ?? ''));
 		if ($postedKey !== '') {
-			$apply[self::KEY_FIELD] = $postedKey;
+			$apply[self::KEY_FIELD] = ConfigSecret::seal($postedKey);
 		}
 
 		$blogAccount = strtolower(trim((string) ($posted['season_blog_account'] ?? '')));
@@ -66,7 +66,7 @@ class SeasonAdminConfig
 
 		$postedBlogKey = trim((string) ($posted[self::BLOG_KEY_FIELD] ?? ''));
 		if ($postedBlogKey !== '') {
-			$apply[self::BLOG_KEY_FIELD] = $postedBlogKey;
+			$apply[self::BLOG_KEY_FIELD] = ConfigSecret::seal($postedBlogKey);
 		}
 
 		$wasOn = (int) ($stored['season_mode'] ?? 0) === 1;

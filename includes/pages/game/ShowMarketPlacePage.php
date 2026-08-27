@@ -7,6 +7,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MarketPlaceResource;
+use HiveNova\Core\ResourceUpdate;
 
 /**
  *  Steemnova
@@ -252,60 +253,119 @@ class ShowMarketPlacePage extends AbstractGamePage
 			return $LNG['market_p_msg_resources_error'];
 		}
 
+		$deutNeeded = $fleetResource[903] + $consumption;
+
+		$db->beginTransaction();
+		try {
+			$sql = 'SELECT f.*, t.* FROM %%FLEETS%% f
+			JOIN %%TRADES%% t ON f.fleet_id = t.seller_fleet_id
+			WHERE f.fleet_id = :fleet_id AND f.fleet_mess = 2 AND t.buyer_fleet_id IS NULL
+			FOR UPDATE';
+			$lockedTrade = $db->selectSingle($sql, array(
+				':fleet_id' => $FleetID,
+			));
+			if (!is_array($lockedTrade)) {
+				$db->rollback();
+				return $LNG['market_p_msg_not_found'];
+			}
+
+			$lockedPlanet = $db->selectSingle(
+				'SELECT metal, crystal, deuterium FROM %%PLANETS%% WHERE id = :id FOR UPDATE',
+				array(':id' => $PLANET['id'])
+			);
+			if (!is_array($lockedPlanet) ||
+				$lockedPlanet[$resource[901]] < $fleetResource[901] ||
+				$lockedPlanet[$resource[902]] < $fleetResource[902] ||
+				$lockedPlanet[$resource[903]] < $deutNeeded) {
+				$db->rollback();
+				return $LNG['market_p_msg_resources_error'];
+			}
+
+			$db->update(
+				'UPDATE %%PLANETS%% SET
+				metal     = metal     - :metal,
+				crystal   = crystal   - :crystal,
+				deuterium = deuterium - :deuterium
+				WHERE id = :planetId',
+				array(
+					':metal'     => $fleetResource[901],
+					':crystal'   => $fleetResource[902],
+					':deuterium' => $deutNeeded,
+					':planetId'  => $PLANET['id'],
+				)
+			);
+
+			$buyerfleet = FleetFunctions::sendFleet($fleetArray, 3/*Transport*/, $USER['id'], $PLANET['id'], $PLANET['galaxy'],
+				$PLANET['system'], $PLANET['planet'], $PLANET['planet_type'], $fleetResult['fleet_owner'], $fleetResult['fleet_start_id'],
+				$fleetResult['fleet_start_galaxy'], $fleetResult['fleet_start_system'], $fleetResult['fleet_start_planet'], $fleetResult['fleet_start_type'],
+				$fleetResource, $fleetStartTime, $fleetStayTime, $fleetEndTime,0,0,1);
+
+
+
+			/////////////////////////////////////////////////////////////////////////////
+			/// SEND/
+			$fleetArray						= FleetFunctions::unserialize($fleetResult['fleet_array']);
+			$SpeedFactor    	= FleetFunctions::GetGameSpeedFactor();
+			$Distance    		= FleetFunctions::GetTargetDistance(array($PLANET['galaxy'], $PLANET['system'], $PLANET['planet']), array($fleetResult['fleet_end_galaxy'], $fleetResult['fleet_end_system'], $fleetResult['fleet_end_planet']));
+			$SpeedAllMin		= FleetFunctions::GetFleetMaxSpeed($fleetArray, $USER_2);
+			$Duration			= FleetFunctions::GetMissionDuration(10, $SpeedAllMin, $Distance, $SpeedFactor, $USER_2);
+			//$consumption		= FleetFunctions::GetFleetConsumption($fleetArray, $Duration, $Distance, $fleetResult['fleet_owner'], $SpeedFactor);
+
+			$fleetStartTime		= $Duration + TIMESTAMP;
+			$fleetStayTime		= $fleetStartTime;
+			$fleetEndTime		= $fleetStayTime + $Duration;
+
+
+			$params = array(
+				':fleetID' => $FleetID,
+				':fleet_target_owner' => $USER['id'],
+				':fleet_end_id' => $PLANET['id'],
+				':fleet_end_planet' => $PLANET['planet'],
+				':fleet_end_system' => $PLANET['system'],
+				':fleet_end_galaxy' => $PLANET['galaxy'],
+				':fleet_start_time' => $fleetStartTime,
+				':fleet_end_stay' => $fleetStayTime,
+				':fleet_end_time' => $fleetEndTime,
+				':fleet_mission' => $fleetResult['transaction_type'] == 0 ? 3 : 17,
+				':fleet_no_m_return' => 1,
+				':fleet_mess'=> 0,
+			);
+			$sql = "UPDATE %%FLEETS%% SET `fleet_no_m_return` = :fleet_no_m_return, `fleet_end_id` = :fleet_end_id,`fleet_target_owner` = :fleet_target_owner, `fleet_mess` = :fleet_mess, `fleet_mission` = :fleet_mission, `fleet_end_stay` = :fleet_end_stay ,`fleet_end_time` = :fleet_end_time ,`fleet_start_time` = :fleet_start_time , `fleet_end_planet` = :fleet_end_planet, `fleet_end_system` = :fleet_end_system, `fleet_end_galaxy` = :fleet_end_galaxy WHERE fleet_id = :fleetID;";
+			$db->update($sql, $params);
+			$sql = "UPDATE %%LOG_FLEETS%% SET `fleet_no_m_return` = :fleet_no_m_return, `fleet_end_id` = :fleet_end_id,`fleet_target_owner` = :fleet_target_owner, `fleet_mess` = :fleet_mess, `fleet_mission` = :fleet_mission, `fleet_end_stay` = :fleet_end_stay ,`fleet_end_time` = :fleet_end_time ,`fleet_start_time` = :fleet_start_time , `fleet_end_planet` = :fleet_end_planet, `fleet_end_system` = :fleet_end_system, `fleet_end_galaxy` = :fleet_end_galaxy WHERE fleet_id = :fleetID;";
+			$db->update($sql, $params);
+			$sql	= 'UPDATE %%FLEETS_EVENT%% SET  `time` = :endTime WHERE fleetID	= :fleetId;';
+			$db->update($sql, array(
+				':fleetId'	=> $FleetID,
+				':endTime'	=> $fleetStartTime
+			));
+
+			$sql	= 'UPDATE %%TRADES%% SET `buyer_fleet_id` = :buyerFleetId, `buy_time` = NOW() WHERE seller_fleet_id = :fleetId AND buyer_fleet_id IS NULL;';
+			$db->update($sql, array(
+				':fleetId'	=> $FleetID,
+				':buyerFleetId' =>$buyerfleet
+			));
+			if ($db->rowCount() === 0) {
+				$db->rollback();
+				return $LNG['market_p_msg_not_found'];
+			}
+
+			$db->commit();
+		} catch (\Throwable $e) {
+			$db->rollback();
+			throw $e;
+		}
+
 		$PLANET[$resource[901]]	-= $fleetResource[901];
 		$PLANET[$resource[902]]	-= $fleetResource[902];
-		$PLANET[$resource[903]]	-= $fleetResource[903] + $consumption;
+		$PLANET[$resource[903]]	-= $deutNeeded;
 
-		$buyerfleet = FleetFunctions::sendFleet($fleetArray, 3/*Transport*/, $USER['id'], $PLANET['id'], $PLANET['galaxy'],
-			$PLANET['system'], $PLANET['planet'], $PLANET['planet_type'], $fleetResult['fleet_owner'], $fleetResult['fleet_start_id'],
-			$fleetResult['fleet_start_galaxy'], $fleetResult['fleet_start_system'], $fleetResult['fleet_start_planet'], $fleetResult['fleet_start_type'],
-			$fleetResource, $fleetStartTime, $fleetStayTime, $fleetEndTime,0,0,1);
-
-
-
-		/////////////////////////////////////////////////////////////////////////////
-		/// SEND/
-		$fleetArray						= FleetFunctions::unserialize($fleetResult['fleet_array']);
-		$SpeedFactor    	= FleetFunctions::GetGameSpeedFactor();
-		$Distance    		= FleetFunctions::GetTargetDistance(array($PLANET['galaxy'], $PLANET['system'], $PLANET['planet']), array($fleetResult['fleet_end_galaxy'], $fleetResult['fleet_end_system'], $fleetResult['fleet_end_planet']));
-		$SpeedAllMin		= FleetFunctions::GetFleetMaxSpeed($fleetArray, $USER_2);
-		$Duration			= FleetFunctions::GetMissionDuration(10, $SpeedAllMin, $Distance, $SpeedFactor, $USER_2);
-		//$consumption		= FleetFunctions::GetFleetConsumption($fleetArray, $Duration, $Distance, $fleetResult['fleet_owner'], $SpeedFactor);
-
-		$fleetStartTime		= $Duration + TIMESTAMP;
-		$fleetStayTime		= $fleetStartTime;
-		$fleetEndTime		= $fleetStayTime + $Duration;
-
-
-		$params = array(
-			':fleetID' => $FleetID,
-			':fleet_target_owner' => $USER['id'],
-			':fleet_end_id' => $PLANET['id'],
-			':fleet_end_planet' => $PLANET['planet'],
-			':fleet_end_system' => $PLANET['system'],
-			':fleet_end_galaxy' => $PLANET['galaxy'],
-			':fleet_start_time' => $fleetStartTime,
-			':fleet_end_stay' => $fleetStayTime,
-			':fleet_end_time' => $fleetEndTime,
-			':fleet_mission' => $fleetResult['transaction_type'] == 0 ? 3 : 17,
-			':fleet_no_m_return' => 1,
-			':fleet_mess'=> 0,
+		ResourceUpdate::adjustPlanetResourceBaseline(
+			(int) $PLANET['id'],
+			-(float) $fleetResource[901],
+			-(float) $fleetResource[902],
+			-(float) $deutNeeded
 		);
-		$sql = "UPDATE %%FLEETS%% SET `fleet_no_m_return` = :fleet_no_m_return, `fleet_end_id` = :fleet_end_id,`fleet_target_owner` = :fleet_target_owner, `fleet_mess` = :fleet_mess, `fleet_mission` = :fleet_mission, `fleet_end_stay` = :fleet_end_stay ,`fleet_end_time` = :fleet_end_time ,`fleet_start_time` = :fleet_start_time , `fleet_end_planet` = :fleet_end_planet, `fleet_end_system` = :fleet_end_system, `fleet_end_galaxy` = :fleet_end_galaxy WHERE fleet_id = :fleetID;";
-		$db->update($sql, $params);
-		$sql = "UPDATE %%LOG_FLEETS%% SET `fleet_no_m_return` = :fleet_no_m_return, `fleet_end_id` = :fleet_end_id,`fleet_target_owner` = :fleet_target_owner, `fleet_mess` = :fleet_mess, `fleet_mission` = :fleet_mission, `fleet_end_stay` = :fleet_end_stay ,`fleet_end_time` = :fleet_end_time ,`fleet_start_time` = :fleet_start_time , `fleet_end_planet` = :fleet_end_planet, `fleet_end_system` = :fleet_end_system, `fleet_end_galaxy` = :fleet_end_galaxy WHERE fleet_id = :fleetID;";
-		$db->update($sql, $params);
-		$sql	= 'UPDATE %%FLEETS_EVENT%% SET  `time` = :endTime WHERE fleetID	= :fleetId;';
-		$db->update($sql, array(
-			':fleetId'	=> $FleetID,
-			':endTime'	=> $fleetStartTime
-		));
-
-		$sql	= 'UPDATE %%TRADES%% SET  `buyer_fleet_id` = :buyerFleetId,`buy_time` = NOW() WHERE seller_fleet_id	= :fleetId;';
-		$db->update($sql, array(
-			':fleetId'	=> $FleetID,
-			':buyerFleetId' =>$buyerfleet
-		));
 
 		$LC = 0;
 		$HC = 0;

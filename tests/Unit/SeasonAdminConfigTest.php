@@ -19,12 +19,17 @@ class SeasonAdminConfigTest extends TestCase
 
 	public function testPostedKeyReplacesStoredKey(): void
 	{
+		$GLOBALS['salt'] = './0123456789abcdefghij';
 		$result = SeasonAdminConfig::applyPosted(
 			['season_wallet_active_key' => '5KOLD', 'season_blog_posting_key' => '5KBLOGOLD'],
 			['season_wallet_active_key' => '5KNEW', 'season_blog_posting_key' => '5KBLOGNEW']
 		);
-		$this->assertSame('5KNEW', $result['apply']['season_wallet_active_key']);
-		$this->assertSame('5KBLOGNEW', $result['apply']['season_blog_posting_key']);
+		$wallet = $result['apply']['season_wallet_active_key'];
+		$blog = $result['apply']['season_blog_posting_key'];
+		$this->assertStringStartsWith('enc:v1:', $wallet);
+		$this->assertStringStartsWith('enc:v1:', $blog);
+		$this->assertSame('5KNEW', \HiveNova\Core\ConfigSecret::reveal($wallet));
+		$this->assertSame('5KBLOGNEW', \HiveNova\Core\ConfigSecret::reveal($blog));
 	}
 
 	public function testLogNeverContainsRawWif(): void

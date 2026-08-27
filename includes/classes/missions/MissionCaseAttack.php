@@ -365,7 +365,36 @@ HTML;
 		if ($combatResult['won'] == "a")
 		{
 			require_once 'includes/classes/missions/functions/calculateSteal.php';
-			$stealResource = calculateSteal($fleetAttack, $targetPlanet);
+			$db->beginTransaction();
+			try {
+				$lockedPlanet = $db->selectSingle(
+					'SELECT metal, crystal, deuterium FROM %%PLANETS%% WHERE id = :planetId FOR UPDATE',
+					array(':planetId' => $this->_fleet['fleet_end_id'])
+				);
+				if (is_array($lockedPlanet)) {
+					$targetPlanet[$resource[901]] = $lockedPlanet[$resource[901]];
+					$targetPlanet[$resource[902]] = $lockedPlanet[$resource[902]];
+					$targetPlanet[$resource[903]] = $lockedPlanet[$resource[903]];
+				}
+				$stealResource = calculateSteal($fleetAttack, $targetPlanet);
+				$db->update(
+					'UPDATE %%PLANETS%% SET
+					metal		= GREATEST(0, metal - :metal),
+					crystal		= GREATEST(0, crystal - :crystal),
+					deuterium	= GREATEST(0, deuterium - :deuterium)
+					WHERE id = :planetId',
+					array(
+						':metal'		=> $stealResource[901],
+						':crystal'		=> $stealResource[902],
+						':deuterium'	=> $stealResource[903],
+						':planetId'		=> $this->_fleet['fleet_end_id'],
+					)
+				);
+				$db->commit();
+			} catch (\Throwable $e) {
+				$db->rollback();
+				throw $e;
+			}
 		}
 		
 		if($this->_fleet['fleet_end_type'] == 3)
@@ -569,19 +598,6 @@ HTML;
 			':planetId'	=> $this->_fleet['fleet_end_id']
 		));
 		}
-
-		$sql = 'UPDATE %%PLANETS%% SET
-		metal		= metal - :metal,
-		crystal		= crystal - :crystal,
-		deuterium	= deuterium - :deuterium
-		WHERE id = :planetId;';
-
-		$db->update($sql, array(
-			':metal'		=> $stealResource[901],
-			':crystal'		=> $stealResource[902],
-			':deuterium'	=> $stealResource[903],
-			':planetId'		=> $this->_fleet['fleet_end_id']
-		));
 
 		$sql = 'INSERT INTO %%TOPKB%% SET
 		units 		= :units,

@@ -47,6 +47,19 @@ class ResourceUpdate
 	private array $resource	= [];
 	private array $reslist	= [];
 
+	/**
+	 * Request-scoped resource snapshots captured when a planet/user is first
+	 * bound to a ResourceUpdate. SavePlanetToDB writes resource deltas against
+	 * these so concurrent SQL increments (claims, fleet returns, steals) are
+	 * not clobbered by an absolute overwrite.
+	 *
+	 * @var array<int, array{metal: float, crystal: float, deuterium: float}>
+	 */
+	private static array $planetResBaseline = [];
+
+	/** @var array<int, float> */
+	private static array $userDarkmatterBaseline = [];
+
 	function __construct($Build = true, $Tech = true)
 	{
 		$this->Build	= $Build;
@@ -64,6 +77,82 @@ class ResourceUpdate
 		$this->USER		= $USER;
 		$this->PLANET	= $PLANET;
 		$this->config	= Config::get($USER['universe']);
+		$this->ensureResourceBaselines();
+	}
+
+	/**
+	 * Shift the save baseline after an external relative SQL update that was
+	 * also applied to the in-memory planet (fleet send, marketplace buy,
+	 * directive claim). Without this, SavePlanetToDB would re-apply the same
+	 * delta.
+	 */
+	public static function adjustPlanetResourceBaseline(int $planetId, float $metal, float $crystal, float $deuterium): void
+	{
+		if (!isset(self::$planetResBaseline[$planetId])) {
+			return;
+		}
+		self::$planetResBaseline[$planetId]['metal'] += $metal;
+		self::$planetResBaseline[$planetId]['crystal'] += $crystal;
+		self::$planetResBaseline[$planetId]['deuterium'] += $deuterium;
+	}
+
+	public static function adjustUserDarkmatterBaseline(int $userId, float $darkmatter): void
+	{
+		if (!isset(self::$userDarkmatterBaseline[$userId])) {
+			return;
+		}
+		self::$userDarkmatterBaseline[$userId] += $darkmatter;
+	}
+
+	/**
+	 * @return array{metal: float, crystal: float, deuterium: float}|null
+	 */
+	public static function peekPlanetResourceBaseline(int $planetId): ?array
+	{
+		return self::$planetResBaseline[$planetId] ?? null;
+	}
+
+	/** @internal tests */
+	public static function resetResourceBaselinesForTests(): void
+	{
+		self::$planetResBaseline = [];
+		self::$userDarkmatterBaseline = [];
+	}
+
+	private function ensureResourceBaselines(): void
+	{
+		if (!is_array($this->PLANET) || !is_array($this->USER)) {
+			return;
+		}
+		if (!isset($this->PLANET['id'], $this->USER['id'])) {
+			return;
+		}
+
+		$planetId = (int) $this->PLANET['id'];
+		$userId = (int) $this->USER['id'];
+
+		if (!isset(self::$planetResBaseline[$planetId])) {
+			self::$planetResBaseline[$planetId] = [
+				'metal' => (float) ($this->PLANET['metal'] ?? 0),
+				'crystal' => (float) ($this->PLANET['crystal'] ?? 0),
+				'deuterium' => (float) ($this->PLANET['deuterium'] ?? 0),
+			];
+		}
+		if (!isset(self::$userDarkmatterBaseline[$userId])) {
+			self::$userDarkmatterBaseline[$userId] = (float) ($this->USER['darkmatter'] ?? 0);
+		}
+	}
+
+	private function refreshResourceBaselinesFromMemory(array $USER, array $PLANET): void
+	{
+		$planetId = (int) $PLANET['id'];
+		$userId = (int) $USER['id'];
+		self::$planetResBaseline[$planetId] = [
+			'metal' => (float) ($PLANET['metal'] ?? 0),
+			'crystal' => (float) ($PLANET['crystal'] ?? 0),
+			'deuterium' => (float) ($PLANET['deuterium'] ?? 0),
+		];
+		self::$userDarkmatterBaseline[$userId] = (float) ($USER['darkmatter'] ?? 0);
 	}
 
 	public function getData()
@@ -124,6 +213,7 @@ class ResourceUpdate
 			return $this->ReturnVars();
 		}
 
+		$this->ensureResourceBaselines();
 		$this->config		= Config::get($this->USER['universe']);
 		
 		// Vacation freezes production for active players, but inactive accounts
@@ -623,12 +713,19 @@ class ResourceUpdate
 
 		$buildQueries	= array();
 
+		$planetId = (int) $PLANET['id'];
+		$userId = (int) $USER['id'];
+		$hasPlanetBaseline = isset(self::$planetResBaseline[$planetId]);
+		$hasUserBaseline = isset(self::$userDarkmatterBaseline[$userId]);
+		// Do not call ensureResourceBaselines() here: capturing from the
+		// already-mutated memory would make the delta always zero.
+
+		$planetBaseline = $hasPlanetBaseline ? self::$planetResBaseline[$planetId] : null;
+		$dmBaseline = $hasUserBaseline ? self::$userDarkmatterBaseline[$userId] : null;
+
 		$params	= array(
 			':userId'				=> $USER['id'],
 			':planetId'				=> $PLANET['id'],
-			':metal'				=> $PLANET['metal'],
-			':crystal'				=> $PLANET['crystal'],
-			':deuterium'			=> $PLANET['deuterium'],
 			':ecoHash'				=> $PLANET['eco_hash'],
 			':lastUpdateTime'		=> $PLANET['last_update'],
 			':b_building'			=> $PLANET['b_building'],
@@ -644,12 +741,35 @@ class ResourceUpdate
 			':energy_used'			=> $PLANET['energy_used'],
 			':energy'				=> $PLANET['energy'],
 			':b_hangar'				=> $PLANET['b_hangar'],
-			':darkmatter'			=> $USER['darkmatter'],
 			':b_tech'				=> $USER['b_tech'],
 			':b_tech_id'			=> $USER['b_tech_id'],
 			':b_tech_planet'		=> $USER['b_tech_planet'],
 			':b_tech_queue'			=> $USER['b_tech_queue']
 		);
+
+		if ($hasPlanetBaseline) {
+			$params[':metalDelta'] = (float) $PLANET['metal'] - (float) $planetBaseline['metal'];
+			$params[':crystalDelta'] = (float) $PLANET['crystal'] - (float) $planetBaseline['crystal'];
+			$params[':deuteriumDelta'] = (float) $PLANET['deuterium'] - (float) $planetBaseline['deuterium'];
+			$metalSql = 'p.metal = GREATEST(0, p.metal + :metalDelta)';
+			$crystalSql = 'p.crystal = GREATEST(0, p.crystal + :crystalDelta)';
+			$deuteriumSql = 'p.deuterium = GREATEST(0, p.deuterium + :deuteriumDelta)';
+		} else {
+			$params[':metal'] = $PLANET['metal'];
+			$params[':crystal'] = $PLANET['crystal'];
+			$params[':deuterium'] = $PLANET['deuterium'];
+			$metalSql = 'p.metal = :metal';
+			$crystalSql = 'p.crystal = :crystal';
+			$deuteriumSql = 'p.deuterium = :deuterium';
+		}
+
+		if ($hasUserBaseline) {
+			$params[':darkmatterDelta'] = (float) $USER['darkmatter'] - (float) $dmBaseline;
+			$darkmatterSql = 'u.darkmatter = GREATEST(0, u.darkmatter + :darkmatterDelta)';
+		} else {
+			$params[':darkmatter'] = $USER['darkmatter'];
+			$darkmatterSql = 'u.darkmatter = :darkmatter';
+		}
 
 		if (!empty($this->Builded))
 		{
@@ -680,9 +800,9 @@ class ResourceUpdate
 		}
 
 		$sql = 'UPDATE %%PLANETS%% as p,%%USERS%% as u SET
-		p.metal				= :metal,
-		p.crystal			= :crystal,
-		p.deuterium			= :deuterium,
+		'.$metalSql.',
+		'.$crystalSql.',
+		'.$deuteriumSql.',
 		p.eco_hash			= :ecoHash,
 		p.last_update		= :lastUpdateTime,
 		p.b_building		= :b_building,
@@ -698,7 +818,7 @@ class ResourceUpdate
 		p.energy_used		= :energy_used,
 		p.energy			= :energy,
 		p.b_hangar			= :b_hangar,
-		u.darkmatter		= :darkmatter,
+		'.$darkmatterSql.',
 		u.b_tech			= :b_tech,
 		u.b_tech_id			= :b_tech_id,
 		u.b_tech_planet		= :b_tech_planet,
@@ -712,6 +832,7 @@ class ResourceUpdate
 		\HiveNova\Core\DirectiveHooks::afterBuildCompleted($this->Builded, $USER);
 
 		$this->Builded	= array();
+		$this->refreshResourceBaselinesFromMemory($USER, $PLANET);
 
 		return array($USER, $PLANET);
 	}
