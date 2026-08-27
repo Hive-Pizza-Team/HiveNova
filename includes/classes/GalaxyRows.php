@@ -33,11 +33,47 @@ class GalaxyRows
 	private $galaxyRow;
 	/** @var array<int, array<string, mixed>> */
 	private $salvageByPlanet = [];
+	/** @var array<string, mixed>|null */
+	private $injectedUser = null;
+	/** @var array<string, mixed>|null */
+	private $injectedPlanet = null;
 	
 	const PLANET_DESTROYED = false;
 	
 	function __construct() {
 		
+	}
+
+	public function setUser(array $user)
+	{
+		$this->injectedUser = $user;
+		return $this;
+	}
+
+	public function setPlanet(array $planet)
+	{
+		$this->injectedPlanet = $planet;
+		return $this;
+	}
+
+	private function getUser(): array
+	{
+		if ($this->injectedUser !== null) {
+			return $this->injectedUser;
+		}
+
+		global $USER;
+		return $USER;
+	}
+
+	private function getPlanet(): array
+	{
+		if ($this->injectedPlanet !== null) {
+			return $this->injectedPlanet;
+		}
+
+		global $PLANET;
+		return $PLANET;
 	}
 	
 	public function setGalaxy($Galaxy) {
@@ -52,7 +88,7 @@ class GalaxyRows
 	
 	public function getGalaxyData()
 	{
-		global $USER;
+		$user = $this->getUser();
 
         $sql	= 'SELECT SQL_BIG_RESULT DISTINCT
 		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.temp_max, p.field_current, p.field_max, p.destruyed, p.der_metal, p.der_crystal, p.id_luna,
@@ -78,8 +114,8 @@ class GalaxyRows
 		$galaxyResult	= Database::get()->select($sql, array(
 			':statTypeUser' 	=> 1,
 			':statTypeAlliance' => 2,
-			':allianceId'		=> $USER['ally_id'],
-			':userId'			=> $USER['id'],
+			':allianceId'		=> $user['ally_id'],
+			':userId'			=> $user['id'],
 			':universe'			=> Universe::current(),
 			':galaxy'			=> $this->Galaxy,
 			':system'			=> $this->System,
@@ -184,14 +220,15 @@ class GalaxyRows
 	
 	protected function isOwnPlanet()
 	{
-		global $USER;
+		$user = $this->getUser();
 		
-		$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet']	= $this->galaxyRow['id_owner'] == $USER['id'];
+		$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet']	= $this->galaxyRow['id_owner'] == $user['id'];
 	}
 	
 	protected function getAllowedMissions()
 	{
-		global $PLANET, $resource;
+		global $resource;
+		$planet = $this->getPlanet();
 		
 		$this->galaxyData[$this->galaxyRow['planet']]['missions']	= array(
 			1	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && isModuleAvailable(MODULE_MISSION_ATTACK),
@@ -200,46 +237,49 @@ class GalaxyRows
 			5	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && isModuleAvailable(MODULE_MISSION_HOLD),
 			6	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && isModuleAvailable(MODULE_MISSION_SPY),
 			8	=> isModuleAvailable(MODULE_MISSION_RECYCLE),
-			9	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && $PLANET[$resource[214]] > 0 && isModuleAvailable(MODULE_MISSION_DESTROY),
-			10	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && $PLANET[$resource[503]] > 0 && isModuleAvailable(MODULE_MISSION_ATTACK) && isModuleAvailable(MODULE_MISSILEATTACK) && $this->inMissileRange(),
+			9	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && $planet[$resource[214]] > 0 && isModuleAvailable(MODULE_MISSION_DESTROY),
+			10	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && $planet[$resource[503]] > 0 && isModuleAvailable(MODULE_MISSION_ATTACK) && isModuleAvailable(MODULE_MISSILEATTACK) && $this->inMissileRange(),
 			18	=> isModuleAvailable(MODULE_MISSION_SALVAGE) && isset($this->salvageByPlanet[(int) $this->galaxyRow['planet']]),
 		);
 	}
 
 	protected function inMissileRange()
 	{
-		global $USER, $PLANET, $resource;
+		global $resource;
+		$user = $this->getUser();
+		$planet = $this->getPlanet();
 		
-		if ($this->galaxyRow['galaxy'] != $PLANET['galaxy'])
+		if ($this->galaxyRow['galaxy'] != $planet['galaxy'])
 			return false;
 		
-		$Range		= FleetFunctions::GetMissileRange($USER[$resource[117]]);
-		$systemMin	= $PLANET['system'] - $Range;
-		$systemMax	= $PLANET['system'] + $Range;
+		$Range		= FleetFunctions::GetMissileRange($user[$resource[117]]);
+		$systemMin	= $planet['system'] - $Range;
+		$systemMax	= $planet['system'] + $Range;
 		
 		return $this->galaxyRow['system'] >= $systemMin && $this->galaxyRow['system'] <= $systemMax;
 	}
 	
 	protected function getActionButtons()
 	{
-		global $USER;
+		$user = $this->getUser();
         if($this->galaxyData[$this->galaxyRow['planet']]['ownPlanet']) {
             $this->galaxyData[$this->galaxyRow['planet']]['action'] = false;
         } else {
             $this->galaxyData[$this->galaxyRow['planet']]['action'] = array(
-                'esp'		=> $USER['settings_esp'] == 1 && $this->galaxyData[$this->galaxyRow['planet']]['missions'][6],
-                'message'	=> $USER['settings_wri'] == 1 && isModuleAvailable(MODULE_MESSAGES),
-                'buddy'		=> $USER['settings_bud'] == 1 && isModuleAvailable(MODULE_BUDDYLIST) && $this->galaxyRow['buddy'] == 0,
-                'missle'	=> $USER['settings_mis'] == 1 && $this->galaxyData[$this->galaxyRow['planet']]['missions'][10],
+                'esp'		=> $user['settings_esp'] == 1 && $this->galaxyData[$this->galaxyRow['planet']]['missions'][6],
+                'message'	=> $user['settings_wri'] == 1 && isModuleAvailable(MODULE_MESSAGES),
+                'buddy'		=> $user['settings_bud'] == 1 && isModuleAvailable(MODULE_BUDDYLIST) && $this->galaxyRow['buddy'] == 0,
+                'missle'	=> $user['settings_mis'] == 1 && $this->galaxyData[$this->galaxyRow['planet']]['missions'][10],
             );
         }
 	}
 
 	protected function getPlayerData()
 	{
-		global $USER, $LNG;
+		global $LNG;
+		$user = $this->getUser();
 
-		$IsNoobProtec		= CheckNoobProtec($USER, $this->galaxyRow, $this->galaxyRow);
+		$IsNoobProtec		= CheckNoobProtec($user, $this->galaxyRow, $this->galaxyRow);
 		$Class		 		= userStatus($this->galaxyRow, $IsNoobProtec);
 		
         $this->galaxyData[$this->galaxyRow['planet']]['user']	= array(
@@ -255,7 +295,8 @@ class GalaxyRows
 	
 	protected function getAllianceData()
 	{
-		global $USER, $LNG;
+		global $LNG;
+		$user = $this->getUser();
 		if(empty($this->galaxyRow['allyid'])) {
 			$this->galaxyData[$this->galaxyRow['planet']]['alliance']	= false;
 		} else {
@@ -279,7 +320,7 @@ class GalaxyRows
 					break;
 			}
 			
-			if($USER['ally_id'] == $this->galaxyRow['ally_id'])
+			if($user['ally_id'] == $this->galaxyRow['ally_id'])
 			{
 				$Class	= array('member');
 			}
@@ -317,13 +358,13 @@ class GalaxyRows
 
 	protected function hasSharedPlanetVizIntel(): bool
 	{
-		global $USER;
+		$user = $this->getUser();
 
 		if ($this->galaxyData[$this->galaxyRow['planet']]['ownPlanet']) {
 			return true;
 		}
 
-		if (empty($this->galaxyRow['id_owner']) || (int) $this->galaxyRow['id_owner'] === (int) $USER['id']) {
+		if (empty($this->galaxyRow['id_owner']) || (int) $this->galaxyRow['id_owner'] === (int) $user['id']) {
 			return false;
 		}
 
@@ -332,15 +373,15 @@ class GalaxyRows
 		}
 
 		if (
-			!empty($USER['ally_id'])
+			!empty($user['ally_id'])
 			&& !empty($this->galaxyRow['ally_id'])
-			&& (int) $USER['ally_id'] === (int) $this->galaxyRow['ally_id']
+			&& (int) $user['ally_id'] === (int) $this->galaxyRow['ally_id']
 		) {
 			return true;
 		}
 
 		if (
-			!empty($USER['ally_id'])
+			!empty($user['ally_id'])
 			&& !empty($this->galaxyRow['allyid'])
 			&& (int) ($this->galaxyRow['diploLevel'] ?? 0) === 1
 		) {
@@ -352,10 +393,10 @@ class GalaxyRows
 
 	protected function getColonizeSlotStatus(int $position, ?bool $hasCapacity = null): array
 	{
-		global $USER;
+		$user = $this->getUser();
 
 		if ($hasCapacity === null) {
-			$hasCapacity = PlayerUtil::hasColonizationCapacity($USER);
+			$hasCapacity = PlayerUtil::hasColonizationCapacity($user);
 		}
 
 		if (!$hasCapacity) {
@@ -365,7 +406,7 @@ class GalaxyRows
 			);
 		}
 
-		if (!PlayerUtil::allowPlanetPosition($position, $USER)) {
+		if (!PlayerUtil::allowPlanetPosition($position, $user)) {
 			return array(
 				'canColonize'             => false,
 				'colonizeBlockedReason'   => 'astro',
@@ -584,10 +625,10 @@ class GalaxyRows
 
 	public function fillUncolonizedSlots(array &$galaxyData, int $maxPlanets, int $galaxy, int $system, string $themePath): void
 	{
-		global $USER;
+		$user = $this->getUser();
 
 		$vizEnabled = str_contains($themePath, '/hive/');
-		$hasCapacity = PlayerUtil::hasColonizationCapacity($USER);
+		$hasCapacity = PlayerUtil::hasColonizationCapacity($user);
 		if ($this->salvageByPlanet === []) {
 			foreach (PvePackageService::inSystem(Universe::current(), $galaxy, $system) as $pkg) {
 				$this->salvageByPlanet[(int) $pkg['planet']] = $pkg;
@@ -628,8 +669,9 @@ class GalaxyRows
 			$system = (int) $matches[2];
 			$planet = (int) $matches[3];
 			$package = PvePackageService::findAt(Universe::current(), $galaxy, $system, $planet);
-			global $USER, $resource;
-			$spyTech = (int) ($USER[$resource[106] ?? 'spy_tech'] ?? $USER['spy_tech'] ?? 0);
+			global $resource;
+			$user = $this->getUser();
+			$spyTech = (int) ($user[$resource[106] ?? 'spy_tech'] ?? $user['spy_tech'] ?? 0);
 			$json = $this->buildUncolonizedPlanetVizJson($galaxy, $system, $planet, $themePath, $package, $spyTech);
 
 			return json_decode($json, true);
@@ -648,8 +690,6 @@ class GalaxyRows
 
 	protected function buildVizPayloadForContextRow(int $entityId, string $type, string $themePath): ?array
 	{
-		global $USER;
-
 		$row = $this->fetchGalaxyContextRow($entityId, $type);
 		if (!$row) {
 			return null;
@@ -660,12 +700,12 @@ class GalaxyRows
 
 	protected function buildVizPayloadFromGalaxyRow(array $row, string $type, string $themePath): ?array
 	{
-		global $USER;
+		$user = $this->getUser();
 
 		$this->galaxyRow = $row;
 		$this->galaxyData = array(
 			$row['planet'] => array(
-				'ownPlanet' => (int) $row['id_owner'] === (int) $USER['id'],
+				'ownPlanet' => (int) $row['id_owner'] === (int) $user['id'],
 			),
 		);
 
@@ -679,7 +719,7 @@ class GalaxyRows
 
 	protected function fetchGalaxyContextRow(int $entityId, string $type): ?array
 	{
-		global $USER;
+		$user = $this->getUser();
 
 		if ($entityId <= 0) {
 			return null;
@@ -713,8 +753,8 @@ class GalaxyRows
 		$row = Database::get()->selectSingle($sql, array(
 			':statTypeUser'       => 1,
 			':statTypeAlliance'   => 2,
-			':allianceId'         => $USER['ally_id'],
-			':userId'             => $USER['id'],
+			':allianceId'         => $user['ally_id'],
+			':userId'             => $user['id'],
 			':universe'           => Universe::current(),
 			':planetTypePlanet'   => $type === 'moon' ? 1 : 1,
 			':entityId'           => $entityId,
@@ -773,9 +813,10 @@ class GalaxyRows
 	 */
 	public function salvageHint(array $package, ?int $spyTech = null): array
 	{
-		global $USER, $resource;
+		global $resource;
 		if ($spyTech === null) {
-			$spyTech = (int) ($USER[$resource[106] ?? 'spy_tech'] ?? $USER['spy_tech'] ?? 0);
+			$user = $this->getUser();
+			$spyTech = (int) ($user[$resource[106] ?? 'spy_tech'] ?? $user['spy_tech'] ?? 0);
 		}
 
 		return PvePackageService::spyHint($package, $spyTech);
