@@ -31,7 +31,7 @@ class FleetDispatchService
      */
     public static function normalizeExpeditionStance(?string $stance, int $mission): ?string
     {
-        if ($mission != 15) {
+        if ($mission != FLEET_MISSION_EXPEDITION) {
             return null;
         }
         $normalized = ExpeditionChoiceService::normalizeStance($stance);
@@ -62,7 +62,7 @@ class FleetDispatchService
         $fleetStorage       = $params['fleetStorage'];
         $consumption        = $params['consumption'];
 
-        if ($targetMission == 18) {
+        if ($targetMission == FLEET_MISSION_SALVAGE) {
             if (!isModuleAvailable(MODULE_MISSION_SALVAGE)) {
                 throw new \RuntimeException($LNG['fl_invalid_mission']);
             }
@@ -92,23 +92,23 @@ class FleetDispatchService
         }
 
         // Transport must contain resources
-        if (($targetMission == 3 || ($targetMission == 16 && $markettype == 0)) &&
+        if (($targetMission == FLEET_MISSION_TRANSPORT || ($targetMission == FLEET_MISSION_TRADE && $markettype == 0)) &&
             $TransportMetal + $TransportCrystal + $TransportDeuterium < 1) {
             throw new \RuntimeException($LNG['fl_no_noresource']);
         }
 
         // Market type 1 cannot contain resources
-        if ($targetMission == 16 && $markettype == 1 &&
+        if ($targetMission == FLEET_MISSION_TRADE && $markettype == 1 &&
             $TransportMetal + $TransportCrystal + $TransportDeuterium != 0) {
             throw new \RuntimeException($LNG['fl_resources']);
         }
 
         // Market exchange amount validation
-        if ($targetMission == 16 && $WantedResourceAmount < 1) {
+        if ($targetMission == FLEET_MISSION_TRADE && $WantedResourceAmount < 1) {
             throw new \RuntimeException($LNG['fl_no_noresource_exchange']);
         }
 
-        if ($targetMission == 16 && $WantedResourceAmount > pow(10, 50)) {
+        if ($targetMission == FLEET_MISSION_TRADE && $WantedResourceAmount > pow(10, 50)) {
             throw new \RuntimeException($LNG['fl_invalid_mission']);
         }
 
@@ -184,7 +184,7 @@ class FleetDispatchService
         $availableMissions = $fleetData['availableMissions'];
 
         // Colonize: target must be empty and must target a planet slot
-        if ($mission == 7) {
+        if ($mission == FLEET_MISSION_COLONISE) {
             if (!empty($targetPlanetData)) {
                 throw new \RuntimeException($LNG['fl_target_exists']);
             }
@@ -195,7 +195,7 @@ class FleetDispatchService
         }
 
         // For colonize / expedition / market the planet not existing is expected
-        if ($mission == 7 || $mission == 15 || $mission == 16 || $mission == 18) {
+        if ($mission == FLEET_MISSION_COLONISE || $mission == FLEET_MISSION_EXPEDITION || $mission == FLEET_MISSION_TRADE || $mission == FLEET_MISSION_SALVAGE) {
             // synthetic target already set by caller — nothing to check here
         } else {
             if (empty($targetPlanetData)) {
@@ -208,7 +208,7 @@ class FleetDispatchService
         }
 
         // Empty target player (salvage on empty slot has no owner)
-        if (empty($targetPlayerData) && $mission != 18) {
+        if (empty($targetPlayerData) && $mission != FLEET_MISSION_SALVAGE) {
             throw new \RuntimeException($LNG['fl_empty_target']);
         }
 
@@ -218,20 +218,20 @@ class FleetDispatchService
         }
 
         // Vacation mode (except recycle and salvage)
-        if ($mission != 8 && $mission != 18 && !empty($targetPlayerData) && IsVacationMode($targetPlayerData)) {
+        if ($mission != FLEET_MISSION_RECYCLE && $mission != FLEET_MISSION_SALVAGE && !empty($targetPlayerData) && IsVacationMode($targetPlayerData)) {
             throw new \RuntimeException($LNG['fl_target_exists']);
         }
 
         // Expedition slot (DM mission = 11)
-        if ($mission == 11) {
-            $activeExpedition = FleetFunctions::GetCurrentFleets($USER['id'], 11, true);
+        if ($mission == FLEET_MISSION_DARKMATTER) {
+            $activeExpedition = FleetFunctions::GetCurrentFleets($USER['id'], FLEET_MISSION_DARKMATTER, true);
             $maxExpedition    = FleetFunctions::getDMMissionLimit($USER);
 
             if ($activeExpedition >= $maxExpedition) {
                 throw new \RuntimeException($LNG['fl_no_expedition_slot']);
             }
-        } elseif ($mission == 15) {
-            $activeExpedition = FleetFunctions::GetCurrentFleets($USER['id'], 15, true);
+        } elseif ($mission == FLEET_MISSION_EXPEDITION) {
+            $activeExpedition = FleetFunctions::GetCurrentFleets($USER['id'], FLEET_MISSION_EXPEDITION, true);
             $maxExpedition    = FleetFunctions::getExpeditionLimit($USER);
 
             if ($activeExpedition >= $maxExpedition) {
@@ -240,14 +240,14 @@ class FleetDispatchService
         }
 
         // Bash protection (attack / ACS / espionage-attack missions)
-        if ($mission == 1 || $mission == 2 || $mission == 9) {
+        if ($mission == FLEET_MISSION_ATTACK || $mission == FLEET_MISSION_ACS || $mission == FLEET_MISSION_DESTROY) {
             if (FleetFunctions::CheckBash($targetPlanetData['id'])) {
                 throw new \RuntimeException($LNG['fl_bash_protection']);
             }
         }
 
         // Admin attack protection & noob protection
-        if ($mission == 1 || $mission == 2 || $mission == 5 || $mission == 6 || $mission == 9) {
+        if ($mission == FLEET_MISSION_ATTACK || $mission == FLEET_MISSION_ACS || $mission == FLEET_MISSION_ALLY_STATION || $mission == FLEET_MISSION_SPY || $mission == FLEET_MISSION_DESTROY) {
             if (Config::get()->adm_attack == 1 && $targetPlayerData['authattack'] > $USER['authlevel']) {
                 throw new \RuntimeException($LNG['fl_admin_attack']);
             }
@@ -266,7 +266,7 @@ class FleetDispatchService
         }
 
         // Buddy check for espionage (mission 5)
-        if ($mission == 5) {
+        if ($mission == FLEET_MISSION_ALLY_STATION) {
             if ($targetPlayerData['ally_id'] != $USER['ally_id'] || $USER['ally_id'] == 0) {
                 $sql = "SELECT COUNT(*) as state FROM %%BUDDY%%
                     WHERE id NOT IN (SELECT id FROM %%BUDDY_REQUEST%% WHERE %%BUDDY_REQUEST%%.id = %%BUDDY%%.id) AND
@@ -283,7 +283,7 @@ class FleetDispatchService
         }
 
         // Tech superiority check (mission 17 — space piracy or similar)
-        if ($mission == 17) {
+        if ($mission == FLEET_MISSION_TRANSFER) {
             $attack    = $USER[$resource[109]] * 10 + $USER['factor']['Attack'] * 100;
             $defensive = $USER[$resource[110]] * 10 + $USER['factor']['Defensive'] * 100;
             $shield    = $USER[$resource[111]] * 10 + $USER['factor']['Shield'] * 100;
@@ -300,7 +300,7 @@ class FleetDispatchService
         }
 
         // Stay/hold time validation
-        if ($mission == 5 || $mission == 11 || $mission == 15 || $mission == 16) {
+        if ($mission == FLEET_MISSION_ALLY_STATION || $mission == FLEET_MISSION_DARKMATTER || $mission == FLEET_MISSION_EXPEDITION || $mission == FLEET_MISSION_TRADE) {
             if (!isset($availableMissions['StayBlock'][$stayTime])) {
                 throw new \RuntimeException($LNG['fl_hold_time_not_exists']);
             }
@@ -404,9 +404,9 @@ class FleetDispatchService
             );
 
             $fleetMeta = $fleetData['fleetMeta'] ?? null;
-            if ($targetMission == 15 && is_array($fleetMeta) && isset($fleetMeta['stance'])) {
+            if ($targetMission == FLEET_MISSION_EXPEDITION && is_array($fleetMeta) && isset($fleetMeta['stance'])) {
                 $fleetMeta['stance'] = ExpeditionChoiceService::normalizeStance((string) $fleetMeta['stance']);
-            } elseif ($targetMission != 15) {
+            } elseif ($targetMission != FLEET_MISSION_EXPEDITION) {
                 $fleetMeta = null;
             }
 
@@ -421,7 +421,7 @@ class FleetDispatchService
                 $fleetGroup, 0, 0, 0, null, $fleetMeta
             );
 
-            if ($targetMission == 16) {
+            if ($targetMission == FLEET_MISSION_TRADE) {
                 $sql = 'INSERT INTO %%TRADES%% SET
                     transaction_type    = :transaction,
                     seller_fleet_id     = :sellerFleet,

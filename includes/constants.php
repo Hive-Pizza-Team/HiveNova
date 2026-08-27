@@ -175,6 +175,14 @@ define('FLEET_MISSION_TRADE'			, 16);
 define('FLEET_MISSION_TRANSFER'			, 17);
 define('FLEET_MISSION_SALVAGE'			, 18);
 
+// Resource element IDs ($resource[] keys; DB columns metal/crystal/deuterium/energy/darkmatter)
+// Player-facing name for 921 is "Pizzabits"; code and schema still use darkmatter.
+define('RESOURCE_METAL'				, 901);
+define('RESOURCE_CRYSTAL'			, 902);
+define('RESOURCE_DEUTERIUM'			, 903);
+define('RESOURCE_ENERGY'			, 911);
+define('RESOURCE_DARKMATTER'		, 921);
+
 // Ship / defense element IDs (%%PLANETS%% / fleet_array keys)
 define('SHIP_SMALL_CARGO'			, 202);
 define('SHIP_LARGE_CARGO'			, 203);
@@ -190,8 +198,14 @@ define('SHIP_SOLAR_SATELLITE'		, 212);
 define('SHIP_DESTROYER'				, 213);
 define('SHIP_DEATHSTAR'				, 214);
 define('SHIP_BATTLECRUISER'			, 215);
-define('SHIP_PATHFINDER'			, 219);
-define('SHIP_DARK_MATTER'			, 220);
+define('SHIP_BLACK_MOON'			, 216);
+define('SHIP_BATTLE_TRANSPORTER'	, 217);
+define('SHIP_AVATAR'				, 218);
+// 219/220: legacy constant names — TECH labels are Battle Recycler / Pizzabits Collector
+define('SHIP_PATHFINDER'			, 219); // Battle Recycler
+define('SHIP_DARK_MATTER'			, 220); // Pizzabits Collector
+define('SHIP_BATTLE_RECYCLER'		, SHIP_PATHFINDER);
+define('SHIP_PIZZABITS_COLLECTOR'	, SHIP_DARK_MATTER);
 
 // Age of fleet logs kept (seconds); must be >= BASH_TIME
 define('FLEETLOG_AGE'				, 86400);

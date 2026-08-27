@@ -37,7 +37,7 @@ class FleetPlanetDeduction
 					$selectCols[] = $resource[$shipId];
 				}
 				if ($consumption > 0) {
-					$selectCols[] = $resource[903];
+					$selectCols[] = $resource[RESOURCE_DEUTERIUM];
 				}
 				$selectCols = array_unique($selectCols);
 
@@ -56,7 +56,7 @@ class FleetPlanetDeduction
 						throw new \RuntimeException('Insufficient ships on planet');
 					}
 				}
-				if ($consumption > 0 && (float) ($lockedPlanet[$resource[903]] ?? 0) < (float) $consumption) {
+				if ($consumption > 0 && (float) ($lockedPlanet[$resource[RESOURCE_DEUTERIUM]] ?? 0) < (float) $consumption) {
 					throw new \RuntimeException('Insufficient deuterium on planet');
 				}
 
@@ -65,7 +65,7 @@ class FleetPlanetDeduction
 					$whereGuards[] = $resource[$shipId].' >= :'.$resource[$shipId];
 				}
 				if ($consumption > 0) {
-					$whereGuards[] = $resource[903].' >= :'.$resource[903];
+					$whereGuards[] = $resource[RESOURCE_DEUTERIUM].' >= :'.$resource[RESOURCE_DEUTERIUM];
 				}
 
 				$sql = 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId AND '.implode(' AND ', $whereGuards).';';
