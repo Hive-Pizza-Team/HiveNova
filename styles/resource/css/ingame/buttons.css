@@ -1,0 +1,332 @@
+/**
+ * HiveNova reusable button styles.
+ *
+ * Usage:
+ *   <button class="btn btn--primary">Confirm</button>
+ *   <a class="btn btn--secondary" href="...">Cancel</a>
+ *
+ * Legacy aliases: .button_standard, .btn-primary, .button (secondary)
+ *
+ * Unclassed <button> and input[type=submit|button] inside <content> inherit .btn--primary.
+ */
+
+:root {
+  --btn-radius: 8px;
+  --btn-font-size: 13px;
+  --btn-min-height: 36px;
+  --btn-padding-x: 1.15em;
+  --btn-padding-y: 0.55em;
+  --btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --btn-shadow-hover: 0 3px 10px rgba(0, 0, 0, 0.35);
+  --btn-shadow-active: 0 1px 2px rgba(0, 0, 0, 0.45);
+
+  /* Default / slate */
+  --btn-primary-bg: linear-gradient(180deg, #3d4450 0%, #2a3039 100%);
+  --btn-primary-bg-hover: linear-gradient(180deg, #4a5568 0%, #343b47 100%);
+  --btn-primary-border: #5c6778;
+  --btn-primary-border-hover: #8b97a8;
+  --btn-primary-text: #f8f9fc;
+
+  /* Accent: muted wine-red — readable but not neon on dark UI */
+  --btn-accent-bg: linear-gradient(180deg, #6e313c 0%, #4f222b 100%);
+  --btn-accent-bg-hover: linear-gradient(180deg, #823a47 0%, #5c2833 100%);
+  --btn-accent-border: #8f4a56;
+  --btn-accent-border-hover: #a85d6a;
+  --btn-accent-text: #f3e8ea;
+
+  --btn-secondary-bg: linear-gradient(180deg, #2e3440 0%, #232830 100%);
+  --btn-secondary-border: #4a5568;
+  --btn-secondary-text: #e8ebf2;
+  --btn-ghost-bg: transparent;
+  --btn-ghost-border: #4a5568;
+  --btn-ghost-text: #d8dce8;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+
+.btn,
+.button_standard,
+a.button_standard {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  box-sizing: border-box;
+  min-height: var(--btn-min-height);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  font: inherit;
+  font-size: var(--btn-font-size);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.015em;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
+  border: 1px solid var(--btn-primary-border);
+  border-radius: var(--btn-radius);
+  box-shadow: var(--btn-shadow);
+  cursor: pointer;
+  vertical-align: middle;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    color 0.16s ease,
+    transform 0.08s ease;
+}
+
+.btn:hover,
+.button_standard:hover,
+a.button_standard:hover {
+  background: var(--btn-primary-bg-hover);
+  border-color: var(--btn-primary-border-hover);
+  box-shadow: var(--btn-shadow-hover);
+  color: var(--btn-primary-text);
+  text-decoration: none;
+}
+
+.btn:active,
+.button_standard:active,
+a.button_standard:active {
+  transform: translateY(1px);
+  box-shadow: var(--btn-shadow-active);
+}
+
+.btn:focus-visible,
+.button_standard:focus-visible,
+a.button_standard:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.btn:disabled,
+.button_standard:disabled,
+.btn.is-disabled,
+button:disabled.btn,
+input:disabled.btn {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Variants ─────────────────────────────────────────────────────────────── */
+
+.btn--primary,
+.btn-primary {
+  color: var(--btn-accent-text);
+  background: var(--btn-accent-bg);
+  border-color: var(--btn-accent-border);
+}
+
+.btn--primary:hover,
+.btn-primary:hover {
+  color: var(--btn-accent-text);
+  background: var(--btn-accent-bg-hover);
+  border-color: var(--btn-accent-border-hover);
+}
+
+.btn--secondary,
+.btn-secondary,
+.button {
+  color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg);
+  border-color: var(--btn-secondary-border);
+}
+
+.btn--secondary:hover,
+.btn-secondary:hover,
+.button:hover {
+  color: #fff;
+  background: var(--btn-primary-bg-hover);
+  border-color: var(--btn-primary-border-hover);
+}
+
+.btn--ghost,
+.btn-ghost {
+  color: var(--btn-ghost-text);
+  background: var(--btn-ghost-bg);
+  border-color: var(--btn-ghost-border);
+  box-shadow: none;
+}
+
+.btn--ghost:hover,
+.btn-ghost:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--btn-primary-border-hover);
+  box-shadow: none;
+}
+
+.btn--danger,
+.btn-danger {
+  color: #f3e8ea;
+  background: linear-gradient(180deg, #5c2430 0%, #3f1821 100%);
+  border-color: #7a3545;
+}
+
+.btn--danger:hover,
+.btn-danger:hover {
+  background: linear-gradient(180deg, #6e313c 0%, #4f222b 100%);
+  border-color: #8f4a56;
+}
+
+.btn--compact,
+.btn-compact {
+  min-height: 30px;
+  padding: 0.35em 0.75em;
+  font-size: 12px;
+}
+
+/* Selected / active filter toggles (JS adds .selected on click) */
+.btn.selected,
+.button_standard.selected,
+button.selected,
+.btn.is-selected {
+  color: var(--btn-accent-text);
+  background: var(--btn-accent-bg);
+  border-color: var(--btn-accent-border);
+  box-shadow: var(--btn-shadow);
+}
+
+.btn.selected:hover,
+.button_standard.selected:hover,
+button.selected:hover,
+.btn.is-selected:hover {
+  color: var(--btn-accent-text);
+  background: var(--btn-accent-bg-hover);
+  border-color: var(--btn-accent-border-hover);
+}
+
+/* Filter chip group: Mining / Other / All, research labs, shipyard */
+.planeto .btn {
+  margin: 0 2px;
+}
+
+/* ── Auto-style plain game controls (no red outline) ─────────────────────── */
+
+content :is(
+  button,
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"]
+):not(
+  [class],
+  .fleet-ship-btn,
+  .galaxy-coords-step,
+  .commander-briefing__toggle,
+  .commander-briefing__select,
+  .commander-briefing__branch,
+  .commander-briefing__claim,
+  .overview-planet-action-btn,
+  .fleet-mobile-active-toggle,
+  .hamburger,
+  .login-button,
+  .reset
+) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: var(--btn-min-height);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  font: inherit;
+  font-size: var(--btn-font-size);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.015em;
+  text-align: center;
+  color: var(--btn-accent-text);
+  background: var(--btn-accent-bg);
+  border: 1px solid var(--btn-accent-border);
+  border-radius: var(--btn-radius);
+  box-shadow: var(--btn-shadow);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.08s ease;
+}
+
+content :is(
+  button,
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"]
+):not(
+  [class],
+  .fleet-ship-btn,
+  .galaxy-coords-step,
+  .commander-briefing__toggle,
+  .commander-briefing__select,
+  .commander-briefing__branch,
+  .commander-briefing__claim,
+  .overview-planet-action-btn,
+  .fleet-mobile-active-toggle,
+  .hamburger,
+  .login-button,
+  .reset
+):hover {
+  background: var(--btn-accent-bg-hover);
+  border-color: var(--btn-accent-border-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+content :is(
+  button,
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"]
+):not(
+  [class],
+  .fleet-ship-btn,
+  .galaxy-coords-step,
+  .commander-briefing__toggle,
+  .commander-briefing__select,
+  .commander-briefing__branch,
+  .commander-briefing__claim,
+  .overview-planet-action-btn,
+  .fleet-mobile-active-toggle,
+  .hamburger,
+  .login-button,
+  .reset
+):active {
+  transform: translateY(1px);
+  box-shadow: var(--btn-shadow-active);
+}
+
+content :is(
+  button,
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"]
+):not(
+  [class],
+  .fleet-ship-btn,
+  .galaxy-coords-step,
+  .commander-briefing__toggle,
+  .commander-briefing__select,
+  .commander-briefing__branch,
+  .commander-briefing__claim,
+  .overview-planet-action-btn,
+  .fleet-mobile-active-toggle,
+  .hamburger,
+  .login-button,
+  .reset
+):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media screen and (max-width: 699px) {
+  :root {
+    --btn-min-height: 44px;
+  }
+}

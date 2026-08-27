@@ -19,7 +19,7 @@
 {foreach $TechTreeList as $elementID => $requireList}
 {if !is_array($requireList)}
 
-<div class="techb" id="{$requireList}"> <button> <span class="plus" id="{$requireList}s"><i class="fa fa-plus"></i></span>
+<div class="techb" id="{$requireList}"> <button type="button" class="btn btn--secondary btn--compact"> <span class="plus" id="{$requireList}s"><i class="fa fa-plus"></i></span>
   <span class="minus" id="{$requireList}h"><i class="fa fa-minus"></i></span></button> {$LNG.tech.$requireList}</div>
 	
 {else}{if $requireList}

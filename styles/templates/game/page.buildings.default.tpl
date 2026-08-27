@@ -50,7 +50,7 @@
 {/if}
 
 	<div>
-<div class="planeto"> <button id="btn1">Mining</button> | <button id="btn2">Other</button> | <button id="btn3">All</button></div>		
+<div class="planeto"> <button type="button" id="btn1" class="btn btn--secondary btn--compact">Mining</button> | <button type="button" id="btn2" class="btn btn--secondary btn--compact">Other</button> | <button type="button" id="btn3" class="btn btn--secondary btn--compact selected">All</button></div>		
 
 {foreach $BuildInfoList as $ID => $Element}
 {if ($ID == 1 || $ID == 2 || $ID == 3 || $ID == 4 || $ID == 12 || $ID == 22 || $ID == 23 || $ID == 24)}

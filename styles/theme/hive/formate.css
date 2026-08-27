@@ -101,17 +101,24 @@ img {
   border: 0
 }
 
-input,
+input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 select,
 textarea,
-#userpic,
-input,
-button {
+#userpic {
   border: 1px solid var(--color-accent);
 }
 
+button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  border: none;
+}
+
 button.selected {
-  border: 1px solid var(--color-accent);
+  border: 1px solid var(--btn-accent-border, #8f4a56);
+  background: var(--btn-accent-bg, linear-gradient(180deg, #6e313c 0%, #4f222b 100%));
+  color: var(--btn-accent-text, #f3e8ea);
 }
 
 td,
@@ -639,7 +646,8 @@ th a,
 
 .infos {
   text-align: center;
-  background: #2d3955d1;
+  background: var(--color-bg-surface);
+  border: 1px solid #3a4048;
   border-radius: 15px;
   margin-top: 10px;
   overflow: auto;
@@ -647,7 +655,8 @@ th a,
 
 .infoso {
   text-align: center;
-  background: #343b6bba;
+  background: var(--color-bg-surface-dark);
+  border: 1px solid #3a4048;
   border-radius: 15px;
   margin-top: 10px;
   overflow: auto;
@@ -656,7 +665,8 @@ th a,
 
 .infos1 {
   text-align: center;
-  background: #356f6dba;
+  background: var(--color-card-header-bg);
+  border: 1px solid #3a4048;
   border-radius: 15px;
   overflow: auto;
   margin: 0 10px 0 10px;
@@ -808,7 +818,8 @@ th a,
 }
 
 .techb {
-  background: #1b4c6e;
+  background: var(--color-card-header-bg);
+  border: 1px solid #3a4048;
   border-radius: 15px;
   padding: 5px;
   overflow: hidden;
@@ -823,7 +834,10 @@ th a,
   float: left;
   width: 32.5%;
   padding: 3px;
-  background: #478f7e8c;
+  background: var(--color-bg-surface-dark);
+  border: 1px solid #3a4048;
+  border-radius: 8px;
+  box-sizing: border-box;
 }
 
 .ship {

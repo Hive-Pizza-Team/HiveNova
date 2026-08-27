@@ -570,7 +570,8 @@ margin: 0;
 
 .infos {
     text-align: center;
-    background: #2d3955d1;
+    background: var(--color-bg-surface);
+    border: 1px solid #3a4048;
     border-radius: 15px;
     margin-top: 10px;
     overflow: auto;
@@ -578,7 +579,8 @@ margin: 0;
 
 .infoso {
     text-align: center;
-    background: #343b6bba;
+    background: var(--color-bg-surface-dark);
+    border: 1px solid #3a4048;
     border-radius: 15px;
     margin-top: 10px;
     overflow: auto;
@@ -587,7 +589,8 @@ margin: 0;
 
 .infos1 {
     text-align: center;
-    background: #356f6dba;
+    background: var(--color-card-header-bg);
+    border: 1px solid #3a4048;
     border-radius: 15px;
     overflow: auto;
 margin:0 10px 0 10px;
@@ -736,7 +739,8 @@ height: 133px;
 }
 
 .techb {
-    background: #1b4c6e;
+    background: var(--color-card-header-bg);
+    border: 1px solid #3a4048;
     border-radius: 15px;
     padding: 5px;
     overflow: hidden;
@@ -751,7 +755,10 @@ width: 100%;
     float: left;
     width: 32.5%;
     padding: 3px;
-    background: #478f7e8c;
+    background: var(--color-bg-surface-dark);
+    border: 1px solid #3a4048;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
 .ship {
