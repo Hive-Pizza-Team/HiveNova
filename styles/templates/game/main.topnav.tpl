@@ -36,12 +36,12 @@
 							<span{if $resourceData.currentt < 0} style="color:red"{/if}>{$resourceData.currentt|number}&nbsp;/&nbsp;{$resourceData.max|number} </span>
 						</td>
 				{else}
-					<div class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|number}{if $resourceID == 921} <br><!--<a href="google.com/wallet">piniondz</a>-->{/if} </div>
+					<div class="res_current" id="current_{$resourceData.name}" data-resource="{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|number}{if $resourceID == 921} <br><!--<a href="google.com/wallet">piniondz</a>-->{/if} </div>
 				{/if}
 				{if !isset($resourceData.current) || !isset($resourceData.max)}
 					<div>&nbsp;</div>
 				{else}
-					<div class="res_max" id="max_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.max|number}</div>
+					<div class="res_max" id="max_{$resourceData.name}" data-real="{$resourceData.max}">{$resourceData.max|number}</div>
 				{/if}
 			</div>
 			
@@ -54,12 +54,12 @@
 {/if}
 {if !isset($resourceData.max)}
 
-						<td class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|shortly_number}</td>
+						<td class="res_current" data-resource="{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|shortly_number}</td>
 				{/if}
 				{if !isset($resourceData.current) || !isset($resourceData.max)}
 					
 				{else}
-					<td class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}"><span{if $resourceData.current >= {$resourceData.max}} style="color:red"{/if}>{$resourceData.current|shortly_number}</span></td>
+					<td class="res_current" data-resource="{$resourceData.name}" data-real="{$resourceData.current}"><span{if $resourceData.current >= {$resourceData.max}} style="color:red"{/if}>{$resourceData.current|shortly_number}</span></td>
 				{/if}
 			</div>
 		
