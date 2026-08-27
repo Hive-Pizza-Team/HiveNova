@@ -45,64 +45,30 @@
 			{/foreach}
 		</tr>
 		{/foreach}
-		<tr>
-			<th colspan="{$colspan}">{$LNG.lv_buildings}</th>
-		</tr>
-		{foreach $planetList.build as $elementID => $buildArray}
-		<tr>
-			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
-			<td>{$buildArray|array_sum|number}</td>
-			{foreach $buildArray as $planetID => $build}
-				<td>{$build|number}</td>
-			{/foreach}
-		</tr>
-		{/foreach}
-		<tr>
-			<th colspan="{$colspan}">{$LNG.lv_ships}</th>
-		</tr>
-		{foreach $planetList.fleet as $elementID => $fleetArray}
-		<tr>
-			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
-			<td>{$fleetArray|array_sum|number}</td>
-			{foreach $fleetArray as $planetID => $fleet}
-				<td>{$fleet|number}</td>
-			{/foreach}
-		</tr>
-		{/foreach}
-		<tr>
-			<th colspan="{$colspan}">{$LNG.lv_defenses}</th>
-		</tr>
-		{foreach $planetList.defense as $elementID => $fleetArray}
-		<tr>
-			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
-			<td>{$fleetArray|array_sum|number}</td>
-			{foreach $fleetArray as $planetID => $fleet}
-				<td>{$fleet|number}</td>
-			{/foreach}
-		</tr>
-		{/foreach}
-		<tr>
-		    <th colspan="{$colspan}">{$LNG.tech.500}</th>
-		</tr>
-		{foreach $planetList.missiles as $elementID => $fleetArray}
-		<tr>
-			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
-			<td>{$fleetArray|array_sum|number}</td>
-			{foreach $fleetArray as $planetID => $fleet}
-				<td>{$fleet|number}</td>
-			{/foreach}
-		</tr>
-		{/foreach}
-		<tr>
-			<th colspan="{$colspan}">{$LNG.lv_technology}</th>
-		</tr>
-		{foreach $planetList.tech as $elementID => $tech}
-		<tr>
-			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
-			<td>{$tech|number}</td>
-			<td colspan="{$colspan-2}">{$tech|number}</td>
-		</tr>
-		{/foreach}
 	</tbody>
 </table>
+
+<details id="empire-details-build" class="empire-section">
+	<summary><strong>{$LNG.lv_buildings}</strong></summary>
+	<table><tbody id="empire-build"></tbody></table>
+</details>
+<details id="empire-details-fleet" class="empire-section">
+	<summary><strong>{$LNG.lv_ships}</strong></summary>
+	<table><tbody id="empire-fleet"></tbody></table>
+</details>
+<details id="empire-details-defense" class="empire-section">
+	<summary><strong>{$LNG.lv_defenses}</strong></summary>
+	<table><tbody id="empire-defense"></tbody></table>
+</details>
+<details id="empire-details-missiles" class="empire-section">
+	<summary><strong>{$LNG.tech.500}</strong></summary>
+	<table><tbody id="empire-missiles"></tbody></table>
+</details>
+<details id="empire-details-tech" class="empire-section">
+	<summary><strong>{$LNG.lv_technology}</strong></summary>
+	<table><tbody id="empire-tech"></tbody></table>
+</details>
+
+<script type="application/json" id="empire-matrix-data">{$empireMatrixJson nofilter}</script>
+<script src="./scripts/game/imperium.js?v={$REV}"></script>
 {/block}

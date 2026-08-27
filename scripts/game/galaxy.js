@@ -52,4 +52,10 @@ $(function () {
 		$('#auto').removeAttr('name');
 		form.submit();
 	});
+
+	// Mobile: drop sticky tooltip HTML — actions column covers missions.
+	document.querySelectorAll('[data-tooltip-content]').forEach(function (el) {
+		el.removeAttribute('data-tooltip-content');
+		el.classList.remove('tooltip_sticky', 'tooltip');
+	});
 });

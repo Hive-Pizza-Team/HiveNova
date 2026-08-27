@@ -147,10 +147,40 @@ class ShowImperiumPage extends AbstractGamePage
 				unset($planetList['tech'][$elementID]);
 			}
 		}
+
+		$matrixSections = array();
+		foreach (array('build' => 'build', 'fleet' => 'fleet', 'defense' => 'defense', 'missiles' => 'missiles') as $key => $section) {
+			$matrixSections[$section] = array();
+			foreach ($planetList[$key] as $elementID => $values) {
+				$matrixSections[$section][] = array(
+					'id'     => (int) $elementID,
+					'name'   => $LNG['tech'][$elementID] ?? (string) $elementID,
+					'total'  => array_sum($values),
+					'values' => $values,
+				);
+			}
+			unset($planetList[$key]);
+		}
+		$matrixSections['tech'] = array();
+		foreach ($planetList['tech'] as $elementID => $tech) {
+			$matrixSections['tech'][] = array(
+				'id'    => (int) $elementID,
+				'name'  => $LNG['tech'][$elementID] ?? (string) $elementID,
+				'total' => (int) $tech,
+				'values' => array(),
+			);
+		}
+		unset($planetList['tech']);
+
+		$empireMatrixJson = json_encode(array(
+			'colspan'  => count($PLANETS) + 2,
+			'sections' => $matrixSections,
+		), JSON_UNESCAPED_UNICODE);
 		
 		$this->assign(array(
-			'colspan'		=> count($PLANETS) + 2,
-			'planetList'	=> $planetList,
+			'colspan'          => count($PLANETS) + 2,
+			'planetList'       => $planetList,
+			'empireMatrixJson' => $empireMatrixJson,
 		));
 
 		$this->display('page.empire.default.tpl');
