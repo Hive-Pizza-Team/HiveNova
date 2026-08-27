@@ -46,6 +46,10 @@ abstract class AbstractGamePage
 	protected $ecoObj;
 	protected $window;
 	protected $disableEcoSystem = false;
+	/** @var array<string, mixed>|null */
+	protected $user = null;
+	/** @var array<string, mixed>|null */
+	protected $planet = null;
 
 	protected function __construct() {
 
@@ -54,15 +58,44 @@ abstract class AbstractGamePage
 			$this->setWindow('full');
 			if(!$this->disableEcoSystem)
 			{
-				global $resource, $reslist;
+				global $USER, $PLANET, $resource, $reslist;
+				$this->user = $USER;
+				$this->planet = $PLANET;
 				$this->ecoObj	= new ResourceUpdate();
 				$this->ecoObj->setResourceData($resource, $reslist);
 				$this->ecoObj->CalcResource();
+			} else {
+				global $USER, $PLANET;
+				$this->user = $USER ?? null;
+				$this->planet = $PLANET ?? null;
 			}
 			$this->initTemplate();
 		} else {
+			global $USER, $PLANET;
+			$this->user = $USER ?? null;
+			$this->planet = $PLANET ?? null;
 			$this->setWindow('ajax');
 		}
+	}
+
+	protected function getUser(): array
+	{
+		if ($this->user !== null) {
+			return $this->user;
+		}
+
+		global $USER;
+		return $USER;
+	}
+
+	protected function getPlanet(): array
+	{
+		if ($this->planet !== null) {
+			return $this->planet;
+		}
+
+		global $PLANET;
+		return $PLANET;
 	}
 
 	protected function initTemplate() {
@@ -109,7 +142,9 @@ abstract class AbstractGamePage
 
 	protected function getNavigationData()
 	{
-		global $PLANET, $LNG, $USER, $THEME, $resource, $reslist;
+		global $LNG, $THEME, $resource, $reslist;
+		$USER = $this->getUser();
+		$PLANET = $this->getPlanet();
 
 		$config			= Config::get();
 
@@ -229,7 +264,8 @@ abstract class AbstractGamePage
 
 	protected function getPageData()
 	{
-		global $USER, $THEME;
+		global $THEME;
+		$USER = $this->getUser();
 
 		if($this->getWindow() === 'full') {
 			$this->getNavigationData();
