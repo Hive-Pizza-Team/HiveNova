@@ -56,7 +56,7 @@
 		serverTime.setSeconds(serverTime.getSeconds()+1);
 		relativeTime++;
 		}
-	}, 1);
+	}, 1000);
 	</script>
 	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
