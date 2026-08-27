@@ -112,6 +112,11 @@
 	}
 
 	function scheduleBoot() {
+		// Mobile: static lite thumb is enough — skip ~670KB Three.js + WebGL boot.
+		if (window.matchMedia('(max-width: 699px)').matches) {
+			showFallback();
+			return;
+		}
 		if (utils && typeof utils.reserveOverviewCanvasSlot === 'function') {
 			utils.reserveOverviewCanvasSlot();
 		}

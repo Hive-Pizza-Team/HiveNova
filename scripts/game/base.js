@@ -331,22 +331,6 @@ function UhrzeitAnzeigen() {
 	}
 })();
 
-if ($.ui && $.ui.autocomplete) {
-	$.widget("custom.catcomplete", $.ui.autocomplete, {
-		_renderMenu: function( ul, items ) {
-			var self = this,
-				currentCategory = "";
-			$.each( items, function( index, item ) {
-				if ( item.category != currentCategory ) {
-					ul.append( "<li class='ui-autocomplete-category'>" + item.category + "</li>" );
-					currentCategory = item.category;
-				}
-				self._renderItem( ul, item );
-			});
-		}
-	});
-}
-
 $(function() {
 	$('#drop-admin').on('click', function() {
 		$.get('admin.php?page=logout', function() {
@@ -375,15 +359,33 @@ $(function() {
 	UhrzeitAnzeigen();
 	setInterval(UhrzeitAnzeigen, 1000);
 	
-	$("button#create_new_alliance_rank").click(function() {
-		$("div#new_alliance_rank").dialog(		{
-			draggable: false,
-			resizable: false,
-			modal: true,
-			width: 760
-		});
-
+	$("button#create_new_alliance_rank").on('click', function(e) {
+		e.preventDefault();
+		var dialog = document.getElementById('new_alliance_rank');
+		if (!dialog) {
+			return false;
+		}
+		if (typeof dialog.showModal === 'function') {
+			dialog.showModal();
+		} else {
+			dialog.setAttribute('open', 'open');
+			dialog.style.display = 'block';
+		}
 		return false;
+	});
+
+	$(document).on('click', '#new_alliance_rank [data-close-dialog]', function(e) {
+		e.preventDefault();
+		var dialog = document.getElementById('new_alliance_rank');
+		if (!dialog) {
+			return;
+		}
+		if (typeof dialog.close === 'function') {
+			dialog.close();
+		} else {
+			dialog.removeAttribute('open');
+			dialog.style.display = 'none';
+		}
 	});
 });
 

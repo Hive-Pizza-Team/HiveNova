@@ -25,7 +25,7 @@
 {else}{if $requireList}
 <div class="techi" id="h{$elementID}">
 <span style="max-width: 42%; display: inline-block;"><a href="#" onclick="return Dialog.info({$elementID})">{$LNG.tech.$elementID}</a></span>
-<a href="#" onclick="return Dialog.info({$elementID})"><img src="{$dpath}gebaeude/{$elementID}.{if $elementID >=600 && $elementID <= 699}jpg{else}gif{/if}" width="89"></a>
+<a href="#" onclick="return Dialog.info({$elementID})"><img data-src="{$dpath}gebaeude/{$elementID}.{if $elementID >=600 && $elementID <= 699}jpg{else}gif{/if}" width="89" alt="" loading="lazy"></a>
 </br>
 {$LNG.tt_requirements}: </br>
 {foreach $requireList as $requireID => $NeedLevel}
@@ -42,4 +42,21 @@
 {/if}
 {/foreach}</div>
 </table>
+{/block}
+
+{block name="script" append}
+<script>
+$(function () {
+	function hydrateVisibleTechImages() {
+		$('.techi:visible img[data-src]').each(function () {
+			if (!this.getAttribute('src')) {
+				this.setAttribute('src', this.getAttribute('data-src'));
+			}
+		});
+	}
+	$(document).on('click', '.techb .plus, .techb .minus', function () {
+		window.setTimeout(hydrateVisibleTechImages, 0);
+	});
+});
+</script>
 {/block}

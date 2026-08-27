@@ -2780,3 +2780,32 @@ table.tablesorter thead tr .headerSortDown {
         min-height: 44px;
     }
 }
+/* Alliance create-rank modal — replaces jquery.ui dialog */
+.alliance-rank-dialog {
+  border: 1px solid var(--color-border, #4a5568);
+  border-radius: 8px;
+  padding: 0;
+  background: var(--color-bg-panel, #1a1a2e);
+  color: inherit;
+  max-width: min(760px, 96vw);
+  width: 760px;
+}
+.alliance-rank-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+.alliance-rank-dialog__chrome {
+  margin: 0;
+  text-align: right;
+}
+.alliance-rank-dialog__close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+.alliance-rank-dialog table {
+  width: 100%;
+}
