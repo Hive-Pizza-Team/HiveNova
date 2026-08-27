@@ -82,7 +82,7 @@
 		</tr>
 		<tr>
 			<td>{$LNG.op_timezone}</td>
-			<td>{html_options name=timezone options=$Selectors.timezones selected=$timezone}</td>
+			<td><details><summary>{$timezone}</summary>{html_options name=timezone options=$Selectors.timezones selected=$timezone}</details></td>
 		</tr>
 		{if $Selectors.lang|count > 1}
 		<tr>
