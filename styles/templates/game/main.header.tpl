@@ -11,6 +11,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 	<link rel="manifest" href="manifest.php?uni={$USER.universe}">
 	<meta name="theme-color" content="#1a1a2e">
+	<meta name="robots" content="noindex, nofollow">
 	{if !empty($goto)}
 	<meta http-equiv="refresh" content="{$gotoinsec};URL={$goto}">
 	{/if}

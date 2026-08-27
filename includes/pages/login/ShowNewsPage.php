@@ -49,6 +49,7 @@ class ShowNewsPage extends AbstractLoginPage
 		$this->assign(array(
 			'newsList'	=> $newsList,
 		));
+		$this->seoAllowIndex = count($newsList) > 0;
 		
 		$this->display('page.news.default.tpl');
 	}

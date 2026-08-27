@@ -1,6 +1,7 @@
 
-{block name="title" prepend}{$LNG.siteTitleRegister}{/block}
+{block name="title"}{$documentTitle}{/block}
 {block name="content"}
+<h1>{$pageHeading}</h1>
 <div class="reg-tabs-wrapper">
 	<script type="application/json" id="reg-seasonal-unis">{$universeSeasonal|json}</script>
 	<div class="reg-tab-nav" role="tablist">

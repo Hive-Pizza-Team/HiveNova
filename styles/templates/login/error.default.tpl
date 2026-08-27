@@ -1,4 +1,4 @@
-{block name="title" prepend}{$LNG.fcm_info}{/block}
+{block name="title"}{$LNG.fcm_info} - {$gameName}{/block}
 {block name="content"}
 <div class="contentbox error-message">
 	<p>{$message|default:''}</p>

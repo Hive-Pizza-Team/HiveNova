@@ -14,7 +14,7 @@
 				<table class="box-inner">
 					<tr class="box-inner-header">
 						<td class="box-inner-header-left"></td>
-						<td class="box-inner-header-center"><h1>{block name=title}{/block}</h1></td>
+						<td class="box-inner-header-center"><h1>{$pageHeading}</h1></td>
 						<td class="box-inner-header-right"></td>
 					</tr>
 					<tr class="box-inner-content">

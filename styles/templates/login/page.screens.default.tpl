@@ -1,4 +1,4 @@
-{block name="title" prepend}{$LNG.siteTitleScreens}{/block}
+{block name="title"}{$documentTitle}{/block}
 {block name="content"}
 <table>
 	{foreach $screenshots as $screenshot}
