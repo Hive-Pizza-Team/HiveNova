@@ -49,7 +49,6 @@
 			<th colspan="{$colspan}">{$LNG.lv_buildings}</th>
 		</tr>
 		{foreach $planetList.build as $elementID => $buildArray}
-		{if ($buildArray|array_sum) > 0}
 		<tr>
 			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
 			<td>{$buildArray|array_sum|number}</td>
@@ -57,13 +56,11 @@
 				<td>{$build|number}</td>
 			{/foreach}
 		</tr>
-		{/if}
 		{/foreach}
 		<tr>
 			<th colspan="{$colspan}">{$LNG.lv_ships}</th>
 		</tr>
 		{foreach $planetList.fleet as $elementID => $fleetArray}
-		{if ($fleetArray|array_sum) > 0}
 		<tr>
 			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
 			<td>{$fleetArray|array_sum|number}</td>
@@ -71,13 +68,11 @@
 				<td>{$fleet|number}</td>
 			{/foreach}
 		</tr>
-		{/if}
 		{/foreach}
 		<tr>
 			<th colspan="{$colspan}">{$LNG.lv_defenses}</th>
 		</tr>
 		{foreach $planetList.defense as $elementID => $fleetArray}
-		{if ($fleetArray|array_sum) > 0}
 		<tr>
 			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
 			<td>{$fleetArray|array_sum|number}</td>
@@ -85,13 +80,11 @@
 				<td>{$fleet|number}</td>
 			{/foreach}
 		</tr>
-		{/if}
 		{/foreach}
 		<tr>
 		    <th colspan="{$colspan}">{$LNG.tech.500}</th>
 		</tr>
 		{foreach $planetList.missiles as $elementID => $fleetArray}
-		{if ($fleetArray|array_sum) > 0}
 		<tr>
 			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
 			<td>{$fleetArray|array_sum|number}</td>
@@ -99,19 +92,16 @@
 				<td>{$fleet|number}</td>
 			{/foreach}
 		</tr>
-		{/if}
 		{/foreach}
 		<tr>
 			<th colspan="{$colspan}">{$LNG.lv_technology}</th>
 		</tr>
 		{foreach $planetList.tech as $elementID => $tech}
-		{if $tech > 0}
 		<tr>
 			<td><a href='#' onclick='return Dialog.info({$elementID})'>{$LNG.tech.$elementID}</a></td>
 			<td>{$tech|number}</td>
 			<td colspan="{$colspan-2}">{$tech|number}</td>
 		</tr>
-		{/if}
 		{/foreach}
 	</tbody>
 </table>

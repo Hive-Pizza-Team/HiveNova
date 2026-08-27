@@ -134,6 +134,19 @@ class ShowImperiumPage extends AbstractGamePage
 		foreach($reslist['tech'] as $elementID){
 			$planetList['tech'][$elementID]	= $USER[$resource[$elementID]];
 		}
+
+		foreach (array('build', 'fleet', 'defense', 'missiles') as $bucket) {
+			foreach ($planetList[$bucket] as $elementID => $values) {
+				if (array_sum($values) <= 0) {
+					unset($planetList[$bucket][$elementID]);
+				}
+			}
+		}
+		foreach ($planetList['tech'] as $elementID => $tech) {
+			if ($tech <= 0) {
+				unset($planetList['tech'][$elementID]);
+			}
+		}
 		
 		$this->assign(array(
 			'colspan'		=> count($PLANETS) + 2,

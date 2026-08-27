@@ -6,7 +6,9 @@
 	
 <style>
 .techi {
-        display:none;	}
+        display:none;
+	content-visibility: hidden;
+}
 .minus {
         display:none;	}
 </style>
