@@ -5,8 +5,7 @@ namespace HiveNova\Core;
 /**
  * CSRF protection for the admin panel.
  *
- * Accepts a dedicated session token (preferred) or the legacy sid=session_id()
- * pattern used by rights/universe/reset/destruction pages and smoke tests.
+ * Uses a dedicated session token submitted as `admin_csrf` (POST or GET).
  */
 class AdminCsrf
 {

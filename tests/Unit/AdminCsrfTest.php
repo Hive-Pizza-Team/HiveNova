@@ -65,6 +65,12 @@ class AdminCsrfTest extends TestCase
 		$this->assertFalse(AdminCsrf::isMutatingRequest('module'));
 	}
 
+	public function testNonGetNonPostIsNotMutating(): void
+	{
+		$_SERVER['REQUEST_METHOD'] = 'HEAD';
+		$this->assertFalse(AdminCsrf::isMutatingRequest('config'));
+	}
+
 	public function testRequestTokenReadsPostField(): void
 	{
 		$token = AdminCsrf::token();
@@ -74,5 +80,40 @@ class AdminCsrfTest extends TestCase
 		$_POST = [];
 		$_GET['sid'] = session_id();
 		$this->assertFalse(AdminCsrf::isValidRequest());
+	}
+
+	public function testRequestTokenReadsGetField(): void
+	{
+		$token = AdminCsrf::token();
+		$_GET['admin_csrf'] = $token;
+		$this->assertSame($token, AdminCsrf::requestToken());
+		$this->assertTrue(AdminCsrf::isValidRequest());
+	}
+
+	public function testEnforceAllowsSafeGetWithoutToken(): void
+	{
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+		AdminCsrf::enforce('overview');
+		$this->assertTrue(true);
+	}
+
+	public function testEnforceAllowsPostWithValidToken(): void
+	{
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_POST['admin_csrf'] = AdminCsrf::token();
+		AdminCsrf::enforce('config');
+		$this->assertTrue(true);
+	}
+
+	public function testTokenStartsSessionWhenInactive(): void
+	{
+		if (session_status() === PHP_SESSION_ACTIVE) {
+			session_write_close();
+		}
+
+		$this->assertNotSame(PHP_SESSION_ACTIVE, session_status());
+		$token = AdminCsrf::token();
+		$this->assertNotSame('', $token);
+		$this->assertSame(PHP_SESSION_ACTIVE, session_status());
 	}
 }
