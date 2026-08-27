@@ -166,4 +166,94 @@ class BattleShareComposerTest extends TestCase
 			$this->assertNotSame('', $community['permlink']);
 		}
 	}
+
+	public function testInvalidReportWhenRaportIdEmpty(): void
+	{
+		$result = $this->composer->compose(
+			$this->sampleReport(),
+			'',
+			42,
+			'aliceaaa',
+			true,
+			'https://moon.hive.pizza/',
+			'Alice',
+			'Bob',
+			'2024-01-01 12:00',
+			$this->labels
+		);
+
+		$this->assertFalse($result['canShare']);
+		$this->assertSame('invalid_report', $result['reason']);
+		$this->assertNull($result['draft']);
+	}
+
+	public function testInvalidReportWhenTimeZero(): void
+	{
+		$report = $this->sampleReport();
+		$report['time'] = 0;
+
+		$result = $this->composer->compose(
+			$report,
+			'abc123',
+			42,
+			'aliceaaa',
+			true,
+			'https://moon.hive.pizza/',
+			'Alice',
+			'Bob',
+			'2024-01-01 12:00',
+			$this->labels
+		);
+
+		$this->assertFalse($result['canShare']);
+		$this->assertSame('invalid_report', $result['reason']);
+	}
+
+	public function testBodyTruncatedWhenTooLong(): void
+	{
+		$longName = str_repeat('X', 9000);
+		$result = $this->composer->compose(
+			$this->sampleReport(),
+			'abc123',
+			42,
+			'aliceaaa',
+			true,
+			'https://moon.hive.pizza/',
+			$longName,
+			$longName,
+			'2024-01-01 12:00',
+			$this->labels
+		);
+
+		$this->assertTrue($result['canShare']);
+		$this->assertLessThanOrEqual(BattleShareComposer::MAX_BODY_BYTES, strlen($result['draft']['body']));
+		$this->assertStringEndsWith('...', $result['draft']['body']);
+	}
+
+	public function testBuildPermlinkFallsBackWhenSlugEmpty(): void
+	{
+		$this->assertSame(
+			'hivenova-battle-battle-1700000000',
+			$this->composer->buildPermlink('!!!', 1700000000)
+		);
+	}
+
+	public function testIncludesDebrisAndStealLines(): void
+	{
+		$result = $this->composer->compose(
+			$this->sampleReport(),
+			'abc123',
+			42,
+			'aliceaaa',
+			true,
+			'https://moon.hive.pizza/',
+			'Alice',
+			'Bob',
+			'2024-01-01 12:00',
+			$this->labels
+		);
+
+		$this->assertStringContainsString('Debris', $result['draft']['body']);
+		$this->assertStringContainsString('Captured', $result['draft']['body']);
+	}
 }
