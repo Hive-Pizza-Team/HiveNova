@@ -58,6 +58,15 @@ class FeatServiceTest extends TestCase
             'hidden' => 0,
             'active' => 1,
         ]);
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'moduls' => implode(';', array_fill(0, MODULE_AMOUNT, 1)),
+            'feat_tracking_from_start' => 0,
+            'feat_banner_key' => '',
+            'feat_banner_user_id' => 0,
+            'feat_banner_at' => 0,
+            'discord_feat_webhook' => '',
+        ]), 1);
     }
 
     protected function tearDown(): void
@@ -68,6 +77,23 @@ class FeatServiceTest extends TestCase
         $ref->setValue(null, []);
         $this->restoreDatabaseInstance();
         parent::tearDown();
+    }
+
+    public function testDisabledModuleBlocksClaims(): void
+    {
+        $modules = array_fill(0, MODULE_AMOUNT, 1);
+        $modules[MODULE_FEATS] = 0;
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'moduls' => implode(';', $modules),
+        ]), 1);
+
+        $this->assertFalse(FeatService::tryClaim(1, FeatCatalog::FIRST_SHIP, 1, TIMESTAMP));
+        $this->assertArrayNotHasKey('1:' . FeatCatalog::FIRST_SHIP, $this->fake->achievement->featClaims);
+        $this->assertSame(
+            FeatCatalog::STATUS_OPEN,
+            $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_SHIP]['status']
+        );
     }
 
     public function testFirstClaimWinsSecondIsSilent(): void
@@ -202,6 +228,7 @@ class FeatServiceTest extends TestCase
     {
         Config::setInstance(new Config([
             'uni' => 1,
+            'moduls' => implode(';', array_fill(0, MODULE_AMOUNT, 1)),
             'feat_banner_key' => '',
             'feat_banner_user_id' => 0,
             'feat_banner_at' => 0,

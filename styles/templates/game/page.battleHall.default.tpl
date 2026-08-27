@@ -5,8 +5,10 @@
 <tr>
     <th colspan="4">
 		<a href="game.php?page=battleHall">{$LNG.tkb_top}</a>
+		{if $smarty.const.MODULE_FEATS|isModuleAvailable}
 		&nbsp;|&nbsp;
 		<a href="game.php?page=battleHall&amp;tab=feats">{$LNG.feat_tab}</a>
+		{/if}
 	</th>
 </tr>
 {if $battleHallTab == 'feats'}

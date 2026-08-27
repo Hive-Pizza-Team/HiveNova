@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use HiveNova\Core\Config;
 use HiveNova\Core\FeatCatalog;
 use HiveNova\Core\FeatHooks;
 use HiveNova\Core\FeatService;
@@ -43,6 +44,15 @@ class FeatHooksTest extends TestCase
             'lang' => 'en',
             'universe' => 1,
         ];
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'moduls' => implode(';', array_fill(0, MODULE_AMOUNT, 1)),
+            'feat_tracking_from_start' => 0,
+            'feat_banner_key' => '',
+            'feat_banner_user_id' => 0,
+            'feat_banner_at' => 0,
+            'discord_feat_webhook' => '',
+        ]), 1);
     }
 
     protected function tearDown(): void
@@ -57,6 +67,9 @@ class FeatHooksTest extends TestCase
         } else {
             unset($GLOBALS['resource']);
         }
+        $ref = new ReflectionProperty(Config::class, 'instances');
+        $ref->setAccessible(true);
+        $ref->setValue(null, []);
         $this->restoreDatabaseInstance();
         parent::tearDown();
     }

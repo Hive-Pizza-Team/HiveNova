@@ -8,6 +8,10 @@ class FeatService
 {
     public static function tryClaim(int $universe, string $featKey, int $userId, int $at = 0): bool
     {
+        if (!isModuleAvailable(MODULE_FEATS)) {
+            return false;
+        }
+
         if ($userId <= 0 || !in_array($featKey, FeatCatalog::keys(), true)) {
             return false;
         }
