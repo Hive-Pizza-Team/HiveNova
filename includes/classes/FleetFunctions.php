@@ -37,7 +37,7 @@ class FleetFunctions
 		return (($impulse >= 5 && $Ship == 202) || ($hyperspaceMotor >= 8 && $Ship == 211)) ? $pricelist[$Ship]['consumption2'] : $pricelist[$Ship]['consumption'];
 	}
 
-	private static function OnlyShipByID($Ships, $ShipID)
+	public static function OnlyShipByID($Ships, $ShipID)
 	{
 		return isset($Ships[$ShipID]) && count($Ships) === 1;
 	}
