@@ -50,14 +50,12 @@ $LNG['user_level_1']                        = 'Moderator';
 $LNG['user_level_2']                        = 'Operator';
 $LNG['user_level_3']                        = 'Administrator';
 
-
 // GAME.PHP
 $LNG['page_doesnt_exist']					= 'Brak strony!';
 $LNG['bad_forum_url']				    	= 'Zły format adresu strony!';
 $LNG['admin_access_1']				    	= 'Tymczasowo masz dostęp do funkcji administracyjnych';
 $LNG['admin_access_link']				    = 'Deaktywuj go';
 $LNG['admin_access_2']				    	= ', jeśli nie używasz.';
-
 
 //----------------------------------------------------------------------------//
 //TOPNAV
@@ -172,7 +170,6 @@ $LNG['ov_reflink']							= 'Reflink';
 $LNG['ov_noreflink']						= 'Nikogo nie zwerbowałeś do gry';
 $LNG['ov_chat_online']						= 'Użytkownicy na czacie:';
 
-
 //----------------------------------------------------------------------------//
 //GALAXY
 
@@ -251,7 +248,6 @@ $LNG['gl_player']							= 'Gracz';
 $LNG['gl_to']								= 'do';
 $LNG['gl_fuel_warning']                     = 'Ostrzeżenie: skanowanie galaktyki kosztuje uran.';
 
-
 //----------------------------------------------------------------------------//
 //PHALANX
 $LNG['px_no_deuterium']						= 'Nie masz wystarczającej ilości deuteru!';
@@ -304,8 +300,6 @@ $LNG['fl_order']							= 'Misja';
 $LNG['fl_new_mission_title']				= 'Nowa misja: Wybierz flotę';
 $LNG['fl_ship_type']						= 'Typ statków';
 $LNG['fl_ship_available']					= 'Dostępne';
-
-
 
 $LNG['fl_planet_shortcut']					= '(P)';
 $LNG['fl_debris_shortcut']					= '(D)';
@@ -402,9 +396,6 @@ $LNG['fl_not_enough_space']					= 'Nie masz tyle miejsca w ładowniach.';
 $LNG['fl_hold_time_not_exists']				= 'Niepoprawny czas postoju.';
 $LNG['fl_own_planet_error']					= 'Błąd! Ponownie wybierz planetę, z której chcesz wysłać flotę.';
 
-
-
-
 //----------------------------------------------------------------------------//
 //BUILDINGS - RESEARCH - SHIPYARD - DEFENSES
 $LNG['bd_dismantle']						= 'Zdemontuj';
@@ -456,7 +447,6 @@ $LNG['sys_buildlist'] 						= 'Lista budowy';
 $LNG['sys_techlist'] 						= 'Lista badań';
 $LNG['sys_buildlist_fail'] 					= 'Nie udało się wykonać zadań z listy budowy';
 
-
 //----------------------------------------------------------------------------//
 //RESOURCES
 $LNG['rs_amount']							= 'Ilość';
@@ -479,8 +469,6 @@ $LNG['of_lvl']								= 'Poziom';
 $LNG['of_dm_trade']							= '%s - Sklep';
 $LNG['of_still']							= 'still';
 $LNG['of_active']							= 'aktywny';
-
-
 
 //----------------------------------------------------------------------------//
 //TRADER
@@ -752,11 +740,6 @@ $LNG['al_view_stats']						= 'Statystyki bitew?';
 $LNG['al_view_diplo']                      	= 'Dyplomacja?';
 $LNG['al_view_events']						= 'Aktualności';
 $LNG['al_new_apply']                      	= 'Twój sojusz otrzymał nowe podanie od - <a href="#" onclick="return Dialog.Playercard(%s, \'%s\');">%s</a>';
-
-
-
-
-
 
 $LNG['al_memberlist_min']					= 'min';
 $LNG['al_memberlist_on']					= 'Online';
@@ -1083,7 +1066,6 @@ $LNG['cr_shields']							= 'Osłona';
 $LNG['cr_armor']							= 'Pancerz';
 $LNG['cr_destroyed']						= 'Zniszczona!';
 
-
 //----------------------------------------------------------------------------//
 // FleetAjax.php
 $LNG['fa_not_enough_probes']				= 'Brak dostępnych sond';
@@ -1138,7 +1120,6 @@ $LNG['tkb_gewinner']              		 	= 'wygrał';
 $LNG['tkb_verlierer']              			= 'przegrał';
 $LNG['tkb_unentschieden']         			= 'remis';
 $LNG['tkb_missing']              		  	= 'Tego konta już nie ma.';
-
 
 //----------------------------------------------------------------------------//
 // playercard.php
@@ -1251,7 +1232,6 @@ $LNG['lo_redirect']						= 'Przekierowuje';
 $LNG['lo_notify']						= 'Zostaniesz przeniesiony za <span id="seconds"> 5 </span> s';
 $LNG['lo_continue']						= 'Kliknij tutaj, jeśli nie chcesz zostać przeniesiony';
 //----------------------------------------------------------------------------//
-
 
 // Translated into Polish by Sirgomo . All rights reversed (C) 2012
 // Edited by TheRavikin. All rights resteemed (C) 2018
@@ -1453,8 +1433,6 @@ $LNG['feat_abandon_planet_name'] = 'First to abandon a planet';
 $LNG['feat_abandon_planet_desc'] = 'First player to abandon a planet.';
 $LNG['feat_abandon_home_name'] = 'First to abandon a homeworld';
 $LNG['feat_abandon_home_desc'] = 'First player to abandon their home planet.';
-$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
-$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements. Leave blank to keep. Check clear to remove.';
 
 $LNG['page_season_title'] = 'Season entry';
 $LNG['page_season_need_hive'] = 'Link a Hive account in settings before you can enter this universe.';

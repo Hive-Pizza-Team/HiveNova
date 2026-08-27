@@ -20,8 +20,6 @@
 // Translated into Turkish by Ibraihm Senyer . All rights reversed (C) 2013
 // 2Moons - Copyright (C) 2010-2012 Slaver
 
-
-
 $LNG['Messages']							= 'Mesajlar';
 $LNG['PM']									= '[O.M.]';
 $LNG['write_message']						= 'Mesaj Yaz';
@@ -55,13 +53,11 @@ $LNG['user_level_1']                        = 'Moderatör';
 $LNG['user_level_2']                        = 'Operatör';
 $LNG['user_level_3']                        = 'Admin';
 
-
 $LNG['page_doesnt_exist']					= 'Sayfa Bulunamadı';
 $LNG['bad_forum_url']				    	= 'Forumda boyle bir link yok!';
 $LNG['admin_access_1']				    	= 'Oyuncu geçici olarak admin yetkisine sahip!';
 $LNG['admin_access_link']				    = 'Yetkiyi sonlandır';
 $LNG['admin_access_2']				    	= ", eğer ihtiyacın kalmadıysa";
-
 
 //----------------------------------------------------------------------------//
 // Topnav
@@ -121,7 +117,6 @@ $LNG['ef_outcome_attacker']				= 'Saldıranlar üstün geldi';
 $LNG['ef_outcome_defender']				= 'Savunanlar dayandı';
 $LNG['ef_outcome_draw']					= 'Berabere';
 $LNG['ef_outcome_formed']					= 'Oluştu';
-
 
 //----------------------------------------------------------------------------//
 // Genel
@@ -257,7 +252,6 @@ $LNG['gl_points'] 							= 'Puan';
 $LNG['gl_player']							= 'Oyuncu';
 $LNG['gl_to']								= ' ';
 $LNG['gl_fuel_warning']                     = 'Uyarı: Galaksi taraması uranyuma mal olur.';
-
 
 //----------------------------------------------------------------------------//
 // Radar
@@ -592,7 +586,6 @@ $LNG['mg_confirm']							= 'Onayla';
 $LNG['mg_receiver_block_pm']				= 'Alıcı özel mesaj kabul etmiyor.';
 $LNG['mg_deleted']					= 'Mesaj silindi.';
 
-
 //----------------------------------------------------------------------------//
 // Ittifak
 
@@ -812,10 +805,6 @@ $LNG['al_invalid_rank_name']				= 'Böyle bir rütbe kaydı yok!';
 $LNG['sys_back']							= 'Geri';
 $LNG['sys_forward']							= 'Ileri';
 $LNG['al_new_apply']                      	= 'İttifağınız bir başvuru aldı - <a href="#" onclick="return Dialog.Playercard(%s, \'%s\');">%s</a>';
-
-
-
-
 
 //----------------------------------------------------------------------------//
 // Arkadas Listesi
@@ -1056,7 +1045,6 @@ $LNG['cff_mission_target_good']				= 'Dost %s,  %s tarafından  %s %s %s koordin
 $LNG['cff_mission_target_stay']				= 'Dost %s, %s tarafından %s %s %s koordinatından kalktı. Su an %s %s %s yörüngesinde bulunmaktalar. Görevi: %s';
 $LNG['cff_mission_target_mip']				= 'Roket Saldırısı : (%d) adet roket  %s tarafından %s %s %s koordinatlarından ateşlendi. Su an  sizin %s %s %s koordinatlarına yaklaşıyor..';
 $LNG['cff_mission_npc_raid']				= 'Düşman bir %s (%s), %s %s %s konumuna ulaşacak. Görev: %s';
-
 
 //----------------------------------------------------------------------------//
 // Ekstra Fonksiyonlar
@@ -1448,8 +1436,6 @@ $LNG['feat_abandon_planet_name'] = 'First to abandon a planet';
 $LNG['feat_abandon_planet_desc'] = 'First player to abandon a planet.';
 $LNG['feat_abandon_home_name'] = 'First to abandon a homeworld';
 $LNG['feat_abandon_home_desc'] = 'First player to abandon their home planet.';
-$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
-$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements. Leave blank to keep. Check clear to remove.';
 
 $LNG['page_season_title'] = 'Season entry';
 $LNG['page_season_need_hive'] = 'Link a Hive account in settings before you can enter this universe.';

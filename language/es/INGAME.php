@@ -56,7 +56,6 @@ $LNG['admin_access_1']				    	= 'Desde aquí cualquier persona tendría acceso 
 $LNG['admin_access_link']				    = 'Pinche aquí para desactivar este acceso';
 $LNG['admin_access_2']				    	= ', Si Usted no lo necesita más.';
 
-
 //----------------------------------------------------------------------------//
 //TOPNAV
 $LNG['tn_vacation_mode']					= 'Estas en modo vacaciones ';
@@ -246,7 +245,6 @@ $LNG['gl_points'] 							= 'Puntos';
 $LNG['gl_player']							= 'Jugador';
 $LNG['gl_to']								= 'hacia';
 $LNG['gl_fuel_warning']                     = 'Advertencia: escanear galaxias cuesta uranio.';
-
 
 //----------------------------------------------------------------------------//
 //PHALANX
@@ -1231,7 +1229,6 @@ $LNG['lo_continue']							= 'Pulsa aquí si no redirecciona tu navegador.';
 
 //----------------------------------------------------------------------------//
 
-
 // Translated into Spanish by Angelus_ira . All rights reversed (C) 2011
 $LNG['type_mission_16'] = 'Comercio';
 $LNG['type_mission_18'] 					= 'Salvamento';
@@ -1433,8 +1430,6 @@ $LNG['feat_abandon_planet_name'] = 'First to abandon a planet';
 $LNG['feat_abandon_planet_desc'] = 'First player to abandon a planet.';
 $LNG['feat_abandon_home_name'] = 'First to abandon a homeworld';
 $LNG['feat_abandon_home_desc'] = 'First player to abandon their home planet.';
-$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
-$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements. Leave blank to keep. Check clear to remove.';
 
 $LNG['page_season_title'] = 'Season entry';
 $LNG['page_season_need_hive'] = 'Link a Hive account in settings before you can enter this universe.';

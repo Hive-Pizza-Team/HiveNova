@@ -46,7 +46,6 @@ $LNG['admin_access_1']				    	= 'Les joueurs ont accès temporairement aux fonc
 $LNG['admin_access_link']				    = 'Désactiver cet accès';
 $LNG['admin_access_2']				    	= ", Si vous n'en avez plus besion dans l'immédiat";
 
-
 //----------------------------------------------------------------------------//
 //TOPNAV
 $LNG['tn_vacation_mode']					= 'Vous êtes en mode vacances ';
@@ -236,7 +235,6 @@ $LNG['gl_points'] 							= 'Points';
 $LNG['gl_player']							= 'Joueur';
 $LNG['gl_to']								= 'à';
 $LNG['gl_fuel_warning']                     = 'Attention : le balayage des galaxies coûte de l\'uranium.';
-
 
 //----------------------------------------------------------------------------//
 //PHALANX
@@ -989,7 +987,6 @@ $LNG['bn_writemail']						= 'Ecrire un mail à %s';
 //----------------------------------------------------------------------------//
 //class.CheckSession.php
 
-
 $LNG['css_account_banned_message']			= 'Votre compte a été suspendu ! ';
 $LNG['css_account_banned_expire']			= 'Vous avez été bannis jusqu\'à %s !<br><a href="./index.php?page=pranger">Pilori</a>';
 $LNG['css_goto_homeside']					= '<a href="./index.php">Se rendre à la page d\'accueil</a>';
@@ -1420,8 +1417,6 @@ $LNG['feat_abandon_planet_name'] = 'First to abandon a planet';
 $LNG['feat_abandon_planet_desc'] = 'First player to abandon a planet.';
 $LNG['feat_abandon_home_name'] = 'First to abandon a homeworld';
 $LNG['feat_abandon_home_desc'] = 'First player to abandon their home planet.';
-$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
-$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements. Leave blank to keep. Check clear to remove.';
 
 $LNG['page_season_title'] = 'Season entry';
 $LNG['page_season_need_hive'] = 'Link a Hive account in settings before you can enter this universe.';
