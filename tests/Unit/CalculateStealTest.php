@@ -159,6 +159,18 @@ class CalculateStealTest extends TestCase
 		);
 	}
 
+	public function testStealAmountsAreIntegersAfterFloor(): void
+	{
+		$fleets = [1 => $this->makeAttacker(3)]; // 150 capacity → fractional thirds before floor
+		$planet = $this->makePlanet(['metal' => 100, 'crystal' => 100, 'deuterium' => 100]);
+
+		$steal = calculateSteal($fleets, $planet, true);
+
+		foreach ($steal as $amount) {
+			$this->assertSame((float) (int) $amount, (float) $amount);
+		}
+	}
+
 	public function testHyperspaceLeftoverIncreasesStealOnRequiringShipsOnly(): void
 	{
 		$GLOBALS['pricelist'][217]['capacity'] = 400000;
@@ -173,8 +185,8 @@ class CalculateStealTest extends TestCase
 		$stealCargo = calculateSteal($smallCargo, $planet, true);
 		$stealPath  = calculateSteal($pathfinder, $planet, true);
 
-		$this->assertLessThanOrEqual(500.01, array_sum($stealCargo));
-		$this->assertEqualsWithDelta(400000 * 1.10, array_sum($stealPath), 1e-6);
+		$this->assertLessThanOrEqual(500, array_sum($stealCargo));
+		$this->assertSame(439998, array_sum($stealPath));
 	}
 
 	public function testMixedFleetStealUsesLeftoverOnlyOnHyperspaceShips(): void
@@ -196,6 +208,6 @@ class CalculateStealTest extends TestCase
 		$planet = $this->makePlanet(['metal' => 1_000_000, 'crystal' => 1_000_000, 'deuterium' => 1_000_000]);
 		$steal = calculateSteal($fleets, $planet, true);
 
-		$this->assertEqualsWithDelta(10 * 50 + 400000 * 1.10, array_sum($steal), 1e-6);
+		$this->assertSame(440499, array_sum($steal));
 	}
 }
