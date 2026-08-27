@@ -37,10 +37,3 @@
 </table>
 </form>
 {/block}
-{block name="script" append}
-<script>
-$(document).ready(function() {
-	$("#form").validationEngine('attach');
-});
-</script>
-{/block}
