@@ -80,6 +80,21 @@ if (!defined('ELEMENT_BONUS'))      define('ELEMENT_BONUS',      32);
 if (!defined('FLEET_OUTWARD'))      define('FLEET_OUTWARD',      0);
 if (!defined('FLEET_RETURN'))       define('FLEET_RETURN',       1);
 if (!defined('FLEET_HOLD'))         define('FLEET_HOLD',         2);
+if (!defined('FLEET_MISSION_ATTACK'))        define('FLEET_MISSION_ATTACK',        1);
+if (!defined('FLEET_MISSION_ACS'))           define('FLEET_MISSION_ACS',           2);
+if (!defined('FLEET_MISSION_TRANSPORT'))     define('FLEET_MISSION_TRANSPORT',     3);
+if (!defined('FLEET_MISSION_STATION'))       define('FLEET_MISSION_STATION',       4);
+if (!defined('FLEET_MISSION_ALLY_STATION'))  define('FLEET_MISSION_ALLY_STATION',  5);
+if (!defined('FLEET_MISSION_SPY'))           define('FLEET_MISSION_SPY',           6);
+if (!defined('FLEET_MISSION_COLONISE'))      define('FLEET_MISSION_COLONISE',      7);
+if (!defined('FLEET_MISSION_RECYCLE'))       define('FLEET_MISSION_RECYCLE',       8);
+if (!defined('FLEET_MISSION_DESTROY'))       define('FLEET_MISSION_DESTROY',       9);
+if (!defined('FLEET_MISSION_MIP'))           define('FLEET_MISSION_MIP',           10);
+if (!defined('FLEET_MISSION_DARKMATTER'))    define('FLEET_MISSION_DARKMATTER',    11);
+if (!defined('FLEET_MISSION_EXPEDITION'))    define('FLEET_MISSION_EXPEDITION',    15);
+if (!defined('FLEET_MISSION_TRADE'))         define('FLEET_MISSION_TRADE',         16);
+if (!defined('FLEET_MISSION_TRANSFER'))      define('FLEET_MISSION_TRANSFER',      17);
+if (!defined('FLEET_MISSION_SALVAGE'))       define('FLEET_MISSION_SALVAGE',       18);
 
 // Shared game-data fixture (populates $pricelist, $resource, $reslist, $requirements, $CombatCaps)
 require_once __DIR__ . '/fixtures/game_data.php';
