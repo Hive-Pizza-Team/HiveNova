@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\AllianceService;
+use HiveNova\Core\AllianceDiplomacyService;
 use HiveNova\Core\Database;
 use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\Config;
@@ -1487,13 +1488,7 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		$db = Database::get();
-
-		$sql = "UPDATE %%DIPLO%% SET accept = 1 WHERE id = :id AND owner_2 = :allianceId;";
-		$db->update($sql, array(
-			':allianceId'   => $this->allianceData['id'],
-			':id'           => HTTP::_GP('id', 0)
-		));
+		AllianceDiplomacyService::accept((int) $this->allianceData['id'], HTTP::_GP('id', 0));
 
 		$this->redirectTo('game.php?page=alliance&mode=admin&action=diplomacy');
 	}
@@ -1504,13 +1499,7 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		$db = Database::get();
-
-		$sql = "DELETE FROM %%DIPLO%% WHERE id = :id AND (owner_1 = :allianceId OR owner_2 = :allianceId);";
-		$db->delete($sql, array(
-			':allianceId'   => $this->allianceData['id'],
-			':id'           => HTTP::_GP('id', 0)
-		));
+		AllianceDiplomacyService::delete((int) $this->allianceData['id'], HTTP::_GP('id', 0));
 
 		$this->redirectTo('game.php?page=alliance&mode=admin&action=diplomacy');
 	}
@@ -1522,29 +1511,16 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		$db = Database::get();
-
 		$this->initTemplate();
 		$this->setWindow('popup');
 
 		$diplomaticMode	= HTTP::_GP('diploMode', 0);
+		$partners = AllianceDiplomacyService::listOtherAlliances((int) $USER['ally_id'], Universe::current());
 
-		$sql = "SELECT ally_tag,ally_name,id FROM %%ALLIANCE%% WHERE id != :allianceId AND ally_universe = :universe  ORDER BY ally_tag ASC;";
-		$diplomaticAlly = $db->select($sql, array(
-			':allianceId'   => $USER['ally_id'],
-			':universe'		=> Universe::current()
-		));
-
-		$AllyList = array();
-		$IdList = array();
-		foreach ($diplomaticAlly as $i) {
-			$IdList[] = $i['id'];
-			$AllyList[] = $i['ally_name'];
-		}
 		$this->assign(array(
 			'diploMode'	=> $diplomaticMode,
-			'AllyList'	=> $AllyList,
-			'IdList'	=> $IdList,
+			'AllyList'	=> $partners['names'],
+			'IdList'	=> $partners['ids'],
 		));
 
 		$this->display('page.alliance.admin.diplomacy.create.tpl');
@@ -1557,17 +1533,13 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-
-		$db = Database::get();
-
 		$id	= HTTP::_GP('ally_id', '', UTF8_SUPPORT);
 
-		$sql = "SELECT id, ally_name, ally_owner, ally_tag, (SELECT level FROM %%DIPLO%% WHERE (owner_1 = :id AND owner_2 = :allianceId) OR (owner_2 = :id AND owner_1 = :allianceId)) as diplo FROM %%ALLIANCE%% WHERE ally_universe = :universe AND id = :id;";
-		$targetAlliance = $db->selectSingle($sql, array(
-			':allianceId'   => $USER['ally_id'],
-			':id'           => $id,
-			':universe'     => Universe::current()
-		));
+		$targetAlliance = AllianceDiplomacyService::findTargetAlliance(
+			(int) $USER['ally_id'],
+			(int) $id,
+			Universe::current()
+		);
 
 		if (empty($targetAlliance)) {
 			$this->sendJSON(array(
@@ -1594,25 +1566,19 @@ class ShowAlliancePage extends AbstractGamePage
 		$level	= HTTP::_GP('level', 0);
 		$text	= HTTP::_GP('text', '', true);
 
-		if(strlen((string) $text) > 255) {
-			// accept_text max len = 255
-			$text = substr((string) $text, 0, 255);
-		}
-
 		if ($level == 5) {
 			PlayerUtil::sendMessage($targetAlliance['ally_owner'], $USER['id'], $LNG['al_circular_alliance'] . $this->allianceData['ally_tag'], 1, $LNG['al_diplo_war'], sprintf($LNG['al_diplo_war_mes'], "[" . $this->allianceData['ally_tag'] . "] " . $this->allianceData['ally_name'], "[" . $targetAlliance['ally_tag'] . "] " . $targetAlliance['ally_name'], $LNG['al_diplo_level'][$level], $text), TIMESTAMP);
 		} else {
 			PlayerUtil::sendMessage($targetAlliance['ally_owner'], $USER['id'], $LNG['al_circular_alliance'] . $this->allianceData['ally_tag'], 1, $LNG['al_diplo_ask'], sprintf($LNG['al_diplo_ask_mes'], $LNG['al_diplo_level'][$level], "[" . $this->allianceData['ally_tag'] . "] " . $this->allianceData['ally_name'], "[" . $targetAlliance['ally_tag'] . "] " . $targetAlliance['ally_name'], $text), TIMESTAMP);
 		}
 
-		$sql = "INSERT INTO %%DIPLO%% SET owner_1 = :allianceId, owner_2 = :allianceTargetID, level	= :level, accept = 0, accept_text = :text, universe	= :universe";
-		$db->insert($sql, array(
-			':allianceId'   => $USER['ally_id'],
-			':allianceTargetID'  => $targetAlliance['id'],
-			':level'             => $level,
-			':text'           => $text,
-			':universe'     => Universe::current()
-		));
+		AllianceDiplomacyService::createRequest(
+			(int) $USER['ally_id'],
+			(int) $targetAlliance['id'],
+			(int) $level,
+			(string) $text,
+			Universe::current()
+		);
 
 		$this->sendJSON(array(
 			'error'		=> false,
