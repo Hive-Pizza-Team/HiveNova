@@ -162,45 +162,39 @@ class GalaxyRows
 	 * @return string Formatted control data
 	*/
 	public function getSystemControlData($galaxy, $system) {
-		$controlSql = 'SELECT ally_name
-			FROM (
-				SELECT ally_name, COUNT(*) planet_count
-				FROM %%ALLIANCE%% a
-				LEFT JOIN %%USERS%% u ON a.id = u.ally_id
-				LEFT JOIN %%PLANETS%% p ON u.id = p.id_owner
-				WHERE p.galaxy = :galaxy
-				AND p.system = :system
-				AND p.universe = :universe
-				GROUP BY ally_name
-			) AS sub
-			WHERE planet_count = (
-				SELECT MAX(planet_count)
-				FROM (
-					SELECT COUNT(*) planet_count
-					FROM %%ALLIANCE%% a
-					LEFT JOIN %%USERS%% u ON a.id = u.ally_id
-					LEFT JOIN %%PLANETS%% p ON u.id = p.id_owner
-					WHERE p.galaxy = :galaxy
-					AND p.system = :system
-					AND p.universe = :universe
-					GROUP BY ally_name
-				) AS max_sub
-			)
-			ORDER BY ally_name;';
+		// Single aggregation — pick the unique max; "-" on ties / empty.
+		$controlSql = 'SELECT a.ally_name, COUNT(*) AS planet_count
+			FROM %%ALLIANCE%% a
+			INNER JOIN %%USERS%% u ON a.id = u.ally_id
+			INNER JOIN %%PLANETS%% p ON u.id = p.id_owner
+			WHERE p.galaxy = :galaxy
+			AND p.system = :system
+			AND p.universe = :universe
+			AND p.planet_type = :planetType
+			AND p.destruyed = :destroyed
+			GROUP BY a.id, a.ally_name
+			ORDER BY planet_count DESC, a.ally_name ASC
+			LIMIT 2';
 
 		$controllingAlliances = Database::get()->select($controlSql, array(
-			':galaxy'	=> $galaxy,
-			':system'	=> $system,
-			':universe' => Universe::current()
+			':galaxy'		=> $galaxy,
+			':system'		=> $system,
+			':universe'		=> Universe::current(),
+			':planetType'	=> 1,
+			':destroyed'	=> 0,
 		));
 
-		if (count($controllingAlliances) === 1 && isset($controllingAlliances[0]['ally_name'])) {
-			$controllingAlliance = $controllingAlliances[0]['ally_name'];
-		} else {
-			$controllingAlliance = "-";
+		if ($controllingAlliances === array() || !isset($controllingAlliances[0]['ally_name'])) {
+			return '-';
 		}
 
-		return $controllingAlliance;
+		if (isset($controllingAlliances[1])
+			&& (int) $controllingAlliances[1]['planet_count'] === (int) $controllingAlliances[0]['planet_count']
+		) {
+			return '-';
+		}
+
+		return $controllingAlliances[0]['ally_name'];
 	}
 	
 	protected function setLastActivity()
