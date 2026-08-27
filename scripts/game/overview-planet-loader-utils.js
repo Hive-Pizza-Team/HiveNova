@@ -96,17 +96,18 @@
 		}
 		var hqSrc = fallbackImg.getAttribute('data-src-hq');
 		var stdSrc = fallbackImg.getAttribute('data-src');
-		if (hqSrc && !fallbackImg.getAttribute('src')) {
-			fallbackImg.setAttribute('src', hqSrc);
+		// Prefer lite jpg for faster first paint; fall back to HQ if lite missing.
+		if (stdSrc && !fallbackImg.getAttribute('src')) {
+			fallbackImg.setAttribute('src', stdSrc);
 			fallbackImg.onerror = function () {
-				if (stdSrc) {
-					fallbackImg.setAttribute('src', stdSrc);
+				if (hqSrc) {
+					fallbackImg.setAttribute('src', hqSrc);
 				}
 			};
 			return;
 		}
-		if (stdSrc && !fallbackImg.getAttribute('src')) {
-			fallbackImg.setAttribute('src', stdSrc);
+		if (hqSrc && !fallbackImg.getAttribute('src')) {
+			fallbackImg.setAttribute('src', hqSrc);
 		}
 	}
 

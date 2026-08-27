@@ -59,7 +59,6 @@
 		}
 	}, 1);
 	</script>
-{if $ingamePage == 'overview'}
 	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.fancybox.js?v={$REV}"></script>
@@ -68,17 +67,6 @@
 	<script type="text/javascript" src="./scripts/base/tooltip.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}"></script>
-{else}
-	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/base/jquery.ui.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/base/jquery.fancybox.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/base/jquery.validationEngine.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/l18n/validationEngine/jquery.validationEngine-{$lang}.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/base/tooltip.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}"></script>
-{/if}
 	{foreach item=scriptname from=$scripts}
 	<script type="text/javascript" src="./scripts/game/{$scriptname}.js?v={$REV}"></script>
 	{/foreach}

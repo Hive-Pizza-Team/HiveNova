@@ -6,10 +6,17 @@
         #threejs-container { position: fixed; touch-action: none; }
 </style>
 
-<script src="scripts/threejs/three.min.js"></script>
-
 <script>
+(function () {
     const container = document.getElementById('threejs-container');
+    if (!container) {
+        return;
+    }
+
+    const isMobile = window.matchMedia('(max-width: 699px)').matches;
+    const threeSrc = 'scripts/threejs/three.min.js';
+
+    function bootViz() {
 
     function positionContainer() {
         const menuFixed = document.querySelector('menu .fixed');
@@ -29,16 +36,19 @@
     }
     positionContainer();
 
-    const scene = new THREE.Scene();
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(container.offsetWidth, container.offsetHeight);
-    container.appendChild(renderer.domElement);
-
     const maxGalaxy  = {$maxGalaxy};
     const maxSystem  = {$maxSystem};
     const maxPlanets = {$maxPlanets};
+    const systemStep = isMobile ? 2 : 1;
+    const planetStep = isMobile ? 2 : 1;
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.5);
+
+    const scene = new THREE.Scene();
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+    renderer.setPixelRatio(pixelRatio);
+    renderer.setSize(container.offsetWidth, container.offsetHeight);
+    container.appendChild(renderer.domElement);
 
     // Build galaxy centre positions arranged in a circle
     const layoutRadius = Math.max(30, maxGalaxy * 8);
@@ -72,7 +82,7 @@
     updateCamera();
 
     // Build static background points using pre-allocated typed arrays
-    const totalPoints = maxGalaxy * maxSystem * maxPlanets;
+    const totalPoints = maxGalaxy * Math.ceil(maxSystem / systemStep) * Math.ceil(maxPlanets / planetStep);
     const positions = new Float32Array(totalPoints * 3);
     const colors    = new Float32Array(totalPoints * 3);
     const tmpColor  = new THREE.Color();
@@ -80,12 +90,12 @@
 
     for (let g = 0; g < maxGalaxy; g++) {
         const offset = circleGroups[g];
-        for (let i = 0; i < maxSystem; i++) {
+        for (let i = 0; i < maxSystem; i += systemStep) {
             const radius = (i + 1) * 0.1;
             tmpColor.setHSL((g * maxSystem + i) / (maxSystem * maxGalaxy), 1, 0.5);
             const cr = tmpColor.r, cg = tmpColor.g, cb = tmpColor.b;
             const ringOffset = i * 2.399963; // golden angle in radians — desynchs rings
-            for (let j = 0; j < maxPlanets; j++) {
+            for (let j = 0; j < maxPlanets; j += planetStep) {
                 const angle = (j / maxPlanets) * 2 * Math.PI + ringOffset;
                 positions[idx]     = offset.x + radius * Math.cos(angle);
                 positions[idx + 1] = offset.y + radius * Math.sin(angle);
@@ -101,7 +111,7 @@
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.setAttribute('color',    new THREE.Float32BufferAttribute(colors, 3));
-    scene.add(new THREE.Points(geometry, new THREE.PointsMaterial({ size: 0.2 * window.devicePixelRatio, vertexColors: true })));
+    scene.add(new THREE.Points(geometry, new THREE.PointsMaterial({ size: 0.2 * pixelRatio, vertexColors: true })));
 
     // Galaxy label overlay
     const labelCanvas = document.createElement('canvas');
@@ -113,7 +123,7 @@
 
     function drawLabels() {
         const w = container.offsetWidth, h = container.offsetHeight;
-        const dpr = window.devicePixelRatio;
+        const dpr = pixelRatio;
         labelCanvas.width  = w * dpr;
         labelCanvas.height = h * dpr;
         labelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -323,5 +333,16 @@
         renderer.setSize(container.offsetWidth, container.offsetHeight);
         drawLabels();
     });
+    }
+
+    const three = document.createElement('script');
+    three.src = threeSrc;
+    three.async = true;
+    three.onload = bootViz;
+    three.onerror = function () {
+        container.textContent = '3D map unavailable';
+    };
+    document.head.appendChild(three);
+})();
 </script>
 {/block}
