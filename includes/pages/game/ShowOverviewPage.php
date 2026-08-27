@@ -322,7 +322,7 @@ class ShowOverviewPage extends AbstractGamePage
 		$this->assign(array(
 			'rankInfo'					=> $rankInfo,
 			'is_news'					=> $config->OverviewNewsFrame,
-			'news'						=> makebr($config->OverviewNewsText),
+			'news'						=> makebr(htmlspecialchars((string) ($config->OverviewNewsText ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')),
 			'featBanner'				=> $this->featBannerAssign($config, $USER, $LNG),
 			'usersOnline'				=> $usersOnline,
 			'fleetsOnline'				=> $fleetsOnline,

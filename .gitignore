@@ -11,6 +11,8 @@ includes/backups
 includes/config.php
 includes/push.config.php
 includes/error.log
+includes/FIRST_INSTALL
+includes/ENABLE_INSTALL_TOOL
 .worktrees/
 reports/
 node_modules/

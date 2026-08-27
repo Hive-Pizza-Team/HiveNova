@@ -1,0 +1,78 @@
+<?php
+
+use HiveNova\Core\AdminCsrf;
+use PHPUnit\Framework\TestCase;
+
+class AdminCsrfTest extends TestCase
+{
+	protected function setUp(): void
+	{
+		parent::setUp();
+		if (session_status() !== PHP_SESSION_ACTIVE) {
+			@session_start();
+		}
+		$_SESSION = [];
+		$_GET = [];
+		$_POST = [];
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+	}
+
+	protected function tearDown(): void
+	{
+		$_SESSION = [];
+		$_GET = [];
+		$_POST = [];
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+		parent::tearDown();
+	}
+
+	public function testTokenIsStableWithinSession(): void
+	{
+		$first = AdminCsrf::token();
+		$second = AdminCsrf::token();
+
+		$this->assertNotSame('', $first);
+		$this->assertSame($first, $second);
+		$this->assertTrue(AdminCsrf::isValid($first));
+	}
+
+	public function testRejectsMissingAndWrongTokens(): void
+	{
+		AdminCsrf::token();
+		$this->assertFalse(AdminCsrf::isValid(null));
+		$this->assertFalse(AdminCsrf::isValid(''));
+		$this->assertFalse(AdminCsrf::isValid('not-the-token'));
+	}
+
+	public function testAcceptsOnlyDedicatedToken(): void
+	{
+		$token = AdminCsrf::token();
+		$this->assertTrue(AdminCsrf::isValid($token));
+		$sid = session_id();
+		$this->assertNotSame('', $sid);
+		$this->assertFalse(AdminCsrf::isValid($sid));
+	}
+
+	public function testMutatingDetectionForPostAndKnownGetPages(): void
+	{
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$this->assertTrue(AdminCsrf::isMutatingRequest('config'));
+
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+		$this->assertFalse(AdminCsrf::isMutatingRequest('clearcache'));
+		$this->assertFalse(AdminCsrf::isMutatingRequest('statsupdate'));
+		$this->assertFalse(AdminCsrf::isMutatingRequest('config'));
+		$this->assertFalse(AdminCsrf::isMutatingRequest('module'));
+	}
+
+	public function testRequestTokenReadsPostField(): void
+	{
+		$token = AdminCsrf::token();
+		$_POST['admin_csrf'] = $token;
+		$this->assertTrue(AdminCsrf::isValidRequest());
+
+		$_POST = [];
+		$_GET['sid'] = session_id();
+		$this->assertFalse(AdminCsrf::isValidRequest());
+	}
+}

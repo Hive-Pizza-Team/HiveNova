@@ -40,7 +40,9 @@ $template->assign(array(
 
 $enableInstallToolFile = 'includes/ENABLE_INSTALL_TOOL';
 $quickStartFile        = 'includes/FIRST_INSTALL';
-// If include/FIRST_INSTALL is present and can be deleted, automatically create include/ENABLE_INSTALL_TOOL
+// Operators may create includes/FIRST_INSTALL once on a fresh host; if it can be
+// deleted, the installer creates includes/ENABLE_INSTALL_TOOL. Do not ship
+// FIRST_INSTALL in the repository.
 if (is_file($quickStartFile) && is_writeable($quickStartFile) && unlink($quickStartFile)) {
 	@touch($enableInstallToolFile);
 }

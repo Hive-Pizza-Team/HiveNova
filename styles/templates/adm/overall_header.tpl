@@ -37,6 +37,7 @@
 	var days 		= {$LNG.week_day|json|default:'[]'} 
 	var months 		= {$LNG.months|json|default:'[]'} ;
 	var tdformat	= "{$LNG.js_tdformat}";
+	var adminCsrf	= {$admin_csrf|json};
 	function openEdit(id, type) {
 		var editlist = window.open("?page=qeditor&edit="+type+"&id="+id, "edit", "scrollbars=yes,statusbar=no,toolbar=no,location=no,directories=no,resizable=no,menubar=no,width=850,height=600,screenX="+((xsize-600)/2)+",screenY="+((ysize-850)/2)+",top="+((ysize-600)/2)+",left="+((xsize-850)/2));
 		editlist.focus();
@@ -56,6 +57,14 @@
 	<script type="text/javascript">
 	$(function() {
 		{$execscript}
+		if (typeof adminCsrf === 'string' && adminCsrf !== '') {
+			$('form').each(function () {
+				var $form = $(this);
+				if ($form.find('input[name="admin_csrf"]').length === 0) {
+					$('<input>', {type: 'hidden', name: 'admin_csrf', value: adminCsrf}).appendTo($form);
+				}
+			});
+		}
 	});
 	</script>
 </head>

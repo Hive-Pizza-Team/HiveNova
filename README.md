@@ -168,7 +168,7 @@ php migrate.php run --dry-run
 
 Run from the project root. The tool requires `includes/config.php` to exist (created by the web installer).
 
-If the game redirects to `install/index.php?mode=upgrade` (`dbVersion` behind `DB_VERSION_REQUIRED` in `includes/dbtables.php`), either run the CLI commands above or use the web wizard: create `includes/ENABLE_INSTALL_TOOL`, open the upgrade page, and confirm. The wizard dumps prefixed tables to `includes/backups/` then applies the same `install/migrations/` files as the CLI. PHP migrations are included in-process (not copied to the web root).
+If the game redirects to `install/index.php?mode=upgrade` (`dbVersion` behind `DB_VERSION_REQUIRED` in `includes/dbtables.php`), either run the CLI commands above or use the web wizard: create `includes/ENABLE_INSTALL_TOOL`, open the upgrade page, and confirm. The wizard dumps prefixed tables to `includes/backups/` then applies the same `install/migrations/` files as the CLI. PHP migrations are included in-process (not copied to the web root). Do not commit `includes/FIRST_INSTALL` or `includes/ENABLE_INSTALL_TOOL` — create them on the host only when you intentionally unlock the installer.
 
 ### If you run HiveNova on NGINX - Read nginx.md file!
 

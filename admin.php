@@ -48,6 +48,8 @@ if($USER['authlevel'] == AUTH_ADM && !empty($uni))
 }
 
 $page	= \HiveNova\Core\HTTP::_GP('page', '');
+\HiveNova\Core\AdminCsrf::token();
+\HiveNova\Core\AdminCsrf::enforce($page);
 switch($page)
 {
 	case 'logout':
