@@ -4,6 +4,10 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Guards named element / mission ID constants against silent renumbering.
+ *
+ * PHPUnit bootstrap stubs these for convenience; also assert the real
+ * includes/constants.php ships the same symbols so namespaced production
+ * code (e.g. FleetPlanetDeduction) cannot reference a bootstrap-only define.
  */
 class ElementIdConstantsTest extends TestCase
 {
@@ -14,6 +18,26 @@ class ElementIdConstantsTest extends TestCase
 		$this->assertSame(903, RESOURCE_DEUTERIUM);
 		$this->assertSame(911, RESOURCE_ENERGY);
 		$this->assertSame(921, RESOURCE_DARKMATTER);
+	}
+
+	public function testConstantsFileDefinesResourceIds(): void
+	{
+		$src = file_get_contents(ROOT_PATH . 'includes/constants.php');
+		$this->assertNotFalse($src);
+
+		foreach ([
+			'RESOURCE_METAL' => 901,
+			'RESOURCE_CRYSTAL' => 902,
+			'RESOURCE_DEUTERIUM' => 903,
+			'RESOURCE_ENERGY' => 911,
+			'RESOURCE_DARKMATTER' => 921,
+		] as $name => $id) {
+			$this->assertMatchesRegularExpression(
+				"/define\\('{$name}'\\s*,\\s*{$id}\\)/",
+				$src,
+				"includes/constants.php must define {$name} = {$id}"
+			);
+		}
 	}
 
 	public function testSpecialShipConstantsAndAliases(): void
