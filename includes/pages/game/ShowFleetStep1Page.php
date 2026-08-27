@@ -93,7 +93,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 		}
 		
 		$this->tplObj->loadscript('flotten.js');
-		$this->tplObj->execscript('updateVars();FleetTime();var relativeTime3 = Math.floor(Date.now() / 1000);window.setInterval(function() {if(relativeTime3 < Math.floor(Date.now() / 1000)) {FleetTime();relativeTime3++;}}, 25);');
+		$this->tplObj->execscript('updateVars();FleetTime();var relativeTime3 = Math.floor(Date.now() / 1000);window.setInterval(function() {if(relativeTime3 < Math.floor(Date.now() / 1000)) {FleetTime();relativeTime3++;}}, 1000);');
 
 
 
@@ -230,14 +230,16 @@ class ShowFleetStep1Page extends AbstractGamePage
 		INNER JOIN %%AKS%% acs ON acsID = acs.id
 		INNER JOIN %%PLANETS%% planet ON planet.id = acs.target
 		LEFT JOIN (
-			SELECT fleet_group, COUNT(*) AS fleetCount
-			FROM %%FLEETS%%
-			GROUP BY fleet_group
+			SELECT f.fleet_group, COUNT(*) AS fleetCount
+			FROM %%FLEETS%% f
+			INNER JOIN %%USERS_ACS%% ua ON ua.acsID = f.fleet_group AND ua.userID = :userIDJoin
+			GROUP BY f.fleet_group
 		) fleetCounts ON fleetCounts.fleet_group = acs.id
 		WHERE userID = :userID
 		AND :maxFleets > COALESCE(fleetCounts.fleetCount, 0);";
         $ACSResult = $db->select($sql, array(
             ':userID'       => $USER['id'],
+            ':userIDJoin'   => $USER['id'],
             ':maxFleets'    => $maxFleets,
         ));
 

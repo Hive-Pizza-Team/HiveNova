@@ -174,7 +174,22 @@
 			<th colspan="3">{$LNG.ov_userbanner}</th>
 		</tr>
 		<tr>
-			<td colspan="3"><img src="userpic.php?id={$userid}" alt="" width="590" height="95" id="userpic"><br><br><table><tr><td class="transparent">HTML:</td><td class="transparent"><input type="text" value='<a href="{$SELF_URL}{if $ref_active}index.php?ref={$userid}{/if}"><img src="{$SELF_URL}userpic.php?id={$userid}"></a>' readonly="readonly" style="width:450px;"></td></tr><tr><td class="transparent">BBCode:</td><td class="transparent"><input type="text" value="[url={$SELF_URL}{if $ref_active}index.php?ref={$userid}{/if}][img]{$SELF_URL}userpic.php?id={$userid}[/img][/url]" readonly="readonly" style="width:450px;"></td></tr></table></td>
+			<td colspan="3">
+				<details id="userbanner-details">
+					<summary>{$LNG.ov_userbanner}</summary>
+					<img data-src="userpic.php?id={$userid}" alt="" width="590" height="95" id="userpic" loading="lazy"><br><br>
+					<table>
+						<tr>
+							<td class="transparent">HTML:</td>
+							<td class="transparent"><input type="text" value='<a href="{$SELF_URL}{if $ref_active}index.php?ref={$userid}{/if}"><img src="{$SELF_URL}userpic.php?id={$userid}"></a>' readonly="readonly" style="width:450px;"></td>
+						</tr>
+						<tr>
+							<td class="transparent">BBCode:</td>
+							<td class="transparent"><input type="text" value="[url={$SELF_URL}{if $ref_active}index.php?ref={$userid}{/if}][img]{$SELF_URL}userpic.php?id={$userid}[/img][/url]" readonly="readonly" style="width:450px;"></td>
+						</tr>
+					</table>
+				</details>
+			</td>
 		</tr>
 		{/if}
 		<tr>
@@ -183,4 +198,17 @@
 		</tbody>
 	</table>
 	</form>
+<script>
+(function () {
+	var banner = document.getElementById('userbanner-details');
+	if (!banner) return;
+	banner.addEventListener('toggle', function () {
+		if (!banner.open) return;
+		var img = document.getElementById('userpic');
+		if (img && img.dataset.src && !img.getAttribute('src')) {
+			img.setAttribute('src', img.dataset.src);
+		}
+	});
+})();
+</script>
 {/block}
