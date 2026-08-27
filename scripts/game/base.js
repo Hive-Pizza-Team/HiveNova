@@ -395,7 +395,14 @@ const HiveKeychainLogin = async () => {
 
 	try
   	{
-		const hiveaccount = prompt("Enter hive account name: ").toLowerCase().trim();
+		const entered = prompt("Enter hive account name: ");
+		if (entered === null) {
+			return;
+		}
+		const hiveaccount = entered.toLowerCase().trim();
+		if (!hiveaccount) {
+			return;
+		}
 		await hive_keychain.requestSignBuffer(
 			hiveaccount,
 			`${hiveaccount} is my account.`,
