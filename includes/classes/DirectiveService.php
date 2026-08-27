@@ -243,9 +243,8 @@ class DirectiveService
 	}
 
 	/**
-	 * Keep the in-memory planet in sync. AbstractGamePage::sendJSON() calls
-	 * ResourceUpdate::SavePlanetToDB() with absolute $PLANET amounts, which
-	 * would otherwise overwrite this SQL increment.
+	 * Keep the in-memory planet in sync with the SQL increment, and shift the
+	 * ResourceUpdate save baseline so a later delta save does not re-apply it.
 	 *
 	 * @param array{metal?: int, crystal?: int, deuterium?: int} $reward
 	 */
@@ -258,9 +257,15 @@ class DirectiveService
 			return;
 		}
 
-		foreach (['metal', 'crystal', 'deuterium'] as $res) {
-			$GLOBALS['PLANET'][$res] = (float) ($GLOBALS['PLANET'][$res] ?? 0) + (int) ($reward[$res] ?? 0);
-		}
+		$metal = (int) ($reward['metal'] ?? 0);
+		$crystal = (int) ($reward['crystal'] ?? 0);
+		$deuterium = (int) ($reward['deuterium'] ?? 0);
+
+		$GLOBALS['PLANET']['metal'] = (float) ($GLOBALS['PLANET']['metal'] ?? 0) + $metal;
+		$GLOBALS['PLANET']['crystal'] = (float) ($GLOBALS['PLANET']['crystal'] ?? 0) + $crystal;
+		$GLOBALS['PLANET']['deuterium'] = (float) ($GLOBALS['PLANET']['deuterium'] ?? 0) + $deuterium;
+
+		ResourceUpdate::adjustPlanetResourceBaseline($planetId, (float) $metal, (float) $crystal, (float) $deuterium);
 	}
 
 	public static function playerPoints(int $userId): int

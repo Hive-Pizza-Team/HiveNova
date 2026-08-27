@@ -440,7 +440,7 @@ CREATE TABLE `%PREFIX%fleets` (
   KEY `fleet_target_owner` (`fleet_target_owner`,`fleet_mission`),
   KEY `fleet_owner` (`fleet_owner`,`fleet_mission`),
   KEY `fleet_group` (`fleet_group`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%trades` (
   `seller_fleet_id`  bigint(11) unsigned NOT NULL DEFAULT 0,
@@ -452,7 +452,7 @@ CREATE TABLE `%PREFIX%trades` (
 	`ex_resource_type` tinyint(1) unsigned NOT NULL DEFAULT 0,
 	`ex_resource_amount` double(50,0) unsigned NOT NULL DEFAULT '0',
 	PRIMARY KEY (`seller_fleet_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%fleet_event` (
   `fleetID` int(11) NOT NULL,
@@ -460,7 +460,7 @@ CREATE TABLE `%PREFIX%fleet_event` (
   `lock` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`fleetID`),
   KEY `lock` (`lock`,`time`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -511,7 +511,7 @@ CREATE TABLE `%PREFIX%log_fleets` (
   `fleet_meta` text,
   PRIMARY KEY (`fleet_id`),
   KEY `BashRule` (`fleet_owner`,`fleet_end_id`,`fleet_start_time`,`fleet_mission`,`fleet_state`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%lostpassword` (
   `userID` int(10) unsigned NOT NULL,
@@ -671,7 +671,7 @@ CREATE TABLE `%PREFIX%planets` (
   KEY `id_owner` (`id_owner`),
   KEY `destruyed` (`destruyed`),
   KEY `universe` (`universe`,`galaxy`,`system`,`planet`,`planet_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%salvage_packages` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -1030,7 +1030,7 @@ CREATE TABLE `%PREFIX%users` (
   KEY `ref_bonus` (`ref_bonus`),
   KEY `universe` (`universe`,`username`,`password`,`onlinetime`,`authlevel`),
   KEY `ally_id` (`ally_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%hive_social_memo_queue` (
   `queue_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
