@@ -451,14 +451,6 @@ class FleetDispatchService
         $PLANET[$resource[902]] -= $fleetResource[902];
         $PLANET[$resource[903]] -= $deutNeeded;
 
-        // Keep SavePlanetToDB deltas from re-applying the SQL deduction.
-        ResourceUpdate::adjustPlanetResourceBaseline(
-            (int) $PLANET['id'],
-            -(float) $fleetResource[901],
-            -(float) $fleetResource[902],
-            -(float) $deutNeeded
-        );
-
         return $fleet_id;
     }
 }

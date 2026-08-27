@@ -1489,3 +1489,4 @@ $LNG['battle_share_cta'] = 'Play Moon on HiveNova';
 $LNG['battle_share_footer'] = 'Shared via HiveNova';
 $LNG['battle_share_result_label'] = 'Result';
 $LNG['battle_share_vs'] = 'vs';
+$LNG['fl_not_enough_resource'] = 'Not enough resources on this planet.';
