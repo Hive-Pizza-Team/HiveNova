@@ -158,7 +158,7 @@ class Session
 			session_start();
 			if(isset($_SESSION['obj']))
 			{
-				$obj = safe_unserialize($_SESSION['obj']);
+				$obj = safe_unserialize($_SESSION['obj'], ['allowed_classes' => [self::class]]);
 				if ($obj instanceof self) {
 					self::$obj = $obj;
 					register_shutdown_function(array(self::$obj, 'save'));

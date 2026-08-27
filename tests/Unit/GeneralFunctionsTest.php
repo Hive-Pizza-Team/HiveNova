@@ -51,6 +51,19 @@ class GeneralFunctionsTest extends TestCase
         $this->assertFalse($result);
     }
 
+    public function testSafeUnserializeRejectsObjectInjectionByDefault(): void
+    {
+        $payload = 'O:8:"stdClass":0:{}';
+        $this->assertFalse(safe_unserialize($payload));
+    }
+
+    public function testSafeUnserializeAllowsExplicitClassAllowlist(): void
+    {
+        $payload = serialize((object) ['ok' => true]);
+        $this->assertFalse(safe_unserialize($payload));
+        $this->assertInstanceOf(\stdClass::class, safe_unserialize($payload, ['allowed_classes' => [\stdClass::class]]));
+    }
+
     // -------------------------------------------------------------------------
     // floatToString
     // -------------------------------------------------------------------------
