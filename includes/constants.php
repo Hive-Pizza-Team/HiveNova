@@ -175,6 +175,24 @@ define('FLEET_MISSION_TRADE'			, 16);
 define('FLEET_MISSION_TRANSFER'			, 17);
 define('FLEET_MISSION_SALVAGE'			, 18);
 
+// Ship / defense element IDs (%%PLANETS%% / fleet_array keys)
+define('SHIP_SMALL_CARGO'			, 202);
+define('SHIP_LARGE_CARGO'			, 203);
+define('SHIP_LIGHT_FIGHTER'			, 204);
+define('SHIP_HEAVY_FIGHTER'			, 205);
+define('SHIP_CRUISER'				, 206);
+define('SHIP_BATTLESHIP'			, 207);
+define('SHIP_COLONY_SHIP'			, 208);
+define('SHIP_RECYCLER'				, 209);
+define('SHIP_ESPIONAGE_PROBE'		, 210);
+define('SHIP_BOMBER'				, 211);
+define('SHIP_SOLAR_SATELLITE'		, 212);
+define('SHIP_DESTROYER'				, 213);
+define('SHIP_DEATHSTAR'				, 214);
+define('SHIP_BATTLECRUISER'			, 215);
+define('SHIP_PATHFINDER'			, 219);
+define('SHIP_DARK_MATTER'			, 220);
+
 // Age of fleet logs kept (seconds); must be >= BASH_TIME
 define('FLEETLOG_AGE'				, 86400);
 

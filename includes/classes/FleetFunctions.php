@@ -451,75 +451,7 @@ class FleetFunctions
 
 	public static function GetAvailableMissions($USER, $MissionInfo, $GetInfoPlanet)
 	{
-		$GetInfoPlanet			= is_array($GetInfoPlanet) ? $GetInfoPlanet : array();
-		$YourPlanet				= (!empty($GetInfoPlanet['id_owner']) && $GetInfoPlanet['id_owner'] == $USER['id']) ? true : false;
-		$UsedPlanet				= (!empty($GetInfoPlanet['id_owner'])) ? true : false;
-		$availableMissions		= array();
-
-		if ($MissionInfo['planet'] == (Config::get($USER['universe'])->max_planets + 1) && isModuleAvailable(MODULE_MISSION_EXPEDITION))
-			$availableMissions[]	= 15;
-		elseif ($MissionInfo['planet'] == (Config::get($USER['universe'])->max_planets + 2) && isModuleAvailable(MODULE_MISSION_TRADE))
-			$availableMissions[]	= 16;
-		elseif ($MissionInfo['planettype'] == 2) {
-			if ((isset($MissionInfo['Ship'][209]) || isset($MissionInfo['Ship'][219])) && isModuleAvailable(MODULE_MISSION_RECYCLE) && !($GetInfoPlanet['der_metal'] == 0 && $GetInfoPlanet['der_crystal'] == 0))
-				$availableMissions[]	= 8;
-			$package = PvePackageService::findAt(
-				(int) $USER['universe'],
-				(int) $MissionInfo['galaxy'],
-				(int) $MissionInfo['system'],
-				(int) $MissionInfo['planet']
-			);
-			if ($package !== null && isModuleAvailable(MODULE_MISSION_SALVAGE)) {
-				$availableMissions[] = 18;
-			}
-		} else {
-			$package = PvePackageService::findAt(
-				(int) $USER['universe'],
-				(int) ($MissionInfo['galaxy'] ?? 0),
-				(int) ($MissionInfo['system'] ?? 0),
-				(int) $MissionInfo['planet']
-			);
-			if ($package !== null && isModuleAvailable(MODULE_MISSION_SALVAGE)) {
-				$availableMissions[] = 18;
-			}
-
-			if (!$UsedPlanet) {
-				if (isset($MissionInfo['Ship'][208]) && $MissionInfo['planettype'] == 1 && isModuleAvailable(MODULE_MISSION_COLONY))
-					$availableMissions[]	= 7;
-			} else {
-				if(isModuleAvailable(MODULE_MISSION_TRANSPORT)) {
-					$MissionInfo['planet'];
-					$availableMissions[]	= 3;
-				}
-
-				if (!$YourPlanet && self::OnlyShipByID($MissionInfo['Ship'], 210) && isModuleAvailable(MODULE_MISSION_SPY))
-					$availableMissions[]	= 6;
-
-				if (!$YourPlanet) {
-					if(isModuleAvailable(MODULE_MISSION_TRANSFER)) {
-						$availableMissions[]	= 17;
-					}
-
-					if(isModuleAvailable(MODULE_MISSION_ATTACK))
-						$availableMissions[]	= 1;
-					if(isModuleAvailable(MODULE_MISSION_HOLD))
-						$availableMissions[]	= 5;}
-
-				elseif(isModuleAvailable(MODULE_MISSION_STATION)) {
-					$availableMissions[]	= 4;}
-
-				if (!empty($MissionInfo['IsAKS']) && !$YourPlanet && isModuleAvailable(MODULE_MISSION_ATTACK) && isModuleAvailable(MODULE_MISSION_ACS))
-					$availableMissions[]	= 2;
-
-				if (!$YourPlanet && $MissionInfo['planettype'] == 3 && isset($MissionInfo['Ship'][214]) && isModuleAvailable(MODULE_MISSION_DESTROY))
-					$availableMissions[]	= 9;
-
-				if ($YourPlanet && $MissionInfo['planettype'] == 3 && self::OnlyShipByID($MissionInfo['Ship'], 220) && isModuleAvailable(MODULE_MISSION_DARKMATTER))
-					$availableMissions[]	= 11;
-			}
-		}
-
-		return $availableMissions;
+		return FleetMissionAvailability::forTarget($USER, $MissionInfo, $GetInfoPlanet);
 	}
 
 	/**
@@ -541,14 +473,14 @@ class FleetFunctions
 			return $requestedMission;
 		}
 
-		$probesOnly = isset($fleet[210]) && count($fleet) === 1;
-		if ($probesOnly && in_array(6, $availableMissions, true)) {
+		$probesOnly = isset($fleet[SHIP_ESPIONAGE_PROBE]) && count($fleet) === 1;
+		if ($probesOnly && in_array(FLEET_MISSION_SPY, $availableMissions, true)) {
 			if ($isAllianceMember) {
-				if (in_array(3, $availableMissions, true)) {
-					return 3;
+				if (in_array(FLEET_MISSION_TRANSPORT, $availableMissions, true)) {
+					return FLEET_MISSION_TRANSPORT;
 				}
 			} else {
-				return 6;
+				return FLEET_MISSION_SPY;
 			}
 		}
 
