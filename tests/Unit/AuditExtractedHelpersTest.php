@@ -40,6 +40,46 @@ class AuditExtractedHelpersTest extends TestCase
 		$this->assertSame(10, $db->selects[0][1][':allianceId']);
 	}
 
+	public function testAllianceDiplomacyAcceptAndDelete(): void
+	{
+		$db = new RecordingDatabase();
+		$this->swapDatabaseInstance($db);
+
+		AllianceDiplomacyService::accept(10, 3);
+		AllianceDiplomacyService::delete(10, 3);
+
+		$this->assertStringContainsString('accept = 1', $db->updates[0][0]);
+		$this->assertStringContainsString('DELETE FROM %%DIPLO%%', $db->deletes[0][0]);
+	}
+
+	public function testBoardRedirectRejectsInvalidForumUrl(): void
+	{
+		\HiveNova\Core\Config::setInstance(new \HiveNova\Core\Config([
+			'uni' => 1,
+			'forum_url' => 'not-a-url',
+		]), 1);
+
+		$this->assertNull(\HiveNova\Core\BoardRedirect::forumUrl());
+
+		$ref = new ReflectionProperty(\HiveNova\Core\Config::class, 'instances');
+		$ref->setAccessible(true);
+		$ref->setValue(null, []);
+	}
+
+	public function testBoardRedirectAcceptsValidForumUrl(): void
+	{
+		\HiveNova\Core\Config::setInstance(new \HiveNova\Core\Config([
+			'uni' => 1,
+			'forum_url' => 'https://forum.example.com/',
+		]), 1);
+
+		$this->assertSame('https://forum.example.com/', \HiveNova\Core\BoardRedirect::forumUrl());
+
+		$ref = new ReflectionProperty(\HiveNova\Core\Config::class, 'instances');
+		$ref->setAccessible(true);
+		$ref->setValue(null, []);
+	}
+
 	public function testBanListDataFetchPaginatesAndFormatsRows(): void
 	{
 		$db = new RecordingDatabase();
