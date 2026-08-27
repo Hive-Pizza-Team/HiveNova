@@ -21,13 +21,13 @@ $cache	= \HiveNova\Core\Cache::get();
 $cache->add('vars', 'HiveNova\\Core\\Cache\\VarsBuildCache');
 extract($cache->getData('vars'));
 
-$resource[901] = 'metal';
-$resource[902] = 'crystal';
-$resource[903] = 'deuterium';
-$resource[911] = 'energy';
-$resource[921] = 'darkmatter';
+$resource[RESOURCE_METAL]      = 'metal';
+$resource[RESOURCE_CRYSTAL]    = 'crystal';
+$resource[RESOURCE_DEUTERIUM]  = 'deuterium';
+$resource[RESOURCE_ENERGY]     = 'energy';
+$resource[RESOURCE_DARKMATTER] = 'darkmatter';
 
-$reslist['ressources']  = array(901, 902, 903, 911, 921);
-$reslist['resstype'][1] = array(901, 902, 903);
-$reslist['resstype'][2] = array(911);
-$reslist['resstype'][3] = array(921);
+$reslist['ressources']  = array(RESOURCE_METAL, RESOURCE_CRYSTAL, RESOURCE_DEUTERIUM, RESOURCE_ENERGY, RESOURCE_DARKMATTER);
+$reslist['resstype'][1] = array(RESOURCE_METAL, RESOURCE_CRYSTAL, RESOURCE_DEUTERIUM);
+$reslist['resstype'][2] = array(RESOURCE_ENERGY);
+$reslist['resstype'][3] = array(RESOURCE_DARKMATTER);

@@ -98,12 +98,22 @@ if (!defined('FLEET_MISSION_EXPEDITION'))    define('FLEET_MISSION_EXPEDITION', 
 if (!defined('FLEET_MISSION_TRADE'))         define('FLEET_MISSION_TRADE',         16);
 if (!defined('FLEET_MISSION_TRANSFER'))      define('FLEET_MISSION_TRANSFER',      17);
 if (!defined('FLEET_MISSION_SALVAGE'))       define('FLEET_MISSION_SALVAGE',       18);
+if (!defined('RESOURCE_METAL'))             define('RESOURCE_METAL',             901);
+if (!defined('RESOURCE_CRYSTAL'))           define('RESOURCE_CRYSTAL',           902);
+if (!defined('RESOURCE_DEUTERIUM'))         define('RESOURCE_DEUTERIUM',         903);
+if (!defined('RESOURCE_ENERGY'))            define('RESOURCE_ENERGY',            911);
+if (!defined('RESOURCE_DARKMATTER'))        define('RESOURCE_DARKMATTER',        921);
 if (!defined('SHIP_COLONY_SHIP'))           define('SHIP_COLONY_SHIP',           208);
 if (!defined('SHIP_RECYCLER'))              define('SHIP_RECYCLER',              209);
 if (!defined('SHIP_ESPIONAGE_PROBE'))       define('SHIP_ESPIONAGE_PROBE',       210);
 if (!defined('SHIP_DEATHSTAR'))             define('SHIP_DEATHSTAR',             214);
+if (!defined('SHIP_BLACK_MOON'))            define('SHIP_BLACK_MOON',            216);
+if (!defined('SHIP_BATTLE_TRANSPORTER'))    define('SHIP_BATTLE_TRANSPORTER',    217);
+if (!defined('SHIP_AVATAR'))                define('SHIP_AVATAR',                218);
 if (!defined('SHIP_PATHFINDER'))            define('SHIP_PATHFINDER',            219);
 if (!defined('SHIP_DARK_MATTER'))           define('SHIP_DARK_MATTER',           220);
+if (!defined('SHIP_BATTLE_RECYCLER'))       define('SHIP_BATTLE_RECYCLER',       SHIP_PATHFINDER);
+if (!defined('SHIP_PIZZABITS_COLLECTOR'))   define('SHIP_PIZZABITS_COLLECTOR',   SHIP_DARK_MATTER);
 
 // Shared game-data fixture (populates $pricelist, $resource, $reslist, $requirements, $CombatCaps)
 require_once __DIR__ . '/fixtures/game_data.php';

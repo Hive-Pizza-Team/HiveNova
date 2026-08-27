@@ -34,6 +34,8 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 
 ## Architecture Overview
 
+Conventions for globals, named element/mission IDs, services vs pages, and the coverage gate: **[`docs/architecture.md`](docs/architecture.md)**.
+
 **Entry points** — each bootstraps via `includes/common.php`:
 
 | File | MODE constant | Purpose |
