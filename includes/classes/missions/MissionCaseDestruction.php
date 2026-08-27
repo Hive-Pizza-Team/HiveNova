@@ -60,26 +60,7 @@ class MissionCaseDestruction extends MissionFunctions implements Mission
 
 		$debrisResource	= array(901, 902);
 
-		$messageHTML	= <<<HTML
-<div class="raportMessage">
-	<table>
-		<tr>
-			<td colspan="2"><a href="game.php?page=raport&raport=%s" target="_blank"><span class="%s">%s %s (%s)</span></a></td>
-		</tr>
-		<tr>
-			<td>%s</td><td><span class="%s">%s: %s</span>&nbsp;<span class="%s">%s: %s</span></td>
-		</tr>
-		<tr>
-			<td>%s</td><td><span>%s:&nbsp;<span class="reportSteal element901">%s</span>&nbsp;</span><span>%s:&nbsp;<span class="reportSteal element902">%s</span>&nbsp;</span><span>%s:&nbsp;<span class="reportSteal element903">%s</span></span></td>
-		</tr>
-		<tr>
-			<td>%s</td><td><span>%s:&nbsp;<span class="reportDebris element901">%s</span>&nbsp;</span><span>%s:&nbsp;<span class="reportDebris element902">%s</span></span></td>
-		</tr>
-	</table>
-</div>
-HTML;
-		//Minize HTML
-		$messageHTML	= str_replace(array("\n", "\t", "\r"), "", $messageHTML);
+		$messageHTML	= \HiveNova\Mission\CombatReportMessageBuilder::template();
 
 		$targetPlanet 	= PlanetRepository::getPlanetById((int) $this->_fleet['fleet_end_id']);
 
