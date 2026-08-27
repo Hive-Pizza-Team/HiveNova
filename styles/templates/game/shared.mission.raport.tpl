@@ -1,6 +1,42 @@
 {block name="title" prepend}{$pageTitle}{/block}
 {block name="content"}
 <div class="battle-report">
+{if $canShareToHive}
+<div class="battle-report__share">
+	<button type="button" class="battle-report__share-btn" id="battleShareOpen">{$LNG.battle_share_button}</button>
+	<div class="battle-report__share-status" id="battleShareStatus" hidden></div>
+</div>
+<div class="battle-report__share-modal" id="battleShareModal" hidden>
+	<div class="battle-report__share-modal-inner">
+		<h3 class="battle-report__share-modal-title">{$LNG.battle_share_modal_title}</h3>
+		<p class="battle-report__share-preview"><strong>{$shareDraft.title|escape:'html'}</strong></p>
+		<fieldset class="battle-report__share-dest">
+			<label class="battle-report__share-option">
+				<input type="radio" name="battleShareDest" value="blog" checked>
+				<span>{$LNG.battle_share_dest_blog}</span>
+			</label>
+			<label class="battle-report__share-option">
+				<input type="radio" name="battleShareDest" value="community">
+				<span>{$LNG.battle_share_dest_community}</span>
+			</label>
+		</fieldset>
+		<div class="battle-report__share-community" id="battleShareCommunityPanel" hidden>
+			<label for="battleShareCommunitySelect">{$LNG.battle_share_community_hint}</label>
+			<select id="battleShareCommunitySelect">
+				{foreach $suggestedCommunities as $community}
+				<option value="{$community.author}|{$community.permlink}">{$community.label|escape:'html'}</option>
+				{/foreach}
+				<option value="custom">{$LNG.battle_share_community_custom}</option>
+			</select>
+			<input type="text" id="battleShareCommunityCustom" placeholder="hive-123456 / community-id" hidden>
+		</div>
+		<div class="battle-report__share-actions">
+			<button type="button" class="battle-report__share-cancel" id="battleShareCancel">{$LNG.battle_share_cancel}</button>
+			<button type="button" class="battle-report__share-confirm" id="battleShareConfirm">{$LNG.battle_share_confirm}</button>
+		</div>
+	</div>
+</div>
+{/if}
 {if isset($Info)}
 <div class="battle-report__players">
 	<div class="battle-report__player {if $Raport.result == "a"}battle-report__player--attacker{elseif $Raport.result == "r"}battle-report__player--defender{/if}">{$Info.0}</div>
@@ -268,6 +304,15 @@
  </div>
 {block name="script" append}
 <script>
+{if $canShareToHive}
+window.battleShareDraft = {$shareDraftJson nofilter};
+window.battleShareMessages = {
+	keychainMissing: "{$LNG.battle_share_keychain_missing|escape:'javascript'}",
+	success: "{$LNG.battle_share_success|escape:'javascript'}",
+	failure: "{$LNG.battle_share_failure|escape:'javascript'}",
+	communityRequired: "{$LNG.battle_share_community_required|escape:'javascript'}"
+};
+{/if}
 $(function() {
 	var $tabs = $('.battle-report__round-tab');
 	var $panels = $('.battle-report__round');
@@ -289,6 +334,77 @@ $(function() {
 		$panels.hide().addClass('is-hidden');
 		$panels.filter('[data-round-panel="' + index + '"]').show().removeClass('is-hidden');
 	});
+
+{if $canShareToHive}
+	var $modal = $('#battleShareModal');
+	var $communityPanel = $('#battleShareCommunityPanel');
+	var $communitySelect = $('#battleShareCommunitySelect');
+	var $communityCustom = $('#battleShareCommunityCustom');
+	var $status = $('#battleShareStatus');
+
+	function setShareStatus(message, isError) {
+		if (!message) {
+			$status.prop('hidden', true).text('');
+			return;
+		}
+		$status.prop('hidden', false).text(message).toggleClass('is-error', !!isError);
+	}
+
+	function toggleCommunityPanel() {
+		var isCommunity = $('input[name="battleShareDest"]:checked').val() === 'community';
+		$communityPanel.prop('hidden', !isCommunity);
+	}
+
+	$('#battleShareOpen').on('click', function() {
+		if (typeof hive_keychain === 'undefined') {
+			alert(window.battleShareMessages.keychainMissing);
+			return;
+		}
+		setShareStatus('');
+		$modal.prop('hidden', false);
+	});
+
+	$('#battleShareCancel').on('click', function() {
+		$modal.prop('hidden', true);
+	});
+
+	$('input[name="battleShareDest"]').on('change', toggleCommunityPanel);
+	$communitySelect.on('change', function() {
+		$communityCustom.prop('hidden', $(this).val() !== 'custom');
+	});
+
+	$('#battleShareConfirm').on('click', function() {
+		var destination = { type: 'blog' };
+		if ($('input[name="battleShareDest"]:checked').val() === 'community') {
+			var raw = $communitySelect.val();
+			if (raw === 'custom') {
+				raw = $.trim($communityCustom.val());
+				if (!raw) {
+					alert(window.battleShareMessages.communityRequired);
+					return;
+				}
+				var parts = raw.split(/[\s/]+/);
+				if (parts.length < 2) {
+					alert(window.battleShareMessages.communityRequired);
+					return;
+				}
+				destination = { type: 'community', parent_author: parts[0], parent_permlink: parts[1] };
+			} else {
+				var pair = raw.split('|');
+				destination = { type: 'community', parent_author: pair[0], parent_permlink: pair[1] };
+			}
+		}
+
+		HiveKeychainShareBattle(window.battleShareDraft, destination, function(err, txid) {
+			if (err) {
+				setShareStatus(window.battleShareMessages.failure + (err ? ' ' + err : ''), true);
+				return;
+			}
+			$modal.prop('hidden', true);
+			setShareStatus(window.battleShareMessages.success + (txid ? ' (' + txid + ')' : ''), false);
+		});
+	});
+{/if}
 });
 </script>
 {/block}

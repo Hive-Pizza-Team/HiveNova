@@ -216,6 +216,10 @@ switch($page)
 		include_once('includes/pages/adm/ShowTransactionsPage.php');
 		ShowTransactionsPage();
 	break;
+	case 'referrals':
+		include_once('includes/pages/adm/ShowReferralStatsPage.php');
+		ShowReferralStatsPage();
+	break;
 	case 'buildlog':
 		include_once('includes/pages/adm/ShowBuildLogPage.php');
 		ShowBuildLogPage();
