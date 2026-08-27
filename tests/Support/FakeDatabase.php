@@ -125,7 +125,8 @@ class FakeDatabase implements DatabaseInterface
     {
         return str_contains($qry, 'planet_count')
             && str_contains($qry, 'ally_name')
-            && str_contains($qry, 'MAX(planet_count)');
+            && str_contains($qry, '%%ALLIANCE%%')
+            && (str_contains($qry, 'MAX(planet_count)') || str_contains($qry, 'ORDER BY planet_count'));
     }
 
     /**

@@ -355,9 +355,30 @@ class GalaxyRowsTest extends TestCase
     public function test_get_system_control_data_returns_dash_when_ambiguous(): void
     {
         $this->fake->systemControlAlliances = [
-            ['ally_name' => 'Alpha'],
-            ['ally_name' => 'Beta'],
+            ['ally_name' => 'Alpha', 'planet_count' => 4],
+            ['ally_name' => 'Beta', 'planet_count' => 4],
         ];
+
+        $result = $this->galaxyRows()->getSystemControlData(1, 5);
+
+        $this->assertSame('-', $result);
+    }
+
+    public function test_get_system_control_data_returns_leader_when_counts_differ(): void
+    {
+        $this->fake->systemControlAlliances = [
+            ['ally_name' => 'Dominators', 'planet_count' => 5],
+            ['ally_name' => 'Runners', 'planet_count' => 2],
+        ];
+
+        $result = $this->galaxyRows()->getSystemControlData(1, 5);
+
+        $this->assertSame('Dominators', $result);
+    }
+
+    public function test_get_system_control_data_returns_dash_when_empty(): void
+    {
+        $this->fake->systemControlAlliances = [];
 
         $result = $this->galaxyRows()->getSystemControlData(1, 5);
 
