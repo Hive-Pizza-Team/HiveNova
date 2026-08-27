@@ -13,10 +13,14 @@ class ResourceUpdateBaselineTest extends TestCase
 
 	private RecordingDatabase $db;
 
+	/** @var mixed */
+	private $savedPlanet;
+
 	protected function setUp(): void
 	{
 		parent::setUp();
 		ResourceUpdate::resetResourceBaselinesForTests();
+		$this->savedPlanet = $GLOBALS['PLANET'] ?? null;
 		$this->db = new RecordingDatabase();
 		$this->swapDatabaseInstance($this->db);
 		Config::setInstance(new Config([
@@ -26,32 +30,24 @@ class ResourceUpdateBaselineTest extends TestCase
 		if (!defined('MODULE_ACHIEVEMENTS')) {
 			define('MODULE_ACHIEVEMENTS', 25);
 		}
-		$GLOBALS['resource'] = [
-			901 => 'metal',
-			902 => 'crystal',
-			903 => 'deuterium',
-			921 => 'darkmatter',
-		];
-		$GLOBALS['reslist'] = [
-			'one' => [],
-			'prod' => [],
-			'build' => [],
-			'tech' => [],
-			'defense' => [],
-		];
 	}
 
 	protected function tearDown(): void
 	{
 		ResourceUpdate::resetResourceBaselinesForTests();
-		unset($GLOBALS['PLANET']);
+		if ($this->savedPlanet === null) {
+			unset($GLOBALS['PLANET']);
+		} else {
+			$GLOBALS['PLANET'] = $this->savedPlanet;
+		}
+		$this->restoreDatabaseInstance();
 		parent::tearDown();
 	}
 
 	public function testSavePlanetToDbWritesResourceDeltas(): void
 	{
 		$eco = new ResourceUpdate(false, false);
-		$eco->setResourceData($GLOBALS['resource'], $GLOBALS['reslist']);
+		$eco->setResourceData($this->resourceMap(), $this->reslistMap());
 
 		$USER = $this->user(100);
 		$PLANET = $this->planet(7, 1000, 500, 200);
@@ -75,7 +71,7 @@ class ResourceUpdateBaselineTest extends TestCase
 	public function testExternalSqlSyncShiftsBaseline(): void
 	{
 		$eco = new ResourceUpdate(false, false);
-		$eco->setResourceData($GLOBALS['resource'], $GLOBALS['reslist']);
+		$eco->setResourceData($this->resourceMap(), $this->reslistMap());
 
 		$USER = $this->user(100);
 		$PLANET = $this->planet(7, 1000, 500, 200);
@@ -99,7 +95,7 @@ class ResourceUpdateBaselineTest extends TestCase
 	{
 		$GLOBALS['PLANET'] = $this->planet(7, 1000, 500, 200);
 		$eco = new ResourceUpdate(false, false);
-		$eco->setResourceData($GLOBALS['resource'], $GLOBALS['reslist']);
+		$eco->setResourceData($this->resourceMap(), $this->reslistMap());
 		$eco->setData($this->user(100), $GLOBALS['PLANET']);
 
 		\HiveNova\Core\DirectiveService::addResourcesToSessionPlanet(7, [
@@ -122,6 +118,29 @@ class ResourceUpdateBaselineTest extends TestCase
 	{
 		$this->assertNotEmpty($this->db->updates);
 		return $this->db->updates[array_key_last($this->db->updates)];
+	}
+
+	/** @return array<int, string> */
+	private function resourceMap(): array
+	{
+		return [
+			901 => 'metal',
+			902 => 'crystal',
+			903 => 'deuterium',
+			921 => 'darkmatter',
+		];
+	}
+
+	/** @return array<string, list<int>> */
+	private function reslistMap(): array
+	{
+		return [
+			'one' => [],
+			'prod' => [],
+			'build' => [],
+			'tech' => [],
+			'defense' => [],
+		];
 	}
 
 	/** @return array<string, mixed> */
