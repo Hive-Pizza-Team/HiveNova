@@ -54,7 +54,7 @@ class ShowAlliancePage extends AbstractGamePage
 
 	function __construct()
 	{
-		global $USER;
+		$USER = $this->getUser();
 		parent::__construct();
 		$this->hasAlliance	= $USER['ally_id'] != 0;
 		$this->hasApply		= $this->isApply();
@@ -65,7 +65,7 @@ class ShowAlliancePage extends AbstractGamePage
 
 	private function setAllianceData($allianceId)
 	{
-		global $USER;
+		$USER = $this->getUser();
 		$db	= Database::get();
 
 		$sql	= 'SELECT * FROM %%ALLIANCE%% WHERE id = :allianceId;';
@@ -106,7 +106,7 @@ class ShowAlliancePage extends AbstractGamePage
 
 	private function isApply()
 	{
-		global $USER;
+		$USER = $this->getUser();
 		$db	= Database::get();
 		$sql = "SELECT COUNT(*) as count FROM %%ALLIANCE_REQUEST%% WHERE userId = :userId;";
 		return $db->selectSingle($sql, array(
@@ -116,7 +116,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	function info()
 	{
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 
 		$allianceId = HTTP::_GP('id', 0);
 
@@ -211,7 +212,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	private function applyWaitScreen()
 	{
-		global $USER, $LNG;
+		global $LNG;
+		$USER = $this->getUser();
 
 		$db	= Database::get();
 		$sql	= "SELECT a.ally_tag FROM %%ALLIANCE_REQUEST%% r INNER JOIN %%ALLIANCE%% a ON a.id = r.allianceId WHERE r.userId = :userId;";
@@ -280,7 +282,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	function apply()
 	{
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 
 		if ($this->hasApply) {
 			$this->redirectToHome();
@@ -362,7 +365,8 @@ class ShowAlliancePage extends AbstractGamePage
 			return;
 	    }
 
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 
 		if (!$this->hasApply) {
 			$this->redirectToHome();
@@ -387,7 +391,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	function create()
 	{
-		global $USER, $LNG;
+		global $LNG;
+		$USER = $this->getUser();
 
 		if ($this->hasApply) {
 			$this->redirectToHome();
@@ -445,7 +450,8 @@ class ShowAlliancePage extends AbstractGamePage
 			return;
 	    }
 
-		global $USER, $LNG;
+		global $LNG;
+		$USER = $this->getUser();
 		$allianceTag	= HTTP::_GP('atag', '', UTF8_SUPPORT);
 		$allianceName	= HTTP::_GP('aname', '', UTF8_SUPPORT);
 
@@ -514,7 +520,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	private function homeAlliance()
 	{
-		global $USER, $LNG;
+		global $LNG;
+		$USER = $this->getUser();
 
 		$db	= Database::get();
 
@@ -593,7 +600,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	public function memberList()
 	{
-		global $USER, $LNG;
+		global $LNG;
+		$USER = $this->getUser();
 		if (!is_array($this->rights) || !$this->rights['MEMBERLIST']) {
 			$this->redirectToHome();
 		}
@@ -668,7 +676,7 @@ class ShowAlliancePage extends AbstractGamePage
 
 	public function close()
 	{
-		global $USER;
+		$USER = $this->getUser();
 
 		try {
 			AllianceService::leaveAlliance($USER['id'], $this->allianceData['id']);
@@ -681,7 +689,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	public function circular()
 	{
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 
 		if (!$this->rights['ROUNDMAIL'])
 			$this->redirectToHome();
@@ -762,7 +771,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminOverview()
 	{
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 		if (empty($this->rights['ADMIN'])) {
 			$this->redirectToHome();
 		}
@@ -952,7 +962,7 @@ class ShowAlliancePage extends AbstractGamePage
 			return;
 	    }
 
-		global $USER;
+		$USER = $this->getUser();
 		try {
 			AllianceService::dissolveAlliance($this->allianceData['id'], $USER['id']);
 		} catch (\RuntimeException $e) {
@@ -964,7 +974,7 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminTransfer()
 	{
-		global $USER;
+		$USER = $this->getUser();
 
 		if ($this->allianceData['ally_owner'] != $USER['id']) {
 			$this->redirectToHome();
@@ -1027,7 +1037,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminMangeApply()
 	{
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 		if (!$this->rights['SEEAPPLY'] || !$this->rights['MANAGEAPPLY']) {
 			$this->redirectToHome();
 		}
@@ -1058,7 +1069,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminDetailApply()
 	{
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 		if (!$this->rights['SEEAPPLY'] || !$this->rights['MANAGEAPPLY']) {
 			$this->redirectToHome();
 		}
@@ -1142,7 +1154,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminSendAnswerToApply()
 	{
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 		if (!$this->rights['SEEAPPLY'] || !$this->rights['MANAGEAPPLY']) {
 			$this->redirectToHome();
 		}
@@ -1305,7 +1318,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminMembers()
 	{
-		global $USER, $LNG;
+		global $LNG;
+		$USER = $this->getUser();
 		if (!$this->rights['MANAGEUSERS']) {
 			$this->redirectToHome();
 		}
@@ -1452,7 +1466,7 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminMembersKick()
 	{
-		global $USER;
+		$USER = $this->getUser();
 
 		if (!$this->rights['KICK']) {
 			$this->redirectToHome();
@@ -1506,7 +1520,7 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminDiplomacyCreate()
 	{
-		global $USER;
+		$USER = $this->getUser();
 		if (!$this->rights['DIPLOMATIC']) {
 			$this->redirectToHome();
 		}
@@ -1528,7 +1542,8 @@ class ShowAlliancePage extends AbstractGamePage
 
 	protected function adminDiplomacyCreateProcessor()
 	{
-		global $LNG, $USER;
+		global $LNG;
+		$USER = $this->getUser();
 		if (!$this->rights['DIPLOMATIC']) {
 			$this->redirectToHome();
 		}
