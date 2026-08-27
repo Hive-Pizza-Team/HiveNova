@@ -29,7 +29,7 @@ CREATE TABLE `%PREFIX%aks` (
   `target` int(11) unsigned NOT NULL,
   `ankunft` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%alliance` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -56,7 +56,7 @@ CREATE TABLE `%PREFIX%alliance` (
   KEY `ally_tag` (`ally_tag`),
   KEY `ally_name` (`ally_name`),
   KEY `ally_universe` (`ally_universe`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%alliance_ranks` (
   `rankID` int(11) NOT NULL AUTO_INCREMENT,
@@ -76,7 +76,7 @@ CREATE TABLE `%PREFIX%alliance_ranks` (
   `EVENTS` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`rankID`),
   KEY `allianceID` (`allianceID`,`rankID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE `%PREFIX%alliance_request` (
@@ -100,7 +100,7 @@ CREATE TABLE `%PREFIX%banned` (
   `universe` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY `ID` (`id`),
   KEY `universe` (`universe`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%buddy` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -110,7 +110,7 @@ CREATE TABLE `%PREFIX%buddy` (
   PRIMARY KEY (`id`),
   KEY `universe` (`universe`),
   KEY `sender` (`sender`,`owner`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%buddy_request` (
   `id` int(11) unsigned NOT NULL,
@@ -378,7 +378,7 @@ CREATE TABLE `%PREFIX%cronjobs` (
   `lock` varchar(32) DEFAULT NULL,
   UNIQUE KEY `cronjobID` (`cronjobID`),
   KEY `isActive` (`isActive`,`nextTime`,`lock`,`cronjobID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%cronjobs_log` (
  `cronjobId` int(11) unsigned NOT NULL,
@@ -399,7 +399,7 @@ CREATE TABLE `%PREFIX%diplo` (
   PRIMARY KEY (`id`),
   KEY `universe` (`universe`),
   KEY `owner_1` (`owner_1`,`owner_2`,`accept`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%fleets` (
   `fleet_id` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -472,7 +472,7 @@ CREATE TABLE `%PREFIX%log` (
   `universe` tinyint(3) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `mode` (`mode`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%log_fleets` (
   `fleet_id` bigint(11) unsigned NOT NULL,
@@ -522,7 +522,7 @@ CREATE TABLE `%PREFIX%lostpassword` (
   PRIMARY KEY (`key`),
   UNIQUE KEY `userID` (`userID`,`key`,`time`,`hasChanged`),
   KEY `time` (`time`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%messages` (
   `message_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -540,14 +540,14 @@ CREATE TABLE `%PREFIX%messages` (
   KEY `message_sender` (`message_sender`),
   KEY `message_deleted` (`message_deleted`),
   KEY `message_owner` (`message_owner`,`message_type`,`message_unread`,`message_deleted`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%multi` (
   `multiID` int(11) NOT NULL AUTO_INCREMENT,
   `userID` int(11) NOT NULL,
   PRIMARY KEY (`multiID`),
   KEY `userID` (`userID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%news` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -556,7 +556,7 @@ CREATE TABLE `%PREFIX%news` (
   `title` varchar(64) NOT NULL,
   `text` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%notes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -795,7 +795,7 @@ CREATE TABLE `%PREFIX%raports` (
   `defender` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`rid`),
   KEY `time` (`time`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%records` (
   `userID` int(10) unsigned NOT NULL,
@@ -1045,7 +1045,7 @@ CREATE TABLE `%PREFIX%hive_social_memo_queue` (
   PRIMARY KEY (`queue_id`),
   KEY `pending` (`sent_at`, `attempts`, `claimed`),
   KEY `user_kind` (`user_id`, `kind`, `sent_at`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%users_to_acs` (
   `userID` int(10) unsigned NOT NULL,
@@ -1664,7 +1664,7 @@ CREATE TABLE `%PREFIX%achievements` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `universe_key` (`universe`, `key`),
   KEY `trigger_type` (`trigger_type`, `active`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%feat_states` (
   `universe` tinyint(3) unsigned NOT NULL,
@@ -1703,7 +1703,7 @@ CREATE TABLE `%PREFIX%user_achievements` (
   KEY `achievement_id` (`achievement_id`),
   KEY `celebrated` (`user_id`, `celebrated`),
   KEY `showcase` (`user_id`, `showcase_order`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%achievement_grants` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
