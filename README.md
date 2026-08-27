@@ -34,7 +34,7 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 
 ## Architecture Overview
 
-Conventions for globals, named element/mission IDs, services vs pages, and the coverage gate: **[`docs/architecture.md`](docs/architecture.md)**.
+Conventions for globals, named element/mission IDs, services vs pages, and the coverage gate: **[`docs/architecture.md`](docs/architecture.md)**. Feature ownership index: **[`docs/domain-map.md`](docs/domain-map.md)**. PHPUnit fixtures: **[`docs/testing.md`](docs/testing.md)**.
 
 **Entry points** — each bootstraps via `includes/common.php`:
 
@@ -127,9 +127,11 @@ Individual test commands:
 php vendor/bin/phpunit                  # unit tests
 php tests/smoke.php                     # smoke test (local dev defaults)
 php .github/scripts/check-language-files.php  # language key validation
+php .github/scripts/add-language-key.php INGAME.php my_key "English text"  # add key + stub all locales
 php tests/smoke.php https://staging.moon.hive.pizza admin s3cr3t  # remote host
 ```
 
+See [`docs/testing.md`](docs/testing.md) for FakeDatabase / fixture setup.
 #### Coverage (pull requests)
 
 PRs enforce **diff coverage** on `includes/classes/`: at least **80%** of changed lines in that tree must be covered by tests (unit + integration Clover reports merged). Page templates, language files, and other paths are not gated.

@@ -79,7 +79,7 @@ Trajectory: carve god-objects (`FleetFunctions`, `ResourceUpdate`, `ShowAlliance
 
 - English under `language/en/` is the source of truth.
 - CI (`check-language-files.php`) requires every EN key to exist in DE/ES/FR/PL/PT/RU/TR — it does not check translation quality.
-- Add new strings to EN first, then mirror keys (EN text is an acceptable interim translation).
+- Add new strings with `php .github/scripts/add-language-key.php <FILE.php> <key> <english text>` (stubs all locales; EN text is an acceptable interim translation).
 
 ## JavaScript
 
@@ -89,14 +89,15 @@ Trajectory: carve god-objects (`FleetFunctions`, `ResourceUpdate`, `ShowAlliance
 ## Testing and coverage gate
 
 - Unit: `php vendor/bin/phpunit`
+- Fixture / FakeDatabase cheat sheet: **`docs/testing.md`**
 - Local CI mirror: `./tests/run-ci-local.sh`
 - **Diff coverage gate** (PRs): ≥80% of changed lines under `includes/classes/` must be covered.
 - Page controllers, templates, and language files are **not** gated — put new behavior in classes/services when you want the gate to protect it.
 
 ## Agent session checklist
 
-1. Read `README.md`, then this file.
+1. Read `README.md`, then this file, then `docs/domain-map.md` when navigating feature code.
 2. Prefer PHP LSP for symbol navigation.
 3. Never push straight to `master` / `develop` — feature branch + PR.
 4. Match nearby style; do not drive-by refactor unrelated files.
-5. When naming IDs or extracting services, follow the tables above rather than inventing a parallel system.
+5. When naming IDs or extracting services, follow the tables above and the touch checklist in `AGENTS.md`.
