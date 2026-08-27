@@ -44,16 +44,5 @@ function check(){
 		return true;
 	}
 }
-
-$(function() {	
-	$('#name').autocomplete({
-		source: "game.php?page=search&mode=autocomplete&type=allyname",
-		minLength: 0,
-		select: function(event, ui) {
-			$(event.target).val(ui.item.label.replace(/<\/?b>/gim, ''));
-			return false;
-		}
-	});
-});
 </script>
 {/block}

@@ -38,11 +38,11 @@
 <div class="buildl">
 
 <a href="#" onclick="return Dialog.info({$ID})">
-				<img style="float: left;" src="{$dpath}gebaeude/{$ID}.gif" alt="{$LNG.tech.{$ID}}" width="120" height="120">
+				<img style="float: left;" src="{$dpath}gebaeude/{$ID}.gif" alt="{$LNG.tech.{$ID}}" width="120" height="120" loading="lazy" loading="lazy">
 			</a>
 			{$LNG.bd_remaining}<br>
 						{foreach $Element.costOverflow as $ResType => $ResCount}
-						<a href='#' onclick='return Dialog.info({$ResType})' class='tooltip' data-tooltip-content="<table><tr><th>{$LNG.tech.{$ResType}}</th></tr><tr><table class='hoverinfo'><tr><td><img src='{$dpath}gebaeude/{$ResType}.{if $ResType >=600 && $ResType <= 699}jpg{else}gif{/if}'></td><td>{$LNG.shortDescription.$ResType}</td></tr></table></tr></table>">{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
+						<a href='#' onclick='return Dialog.info({$ResType})'>{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
 						<p>{$LNG.bd_max_ships_long}:<span style="font-weight:700"><br><span id="max_{$ID}" data-n="{$Element.maxBuildable}">{$Element.maxBuildable|number}</span></p>
 
@@ -50,7 +50,7 @@
 	
 					<div class="buildl">
 					<span>{foreach $Element.costResources as $RessID => $RessAmount}
-					<a href='#' onclick='return Dialog.info({$RessID})' class='tooltip' data-tooltip-content="<table><tr><th>{$LNG.tech.{$RessID}}</th></tr><tr><table class='hoverinfo'><tr><td><img src='{$dpath}gebaeude/{$RessID}.{if $RessID >=600 && $RessID <= 699}jpg{else}gif{/if}'></td><td>{$LNG.shortDescription.$RessID}</td></tr></table></tr></table>">{$LNG.tech.{$RessID}}</a>: <b><span style="color:{if $Element.costOverflow[$RessID] == 0}lime{else}red{/if}">{$RessAmount|number}</span></b>
+					<a href='#' onclick='return Dialog.info({$RessID})'>{$LNG.tech.{$RessID}}</a>: <b><span style="color:{if $Element.costOverflow[$RessID] == 0}lime{else}red{/if}">{$RessAmount|number}</span></b>
 					{/foreach}</span></br>
 					{if $ID==212} +<span id="SolarEnergy">{$SolarEnergy}</span> {$LNG.tech.911}<br><script>$('#SolarEnergy').text(number_format({$SolarEnergy},0))</script>{/if}
 					<span>{if $Element.AlreadyBuild}<span style="color:red">{$LNG.bd_protection_shield_only_one}</span>{elseif $NotBuilding && $Element.buyable}<input type="text" inputmode="numeric" name="fmenge[{$ID}]" id="input_{$ID}" size="3" maxlength="{$maxlength}" placeholder="0" tabindex="{$smarty.foreach.FleetList.iteration}" >

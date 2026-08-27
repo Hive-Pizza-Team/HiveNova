@@ -15,22 +15,15 @@
 	</tr>
 	<tr>
 		<td><label for="subject">{$LNG.ti_subject}</label></td>
-		<td><input class="validate[required]" type="text" id="subject" name="subject" size="40" maxlength="255"></td>
+		<td><input type="text" id="subject" name="subject" size="40" maxlength="255" required></td>
 	</tr>
 	<tr>
 		<td><label for="message">{$LNG.ti_message}</label></td>
-		<td><textarea class="validate[required]" id="message" name="message" row="60" cols="8" style="height:100px;"></textarea></td>
+		<td><textarea id="message" name="message" row="60" cols="8" style="height:100px;" required></textarea></td>
 	</tr>
 	<tr>
 		<td colspan="2"><input type="submit" value="{$LNG.ti_submit}"></td>
 	</tr>
 </table>
 </form>
-{/block}
-{block name="script" append}
-<script>
-$(document).ready(function() {
-$("#form").validationEngine('attach');
-});
-</script>
 {/block}

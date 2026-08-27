@@ -1,5 +1,5 @@
 function instant(event){
-	if (event.keyCode == $.ui.keyCode.ENTER) {
+	if (event.keyCode == 13) {
 		event.preventDefault();
 	}
 	

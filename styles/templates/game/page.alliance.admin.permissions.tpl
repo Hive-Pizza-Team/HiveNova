@@ -45,15 +45,21 @@
 	</table>
 </form>
 
-<div id="new_alliance_rank" title="{$LNG.al_create_new_rank}" style="display:none;">
+<dialog id="new_alliance_rank" class="alliance-rank-dialog">
+	<form method="dialog" class="alliance-rank-dialog__chrome">
+		<button type="submit" value="cancel" class="alliance-rank-dialog__close" data-close-dialog aria-label="{$LNG.al_back}">×</button>
+	</form>
 	<form action="game.php?page=alliance&amp;mode=admin&amp;action=permissionsSend" method="post">
 		<table>
+	<tr>
+				<th colspan="2">{$LNG.al_create_new_rank}</th>
+	</tr>
 	<tr>
 				<td><label for="rankName">{$LNG.al_rank_name}</label></td>
 				<td><input type="text" name="newrank[rankName]" size="20" maxlength="32" id="rankName" required></td>
 	</tr>
 			<tr>
-				<th colspan="{$countRank + 2}">&nbsp;</th>
+				<th colspan="2">&nbsp;</th>
 			</tr>
 	{foreach $availableRanks as $rankId => $rankName}
 	<tr>
@@ -62,9 +68,9 @@
 	</tr>
 	{/foreach}
 	<tr>
-		<td colspan="{$countRank + 2}"><input type="submit" value="{$LNG.al_create}"></td>
+		<td colspan="2"><input type="submit" value="{$LNG.al_create}"> <button type="button" data-close-dialog>{$LNG.al_back}</button></td>
 	</tr>
 	</table>
 </form>
-</div>
+</dialog>
 {/block}

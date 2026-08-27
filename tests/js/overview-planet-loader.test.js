@@ -99,18 +99,18 @@ describe('overview-planet-loader fallback helpers', () => {
 		assert.equal(isLoaderConfigValid({ planetSrc: './overview-planet.js' }), false);
 	});
 
-	it('resolveFallbackSrc prefers hq with jpg fallback on error', () => {
+	it('resolveFallbackSrc prefers lite jpg with hq fallback on error', () => {
 		const fallbackImg = createFallbackImg('./styles/theme/hive/planeten/normaltempplanet03.jpg');
 		fallbackImg.setAttribute('data-src-hq', './styles/theme/hive/planeten/normaltempplanet03_hq.jpg');
 		resolveFallbackSrc(fallbackImg);
 		assert.equal(
 			fallbackImg.getAttribute('src'),
-			'./styles/theme/hive/planeten/normaltempplanet03_hq.jpg'
+			'./styles/theme/hive/planeten/normaltempplanet03.jpg'
 		);
 		fallbackImg.onerror();
 		assert.equal(
 			fallbackImg.getAttribute('src'),
-			'./styles/theme/hive/planeten/normaltempplanet03.jpg'
+			'./styles/theme/hive/planeten/normaltempplanet03_hq.jpg'
 		);
 	});
 
