@@ -134,7 +134,7 @@ class AuditExtractedHelpersTest extends TestCase
 		$db = $this->pdoDatabase(false);
 		$db->selectSingleResult = ['light_fighter' => 5, 'deuterium' => 100];
 		$db->forcedRowCount = 1;
-		$resource = [204 => 'light_fighter', 903 => 'deuterium'];
+		$resource = [204 => 'light_fighter', \RESOURCE_DEUTERIUM => 'deuterium'];
 		$params = [
 			':planetId' => 9,
 			':light_fighter' => '3',
@@ -205,7 +205,7 @@ class AuditExtractedHelpersTest extends TestCase
 			$db,
 			9,
 			[204 => 1],
-			[204 => 'light_fighter', 903 => 'deuterium'],
+			[204 => 'light_fighter', \RESOURCE_DEUTERIUM => 'deuterium'],
 			[':planetId' => 9, ':light_fighter' => '1', ':deuterium' => '10'],
 			['light_fighter = light_fighter - :light_fighter', 'deuterium = deuterium - :deuterium'],
 			10.0
