@@ -84,7 +84,7 @@
 				</tr>
 				<tr>
 					<td style='width:80px' class='galaxy-viz-host'>
-						{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt='' preferLite=true}
+						{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt=''}
 					</td>
 					<td>
 						{if !empty($currentPlanet.canColonize)}
@@ -100,7 +100,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
-				{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=30 height=30 alt='' preferLite=true loading="lazy"}
+				{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=30 height=30 alt=''}
 			</a>
 		</td>
 		<td></td>
@@ -133,7 +133,7 @@
 				</tr>
 				<tr>
 					<td style='width:80px' class='galaxy-viz-host'>
-						{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt='' preferLite=true}
+						{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt=''}
 					</td>
 					<td>
 						{if $currentPlanet.missions.6}
@@ -176,7 +176,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
-				{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=30 height=30 alt='' preferLite=true loading="lazy"}
+				{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=30 height=30 alt=''}
 			</a>
 		</td>
 		<td style="white-space: nowrap;">{$currentPlanet.planet.name} {$currentPlanet.lastActivity}</td>
@@ -189,7 +189,7 @@
 				</tr>
 				<tr>
 					<td style='width:80px' class='galaxy-viz-host'>
-						{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt='' preferLite=true}
+						{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt=''}
 					</td>
 					<td>
 						<table style='width:100%'>
@@ -238,7 +238,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.moon.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.moonTooltip|escape:'html'}">
-				{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=22 height=22 alt=$currentPlanet.moon.name preferLite=true loading="lazy"}
+				{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=22 height=22 alt=$currentPlanet.moon.name}
 			</a>
 			{/if}
 		</td>
@@ -250,7 +250,7 @@
 					<th colspan='2'>{$LNG.gl_debris_field} [{$galaxy}:{$system}:{$planet}]</th>
 				</tr>
 				<tr>
-					<td style='width:80px'>{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=75 height=75 style='width:75px' alt='' preferLite=true}</td>
+					<td style='width:80px'>{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=75 height=75 style='width:75px' alt=''}</td>
 					<td>
 						<table style='width:100%'>
 							<tr>
@@ -278,7 +278,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky" data-tooltip-content="{$smarty.capture.debrisTooltip|escape:'html'}">
-			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt='' preferLite=true loading="lazy"}
+			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt=''}
 			</a>
         {/if}
 		</td>
@@ -433,23 +433,11 @@
 		MaxFleetSetting = {$settings_fleetactions};
 	</script>
 	{if $dpath|strstr:'/hive/'}
-	{* Desktop-only: mobile tooltips skip Three.js previews — avoid downloading preview JS on small screens. *}
-	<script type="text/javascript">
-	(function () {
-		if (window.matchMedia('(max-width: 699px)').matches) {
-			return;
-		}
-		var utils = document.createElement('script');
-		utils.src = './scripts/game/galaxy-planet-preview-utils.js?v={$REV}';
-		utils.onload = function () {
-			var preview = document.createElement('script');
-			preview.src = './scripts/game/galaxy-planet-preview.js?v={$REV}';
-			preview.setAttribute('data-three-src', './scripts/threejs/three.min.js?v={$REV}');
-			preview.setAttribute('data-planet-src', './scripts/game/overview-planet.js?v={$REV}');
-			document.body.appendChild(preview);
-		};
-		document.body.appendChild(utils);
-	})();
-	</script>
+	<script type="text/javascript"
+		src="./scripts/game/galaxy-planet-preview-utils.js?v={$REV}"></script>
+	<script type="text/javascript"
+		src="./scripts/game/galaxy-planet-preview.js?v={$REV}"
+		data-three-src="./scripts/threejs/three.min.js?v={$REV}"
+		data-planet-src="./scripts/game/overview-planet.js?v={$REV}"></script>
 	{/if}
 {/block}
