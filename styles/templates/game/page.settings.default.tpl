@@ -41,17 +41,19 @@
 	    <td>{$permaEmail}</td>
 	</tr>
 	<tr>
-	    <td style="height:22px;">Hive Account</td>
-		<td><input id="hiveAccount" name="hiveAccount" maxlength="16" size="16" value="{$hiveAccount}" placeholder="⬇⬇⬇⬇⬇" readonly></input></td>
-		<input id="hivesign" name="hivesign" type="hidden"></input>
+	    <td style="height:22px;">{$LNG.op_hive_account}</td>
+		<td>
+			<input id="hiveAccount" name="hiveAccount" maxlength="16" size="16" value="{$hiveAccount}" placeholder="⬇⬇⬇⬇⬇" readonly>
+			<input id="hivesign" name="hivesign" type="hidden">
+			<button type="button" onclick="HiveKeychainLogin()" class="login-button button_standard" title="{$LNG.op_link_hive_account}">{$LNG.op_link_hive_account}</button>
+		</td>
 	</tr>
 	<tr>
-		<td style="height:22px;"></td>
-		<td><button type="button" onclick="HiveKeychainLogin()" class="login-button button_standard" title="Link Hive Account">Link Hive Account</button></td>
-	</tr>
-	<tr>
-		<td style="height:22px;">1 PIZZA = 10 Pizzabits</td>
-		<td><button type="button" onclick="DepositPizzaTokens('{$hiveAccount}', '{$universe}', '{$depositWallet}')" class="login-button button_standard" title="Deposit Pizza Tokens" {if $disableDepositButton}disabled{/if}>Deposit $PIZZA</button></td>
+		<td style="height:22px;">{$LNG.op_deposit_pizza}</td>
+		<td>
+			<button type="button" onclick="DepositPizzaTokens('{$hiveAccount}', '{$universe}', '{$depositWallet}')" class="login-button button_standard" title="{$LNG.op_deposit_pizza}"{if $disableDepositButton} disabled{/if}>{$LNG.op_deposit_pizza}</button>
+			<br><small>{$LNG.op_pizza_pizzabits_ratio}</small>
+		</td>
 	</tr>
 	<tr>
 		<td><a title="{if $hiveIdentityPublic}{$LNG.op_public_message_hive}{else}{$LNG.op_public_message_desc}{/if}">{$LNG.op_public_message}</a></td>

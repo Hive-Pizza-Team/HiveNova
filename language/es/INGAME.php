@@ -526,6 +526,8 @@ $LNG['in_missilestype'] 					= 'Tipo de misil';
 $LNG['in_missilesamount'] 					= 'Cantidad';
 $LNG['in_engine'] 							= 'Motor';
 $LNG['in_bonus'] 							= 'Bonos:';
+$LNG['in_pizzabits_deposit_help']			= 'To deposit PIZZA for Pizzabits, link a Hive account under Settings → User data.';
+$LNG['in_pizzabits_open_settings']			= 'Open Settings to link Hive';
 
 //----------------------------------------------------------------------------//
 //MESSAGES
@@ -984,6 +986,11 @@ $LNG['op_block_pm']							= 'Mensajes privados bloqueados';
 $LNG['op_public_message']					= 'Mensaje público del perfil';
 $LNG['op_public_message_desc']				= 'Se muestra en tu perfil de jugador. Si está vacío y tu cuenta Hive es pública (el nombre coincide), se usa la descripción de tu perfil Hive.';
 $LNG['op_public_message_hive']				= 'Tu usuario de Hive coincide con esta cuenta. Los visitantes ven este texto si lo escribes; si no, la descripción de tu perfil Hive.';
+$LNG['op_hive_account']						= 'Hive Account';
+$LNG['op_link_hive_account']				= 'Link Hive Account';
+$LNG['op_deposit_pizza']					= 'Deposit $PIZZA';
+$LNG['op_pizza_pizzabits_ratio']			= '1 PIZZA = 10 Pizzabits';
+$LNG['js_need_hive_for_deposit']			= 'Link a Hive account in Settings before you can deposit PIZZA.';
 $LNG['number_format_label']					= 'Formato de número';
 $LNG['number_format_auto']					= 'Predeterminado del navegador (ej. 1.234.567)';
 $LNG['number_format_eu']					= 'Europeo (ej. 1.234.567)';

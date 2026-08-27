@@ -80,7 +80,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'hiveIdentityPublic'=> PlayerUtil::isHiveIdentityPublic($USER),
 				'universe'			=> $USER['universe'],
 				'isHiveKeychainAct' => (str_ends_with((string) $USER['email'], '@hive.blog')),
-				'disableDepositButton' => ($USER['universe'] === "1"),
+				'disableDepositButton' => ($USER['universe'] === "1" || empty($USER['hive_account'])),
 				'depositWallet'		=> $depositWallet,
 				'userLang'			=> $USER['lang'],
 				'theme'				=> $USER['dpath'],

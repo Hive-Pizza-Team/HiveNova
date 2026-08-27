@@ -207,7 +207,11 @@ function handleErr(errMessage, url, line)
 
 var Dialog	= {	
 	info: function(ID){
-		return Dialog.open('game.php?page=information&id='+ID, 590, (ID > 600 && ID < 800 || ID > 900 && ID < 930) ? 210 : ((ID > 100 && ID < 200) ? 300 : 620));
+		var height = (ID > 600 && ID < 800 || ID > 900 && ID < 930) ? 210 : ((ID > 100 && ID < 200) ? 300 : 620);
+		if (ID === 921) {
+			height = 380;
+		}
+		return Dialog.open('game.php?page=information&id='+ID, 590, height);
 	},
 	
 	alert: function(msg, callback){
@@ -414,6 +418,10 @@ const HiveKeychainLogin = async () => {
 }
 
 const DepositPizzaTokens = async (hiveaccount, universe, wallet) => {
+	if (!hiveaccount) {
+		alert(typeof needHiveForDeposit !== 'undefined' ? needHiveForDeposit : 'Link a Hive account in Settings before you can deposit PIZZA.');
+		return;
+	}
 	if (typeof(hive_keychain) == "undefined") {
 		alert('You must install HiveKeychain extension first');
 		return;
