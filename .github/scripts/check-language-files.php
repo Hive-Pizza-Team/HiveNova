@@ -9,8 +9,8 @@
 $langDir = dirname(__DIR__, 2) . '/language';
 $baseLanguage = 'en';
 $languageFiles = [
-    'ADMIN.php', 'BANNER.php', 'CUSTOM.php', 'FAQ.php', 'FLEET.php',
-    'INGAME.php', 'INSTALL.php', 'L18N.php', 'PUBLIC.php', 'TECH.php',
+    'ACHIEVEMENTS.php', 'ADMIN.php', 'BANNER.php', 'CUSTOM.php', 'FAQ.php',
+    'FLEET.php', 'INGAME.php', 'INSTALL.php', 'L18N.php', 'PUBLIC.php', 'TECH.php',
 ];
 
 $errors = [];

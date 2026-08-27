@@ -18,8 +18,6 @@
 // 2Moons - Copyright (C) 2010-2012 Slaver
 // Grammar Pedantry fixes @etaletai 2018
 
-
-
 $LNG['Messages']							= 'Messages';
 
 $LNG['PM']									= '[PM]';
@@ -59,13 +57,11 @@ $LNG['user_level_1']                        = 'Moderator';
 $LNG['user_level_2']                        = 'Operator';
 $LNG['user_level_3']                        = 'Administrator';
 
-
 $LNG['page_doesnt_exist']					= 'This page does not exist';
 $LNG['bad_forum_url']				    	= 'The Forum link is incorrect!';
 $LNG['admin_access_1']				    	= 'Players have temporary administrative permissions.';
 $LNG['admin_access_link']				    = 'Disable this access';
 $LNG['admin_access_2']				    	= ", If you don't need it any longer";
-
 
 //----------------------------------------------------------------------------//
 // Topnav
@@ -262,7 +258,6 @@ $LNG['gl_to']								= 'to';
 $LNG['gl_to']								= 'to';
 $LNG['gl_trade_space']	= 'Trading zone';
 $LNG['gl_fuel_warning']                     = 'Warning: galaxy scan costs uranium.';
-
 
 //----------------------------------------------------------------------------//
 // Sensor Phalanx
@@ -1087,7 +1082,6 @@ $LNG['spec_mail_inactive_title']  			= '%s - Reminder';
 $LNG['sys_back']							= 'Back';
 $LNG['sys_forward']							= 'Next';
 
-
 $LNG['market_p_total']  ='Total';
 $LNG['market_p_ratio']  ='Ratio';
 $LNG['market_p_cost_type']   ='Cost type';
@@ -1443,8 +1437,6 @@ $LNG['feat_abandon_planet_name'] = 'First to abandon a planet';
 $LNG['feat_abandon_planet_desc'] = 'First player to abandon a planet.';
 $LNG['feat_abandon_home_name'] = 'First to abandon a homeworld';
 $LNG['feat_abandon_home_desc'] = 'First player to abandon their home planet.';
-$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
-$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements. Leave blank to keep. Check clear to remove.';
 
 $LNG['page_season_title'] = 'Season entry';
 $LNG['page_season_need_hive'] = 'Link a Hive account in settings before you can enter this universe.';

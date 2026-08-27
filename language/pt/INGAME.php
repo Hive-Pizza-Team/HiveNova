@@ -60,7 +60,6 @@ $LNG['admin_access_1']				    	= 'Os jogadores tem temporariamente acesso às fu
 $LNG['admin_access_link']				    = 'Desativar este acesso';
 $LNG['admin_access_2']				    	= ', se não precisar por mais tempo';
 
-
 //----------------------------------------------------------------------------//
 // Topnav
 $LNG['tn_vacation_mode']					= 'Atualmente está em Modo de Férias';
@@ -250,7 +249,6 @@ $LNG['gl_points'] 							= 'Pontos';
 $LNG['gl_player']							= 'Jogador';
 $LNG['gl_to']								= 'a';
 $LNG['gl_fuel_warning']                     = 'Aviso: a análise da galáxia custa urânio.';
-
 
 //----------------------------------------------------------------------------//
 // Sensor Phalanx
@@ -1063,7 +1061,6 @@ $LNG['sys_refferal_recruit_text']			= 'Atingiste %s pontos depois de entrares co
 $LNG['sys_closed_game']        	 			= 'O jogo atualmente não está disponível:';
 $LNG['spec_mail_inactive_title']  			= '%s - Relembrar';
 
-
 //----------------------------------------------------------------------------//
 // Relatório de Combate
 $LNG['cr_lost_contact']                     = 'Perdeu-se o contacto com a sua frota.';
@@ -1242,7 +1239,6 @@ $LNG['lo_notify']							= 'Serás redirecionado em <span id="seconds">5</span> s
 $LNG['lo_continue']							= 'Clica aqui para não esperar';
 
 //----------------------------------------------------------------------------//
-
 
 // Translated into Portuguese by QwataKayean . All rights reversed (C) 2012
 $LNG['type_mission_16'] = 'Comércio';
@@ -1439,8 +1435,6 @@ $LNG['feat_abandon_planet_name'] = 'First to abandon a planet';
 $LNG['feat_abandon_planet_desc'] = 'First player to abandon a planet.';
 $LNG['feat_abandon_home_name'] = 'First to abandon a homeworld';
 $LNG['feat_abandon_home_desc'] = 'First player to abandon their home planet.';
-$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
-$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements. Leave blank to keep. Check clear to remove.';
 
 $LNG['page_season_title'] = 'Season entry';
 $LNG['page_season_need_hive'] = 'Link a Hive account in settings before you can enter this universe.';

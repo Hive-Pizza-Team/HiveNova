@@ -240,7 +240,6 @@ $LNG['gl_points']                         = 'Очки';
 $LNG['gl_to']                             = 'на';
 $LNG['gl_fuel_warning']                     = 'Внимание: сканирование галактики стоит урана.';
 
-
 // Фаланга
 $LNG['px_no_deuterium']                   = 'Не хватает дейтерия.';
 $LNG['px_scan_position']                  = 'Координаты сканирования';
@@ -1383,8 +1382,6 @@ $LNG['feat_abandon_planet_name'] = 'First to abandon a planet';
 $LNG['feat_abandon_planet_desc'] = 'First player to abandon a planet.';
 $LNG['feat_abandon_home_name'] = 'First to abandon a homeworld';
 $LNG['feat_abandon_home_desc'] = 'First player to abandon their home planet.';
-$LNG['adm_feat_discord_webhook'] = 'Feats of Strength Discord webhook';
-$LNG['adm_feat_discord_webhook_hint'] = 'Per-universe webhook for feat announcements. Leave blank to keep. Check clear to remove.';
 
 $LNG['page_season_title'] = 'Season entry';
 $LNG['page_season_need_hive'] = 'Link a Hive account in settings before you can enter this universe.';
