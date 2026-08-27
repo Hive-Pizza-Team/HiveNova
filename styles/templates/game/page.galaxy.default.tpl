@@ -77,31 +77,13 @@
 		</td>
         {$currentPlanet = $GalaxyRows[$planet]}
 		<td>
-			{capture name="planetTooltip"}
-			<table style='width:220px'>
-				<tr>
-					<th colspan='2'>{$LNG.gl_unknown} [{$galaxy}:{$system}:{$planet}]</th>
-				</tr>
-				<tr>
-					<td style='width:80px' class='galaxy-viz-host'>
-						{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=75 height=75 class='galaxy-viz-fallback' alt='' preferLite=true}
-					</td>
-					<td>
-						{if !empty($currentPlanet.canColonize)}
-						{$LNG.gl_free_desc}<br><br>
-						<a href='?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$planet}&amp;planettype=1&amp;target_mission=7'>{$LNG["type_mission_7"]}</a>
-						{elseif $currentPlanet.colonizeBlockedReason == 'cap'}
-						{$LNG.gl_free_colony_cap_reached}
-						{else}
-						{$LNG.gl_free_astrotech_required}
-						{/if}
-					</td>
-				</tr>
-			</table>
-			{/capture}
-			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
-				{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=30 height=30 alt='' preferLite=true loading="lazy"}
-			</a>
+			{if !empty($currentPlanet.canColonize)}
+			<a href="?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$planet}&amp;planettype=1&amp;target_mission=7">{$LNG["type_mission_7"]}</a>
+			{elseif $currentPlanet.colonizeBlockedReason == 'cap'}
+			{$LNG.gl_free_colony_cap_reached}
+			{else}
+			{$LNG.gl_free_astrotech_required}
+			{/if}
 		</td>
 		<td></td>
         <td></td>

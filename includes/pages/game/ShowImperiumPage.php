@@ -71,7 +71,6 @@ class ShowImperiumPage extends AbstractGamePage
 			'name'           => array(),
 			'coords'         => array(),
 			'field'          => array(),
-			'energy_used'    => array(),
 			'resource'       => array(),
 			'resourcePerHour'=> array(),
 			'planet_type'    => array(),
@@ -93,9 +92,6 @@ class ShowImperiumPage extends AbstractGamePage
 			
 			$planetList['field'][$Planet['id']]['current']		= $Planet['field_current'];
 			$planetList['field'][$Planet['id']]['max']			= CalculateMaxPlanetFields($Planet);
-			
-			$planetList['energy_used'][$Planet['id']]			= $Planet['energy'] + $Planet['energy_used'];
-
            
 			$planetList['resource'][901][$Planet['id']]			= $Planet['metal'];
 			$planetList['resource'][902][$Planet['id']]			= $Planet['crystal'];

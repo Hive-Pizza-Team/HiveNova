@@ -292,6 +292,7 @@ class ShowShipyardPage extends AbstractGamePage
 			'SolarEnergy'		=> $SolarEnergy,
 		));
 
+		$this->tplObj->loadscript('page-filters.js');
 		$this->display('page.shipyard.default.tpl');
 	}
 }

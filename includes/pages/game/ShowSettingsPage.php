@@ -98,7 +98,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'galaxyMessage' 	=> $USER['settings_wri'],
 				'blockPM' 			=> $USER['settings_blockPM'],
 				'numberFormat'		=> $USER['number_format'] ?? 'auto',
-				'pushAlerts'		=> PushNotificationService::isEnabledForUser((int) $USER['id']) ? 1 : 0,
+				'pushAlerts'		=> (!array_key_exists('settings_push', $USER) || $USER['settings_push'] === null || (int) $USER['settings_push'] === 1) ? 1 : 0,
 				'pushConfigured'	=> PushNotificationService::isConfigured(),
 				'userid'		 	=> $USER['id'],
 				'ref_active'		=> Config::get()->ref_active,

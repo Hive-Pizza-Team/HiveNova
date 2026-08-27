@@ -394,6 +394,7 @@ $Messages		= $USER['messages'];
 
 		
 		if ($QueueCount != 0) {
+			$this->tplObj->loadscript('page-filters.js');
 			$this->tplObj->loadscript('buildlist.js');
 		}
 		

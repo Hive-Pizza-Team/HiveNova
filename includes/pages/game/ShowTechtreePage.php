@@ -77,6 +77,7 @@ class ShowTechtreePage extends AbstractGamePage
             'messages'			=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)): false,
         ));
 
+        $this->tplObj->loadscript('page-filters.js');
         $this->display('page.techTree.default.tpl');
     }
 }
