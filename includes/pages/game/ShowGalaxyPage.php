@@ -96,6 +96,8 @@ class ShowGalaxyPage extends AbstractGamePage
 		$galaxyRows	= new GalaxyRows;
 		$galaxyRows->setGalaxy($galaxy);
 		$galaxyRows->setSystem($system);
+		$galaxyRows->setUser($USER);
+		$galaxyRows->setPlanet($PLANET);
 		$Result	= $galaxyRows->getGalaxyData();
 		if (gettype($Result) == "NULL")
 		{

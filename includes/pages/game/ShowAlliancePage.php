@@ -1474,55 +1474,8 @@ class ShowAlliancePage extends AbstractGamePage
 			$this->redirectToHome();
 		}
 
-		$db = Database::get();
-
-		$diplomaticList	= array(
-			0 => array(
-				1 => array(),
-				2 => array(),
-				3 => array(),
-				4 => array(),
-				5 => array(),
-				6 => array()
-			),
-			1 => array(
-				1 => array(),
-				2 => array(),
-				3 => array(),
-				4 => array(),
-				5 => array(),
-				6 => array()
-			),
-			2 => array(
-				1 => array(),
-				2 => array(),
-				3 => array(),
-				4 => array(),
-				5 => array(),
-				6 => array()
-			)
-		);
-
-		$sql = "SELECT d.id, d.level, d.accept, d.owner_1, d.owner_2, a.ally_name FROM %%DIPLO%% d
-		INNER JOIN %%ALLIANCE%% a ON IF(:allianceId = d.owner_1, a.id = d.owner_2, a.id = d.owner_1)
-		WHERE owner_1 = :allianceId OR owner_2 = :allianceId;";
-		$diplomaticResult =  $db->select($sql, array(
-			':allianceId'   => $this->allianceData['id']
-		));
-
-		foreach ($diplomaticResult as $diplomaticRow) {
-			$own	= $diplomaticRow['owner_1'] == $this->allianceData['id'];
-			if ($diplomaticRow['accept'] == 1) {
-				$diplomaticList[0][$diplomaticRow['level']][$diplomaticRow['id']] = $diplomaticRow['ally_name'];
-			} elseif ($own) {
-				$diplomaticList[2][$diplomaticRow['level']][$diplomaticRow['id']] = $diplomaticRow['ally_name'];
-			} else {
-				$diplomaticList[1][$diplomaticRow['level']][$diplomaticRow['id']] = $diplomaticRow['ally_name'];
-			}
-		}
-
 		$this->assign(array(
-			'diploList'	=> $diplomaticList,
+			'diploList'	=> \HiveNova\Core\AllianceDiplomacyService::buildDiplomaticList((int) $this->allianceData['id']),
 		));
 
 		$this->display('page.alliance.admin.diplomacy.default.tpl');

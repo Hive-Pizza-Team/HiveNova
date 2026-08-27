@@ -52,9 +52,10 @@ class FlyingFleetHandlerTest extends TestCase
 
         $handler = new FlyingFleetHandler();
         $handler->setToken('tok');
-        $handler->run();
+        $failedFleetIds = $handler->run();
 
         $this->assertSame(2, FlyingFleetHandlerProbeMission::$started);
         $this->assertSame(1, FlyingFleetHandlerProbeMission::$finished);
+        $this->assertSame([1], $failedFleetIds);
     }
 }

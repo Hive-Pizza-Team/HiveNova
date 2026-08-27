@@ -74,9 +74,9 @@ class ResourceCalculator
             $this->PLANET['deuterium'] = min($this->PLANET['deuterium'] + $DeuteriumTheoretical, $MaxDeuteriumStorage);
         }
 
-        $this->PLANET['metal']     = max($this->PLANET['metal'], 0);
-        $this->PLANET['crystal']   = max($this->PLANET['crystal'], 0);
-        $this->PLANET['deuterium'] = max($this->PLANET['deuterium'], 0);
+        $this->PLANET['metal']     = (int) floor(max($this->PLANET['metal'], 0));
+        $this->PLANET['crystal']   = (int) floor(max($this->PLANET['crystal'], 0));
+        $this->PLANET['deuterium'] = (int) floor(max($this->PLANET['deuterium'], 0));
     }
 
     /**

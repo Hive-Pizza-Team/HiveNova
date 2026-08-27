@@ -748,9 +748,9 @@ class ResourceUpdate
 		);
 
 		if ($hasPlanetBaseline) {
-			$params[':metalDelta'] = (float) $PLANET['metal'] - (float) $planetBaseline['metal'];
-			$params[':crystalDelta'] = (float) $PLANET['crystal'] - (float) $planetBaseline['crystal'];
-			$params[':deuteriumDelta'] = (float) $PLANET['deuterium'] - (float) $planetBaseline['deuterium'];
+			$params[':metalDelta'] = (int) floor((float) $PLANET['metal'] - (float) $planetBaseline['metal']);
+			$params[':crystalDelta'] = (int) floor((float) $PLANET['crystal'] - (float) $planetBaseline['crystal']);
+			$params[':deuteriumDelta'] = (int) floor((float) $PLANET['deuterium'] - (float) $planetBaseline['deuterium']);
 			$metalSql = 'p.metal = GREATEST(0, p.metal + :metalDelta)';
 			$crystalSql = 'p.crystal = GREATEST(0, p.crystal + :crystalDelta)';
 			$deuteriumSql = 'p.deuterium = GREATEST(0, p.deuterium + :deuteriumDelta)';

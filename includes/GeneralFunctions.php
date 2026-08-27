@@ -468,13 +468,27 @@ function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 	);
 }
 
-function safe_unserialize(?string $data): mixed
+function safe_unserialize(?string $data, array $options = ['allowed_classes' => false]): mixed
 {
 	if (!is_string($data) || $data === '') {
 		return false;
 	}
 
-	return unserialize($data);
+	try {
+		$result = unserialize($data, $options);
+	} catch (\Throwable $e) {
+		return false;
+	}
+
+	if ($result instanceof __PHP_Incomplete_Class) {
+		return false;
+	}
+
+	if (($options['allowed_classes'] ?? false) === false && is_object($result)) {
+		return false;
+	}
+
+	return $result;
 }
 
 function shortly_number($number, $decial = NULL)

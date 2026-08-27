@@ -645,8 +645,15 @@ class FleetFunctions
 
 
 		if ($fleetStartPlanetID > 0) {
-			$sql	= 'UPDATE %%PLANETS%% SET '.implode(', ', $planetQuery).' WHERE id = :planetId;';
-			$db->update($sql, $params);
+			FleetPlanetDeduction::deductShipsAndDeuterium(
+				$db,
+				$fleetStartPlanetID,
+				$fleetArray,
+				$resource,
+				$params,
+				$planetQuery,
+				(float) $consumption
+			);
 		}
 
 		$sql	= 'INSERT INTO %%FLEETS%% SET

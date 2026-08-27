@@ -158,6 +158,23 @@ define('FLEET_OUTWARD'				, 0);
 define('FLEET_RETURN'				, 1);
 define('FLEET_HOLD'					, 2);
 
+// Fleet mission types (fleet_mission column; distinct from MODULE_MISSION_* flags)
+define('FLEET_MISSION_ATTACK'			, 1);
+define('FLEET_MISSION_ACS'				, 2);
+define('FLEET_MISSION_TRANSPORT'		, 3);
+define('FLEET_MISSION_STATION'			, 4);
+define('FLEET_MISSION_ALLY_STATION'		, 5);
+define('FLEET_MISSION_SPY'				, 6);
+define('FLEET_MISSION_COLONISE'			, 7);
+define('FLEET_MISSION_RECYCLE'			, 8);
+define('FLEET_MISSION_DESTROY'			, 9);
+define('FLEET_MISSION_MIP'				, 10);
+define('FLEET_MISSION_DARKMATTER'		, 11);
+define('FLEET_MISSION_EXPEDITION'		, 15);
+define('FLEET_MISSION_TRADE'			, 16);
+define('FLEET_MISSION_TRANSFER'			, 17);
+define('FLEET_MISSION_SALVAGE'			, 18);
+
 // Age of fleet logs kept (seconds); must be >= BASH_TIME
 define('FLEETLOG_AGE'				, 86400);
 

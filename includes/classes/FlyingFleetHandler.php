@@ -24,21 +24,21 @@ class FlyingFleetHandler
 	protected $token;
 
 	public static $missionObjPattern	= array(
-		1	=> 'HiveNova\\Mission\\MissionCaseAttack',
-		2	=> 'HiveNova\\Mission\\MissionCaseACS',
-		3	=> 'HiveNova\\Mission\\MissionCaseTransport',
-		4	=> 'HiveNova\\Mission\\MissionCaseStay',
-		5	=> 'HiveNova\\Mission\\MissionCaseStayAlly',
-		6	=> 'HiveNova\\Mission\\MissionCaseSpy',
-		7	=> 'HiveNova\\Mission\\MissionCaseColonisation',
-		8	=> 'HiveNova\\Mission\\MissionCaseRecycling',
-		9	=> 'HiveNova\\Mission\\MissionCaseDestruction',
-		10	=> 'HiveNova\\Mission\\MissionCaseMIP',
-		11	=> 'HiveNova\\Mission\\MissionCaseFoundDM',
-		15	=> 'HiveNova\\Mission\\MissionCaseExpedition',
-		16	=> 'HiveNova\\Mission\\MissionCaseTrade',
-		17	=> 'HiveNova\\Mission\\MissionCaseTransfer',
-		18	=> 'HiveNova\\Mission\\MissionCaseSalvage',
+		FLEET_MISSION_ATTACK		=> 'HiveNova\\Mission\\MissionCaseAttack',
+		FLEET_MISSION_ACS			=> 'HiveNova\\Mission\\MissionCaseACS',
+		FLEET_MISSION_TRANSPORT		=> 'HiveNova\\Mission\\MissionCaseTransport',
+		FLEET_MISSION_STATION		=> 'HiveNova\\Mission\\MissionCaseStay',
+		FLEET_MISSION_ALLY_STATION	=> 'HiveNova\\Mission\\MissionCaseStayAlly',
+		FLEET_MISSION_SPY			=> 'HiveNova\\Mission\\MissionCaseSpy',
+		FLEET_MISSION_COLONISE		=> 'HiveNova\\Mission\\MissionCaseColonisation',
+		FLEET_MISSION_RECYCLE		=> 'HiveNova\\Mission\\MissionCaseRecycling',
+		FLEET_MISSION_DESTROY		=> 'HiveNova\\Mission\\MissionCaseDestruction',
+		FLEET_MISSION_MIP			=> 'HiveNova\\Mission\\MissionCaseMIP',
+		FLEET_MISSION_DARKMATTER	=> 'HiveNova\\Mission\\MissionCaseFoundDM',
+		FLEET_MISSION_EXPEDITION	=> 'HiveNova\\Mission\\MissionCaseExpedition',
+		FLEET_MISSION_TRADE			=> 'HiveNova\\Mission\\MissionCaseTrade',
+		FLEET_MISSION_TRANSFER		=> 'HiveNova\\Mission\\MissionCaseTransfer',
+		FLEET_MISSION_SALVAGE		=> 'HiveNova\\Mission\\MissionCaseSalvage',
 	);
 
 	function setToken($token)
@@ -49,6 +49,7 @@ class FlyingFleetHandler
 	function run()
 	{
 		$db	= Database::get();
+		$failedFleetIds = array();
 
 		$sql = 'SELECT %%FLEETS%%.*
 		FROM %%FLEETS_EVENT%%
@@ -96,7 +97,10 @@ class FlyingFleetHandler
 					$fleetRow['fleet_mission'] ?? '?',
 					$e->getMessage()
 				));
+				$failedFleetIds[] = (int) $fleetRow['fleet_id'];
 			}
 		}
+
+		return $failedFleetIds;
 	}
 }
