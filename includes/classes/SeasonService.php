@@ -474,7 +474,7 @@ class SeasonService
 		$seasonId = (int) $config->season_id;
 		$open = $this->store->openPayouts($uni, $seasonId);
 		$from = (string) ($config->season_wallet_account ?? '');
-		$wif = (string) ($config->season_wallet_active_key ?? '');
+		$wif = ConfigSecret::resolve(ConfigSecret::ENV_SEASON_WALLET_KEY, $config->season_wallet_active_key ?? '');
 		$failed = false;
 
 		foreach ($open as $payout) {
@@ -524,7 +524,7 @@ class SeasonService
 		}
 
 		$author = strtolower(trim((string) ($config->season_blog_account ?? '')));
-		$wif = (string) ($config->season_blog_posting_key ?? '');
+		$wif = ConfigSecret::resolve(ConfigSecret::ENV_SEASON_BLOG_KEY, $config->season_blog_posting_key ?? '');
 		if ($author === '' || $wif === '' || !HiveUtil::isAccountValid($author)) {
 			return $this->enterBlogHold($config, $uni, $seasonId);
 		}

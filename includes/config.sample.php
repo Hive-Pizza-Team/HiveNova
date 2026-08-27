@@ -25,5 +25,10 @@ $database['databasename']	= '%s';
 $database['tableprefix']	= '%s';
 $salt						= '%s'; // 22 digits from the alphabet "./0-9A-Za-z"
 
+// Optional: override encrypt-at-rest key for Hive WIFs (else $salt is used).
+// Prefer env APP_KEY in production. Also: HIVE_INACTIVE_MEMO_ACTIVE_KEY,
+// HIVE_SOCIAL_MEMO_MEMO_KEY, SEASON_WALLET_ACTIVE_KEY, SEASON_BLOG_POSTING_KEY.
+$appKey						= '';
+
 //### Do not change beyond here ###//
 ?>

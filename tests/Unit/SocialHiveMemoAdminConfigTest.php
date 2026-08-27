@@ -25,11 +25,14 @@ class SocialHiveMemoAdminConfigTest extends TestCase
 
 	public function testPostedMemoKeyReplacesStoredKey(): void
 	{
+		$GLOBALS['salt'] = './0123456789abcdefghij';
 		$result = SocialHiveMemoAdminConfig::applyPosted(
 			['hive_social_memo_memo_key' => '5KOLD'],
 			['hive_social_memo_memo_key' => '5KNEW']
 		);
-		$this->assertSame('5KNEW', $result['apply']['hive_social_memo_memo_key']);
+		$stored = $result['apply']['hive_social_memo_memo_key'];
+		$this->assertStringStartsWith('enc:v1:', $stored);
+		$this->assertSame('5KNEW', \HiveNova\Core\ConfigSecret::reveal($stored));
 	}
 
 	public function testLogPayloadNeverContainsRawWif(): void

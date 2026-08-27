@@ -30,11 +30,15 @@ class InactiveHiveMemoAdminConfigTest extends TestCase
 
 	public function testPostedKeyReplacesStoredKey(): void
 	{
+		$GLOBALS['salt'] = './0123456789abcdefghij';
 		$result = InactiveHiveMemoAdminConfig::applyPosted(
 			['hive_inactive_memo_active_key' => '5KOLD'],
 			['hive_inactive_memo_active_key' => '5KNEW']
 		);
-		$this->assertSame('5KNEW', $result['apply']['hive_inactive_memo_active_key']);
+		$stored = $result['apply']['hive_inactive_memo_active_key'];
+		$this->assertNotSame('5KNEW', $stored);
+		$this->assertStringStartsWith('enc:v1:', $stored);
+		$this->assertSame('5KNEW', \HiveNova\Core\ConfigSecret::reveal($stored));
 	}
 
 	public function testLogPayloadNeverContainsRawWif(): void

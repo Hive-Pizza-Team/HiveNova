@@ -64,10 +64,10 @@ class SocialHiveMemoService
 		if (!HiveUtil::isAccountValid((string) $config->hive_inactive_memo_account)) {
 			return false;
 		}
-		if (trim((string) $config->hive_inactive_memo_active_key) === '') {
+		if (!ConfigSecret::isPresent(ConfigSecret::ENV_INACTIVE_ACTIVE_KEY, $config->hive_inactive_memo_active_key ?? '')) {
 			return false;
 		}
-		if (!isset($config->hive_social_memo_memo_key) || trim((string) $config->hive_social_memo_memo_key) === '') {
+		if (!ConfigSecret::isPresent(ConfigSecret::ENV_SOCIAL_MEMO_KEY, $config->hive_social_memo_memo_key ?? '')) {
 			return false;
 		}
 		$asset = strtoupper((string) $config->hive_inactive_memo_asset);
@@ -266,7 +266,7 @@ class SocialHiveMemoService
 			(string) $config->game_name
 		);
 		$encrypted = $this->encrypt(
-			(string) $config->hive_social_memo_memo_key,
+			ConfigSecret::resolve(ConfigSecret::ENV_SOCIAL_MEMO_KEY, $config->hive_social_memo_memo_key ?? ''),
 			$memoPub,
 			$plaintext
 		);
@@ -280,7 +280,7 @@ class SocialHiveMemoService
 			(float) $config->hive_inactive_memo_amount,
 			strtoupper((string) $config->hive_inactive_memo_asset),
 			$encrypted,
-			(string) $config->hive_inactive_memo_active_key,
+			ConfigSecret::resolve(ConfigSecret::ENV_INACTIVE_ACTIVE_KEY, $config->hive_inactive_memo_active_key ?? ''),
 			true
 		);
 		if (!$result['ok']) {
