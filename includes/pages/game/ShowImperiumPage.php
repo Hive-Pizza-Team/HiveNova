@@ -58,10 +58,8 @@ class ShowImperiumPage extends AbstractGamePage
 
 		foreach ($PlanetsRAW as $CPLANET)
 		{
-			// Only persist when a queue may complete — avoid N UPDATEs on a read-only empire view.
-			$shouldSave = self::planetEcoNeedsPersist($USER, $CPLANET);
-			list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, $shouldSave);
-
+            list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, true);
+			
 			$PLANETS[]	= $CPLANET;
 			unset($CPLANET);
 		}
@@ -145,29 +143,5 @@ class ShowImperiumPage extends AbstractGamePage
 		));
 
 		$this->display('page.empire.default.tpl');
-	}
-
-	/**
-	 * True when CalcResource may mutate queues / levels that must be written back.
-	 * Pure resource accrual can stay in-memory for the empire matrix.
-	 *
-	 * @param array<string, mixed> $user
-	 * @param array<string, mixed> $planet
-	 */
-	public static function planetEcoNeedsPersist(array $user, array $planet): bool
-	{
-		if (!empty($planet['b_hangar_id'])) {
-			return true;
-		}
-
-		if (!empty($planet['b_building']) && (int) $planet['b_building'] <= TIMESTAMP) {
-			return true;
-		}
-
-		if (!empty($user['b_tech']) && (int) $user['b_tech'] <= TIMESTAMP) {
-			return true;
-		}
-
-		return false;
 	}
 }

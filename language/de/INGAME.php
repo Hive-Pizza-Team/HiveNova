@@ -1352,8 +1352,8 @@ $LNG['cm_branch_invalid'] = 'Invalid expedition branch';
 $LNG['cm_branch_forbidden'] = 'That expedition does not belong to you';
 $LNG['cm_branch_gone'] = 'No pending expedition choice';
 $LNG['push_expedition_title'] = 'Expedition complete';
-$LNG['push_expedition_body'] = 'Your expedition has arrived.';
-$LNG['push_expedition_choice_body'] = 'Your expedition arrived with a choice to review.';
+$LNG['push_expedition_body'] = 'Your expedition has returned.';
+$LNG['push_expedition_choice_body'] = 'Your expedition returned with a choice to review.';
 $LNG['push_directive_complete_title'] = 'Directive complete';
 $LNG['push_directive_complete_body'] = 'Your empire directive is ready to claim.';
 $LNG['push_directive_ending_title'] = 'Directive period ending';
@@ -1487,4 +1487,4 @@ $LNG['battle_share_cta'] = 'Play Moon on HiveNova';
 $LNG['battle_share_footer'] = 'Shared via HiveNova';
 $LNG['battle_share_result_label'] = 'Result';
 $LNG['battle_share_vs'] = 'vs';
-
+$LNG['fl_not_enough_resource'] = 'Not enough resources on this planet.';

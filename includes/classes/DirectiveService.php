@@ -264,8 +264,6 @@ class DirectiveService
 		$GLOBALS['PLANET']['metal'] = (float) ($GLOBALS['PLANET']['metal'] ?? 0) + $metal;
 		$GLOBALS['PLANET']['crystal'] = (float) ($GLOBALS['PLANET']['crystal'] ?? 0) + $crystal;
 		$GLOBALS['PLANET']['deuterium'] = (float) ($GLOBALS['PLANET']['deuterium'] ?? 0) + $deuterium;
-
-		ResourceUpdate::adjustPlanetResourceBaseline($planetId, (float) $metal, (float) $crystal, (float) $deuterium);
 	}
 
 	public static function playerPoints(int $userId): int
