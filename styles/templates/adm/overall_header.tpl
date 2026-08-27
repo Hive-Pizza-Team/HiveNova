@@ -57,6 +57,7 @@
 	<script type="text/javascript">
 	$(function() {
 		{$execscript}
+		{literal}
 		if (typeof adminCsrf === 'string' && adminCsrf !== '') {
 			$('form').each(function () {
 				var $form = $(this);
@@ -65,6 +66,7 @@
 				}
 			});
 		}
+		{/literal}
 	});
 	</script>
 </head>
