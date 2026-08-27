@@ -24,7 +24,6 @@
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/achievements.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/tokens.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/jquery.css?v={$REV}">
-	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/jquery.fancybox.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="{$dpath}formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/buttons.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/fontawesome/css/ingame-icons.css?v={$REV}">
@@ -60,7 +59,6 @@
 	</script>
 	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
-	<script type="text/javascript" src="./scripts/base/jquery.fancybox.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/tooltip.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}"></script>

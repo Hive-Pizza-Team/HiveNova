@@ -206,6 +206,26 @@ function handleErr(errMessage, url, line)
 }
 
 var Dialog	= {	
+	_fancyboxReady: null,
+
+	ensureFancybox: function() {
+		if (typeof $.fancybox === 'function') {
+			return $.Deferred().resolve().promise();
+		}
+		if (Dialog._fancyboxReady) {
+			return Dialog._fancyboxReady;
+		}
+		var versionMatch = (document.querySelector('script[src*="scripts/game/base.js"]') || {src: ''}).src.match(/[?&]v=([^&]+)/);
+		var versionQuery = versionMatch ? ('?v=' + versionMatch[1]) : '';
+		var cssHref = './styles/resource/css/base/jquery.fancybox.css' + versionQuery;
+		var jsHref = './scripts/base/jquery.fancybox.js' + versionQuery;
+		if (!$('link[data-fancybox-css]').length) {
+			$('<link rel="stylesheet" data-fancybox-css>').attr('href', cssHref).appendTo('head');
+		}
+		Dialog._fancyboxReady = $.getScript(jsHref);
+		return Dialog._fancyboxReady;
+	},
+
 	info: function(ID){
 		var height = (ID > 600 && ID < 800 || ID > 900 && ID < 930) ? 210 : ((ID > 100 && ID < 200) ? 300 : 620);
 		if (ID === 921) {
@@ -250,20 +270,22 @@ var Dialog	= {
 	
 	open: function(url, width, height) {
 		var dims = getDialogDimensions(width, height);
-		$.fancybox({
-			width: dims.width,
-			padding: 0,
-			height: dims.height,
-			type: 'iframe',
-			href: url,
-			onStart: function() {
-				if (isMobileViewport()) {
-					$('#fancybox-wrap').addClass('mobile-dialog');
+		Dialog.ensureFancybox().done(function() {
+			$.fancybox({
+				width: dims.width,
+				padding: 0,
+				height: dims.height,
+				type: 'iframe',
+				href: url,
+				onStart: function() {
+					if (isMobileViewport()) {
+						$('#fancybox-wrap').addClass('mobile-dialog');
+					}
+				},
+				onClosed: function() {
+					$('#fancybox-wrap').removeClass('mobile-dialog');
 				}
-			},
-			onClosed: function() {
-				$('#fancybox-wrap').removeClass('mobile-dialog');
-			}
+			});
 		});
 		
 		return false;
