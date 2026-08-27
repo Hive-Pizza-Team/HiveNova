@@ -219,8 +219,8 @@ class PushNotificationService
 		global $LNG;
 		$title = $LNG['push_expedition_title'] ?? 'Expedition complete';
 		$body = $hasChoice
-			? ($LNG['push_expedition_choice_body'] ?? 'Your expedition returned with a choice to review.')
-			: ($LNG['push_expedition_body'] ?? 'Your expedition has returned.');
+			? ($LNG['push_expedition_choice_body'] ?? 'Your expedition arrived with a choice to review.')
+			: ($LNG['push_expedition_body'] ?? 'Your expedition has arrived.');
 
 		return [
 			'title' => $title,
