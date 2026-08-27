@@ -28,6 +28,18 @@ $LNG['siteTitleNews']				= 'News';
 $LNG['siteTitleDisclamer']			= 'Contact Admin';
 $LNG['siteTitleLostPassword']		= 'Lost Password?';
 
+// Public SEO (EN is fallback for other languages)
+$LNG['metaTitleHome']				= '%s — Free Hive browser space strategy game';
+$LNG['metaDescriptionIndex']		= 'Multiplayer Orbiting Optimization Network (MOON). Free-to-play space empire browser game on Hive. Build fleets, ally up, and come get mooned!';
+$LNG['metaDescriptionRegister']		= 'Create your free %s account. Play in any browser — no download. Register with email or Hive Keychain.';
+$LNG['metaDescriptionRules']		= 'Official %s game rules: accounts, multi-accounting, bashing, bugs, and fair play.';
+$LNG['metaDescriptionScreens']		= 'Screenshots from %s — the free Hive space strategy browser game.';
+$LNG['metaDescriptionBattleHall']	= 'Hall of fame battles on %s. See the biggest fleet fights in the universe.';
+$LNG['metaDescriptionBanList']		= 'Banned players list for %s.';
+$LNG['metaDescriptionNews']			= 'News and announcements for %s.';
+$LNG['metaDescriptionDisclamer']	= 'Contact the %s administrators.';
+$LNG['metaDescriptionLostPassword']	= 'Reset your %s account password.';
+
 // Menu
 $LNG['forum']						= 'Forum';
 $LNG['menu_index']					= 'Index';

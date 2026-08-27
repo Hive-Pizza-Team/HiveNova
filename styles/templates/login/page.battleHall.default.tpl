@@ -1,4 +1,4 @@
-{block name="title" prepend}{$LNG.siteTitleBattleHall}{/block}
+{block name="title"}{$documentTitle}{/block}
 {block name="content"}
 {if $isMultiUniverse}<p>
 {html_options options=$universeSelect selected=$UNI class="changeUni" id="universe" name="universe"}

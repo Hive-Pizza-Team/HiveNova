@@ -1,3 +1,9 @@
 User-agent: *
 Disallow: /includes/
 Disallow: /cache/
+Disallow: /install/
+Disallow: /admin.php
+Disallow: /game.php
+Disallow: /cronjob.php
+
+Sitemap: https://moon.hive.pizza/sitemap.xml

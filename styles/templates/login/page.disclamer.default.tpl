@@ -1,4 +1,4 @@
-{block name="title" prepend}{$LNG.siteTitleDisclamer}{/block}
+{block name="title"}{$documentTitle}{/block}
 {block name="content"}
 <table id="disclamerTable">
 	<tr>

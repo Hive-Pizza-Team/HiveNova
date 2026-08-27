@@ -1,4 +1,4 @@
-{block name="title"}{$gameName}{/block}
+{block name="title"}{$documentTitle}{/block}
 {block name="content"}
 <section class="hero-section">
 	<h1>{$descHeader}</h1>

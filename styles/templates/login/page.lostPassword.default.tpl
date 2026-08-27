@@ -1,4 +1,4 @@
-{block name="title" prepend}{$LNG.siteTitleLostPassword}{/block}
+{block name="title"}{$documentTitle}{/block}
 {block name="content"}
 <p>{$LNG.passwordInfo}</p>
 <form action="index.php?page=lostPassword" method="post" data-action="index.php?page=lostPassword" >

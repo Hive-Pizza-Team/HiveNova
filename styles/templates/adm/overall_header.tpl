@@ -6,6 +6,7 @@
 <!--[if (gt IE 9)|!(IE)]><!--> <html lang="{$lang}" class="no-js"> <!--<![endif]-->
 <head>
 	<title>{$title}</title>
+	<meta name="robots" content="noindex, nofollow">
 	{if !empty($goto)}
 	<meta http-equiv="refresh" content="{$gotoinsec};URL={$goto}">
 	{/if}

@@ -3,7 +3,7 @@
 	<nav>
 		<ul id="language">
 		{foreach $languages as $langKey => $langName}
-		<li><a href="?lang={$langKey}" rel="alternate" hreflang="{$langKey}" title="{$langName}"><span class="flags {$langKey}">{$langName}</span></a></li>
+		<li><a href="{if isset($hreflangUrls[$langKey])}{$hreflangUrls[$langKey]}{else}?lang={$langKey}{/if}" title="{$langName}"{if $langKey == $lang} aria-current="true"{/if}><span class="flags {$langKey}">{$langName}</span></a></li>
 		{/foreach}
 		</ul>
 	</nav>
