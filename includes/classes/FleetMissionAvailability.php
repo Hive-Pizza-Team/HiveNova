@@ -53,7 +53,7 @@ class FleetMissionAvailability
 				$availableMissions[]	= FLEET_MISSION_TRANSPORT;
 			}
 
-			if (!$YourPlanet && self::OnlyShipByID($MissionInfo['Ship'], SHIP_ESPIONAGE_PROBE) && isModuleAvailable(MODULE_MISSION_SPY))
+			if (!$YourPlanet && FleetFunctions::OnlyShipByID($MissionInfo['Ship'], SHIP_ESPIONAGE_PROBE) && isModuleAvailable(MODULE_MISSION_SPY))
 				$availableMissions[]	= FLEET_MISSION_SPY;
 
 			if (!$YourPlanet) {
@@ -75,7 +75,7 @@ class FleetMissionAvailability
 			if (!$YourPlanet && $MissionInfo['planettype'] == 3 && isset($MissionInfo['Ship'][SHIP_DEATHSTAR]) && isModuleAvailable(MODULE_MISSION_DESTROY))
 				$availableMissions[]	= FLEET_MISSION_DESTROY;
 
-			if ($YourPlanet && $MissionInfo['planettype'] == 3 && self::OnlyShipByID($MissionInfo['Ship'], SHIP_DARK_MATTER) && isModuleAvailable(MODULE_MISSION_DARKMATTER))
+			if ($YourPlanet && $MissionInfo['planettype'] == 3 && FleetFunctions::OnlyShipByID($MissionInfo['Ship'], SHIP_DARK_MATTER) && isModuleAvailable(MODULE_MISSION_DARKMATTER))
 				$availableMissions[]	= FLEET_MISSION_DARKMATTER;
 		}
 	}
