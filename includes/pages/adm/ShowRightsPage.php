@@ -42,6 +42,24 @@ function ShowRightsPage()
 					exit;
 				}
 
+				$target = Database::get()->selectSingle(
+					"SELECT `id`, `authlevel` FROM %%USERS%% WHERE `id` = :id;",
+					[':id' => $id]
+				);
+
+				if (empty($target)) {
+					$template->message($LNG['ad_authlevel_error_2'], '?page=rights&mode=rights&sid='.session_id());
+					exit;
+				}
+
+				if ($USER['id'] != ROOT_USER
+					&& (int) $target['authlevel'] >= (int) $USER['authlevel']
+					&& (int) $target['id'] !== (int) $USER['id']
+				) {
+					$template->message($LNG['ad_authlevel_error_4'], '?page=rights&mode=rights&sid='.session_id());
+					exit;
+				}
+
 				if(!isset($_POST['rights'])) {
 					$_POST['rights']	= array();
 				}
@@ -132,13 +150,36 @@ function ShowRightsPage()
 			if ($_POST)
 			{
 				$id			= HTTP::_GP('id_1', 0);
-				$authlevel	= HTTP::_GP('authlevel', 0);
+				$authlevel	= (int) HTTP::_GP('authlevel', 0);
 
 				if($id == 0)
 					$id	= HTTP::_GP('id_2', 0);
 
 				if($USER['id'] != ROOT_USER && $id == ROOT_USER) {
 					$template->message($LNG['ad_authlevel_error_3'], '?page=rights&mode=users&sid='.session_id());
+					exit;
+				}
+
+				if ($authlevel < AUTH_USR || $authlevel > AUTH_ADM || $authlevel > (int) $USER['authlevel']) {
+					$template->message($LNG['ad_authlevel_error_4'], '?page=rights&mode=users&sid='.session_id());
+					exit;
+				}
+
+				$target = Database::get()->selectSingle(
+					"SELECT `id`, `authlevel` FROM %%USERS%% WHERE `id` = :id;",
+					[':id' => $id]
+				);
+
+				if (empty($target)) {
+					$template->message($LNG['ad_authlevel_error_2'], '?page=rights&mode=users&sid='.session_id());
+					exit;
+				}
+
+				if ($USER['id'] != ROOT_USER
+					&& (int) $target['authlevel'] >= (int) $USER['authlevel']
+					&& (int) $target['id'] !== (int) $USER['id']
+				) {
+					$template->message($LNG['ad_authlevel_error_4'], '?page=rights&mode=users&sid='.session_id());
 					exit;
 				}
 

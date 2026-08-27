@@ -44,7 +44,7 @@ function ShowCreatorPage()
 				$UserPass2 	= HTTP::_GP('password2', '');
 				$UserMail 	= HTTP::_GP('email', '');
 				$UserMail2	= HTTP::_GP('email2', '');
-				$UserAuth 	= HTTP::_GP('authlevel', 0);
+				$UserAuth 	= (int) HTTP::_GP('authlevel', 0);
 				$Galaxy 	= HTTP::_GP('galaxy', 0);
 				$System 	= HTTP::_GP('system', 0);
 				$Planet 	= HTTP::_GP('planet', 0);
@@ -56,6 +56,10 @@ function ShowCreatorPage()
 				$errors	= "";
 
 				$config	= Config::get(Universe::getEmulated());
+
+				if ($UserAuth < AUTH_USR || $UserAuth > AUTH_ADM || $UserAuth > (int) $USER['authlevel']) {
+					$errors .= $LNG['ad_authlevel_error_4'];
+				}
 
 				if (!PlayerUtil::isMailValid($UserMail))
 					$errors .= $LNG['invalid_mail_adress'];

@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminCsrf;
 use HiveNova\Core\Template;
 
 
@@ -23,7 +24,20 @@ if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FI
 function ShowClearCachePage()
 {
 	global $LNG;
-	ClearCache();
+
+	if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+		ClearCache();
+		$template = new Template();
+		$template->message($LNG['cc_cache_clear']);
+		return;
+	}
+
 	$template = new Template();
-	$template->message($LNG['cc_cache_clear']);
+	$template->assign_vars([
+		'admin_csrf' => AdminCsrf::token(),
+		'cc_cache_clear' => $LNG['cc_cache_clear'] ?? 'Clear cache',
+		'button_submit' => $LNG['button_submit'] ?? 'Submit',
+		'mu_clear_cache' => $LNG['mu_clear_cache'] ?? 'Clear cache',
+	]);
+	$template->show('ClearCacheConfirm.tpl');
 }

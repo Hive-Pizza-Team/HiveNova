@@ -116,7 +116,9 @@ function ShowConfigUniPage()
 		$debris_moon			= isset($_POST['debris_moon']) && $_POST['debris_moon'] == 'on' ? 1 : 0;
 		$ref_active				= isset($_POST['ref_active']) && $_POST['ref_active'] == 'on' ? 1 : 0;
 
-		$OverviewNewsText		= $_POST['NewsText'];
+		$OverviewNewsText		= (string) ($_POST['NewsText'] ?? '');
+		// Strip active HTML/script from overview news; players render this untrusted surface.
+		$OverviewNewsText		= strip_tags($OverviewNewsText);
 		$close_reason			= HTTP::_GP('close_reason', '', true);
 		$uni_name				= HTTP::_GP('uni_name', '', true);
 		$forum_url 				= HTTP::_GP('forum_url', '', true);

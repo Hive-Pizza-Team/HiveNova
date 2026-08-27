@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminCsrf;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Universe;
@@ -27,11 +28,11 @@ function ShowSearchPage()
 {
 	global $LNG, $USER;
 	
-	if(!isset($_POST['delete'])) { $_POST['delete']=''; }
-	if (($_GET['delete'] ?? '') == 'user') {
+	if (!isset($_POST['delete'])) { $_POST['delete']=''; }
+	if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && (($_GET['delete'] ?? '') === 'user' || $_POST['delete'] === 'user') && !empty($_POST['user'])) {
         PlayerUtil::deletePlayer((int) $_POST['user']);
         message($LNG['se_delete_succes_p'], '?page=search&search=users&minimize=on', 2);
-	} elseif ($_POST['delete'] == 'planet'){
+	} elseif (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && (($_GET['delete'] ?? '') === 'planet' || $_POST['delete'] === 'planet') && !empty($_POST['planet'])){
 		PlayerUtil::deletePlanet((int) $_POST['planet']);
         message($LNG['se_delete_succes_p'], '?page=search&search=planet&minimize=on', 2);
     }
@@ -330,14 +331,14 @@ function MyCrazyLittleSearch($SpecifyItems, $WhereItem, $SpecifyWhere, $SpecialS
 		if(!isset($_GET['key_order'])) { $_GET['key_order'] = ''; }
 		if(!isset($_GET['key_acc'])) { $_GET['key_acc'] = ''; }
 
-		$UrlForPage	= "?page=search
-						&search=".$SearchFile."
-						&search_in=".$_GET['search_in']."
-						&fuki=".$_GET['fuki']."
-						&key_user=".$_GET['key_user']."
-						&key_order=".$_GET['key_order']."
-						&key_acc=".$_GET['key_acc']."
-						&limit=".$Limit;
+		$UrlForPage	= "?page=search"
+						."&search=".rawurlencode((string) $SearchFile)
+						."&search_in=".rawurlencode((string) ($_GET['search_in'] ?? ''))
+						."&fuki=".rawurlencode((string) ($_GET['fuki'] ?? ''))
+						."&key_user=".rawurlencode((string) ($_GET['key_user'] ?? ''))
+						."&key_order=".rawurlencode((string) ($_GET['key_order'] ?? ''))
+						."&key_acc=".rawurlencode((string) ($_GET['key_acc'] ?? ''))
+						."&limit=".(int) $Limit;
 						 
 		$Search['PAGES'] = '';
 		if($NumberOfPages > 1)
@@ -431,7 +432,18 @@ function MyCrazyLittleSearch($SpecifyItems, $WhereItem, $SpecifyWhere, $SpecialS
 			
 				if ($USER['authlevel'] == AUTH_ADM)
 				{
-					$DELETEBUTTON = $WhileResult[0] != $USER['id'] || $WhileResult[0] != ROOT_USER ? '<a href="?page=search&amp;delete=user&amp;user='.$WhileResult[0].'" border="0" onclick="return confirm(\''.$LNG['ul_sure_you_want_dlte'].' '.$WhileResult[1].'?\');"><img src="./styles/resource/images/alliance/CLOSE.png" width="16" height="16" title='.$WhileResult[1].'></a>' : '-';
+					if ($WhileResult[0] != $USER['id'] && (int) $WhileResult[0] !== ROOT_USER) {
+						$confirm = htmlspecialchars($LNG['ul_sure_you_want_dlte'].' '.$WhileResult[1].'?', ENT_QUOTES, 'UTF-8');
+						$title = htmlspecialchars((string) $WhileResult[1], ENT_QUOTES, 'UTF-8');
+						$DELETEBUTTON = '<form action="?page=search&amp;delete=user" method="post" style="display:inline" onsubmit="return confirm(\''.$confirm.'\');">'
+							.'<input type="hidden" name="admin_csrf" value="'.htmlspecialchars(AdminCsrf::token(), ENT_QUOTES, 'UTF-8').'">'
+							.'<input type="hidden" name="user" value="'.(int) $WhileResult[0].'">'
+							.'<button type="submit" style="border:0;background:transparent;padding:0;cursor:pointer">'
+							.'<img src="./styles/resource/images/alliance/CLOSE.png" width="16" height="16" title="'.$title.'">'
+							.'</button></form>';
+					} else {
+						$DELETEBUTTON = '-';
+					}
 					
 					$Search['LIST']	.= "<td>".$DELETEBUTTON."</td>";
 				}
@@ -442,8 +454,16 @@ function MyCrazyLittleSearch($SpecifyItems, $WhereItem, $SpecifyWhere, $SpecialS
 				if (allowedTo('ShowQuickEditorPage'))
 					$Search['LIST']	.= "<td><a href=\"javascript:openEdit('".$WhileResult[0]."', 'planet');\" border=\"0\"><img src=\"./styles/resource/images/admin/GO.png\" title=".$LNG['se_search_edit']."></a></td>";
 					
-				if ($USER['authlevel'] == AUTH_ADM)
-					$Search['LIST']	.= '<td><a href="?page=search&amp;delete=planet&amp;planet='.$WhileResult[0].'" border="0" onclick="return confirm(\''.$LNG['se_confirm_planet'].' '.$WhileResult[1].'\');"><img src="./styles/resource/images/alliance/CLOSE.png" width="16" height="16" title='.$LNG['button_delete'].'></a></td>';
+				if ($USER['authlevel'] == AUTH_ADM) {
+					$confirm = htmlspecialchars($LNG['se_confirm_planet'].' '.$WhileResult[1], ENT_QUOTES, 'UTF-8');
+					$title = htmlspecialchars((string) ($LNG['button_delete'] ?? 'delete'), ENT_QUOTES, 'UTF-8');
+					$Search['LIST']	.= '<td><form action="?page=search&amp;delete=planet" method="post" style="display:inline" onsubmit="return confirm(\''.$confirm.'\');">'
+						.'<input type="hidden" name="admin_csrf" value="'.htmlspecialchars(AdminCsrf::token(), ENT_QUOTES, 'UTF-8').'">'
+						.'<input type="hidden" name="planet" value="'.(int) $WhileResult[0].'">'
+						.'<button type="submit" style="border:0;background:transparent;padding:0;cursor:pointer">'
+						.'<img src="./styles/resource/images/alliance/CLOSE.png" width="16" height="16" title="'.$title.'">'
+						.'</button></form></td>';
+				}
 			}
 			
 			$Search['LIST']	.= "</tr>";

@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminCsrf;
 use HiveNova\Core\StatBuilder;
 use HiveNova\Core\Template;
 
@@ -23,6 +24,19 @@ if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FI
 
 function ShowStatUpdatePage() {
 	global $LNG;
+
+	if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+		$template = new Template();
+		$template->assign_vars([
+			'admin_csrf' => AdminCsrf::token(),
+			'mu_manual_points_update' => $LNG['mu_manual_points_update'] ?? 'Update stats',
+			'mu_mpu_confirmation' => $LNG['mu_mpu_confirmation'] ?? 'Run stats update?',
+			'button_submit' => $LNG['button_submit'] ?? 'Submit',
+		]);
+		$template->show('StatUpdateConfirm.tpl');
+		return;
+	}
+
 	$stat			= new StatBuilder();
 	$result			= $stat->MakeStats();
 	$memory_p		= str_replace(array("%p", "%m"), $result['memory_peak'], $LNG['sb_top_memory']);

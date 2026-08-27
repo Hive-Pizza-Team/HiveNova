@@ -30,8 +30,9 @@ function ShowModulePage()
 	$config	= Config::get(Universe::getEmulated());
 	$module	= explode(';', (string) $config->moduls);
 
-	if(isset($_GET['mode'])) {
-		$module[HTTP::_GP('id', 0)]	= ($_GET['mode'] == 'aktiv') ? 1 : 0;
+	$mode = HTTP::_GP('mode', '');
+	if ($mode !== '' && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+		$module[HTTP::_GP('id', 0)]	= ($mode === 'aktiv') ? 1 : 0;
 		$config->moduls = implode(";", $module);
 		$config->save();
 		ClearCache();

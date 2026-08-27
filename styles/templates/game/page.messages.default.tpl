@@ -58,7 +58,7 @@
 		<td class="msg-subject-col">
 			{$Message.subject}
 			{if $Message.type == 1 && $MessID != 999}
-			<a href="#" onclick="return Dialog.PM({$Message.sender}, Message.CreateAnswer('{$Message.subject}'));" title="{$LNG.mg_answer_to} {$Message.from|strip_tags}" class="msg-icon-btn"><i class="fas fa-reply"></i></a>
+			<a href="#" data-msg-subject="{$Message.subject}" onclick="return Dialog.PM({$Message.sender}, Message.CreateAnswer(this.getAttribute('data-msg-subject') || ''));" title="{$LNG.mg_answer_to} {$Message.from|strip_tags}" class="msg-icon-btn"><i class="fas fa-reply"></i></a>
 			{/if}
 			{if $MessID != 999}<a href="#" onclick="Message.delMessage({$Message.id});return false;" class="msg-icon-btn msg-delete-btn"><i class="fas fa-trash"></i></a>{/if}
 		</td>
