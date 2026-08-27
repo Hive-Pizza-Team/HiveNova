@@ -393,6 +393,27 @@ class GalaxyRowsTest extends TestCase
         $this->assertTrue($method->invoke($rows));
     }
 
+    public function test_set_user_and_planet_return_self_and_drive_own_planet_check(): void
+    {
+        $rows = new GalaxyRows();
+        $user = array_merge($GLOBALS['USER'], ['id' => 42]);
+        $planet = $GLOBALS['PLANET'];
+
+        $this->assertSame($rows, $rows->setUser($user));
+        $this->assertSame($rows, $rows->setPlanet($planet));
+
+        $this->seedGalaxyRow([
+            'planet' => 4,
+            'id_owner' => 42,
+            'userid' => 42,
+            'username' => 'injected',
+        ]);
+
+        $data = $rows->setGalaxy(1)->setSystem(5)->getGalaxyData();
+
+        $this->assertTrue($data[4]['ownPlanet']);
+    }
+
     private function galaxyRows(): GalaxyRows
     {
         return new GalaxyRows();
