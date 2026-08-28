@@ -271,6 +271,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 			}
 		}
 		
+		$this->tplObj->loadscript('simple-tabs.js');
 		$this->tplObj->loadscript('battlesim.js');
 
 		$simCoords = $this->simulationCoords();

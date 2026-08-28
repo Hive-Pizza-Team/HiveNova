@@ -2812,3 +2812,36 @@ table.tablesorter thead tr .headerSortDown {
 .alliance-rank-dialog table {
   width: 100%;
 }
+
+/* Lightweight tabs — replaces jquery.ui tabs on overview actions / battlesim */
+.simple-tabs__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+}
+.simple-tabs__nav li {
+  margin: 0;
+}
+.simple-tabs__nav a {
+  display: inline-block;
+  border: 1px solid var(--color-border, #4a5568);
+  background: var(--color-menu-bg, #1a1a2e);
+  color: var(--color-text, #ddd);
+  border-radius: 6px;
+  padding: 6px 10px;
+  text-decoration: none;
+}
+.simple-tabs__nav li.is-active a,
+.simple-tabs__nav a.is-active {
+  border-color: var(--color-accent, #7eb6ff);
+  color: var(--color-accent, #7eb6ff);
+}
+.simple-tabs__panel {
+  clear: both;
+}
+.simple-tabs__panel[hidden] {
+  display: none !important;
+}
