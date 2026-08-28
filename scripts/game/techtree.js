@@ -2,7 +2,7 @@
  * Techtree expand/collapse — injects category bodies on first open.
  * Config: #techtree-data JSON
  */
-(function ($) {
+(function () {
 	'use strict';
 
 	var RANGES = {
@@ -28,7 +28,6 @@
 		var wrap = document.createElement('div');
 		wrap.className = 'techi';
 		wrap.id = 'h' + elementId;
-		wrap.style.display = 'none';
 
 		var name = document.createElement('span');
 		name.style.cssText = 'max-width:42%;display:inline-block';
@@ -82,8 +81,12 @@
 		var frag = document.createDocumentFragment();
 		var items = cfg.items || {};
 		for (var id = range[0]; id <= range[1]; id++) {
-			if (!Object.prototype.hasOwnProperty.call(items, id)) continue;
-			frag.appendChild(buildItem(cfg, id, items[id]));
+			if (!Object.prototype.hasOwnProperty.call(items, String(id))
+				&& !Object.prototype.hasOwnProperty.call(items, id)) {
+				continue;
+			}
+			var reqList = items[String(id)] || items[id];
+			frag.appendChild(buildItem(cfg, id, reqList));
 		}
 		body.appendChild(frag);
 	}
@@ -100,33 +103,48 @@
 		}
 	}
 
-	function showCategory(catId, show) {
+	function setOpen(catId, open) {
+		var header = document.getElementById(String(catId));
 		var body = document.getElementById('body' + catId);
-		if (body) {
-			var nodes = body.querySelectorAll('.techi');
-			for (var i = 0; i < nodes.length; i++) {
-				nodes[i].style.display = show ? '' : 'none';
-			}
+		if (header) {
+			header.classList.toggle('is-open', open);
 		}
-		var plus = document.getElementById(catId + 's');
-		var minus = document.getElementById(catId + 'h');
-		if (plus) plus.style.display = show ? 'none' : '';
-		if (minus) minus.style.display = show ? '' : 'none';
-		if (show) hydrateVisibleImages(catId);
+		if (body) {
+			body.classList.toggle('is-open', open);
+		}
+		if (open) {
+			hydrateVisibleImages(catId);
+		}
 	}
 
-	$(function () {
+	function bindCategory(cfg, catId) {
+		var header = document.getElementById(String(catId));
+		if (!header) return;
+		var btn = header.querySelector('button');
+		if (!btn) return;
+
+		btn.addEventListener('click', function (e) {
+			e.preventDefault();
+			var open = !header.classList.contains('is-open');
+			if (open) {
+				ensureCategory(cfg, catId);
+			}
+			setOpen(catId, open);
+		});
+	}
+
+	function boot() {
 		var cfg = readConfig();
 		if (!cfg) return;
 
 		Object.keys(RANGES).forEach(function (catId) {
-			$('#' + catId + 's').on('click', function () {
-				ensureCategory(cfg, catId);
-				showCategory(catId, true);
-			});
-			$('#' + catId + 'h').on('click', function () {
-				showCategory(catId, false);
-			});
+			bindCategory(cfg, catId);
 		});
-	});
-})(jQuery);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', boot);
+	} else {
+		boot();
+	}
+})();
