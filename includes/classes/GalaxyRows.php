@@ -729,8 +729,7 @@ class GalaxyRows
 		$inventorySelect = $this->getGalaxyInventorySelectSql();
 		$where = $type === 'moon' ? 'm.id = :entityId' : 'p.id = :entityId';
 
-		// planetViz AJAX still needs diameter/temp/fields for the hover payload.
-		$sql = 'SELECT
+		$sql = 'SELECT SQL_BIG_RESULT DISTINCT
 		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.temp_max, p.field_current, p.field_max, p.destruyed, p.der_metal, p.der_crystal, p.id_luna,
 		u.id as userid, u.ally_id, u.username, u.onlinetime, u.urlaubs_modus, u.banaday,
 		m.id as m_id, m.diameter as m_diameter, m.name as m_name, m.temp_min as m_temp_min, m.temp_max as m_temp_max, m.mondbasis as m_mondbasis, m.last_update as m_last_update,
