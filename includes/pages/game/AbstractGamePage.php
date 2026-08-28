@@ -226,6 +226,8 @@ abstract class AbstractGamePage
 			'pushConfigured'	=> PushNotificationService::isConfigured(),
 			'attackAlertCount'	=> $this->getAttackAlertCount((int) $USER['id']),
 			'loadAchievementsCss'=> $loadAchievementsCss,
+			// Set by base.js at ≤699px; skip assets CSS hides on mobile (nav logo, etc.).
+			'compactViewport'	=> (($_COOKIE['hn_compact'] ?? '') === '1'),
 		));
 
 		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {

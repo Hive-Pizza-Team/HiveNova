@@ -116,9 +116,9 @@ class FakeDatabase implements DatabaseInterface
 
     private function isGalaxyDataQuery(string $qry): bool
     {
-        return str_contains($qry, 'SQL_BIG_RESULT')
-            && str_contains($qry, '%%PLANETS%%')
-            && str_contains($qry, 'diploLevel');
+        return str_contains($qry, '%%PLANETS%%')
+            && str_contains($qry, 'diploLevel')
+            && (str_contains($qry, 'SQL_BIG_RESULT') || str_contains($qry, 'GROUP BY p.id'));
     }
 
     private function isSystemControlQuery(string $qry): bool

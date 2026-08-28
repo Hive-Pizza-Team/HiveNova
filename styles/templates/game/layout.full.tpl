@@ -9,7 +9,9 @@
 
 	<logo>
 		<div class="fixed">
+			{if empty($compactViewport)}
 			<a href="game.php?page=overview"><img src="styles/resource/images/HiveNova-nav.png" width="120" height="90" alt="HiveNova" decoding="async"></a>
+			{/if}
 		</div>
 	</logo>
 	
