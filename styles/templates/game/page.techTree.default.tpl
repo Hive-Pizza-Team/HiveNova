@@ -3,8 +3,11 @@
 
 {block name="content"}
 <style>
-.minus { display:none; }
-.techtree-body .techi { display:none; }
+.techb .minus { display: none; }
+.techb.is-open .minus { display: inline; }
+.techb.is-open .plus { display: none; }
+.techtree-body .techi { display: none; }
+.techtree-body.is-open .techi { display: block; }
 </style>
 {if $messages}
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
