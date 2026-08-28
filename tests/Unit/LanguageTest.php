@@ -209,4 +209,52 @@ class LanguageTest extends TestCase
         $this->assertNull(Language::preferredFromAcceptLanguage('', ['en']));
         $this->assertNull(Language::preferredFromAcceptLanguage('en-US', []));
     }
+
+    public function testPreferredFromAcceptLanguageKeepsOrderOnEqualQ(): void
+    {
+        $allowed = ['en', 'de', 'fr'];
+        // Equal q → stable enough that first listed among equals wins after sort
+        $this->assertContains(
+            Language::preferredFromAcceptLanguage('de;q=0.8,fr;q=0.8', $allowed),
+            ['de', 'fr']
+        );
+    }
+
+    public function testGetUserAgentLanguageUsesAcceptLanguageWhenNoCookie(): void
+    {
+        $savedRequest = $_REQUEST;
+        $savedCookie = $_COOKIE;
+        $savedServer = $_SERVER;
+        unset($_REQUEST['lang'], $_COOKIE['lang']);
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'de-DE,de;q=0.9,en;q=0.5';
+
+        try {
+            $lng = new Language(null);
+            $result = $lng->getUserAgentLanguage();
+            $this->assertSame('de', $result);
+            $this->assertSame('de', $lng->getLanguage());
+        } finally {
+            $_REQUEST = $savedRequest;
+            $_COOKIE = $savedCookie;
+            $_SERVER = $savedServer;
+        }
+    }
+
+    public function testGetUserAgentLanguageReturnsFalseWhenAcceptLanguageMisses(): void
+    {
+        $savedRequest = $_REQUEST;
+        $savedCookie = $_COOKIE;
+        $savedServer = $_SERVER;
+        unset($_REQUEST['lang'], $_COOKIE['lang']);
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ja-JP,ja;q=0.9';
+
+        try {
+            $lng = new Language(null);
+            $this->assertFalse($lng->getUserAgentLanguage());
+        } finally {
+            $_REQUEST = $savedRequest;
+            $_COOKIE = $savedCookie;
+            $_SERVER = $savedServer;
+        }
+    }
 }

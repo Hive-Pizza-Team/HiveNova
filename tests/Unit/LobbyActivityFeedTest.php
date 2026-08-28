@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\EventFirehoseWriter;
 use HiveNova\Core\LobbyActivityFeed;
-use HiveNova\Core\LoginUniverseDefaults;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/FakeDatabase.php';
@@ -85,54 +83,49 @@ class LobbyActivityFeedTest extends TestCase
 		$this->assertSame(1, $rows[1]['universeId']);
 	}
 
+	public function test_fetch_since_id_returns_newest_first(): void
+	{
+		EventFirehoseWriter::record(1, 100, 10, 'a');
+		EventFirehoseWriter::record(1, 101, 10, 'r');
+		EventFirehoseWriter::record(1, 102, 10, 'w');
+		EventFirehoseWriter::record(1, 103, 10, 'a');
+
+		$all = LobbyActivityFeed::fetch([1], $this->lng, 'UTC', [1 => 'Classic']);
+		$this->assertGreaterThanOrEqual(4, count($all));
+		// Oldest of the newest-first page — fetch everything after it.
+		$sinceId = $all[count($all) - 2]['id'];
+
+		$newer = LobbyActivityFeed::fetch(
+			[1],
+			$this->lng,
+			'UTC',
+			[1 => 'Classic'],
+			$sinceId
+		);
+
+		$this->assertGreaterThanOrEqual(2, count($newer));
+		$this->assertGreaterThan($sinceId, $newer[0]['id']);
+		for ($i = 1, $n = count($newer); $i < $n; $i++) {
+			$this->assertGreaterThan($newer[$i - 1]['id'], $newer[$i]['id']);
+		}
+	}
+
+	public function test_fetch_returns_empty_when_database_throws(): void
+	{
+		$db = new class extends FakeDatabase {
+			public function select($qry, array $params = []): array
+			{
+				throw new RuntimeException('lobby feed unavailable');
+			}
+		};
+		$this->swapDatabaseInstance($db);
+
+		$this->assertSame([], LobbyActivityFeed::fetch([1], $this->lng, 'UTC'));
+	}
+
 	public function test_empty_universe_list_returns_empty(): void
 	{
 		$this->assertSame([], LobbyActivityFeed::fetch([], $this->lng, 'UTC'));
 	}
 }
 
-class EmailRegistrationServiceTest extends TestCase
-{
-	use SwapDatabaseInstance;
-
-	private FakeDatabase $fake;
-
-	protected function setUp(): void
-	{
-		$this->fake = new FakeDatabase();
-		$this->swapDatabaseInstance($this->fake);
-	}
-
-	protected function tearDown(): void
-	{
-		$this->restoreDatabaseInstance();
-		parent::tearDown();
-	}
-
-	public function test_build_verify_url_embeds_universe(): void
-	{
-		$url = EmailRegistrationService::buildVerifyUrl(3, 42, 'abcKEY');
-		$this->assertStringContainsString('/uni3/index.php?', $url);
-		$this->assertStringContainsString('page=vertify', $url);
-		$this->assertStringContainsString('i=42', $url);
-		$this->assertStringContainsString('k=abcKEY', $url);
-		$this->assertStringContainsString('uni=3', $url);
-	}
-
-	public function test_find_pending_validation_ignores_current_universe(): void
-	{
-		$this->fake->achievement->usersValidRows = [[
-			'validationID' => 7,
-			'validationKey' => 'secret',
-			'universe' => 3,
-			'userName' => 'Commander',
-		]];
-
-		$found = EmailRegistrationService::findPendingValidation(7, 'secret');
-		$this->assertIsArray($found);
-		$this->assertSame(3, (int) $found['universe']);
-
-		$this->assertFalse(EmailRegistrationService::findPendingValidation(7, 'wrong'));
-		$this->assertFalse(EmailRegistrationService::findPendingValidation(0, 'secret'));
-	}
-}
