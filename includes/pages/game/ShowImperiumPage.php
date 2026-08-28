@@ -64,6 +64,12 @@ class ShowImperiumPage extends AbstractGamePage
 
 		foreach ($PlanetsRAW as $CPLANET)
 		{
+			// Current planet was already eco'd in AbstractGamePage this request.
+			if ((int) $CPLANET['id'] === (int) $PLANET['id']) {
+				$PLANETS[] = array_merge($CPLANET, $PLANET);
+				continue;
+			}
+
 			// Only persist when a queue may complete — avoid N UPDATEs on a read-only empire view.
 			$shouldSave = self::planetEcoNeedsPersist($USER, $CPLANET);
 			list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, $shouldSave);

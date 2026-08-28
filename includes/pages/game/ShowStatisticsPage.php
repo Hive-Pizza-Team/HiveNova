@@ -94,8 +94,15 @@ class ShowStatisticsPage extends AbstractGamePage
 
                 $start = max(floor(($range - 1) / 100) * 100, 0);
 
+                $statColumns = implode(', ', array_unique([
+                    's.' . $Rank,
+                    's.' . $OldRank,
+                    's.' . $Points,
+                    's.total_points',
+                ]));
+
                 if ($config->stat == 2) {
-                    $sql = "SELECT DISTINCT s.*, u.id, u.username, u.hive_account, u.ally_id, u.banaday, u.urlaubs_modus, u.onlinetime, a.ally_name, (a.ally_owner=u.id) as is_leader, a.ally_owner_range FROM %%STATPOINTS%% as s
+                    $sql = "SELECT {$statColumns}, u.id, u.username, u.hive_account, u.ally_id, u.banaday, u.urlaubs_modus, u.onlinetime, a.ally_name, (a.ally_owner=u.id) as is_leader, a.ally_owner_range FROM %%STATPOINTS%% as s
 					INNER JOIN %%USERS%% as u ON u.id = s.id_owner
 					LEFT JOIN %%ALLIANCE%% as a ON a.id = s.id_ally
 					WHERE s.universe = :universe AND s.stat_type = 1 AND u.authlevel < :authLevel
@@ -107,7 +114,7 @@ class ShowStatisticsPage extends AbstractGamePage
                         ':limit'    => 100,
                     ));
                 } else {
-                    $sql = "SELECT DISTINCT s.*, u.id, u.username, u.hive_account, u.ally_id, u.banaday, u.urlaubs_modus, u.onlinetime, a.ally_name, (a.ally_owner=u.id) as is_leader, a.ally_owner_range FROM %%STATPOINTS%% as s
+                    $sql = "SELECT {$statColumns}, u.id, u.username, u.hive_account, u.ally_id, u.banaday, u.urlaubs_modus, u.onlinetime, a.ally_name, (a.ally_owner=u.id) as is_leader, a.ally_owner_range FROM %%STATPOINTS%% as s
 					INNER JOIN %%USERS%% as u ON u.id = s.id_owner
 					LEFT JOIN %%ALLIANCE%% as a ON a.id = s.id_ally
 					WHERE s.universe = :universe AND s.stat_type = 1
@@ -121,10 +128,12 @@ class ShowStatisticsPage extends AbstractGamePage
 
                 $RangeList    = array();
 
-                try {
-                    mergeUserStatPoints($USER);
-                } catch (Exception) {
-                    $USER['total_points'] = 0;
+                if (!isset($USER['total_points'])) {
+                    try {
+                        mergeUserStatPoints($USER);
+                    } catch (Exception) {
+                        $USER['total_points'] = 0;
+                    }
                 }
 
                 foreach ($query as $StatRow) {
@@ -164,10 +173,16 @@ class ShowStatisticsPage extends AbstractGamePage
 
                 $start = max(floor(($range - 1) / 100) * 100, 0);
 
-                $sql = 'SELECT DISTINCT s.*, a.id, a.ally_members, a.ally_name FROM %%STATPOINTS%% as s
+                $allyStatColumns = implode(', ', array_unique([
+                    's.' . $Rank,
+                    's.' . $OldRank,
+                    's.' . $Points,
+                ]));
+
+                $sql = "SELECT {$allyStatColumns}, a.id, a.ally_members, a.ally_name FROM %%STATPOINTS%% as s
                 INNER JOIN %%ALLIANCE%% as a ON a.id = s.id_owner
                 WHERE universe = :universe AND stat_type = 2
-                ORDER BY ' . $Order . ' ASC LIMIT :offset, :limit;';
+                ORDER BY " . $Order . " ASC LIMIT :offset, :limit;";
                 $query = $db->select($sql, array(
                     ':universe'    => Universe::current(),
                     ':offset'    => $start,

@@ -22,6 +22,3 @@
 {/if}
 </table>
 {/block}
-{block name="script" append}
-    <script src="scripts/game/statistics.js"></script>
-{/block}
