@@ -107,10 +107,18 @@
 		var header = document.getElementById(String(catId));
 		var body = document.getElementById('body' + catId);
 		if (header) {
-			header.classList.toggle('is-open', open);
+			if (open) {
+				header.classList.add('is-open');
+			} else {
+				header.classList.remove('is-open');
+			}
 		}
 		if (body) {
-			body.classList.toggle('is-open', open);
+			if (open) {
+				body.classList.add('is-open');
+			} else {
+				body.classList.remove('is-open');
+			}
 		}
 		if (open) {
 			hydrateVisibleImages(catId);
@@ -120,11 +128,11 @@
 	function bindCategory(cfg, catId) {
 		var header = document.getElementById(String(catId));
 		if (!header) return;
-		var btn = header.querySelector('button');
-		if (!btn) return;
 
-		btn.addEventListener('click', function (e) {
-			e.preventDefault();
+		header.addEventListener('click', function (e) {
+			if (e) {
+				e.preventDefault();
+			}
 			var open = !header.classList.contains('is-open');
 			if (open) {
 				ensureCategory(cfg, catId);

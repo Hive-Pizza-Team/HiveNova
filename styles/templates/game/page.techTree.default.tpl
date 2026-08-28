@@ -3,11 +3,21 @@
 
 {block name="content"}
 <style>
+.techb {
+	cursor: pointer;
+}
 .techb .minus { display: none; }
-.techb.is-open .minus { display: inline; }
+.techb.is-open .minus { display: inline-block; }
 .techb.is-open .plus { display: none; }
 .techtree-body .techi { display: none; }
-.techtree-body.is-open .techi { display: block; }
+/* Contain floated .techi cards — without this the body height stays 0 (broken in WebKit). */
+.techtree-body.is-open {
+	overflow: hidden; /* BFC fallback for engines without flow-root */
+	display: flow-root;
+}
+.techtree-body.is-open .techi {
+	display: block;
+}
 </style>
 {if $messages}
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
