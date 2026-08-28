@@ -29,52 +29,62 @@ class ShowTechtreePage extends AbstractGamePage
 
     function show()
     {
-        global $resource, $requirements, $reslist, $USER, $PLANET, $LNG;
+        global $resource, $requirements, $reslist, $USER, $PLANET, $LNG, $THEME;
 
         $elementIDs		= array_merge(
-            array(0),
             $reslist['build'],
-            array(100),
             $reslist['tech'],
-            array(200),
             $reslist['fleet'],
-            array(400),
             $reslist['defense'],
-            array(500),
             $reslist['missile'],
-            array(600),
             $reslist['officier']
         );
 
-        $techTreeList = array();
-        $Messages		= $USER['messages'];
-        foreach($elementIDs as $elementId)
-        {
-            if(!isset($resource[$elementId]))
-            {
-                $techTreeList[$elementId]	= $elementId;
-            }
-            else
-            {
-                $requirementsList	= array();
-                if(isset($requirements[$elementId]))
-                {
-                    foreach($requirements[$elementId] as $requireID => $RedCount)
-                    {
-                        $requirementsList[$requireID]	= array(
-                            'count' => $RedCount,
-                            'own'   => isset($PLANET[$resource[$requireID]]) ? $PLANET[$resource[$requireID]] : $USER[$resource[$requireID]]
-                        );
-                    }
-                }
+        $items = array();
+        $names = array();
+        $ext = array();
+        $Messages = $USER['messages'];
 
-                $techTreeList[$elementId]	= $requirementsList;
+        foreach ($elementIDs as $elementId) {
+            if (!isset($resource[$elementId])) {
+                continue;
             }
+
+            $requirementsList = array();
+            if (isset($requirements[$elementId])) {
+                foreach ($requirements[$elementId] as $requireID => $RedCount) {
+                    $requirementsList[(string) $requireID] = array(
+                        'count' => $RedCount,
+                        'own'   => isset($PLANET[$resource[$requireID]]) ? $PLANET[$resource[$requireID]] : $USER[$resource[$requireID]],
+                    );
+                    $names[(string) $requireID] = $LNG['tech'][$requireID] ?? (string) $requireID;
+                }
+            }
+
+            // Keep empty-req techs out of the payload — expand only shows requirement rows historically when requireList truthy.
+            if ($requirementsList === array()) {
+                continue;
+            }
+
+            $items[(string) $elementId] = $requirementsList;
+            $names[(string) $elementId] = $LNG['tech'][$elementId] ?? (string) $elementId;
+            $ext[(string) $elementId] = ($elementId >= 600 && $elementId <= 699) ? 'jpg' : 'gif';
         }
 
+        $dpath = $THEME->getTheme();
+        $techTreeJson = json_encode(array(
+            'dpath' => $dpath,
+            'ttRequirements' => $LNG['tt_requirements'],
+            'ttLvl' => $LNG['tt_lvl'],
+            'names' => $names,
+            'ext' => $ext,
+            'items' => $items,
+        ), JSON_UNESCAPED_UNICODE);
+
         $this->assign(array(
-            'TechTreeList'		=> $techTreeList,
-            'messages'			=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)): false,
+            'TechCategories' => array(0, 100, 200, 400, 500, 600),
+            'techTreeJson'   => $techTreeJson,
+            'messages'       => ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)) : false,
         ));
 
         $this->display('page.techTree.default.tpl');

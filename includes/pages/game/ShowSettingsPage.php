@@ -57,7 +57,6 @@ class ShowSettingsPage extends AbstractGamePage
 
 			$this->assign(array(
 				'Selectors'			=> array(
-					'timezones' => get_timezone_selector(), 
 					'Sort' => array(
 						0 => $LNG['op_sort_normal'], 
 						1 => $LNG['op_sort_koords'],
@@ -98,7 +97,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'galaxyMessage' 	=> $USER['settings_wri'],
 				'blockPM' 			=> $USER['settings_blockPM'],
 				'numberFormat'		=> $USER['number_format'] ?? 'auto',
-				'pushAlerts'		=> PushNotificationService::isEnabledForUser((int) $USER['id']) ? 1 : 0,
+				'pushAlerts'		=> (!array_key_exists('settings_push', $USER) || $USER['settings_push'] === null || (int) $USER['settings_push'] === 1) ? 1 : 0,
 				'pushConfigured'	=> PushNotificationService::isConfigured(),
 				'userid'		 	=> $USER['id'],
 				'ref_active'		=> Config::get()->ref_active,
@@ -107,6 +106,11 @@ class ShowSettingsPage extends AbstractGamePage
 			
 			$this->display('page.settings.default.tpl');
 		}
+	}
+
+	public function timezones()
+	{
+		$this->sendJSON(get_timezone_selector());
 	}
 	
 	private function CheckVMode()

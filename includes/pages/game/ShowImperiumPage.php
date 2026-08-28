@@ -58,8 +58,10 @@ class ShowImperiumPage extends AbstractGamePage
 
 		foreach ($PlanetsRAW as $CPLANET)
 		{
-            list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, true);
-			
+			// Only persist when a queue may complete — avoid N UPDATEs on a read-only empire view.
+			$shouldSave = self::planetEcoNeedsPersist($USER, $CPLANET);
+			list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, $shouldSave);
+
 			$PLANETS[]	= $CPLANET;
 			unset($CPLANET);
 		}
@@ -69,7 +71,6 @@ class ShowImperiumPage extends AbstractGamePage
 			'name'           => array(),
 			'coords'         => array(),
 			'field'          => array(),
-			'energy_used'    => array(),
 			'resource'       => array(),
 			'resourcePerHour'=> array(),
 			'planet_type'    => array(),
@@ -91,9 +92,6 @@ class ShowImperiumPage extends AbstractGamePage
 			
 			$planetList['field'][$Planet['id']]['current']		= $Planet['field_current'];
 			$planetList['field'][$Planet['id']]['max']			= CalculateMaxPlanetFields($Planet);
-			
-			$planetList['energy_used'][$Planet['id']]			= $Planet['energy'] + $Planet['energy_used'];
-
            
 			$planetList['resource'][901][$Planet['id']]			= $Planet['metal'];
 			$planetList['resource'][902][$Planet['id']]			= $Planet['crystal'];
@@ -136,12 +134,79 @@ class ShowImperiumPage extends AbstractGamePage
 		foreach($reslist['tech'] as $elementID){
 			$planetList['tech'][$elementID]	= $USER[$resource[$elementID]];
 		}
+
+		foreach (array('build', 'fleet', 'defense', 'missiles') as $bucket) {
+			foreach ($planetList[$bucket] as $elementID => $values) {
+				if (array_sum($values) <= 0) {
+					unset($planetList[$bucket][$elementID]);
+				}
+			}
+		}
+		foreach ($planetList['tech'] as $elementID => $tech) {
+			if ($tech <= 0) {
+				unset($planetList['tech'][$elementID]);
+			}
+		}
+
+		$matrixSections = array();
+		foreach (array('build' => 'build', 'fleet' => 'fleet', 'defense' => 'defense', 'missiles' => 'missiles') as $key => $section) {
+			$matrixSections[$section] = array();
+			foreach ($planetList[$key] as $elementID => $values) {
+				$matrixSections[$section][] = array(
+					'id'     => (int) $elementID,
+					'name'   => $LNG['tech'][$elementID] ?? (string) $elementID,
+					'total'  => array_sum($values),
+					'values' => $values,
+				);
+			}
+			unset($planetList[$key]);
+		}
+		$matrixSections['tech'] = array();
+		foreach ($planetList['tech'] as $elementID => $tech) {
+			$matrixSections['tech'][] = array(
+				'id'    => (int) $elementID,
+				'name'  => $LNG['tech'][$elementID] ?? (string) $elementID,
+				'total' => (int) $tech,
+				'values' => array(),
+			);
+		}
+		unset($planetList['tech']);
+
+		$empireMatrixJson = json_encode(array(
+			'colspan'  => count($PLANETS) + 2,
+			'sections' => $matrixSections,
+		), JSON_UNESCAPED_UNICODE);
 		
 		$this->assign(array(
-			'colspan'		=> count($PLANETS) + 2,
-			'planetList'	=> $planetList,
+			'colspan'          => count($PLANETS) + 2,
+			'planetList'       => $planetList,
+			'empireMatrixJson' => $empireMatrixJson,
 		));
 
 		$this->display('page.empire.default.tpl');
+	}
+
+	/**
+	 * True when CalcResource may mutate queues / levels that must be written back.
+	 * Pure resource accrual can stay in-memory for the empire matrix.
+	 *
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
+	 */
+	public static function planetEcoNeedsPersist(array $user, array $planet): bool
+	{
+		if (!empty($planet['b_hangar_id'])) {
+			return true;
+		}
+
+		if (!empty($planet['b_building']) && (int) $planet['b_building'] <= TIMESTAMP) {
+			return true;
+		}
+
+		if (!empty($user['b_tech']) && (int) $user['b_tech'] <= TIMESTAMP) {
+			return true;
+		}
+
+		return false;
 	}
 }

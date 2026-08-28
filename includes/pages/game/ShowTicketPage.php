@@ -38,11 +38,24 @@ class ShowTicketPage extends AbstractGamePage
 		global $USER, $LNG;
 
 		$db = Database::get();
+		$pageNo = max(1, (int) HTTP::_GP('ticketPage', 1));
+		$perPage = 25;
+		$offset = ($pageNo - 1) * $perPage;
 
-		$sql = "SELECT t.*, COUNT(a.ticketID) as answer
+		$countSql = "SELECT COUNT(*) AS cnt
+			FROM %%TICKETS%% t
+			WHERE t.ownerID = :userID;";
+		$totalTickets = (int) $db->selectSingle($countSql, array(
+			':userID' => $USER['id'],
+		), 'cnt');
+
+		$sql = "SELECT t.ticketID, t.subject, t.time, t.status, COUNT(a.ticketID) as answer
 		FROM %%TICKETS%% t
 		INNER JOIN %%TICKETS_ANSWER%% a USING (ticketID)
-		WHERE t.ownerID = :userID GROUP BY a.ticketID ORDER BY t.ticketID DESC;";
+		WHERE t.ownerID = :userID
+		GROUP BY t.ticketID, t.subject, t.time, t.status
+		ORDER BY t.ticketID DESC
+		LIMIT {$perPage} OFFSET {$offset};";
 
 		$ticketResult = $db->select($sql, array(
 			':userID'	=> $USER['id']
@@ -55,9 +68,14 @@ class ShowTicketPage extends AbstractGamePage
 
 			$ticketList[$ticketRow['ticketID']]	= $ticketRow;
 		}
+
+		$totalPages = max(1, (int) ceil($totalTickets / $perPage));
 		
 		$this->assign(array(
-			'ticketList'	=> $ticketList
+			'ticketList'	=> $ticketList,
+			'ticketPage'	=> $pageNo,
+			'ticketPages'	=> $totalPages,
+			'ticketTotal'	=> $totalTickets,
 		));
 			
 		$this->display('page.ticket.default.tpl');

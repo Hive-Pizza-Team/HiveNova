@@ -162,6 +162,7 @@ abstract class AbstractGamePage
 		}
 
 		$resourceTable	= array();
+		$loadAchievementsCss = HTTP::_GP('page', '') === 'achievements';
 		$resourceSpeed	= $config->resource_multiplier;
 		foreach($reslist['resstype'][1] as $resourceID)
 		{
@@ -221,15 +222,18 @@ abstract class AbstractGamePage
 			'hasGate'			=> $PLANET[$resource[43]] > 0,
 			'discordUrl'		=> DISCORD_URL,
 			'badges'            => PlayerUtil::getPlayerBadges($USER),
-			'pushAlerts'		=> PushNotificationService::isEnabledForUser((int) $USER['id']) ? 1 : 0,
+			'pushAlerts'		=> (!array_key_exists('settings_push', $USER) || $USER['settings_push'] === null || (int) $USER['settings_push'] === 1) ? 1 : 0,
 			'pushConfigured'	=> PushNotificationService::isConfigured(),
-			'attackAlertCount'	=> IncomingHostileFleetQuery::countForUser((int) $USER['id']),
+			'attackAlertCount'	=> $this->getAttackAlertCount((int) $USER['id']),
+			'loadAchievementsCss'=> $loadAchievementsCss,
 		));
 
 		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {
 			global $LNG;
 			$pending = AchievementService::get()->getPendingCelebrations((int) $USER['id']);
 			if (!empty($pending)) {
+				$loadAchievementsCss = true;
+				$this->assign(array('loadAchievementsCss' => true));
 				$queue = [];
 				foreach ($pending as $row) {
 					$queue[] = [
@@ -260,6 +264,24 @@ abstract class AbstractGamePage
 				);
 			}
 		}
+	}
+
+	/**
+	 * Cache hostile inbound count briefly in the session to avoid a fleets COUNT on every page.
+	 */
+	protected function getAttackAlertCount(int $userId): int
+	{
+		$session = Session::load();
+		$cachedAt = isset($session->attackAlertAt) ? (int) $session->attackAlertAt : 0;
+		if ($cachedAt > 0 && (TIMESTAMP - $cachedAt) < 15 && isset($session->attackAlertCount)) {
+			return (int) $session->attackAlertCount;
+		}
+
+		$count = IncomingHostileFleetQuery::countForUser($userId);
+		$session->attackAlertCount = $count;
+		$session->attackAlertAt = TIMESTAMP;
+
+		return $count;
 	}
 
 	protected function getPageData()

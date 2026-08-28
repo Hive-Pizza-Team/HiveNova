@@ -65,13 +65,16 @@ class ShowVizPage extends AbstractGamePage
                 'fleet_universe' => Universe::current()
             )
         );
-        $fleetsJson = json_encode($fleetData);
+        $vizConfigJson = json_encode(array(
+            'threeSrc'   => './scripts/threejs/three.min.js?v=' . substr((string) $config->VERSION, -4),
+            'maxGalaxy'  => (int) $config->max_galaxy,
+            'maxSystem'  => (int) $config->max_system,
+            'maxPlanets' => (int) $config->max_planets,
+            'fleets'     => $fleetData,
+        ));
 
         $this->assign(array(
-            'fleetsJson'  => $fleetsJson,
-            'maxGalaxy'   => (int) $config->max_galaxy,
-            'maxSystem'   => (int) $config->max_system,
-            'maxPlanets'  => (int) $config->max_planets,
+            'vizConfigJson' => $vizConfigJson,
         ));
 
         $this->display('page.viz.default.tpl');

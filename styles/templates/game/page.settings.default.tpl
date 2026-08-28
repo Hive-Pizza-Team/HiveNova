@@ -82,7 +82,14 @@
 		</tr>
 		<tr>
 			<td>{$LNG.op_timezone}</td>
-			<td><details><summary>{$timezone}</summary>{html_options name=timezone options=$Selectors.timezones selected=$timezone}</details></td>
+			<td>
+				<details id="timezone-details">
+					<summary>{$timezone}</summary>
+					<select name="timezone" id="timezone-select">
+						<option value="{$timezone|escape:'html'}" selected>{$timezone}</option>
+					</select>
+				</details>
+			</td>
 		</tr>
 		{if $Selectors.lang|count > 1}
 		<tr>
@@ -174,7 +181,22 @@
 			<th colspan="3">{$LNG.ov_userbanner}</th>
 		</tr>
 		<tr>
-			<td colspan="3"><img src="userpic.php?id={$userid}" alt="" width="590" height="95" id="userpic"><br><br><table><tr><td class="transparent">HTML:</td><td class="transparent"><input type="text" value='<a href="{$SELF_URL}{if $ref_active}index.php?ref={$userid}{/if}"><img src="{$SELF_URL}userpic.php?id={$userid}"></a>' readonly="readonly" style="width:450px;"></td></tr><tr><td class="transparent">BBCode:</td><td class="transparent"><input type="text" value="[url={$SELF_URL}{if $ref_active}index.php?ref={$userid}{/if}][img]{$SELF_URL}userpic.php?id={$userid}[/img][/url]" readonly="readonly" style="width:450px;"></td></tr></table></td>
+			<td colspan="3">
+				<details id="userbanner-details">
+					<summary>{$LNG.ov_userbanner}</summary>
+					<img data-src="userpic.php?id={$userid}" alt="" width="590" height="95" id="userpic" loading="lazy"><br><br>
+					<table>
+						<tr>
+							<td class="transparent">HTML:</td>
+							<td class="transparent"><input type="text" value='<a href="{$SELF_URL}{if $ref_active}index.php?ref={$userid}{/if}"><img src="{$SELF_URL}userpic.php?id={$userid}"></a>' readonly="readonly" style="width:450px;"></td>
+						</tr>
+						<tr>
+							<td class="transparent">BBCode:</td>
+							<td class="transparent"><input type="text" value="[url={$SELF_URL}{if $ref_active}index.php?ref={$userid}{/if}][img]{$SELF_URL}userpic.php?id={$userid}[/img][/url]" readonly="readonly" style="width:450px;"></td>
+						</tr>
+					</table>
+				</details>
+			</td>
 		</tr>
 		{/if}
 		<tr>
@@ -183,4 +205,48 @@
 		</tbody>
 	</table>
 	</form>
+<script>
+(function () {
+	var banner = document.getElementById('userbanner-details');
+	if (banner) {
+		banner.addEventListener('toggle', function () {
+			if (!banner.open) return;
+			var img = document.getElementById('userpic');
+			if (img && img.dataset.src && !img.getAttribute('src')) {
+				img.setAttribute('src', img.dataset.src);
+			}
+		});
+	}
+
+	var tzDetails = document.getElementById('timezone-details');
+	var tzSelect = document.getElementById('timezone-select');
+	if (!tzDetails || !tzSelect) return;
+	tzDetails.addEventListener('toggle', function () {
+		if (!tzDetails.open || tzDetails.dataset.loaded === '1') return;
+		tzDetails.dataset.loaded = '1';
+		var selected = tzSelect.value;
+		fetch('game.php?page=settings&mode=timezones&ajax=1', { credentials: 'same-origin' })
+			.then(function (r) { return r.json(); })
+			.then(function (groups) {
+				tzSelect.innerHTML = '';
+				Object.keys(groups).forEach(function (continent) {
+					var optgroup = document.createElement('optgroup');
+					optgroup.label = continent;
+					var cities = groups[continent];
+					Object.keys(cities).forEach(function (value) {
+						var opt = document.createElement('option');
+						opt.value = value;
+						opt.textContent = cities[value];
+						if (value === selected) opt.selected = true;
+						optgroup.appendChild(opt);
+					});
+					tzSelect.appendChild(optgroup);
+				});
+			})
+			.catch(function () {
+				tzDetails.dataset.loaded = '0';
+			});
+	});
+})();
+</script>
 {/block}

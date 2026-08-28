@@ -49,13 +49,8 @@ $(document).ready(function() {
     interval	= window.setInterval(Buildlist, 1000);
 
 	window.setTimeout(function () {
-        if(time <= 0) return;
-
-        $('#progressbar').progressbar({
-            value: Math.max(100 - (resttime / time) * 100, 0.01)
-        });
-        $('.ui-progressbar-value').addClass('ui-corner-right').animate({width: "100%"}, resttime * 1000, "linear");
-    }, 5);
+		initQueueProgressBar('#progressbar', time, resttime);
+	}, 5);
 
 
 	Buildlist();

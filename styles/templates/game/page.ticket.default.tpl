@@ -22,6 +22,19 @@
 		<td>{$TicketInfo.time}</td>
 		<td>{if $TicketInfo.status == 0}<span style="color:green">{$LNG.ti_status_open}</span>{elseif $TicketInfo.status == 1}<span style="color:orange">{$LNG.ti_status_answer}</span>{else}<span style="color:red">{$LNG.ti_status_closed}</span>{/if}</td>
 	</tr>
+	{foreachelse}
+	<tr>
+		<td colspan="5">—</td>
+	</tr>
 	{/foreach}
+	{if $ticketPages > 1}
+	<tr>
+		<td colspan="5">
+			{if $ticketPage > 1}<a href="game.php?page=ticket&amp;ticketPage={$ticketPage-1}">&laquo;</a>{/if}
+			{$ticketPage} / {$ticketPages}
+			{if $ticketPage < $ticketPages}<a href="game.php?page=ticket&amp;ticketPage={$ticketPage+1}">&raquo;</a>{/if}
+		</td>
+	</tr>
+	{/if}
 </table>
 {/block}

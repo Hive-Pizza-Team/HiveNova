@@ -33,6 +33,13 @@ html {
   background-size: cover;
 }
 
+@media screen and (max-width: 699px) {
+  html {
+    background-image: url("img/bkd_page-mobile.jpg");
+    background-attachment: scroll;
+  }
+}
+
 body {
   /* background: rgba(13, 16, 20, 0.50); */
   /* color: #f0f0f8; */

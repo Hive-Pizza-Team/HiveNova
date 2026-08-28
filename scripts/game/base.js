@@ -331,6 +331,22 @@ function NotifyBox(text) {
 	showGameToast(text, 'notify-toast', 2500);
 }
 
+/** Build/research queue bar — replaces jQuery UI progressbar (removed in #362). */
+function initQueueProgressBar(selector, time, resttime) {
+	if (time <= 0) {
+		return;
+	}
+	var $bar = $(selector);
+	if (!$bar.length || $bar.children('.ui-progressbar-value').length) {
+		return;
+	}
+	var startPct = Math.max(100 - (resttime / time) * 100, 0.01);
+	$bar.addClass('ui-progressbar ui-widget ui-widget-content ui-corner-all');
+	var $fill = $('<div class="ui-progressbar-value ui-widget-header ui-corner-left">').appendTo($bar);
+	$fill.css('width', startPct + '%');
+	$fill.addClass('ui-corner-right').animate({ width: '100%' }, resttime * 1000, 'linear');
+}
+
 
 function UhrzeitAnzeigen() {
    $(".servertime").text(getFormatedDate(serverTime.getTime(), tdformat));
