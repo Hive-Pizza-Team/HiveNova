@@ -8,17 +8,17 @@ class EventFirehoseFeed
 {
 	public const LIMIT = 50;
 
-	public const JSON_KEYS = ['id', 'time', 'eventType', 'size', 'outcome'];
+	public const JSON_KEYS = ['id', 'time', 'eventType', 'size', 'outcome', 'headline'];
 
 	/**
 	 * @param array<string, string>|ArrayAccess $LNG
-	 * @return list<array{id: int, time: string, eventType: string, size: string, outcome: string}>
+	 * @return list<array{id: int, time: string, eventType: string, size: string, outcome: string, headline: string}>
 	 */
 	public static function fetch(int $universe, array|ArrayAccess $LNG, string $timezone, int $sinceId = 0): array
 	{
 		$limit = self::LIMIT;
 		if ($sinceId > 0) {
-			$sql = 'SELECT id, time, event_type, size_bucket, outcome
+			$sql = 'SELECT id, time, event_type, size_bucket, outcome, actor_name, target_name
 				FROM %%UNIVERSE_EVENTS%%
 				WHERE universe = :universe AND id > :sinceId
 				ORDER BY id ASC
@@ -28,7 +28,7 @@ class EventFirehoseFeed
 				':sinceId'  => $sinceId,
 			];
 		} else {
-			$sql = 'SELECT id, time, event_type, size_bucket, outcome
+			$sql = 'SELECT id, time, event_type, size_bucket, outcome, actor_name, target_name
 				FROM %%UNIVERSE_EVENTS%%
 				WHERE universe = :universe
 				ORDER BY id DESC
@@ -59,7 +59,7 @@ class EventFirehoseFeed
 	/**
 	 * @param array<string, mixed> $row
 	 * @param array<string, string>|ArrayAccess $LNG
-	 * @return array{id: int, time: string, eventType: string, size: string, outcome: string}
+	 * @return array{id: int, time: string, eventType: string, size: string, outcome: string, headline: string}
 	 */
 	public static function present(array $row, array|ArrayAccess $LNG, string $timezone): array
 	{
@@ -74,6 +74,33 @@ class EventFirehoseFeed
 			'eventType' => (string) ($LNG['ef_event_' . $eventType] ?? $LNG['ef_event_battle'] ?? 'Battle'),
 			'size'      => (string) ($LNG['ef_size_' . $eventType . '_' . $size] ?? $LNG['ef_size_' . $size] ?? $size),
 			'outcome'   => (string) ($LNG['ef_outcome_' . $outcome] ?? $outcome),
+			'headline'  => self::headline($row, $LNG),
 		];
+	}
+
+	/**
+	 * @param array<string, mixed> $row
+	 * @param array<string, string>|ArrayAccess $LNG
+	 */
+	public static function headline(array $row, array|ArrayAccess $LNG): string
+	{
+		$actor = EventFirehoseWriter::sanitizeName((string) ($row['actor_name'] ?? ''));
+		$target = EventFirehoseWriter::sanitizeName((string) ($row['target_name'] ?? ''));
+		$eventType = (string) ($row['event_type'] ?? EventFirehoseWriter::EVENT_BATTLE);
+
+		if ($eventType === EventFirehoseWriter::EVENT_MOON && $actor !== '') {
+			return sprintf((string) ($LNG['ef_headline_moon'] ?? '%s formed a moon'), $actor);
+		}
+		if ($eventType === EventFirehoseWriter::EVENT_FEAT && $actor !== '') {
+			return sprintf((string) ($LNG['ef_headline_feat'] ?? '%s claimed a feat'), $actor);
+		}
+		if ($actor !== '' && $target !== '') {
+			return sprintf((string) ($LNG['ef_headline_vs'] ?? '%s vs %s'), $actor, $target);
+		}
+		if ($actor !== '') {
+			return $actor;
+		}
+
+		return '';
 	}
 }

@@ -223,11 +223,12 @@
 	display: block;
 	width: 100%;
 	height: auto;
+	aspect-ratio: 16 / 10;
 	max-height: min(62vh, 560px);
-	object-fit: contain;
-	object-position: center center;
-	filter: saturate(1.05) contrast(1.04);
-	padding: 4% 10%;
+	object-fit: cover;
+	object-position: center 28%;
+	filter: saturate(1.06) contrast(1.05);
+	padding: 0;
 	box-sizing: border-box;
 }
 
@@ -322,7 +323,7 @@
 
 .lobby-feed-item {
 	display: grid;
-	grid-template-columns: 7.5rem 6.5rem minmax(4rem, 1fr) minmax(6rem, 1.2fr) 9rem;
+	grid-template-columns: 7rem minmax(8rem, 1.4fr) 5.5rem 4.5rem minmax(6rem, 1fr) 8.5rem;
 	gap: 8px;
 	align-items: center;
 	padding: 9px 4px;
@@ -341,9 +342,33 @@
 	color: #E31337;
 }
 
+.lobby-feed-headline {
+	font-weight: 700;
+	color: #f2f7fc;
+	letter-spacing: 0.01em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .lobby-feed-size {
 	color: #9fd0ff;
 	font-weight: 700;
+}
+
+.lobby-feed-type {
+	color: #7f96aa;
+	text-transform: uppercase;
+	font-size: 11px;
+	letter-spacing: 0.06em;
+}
+
+.lobby-feed-outcome {
+	color: #c5d7e6;
+}
+
+.lobby-feed-item--moon .lobby-feed-headline {
+	color: #d7e8ff;
 }
 
 .lobby-feed-time {
@@ -405,20 +430,22 @@
 
 	.lobby-hero-visual-frame img {
 		max-height: min(48vh, 420px);
-		object-fit: contain;
-		padding: 6% 12%;
+		object-fit: cover;
+		padding: 0;
 	}
 
 	.lobby-feed-item {
 		grid-template-columns: 1fr 1fr;
 		grid-template-areas:
 			"uni time"
+			"headline headline"
 			"size type"
 			"outcome outcome";
 	}
 
 	.lobby-feed-uni { grid-area: uni; }
 	.lobby-feed-time { grid-area: time; justify-self: end; }
+	.lobby-feed-headline { grid-area: headline; white-space: normal; }
 	.lobby-feed-size { grid-area: size; }
 	.lobby-feed-type { grid-area: type; }
 	.lobby-feed-outcome { grid-area: outcome; }

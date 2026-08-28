@@ -10,7 +10,7 @@
 {foreach $EventList as $row}
 <tr data-event-id="{$row.id}">
 	<td>{$row.time}</td>
-	<td>{$row.eventType}</td>
+	<td>{$row.headline|default:$row.eventType}</td>
 	<td>{$row.size}</td>
 	<td>{$row.outcome}</td>
 </tr>

@@ -183,7 +183,7 @@ class ShowIndexPage extends AbstractLoginPage
 			'prefetchUrls'			=> $prefetchUrls,
 			'activityEvents'		=> $activityEvents,
 			'activityPollUrl'		=> 'index.php?page=index&mode=activity&ajax=1',
-			'lobbyHeroImage'		=> 'styles/resource/images/login/HiveNova.png',
+			'lobbyHeroImage'		=> 'styles/resource/images/login/lobby-hero.jpg',
 			'lobbyHeroAlt'			=> $LNG['lobby_hero_alt'] ?? $config->game_name,
 			'lobbyHook'				=> (string) ($LNG['lobby_hook'] ?? 'Come get'),
 			'lobbyHookEm'			=> (string) ($LNG['lobby_hook_em'] ?? 'MOONed'),

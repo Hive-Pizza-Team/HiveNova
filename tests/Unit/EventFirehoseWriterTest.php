@@ -37,7 +37,7 @@ class EventFirehoseWriterTest extends TestCase
 
 	public function test_record_stores_enums_not_raw_units_or_rid(): void
 	{
-		EventFirehoseWriter::record(1, 1_700_000_000, 1_500_000, 'a');
+		EventFirehoseWriter::record(1, 1_700_000_000, 1_500_000, 'a', 'Alice', 'Bob');
 
 		$rows = $this->fake->achievement->universeEvents;
 		$this->assertCount(1, $rows);
@@ -45,9 +45,17 @@ class EventFirehoseWriterTest extends TestCase
 		$this->assertSame('battle', $row['event_type']);
 		$this->assertSame('medium', $row['size_bucket']);
 		$this->assertSame('attacker', $row['outcome']);
+		$this->assertSame('Alice', $row['actor_name']);
+		$this->assertSame('Bob', $row['target_name']);
 		$this->assertArrayNotHasKey('rid', $row);
 		$this->assertArrayNotHasKey('units', $row);
 		$this->assertArrayNotHasKey(':reportId', $row);
+	}
+
+	public function test_sanitize_name_strips_tags_and_trims(): void
+	{
+		$this->assertSame('Nova', EventFirehoseWriter::sanitizeName('  <b>Nova</b>  '));
+		$this->assertSame('', EventFirehoseWriter::sanitizeName('   '));
 	}
 
 	public function test_record_failure_does_not_throw(): void
@@ -68,7 +76,7 @@ class EventFirehoseWriterTest extends TestCase
 
 	public function test_record_moon_stores_formed_event(): void
 	{
-		EventFirehoseWriter::recordMoon(1, 1_700_000_000, 8500);
+		EventFirehoseWriter::recordMoon(1, 1_700_000_000, 8500, 'Luna');
 
 		$rows = $this->fake->achievement->universeEvents;
 		$this->assertCount(1, $rows);
@@ -76,6 +84,7 @@ class EventFirehoseWriterTest extends TestCase
 		$this->assertSame('moon', $row['event_type']);
 		$this->assertSame('large', $row['size_bucket']);
 		$this->assertSame('formed', $row['outcome']);
+		$this->assertSame('Luna', $row['actor_name']);
 		$this->assertArrayNotHasKey('rid', $row);
 		$this->assertArrayNotHasKey('diameter', $row);
 	}

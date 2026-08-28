@@ -36,6 +36,7 @@
 			{foreach $activityEvents as $event}
 			<li class="lobby-feed-item lobby-feed-item--{$event.eventType|lower|escape}" data-event-id="{$event.id}" data-ts="{$event.ts}">
 				<span class="lobby-feed-uni">{$event.universe|escape}</span>
+				{if $event.headline}<span class="lobby-feed-headline">{$event.headline|escape}</span>{/if}
 				<span class="lobby-feed-size">{$event.size|escape}</span>
 				<span class="lobby-feed-type">{$event.eventType|escape}</span>
 				<span class="lobby-feed-outcome">{$event.outcome|escape}</span>

@@ -214,7 +214,7 @@ $LNG['disclamerLabelNotice']		= 'Mais informações';
 
 $LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';
 $LNG['lobby_kicker'] = 'Free to play on Hive';
-$LNG['lobby_hero_alt'] = 'Moon — free space empire game on Hive';
+$LNG['lobby_hero_alt'] = 'In-game view of Moon — build, fight, and expand across the galaxy';
 $LNG['lobby_hero_caption'] = 'Built on Hive';
 $LNG['lobby_feed_title_one'] = '%s universe is live';
 $LNG['lobby_feed_title_other'] = '%s universes are live';

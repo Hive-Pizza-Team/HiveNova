@@ -290,6 +290,18 @@ class FeatService
 
     private static function broadcast(int $universe, string $featKey, int $userId, int $at): void
     {
+        $username = '';
+        try {
+            $winner = Database::get()->selectSingle(
+                'SELECT username FROM %%USERS%% WHERE id = :id;',
+                [':id' => $userId],
+                'username'
+            );
+            $username = is_string($winner) ? $winner : '';
+        } catch (Throwable $e) {
+            $username = '';
+        }
+
         try {
             $config = Config::get($universe);
             $config->feat_banner_key = $featKey;
@@ -307,7 +319,7 @@ class FeatService
         }
 
         try {
-            EventFirehoseWriter::recordFeat($universe, $at);
+            EventFirehoseWriter::recordFeat($universe, $at, $username);
         } catch (Throwable $e) {
             error_log('FeatService feed: ' . $e->getMessage());
         }

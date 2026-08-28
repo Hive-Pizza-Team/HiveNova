@@ -26,6 +26,7 @@ class LobbyActivityFeedTest extends TestCase
 			'php_tdformat' => 'Y-m-d',
 			'ef_event_battle' => 'Battle',
 			'ef_event_moon' => 'Moon',
+			'ef_event_feat' => 'Feat',
 			'ef_size_small' => 'Skirmish',
 			'ef_size_medium' => 'Clash',
 			'ef_size_large' => 'Major battle',
@@ -36,6 +37,9 @@ class LobbyActivityFeedTest extends TestCase
 			'ef_outcome_defender' => 'Defenders held',
 			'ef_outcome_draw' => 'Stalemate',
 			'ef_outcome_formed' => 'Formed',
+			'ef_headline_vs' => '%s vs %s',
+			'ef_headline_moon' => '%s formed a moon',
+			'ef_headline_feat' => '%s claimed a feat',
 		];
 	}
 
@@ -54,6 +58,8 @@ class LobbyActivityFeedTest extends TestCase
 			'event_type' => 'battle',
 			'size_bucket' => 'large',
 			'outcome' => 'attacker',
+			'actor_name' => 'Nova',
+			'target_name' => 'Marauder',
 		], $this->lng, 'UTC', [3 => 'Season Arena']);
 
 		$this->assertSame(LobbyActivityFeed::JSON_KEYS, array_keys($presented));
@@ -62,6 +68,23 @@ class LobbyActivityFeedTest extends TestCase
 		$this->assertSame(3, $presented['universeId']);
 		$this->assertSame('Season Arena', $presented['universe']);
 		$this->assertSame('Major battle', $presented['size']);
+		$this->assertSame('Nova vs Marauder', $presented['headline']);
+	}
+
+	public function test_present_moon_headline(): void
+	{
+		$presented = LobbyActivityFeed::present([
+			'id' => 2,
+			'universe' => 1,
+			'time' => 1_700_000_100,
+			'event_type' => 'moon',
+			'size_bucket' => 'large',
+			'outcome' => 'formed',
+			'actor_name' => 'Commander',
+		], $this->lng, 'UTC', [1 => 'Classic']);
+
+		$this->assertSame('Commander formed a moon', $presented['headline']);
+		$this->assertSame('Moon', $presented['eventType']);
 	}
 
 	public function test_fetch_across_universes(): void

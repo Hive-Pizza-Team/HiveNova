@@ -574,7 +574,18 @@ class PlayerUtil
 			':planetId'	=> $parentPlanet['id'],
 		));
 
-		EventFirehoseWriter::recordMoon((int) $universe, TIMESTAMP, (float) $diameter);
+		$actorName = '';
+		try {
+			$actorName = (string) $db->selectSingle(
+				'SELECT username FROM %%USERS%% WHERE id = :id;',
+				[':id' => (int) $userId],
+				'username'
+			);
+		} catch (\Throwable $e) {
+			$actorName = '';
+		}
+
+		EventFirehoseWriter::recordMoon((int) $universe, TIMESTAMP, (float) $diameter, $actorName);
 
 		return $moonId;
 	}
