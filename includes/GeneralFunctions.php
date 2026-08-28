@@ -797,9 +797,13 @@ function exceptionHandler($exception)
 		$ErrName = 'System';
 	}
 	
-	$ticketObj	= new \HiveNova\Core\SupportTickets;
-	$ticketID	= $ticketObj->createTicket($ErrSource, '1', $errorType[$errno]);
-	$ticketObj->createAnswer($ticketID, $ErrSource, $ErrName, $errorType[$errno], $errorText, 0);
+	try {
+		$ticketObj	= new \HiveNova\Core\SupportTickets;
+		$ticketID	= $ticketObj->createTicket($ErrSource, '1', $errorType[$errno]);
+		$ticketObj->createAnswer($ticketID, $ErrSource, $ErrName, $errorType[$errno], $errorText, 0);
+	} catch (\Throwable) {
+		// Support tickets need DB; if the original fault is PDO/connection, calling Database again would recurse.
+	}
 }
 /*
  *
