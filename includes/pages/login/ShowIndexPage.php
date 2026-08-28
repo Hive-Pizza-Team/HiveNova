@@ -5,6 +5,7 @@ namespace HiveNova\Page\Login;
 use HiveNova\Core\Database;
 use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Config;
+use HiveNova\Core\GameAssetPrefetchService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
@@ -129,6 +130,8 @@ class ShowIndexPage extends AbstractLoginPage
 			'cappublic'	=> $config->cappublic ?? '',
 			'capprivate'	=> $config->capprivate ?? '',
 		);
+		$prefetchUrls = (new GameAssetPrefetchService())->listUrls();
+
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
 			'defaultUniverse'		=> $this->getDefaultUniverseId(),
@@ -138,7 +141,8 @@ class ShowIndexPage extends AbstractLoginPage
 			'descHeader'			=> sprintf($LNG['loginWelcome'], $config->game_name),
 			'descText'				=> sprintf($LNG['loginServerDesc'], $config->game_name),
             'gameInformations'      => array_filter(explode("\n", (string) $LNG['gameInformations']), 'strlen'),
-			'loginInfo'				=> sprintf($LNG['loginInfo'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>')
+			'loginInfo'				=> sprintf($LNG['loginInfo'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
+			'prefetchUrls'			=> $prefetchUrls,
 		));
 
 		if ($loginErrorMessage) {

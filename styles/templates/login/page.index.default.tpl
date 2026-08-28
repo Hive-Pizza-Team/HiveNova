@@ -201,6 +201,8 @@
 {block name="script" append}
 <script>{if $code}alert({$code|default:0|json});{/if}</script>
 <link rel="stylesheet" type="text/css" href="styles/resource/css/login/register.css?v={$REV}">
+<script type="application/json" id="prefetch-assets-data">{$prefetchUrls|default:[]|json}</script>
+<script src="scripts/login/prefetch-assets.js?v={$REV}" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	var btns = document.querySelectorAll('.reg-tab-btn');
