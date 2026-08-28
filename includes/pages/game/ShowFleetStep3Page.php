@@ -243,6 +243,11 @@ class ShowFleetStep3Page extends AbstractGamePage
 			903 => min($TransportDeuterium, floor($PLANET[$resource[903]] - $consumption)),
 		);
 
+		// Persist accrued production before the locked DB deduction in dispatch().
+		if (isset($this->ecoObj)) {
+			list($USER, $PLANET) = $this->ecoObj->SavePlanetToDB($USER, $PLANET);
+		}
+
 		// Compute timing
 		$fleetStartTime  = $duration + TIMESTAMP;
 		$timeDifference  = round(max(0, $fleetStartTime - $ACSTime));

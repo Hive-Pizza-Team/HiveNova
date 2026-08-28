@@ -184,8 +184,8 @@ class PushNotificationServiceTest extends TestCase
 		$previousLng = $GLOBALS['LNG'] ?? null;
 		$GLOBALS['LNG'] = [
 			'push_expedition_title' => 'Expedition complete',
-			'push_expedition_body' => 'Your expedition has arrived.',
-			'push_expedition_choice_body' => 'Your expedition arrived with a choice to review.',
+			'push_expedition_body' => 'Your expedition has returned.',
+			'push_expedition_choice_body' => 'Your expedition returned with a choice to review.',
 		];
 		try {
 			$plain = PushNotificationService::expeditionResultMessage(false);

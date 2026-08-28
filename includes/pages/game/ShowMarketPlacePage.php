@@ -360,13 +360,6 @@ class ShowMarketPlacePage extends AbstractGamePage
 		$PLANET[$resource[902]]	-= $fleetResource[902];
 		$PLANET[$resource[903]]	-= $deutNeeded;
 
-		ResourceUpdate::adjustPlanetResourceBaseline(
-			(int) $PLANET['id'],
-			-(float) $fleetResource[901],
-			-(float) $fleetResource[902],
-			-(float) $deutNeeded
-		);
-
 		$LC = 0;
 		$HC = 0;
 		if(array_key_exists(202,$fleetArrayTMP))

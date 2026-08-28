@@ -77,13 +77,7 @@
 		</td>
         {$currentPlanet = $GalaxyRows[$planet]}
 		<td>
-			{if !empty($currentPlanet.canColonize)}
-			<a href="?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$planet}&amp;planettype=1&amp;target_mission=7">{$LNG["type_mission_7"]}</a>
-			{elseif $currentPlanet.colonizeBlockedReason == 'cap'}
-			{$LNG.gl_free_colony_cap_reached}
-			{else}
-			{$LNG.gl_free_astrotech_required}
-			{/if}
+			{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=30 height=30 alt='' preferLite=true loading="lazy"}
 		</td>
 		<td></td>
         <td></td>
@@ -226,7 +220,7 @@
 					<th colspan='2'>{$LNG.gl_debris_field} [{$galaxy}:{$system}:{$planet}]</th>
 				</tr>
 				<tr>
-					<td style='width:80px'>{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=75 height=75 style='width:75px' alt='' preferLite=true}</td>
+					<td style='width:80px'>{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=75 height=75 style='width:75px' alt=''}</td>
 					<td>
 						<table style='width:100%'>
 							<tr>
@@ -254,7 +248,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky" data-tooltip-content="{$smarty.capture.debrisTooltip|escape:'html'}">
-			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt='' preferLite=true loading="lazy"}
+			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt=''}
 			</a>
         {/if}
 		</td>
@@ -409,23 +403,11 @@
 		MaxFleetSetting = {$settings_fleetactions};
 	</script>
 	{if $dpath|strstr:'/hive/'}
-	{* Desktop-only: mobile tooltips skip Three.js previews — avoid downloading preview JS on small screens. *}
-	<script type="text/javascript">
-	(function () {
-		if (window.matchMedia('(max-width: 699px)').matches) {
-			return;
-		}
-		var utils = document.createElement('script');
-		utils.src = './scripts/game/galaxy-planet-preview-utils.js?v={$REV}';
-		utils.onload = function () {
-			var preview = document.createElement('script');
-			preview.src = './scripts/game/galaxy-planet-preview.js?v={$REV}';
-			preview.setAttribute('data-three-src', './scripts/threejs/three.min.js?v={$REV}');
-			preview.setAttribute('data-planet-src', './scripts/game/overview-planet.js?v={$REV}');
-			document.body.appendChild(preview);
-		};
-		document.body.appendChild(utils);
-	})();
-	</script>
+	<script type="text/javascript"
+		src="./scripts/game/galaxy-planet-preview-utils.js?v={$REV}"></script>
+	<script type="text/javascript"
+		src="./scripts/game/galaxy-planet-preview.js?v={$REV}"
+		data-three-src="./scripts/threejs/three.min.js?v={$REV}"
+		data-planet-src="./scripts/game/overview-planet.js?v={$REV}"></script>
 	{/if}
 {/block}
