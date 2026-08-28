@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FrequentLocationService;
+use HiveNova\Core\Session;
 
 /**
  *  2Moons 
@@ -27,6 +28,8 @@ use HiveNova\Core\FrequentLocationService;
 class ShowFleetStep1Page extends AbstractGamePage
 {
 	public static $requireModule = MODULE_FLEET_TABLE;
+
+	private const LIST_CACHE_TTL = 30;
 
 	function __construct() 
 	{
@@ -78,13 +81,11 @@ class ShowFleetStep1Page extends AbstractGamePage
 			'fleetRoom'	=> $FleetRoom,
 		);
 
-		$shortcutList	= $this->GetUserShotcut();
-		$colonyList 	= $this->GetColonyList();
-		$ACSList 		= $this->GetAvalibleACS();
-		$frequentLocationList = FrequentLocationService::listForUser(
-			(int) $USER['id'],
-			FrequentLocationService::ownBodiesFromPlanets($USER['PLANETS'] ?? [])
-		);
+		$lists = $this->loadFleetStep1Lists();
+		$shortcutList = $lists['shortcutList'];
+		$colonyList = $lists['colonyList'];
+		$ACSList = $lists['ACSList'];
+		$frequentLocationList = $lists['frequentLocationList'];
 		
 		if(!empty($shortcutList)) {
 			$shortcutAmount	= max(array_keys($shortcutList));
@@ -121,6 +122,8 @@ class ShowFleetStep1Page extends AbstractGamePage
 	public function saveShortcuts()
 	{
 		global $USER, $LNG;
+
+		$this->invalidateFleetStep1ListCache();
 		
 		if(!isset($_REQUEST['shortcut'])) {
 			$this->sendJSON($LNG['fl_shortcut_saved']);
@@ -172,11 +175,83 @@ class ShowFleetStep1Page extends AbstractGamePage
 		$this->sendJSON($LNG['fl_shortcut_saved']);
 	}
 	
+	/**
+	 * @return array{shortcutList: array, colonyList: list<array<string, mixed>>, ACSList: list<array<string, mixed>>, frequentLocationList: list<array<string, mixed>>}
+	 */
+	private function loadFleetStep1Lists(): array
+	{
+		global $USER;
+
+		$userId = (int) $USER['id'];
+		$cached = $this->getCachedFleetStep1Lists($userId);
+		if ($cached !== null) {
+			return $cached;
+		}
+
+		$ownBodies = FrequentLocationService::ownBodiesFromPlanets($USER['PLANETS'] ?? []);
+		$lists = [
+			'shortcutList'         => $this->GetUserShotcut(),
+			'colonyList'           => $this->GetColonyList(),
+			'ACSList'              => $this->GetAvalibleACS(),
+			'frequentLocationList' => FrequentLocationService::listForUser($userId, $ownBodies),
+		];
+
+		$this->cacheFleetStep1Lists($userId, $lists);
+
+		return $lists;
+	}
+
+	/**
+	 * @return array{shortcutList: array, colonyList: list<array<string, mixed>>, ACSList: list<array<string, mixed>>, frequentLocationList: list<array<string, mixed>>}|null
+	 */
+	private function getCachedFleetStep1Lists(int $userId): ?array
+	{
+		$session = Session::load();
+		if (!isset($session->fleetStep1Lists) || !is_array($session->fleetStep1Lists)) {
+			return null;
+		}
+
+		$cached = $session->fleetStep1Lists;
+		if (($cached['userId'] ?? 0) !== $userId) {
+			return null;
+		}
+
+		$cachedAt = (int) ($cached['at'] ?? 0);
+		if ($cachedAt <= 0 || (TIMESTAMP - $cachedAt) >= self::LIST_CACHE_TTL) {
+			return null;
+		}
+
+		return $cached['data'] ?? null;
+	}
+
+	/**
+	 * @param array{shortcutList: array, colonyList: list<array<string, mixed>>, ACSList: list<array<string, mixed>>, frequentLocationList: list<array<string, mixed>>} $lists
+	 */
+	private function cacheFleetStep1Lists(int $userId, array $lists): void
+	{
+		$session = Session::load();
+		$session->fleetStep1Lists = [
+			'userId' => $userId,
+			'at'     => TIMESTAMP,
+			'data'   => $lists,
+		];
+	}
+
+	private function invalidateFleetStep1ListCache(): void
+	{
+		$session = Session::load();
+		unset($session->fleetStep1Lists);
+	}
+
 	private function GetColonyList()
 	{
 		global $PLANET, $USER;
 		
 		$ColonyList	= array();
+
+		if (empty($USER['PLANETS']) || count($USER['PLANETS']) <= 1) {
+			return $ColonyList;
+		}
 		
 		foreach($USER['PLANETS'] as $CurPlanetID => $CurPlanet)
 		{
@@ -204,7 +279,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 
         $db = Database::get();
 
-        $sql = "SELECT * FROM %%SHORTCUTS%% WHERE ownerID = :userID;";
+        $sql = "SELECT shortcutID, name, galaxy, `system`, planet, type FROM %%SHORTCUTS%% WHERE ownerID = :userID;";
         $ShortcutResult = $db->select($sql, array(
             ':userID'   => $USER['id']
         ));
@@ -221,8 +296,20 @@ class ShowFleetStep1Page extends AbstractGamePage
 	private function GetAvalibleACS()
 	{
 		global $USER;
+
+		if (!isModuleAvailable(MODULE_MISSION_ACS)) {
+			return array();
+		}
 		
 		$db = Database::get();
+
+		if (!$db->selectSingle(
+			'SELECT 1 AS ok FROM %%USERS_ACS%% WHERE userID = :userID LIMIT 1;',
+			[':userID' => $USER['id']],
+			'ok'
+		)) {
+			return array();
+		}
 
         $maxFleets = (int) Config::get()->max_fleets_per_acs;
         $sql = "SELECT acs.id, acs.name, planet.galaxy, planet.system, planet.planet, planet.planet_type

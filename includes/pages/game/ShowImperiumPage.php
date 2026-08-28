@@ -38,8 +38,14 @@ class ShowImperiumPage extends AbstractGamePage
         $db = Database::get();
 		
 		$order = $USER['planet_sort_order'] == 1 ? 'DESC' : 'ASC';
-		
-		$sql = "SELECT * FROM %%PLANETS%% WHERE id_owner = :userID AND destruyed = '0' ORDER BY ";
+
+		$selectColumns = self::imperiumPlanetSelectColumns($resource, $reslist);
+		$selectList = implode(', ', array_map(
+			static fn(string $col): string => $col === 'system' ? '`system`' : $col,
+			$selectColumns
+		));
+
+		$sql = 'SELECT ' . $selectList . ' FROM %%PLANETS%% WHERE id_owner = :userID AND destruyed = \'0\' ORDER BY ';
 
 		match ($USER['planet_sort']) {
             2 => $sql .= 'name '.$order,
@@ -58,6 +64,12 @@ class ShowImperiumPage extends AbstractGamePage
 
 		foreach ($PlanetsRAW as $CPLANET)
 		{
+			// Current planet was already eco'd in AbstractGamePage this request.
+			if ((int) $CPLANET['id'] === (int) $PLANET['id']) {
+				$PLANETS[] = array_merge($CPLANET, $PLANET);
+				continue;
+			}
+
 			// Only persist when a queue may complete — avoid N UPDATEs on a read-only empire view.
 			$shouldSave = self::planetEcoNeedsPersist($USER, $CPLANET);
 			list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, $shouldSave);
@@ -184,6 +196,58 @@ class ShowImperiumPage extends AbstractGamePage
 		));
 
 		$this->display('page.empire.default.tpl');
+	}
+
+	/**
+	 * Planet columns required for the empire overview: template fields, matrix
+	 * buckets, CalcResource production, and queue/persist gates.
+	 *
+	 * @param array<int|string, string> $resource
+	 * @param array<string, list<int>> $reslist
+	 * @return list<string>
+	 */
+	public static function imperiumPlanetSelectColumns(array $resource, array $reslist): array
+	{
+		$columns = [
+			'id', 'name', 'image',
+			'galaxy', 'system', 'planet', 'planet_type',
+			'field_current', 'field_max', 'temp_max',
+			'metal', 'crystal', 'deuterium', 'energy', 'energy_used',
+			'metal_perhour', 'crystal_perhour', 'deuterium_perhour',
+			'metal_max', 'crystal_max', 'deuterium_max',
+			'last_update', 'eco_hash',
+			'b_hangar_id', 'b_hangar', 'b_building', 'b_building_id',
+		];
+
+		foreach (['build', 'fleet', 'defense', 'missile', 'storage', 'prod'] as $bucket) {
+			if (empty($reslist[$bucket]) || !is_array($reslist[$bucket])) {
+				continue;
+			}
+			foreach ($reslist[$bucket] as $elementId) {
+				$col = $resource[$elementId] ?? null;
+				if ($col !== null && $col !== '') {
+					$columns[] = $col;
+				}
+			}
+		}
+
+		if (!empty($reslist['prod']) && is_array($reslist['prod'])) {
+			foreach ($reslist['prod'] as $elementId) {
+				$col = $resource[$elementId] ?? null;
+				if ($col !== null && $col !== '') {
+					$columns[] = $col . '_porcent';
+				}
+			}
+		}
+
+		foreach ([33, 41] as $elementId) {
+			$col = $resource[$elementId] ?? null;
+			if ($col !== null && $col !== '') {
+				$columns[] = $col;
+			}
+		}
+
+		return array_values(array_unique($columns));
 	}
 
 	/**

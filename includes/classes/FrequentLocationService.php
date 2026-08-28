@@ -124,9 +124,14 @@ class FrequentLocationService
 	 */
 	public static function listForUser(int $ownerId, array $ownBodies): array
 	{
+		// Fetch only enough rows to fill MAX_RECENT after filtering own colonies.
+		$limit = self::MAX_RECENT + count($ownBodies);
 		$rows = Database::get()->select(
-			'SELECT galaxy, `system`, planet, type, lastUsed FROM %%FREQUENT_LOCATIONS%% WHERE ownerID = :ownerID ORDER BY lastUsed DESC, id DESC;',
-			[':ownerID' => $ownerId]
+			'SELECT galaxy, `system`, planet, type, lastUsed FROM %%FREQUENT_LOCATIONS%% WHERE ownerID = :ownerID ORDER BY lastUsed DESC, id DESC LIMIT :limit;',
+			[
+				':ownerID' => $ownerId,
+				':limit'   => $limit,
+			]
 		);
 
 		$locations = [];
@@ -145,6 +150,10 @@ class FrequentLocationService
 				'type'     => (int) $row['type'],
 				'lastUsed' => (int) $row['lastUsed'],
 			];
+
+			if (count($locations) >= self::MAX_RECENT) {
+				break;
+			}
 		}
 
 		return $locations;

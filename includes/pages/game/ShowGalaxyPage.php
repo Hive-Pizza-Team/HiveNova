@@ -112,6 +112,8 @@ class ShowGalaxyPage extends AbstractGamePage
 			$THEME->getTheme()
 		);
 
+		$galaxyCompact = (($_COOKIE['hn_compact'] ?? '') === '1');
+
         $this->tplObj->loadscript('galaxy.js');
         $this->assign(array(
 			'GalaxyRows'				=> $Result,
@@ -136,6 +138,7 @@ class ShowGalaxyPage extends AbstractGamePage
 			'planet_type' 				=> $PLANET['planet_type'],
             'max_planets'               => $config->max_planets,
 			'missileSelector'			=> $missileSelector,
+			'galaxyCompact'				=> $galaxyCompact,
 			'ShortStatus'				=> array(
 				'vacation'					=> $LNG['gl_short_vacation'],
 				'banned'					=> $LNG['gl_short_ban'],
@@ -147,7 +150,9 @@ class ShowGalaxyPage extends AbstractGamePage
 				'friend'					=> $LNG['gl_short_friend'],
 				'member'					=> $LNG['gl_short_member'],
 			),
-			'controllingAlliance'		=> $galaxyRows->getSystemControlData($galaxy, $system)
+			'controllingAlliance'		=> $galaxyCompact
+				? '-'
+				: $galaxyRows->getSystemControlData($galaxy, $system),
 		));
 		
 		$this->display('page.galaxy.default.tpl');

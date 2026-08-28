@@ -370,6 +370,14 @@ function UhrzeitAnzeigen() {
 })();
 
 $(function() {
+	// Let PHP skip mobile-hidden work on the next request (galaxy system control, etc.).
+	if (typeof $.cookie === 'function') {
+		var compact = isMobileViewport() ? '1' : '0';
+		if ($.cookie('hn_compact') !== compact) {
+			$.cookie('hn_compact', compact, { path: '/', expires: 7 });
+		}
+	}
+
 	$('#drop-admin').on('click', function() {
 		$.get('admin.php?page=logout', function() {
 			$('.globalWarning').animate({

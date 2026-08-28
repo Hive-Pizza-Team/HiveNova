@@ -13,7 +13,7 @@
 </div>
 
 <div class="planetSelectorWrapper">
-	<a href="game.php?page=overview">{include file="shared.planet-thumb.tpl" texture=$image dpath=$dpath width=50 height=50 alt=$LNG.lm_overview}</a>
+	<a href="game.php?page=overview">{include file="shared.planet-thumb.tpl" texture=$image dpath=$dpath width=50 height=50 alt=$LNG.lm_overview preferLite=true}</a>
 	<div class="planetSelectorName" for="planetSelector"></div>
 	<div class="no-mobile">&nbsp;</div>
 	<div class="no-mobile">&nbsp;</div>
@@ -125,7 +125,7 @@
 			   <div>{$LNG.tech.615} <b>{$username}</b></div>
 			</td>
 			<td id="planetSelectorWrapper">
-			   {include file="shared.planet-thumb.tpl" texture=$image dpath=$dpath width=50 height=50 alt=''}
+			   {include file="shared.planet-thumb.tpl" texture=$image dpath=$dpath width=50 height=50 alt='' preferLite=true}
 				<label for="planetSelector"></label>
 				<select id="planetSelector">
 					{html_options options=$PlanetSelect selected=$current_pid}

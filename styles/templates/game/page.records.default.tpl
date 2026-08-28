@@ -4,6 +4,7 @@
         <tr>
             <th colspan="3" style="text-align:center;">{$LNG.rec_last_update_on}: {$update}</th>
         </tr>
+        {if $buildList}
         <tr>
             <th width="33%">{$LNG.tech.0}</th>
             <th width="33%">{$LNG.rec_players}</th>
@@ -16,6 +17,8 @@
             <td>{$elementRow[0].level|number}</td>
         </tr>
         {/foreach}
+        {/if}
+        {if $researchList}
         <tr>
             <th>{$LNG.tech.100}</th>
             <th>{$LNG.rec_players}</th>
@@ -28,6 +31,8 @@
             <td>{$elementRow[0].level|number}</td>
         </tr>
         {/foreach}
+        {/if}
+        {if $fleetList}
         <tr>
             <th>{$LNG.tech.200}</th>
             <th>{$LNG.rec_players}</th>
@@ -40,6 +45,8 @@
             <td>{$elementRow[0].level|number}</td>
         </tr>
         {/foreach}
+        {/if}
+        {if $defenseList}
         <tr>
             <th>{$LNG.tech.400}</th>
             <th>{$LNG.rec_players}</th>
@@ -52,6 +59,8 @@
             <td>{$elementRow[0].level|number}</td>
         </tr>
         {/foreach}
+        {/if}
+        {if $officerList}
         <tr>
             <th>{$LNG.tech.600}</th>
             <th>{$LNG.rec_players}</th>
@@ -64,6 +73,7 @@
             <td>{$elementRow[0].level|number}</td>
         </tr>
         {/foreach}
+        {/if}
     </tbody>
 </table>
 {/block}

@@ -76,9 +76,7 @@
 			{/if}
 		</td>
         {$currentPlanet = $GalaxyRows[$planet]}
-		<td>
-			{include file="shared.planet-thumb.tpl" texture='unknown' dpath=$dpath width=30 height=30 alt='' preferLite=true loading="lazy"}
-		</td>
+		<td></td>
 		<td></td>
         <td></td>
         <td></td>
@@ -401,7 +399,7 @@
 		status_fail		= '{$LNG.gl_ajax_status_fail}';
 		MaxFleetSetting = {$settings_fleetactions};
 	</script>
-	{if $dpath|strstr:'/hive/'}
+	{if $dpath|strstr:'/hive/' && empty($galaxyCompact)}
 	<script type="text/javascript"
 		src="./scripts/game/galaxy-planet-preview-utils.js?v={$REV}"></script>
 	<script type="text/javascript"
