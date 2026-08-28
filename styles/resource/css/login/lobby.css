@@ -391,7 +391,16 @@
 
 	.lobby-hero-visual {
 		order: -1;
-		min-height: min(38vh, 320px);
+		min-height: min(42vh, 340px);
+		margin-top: 4px;
+		/* keep map clear of page chrome / rounded clip */
+		overflow: hidden;
+	}
+
+	.lobby-viz {
+		inset: 8px 6px 10px;
+		width: auto;
+		height: auto;
 	}
 
 	.lobby-feed-item {
