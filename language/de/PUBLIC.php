@@ -219,3 +219,4 @@ $LNG['lobby_feed_live'] = 'Live';
 $LNG['lobby_feed_empty'] = 'Waiting for the next strike…';
 $LNG['lobby_hook'] = 'Come get';
 $LNG['lobby_hook_em'] = 'MOONed';
+$LNG['lobby_viz_label'] = 'Live fleets across open universes';

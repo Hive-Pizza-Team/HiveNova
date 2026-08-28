@@ -5,6 +5,7 @@ namespace HiveNova\Page\Login;
 use HiveNova\Core\Database;
 use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Config;
+use HiveNova\Core\FleetVizSnapshotService;
 use HiveNova\Core\GameAssetPrefetchService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\LobbyActivityFeed;
@@ -165,6 +166,8 @@ class ShowIndexPage extends AbstractLoginPage
 			(string) ($LNG[$feedTitleKey] ?? '%s universes are live'),
 			number_format($liveUniverseCount)
 		);
+		$lobbyVizConfig = (new FleetVizSnapshotService())->forOpenUniverses();
+		$lobbyVizConfigJson = json_encode($lobbyVizConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
@@ -183,8 +186,7 @@ class ShowIndexPage extends AbstractLoginPage
 			'prefetchUrls'			=> $prefetchUrls,
 			'activityEvents'		=> $activityEvents,
 			'activityPollUrl'		=> 'index.php?page=index&mode=activity&ajax=1',
-			'lobbyHeroImage'		=> 'styles/resource/images/login/lobby-hero.jpg',
-			'lobbyHeroAlt'			=> $LNG['lobby_hero_alt'] ?? $config->game_name,
+			'lobbyVizConfigJson'		=> $lobbyVizConfigJson,
 			'lobbyHook'				=> (string) ($LNG['lobby_hook'] ?? 'Come get'),
 			'lobbyHookEm'			=> (string) ($LNG['lobby_hook_em'] ?? 'MOONed'),
 		));

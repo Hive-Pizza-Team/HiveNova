@@ -13,16 +13,9 @@
 			</div>
 			<ul class="lobby-bullets" id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul>
 		</div>
-		<figure class="lobby-hero-visual">
-			<div class="lobby-hero-stage">
-				<div class="lobby-hero-dvd lobby-hero-dvd--x">
-					<div class="lobby-hero-dvd lobby-hero-dvd--y">
-						<div class="lobby-hero-visual-frame">
-							<img src="{$lobbyHeroImage}" alt="{$lobbyHeroAlt|escape}" width="960" height="540" loading="eager" decoding="async">
-						</div>
-					</div>
-				</div>
-			</div>
+		<figure class="lobby-hero-visual" aria-label="{$LNG.lobby_viz_label|escape}">
+			<div id="lobby-viz" class="lobby-viz" role="img" aria-hidden="true"></div>
+			<script type="application/json" id="lobby-viz-config">{$lobbyVizConfigJson nofilter}</script>
 		</figure>
 	</section>
 
@@ -214,6 +207,7 @@
 <script type="application/json" id="prefetch-assets-data">{$prefetchUrls|default:[]|json}</script>
 <script src="scripts/login/prefetch-assets.js?v={$REV}" defer></script>
 <script src="scripts/login/lobby-feed.js?v={$REV}" defer></script>
+<script src="scripts/login/lobby-viz.js?v={$REV}" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	var btns = document.querySelectorAll('.reg-tab-btn');

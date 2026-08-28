@@ -159,77 +159,41 @@
 .lobby-hero-visual {
 	margin: 0;
 	position: relative;
-	background: transparent;
+	min-height: min(52vh, 480px);
+	border: 1px solid rgba(227, 19, 55, 0.28);
+	background:
+		radial-gradient(ellipse at 30% 40%, rgba(227, 19, 55, 0.14), transparent 55%),
+		radial-gradient(ellipse at 70% 60%, rgba(40, 90, 160, 0.18), transparent 50%),
+		rgba(3, 10, 18, 0.72);
+	box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+	overflow: hidden;
 	animation: lobby-visual-in 0.9s ease both;
 }
 
-/* Room for a tiny DVD-style drift without escaping the column */
-.lobby-hero-stage {
-	overflow: hidden;
-	padding: 14px;
-}
-
-.lobby-hero-dvd--x {
-	animation: lobby-dvd-x 19s linear infinite alternate;
-	will-change: transform;
-}
-
-.lobby-hero-dvd--y {
-	animation: lobby-dvd-y 13s linear infinite alternate;
-	will-change: transform;
-}
-
-@keyframes lobby-dvd-x {
-	from { transform: translateX(-12px); }
-	to   { transform: translateX(12px); }
-}
-
-@keyframes lobby-dvd-y {
-	from { transform: translateY(-10px); }
-	to   { transform: translateY(10px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.lobby-hero-dvd--x,
-	.lobby-hero-dvd--y {
-		animation: none;
-	}
-}
-
-/* Hive-hex frame: flat-top hex, wide enough to hold the logo */
-.lobby-hero-visual-frame {
-	position: relative;
-	overflow: hidden;
-	background: #050e18;
-	/* wide flat-top hexagon — Hive mark language without crushing the art */
-	clip-path: polygon(12% 0%, 88% 0%, 100% 50%, 88% 100%, 12% 100%, 0% 50%);
-	-webkit-clip-path: polygon(12% 0%, 88% 0%, 100% 50%, 88% 100%, 12% 100%, 0% 50%);
-	filter:
-		drop-shadow(0 0 1px rgba(227, 19, 55, 0.95))
-		drop-shadow(0 0 12px rgba(227, 19, 55, 0.35))
-		drop-shadow(0 18px 36px rgba(0, 0, 0, 0.55));
-}
-
-.lobby-hero-visual-frame::before {
-	content: "";
+.lobby-viz {
 	position: absolute;
 	inset: 0;
-	pointer-events: none;
-	background: linear-gradient(135deg, rgba(227, 19, 55, 0.18), transparent 42%, transparent 58%, rgba(227, 19, 55, 0.12));
-	z-index: 1;
+	width: 100%;
+	height: 100%;
 }
 
-.lobby-hero-visual-frame img {
+.lobby-viz canvas {
 	display: block;
 	width: 100%;
-	height: auto;
-	aspect-ratio: 16 / 10;
-	max-height: min(62vh, 560px);
-	object-fit: cover;
-	object-position: center 28%;
-	filter: saturate(1.06) contrast(1.05);
-	padding: 0;
-	box-sizing: border-box;
+	height: 100%;
+}
+
+.lobby-viz-labels {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.lobby-viz.is-fallback,
+.lobby-viz.is-empty {
+	background: transparent;
 }
 
 .lobby-hero-hook {
@@ -426,12 +390,7 @@
 
 	.lobby-hero-visual {
 		order: -1;
-	}
-
-	.lobby-hero-visual-frame img {
-		max-height: min(48vh, 420px);
-		object-fit: cover;
-		padding: 0;
+		min-height: min(38vh, 320px);
 	}
 
 	.lobby-feed-item {
