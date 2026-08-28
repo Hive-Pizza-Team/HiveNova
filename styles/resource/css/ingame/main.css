@@ -670,10 +670,13 @@ div#disclamer {
 
 .ui-progressbar {
     height: 10px !important;
+    overflow: hidden;
+    text-align: left;
 }
 
 .ui-progressbar-value {
     margin: 0;
+    height: 100%;
 }
 
 #traderContainer {
