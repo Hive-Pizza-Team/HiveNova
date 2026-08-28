@@ -4,6 +4,7 @@ namespace HiveNova\Page\Login;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
@@ -105,7 +106,9 @@ class ShowRegisterPage extends AbstractLoginPage
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,
 			'universeSeasonal'	=> $universeSeasonal,
-			'defaultUniverse'	=> $this->getDefaultUniverseId(true),
+			'defaultUniverse'		=> $this->getDefaultEmailUniverseId(true),
+			'defaultEmailUniverse'	=> $this->getDefaultEmailUniverseId(true),
+			'defaultHiveUniverse'	=> $this->getDefaultHiveUniverseId(true),
 			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], 6),
 			'registerRulesDesc'			=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
 			'registerTabEmail'			=> $LNG['registerTabEmail'],
@@ -355,11 +358,14 @@ class ShowRegisterPage extends AbstractLoginPage
 		));
 
 		$validationID	= $db->lastInsertId();
-		$verifyURL	= 'index.php?page=vertify&i='.$validationID.'&k='.$validationKey;
+		$universeId	= (int) Universe::current();
+		// Relative redirect stays on the current /uniN/ rewrite context.
+		$verifyPath	= 'index.php?page=vertify&i='.$validationID.'&k='.$validationKey.'&uni='.$universeId;
+		$verifyURL	= EmailRegistrationService::buildVerifyUrl($universeId, (int) $validationID, $validationKey);
 		
 		if($config->user_valid == 0 || !empty($externalAuthUID))
 		{
-			$this->redirectTo($verifyURL);
+			$this->redirectTo($verifyPath);
 		}
 		else
 		{
@@ -375,7 +381,7 @@ class ShowRegisterPage extends AbstractLoginPage
 				$userName,
 				$password,
 				$config->game_name.' - '.$config->uni_name,
-				HTTP_PATH.$verifyURL,
+				$verifyURL,
 				$config->smtp_sendmail,
 			), $MailRAW);
 

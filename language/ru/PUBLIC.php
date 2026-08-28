@@ -208,3 +208,13 @@ $LNG['loginHiveAccount'] = 'Учётная запись Hive';
 $LNG['loginKeychainButton'] = 'Войти через Keychain';
 
 $LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';
+$LNG['lobby_kicker'] = 'Free to play on Hive';
+$LNG['lobby_hero_alt'] = 'Moon — free space empire game on Hive';
+$LNG['lobby_hero_caption'] = 'Built on Hive';
+$LNG['lobby_feed_title_one'] = '%s universe is live';
+$LNG['lobby_feed_title_other'] = '%s universes are live';
+$LNG['lobby_feed_sub'] = 'Recent battles and moons across every open universe.';
+$LNG['lobby_feed_live'] = 'Live';
+$LNG['lobby_feed_empty'] = 'Waiting for the next strike…';
+$LNG['lobby_hook'] = 'Come get';
+$LNG['lobby_hook_em'] = 'MOONed';

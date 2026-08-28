@@ -183,4 +183,78 @@ class LanguageTest extends TestCase
         // After unset, offsetGet should return key name as fallback
         $this->assertSame('temp', $this->lng['temp']);
     }
+
+    // -------------------------------------------------------------------------
+    // Accept-Language preference
+    // -------------------------------------------------------------------------
+
+    public function testPreferredFromAcceptLanguagePicksPrimaryMatch(): void
+    {
+        $allowed = ['en', 'de', 'fr', 'es'];
+        $this->assertSame('de', Language::preferredFromAcceptLanguage('de-DE,de;q=0.9,en;q=0.8', $allowed));
+        $this->assertSame('fr', Language::preferredFromAcceptLanguage('fr-FR,fr;q=0.9', $allowed));
+        $this->assertSame('en', Language::preferredFromAcceptLanguage('en-US,en;q=0.9', $allowed));
+    }
+
+    public function testPreferredFromAcceptLanguageRespectsQValues(): void
+    {
+        $allowed = ['en', 'de', 'fr'];
+        // Higher q wins even if listed later
+        $this->assertSame('de', Language::preferredFromAcceptLanguage('fr;q=0.4,de;q=0.9,en;q=0.2', $allowed));
+    }
+
+    public function testPreferredFromAcceptLanguageReturnsNullWhenNoMatch(): void
+    {
+        $this->assertNull(Language::preferredFromAcceptLanguage('ja-JP,ja;q=0.9', ['en', 'de']));
+        $this->assertNull(Language::preferredFromAcceptLanguage('', ['en']));
+        $this->assertNull(Language::preferredFromAcceptLanguage('en-US', []));
+    }
+
+    public function testPreferredFromAcceptLanguageKeepsOrderOnEqualQ(): void
+    {
+        $allowed = ['en', 'de', 'fr'];
+        // Equal q → stable enough that first listed among equals wins after sort
+        $this->assertContains(
+            Language::preferredFromAcceptLanguage('de;q=0.8,fr;q=0.8', $allowed),
+            ['de', 'fr']
+        );
+    }
+
+    public function testGetUserAgentLanguageUsesAcceptLanguageWhenNoCookie(): void
+    {
+        $savedRequest = $_REQUEST;
+        $savedCookie = $_COOKIE;
+        $savedServer = $_SERVER;
+        unset($_REQUEST['lang'], $_COOKIE['lang']);
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'de-DE,de;q=0.9,en;q=0.5';
+
+        try {
+            $lng = new Language(null);
+            $result = $lng->getUserAgentLanguage();
+            $this->assertSame('de', $result);
+            $this->assertSame('de', $lng->getLanguage());
+        } finally {
+            $_REQUEST = $savedRequest;
+            $_COOKIE = $savedCookie;
+            $_SERVER = $savedServer;
+        }
+    }
+
+    public function testGetUserAgentLanguageReturnsFalseWhenAcceptLanguageMisses(): void
+    {
+        $savedRequest = $_REQUEST;
+        $savedCookie = $_COOKIE;
+        $savedServer = $_SERVER;
+        unset($_REQUEST['lang'], $_COOKIE['lang']);
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ja-JP,ja;q=0.9';
+
+        try {
+            $lng = new Language(null);
+            $this->assertFalse($lng->getUserAgentLanguage());
+        } finally {
+            $_REQUEST = $savedRequest;
+            $_COOKIE = $savedCookie;
+            $_SERVER = $savedServer;
+        }
+    }
 }

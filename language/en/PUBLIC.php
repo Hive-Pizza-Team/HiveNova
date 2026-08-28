@@ -30,7 +30,7 @@ $LNG['siteTitleLostPassword']		= 'Lost Password?';
 
 // Public SEO (EN is fallback for other languages)
 $LNG['metaTitleHome']				= '%s — Free Hive browser space strategy game';
-$LNG['metaDescriptionIndex']		= 'Multiplayer Orbiting Optimization Network (MOON). Free-to-play space empire browser game on Hive. Build fleets, ally up, and come get mooned!';
+$LNG['metaDescriptionIndex']		= 'Free-to-play Hive space strategy browser game. Build fleets, ally up, fight for the galaxy — come get mooned!';
 $LNG['metaDescriptionRegister']		= 'Create your free %s account. Play in any browser — no download. Register with email or Hive Keychain.';
 $LNG['metaDescriptionRules']		= 'Official %s game rules: accounts, multi-accounting, bashing, bugs, and fair play.';
 $LNG['metaDescriptionScreens']		= 'Screenshots from %s — the free Hive space strategy browser game.';
@@ -103,7 +103,7 @@ $LNG['loginPassword']				= 'Password';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'With the login I accept the %s.';
 $LNG['loginWelcome']				= 'Welcome to %s';
-$LNG['loginServerDesc']				= '%s is a real-time space strategy game.';
+$LNG['loginServerDesc']				= '%s is a real-time space empire game on Hive — free to play in any browser.';
 $LNG['loginHiveAccount']			= 'Hive Account';
 $LNG['loginKeychainButton']			= 'Sign in with Keychain';
 
@@ -212,3 +212,13 @@ $LNG['disclamerLabelMail']			= 'Support Email:';
 $LNG['disclamerLabelNotice']		= 'More information';
 
 $LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';
+$LNG['lobby_kicker'] = 'Free to play on Hive';
+$LNG['lobby_hero_alt'] = 'Moon — free space empire game on Hive';
+$LNG['lobby_hero_caption'] = 'Built on Hive';
+$LNG['lobby_feed_title_one'] = '%s universe is live';
+$LNG['lobby_feed_title_other'] = '%s universes are live';
+$LNG['lobby_feed_sub'] = 'Recent battles and moons across every open universe.';
+$LNG['lobby_feed_live'] = 'Live';
+$LNG['lobby_feed_empty'] = 'Waiting for the next strike…';
+$LNG['lobby_hook'] = 'Come get';
+$LNG['lobby_hook_em'] = 'MOONed';

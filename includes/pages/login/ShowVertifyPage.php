@@ -4,9 +4,9 @@ namespace HiveNova\Page\Login;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
-use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Mail;
 
@@ -41,25 +41,15 @@ class ShowVertifyPage extends AbstractLoginPage
 		$validationID	= HTTP::_GP('i', 0);
 		$validationKey	= HTTP::_GP('k', '');
 
-		$db = Database::get();
+		$userData = EmailRegistrationService::findPendingValidation($validationID, $validationKey);
 
-		$sql = "SELECT * FROM %%USERS_VALID%%
-		WHERE validationID	= :validationID
-		AND validationKey	= :validationKey
-		AND universe		= :universe;";
-
-		$userData = $db->selectSingle($sql, array(
-			':validationKey'	=> $validationKey,
-			':validationID'		=> $validationID,
-			':universe'			=> Universe::current()
-		));
-
-		if(empty($userData))
+		if($userData === false)
 		{
 			$this->printMessage($LNG['vertifyNoUserFound']);
 		}
 
-		$config	= Config::get();
+		$db = Database::get();
+		$config	= Config::get((int) $userData['universe']);
 
 		$sql = "DELETE FROM %%USERS_VALID%% WHERE validationID = :validationID;";
 		$db->delete($sql, array(
@@ -71,7 +61,7 @@ class ShowVertifyPage extends AbstractLoginPage
 		if($config->mail_active == 1)
 		{
 			
-			$MailSubject	= sprintf($LNG['registerMailCompleteTitle'], $config->game_name, Universe::current());
+			$MailSubject	= sprintf($LNG['registerMailCompleteTitle'], $config->game_name, $userData['universe']);
 			$MailRAW		= $LNG->getTemplate('email_reg_done');
 			$MailContent	= str_replace(array(
 				'{USERNAME}',

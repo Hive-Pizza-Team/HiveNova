@@ -7,6 +7,7 @@ use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Config;
 use HiveNova\Core\GameAssetPrefetchService;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\LobbyActivityFeed;
 use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
 
@@ -32,6 +33,20 @@ class ShowIndexPage extends AbstractLoginPage
 		parent::__construct();
 		$this->setWindow('light');
 	}
+
+	/**
+	 * AJAX poll endpoint for the public lobby activity feed.
+	 * index.php?page=index&mode=activity&ajax=1&sinceId=0
+	 */
+	function activity()
+	{
+		global $LNG;
+
+		$sinceId = HTTP::_GP('sinceId', 0);
+		$uniFilter = HTTP::_GP('uni', 0);
+		$payload = $this->buildActivityPayload($LNG, $sinceId, $uniFilter);
+		$this->sendJSON($payload);
+	}
 	
 	function show()
 	{
@@ -45,6 +60,8 @@ class ShowIndexPage extends AbstractLoginPage
 
 		$universeSelect	= array();
 		$universeStats	= array();
+		$universeNames	= array();
+		$liveUniverseCount = 0;
 
 		$db = Database::get();
 		$seasonService = new SeasonService(new DatabaseSeasonStore());
@@ -53,6 +70,10 @@ class ShowIndexPage extends AbstractLoginPage
 		{
 			$uniConfig = Config::get($uniId);
 			$universeSelect[$uniId]	= $uniConfig->uni_name.($uniConfig->game_disable == 0 ? $LNG['uni_closed'] : '');
+			$universeNames[$uniId]	= (string) $uniConfig->uni_name;
+			if ((int) $uniConfig->game_disable === 1) {
+				$liveUniverseCount++;
+			}
 
 			$sql = 'SELECT COUNT(*) as cnt FROM %%FLEETS%% WHERE fleet_universe = :uniId;';
 			$fleetCount = $db->selectSingle($sql, array(':uniId' => $uniId), 'cnt');
@@ -131,18 +152,41 @@ class ShowIndexPage extends AbstractLoginPage
 			'capprivate'	=> $config->capprivate ?? '',
 		);
 		$prefetchUrls = (new GameAssetPrefetchService())->listUrls();
+		$defaultEmailUniverse = $this->getDefaultEmailUniverseId();
+		$defaultHiveUniverse = $this->getDefaultHiveUniverseId();
+		$activityEvents = LobbyActivityFeed::fetch(
+			array_keys($universeNames),
+			$LNG,
+			'UTC',
+			$universeNames
+		);
+		$feedTitleKey = $liveUniverseCount === 1 ? 'lobby_feed_title_one' : 'lobby_feed_title_other';
+		$feedTitle = sprintf(
+			(string) ($LNG[$feedTitleKey] ?? '%s universes are live'),
+			number_format($liveUniverseCount)
+		);
 
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
-			'defaultUniverse'		=> $this->getDefaultUniverseId(),
+			'defaultUniverse'		=> $defaultEmailUniverse,
+			'defaultEmailUniverse'	=> $defaultEmailUniverse,
+			'defaultHiveUniverse'	=> $defaultHiveUniverse,
 			'universeStats'			=> $universeStats,
+			'liveUniverseCount'		=> $liveUniverseCount,
+			'lobbyFeedTitle'		=> $feedTitle,
 			'code'					=> $loginErrorMessage,
 			'verkey'			=> $verkey,
 			'descHeader'			=> sprintf($LNG['loginWelcome'], $config->game_name),
 			'descText'				=> sprintf($LNG['loginServerDesc'], $config->game_name),
-            'gameInformations'      => array_filter(explode("\n", (string) $LNG['gameInformations']), 'strlen'),
+			'gameInformations'      => array_filter(explode("\n", (string) $LNG['gameInformations']), 'strlen'),
 			'loginInfo'				=> sprintf($LNG['loginInfo'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
 			'prefetchUrls'			=> $prefetchUrls,
+			'activityEvents'		=> $activityEvents,
+			'activityPollUrl'		=> 'index.php?page=index&mode=activity&ajax=1',
+			'lobbyHeroImage'		=> 'styles/resource/images/login/HiveNova.png',
+			'lobbyHeroAlt'			=> $LNG['lobby_hero_alt'] ?? $config->game_name,
+			'lobbyHook'				=> (string) ($LNG['lobby_hook'] ?? 'Come get'),
+			'lobbyHookEm'			=> (string) ($LNG['lobby_hook_em'] ?? 'MOONed'),
 		));
 
 		if ($loginErrorMessage) {
@@ -152,5 +196,32 @@ class ShowIndexPage extends AbstractLoginPage
 		}
 		
 		$this->display('page.index.default.tpl');
+	}
+
+	/**
+	 * @param object $LNG
+	 * @return array{events: list<array<string, mixed>>}
+	 */
+	private function buildActivityPayload($LNG, int $sinceId, int $uniFilter): array
+	{
+		$universeNames = [];
+		$universeIds = [];
+		foreach (Universe::availableUniverses() as $uniId) {
+			$uniId = (int) $uniId;
+			$universeNames[$uniId] = (string) Config::get($uniId)->uni_name;
+			if ($uniFilter <= 0 || $uniFilter === $uniId) {
+				$universeIds[] = $uniId;
+			}
+		}
+
+		return [
+			'events' => LobbyActivityFeed::fetch(
+				$universeIds,
+				$LNG,
+				'UTC',
+				$universeNames,
+				$sinceId
+			),
+		];
 	}
 }
