@@ -220,7 +220,6 @@
 					<th colspan='2'>{$LNG.gl_debris_field} [{$galaxy}:{$system}:{$planet}]</th>
 				</tr>
 				<tr>
-					<td style='width:80px'>{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=75 height=75 style='width:75px' alt=''}</td>
 					<td>
 						<table style='width:100%'>
 							<tr>
@@ -248,7 +247,7 @@
 			</table>
 			{/capture}
 			<a class="tooltip_sticky" data-tooltip-content="{$smarty.capture.debrisTooltip|escape:'html'}">
-			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt=''}
+			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt='' preferLite=true loading="lazy"}
 			</a>
         {/if}
 		</td>
