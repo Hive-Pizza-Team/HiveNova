@@ -90,24 +90,16 @@ class LobbyActivityFeedTest extends TestCase
 		EventFirehoseWriter::record(1, 102, 10, 'w');
 		EventFirehoseWriter::record(1, 103, 10, 'a');
 
-		$all = LobbyActivityFeed::fetch([1], $this->lng, 'UTC', [1 => 'Classic']);
-		$this->assertGreaterThanOrEqual(4, count($all));
-		// Oldest of the newest-first page — fetch everything after it.
-		$sinceId = $all[count($all) - 2]['id'];
-
 		$newer = LobbyActivityFeed::fetch(
 			[1],
 			$this->lng,
 			'UTC',
 			[1 => 'Classic'],
-			$sinceId
+			2
 		);
 
-		$this->assertGreaterThanOrEqual(2, count($newer));
-		$this->assertGreaterThan($sinceId, $newer[0]['id']);
-		for ($i = 1, $n = count($newer); $i < $n; $i++) {
-			$this->assertGreaterThan($newer[$i - 1]['id'], $newer[$i]['id']);
-		}
+		// Fake assigns ids 1..4; sinceId=2 → ASC fetch [3,4] then reverse to newest-first.
+		$this->assertSame([4, 3], array_column($newer, 'id'));
 	}
 
 	public function test_fetch_returns_empty_when_database_throws(): void
