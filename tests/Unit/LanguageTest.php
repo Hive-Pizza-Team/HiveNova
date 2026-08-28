@@ -183,4 +183,30 @@ class LanguageTest extends TestCase
         // After unset, offsetGet should return key name as fallback
         $this->assertSame('temp', $this->lng['temp']);
     }
+
+    // -------------------------------------------------------------------------
+    // Accept-Language preference
+    // -------------------------------------------------------------------------
+
+    public function testPreferredFromAcceptLanguagePicksPrimaryMatch(): void
+    {
+        $allowed = ['en', 'de', 'fr', 'es'];
+        $this->assertSame('de', Language::preferredFromAcceptLanguage('de-DE,de;q=0.9,en;q=0.8', $allowed));
+        $this->assertSame('fr', Language::preferredFromAcceptLanguage('fr-FR,fr;q=0.9', $allowed));
+        $this->assertSame('en', Language::preferredFromAcceptLanguage('en-US,en;q=0.9', $allowed));
+    }
+
+    public function testPreferredFromAcceptLanguageRespectsQValues(): void
+    {
+        $allowed = ['en', 'de', 'fr'];
+        // Higher q wins even if listed later
+        $this->assertSame('de', Language::preferredFromAcceptLanguage('fr;q=0.4,de;q=0.9,en;q=0.2', $allowed));
+    }
+
+    public function testPreferredFromAcceptLanguageReturnsNullWhenNoMatch(): void
+    {
+        $this->assertNull(Language::preferredFromAcceptLanguage('ja-JP,ja;q=0.9', ['en', 'de']));
+        $this->assertNull(Language::preferredFromAcceptLanguage('', ['en']));
+        $this->assertNull(Language::preferredFromAcceptLanguage('en-US', []));
+    }
 }

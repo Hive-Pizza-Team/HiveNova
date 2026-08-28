@@ -36,6 +36,9 @@ class FakeAchievementDatabase implements DatabaseInterface
     public bool $throwOnUniverseEventsSelect = false;
 
     /** @var list<array<string, mixed>> */
+    public array $usersValidRows = [];
+
+    /** @var list<array<string, mixed>> */
     public array $messages = [];
 
     /** @var list<array<string, mixed>> */
@@ -185,12 +188,20 @@ class FakeAchievementDatabase implements DatabaseInterface
             if ($this->throwOnUniverseEventsSelect) {
                 throw new RuntimeException('universe events select failed');
             }
-            $universe = (int) ($params[':universe'] ?? 0);
+            $universe = array_key_exists(':universe', $params) ? (int) $params[':universe'] : null;
+            $universeIds = null;
+            if ($universe === null && preg_match('/universe\s+IN\s*\(([^)]+)\)/i', $qry, $inMatch)) {
+                $universeIds = array_map('intval', preg_split('/\s*,\s*/', trim($inMatch[1])));
+            }
             $sinceId = (int) ($params[':sinceId'] ?? 0);
             $rows = array_values(array_filter(
                 $this->universeEvents,
-                static function (array $row) use ($universe, $sinceId): bool {
-                    if ((int) ($row['universe'] ?? 0) !== $universe) {
+                static function (array $row) use ($universe, $universeIds, $sinceId): bool {
+                    $rowUni = (int) ($row['universe'] ?? 0);
+                    if ($universe !== null && $rowUni !== $universe) {
+                        return false;
+                    }
+                    if ($universeIds !== null && !in_array($rowUni, $universeIds, true)) {
                         return false;
                     }
                     if ($sinceId > 0 && (int) ($row['id'] ?? 0) <= $sinceId) {
@@ -288,6 +299,23 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public function selectSingle($qry, array $params = array(), $field = false)
     {
+        if (str_contains($qry, 'FROM %%USERS_VALID%%')) {
+            $id = (int) ($params[':validationID'] ?? 0);
+            $key = (string) ($params[':validationKey'] ?? '');
+            foreach ($this->usersValidRows as $row) {
+                if ((int) ($row['validationID'] ?? 0) === $id
+                    && (string) ($row['validationKey'] ?? '') === $key) {
+                    if ($field === false) {
+                        return $row;
+                    }
+
+                    return $row[$field] ?? false;
+                }
+            }
+
+            return $field === false ? false : false;
+        }
+
         if (str_contains($qry, 'graviton_tech')) {
             return 0;
         }

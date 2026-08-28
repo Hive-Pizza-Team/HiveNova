@@ -5,6 +5,7 @@ namespace HiveNova\Page\Login;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
+use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\PublicSeo;
 use HiveNova\Core\Template as template;
 use HiveNova\Core\Universe;
@@ -65,24 +66,23 @@ abstract class AbstractLoginPage
 	 */
 	protected function getDefaultUniverseId($forRegistration = false)
 	{
-		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
-		{
-			$config = Config::get($uniId);
-			if($config->game_disable == 0)
-			{
-				continue;
-			}
+		return LoginUniverseDefaults::newestOpen((bool) $forRegistration);
+	}
 
-			if($forRegistration && $config->reg_closed == 1)
-			{
-				continue;
-			}
+	/**
+	 * Email/password flows default to the newest open seasonal universe (Uni3).
+	 */
+	protected function getDefaultEmailUniverseId($forRegistration = false)
+	{
+		return LoginUniverseDefaults::forEmail((bool) $forRegistration);
+	}
 
-			return $uniId;
-		}
-
-		$universes = array_reverse(Universe::availableUniverses());
-		return $universes ? $universes[0] : ROOT_UNI;
+	/**
+	 * Hive Keychain flows default to the busiest open universe.
+	 */
+	protected function getDefaultHiveUniverseId($forRegistration = false)
+	{
+		return LoginUniverseDefaults::forHive((bool) $forRegistration);
 	}
 
 	protected function initTemplate()

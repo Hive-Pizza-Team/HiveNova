@@ -100,11 +100,7 @@ class Universe {
 		{
 			if(MODE == 'LOGIN')
 			{
-				if(isset($_COOKIE['uni']))
-				{
-					$universe = (int) $_COOKIE['uni'];
-				}
-
+				// Explicit query/body wins (email verify links include ?uni=).
 				if(isset($_REQUEST['uni']))
 				{
 					$universe = (int) $_REQUEST['uni'];
@@ -126,10 +122,6 @@ class Universe {
 					{
 						$universe = $temp;
 					}
-					else
-					{
-						$universe = ROOT_UNI;
-					}
 				}
 				else
 				{
@@ -149,10 +141,17 @@ class Universe {
 							$universe = $match[1];
 						}
 					}
-					else
-					{
-						$universe = ROOT_UNI;
-					}
+				}
+
+				// Cookie is last resort — must not override /uni3/ path or verify links.
+				if(is_null($universe) && MODE == 'LOGIN' && isset($_COOKIE['uni']))
+				{
+					$universe = (int) $_COOKIE['uni'];
+				}
+
+				if(is_null($universe))
+				{
+					$universe = ROOT_UNI;
 				}
 
 				if(!isset($universe) || !self::exists($universe))

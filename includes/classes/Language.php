@@ -47,6 +47,12 @@ class Language implements ArrayAccess {
 		}
 	}
 
+	/**
+	 * Resolve login/install UI language.
+	 *
+	 * Priority: explicit ?lang= (override) → lang cookie (prior override) →
+	 * Accept-Language → leave existing/default language (no sticky cookie).
+	 */
 	public function getUserAgentLanguage()
 	{
    		if (isset($_REQUEST['lang']) && in_array($_REQUEST['lang'], self::getAllowedLangs()))
@@ -62,37 +68,75 @@ class Language implements ArrayAccess {
 			return true;
 		}
 
-	    if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+		$detected = self::preferredFromAcceptLanguage(
+			(string) ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? ''),
+			self::getAllowedLangs()
+		);
+
+		if ($detected === null)
 		{
-            return false;
-        }
+			return false;
+		}
 
-        $accepted_languages = preg_split('/,\s*/', (string) $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+		HTTP::sendCookie('lang', $detected, 2147483647);
+		$this->setLanguage($detected);
 
-        $language = $this->getLanguage();
+		return $detected;
+	}
 
-        foreach ($accepted_languages as $accepted_language)
+	/**
+	 * Pick the best allowed language from an Accept-Language header.
+	 *
+	 * @param list<string> $allowed
+	 */
+	public static function preferredFromAcceptLanguage(string $header, array $allowed): ?string
+	{
+		$header = trim($header);
+		if ($header === '' || $allowed === [])
 		{
-			$isValid = preg_match('!^([a-z]{1,8}(?:-[a-z]{1,8})*)(?:;\s*q=(0(?:\.[0-9]{1,3})?|1(?:\.0{1,3})?))?$!i', $accepted_language, $matches);
+			return null;
+		}
+
+		$allowedLookup = array_fill_keys($allowed, true);
+		$candidates = [];
+
+		foreach (preg_split('/,\s*/', $header) as $acceptedLanguage)
+		{
+			$isValid = preg_match(
+				'!^([a-z]{1,8}(?:-[a-z]{1,8})*)(?:;\s*q=(0(?:\.[0-9]{1,3})?|1(?:\.0{1,3})?))?$!i',
+				$acceptedLanguage,
+				$matches
+			);
 
 			if ($isValid !== 1)
 			{
 				continue;
 			}
 
-            list($code)	= explode('-', strtolower($matches[1]));
-
-			if(in_array($code, self::getAllowedLangs()))
+			$code = strtolower(explode('-', $matches[1])[0]);
+			if (!isset($allowedLookup[$code]))
 			{
-				$language	= $code;
-				break;
+				continue;
 			}
-        }
 
-		HTTP::sendCookie('lang', $language, 2147483647);
-		$this->setLanguage($language);
+			$q = isset($matches[2]) && $matches[2] !== '' ? (float) $matches[2] : 1.0;
+			$candidates[] = ['code' => $code, 'q' => $q];
+		}
 
-		return $language;
+		if ($candidates === [])
+		{
+			return null;
+		}
+
+		usort($candidates, static function (array $a, array $b): int {
+			if ($a['q'] === $b['q']) {
+				return 0;
+			}
+
+			return ($a['q'] < $b['q']) ? 1 : -1;
+		});
+
+		return $candidates[0]['code'];
 	}
 
     public function __construct($language = NULL)
