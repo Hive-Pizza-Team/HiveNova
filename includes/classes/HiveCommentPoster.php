@@ -10,7 +10,11 @@ use Throwable;
  */
 class HiveCommentPoster
 {
-	public const DEFAULT_PARENT_PERMLINK = 'moon';
+	/** Empty for top-level/root posts; set only for replies or community posts. */
+	public const DEFAULT_PARENT_PERMLINK = '';
+
+	/** Used when the caller passes no valid tags. */
+	public const FALLBACK_TAG = 'moon';
 
 	/** @var callable|null fn(string $parentAuthor, string $parentPermlink, string $author, string $permlink, string $title, string $body, string $jsonMetadata, string $wif): mixed */
 	private static $broadcaster = null;
@@ -53,10 +57,17 @@ class HiveCommentPoster
 			if ($wif === '' || !HiveUtil::isAccountValid($author)) {
 				return self::fail();
 			}
-			if ($permlink === '' || $title === '' || $body === '' || $parentPermlink === '') {
+			if ($permlink === '' || $title === '' || $body === '') {
 				return self::fail();
 			}
-			if ($parentAuthor !== '' && !HiveUtil::isAccountValid($parentAuthor)) {
+			// Replies/community posts need both parent fields; root posts use empty parent_author
+			// and empty parent_permlink by default.
+			if ($parentAuthor !== '') {
+				if (!HiveUtil::isAccountValid($parentAuthor) || $parentPermlink === '') {
+					return self::fail();
+				}
+			}
+			if ($parentPermlink !== '' && !preg_match('/^[a-z0-9][a-z0-9-]{0,254}$/', $parentPermlink)) {
 				return self::fail();
 			}
 			if (!preg_match('/^[a-z0-9][a-z0-9-]{0,254}$/', $permlink)) {
@@ -72,7 +83,7 @@ class HiveCommentPoster
 			}
 			$cleanTags = array_values(array_unique($cleanTags));
 			if ($cleanTags === []) {
-				$cleanTags = [self::DEFAULT_PARENT_PERMLINK];
+				$cleanTags = [self::FALLBACK_TAG];
 			}
 
 			$jsonMetadata = (string) json_encode([

@@ -44,7 +44,7 @@ class HiveCommentPosterTest extends TestCase
 		$this->assertSame('blogtrx1', $result['trx_id']);
 		$this->assertCount(1, $this->calls);
 		$this->assertSame('', $this->calls[0][0]);
-		$this->assertSame('moon', $this->calls[0][1]);
+		$this->assertSame('', $this->calls[0][1]);
 		$this->assertSame('season.blog', $this->calls[0][2]);
 		$this->assertSame('hivenova-u2-season-12', $this->calls[0][3]);
 		$this->assertSame('HiveNova Season 12 Recap', $this->calls[0][4]);
