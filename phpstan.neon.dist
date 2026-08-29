@@ -5,6 +5,10 @@ parameters:
 	level: 0
 	paths:
 		- includes/classes
+	excludePaths:
+		# Legacy global-namespace class implementing a namespaced interface;
+		# excluded so we do not need a non-coverable `use` tweak for CI.
+		- includes/classes/extauth/SteemconnectAuth.php
 	scanDirectories:
 		- includes/libs/opbe
 		- includes/libs/tdcron
