@@ -1,20 +1,33 @@
 /**
- * Imperium matrix sections — inject build/fleet/defense/missile/tech rows on expand.
- * Config: #empire-matrix-data JSON
+ * Imperium matrix sections — fetch + inject build/fleet/defense/missile/tech on expand.
  */
 (function ($) {
 	'use strict';
 
 	var SECTIONS = ['build', 'fleet', 'defense', 'missiles', 'tech'];
+	var matrixPromise = null;
 
-	function readConfig() {
-		var tag = document.getElementById('empire-matrix-data');
-		if (!tag) return null;
-		try {
-			return JSON.parse(tag.textContent);
-		} catch (e) {
-			return null;
+	function matrixUrl() {
+		var tag = document.getElementById('empire-matrix-config');
+		return (tag && tag.getAttribute('data-url')) || 'game.php?page=imperium&mode=matrix&ajax=1';
+	}
+
+	function loadMatrix() {
+		if (matrixPromise) {
+			return matrixPromise;
 		}
+		matrixPromise = fetch(matrixUrl(), { credentials: 'same-origin' })
+			.then(function (res) {
+				if (!res.ok) {
+					throw new Error('matrix ' + res.status);
+				}
+				return res.json();
+			})
+			.catch(function (err) {
+				matrixPromise = null;
+				throw err;
+			});
+		return matrixPromise;
 	}
 
 	function fmtNumber(n) {
@@ -30,6 +43,7 @@
 		host.dataset.filled = '1';
 
 		var rows = (cfg.sections && cfg.sections[section]) || [];
+		var planetIds = cfg.planetIds || [];
 		var frag = document.createDocumentFragment();
 
 		rows.forEach(function (row) {
@@ -53,9 +67,10 @@
 				spanTd.textContent = fmtNumber(row.total);
 				tr.appendChild(spanTd);
 			} else {
-				Object.keys(row.values || {}).forEach(function (planetId) {
+				var values = row.values || {};
+				planetIds.forEach(function (planetId) {
 					var td = document.createElement('td');
-					td.textContent = fmtNumber(row.values[planetId]);
+					td.textContent = fmtNumber(values[planetId] || 0);
 					tr.appendChild(td);
 				});
 			}
@@ -67,16 +82,18 @@
 	}
 
 	$(function () {
-		var cfg = readConfig();
-		if (!cfg) return;
-
 		SECTIONS.forEach(function (section) {
 			var details = document.getElementById('empire-details-' + section);
 			if (!details) return;
 			details.addEventListener('toggle', function () {
-				if (details.open) {
-					renderSection(cfg, section);
+				if (!details.open) {
+					return;
 				}
+				loadMatrix().then(function (cfg) {
+					renderSection(cfg, section);
+				}).catch(function () {
+					details.open = false;
+				});
 			});
 		});
 	});

@@ -33,13 +33,44 @@ class ShowImperiumPage extends AbstractGamePage
 
 	function show()
 	{
+		global $USER, $PLANET, $resource, $reslist, $LNG;
+
+		$planets = $this->loadPlanets(false);
+		$planetList = $this->buildHeaderPlanetList($planets, $USER, $resource, $reslist);
+
+		$this->assign(array(
+			'colspan'    => count($planets) + 2,
+			'planetList' => $planetList,
+		));
+
+		$this->display('page.empire.default.tpl');
+	}
+
+	/**
+	 * AJAX: build/fleet/defense/missile/tech matrix for <details> expand.
+	 */
+	public function matrix()
+	{
+		global $USER, $resource, $reslist, $LNG;
+
+		$planets = $this->loadPlanets(true);
+		$payload = self::buildMatrixPayload($planets, $USER, $resource, $reslist, $LNG['tech'] ?? []);
+
+		$this->sendJSON($payload);
+	}
+
+	/**
+	 * @param bool $includeMatrixColumns fleet/defense/missile counts for the expand matrix
+	 * @return list<array<string, mixed>>
+	 */
+	private function loadPlanets(bool $includeMatrixColumns): array
+	{
 		global $USER, $PLANET, $resource, $reslist;
 
-        $db = Database::get();
-		
+		$db = Database::get();
 		$order = $USER['planet_sort_order'] == 1 ? 'DESC' : 'ASC';
 
-		$selectColumns = self::imperiumPlanetSelectColumns($resource, $reslist);
+		$selectColumns = self::imperiumPlanetSelectColumns($resource, $reslist, $includeMatrixColumns);
 		$selectList = implode(', ', array_map(
 			static fn(string $col): string => $col === 'system' ? '`system`' : $col,
 			$selectColumns
@@ -48,166 +79,207 @@ class ShowImperiumPage extends AbstractGamePage
 		$sql = 'SELECT ' . $selectList . ' FROM %%PLANETS%% WHERE id_owner = :userID AND destruyed = \'0\' ORDER BY ';
 
 		match ($USER['planet_sort']) {
-            2 => $sql .= 'name '.$order,
-            1 => $sql .= 'galaxy '.$order.', `system` '.$order.', planet '.$order.', planet_type '.$order,
-            default => $sql .= 'id '.$order,
-        };
+			2 => $sql .= 'name '.$order,
+			1 => $sql .= 'galaxy '.$order.', `system` '.$order.', planet '.$order.', planet_type '.$order,
+			default => $sql .= 'id '.$order,
+		};
 
-        $PlanetsRAW = $db->select($sql, array(
-            ':userID'   => $USER['id']
-        ));
+		$PlanetsRAW = $db->select($sql, array(
+			':userID' => $USER['id'],
+		));
 
-        $PLANETS	= array();
-		
-		$PlanetRess	= new ResourceUpdate();
-		$PlanetRess->setResourceData($resource, $reslist);
+		$planets = array();
+		$PlanetRessFull = new ResourceUpdate(true, true);
+		$PlanetRessFull->setResourceData($resource, $reslist);
+		$PlanetRessLite = new ResourceUpdate(false, false);
+		$PlanetRessLite->setResourceData($resource, $reslist);
 
-		foreach ($PlanetsRAW as $CPLANET)
-		{
-			// Current planet was already eco'd in AbstractGamePage this request.
+		foreach ($PlanetsRAW as $CPLANET) {
 			if ((int) $CPLANET['id'] === (int) $PLANET['id']) {
-				$PLANETS[] = array_merge($CPLANET, $PLANET);
+				$planets[] = array_merge($CPLANET, $PLANET);
 				continue;
 			}
 
-			// Only persist when a queue may complete — avoid N UPDATEs on a read-only empire view.
 			$shouldSave = self::planetEcoNeedsPersist($USER, $CPLANET);
-			list($USER, $CPLANET)	= $PlanetRess->CalcResource($USER, $CPLANET, $shouldSave);
+			$eco = $shouldSave ? $PlanetRessFull : $PlanetRessLite;
+			list($USER, $CPLANET) = $eco->CalcResource($USER, $CPLANET, $shouldSave);
 
-			$PLANETS[]	= $CPLANET;
-			unset($CPLANET);
+			$planets[] = $CPLANET;
 		}
 
-        $planetList	= array(
-			'image'          => array(),
-			'name'           => array(),
-			'coords'         => array(),
-			'field'          => array(),
-			'resource'       => array(),
-			'resourcePerHour'=> array(),
-			'planet_type'    => array(),
-			'build'          => array(),
-			'fleet'          => array(),
-			'defense'        => array(),
-			'missiles'       => array(),
-			'tech'           => array(),
-		);
-	$config		= Config::get($USER['universe']);
-		foreach($PLANETS as $Planet)
-		{
-			$planetList['name'][$Planet['id']]					= $Planet['name'];
-			$planetList['image'][$Planet['id']]					= $Planet['image'];
-			
-			$planetList['coords'][$Planet['id']]['galaxy']		= $Planet['galaxy'];
-			$planetList['coords'][$Planet['id']]['system']		= $Planet['system'];
-			$planetList['coords'][$Planet['id']]['planet']		= $Planet['planet'];
-			
-			$planetList['field'][$Planet['id']]['current']		= $Planet['field_current'];
-			$planetList['field'][$Planet['id']]['max']			= CalculateMaxPlanetFields($Planet);
-           
-			$planetList['resource'][901][$Planet['id']]			= $Planet['metal'];
-			$planetList['resource'][902][$Planet['id']]			= $Planet['crystal'];
-			$planetList['resource'][903][$Planet['id']]			= $Planet['deuterium'];
-			$planetList['resource'][911][$Planet['id']]			= $Planet['energy'];
-			
-			if($Planet['planet_type'] == 1){
-				$basic[901][$Planet['id']] = $config->metal_basic_income * $config->resource_multiplier;
-				$basic[902][$Planet['id']] = $config->crystal_basic_income * $config->resource_multiplier;
-				$basic[903][$Planet['id']] = $config->deuterium_basic_income * $config->resource_multiplier;
-			}else{
-				$basic[901][$Planet['id']] = 0;
-				$basic[902][$Planet['id']] = 0;
-				$basic[903][$Planet['id']] = 0;
-			}
-
-			$planetList['resourcePerHour'][901][$Planet['id']]			= $basic[901][$Planet['id']] + $Planet['metal_perhour'];
-			$planetList['resourcePerHour'][902][$Planet['id']]			= $basic[902][$Planet['id']] + $Planet['crystal_perhour'];
-			$planetList['resourcePerHour'][903][$Planet['id']]			= $basic[903][$Planet['id']] + $Planet['deuterium_perhour'];
-	
-			$planetList['planet_type'][$Planet['id']] = $Planet['planet_type'];
-
-
-			foreach($reslist['build'] as $elementID) {
-				$planetList['build'][$elementID][$Planet['id']]	= $Planet[$resource[$elementID]];
-			}
-			
-			foreach($reslist['fleet'] as $elementID) {
-				$planetList['fleet'][$elementID][$Planet['id']]	= $Planet[$resource[$elementID]];
-			}
-			
-			foreach($reslist['defense'] as $elementID) {
-				$planetList['defense'][$elementID][$Planet['id']]	= $Planet[$resource[$elementID]];
-			}
-			
-			$planetList['missiles'][502][$Planet['id']]         = $Planet[$resource[502]];
-            		$planetList['missiles'][503][$Planet['id']]         = $Planet[$resource[503]];
-		}
-
-		foreach($reslist['tech'] as $elementID){
-			$planetList['tech'][$elementID]	= $USER[$resource[$elementID]];
-		}
-
-		foreach (array('build', 'fleet', 'defense', 'missiles') as $bucket) {
-			foreach ($planetList[$bucket] as $elementID => $values) {
-				if (array_sum($values) <= 0) {
-					unset($planetList[$bucket][$elementID]);
-				}
-			}
-		}
-		foreach ($planetList['tech'] as $elementID => $tech) {
-			if ($tech <= 0) {
-				unset($planetList['tech'][$elementID]);
-			}
-		}
-
-		$matrixSections = array();
-		foreach (array('build' => 'build', 'fleet' => 'fleet', 'defense' => 'defense', 'missiles' => 'missiles') as $key => $section) {
-			$matrixSections[$section] = array();
-			foreach ($planetList[$key] as $elementID => $values) {
-				$matrixSections[$section][] = array(
-					'id'     => (int) $elementID,
-					'name'   => $LNG['tech'][$elementID] ?? (string) $elementID,
-					'total'  => array_sum($values),
-					'values' => $values,
-				);
-			}
-			unset($planetList[$key]);
-		}
-		$matrixSections['tech'] = array();
-		foreach ($planetList['tech'] as $elementID => $tech) {
-			$matrixSections['tech'][] = array(
-				'id'    => (int) $elementID,
-				'name'  => $LNG['tech'][$elementID] ?? (string) $elementID,
-				'total' => (int) $tech,
-				'values' => array(),
-			);
-		}
-		unset($planetList['tech']);
-
-		$empireMatrixJson = json_encode(array(
-			'colspan'  => count($PLANETS) + 2,
-			'sections' => $matrixSections,
-		), JSON_UNESCAPED_UNICODE);
-		
-		$this->assign(array(
-			'colspan'          => count($PLANETS) + 2,
-			'planetList'       => $planetList,
-			'empireMatrixJson' => $empireMatrixJson,
-		));
-
-		$this->display('page.empire.default.tpl');
+		return $planets;
 	}
 
 	/**
-	 * Planet columns required for the empire overview: template fields, matrix
-	 * buckets, CalcResource production, and queue/persist gates.
+	 * @param list<array<string, mixed>> $planets
+	 * @param array<string, mixed> $user
+	 * @param array<int|string, string> $resource
+	 * @param array<string, list<int>> $reslist
+	 * @return array<string, mixed>
+	 */
+	private function buildHeaderPlanetList(array $planets, array $user, array $resource, array $reslist): array
+	{
+		$config = Config::get($user['universe']);
+		$planetList = array(
+			'image'           => array(),
+			'name'            => array(),
+			'coords'          => array(),
+			'field'           => array(),
+			'resource'        => array(),
+			'resourcePerHour' => array(),
+			'planet_type'     => array(),
+		);
+
+		foreach ($planets as $Planet) {
+			$planetList['name'][$Planet['id']] = $Planet['name'];
+			$planetList['image'][$Planet['id']] = $Planet['image'];
+
+			$planetList['coords'][$Planet['id']]['galaxy'] = $Planet['galaxy'];
+			$planetList['coords'][$Planet['id']]['system'] = $Planet['system'];
+			$planetList['coords'][$Planet['id']]['planet'] = $Planet['planet'];
+
+			$planetList['field'][$Planet['id']]['current'] = $Planet['field_current'];
+			$planetList['field'][$Planet['id']]['max'] = CalculateMaxPlanetFields($Planet);
+
+			$planetList['resource'][901][$Planet['id']] = $Planet['metal'];
+			$planetList['resource'][902][$Planet['id']] = $Planet['crystal'];
+			$planetList['resource'][903][$Planet['id']] = $Planet['deuterium'];
+			$planetList['resource'][911][$Planet['id']] = $Planet['energy'];
+
+			if ($Planet['planet_type'] == 1) {
+				$basic901 = $config->metal_basic_income * $config->resource_multiplier;
+				$basic902 = $config->crystal_basic_income * $config->resource_multiplier;
+				$basic903 = $config->deuterium_basic_income * $config->resource_multiplier;
+			} else {
+				$basic901 = 0;
+				$basic902 = 0;
+				$basic903 = 0;
+			}
+
+			$planetList['resourcePerHour'][901][$Planet['id']] = $basic901 + $Planet['metal_perhour'];
+			$planetList['resourcePerHour'][902][$Planet['id']] = $basic902 + $Planet['crystal_perhour'];
+			$planetList['resourcePerHour'][903][$Planet['id']] = $basic903 + $Planet['deuterium_perhour'];
+
+			$planetList['planet_type'][$Planet['id']] = $Planet['planet_type'];
+		}
+
+		return $planetList;
+	}
+
+	/**
+	 * @param list<array<string, mixed>> $planets
+	 * @param array<string, mixed> $user
+	 * @param array<int|string, string> $resource
+	 * @param array<string, list<int>> $reslist
+	 * @param array<int|string, string> $techNames
+	 * @return array{colspan: int, sections: array<string, list<array<string, mixed>>>}
+	 */
+	public static function buildMatrixPayload(
+		array $planets,
+		array $user,
+		array $resource,
+		array $reslist,
+		array $techNames
+	): array {
+		$buckets = array(
+			'build'    => array(),
+			'fleet'    => array(),
+			'defense'  => array(),
+			'missiles' => array(),
+			'tech'     => array(),
+		);
+
+		foreach ($planets as $Planet) {
+			foreach ($reslist['build'] as $elementID) {
+				$buckets['build'][$elementID][$Planet['id']] = (int) ($Planet[$resource[$elementID]] ?? 0);
+			}
+			foreach ($reslist['fleet'] as $elementID) {
+				$buckets['fleet'][$elementID][$Planet['id']] = (int) ($Planet[$resource[$elementID]] ?? 0);
+			}
+			foreach ($reslist['defense'] as $elementID) {
+				$buckets['defense'][$elementID][$Planet['id']] = (int) ($Planet[$resource[$elementID]] ?? 0);
+			}
+			$buckets['missiles'][502][$Planet['id']] = (int) ($Planet[$resource[502]] ?? 0);
+			$buckets['missiles'][503][$Planet['id']] = (int) ($Planet[$resource[503]] ?? 0);
+		}
+
+		foreach ($reslist['tech'] as $elementID) {
+			$buckets['tech'][$elementID] = (int) ($user[$resource[$elementID]] ?? 0);
+		}
+
+		foreach (array('build', 'fleet', 'defense', 'missiles') as $bucket) {
+			foreach ($buckets[$bucket] as $elementID => $values) {
+				if (array_sum($values) <= 0) {
+					unset($buckets[$bucket][$elementID]);
+				}
+			}
+		}
+		foreach ($buckets['tech'] as $elementID => $tech) {
+			if ($tech <= 0) {
+				unset($buckets['tech'][$elementID]);
+			}
+		}
+
+		$sections = array();
+		foreach (array('build', 'fleet', 'defense', 'missiles') as $section) {
+			$sections[$section] = array();
+			foreach ($buckets[$section] as $elementID => $values) {
+				$sections[$section][] = array(
+					'id'     => (int) $elementID,
+					'name'   => $techNames[$elementID] ?? (string) $elementID,
+					'total'  => array_sum($values),
+					'values' => self::compactMatrixValues($values),
+				);
+			}
+		}
+		$sections['tech'] = array();
+		foreach ($buckets['tech'] as $elementID => $tech) {
+			$sections['tech'][] = array(
+				'id'     => (int) $elementID,
+				'name'   => $techNames[$elementID] ?? (string) $elementID,
+				'total'  => (int) $tech,
+				'values' => array(),
+			);
+		}
+
+		return array(
+			'colspan'   => count($planets) + 2,
+			'planetIds' => array_map(static fn(array $p): string => (string) $p['id'], $planets),
+			'sections'  => $sections,
+		);
+	}
+
+	/**
+	 * Drop zero planet cells from matrix rows (client treats missing as 0).
+	 *
+	 * @param array<int|string, int|float> $values
+	 * @return array<int|string, int|float>
+	 */
+	public static function compactMatrixValues(array $values): array
+	{
+		$compact = array();
+		foreach ($values as $planetId => $amount) {
+			if ((float) $amount != 0.0) {
+				$compact[$planetId] = $amount;
+			}
+		}
+
+		return $compact;
+	}
+
+	/**
+	 * Planet columns required for the empire overview: template fields, optional
+	 * matrix buckets, CalcResource production, and queue/persist gates.
 	 *
 	 * @param array<int|string, string> $resource
 	 * @param array<string, list<int>> $reslist
 	 * @return list<string>
 	 */
-	public static function imperiumPlanetSelectColumns(array $resource, array $reslist): array
-	{
+	public static function imperiumPlanetSelectColumns(
+		array $resource,
+		array $reslist,
+		bool $includeMatrixColumns = true
+	): array {
 		$columns = [
 			'id', 'name', 'image',
 			'galaxy', 'system', 'planet', 'planet_type',
@@ -219,7 +291,11 @@ class ShowImperiumPage extends AbstractGamePage
 			'b_hangar_id', 'b_hangar', 'b_building', 'b_building_id',
 		];
 
-		foreach (['build', 'fleet', 'defense', 'missile', 'storage', 'prod'] as $bucket) {
+		$buckets = $includeMatrixColumns
+			? ['build', 'fleet', 'defense', 'missile', 'storage', 'prod']
+			: ['build', 'storage', 'prod'];
+
+		foreach ($buckets as $bucket) {
 			if (empty($reslist[$bucket]) || !is_array($reslist[$bucket])) {
 				continue;
 			}
