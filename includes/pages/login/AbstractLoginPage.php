@@ -7,6 +7,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
 use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\PublicSeo;
+use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\Template as template;
 use HiveNova\Core\Universe;
 
@@ -134,7 +135,7 @@ abstract class AbstractLoginPage
 			'fb_key' 				=> $config->fb_apikey,
 			'mailEnable'			=> $config->mail_active,
 			'reg_close'				=> $config->reg_closed,
-			'referralEnable'		=> $config->ref_active,
+			'referralEnable'		=> ReferralCaptureService::anyUniverseHasReferralsActive() ? 1 : 0,
 			'analyticsEnable'		=> $config->ga_active,
 			'analyticsUID'			=> $config->ga_key,
 			'lang'					=> $LNG->getLanguage(),

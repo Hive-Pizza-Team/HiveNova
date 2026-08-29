@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use HiveNova\Core\Config;
 use HiveNova\Core\DatabaseInterface;
 use HiveNova\Core\ReferralCaptureService;
+use HiveNova\Core\Universe;
 use PHPUnit\Framework\TestCase;
 
 class ReferralCaptureServiceTest extends TestCase
@@ -11,17 +13,30 @@ class ReferralCaptureServiceTest extends TestCase
 	/** @var list<array{name: string, value: string, expire: int}> */
 	private array $cookiesWritten = [];
 
-	private function service(): ReferralCaptureService
+	/** @var array<int, bool> */
+	private array $refActiveByUni = [];
+
+	private function service(?array $refActiveByUni = null): ReferralCaptureService
 	{
 		$this->cookiesWritten = [];
+		$this->refActiveByUni = $refActiveByUni ?? [];
 
-		return new ReferralCaptureService(function (string $name, string $value, int $expire): void {
-			$this->cookiesWritten[] = [
-				'name'   => $name,
-				'value'  => $value,
-				'expire' => $expire,
-			];
-		});
+		return new ReferralCaptureService(
+			function (string $name, string $value, int $expire): void {
+				$this->cookiesWritten[] = [
+					'name'   => $name,
+					'value'  => $value,
+					'expire' => $expire,
+				];
+			},
+			function (int $universeId): bool {
+				if ($this->refActiveByUni === []) {
+					return true;
+				}
+
+				return (bool) ($this->refActiveByUni[$universeId] ?? false);
+			}
+		);
 	}
 
 	private function dbWithReferrer(?array $row): DatabaseInterface
@@ -54,12 +69,10 @@ class ReferralCaptureServiceTest extends TestCase
 		);
 	}
 
-	public function testCaptureInactiveReturnsEmpty(): void
+	public function testCaptureInactiveOnReferrerUniverseReturnsEmpty(): void
 	{
-		$service = $this->service();
-		$result = $service->capture(
-			$this->dbWithReferrer(['id' => 5, 'username' => 'Alice', 'universe' => 1]),
-			false,
+		$result = $this->service([2 => false])->capture(
+			$this->dbWithReferrer(['id' => 5, 'username' => 'Alice', 'universe' => 2]),
 			['ref' => 5],
 			[]
 		);
@@ -68,12 +81,25 @@ class ReferralCaptureServiceTest extends TestCase
 		$this->assertSame([], $this->cookiesWritten);
 	}
 
+	public function testCaptureIgnoresAmbientUniverseRefFlag(): void
+	{
+		// Referrer lives in uni 2 with refs on; ambient/current uni 1 may be off.
+		$result = $this->service([1 => false, 2 => true])->capture(
+			$this->dbWithReferrer(['id' => 712, 'username' => 'Referrer', 'universe' => 2]),
+			['ref' => 712],
+			[]
+		);
+
+		$this->assertSame(712, $result['id']);
+		$this->assertSame(2, $result['universe']);
+		$this->assertCount(2, $this->cookiesWritten);
+		$this->assertSame('712', $this->cookiesWritten[0]['value']);
+	}
+
 	public function testCaptureFromQueryPersistsCookies(): void
 	{
-		$service = $this->service();
-		$result = $service->capture(
+		$result = $this->service([2 => true])->capture(
 			$this->dbWithReferrer(['id' => 12, 'username' => 'Bob', 'universe' => 2]),
-			true,
 			['ref' => 12],
 			[]
 		);
@@ -96,9 +122,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testCaptureFromReferralIdQueryPersistsCookies(): void
 	{
-		$result = $this->service()->capture(
+		$result = $this->service([2 => true])->capture(
 			$this->dbWithReferrer(['id' => 12, 'username' => 'Bob', 'universe' => 2]),
-			true,
 			['referralID' => 12],
 			[]
 		);
@@ -119,9 +144,8 @@ class ReferralCaptureServiceTest extends TestCase
 			)
 			->willReturn(['id' => 7, 'username' => 'Carol', 'universe' => 1]);
 
-		$result = $this->service()->capture(
+		$result = $this->service([1 => true])->capture(
 			$db,
-			true,
 			['ref' => 7, 'referralID' => 99],
 			[]
 		);
@@ -131,9 +155,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testCaptureQueryOverwritesStaleCookie(): void
 	{
-		$result = $this->service()->capture(
+		$result = $this->service([1 => true])->capture(
 			$this->dbWithReferrer(['id' => 7, 'username' => 'Carol', 'universe' => 1]),
-			true,
 			['ref' => 7],
 			[
 				ReferralCaptureService::COOKIE_REF     => '99',
@@ -148,9 +171,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testCaptureFallsBackToCookie(): void
 	{
-		$result = $this->service()->capture(
+		$result = $this->service([1 => true])->capture(
 			$this->dbWithReferrer(['id' => 9, 'username' => 'Dana', 'universe' => 1]),
-			true,
 			[],
 			[ReferralCaptureService::COOKIE_REF => '9']
 		);
@@ -170,9 +192,8 @@ class ReferralCaptureServiceTest extends TestCase
 			)
 			->willReturn(['id' => 9, 'username' => 'Dana', 'universe' => 3]);
 
-		$result = $this->service()->capture(
+		$result = $this->service([3 => true])->capture(
 			$db,
-			true,
 			[],
 			[
 				ReferralCaptureService::COOKIE_REF     => '9',
@@ -188,7 +209,6 @@ class ReferralCaptureServiceTest extends TestCase
 	{
 		$result = $this->service()->capture(
 			$this->dbWithReferrer(null),
-			true,
 			['ref' => 404],
 			[
 				ReferralCaptureService::COOKIE_REF     => '9',
@@ -205,9 +225,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testResolveForRegisterUsesReferralIdThenCookie(): void
 	{
-		$result = $this->service()->resolveForRegister(
+		$result = $this->service([1 => true])->resolveForRegister(
 			$this->dbWithReferrer(['id' => 3, 'username' => 'Eve', 'universe' => 1]),
-			true,
 			['referralID' => 3],
 			[ReferralCaptureService::COOKIE_REF => '99']
 		);
@@ -219,9 +238,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testResolveForRegisterCookieFallbackPersists(): void
 	{
-		$result = $this->service()->resolveForRegister(
+		$result = $this->service([2 => true])->resolveForRegister(
 			$this->dbWithReferrer(['id' => 8, 'username' => 'Frank', 'universe' => 2]),
-			true,
 			[],
 			[ReferralCaptureService::COOKIE_REF => '8']
 		);
@@ -244,9 +262,8 @@ class ReferralCaptureServiceTest extends TestCase
 			)
 			->willReturn([]);
 
-		$result = $this->service()->resolveForRegister(
+		$result = $this->service([2 => true])->resolveForRegister(
 			$db,
-			true,
 			['referralID' => 4],
 			[],
 			2
@@ -268,9 +285,8 @@ class ReferralCaptureServiceTest extends TestCase
 			)
 			->willReturn(['id' => 4, 'username' => 'Gina', 'universe' => 2]);
 
-		$result = $this->service()->resolveForRegister(
+		$result = $this->service([2 => true])->resolveForRegister(
 			$db,
-			true,
 			['referralID' => 4],
 			[],
 			2
@@ -286,16 +302,17 @@ class ReferralCaptureServiceTest extends TestCase
 		$this->assertSame('2', $this->cookiesWritten[1]['value']);
 	}
 
-	public function testResolveForRegisterInactive(): void
+	public function testResolveForRegisterInactiveOnTargetUniverse(): void
 	{
-		$result = $this->service()->resolveForRegister(
-			$this->dbWithReferrer(['id' => 1, 'username' => 'X', 'universe' => 1]),
-			false,
+		$result = $this->service([2 => false])->resolveForRegister(
+			$this->dbWithReferrer(['id' => 1, 'username' => 'X', 'universe' => 2]),
 			['referralID' => 1],
-			[]
+			[],
+			2
 		);
 
 		$this->assertSame(0, $result['id']);
+		$this->assertSame([], $this->cookiesWritten);
 	}
 
 	public function testRegistrationUniverseIdWhenOpen(): void
@@ -330,5 +347,165 @@ class ReferralCaptureServiceTest extends TestCase
 		$this->assertFalse(ReferralCaptureService::isUniverseOpenForRegistration(
 			(object) ['game_disable' => 0, 'reg_closed' => 0]
 		));
+	}
+
+	public function testAnyUniverseHasReferralsActive(): void
+	{
+		$savedConfig = $this->getConfigCache();
+		$savedUnis = $this->getUniverseList();
+		try {
+			$this->resetUniverseList([1, 2]);
+			$this->clearConfigCache();
+			Config::setInstance(new Config([
+				'uni' => 1,
+				'uni_name' => 'A',
+				'ref_active' => 0,
+				'game_disable' => 1,
+				'reg_closed' => 0,
+			]), 1);
+			Config::setInstance(new Config([
+				'uni' => 2,
+				'uni_name' => 'B',
+				'ref_active' => 1,
+				'game_disable' => 1,
+				'reg_closed' => 0,
+			]), 2);
+
+			$this->assertTrue(ReferralCaptureService::anyUniverseHasReferralsActive());
+
+			Config::setInstance(new Config([
+				'uni' => 2,
+				'uni_name' => 'B',
+				'ref_active' => 0,
+				'game_disable' => 1,
+				'reg_closed' => 0,
+			]), 2);
+			$this->assertFalse(ReferralCaptureService::anyUniverseHasReferralsActive());
+
+			$this->resetUniverseList([]);
+			$this->assertFalse(ReferralCaptureService::anyUniverseHasReferralsActive());
+		} finally {
+			$this->setConfigCache($savedConfig);
+			$this->resetUniverseList($savedUnis);
+		}
+	}
+
+	public function testDefaultClosuresUseConfigAndHttpCookie(): void
+	{
+		$savedConfig = $this->getConfigCache();
+		try {
+			$this->clearConfigCache();
+			Config::setInstance(new Config([
+				'uni' => 2,
+				'uni_name' => 'Live',
+				'ref_active' => 1,
+				'game_disable' => 1,
+				'reg_closed' => 0,
+			]), 2);
+
+			// No injectable stubs — exercise default Config/HTTP closures.
+			$service = new ReferralCaptureService();
+			$result = $service->capture(
+				$this->dbWithReferrer(['id' => 712, 'username' => 'Referrer', 'universe' => 2]),
+				['ref' => 712],
+				[]
+			);
+
+			$this->assertSame(712, $result['id']);
+			$this->assertSame(2, $result['universe']);
+		} finally {
+			$this->setConfigCache($savedConfig);
+		}
+	}
+
+	public function testDefaultCheckerRejectsInactiveUniverse(): void
+	{
+		$savedConfig = $this->getConfigCache();
+		try {
+			$this->clearConfigCache();
+			Config::setInstance(new Config([
+				'uni' => 2,
+				'uni_name' => 'Off',
+				'ref_active' => 0,
+				'game_disable' => 1,
+				'reg_closed' => 0,
+			]), 2);
+
+			$service = new ReferralCaptureService();
+			$result = $service->capture(
+				$this->dbWithReferrer(['id' => 5, 'username' => 'Alice', 'universe' => 2]),
+				['ref' => 5],
+				[]
+			);
+
+			$this->assertSame(0, $result['id']);
+		} finally {
+			$this->setConfigCache($savedConfig);
+		}
+	}
+
+	public function testCaptureRejectsReferrerWithZeroUniverse(): void
+	{
+		$result = $this->service()->capture(
+			$this->dbWithReferrer(['id' => 1, 'username' => 'Broken', 'universe' => 0]),
+			['ref' => 1],
+			[]
+		);
+
+		$this->assertSame(0, $result['id']);
+		$this->assertSame([], $this->cookiesWritten);
+	}
+
+	/**
+	 * @return list<int>
+	 */
+	private function getUniverseList(): array
+	{
+		$ref = new ReflectionProperty(Universe::class, 'availableUniverses');
+		$ref->setAccessible(true);
+		$value = $ref->getValue(null);
+
+		return is_array($value) ? array_map('intval', $value) : [];
+	}
+
+	/**
+	 * @param list<int> $ids
+	 */
+	private function resetUniverseList(array $ids): void
+	{
+		$ref = new ReflectionProperty(Universe::class, 'availableUniverses');
+		$ref->setAccessible(true);
+		$ref->setValue(null, $ids);
+
+		$cur = new ReflectionProperty(Universe::class, 'currentUniverse');
+		$cur->setAccessible(true);
+		$cur->setValue(null, null);
+	}
+
+	/**
+	 * @return array<int|string, Config>
+	 */
+	private function getConfigCache(): array
+	{
+		$ref = new ReflectionProperty(Config::class, 'instances');
+		$ref->setAccessible(true);
+		$value = $ref->getValue(null);
+
+		return is_array($value) ? $value : [];
+	}
+
+	private function clearConfigCache(): void
+	{
+		$this->setConfigCache([]);
+	}
+
+	/**
+	 * @param array<int|string, Config> $cache
+	 */
+	private function setConfigCache(array $cache): void
+	{
+		$ref = new ReflectionProperty(Config::class, 'instances');
+		$ref->setAccessible(true);
+		$ref->setValue(null, $cache);
 	}
 }
