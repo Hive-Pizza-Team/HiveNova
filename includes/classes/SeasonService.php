@@ -238,11 +238,11 @@ class SeasonService
 		return $out;
 	}
 
-	public function tick(): void
+	public function tick(array $lng = []): void
 	{
 		foreach (Universe::availableUniverses() as $uni) {
 			try {
-				$this->tickUniverse(Config::get((int) $uni));
+				$this->tickUniverse(Config::get((int) $uni), $lng);
 			} catch (\Throwable $e) {
 				continue;
 			}
@@ -544,6 +544,9 @@ class SeasonService
 
 		$this->store->updateWeek($uni, $seasonId, ['status' => 'paid']);
 
+		$payoutTpl = (string) ($lng['season_discord_payouts'] ?? 'Season %d Pizza payouts have been sent.');
+		DiscordWebhookService::notifySeasonReminder($uni, sprintf($payoutTpl, $seasonId));
+
 		return $this->publishAndWipe($config, $lng);
 	}
 
@@ -557,8 +560,7 @@ class SeasonService
 		$week = $this->store->getWeek($uni, $seasonId) ?? [];
 
 		if (trim((string) ($week['blog_trx_id'] ?? '')) !== '') {
-			$this->store->wipeProgress($uni, $config);
-			$this->startWeek($config, $lng);
+			$this->performWipe($config, $lng);
 
 			return 'wiped';
 		}
@@ -604,10 +606,41 @@ class SeasonService
 			'blog_permlink' => $report['permlink'],
 			'blog_trx_id'   => $result['trx_id'],
 		]);
+
+		$blogUrl = 'https://peakd.com/@' . $author . '/' . $report['permlink'];
+		$blogTpl = (string) ($lng['season_discord_blog'] ?? 'Season %d recap posted: %s');
+		DiscordWebhookService::notifySeasonReminder($uni, sprintf($blogTpl, $seasonId, $blogUrl));
+
+		$this->performWipe($config, $lng);
+
+		return 'wiped';
+	}
+
+	/**
+	 * Close the universe, log everyone out, wipe progress, start the next week, reopen.
+	 */
+	private function performWipe(Config $config, array $lng = []): void
+	{
+		$uni = (int) $config->uni;
+		$seasonId = (int) $config->season_id;
+
+		$config->game_disable = 0;
+		$config->close_reason = (string) ($lng['season_wipe_close_reason'] ?? 'Season wipe in progress. Back shortly.');
+		$config->save();
+
+		$startTpl = (string) ($lng['season_discord_wipe_start'] ?? 'Season %d wipe starting — universe closed.');
+		DiscordWebhookService::notifySeasonReminder($uni, sprintf($startTpl, $seasonId));
+
+		$this->store->logoutUniverse($uni);
 		$this->store->wipeProgress($uni, $config);
 		$this->startWeek($config, $lng);
 
-		return 'wiped';
+		$config->game_disable = 1;
+		$config->close_reason = '';
+		$config->save();
+
+		$doneTpl = (string) ($lng['season_discord_wipe_done'] ?? 'Season wipe complete — universe online. Season %d has started.');
+		DiscordWebhookService::notifySeasonReminder($uni, sprintf($doneTpl, (int) $config->season_id));
 	}
 
 	private function enterBlogHold(Config $config, int $uni, int $seasonId): string
