@@ -171,26 +171,20 @@ class HiveUtilTest extends TestCase
         $this->assertCount(1, HiveUtil::rpcNodesToTry(0));
     }
 
-    public function testStephenHillBase58ConstructsUnderThrowingErrorHandler(): void
+    public function testStephenHillBase58IsPhp84SafeRelease(): void
     {
-        // mahdiyari/hive-php installs this style of handler; Base58 1.1.5 tripped PHP 8.4
-        // nullable deprecations and aborted season blog privateKeyFrom().
-        $previous = set_error_handler(static function (int $errno, string $errstr, string $errfile, int $errline): bool {
-            if (0 === error_reporting()) {
-                return false;
-            }
-            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-        });
+        // mahdiyari/hive-php requires ^1.1; we alias 2.1.0 (explicit nullables) as 1.1.5.
+        $version = \Composer\InstalledVersions::getPrettyVersion('stephenhill/base58');
+        $this->assertNotFalse($version);
+        $this->assertTrue(
+            version_compare(ltrim((string) $version, 'v'), '2.1.0', '>='),
+            "stephenhill/base58 must be 2.1+ (got {$version}) so Base58::__construct does not emit PHP 8.4 nullable deprecations"
+        );
 
-        try {
-            $codec = new StephenHill\Base58();
-            $this->assertNotSame('', $codec->encode('hi'));
-        } finally {
-            if ($previous !== null) {
-                set_error_handler($previous);
-            } else {
-                restore_error_handler();
-            }
-        }
+        $param = (new ReflectionMethod(StephenHill\Base58::class, '__construct'))->getParameters()[1];
+        $type = $param->getType();
+        $this->assertInstanceOf(ReflectionNamedType::class, $type);
+        $this->assertTrue($type->allowsNull());
+        $this->assertSame('StephenHill\\ServiceInterface', $type->getName());
     }
 }
