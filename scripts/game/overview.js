@@ -35,8 +35,32 @@ function updateOverviewTimers() {
 	}
 }
 
+function formatSeasonWipeResetAt(closesAt) {
+	try {
+		return new Date(closesAt * 1000).toLocaleString(undefined, {
+			dateStyle: 'medium',
+			timeStyle: 'long'
+		});
+	} catch (e) {
+		return new Date(closesAt * 1000).toString();
+	}
+}
+
+function updateSeasonWipeResetLabels() {
+	document.querySelectorAll('.season-wipe-countdown').forEach(function(el) {
+		var closes = parseInt(el.getAttribute('data-closes-at'), 10);
+		var target = el.querySelector('.season-wipe-reset-at');
+		if (!target || !closes) {
+			return;
+		}
+		target.textContent = formatSeasonWipeResetAt(closes);
+	});
+}
+
 $(document).ready(function()
 {
+	updateSeasonWipeResetLabels();
+
 	window.setInterval(function() {
 		$('.fleets').each(function() {
 			var s		= $(this).data('fleet-time') - (serverTime.getTime() - startTime) / 1000;

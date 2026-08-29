@@ -153,6 +153,25 @@ class SeasonService
 		];
 	}
 
+	/**
+	 * Overview season wipe clock. Only while the season is running with time left.
+	 *
+	 * @return array{show: bool, closes_at: int, wipe_seconds: int}
+	 */
+	public function overviewWipeCountdown(Config $config): array
+	{
+		$panel = $this->loginPanel($config);
+		if (!$panel['wipe_live']) {
+			return ['show' => false, 'closes_at' => 0, 'wipe_seconds' => 0];
+		}
+
+		return [
+			'show'         => true,
+			'closes_at'    => $panel['closes_at'],
+			'wipe_seconds' => $panel['wipe_seconds'],
+		];
+	}
+
 	public function entryMemo(int $universe, int $seasonId, int $userId): string
 	{
 		return sprintf('hn-s%d-%d-%d', $universe, $seasonId, $userId);
@@ -677,5 +696,7 @@ class SeasonService
 			}
 			PlayerUtil::sendMessage((int) $player['id'], 0, 'Season', 50, $subject, $text, $this->now(), null, 1, $uni);
 		}
+
+		DiscordWebhookService::notifySeasonReminder($uni, $text);
 	}
 }

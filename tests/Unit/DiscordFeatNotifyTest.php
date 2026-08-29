@@ -92,4 +92,40 @@ class DiscordFeatNotifyTest extends TestCase
         $this->assertStringContainsString('First player to own a moon.', $json);
         $this->assertStringNotContainsString('feat_first_moon', $json);
     }
+
+    public function testNotifySeasonReminderPostsContent(): void
+    {
+        $token = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0123456789-_xx';
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'discord_feat_webhook' => 'https://discord.com/api/webhooks/123456789012345678/' . $token,
+        ]), 1);
+
+        DiscordWebhookService::notifySeasonReminder(1, 'Season 3 countdown: 2 day(s) until close.');
+        $this->assertCount(1, $this->posts);
+        $payload = json_decode($this->posts[0]['json'], true);
+        $this->assertSame('Season 3 countdown: 2 day(s) until close.', $payload['content']);
+        $this->assertSame('HiveNova', $payload['username']);
+    }
+
+    public function testNotifySeasonReminderSkipsWhenWebhookMissing(): void
+    {
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'discord_feat_webhook' => '',
+        ]), 1);
+        DiscordWebhookService::notifySeasonReminder(1, 'Season 3 is closing.');
+        $this->assertSame([], $this->posts);
+    }
+
+    public function testNotifySeasonReminderSkipsBlankText(): void
+    {
+        $token = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0123456789-_xx';
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'discord_feat_webhook' => 'https://discord.com/api/webhooks/123456789012345678/' . $token,
+        ]), 1);
+        DiscordWebhookService::notifySeasonReminder(1, '   ');
+        $this->assertSame([], $this->posts);
+    }
 }
