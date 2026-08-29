@@ -8,7 +8,7 @@
 			<p class="lobby-hero-hook">{$lobbyHook} <span class="lobby-hero-hook-em">{$lobbyHookEm}</span></p>
 			<p class="lobby-tagline">{$descText}</p>
 			<div class="lobby-cta-row">
-				<a class="lobby-cta lobby-cta--primary" href="index.php?page=register">{$LNG.buttonRegister}</a>
+				<a class="lobby-cta lobby-cta--primary" href="{$registerUrl|escape}">{$LNG.buttonRegister}</a>
 				<a class="lobby-cta lobby-cta--ghost" href="#lobby-login">{$LNG.loginHeader}</a>
 			</div>
 			<ul class="lobby-bullets" id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul>
@@ -204,7 +204,7 @@
 
 			<div class="contentbox lobby-register-box">
 				<h2>{$LNG.buttonRegister}</h2>
-				<a href="index.php?page=register"><input value="{$LNG.buttonRegister}"></a>
+				<a href="{$registerUrl|escape}"><input value="{$LNG.buttonRegister}"></a>
 			</div>
 		</div>
 	</section>

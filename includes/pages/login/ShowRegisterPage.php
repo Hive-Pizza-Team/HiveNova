@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
@@ -44,7 +45,15 @@ class ShowRegisterPage extends AbstractLoginPage
 		$accountName	= "";
 		
 		$externalAuth	= HTTP::_GP('externalAuth', array());
-		$referralID 	= HTTP::_GP('referralID', 0);
+		$referralCapture	= new ReferralCaptureService();
+		$referralResolved	= $referralCapture->resolveForRegister(
+			Database::get(),
+			(int) Config::get()->ref_active === 1,
+			ReferralCaptureService::requestBag(),
+			$_COOKIE
+		);
+		$referralRegUni	= $referralCapture->registrationUniverseId($referralResolved);
+		$referralID 	= $referralRegUni > 0 ? (int) $referralResolved['id'] : 0;
 
 		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
@@ -84,31 +93,28 @@ class ShowRegisterPage extends AbstractLoginPage
 		}
 
 		$config			= Config::get();
-		if($config->ref_active == 1 && !empty($referralID))
+		if($config->ref_active == 1 && $referralID > 0 && $referralResolved['name'] !== '')
 		{
-			$db = Database::get();
+			$referralData	= array('id' => $referralID, 'name' => $referralResolved['name']);
+		}
 
-			$sql = "SELECT username FROM %%USERS%% WHERE id = :referralID AND universe = :universe;";
-			$referralAccountName = $db->selectSingle($sql, array(
-				':referralID'	=> $referralID,
-				':universe'		=> Universe::current()
-			), 'username');
-
-			if(!empty($referralAccountName))
-			{
-				$referralData	= array('id' => $referralID, 'name' => $referralAccountName);
-			}
+		$defaultEmailUniverse = $this->getDefaultEmailUniverseId(true);
+		$defaultHiveUniverse = $this->getDefaultHiveUniverseId(true);
+		if ($referralRegUni > 0) {
+			$defaultEmailUniverse = $referralRegUni;
+			$defaultHiveUniverse = $referralRegUni;
 		}
 		
 		$this->assign(array(
 			'referralData'		=> $referralData,
+			'referralUniverse'	=> $referralRegUni,
 			'accountName'		=> $accountName,
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,
 			'universeSeasonal'	=> $universeSeasonal,
-			'defaultUniverse'		=> $this->getDefaultEmailUniverseId(true),
-			'defaultEmailUniverse'	=> $this->getDefaultEmailUniverseId(true),
-			'defaultHiveUniverse'	=> $this->getDefaultHiveUniverseId(true),
+			'defaultUniverse'		=> $defaultEmailUniverse,
+			'defaultEmailUniverse'	=> $defaultEmailUniverse,
+			'defaultHiveUniverse'	=> $defaultHiveUniverse,
 			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], 6),
 			'registerRulesDesc'			=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
 			'registerTabEmail'			=> $LNG['registerTabEmail'],
@@ -140,7 +146,14 @@ class ShowRegisterPage extends AbstractLoginPage
 		$rulesChecked	= HTTP::_GP('rules', 0);
 		$language 		= HTTP::_GP('lang', '');
 		
-		$referralID 	= HTTP::_GP('referralID', 0);
+		$referralResolved	= (new ReferralCaptureService())->resolveForRegister(
+			Database::get(),
+			(int) $config->ref_active === 1,
+			ReferralCaptureService::requestBag(),
+			$_COOKIE,
+			(int) Universe::current()
+		);
+		$referralID 	= (int) $referralResolved['id'];
 
 		$externalAuth	= HTTP::_GP('externalAuth', array());
 		if(!isset($externalAuth['account'], $externalAuth['method']))
@@ -306,21 +319,8 @@ class ShowRegisterPage extends AbstractLoginPage
 				$externalAuthUID	= $authObj->getAccount();
 			}
 		}
-		
-		if($config->ref_active == 1 && !empty($referralID))
-		{
-			$sql = "SELECT COUNT(*) as state FROM %%USERS%% WHERE id = :referralID AND universe = :universe;";
-			$Count = $db->selectSingle($sql, array(
-				':referralID' 	=> $referralID,
-				':universe'		=> Universe::current()
-			), 'state');
 
-			if($Count == 0)
-			{
-				$referralID	= 0;
-			}
-		}
-		else
+		if($config->ref_active != 1)
 		{
 			$referralID	= 0;
 		}

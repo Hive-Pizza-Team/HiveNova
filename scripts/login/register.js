@@ -77,10 +77,33 @@ document.addEventListener('DOMContentLoaded', function() {
 			var val = this.value;
 			document.querySelectorAll('.changeAction').forEach(function(s) { s.value = val; });
 			applySeasonalRegister(val);
+			syncReferralWithUniverse(val);
 		});
 	});
 
+	var tabsWrapper = document.querySelector('.reg-tabs-wrapper');
+	var referrerId = tabsWrapper ? String(tabsWrapper.getAttribute('data-referrer-id') || '0') : '0';
+	var referrerUni = tabsWrapper ? String(tabsWrapper.getAttribute('data-referrer-uni') || '0') : '0';
+
+	function syncReferralWithUniverse(uniId) {
+		if (referrerId === '0' || referrerUni === '0') {
+			return;
+		}
+		var match = String(uniId) === referrerUni;
+		document.querySelectorAll('.reg-referral-id').forEach(function(input) {
+			input.value = match ? referrerId : '0';
+		});
+		document.querySelectorAll('.reg-referral-row').forEach(function(row) {
+			if (match) {
+				row.removeAttribute('hidden');
+			} else {
+				row.setAttribute('hidden', 'hidden');
+			}
+		});
+	}
+
 	applySeasonalRegister(currentUniId());
+	syncReferralWithUniverse(currentUniId());
 
 	// If Hive Keychain is available, select that tab by default
 	// Extensions inject after DOMContentLoaded, so we wait briefly
