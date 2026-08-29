@@ -168,6 +168,20 @@ class ShowIndexPage extends AbstractLoginPage
 		);
 		$lobbyVizConfig = (new FleetVizSnapshotService())->forOpenUniverses();
 		$lobbyVizConfigJson = json_encode($lobbyVizConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$lobbyVizUniNames = [];
+		foreach (($lobbyVizConfig['universes'] ?? []) as $uniRow) {
+			$name = trim((string) ($uniRow['name'] ?? ''));
+			if ($name !== '') {
+				$lobbyVizUniNames[] = $name;
+			}
+		}
+		$lobbyVizCaptionTitle = (string) ($LNG['lobby_viz_caption_title'] ?? 'Live fleet map');
+		if ($lobbyVizUniNames !== []) {
+			$lobbyVizCaptionTitle = sprintf(
+				(string) ($LNG['lobby_viz_caption_title_uni'] ?? 'Live fleet map · %s'),
+				implode(', ', $lobbyVizUniNames)
+			);
+		}
 
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
@@ -187,8 +201,11 @@ class ShowIndexPage extends AbstractLoginPage
 			'activityEvents'		=> $activityEvents,
 			'activityPollUrl'		=> 'index.php?page=index&mode=activity&ajax=1',
 			'lobbyVizConfigJson'		=> $lobbyVizConfigJson,
+			'lobbyVizCaptionTitle'	=> $lobbyVizCaptionTitle,
 			'lobbyHook'				=> (string) ($LNG['lobby_hook'] ?? 'Come get'),
 			'lobbyHookEm'			=> (string) ($LNG['lobby_hook_em'] ?? 'MOONed'),
+			'lobbyVizMtime'			=> (string) (@filemtime(ROOT_PATH . 'scripts/login/lobby-viz.js') ?: 0),
+			'lobbyCssMtime'			=> (string) (@filemtime(ROOT_PATH . 'styles/resource/css/login/lobby.css') ?: 0),
 		));
 
 		if ($loginErrorMessage) {

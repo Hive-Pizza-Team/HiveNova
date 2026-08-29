@@ -159,16 +159,24 @@
 .lobby-hero-visual {
 	margin: 0;
 	position: relative;
+	display: flex;
+	flex-direction: column;
 	min-height: min(64vh, 560px);
 	border: 1px solid rgba(70, 210, 255, 0.22);
 	background:
-		radial-gradient(ellipse at 50% 45%, rgba(20, 60, 100, 0.35), transparent 55%),
-		#000;
+		radial-gradient(ellipse at 50% 45%, rgba(20, 60, 100, 0.28), transparent 58%),
+		rgba(0, 4, 12, 0.42);
 	box-shadow:
-		inset 0 0 60px rgba(0, 40, 80, 0.45),
-		0 18px 40px rgba(0, 0, 0, 0.55);
+		inset 0 0 48px rgba(0, 40, 80, 0.28),
+		0 18px 40px rgba(0, 0, 0, 0.35);
 	overflow: hidden;
 	animation: lobby-visual-in 0.9s ease both;
+}
+
+.lobby-viz-stage {
+	position: relative;
+	flex: 1 1 auto;
+	min-height: min(48vh, 420px);
 }
 
 .lobby-viz {
@@ -195,6 +203,83 @@
 .lobby-viz.is-fallback,
 .lobby-viz.is-empty {
 	background: transparent;
+}
+
+.lobby-viz-caption {
+	position: relative;
+	z-index: 2;
+	flex: 0 0 auto;
+	margin: 0;
+	padding: 12px 14px 14px;
+	border-top: 1px solid rgba(70, 210, 255, 0.18);
+	background: rgba(2, 10, 18, 0.62);
+}
+
+.lobby-viz-caption-title {
+	margin: 0 0 2px;
+	font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #9fe0ff;
+}
+
+.lobby-viz-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	list-style: none;
+	margin: 8px 0 0;
+	padding: 0;
+}
+
+.lobby-viz-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: rgba(200, 220, 235, 0.88);
+}
+
+.lobby-viz-legend-item::before {
+	content: "";
+	flex: 0 0 auto;
+	box-sizing: border-box;
+}
+
+.lobby-viz-legend-item--galaxy::before {
+	width: 11px;
+	height: 11px;
+	background: #6ad4ff;
+	clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+	box-shadow: 0 0 8px rgba(106, 212, 255, 0.55);
+}
+
+.lobby-viz-legend-item--fleet::before {
+	width: 18px;
+	height: 3px;
+	border-radius: 2px;
+	background: linear-gradient(90deg, rgba(90, 216, 255, 0.2), #5ad8ff 55%, #fff);
+	box-shadow: 0 0 8px rgba(90, 216, 255, 0.45);
+}
+
+.lobby-viz-legend-item--attack::before {
+	width: 12px;
+	height: 12px;
+	border: 2px solid #ff9646;
+	border-radius: 50%;
+	box-shadow:
+		inset 0 0 0 2px rgba(0, 0, 0, 0.35),
+		0 0 0 1px rgba(255, 150, 70, 0.35),
+		0 0 10px rgba(255, 120, 50, 0.45);
+	background:
+		linear-gradient(#ff9646, #ff9646) center/2px 100% no-repeat,
+		linear-gradient(#ff9646, #ff9646) center/100% 2px no-repeat;
 }
 
 .lobby-hero-hook {
@@ -391,16 +476,32 @@
 
 	.lobby-hero-visual {
 		order: -1;
-		min-height: min(42vh, 340px);
+		min-height: 0;
 		margin-top: 4px;
-		/* keep map clear of page chrome / rounded clip */
 		overflow: hidden;
 	}
 
+	.lobby-viz-stage {
+		min-height: min(36vh, 280px);
+	}
+
 	.lobby-viz {
-		inset: 8px 6px 10px;
+		inset: 4px 4px 6px;
 		width: auto;
 		height: auto;
+	}
+
+	.lobby-viz-caption {
+		padding: 10px 12px 12px;
+	}
+
+	.lobby-viz-caption-body {
+		font-size: 12px;
+	}
+
+	.lobby-viz-legend {
+		gap: 6px 12px;
+		margin-top: 8px;
 	}
 
 	.lobby-feed-item {

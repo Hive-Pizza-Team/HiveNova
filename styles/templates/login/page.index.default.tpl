@@ -14,8 +14,18 @@
 			<ul class="lobby-bullets" id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul>
 		</div>
 		<figure class="lobby-hero-visual" aria-label="{$LNG.lobby_viz_label|escape}">
-			<div id="lobby-viz" class="lobby-viz" role="img" aria-hidden="true"></div>
-			<script type="application/json" id="lobby-viz-config">{$lobbyVizConfigJson nofilter}</script>
+			<div class="lobby-viz-stage">
+				<div id="lobby-viz" class="lobby-viz" role="img" aria-hidden="true"></div>
+				<script type="application/json" id="lobby-viz-config">{$lobbyVizConfigJson nofilter}</script>
+			</div>
+			<figcaption class="lobby-viz-caption">
+				<p class="lobby-viz-caption-title">{$lobbyVizCaptionTitle|escape}</p>
+				<ul class="lobby-viz-legend" aria-hidden="true">
+					<li class="lobby-viz-legend-item lobby-viz-legend-item--galaxy">{$LNG.lobby_viz_legend_galaxy}</li>
+					<li class="lobby-viz-legend-item lobby-viz-legend-item--fleet">{$LNG.lobby_viz_legend_fleet}</li>
+					<li class="lobby-viz-legend-item lobby-viz-legend-item--attack">{$LNG.lobby_viz_legend_attack}</li>
+				</ul>
+			</figcaption>
 		</figure>
 	</section>
 
@@ -203,11 +213,11 @@
 {block name="script" append}
 <script>{if $code}alert({$code|default:0|json});{/if}</script>
 <link rel="stylesheet" type="text/css" href="styles/resource/css/login/register.css?v={$REV}">
-<link rel="stylesheet" type="text/css" href="styles/resource/css/login/lobby.css?v={$REV}">
+<link rel="stylesheet" type="text/css" href="styles/resource/css/login/lobby.css?v={$REV}.{$lobbyCssMtime}">
 <script type="application/json" id="prefetch-assets-data">{$prefetchUrls|default:[]|json}</script>
 <script src="scripts/login/prefetch-assets.js?v={$REV}" defer></script>
 <script src="scripts/login/lobby-feed.js?v={$REV}" defer></script>
-<script src="scripts/login/lobby-viz.js?v={$REV}" defer></script>
+<script src="scripts/login/lobby-viz.js?v={$REV}.{$lobbyVizMtime}" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	var btns = document.querySelectorAll('.reg-tab-btn');
