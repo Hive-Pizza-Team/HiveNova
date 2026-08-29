@@ -417,4 +417,54 @@ PHP;
         $this->expectException(Exception::class);
         SQLDumper::quoteIdentifier('uni1_users`; DROP TABLE x; --');
     }
+
+    public function testFormatClientDefaultsQuotesCredentials(): void
+    {
+        $body = SQLDumper::formatClientDefaults([
+            'host' => 'db.example',
+            'port' => '3307',
+            'user' => 'nova"admin',
+            'userpw' => 'p\\ass"word',
+        ]);
+
+        $this->assertStringContainsString("[client]\n", $body);
+        $this->assertStringContainsString('host="db.example"', $body);
+        $this->assertStringContainsString('port=3307', $body);
+        $this->assertStringContainsString('user="nova\\"admin"', $body);
+        $this->assertStringContainsString('password="p\\\\ass\\"word"', $body);
+    }
+
+    public function testFormatClientDefaultsUsesSafeDefaultsWhenKeysMissing(): void
+    {
+        $body = SQLDumper::formatClientDefaults([]);
+
+        $this->assertStringContainsString('host="127.0.0.1"', $body);
+        $this->assertStringContainsString('port=3306', $body);
+        $this->assertStringContainsString('user=""', $body);
+        $this->assertStringContainsString('password=""', $body);
+    }
+
+    public function testCreateClientDefaultsFileIsPrivateReadableAndRemovedByCallerPattern(): void
+    {
+        $dumper = new SQLDumper();
+        $path = $this->invokePrivate($dumper, 'createClientDefaultsFile', [
+            'host' => '127.0.0.1',
+            'port' => 3306,
+            'user' => 'test',
+            'userpw' => 'secret',
+        ]);
+
+        try {
+            $this->assertFileExists($path);
+            $contents = file_get_contents($path);
+            $this->assertIsString($contents);
+            $this->assertStringContainsString('password="secret"', $contents);
+            $perms = fileperms($path) & 0777;
+            $this->assertSame(0600, $perms);
+        } finally {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+    }
 }
