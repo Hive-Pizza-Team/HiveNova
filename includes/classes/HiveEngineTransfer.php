@@ -106,27 +106,17 @@ class HiveEngineTransfer
 			require_once $hivePhp;
 		}
 
-		$previousHandler = set_error_handler(static function () {
-			return false;
-		});
-		$previousTz = date_default_timezone_get();
-		try {
+		return HiveUtil::withHiveClient(static function () use ($from, $to, $quantity, $symbol, $memo, $wif) {
 			$hive = new Hive([
 				'rpcNodes' => HiveUtil::rpcNodesToTry(1),
 				'timeout'  => \HIVE_RPC_TIMEOUT,
 			]);
+			HiveUtil::installHiveClientErrorHandler();
 			$key = $hive->privateKeyFrom($wif);
 			$params = self::customJsonParams($from, $to, $quantity, $symbol, $memo);
 
 			return $hive->broadcast($key, 'custom_json', $params);
-		} finally {
-			if ($previousHandler !== null) {
-				set_error_handler($previousHandler);
-			} else {
-				restore_error_handler();
-			}
-			date_default_timezone_set($previousTz);
-		}
+		});
 	}
 
 	private static function extractTrxId(mixed $result): string

@@ -78,26 +78,16 @@ class HiveTransfer
 			require_once $hivePhp;
 		}
 
-		$previousHandler = set_error_handler(static function () {
-			return false;
-		});
-		$previousTz = date_default_timezone_get();
-		try {
+		return HiveUtil::withHiveClient(static function () use ($from, $to, $amountAsset, $memo, $wif) {
 			$hive = new Hive([
 				'rpcNodes' => HiveUtil::rpcNodesToTry(1),
 				'timeout'  => \HIVE_RPC_TIMEOUT,
 			]);
+			HiveUtil::installHiveClientErrorHandler();
 			$key = $hive->privateKeyFrom($wif);
 
 			return $hive->broadcast($key, 'transfer', [$from, $to, $amountAsset, $memo]);
-		} finally {
-			if ($previousHandler !== null) {
-				set_error_handler($previousHandler);
-			} else {
-				restore_error_handler();
-			}
-			date_default_timezone_set($previousTz);
-		}
+		});
 	}
 
 	private static function extractTrxId(mixed $result): string

@@ -114,6 +114,47 @@ class HiveUtil
 		return (bool) preg_match('/^[a-z][-a-z0-9]+[a-z0-9](\.[a-z][-a-z0-9]+[a-z0-9])*$/', (string) $hiveaccount);
 	}
 
+	/**
+	 * mahdiyari/hive-php installs a throwing error handler in Hive::__construct().
+	 * Call this immediately after `new Hive(...)` so E_DEPRECATED from deps (e.g. Base58)
+	 * does not abort season blog / Engine transfers.
+	 */
+	public static function installHiveClientErrorHandler(): void
+	{
+		set_error_handler(static function (int $errno, string $errstr, string $errfile, int $errline): bool {
+			if ($errno === E_DEPRECATED || $errno === E_USER_DEPRECATED) {
+				return true;
+			}
+			if (error_reporting() === 0) {
+				return false;
+			}
+			throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+		});
+	}
+
+	/**
+	 * Restore prior error handler + timezone after Hive client work.
+	 *
+	 * @template T
+	 * @param callable(): T $fn
+	 * @return T
+	 */
+	public static function withHiveClient(callable $fn): mixed
+	{
+		$previousHandler = set_error_handler(static fn (): bool => true);
+		$previousTz = date_default_timezone_get();
+		try {
+			return $fn();
+		} finally {
+			if ($previousHandler !== null) {
+				set_error_handler($previousHandler);
+			} else {
+				restore_error_handler();
+			}
+			date_default_timezone_set($previousTz);
+		}
+	}
+
 	static public function isSignValid($hiveaccount, $signedblob): bool
 	{
 		if (!HiveUtil::isAccountValid($hiveaccount)) {
