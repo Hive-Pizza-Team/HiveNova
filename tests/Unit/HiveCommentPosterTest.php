@@ -36,7 +36,7 @@ class HiveCommentPosterTest extends TestCase
 			'hivenova-u2-season-12',
 			'HiveNova Season 12 Recap',
 			"# Season 12\n\nBody",
-			['hivenova', 'hive-pizza', 'gaming', 'season'],
+			['moon', 'hive-pizza', 'gaming', 'season'],
 			'5Ktestwif'
 		);
 
@@ -44,13 +44,13 @@ class HiveCommentPosterTest extends TestCase
 		$this->assertSame('blogtrx1', $result['trx_id']);
 		$this->assertCount(1, $this->calls);
 		$this->assertSame('', $this->calls[0][0]);
-		$this->assertSame('hivenova', $this->calls[0][1]);
+		$this->assertSame('moon', $this->calls[0][1]);
 		$this->assertSame('season.blog', $this->calls[0][2]);
 		$this->assertSame('hivenova-u2-season-12', $this->calls[0][3]);
 		$this->assertSame('HiveNova Season 12 Recap', $this->calls[0][4]);
 		$this->assertStringContainsString('Season 12', $this->calls[0][5]);
 		$meta = json_decode($this->calls[0][6], true);
-		$this->assertSame(['hivenova', 'hive-pizza', 'gaming', 'season'], $meta['tags']);
+		$this->assertSame(['moon', 'hive-pizza', 'gaming', 'season'], $meta['tags']);
 		$this->assertSame('5Ktestwif', $this->calls[0][7]);
 	}
 

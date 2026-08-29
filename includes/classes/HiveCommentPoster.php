@@ -10,7 +10,7 @@ use Throwable;
  */
 class HiveCommentPoster
 {
-	public const DEFAULT_PARENT_PERMLINK = 'hivenova';
+	public const DEFAULT_PARENT_PERMLINK = 'moon';
 
 	/** @var callable|null fn(string $parentAuthor, string $parentPermlink, string $author, string $permlink, string $title, string $body, string $jsonMetadata, string $wif): mixed */
 	private static $broadcaster = null;

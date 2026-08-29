@@ -66,7 +66,7 @@ class SeasonReportComposer
 
 		$title = sprintf('HiveNova Season %d Recap', $seasonId);
 		$permlink = sprintf('hivenova-u%d-season-%d', $uni, $seasonId);
-		$tags = ['hivenova', 'hive-pizza', 'gaming', 'season'];
+		$tags = ['moon', 'hive-pizza', 'gaming', 'season'];
 
 		$lines = [];
 		$lines[] = '# ' . $title;
