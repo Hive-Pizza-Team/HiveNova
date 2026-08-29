@@ -46,7 +46,7 @@ class SeasonAdminConfig
 
 		$entry = (float) ($posted['season_entry_pizza'] ?? 0);
 		if ($entry >= HiveEngineTransfer::MIN_AMOUNT) {
-			$apply['season_entry_pizza'] = sprintf('%.3f', $entry);
+			$apply['season_entry_pizza'] = sprintf('%.' . HiveEngineTransfer::PRECISION . 'f', $entry);
 		}
 
 		$account = strtolower(trim((string) ($posted['season_wallet_account'] ?? '')));

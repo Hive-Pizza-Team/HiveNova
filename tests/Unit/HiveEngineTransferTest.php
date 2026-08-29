@@ -33,7 +33,7 @@ class HiveEngineTransferTest extends TestCase
 
 		$this->assertTrue($result['ok']);
 		$this->assertSame('eng1', $result['trx_id']);
-		$this->assertSame(['gameacct', 'playerone', '1.200', 'PIZZA', 'hn-s2-1-10', '5Ktestwif'], $this->calls[0]);
+		$this->assertSame(['gameacct', 'playerone', '1.20', 'PIZZA', 'hn-s2-1-10', '5Ktestwif'], $this->calls[0]);
 	}
 
 	public function testAmountBelowFloorDoesNotBroadcast(): void
@@ -42,7 +42,7 @@ class HiveEngineTransferTest extends TestCase
 			$this->calls[] = $args;
 			return ['trx_id' => 'x'];
 		});
-		$result = (new HiveEngineTransfer())->send('gameacct', 'playerone', 0.0004, 'PIZZA', 'm', '5K');
+		$result = (new HiveEngineTransfer())->send('gameacct', 'playerone', 0.004, 'PIZZA', 'm', '5K');
 		$this->assertFalse($result['ok']);
 		$this->assertSame([], $this->calls);
 	}
@@ -95,5 +95,39 @@ class HiveEngineTransferTest extends TestCase
 		$result = (new HiveEngineTransfer())->send('gameacct', 'playerone', 1, 'P!ZZA', 'm', '5Ktest');
 		$this->assertFalse($result['ok']);
 		$this->assertSame([], $this->calls);
+	}
+
+	public function testTransferJsonIsValidJsonString(): void
+	{
+		$json = HiveEngineTransfer::transferJson('alice', '45.00', 'PIZZA', 'LocalMoon season 1 prize');
+		$this->assertJson($json);
+		$decoded = json_decode($json, true);
+		$this->assertSame(
+			[
+				'contractName' => 'tokens',
+				'contractAction' => 'transfer',
+				'contractPayload' => [
+					'symbol' => 'PIZZA',
+					'to' => 'alice',
+					'quantity' => '45.00',
+					'memo' => 'LocalMoon season 1 prize',
+				],
+			],
+			$decoded
+		);
+
+		$params = HiveEngineTransfer::customJsonParams('season.wallet', 'alice', '45.00', 'PIZZA', 'LocalMoon season 1 prize');
+		$op = [
+			'required_auths' => $params[0],
+			'required_posting_auths' => $params[1],
+			'id' => $params[2],
+			'json' => $params[3],
+		];
+		$outer = json_encode(['custom_json', $op], JSON_UNESCAPED_SLASHES);
+		$this->assertIsString($outer);
+		$this->assertJson($outer);
+		$roundTrip = json_decode($outer, true);
+		$this->assertIsString($roundTrip[1]['json']);
+		$this->assertJson($roundTrip[1]['json']);
 	}
 }

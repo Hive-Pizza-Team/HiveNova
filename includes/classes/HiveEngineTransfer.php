@@ -10,7 +10,9 @@ use Throwable;
  */
 class HiveEngineTransfer
 {
-	public const MIN_AMOUNT = 0.001;
+	/** PIZZA (and current Engine transfers) use 2 decimal places. */
+	public const PRECISION = 2;
+	public const MIN_AMOUNT = 0.01;
 	public const CONTRACT_ID = 'ssc-mainnet-hive';
 
 	/** @var callable|null fn(string $from, string $to, string $quantity, string $symbol, string $memo, string $wif): mixed */
@@ -41,7 +43,7 @@ class HiveEngineTransfer
 				return self::fail();
 			}
 
-			$quantity = sprintf('%.3f', $amount);
+			$quantity = sprintf('%.' . self::PRECISION . 'f', $amount);
 			$result = $this->broadcast($from, $to, $quantity, $symbol, $memo, $wif);
 			$trxId = self::extractTrxId($result);
 			if ($trxId === '') {
@@ -52,6 +54,45 @@ class HiveEngineTransfer
 		} catch (Throwable $e) {
 			return self::fail();
 		}
+	}
+
+	/**
+	 * Hive Engine tokens.transfer body for custom_json.json (must be a JSON string on-chain).
+	 */
+	public static function transferJson(string $to, string $quantity, string $symbol, string $memo): string
+	{
+		$encoded = json_encode(
+			[
+				'contractName'    => 'tokens',
+				'contractAction'  => 'transfer',
+				'contractPayload' => [
+					'symbol'   => $symbol,
+					'to'       => $to,
+					'quantity' => $quantity,
+					'memo'     => $memo,
+				],
+			],
+			JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+		);
+		// custom_json.json must itself be parseable JSON
+		json_decode($encoded, true, 512, JSON_THROW_ON_ERROR);
+
+		return $encoded;
+	}
+
+	/**
+	 * Full custom_json op params as passed to Hive::broadcast (json is a string, not an object).
+	 *
+	 * @return array{0: list<string>, 1: list<string>, 2: string, 3: string}
+	 */
+	public static function customJsonParams(string $from, string $to, string $quantity, string $symbol, string $memo): array
+	{
+		return [
+			[$from],
+			[],
+			self::CONTRACT_ID,
+			self::transferJson($to, $quantity, $symbol, $memo),
+		];
 	}
 
 	private function broadcast(string $from, string $to, string $quantity, string $symbol, string $memo, string $wif): mixed
@@ -75,23 +116,9 @@ class HiveEngineTransfer
 				'timeout'  => \HIVE_RPC_TIMEOUT,
 			]);
 			$key = $hive->privateKeyFrom($wif);
-			$json = json_encode([
-				'contractName'    => 'tokens',
-				'contractAction'  => 'transfer',
-				'contractPayload' => [
-					'symbol'   => $symbol,
-					'to'       => $to,
-					'quantity' => $quantity,
-					'memo'     => $memo,
-				],
-			], JSON_UNESCAPED_SLASHES);
+			$params = self::customJsonParams($from, $to, $quantity, $symbol, $memo);
 
-			return $hive->broadcast($key, 'custom_json', [
-				[$from],
-				[],
-				self::CONTRACT_ID,
-				(string) $json,
-			]);
+			return $hive->broadcast($key, 'custom_json', $params);
 		} finally {
 			if ($previousHandler !== null) {
 				set_error_handler($previousHandler);
