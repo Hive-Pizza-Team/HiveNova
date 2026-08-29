@@ -67,6 +67,49 @@ class HiveCommentPosterTest extends TestCase
 		$this->assertSame([], $this->calls);
 	}
 
+	public function testReplyRequiresValidParentAuthorAndPermlink(): void
+	{
+		HiveCommentPoster::setBroadcaster(function (...$args) {
+			$this->calls[] = $args;
+			return ['trx_id' => 'x'];
+		});
+		$poster = new HiveCommentPoster();
+		$this->assertFalse($poster->post(
+			'goodacct', 'ok-permlink', 'Title', 'Body', ['moon'], '5K', '1bad', 'parent-post'
+		)['ok']);
+		$this->assertFalse($poster->post(
+			'goodacct', 'ok-permlink', 'Title', 'Body', ['moon'], '5K', 'parentacct', ''
+		)['ok']);
+		$this->assertFalse($poster->post(
+			'goodacct', 'ok-permlink', 'Title', 'Body', ['moon'], '5K', 'parentacct', 'Bad Parent!'
+		)['ok']);
+		$this->assertSame([], $this->calls);
+	}
+
+	public function testEmptyTagsFallBackToMoon(): void
+	{
+		HiveCommentPoster::setBroadcaster(function (...$args) {
+			$this->calls[] = $args;
+			return ['trx_id' => 'blogtrx2'];
+		});
+
+		$result = (new HiveCommentPoster())->post(
+			'goodacct',
+			'ok-permlink',
+			'Title',
+			'Body',
+			['', '!!!'],
+			'5Ktestwif'
+		);
+
+		$this->assertTrue($result['ok']);
+		$this->assertCount(1, $this->calls);
+		$this->assertSame('', $this->calls[0][0]);
+		$this->assertSame('', $this->calls[0][1]);
+		$meta = json_decode($this->calls[0][6], true);
+		$this->assertSame([HiveCommentPoster::FALLBACK_TAG], $meta['tags']);
+	}
+
 	public function testBroadcasterExceptionReturnsFailure(): void
 	{
 		HiveCommentPoster::setBroadcaster(static function () {
