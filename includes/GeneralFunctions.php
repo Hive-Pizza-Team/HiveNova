@@ -818,9 +818,9 @@ function errorHandler($errno, $errstr, $errfile, $errline)
 		return false;
 	}
 
-	// Deprecation notices should never be fatal — just skip them
+	// Deprecation notices should never be fatal — swallow them
 	if ($errno === E_DEPRECATED || $errno === E_USER_DEPRECATED) {
-		return false;
+		return true;
 	}
 
 	throw new ErrorException($errstr, 0, $errno, $errfile, $errline);

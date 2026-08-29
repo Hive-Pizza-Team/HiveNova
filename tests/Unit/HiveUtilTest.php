@@ -170,4 +170,21 @@ class HiveUtilTest extends TestCase
         $this->assertSame($all, HiveUtil::rpcNodesToTry(null));
         $this->assertCount(1, HiveUtil::rpcNodesToTry(0));
     }
+
+    public function testStephenHillBase58IsPhp84SafeRelease(): void
+    {
+        // mahdiyari/hive-php requires ^1.1; we alias 2.1.0 (explicit nullables) as 1.1.5.
+        $version = \Composer\InstalledVersions::getPrettyVersion('stephenhill/base58');
+        $this->assertNotFalse($version);
+        $this->assertTrue(
+            version_compare(ltrim((string) $version, 'v'), '2.1.0', '>='),
+            "stephenhill/base58 must be 2.1+ (got {$version}) so Base58::__construct does not emit PHP 8.4 nullable deprecations"
+        );
+
+        $param = (new ReflectionMethod(StephenHill\Base58::class, '__construct'))->getParameters()[1];
+        $type = $param->getType();
+        $this->assertInstanceOf(ReflectionNamedType::class, $type);
+        $this->assertTrue($type->allowsNull());
+        $this->assertSame('StephenHill\\ServiceInterface', $type->getName());
+    }
 }
