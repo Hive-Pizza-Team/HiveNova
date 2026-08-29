@@ -101,7 +101,7 @@ class SQLDumper
 		@set_time_limit(600); // 10 Minutes
 	}
 		
-	private function canNative($command)
+	protected function canNative($command)
 	{
 		if (!function_exists('proc_open') || !function_exists('shell_exec') || !function_exists('escapeshellarg')) {
 			return false;
@@ -136,7 +136,7 @@ class SQLDumper
 	 * @param list<string> $arguments Shell-escaped argument tokens (not including the binary)
 	 * @param array{0?:array{0:string,1:string,2?:string},1?:array{0:string,1:string,2?:string},2?:array{0:string,1:string,2?:string}}|null $descriptorSpec
 	 */
-	private function runNativeClient(string $binary, array $database, array $arguments, ?array $descriptorSpec = null): void
+	protected function runNativeClient(string $binary, array $database, array $arguments, ?array $descriptorSpec = null): void
 	{
 		$defaultsFile = $this->createClientDefaultsFile($database);
 		try {
