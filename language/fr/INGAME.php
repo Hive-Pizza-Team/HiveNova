@@ -1284,8 +1284,8 @@ $LNG['hive_social_memo_pm'] = '%s sent you a private message in %s. Log in to re
 //----------------------------------------------------------------------------//
 // Commander loop
 $LNG['cm_title'] = 'Commander briefing';
-$LNG['cm_period_remaining'] = 'Time remaining this week';
-$LNG['cm_select_directive'] = 'Choose one Empire Directive. It stays locked until the next weekly period.';
+$LNG['cm_period_remaining'] = 'Time remaining today';
+$LNG['cm_select_directive'] = 'Choose one Empire Directive. It stays locked until the next daily period.';
 $LNG['cm_locked'] = 'Directive locked for this period';
 $LNG['cm_progress'] = 'Progress';
 $LNG['cm_counter_build_complete'] = 'Buildings & research';
@@ -1312,7 +1312,7 @@ $LNG['cm_dir_exploration'] = 'Exploration Push';
 $LNG['cm_dir_exploration_desc'] = 'Complete expeditions. Favors aggressive stances and salvage.';
 $LNG['cm_dir_trade'] = 'Trade Surplus';
 $LNG['cm_dir_trade_desc'] = 'Complete large transports or recycles above the cargo threshold.';
-$LNG['cm_suggest_industrial'] = 'Queue builds and research this week';
+$LNG['cm_suggest_industrial'] = 'Queue builds and research today';
 $LNG['cm_suggest_defensive'] = 'Fortify home and hold with a cautious expedition stance';
 $LNG['cm_suggest_exploration'] = 'Send expeditions on an aggressive stance';
 $LNG['cm_suggest_trade'] = 'Move surplus cargo on transports and recyclers';
