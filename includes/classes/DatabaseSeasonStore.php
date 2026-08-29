@@ -368,6 +368,14 @@ class DatabaseSeasonStore implements SeasonStore
 		return (int) $count;
 	}
 
+	public function logoutUniverse(int $universe): void
+	{
+		Database::get()->delete(
+			'DELETE FROM %%SESSION%% WHERE `userID` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
+			[':uni' => $universe]
+		);
+	}
+
 	public function wipeProgress(int $universe, Config $config): void
 	{
 		$wipe = $this->wipe ?? SeasonWipeService::fromGlobals(null, null, $config);

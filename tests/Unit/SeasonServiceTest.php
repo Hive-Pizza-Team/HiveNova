@@ -126,6 +126,8 @@ class SeasonServiceTest extends TestCase
 			'OverviewNewsFrame' => 0,
 			'OverviewNewsText' => '',
 			'discord_feat_webhook' => '',
+			'game_disable' => 1,
+			'close_reason' => '',
 			'metal_start' => 500,
 			'crystal_start' => 500,
 			'deuterium_start' => 0,
@@ -681,5 +683,51 @@ class SeasonServiceTest extends TestCase
 		$this->assertSame(SeasonService::STATUS_BLOG_HOLD, $result);
 		$this->assertSame([], $this->store->wiped);
 		$this->assertSame([], $this->blogPosts);
+	}
+
+	public function testWipeClosesServerLogsOutAndReopensWithDiscord(): void
+	{
+		$token = str_repeat('A', 68);
+		$config = $this->makeConfig([
+			'discord_feat_webhook' => 'https://discord.com/api/webhooks/123456789012345678/' . $token,
+		]);
+		Config::setInstance($config, 2);
+		$svc = $this->service();
+		$svc->acceptTransfer($config, ['id' => 10, 'hive_account' => 'aliceaaa'], $this->transferFor(10, 'aliceaaa', 10));
+		$this->store->ranking = [
+			['user_id' => 10, 'hive_account' => 'aliceaaa', 'authlevel' => 0, 'points' => 100, 'rank' => 1],
+		];
+		$this->store->players = [
+			['id' => 10, 'hive_account' => 'aliceaaa', 'lang' => 'en'],
+		];
+
+		$result = $svc->closeWeek($config);
+		$this->assertSame('wiped', $result);
+		$this->assertSame([2], $this->store->wiped);
+		$this->assertSame([2], $this->store->loggedOut);
+		$this->assertSame([0], $this->store->gameDisableAtWipe);
+		$this->assertSame(1, (int) $config->game_disable);
+		$this->assertSame('', (string) $config->close_reason);
+
+		$contents = array_map(
+			static fn (array $post): string => (string) (json_decode($post['json'], true)['content'] ?? ''),
+			$this->discordPosts
+		);
+		$this->assertTrue(
+			(bool) array_filter($contents, static fn (string $c): bool => str_contains($c, 'Pizza payouts have been sent')),
+			'expected payouts Discord: ' . implode(' | ', $contents)
+		);
+		$this->assertTrue(
+			(bool) array_filter($contents, static fn (string $c): bool => str_contains($c, 'recap posted:') && str_contains($c, 'peakd.com/@season.blog/')),
+			'expected blog Discord: ' . implode(' | ', $contents)
+		);
+		$this->assertTrue(
+			(bool) array_filter($contents, static fn (string $c): bool => str_contains($c, 'wipe starting')),
+			'expected wipe-start Discord: ' . implode(' | ', $contents)
+		);
+		$this->assertTrue(
+			(bool) array_filter($contents, static fn (string $c): bool => str_contains($c, 'wipe complete')),
+			'expected wipe-done Discord: ' . implode(' | ', $contents)
+		);
 	}
 }

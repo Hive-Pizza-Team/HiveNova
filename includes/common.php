@@ -166,12 +166,18 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	if(!empty($USER['dpath'])) { $THEME->setUserTheme($USER['dpath']); }
 	$GLOBALS['userNumberFormat'] = $USER['number_format'] ?? 'auto';
 
+	$gamePage = isset($_GET['page']) ? strtolower((string) $_GET['page']) : '';
 	if($config->game_disable == 0 && $USER['authlevel'] == AUTH_USR) {
-		ShowErrorPage::printError($LNG['sys_closed_game'].'<br><br>'.$config->close_reason, false);
+		if ($gamePage === 'logout') {
+			$session->delete();
+			HTTP::redirectTo('index.php');
+		}
+		// fullSide=false: closed-game path runs before $PLANET is loaded; full nav would crash getPlanet().
+		ShowErrorPage::printError($LNG['sys_closed_game'].'<br><br>'.$config->close_reason, null, null, false);
 	}
 
 	if($USER['bana'] == 1) {
-		ShowErrorPage::printError("<font size=\"6px\">".$LNG['css_account_banned_message']."</font><br><br>".sprintf($LNG['css_account_banned_expire'], _date($LNG['php_tdformat'], $USER['banaday'], $USER['timezone']))."<br><br>".$LNG['css_goto_homeside'], false);
+		ShowErrorPage::printError("<font size=\"6px\">".$LNG['css_account_banned_message']."</font><br><br>".sprintf($LNG['css_account_banned_expire'], _date($LNG['php_tdformat'], $USER['banaday'], $USER['timezone']))."<br><br>".$LNG['css_goto_homeside'], null, null, false);
 	}
 
 	if(!(!$session->isValidSession() && isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)>=2 && MODE === 'INGAME'))
@@ -203,7 +209,7 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 				$fallback = $db->selectSingle($sql, array(':userId' => $USER['id']), 'id');
 				if(empty($fallback))
 				{
-					ShowErrorPage::printError("Main Planet does not exist!", false);
+					ShowErrorPage::printError("Main Planet does not exist!", null, null, false);
 				}
 				$session->planetId	= $fallback;
 				$USER['id_planet']	= $fallback;

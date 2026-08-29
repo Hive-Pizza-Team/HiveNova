@@ -85,5 +85,8 @@ interface SeasonStore
 
 	public function countEntries(int $universe, int $seasonId): int;
 
+	/** End active game sessions for every account in this universe. */
+	public function logoutUniverse(int $universe): void;
+
 	public function wipeProgress(int $universe, Config $config): void;
 }

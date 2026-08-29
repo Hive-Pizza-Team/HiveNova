@@ -29,6 +29,12 @@ class InMemorySeasonStore implements SeasonStore
 	/** @var list<int> */
 	public array $wiped = [];
 
+	/** @var list<int> */
+	public array $loggedOut = [];
+
+	/** @var list<int> game_disable value observed at each wipeProgress call */
+	public array $gameDisableAtWipe = [];
+
 	/** @var list<array{units: int, result: string, attacker: string, defender: string}> */
 	public array $hallOfFame = [];
 
@@ -227,9 +233,15 @@ class InMemorySeasonStore implements SeasonStore
 		return $count;
 	}
 
+	public function logoutUniverse(int $universe): void
+	{
+		$this->loggedOut[] = $universe;
+	}
+
 	public function wipeProgress(int $universe, Config $config): void
 	{
 		$this->wiped[] = $universe;
+		$this->gameDisableAtWipe[] = (int) ($config->game_disable ?? -1);
 	}
 
 	private function entryKey(int $universe, int $seasonId, int $userId): string
