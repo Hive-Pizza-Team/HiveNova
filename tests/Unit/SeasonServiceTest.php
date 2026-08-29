@@ -122,6 +122,7 @@ class SeasonServiceTest extends TestCase
 			'season_closes_at' => $this->now + 604800,
 			'season_status' => SeasonService::STATUS_RUNNING,
 			'season_last_reminder' => 'start',
+			'game_name' => 'LocalMoon',
 			'OverviewNewsFrame' => 0,
 			'OverviewNewsText' => '',
 			'discord_feat_webhook' => '',
@@ -274,6 +275,8 @@ class SeasonServiceTest extends TestCase
 		$this->assertEqualsWithDelta($budget * 300 / 600, $byUser[10], 0.001);
 		$this->assertEqualsWithDelta($budget * 200 / 600, $byUser[11], 0.001);
 		$this->assertSame(3, count($this->sends));
+		$this->assertSame('LocalMoon season 1 prize', $this->sends[0][4]);
+		$this->assertSame('18.00', sprintf('%.2f', $this->sends[0][2]));
 		$this->assertSame(1, count($this->blogPosts));
 		$this->assertSame('hivenova-u2-season-1', $this->blogPosts[0][3]);
 		$week = $this->store->getWeek(2, 1);

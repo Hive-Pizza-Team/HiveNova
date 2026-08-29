@@ -59,7 +59,7 @@ class SeasonAdminConfigTest extends TestCase
 			'season_blog_account' => 'Season.Blog',
 		]);
 		$this->assertSame('12.50', $result['apply']['season_house_cut_percent']);
-		$this->assertSame('0.250', $result['apply']['season_entry_pizza']);
+		$this->assertSame('0.25', $result['apply']['season_entry_pizza']);
 		$this->assertSame(100, $result['apply']['season_min_points']);
 		$this->assertSame('season.wallet', $result['apply']['season_wallet_account']);
 		$this->assertSame('season.blog', $result['apply']['season_blog_account']);

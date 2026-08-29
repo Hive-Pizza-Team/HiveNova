@@ -209,7 +209,8 @@ class SeasonService
 		$out = [];
 		$allocated = 0.0;
 		foreach ($eligible as $row) {
-			$amount = floor($budget * ((int) $row['points']) / $totalPoints * 1000) / 1000;
+			$scale = 10 ** HiveEngineTransfer::PRECISION;
+			$amount = floor($budget * ((int) $row['points']) / $totalPoints * $scale) / $scale;
 			if ($amount < HiveEngineTransfer::MIN_AMOUNT) {
 				continue;
 			}
@@ -226,7 +227,7 @@ class SeasonService
 		if ($out !== []) {
 			$last = count($out) - 1;
 			$allocated -= $out[$last]['pizza_amount'];
-			$remainder = round($budget - $allocated, 3);
+			$remainder = round($budget - $allocated, HiveEngineTransfer::PRECISION);
 			if ($remainder >= HiveEngineTransfer::MIN_AMOUNT) {
 				$out[$last]['pizza_amount'] = $remainder;
 			} else {
@@ -422,7 +423,7 @@ class SeasonService
 			'season_id'     => $seasonId,
 			'user_id'       => $userId,
 			'hive_account'  => $hive,
-			'pizza_amount'  => round($transfer['quantity'], 3),
+			'pizza_amount'  => round($transfer['quantity'], HiveEngineTransfer::PRECISION),
 			'trx_id'        => $transfer['trx_id'],
 			'created_at'    => $this->now(),
 		]);
@@ -462,8 +463,8 @@ class SeasonService
 
 		$pool = $this->store->sumPool($uni, $seasonId);
 		$cutPct = max(0.0, min(100.0, (float) ($config->season_house_cut_percent ?? 0)));
-		$house = round($pool * $cutPct / 100, 3);
-		$budget = round($pool - $house, 3);
+		$house = round($pool * $cutPct / 100, HiveEngineTransfer::PRECISION);
+		$budget = round($pool - $house, HiveEngineTransfer::PRECISION);
 		$payouts = $this->allocatePayouts($eligible, $budget);
 
 		$this->store->upsertWeek([
@@ -510,13 +511,19 @@ class SeasonService
 		$wif = ConfigSecret::resolve(ConfigSecret::ENV_SEASON_WALLET_KEY, $config->season_wallet_active_key ?? '');
 		$failed = false;
 
+		$gameName = trim((string) ($config->game_name ?? ''));
+		if ($gameName === '') {
+			$gameName = 'HiveNova';
+		}
+		$memo = sprintf('%s season %d prize', $gameName, $seasonId);
+
 		foreach ($open as $payout) {
 			$result = $this->transfer->send(
 				$from,
 				$payout['hive_account'],
 				(float) $payout['pizza_amount'],
 				self::TOKEN,
-				sprintf('HiveNova season %d prize', $seasonId),
+				$memo,
 				$wif
 			);
 			if ($result['ok']) {
