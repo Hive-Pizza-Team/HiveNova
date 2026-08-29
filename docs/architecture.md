@@ -89,6 +89,7 @@ Trajectory: carve god-objects (`FleetFunctions`, `ResourceUpdate`, `ShowAlliance
 ## Testing and coverage gate
 
 - Unit: `php vendor/bin/phpunit`
+- Static analysis: `composer phpstan` (level 0 on `includes/classes/`; baseline in `phpstan-baseline.neon`)
 - Fixture / FakeDatabase cheat sheet: **`docs/testing.md`**
 - Local CI mirror: `./tests/run-ci-local.sh`
 - **Diff coverage gate** (PRs): ≥80% of changed lines under `includes/classes/` must be covered.

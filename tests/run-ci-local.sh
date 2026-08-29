@@ -76,6 +76,7 @@ check_error_log() {
 run "Language check"   php .github/scripts/check-language-files.php
 run "CSS check"        bash tests/check-css.sh
 run "JS tests"         npm run test:js
+run "PHPStan"          composer phpstan
 
 if [[ $COVERAGE -ne 1 ]]; then
   run "Unit tests" php vendor/bin/phpunit --configuration phpunit.xml

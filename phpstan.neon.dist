@@ -1,0 +1,33 @@
+includes:
+	- phpstan-baseline.neon
+
+parameters:
+	level: 0
+	paths:
+		- includes/classes
+	excludePaths:
+		# Legacy global-namespace class implementing a namespaced interface;
+		# excluded so we do not need a non-coverable `use` tweak for CI.
+		- includes/classes/extauth/SteemconnectAuth.php
+	scanDirectories:
+		- includes/libs/opbe
+		- includes/libs/tdcron
+		- includes/libs/wcf
+		- includes/libs/BBCodeParser2
+		- includes/libs/steemconnect
+		- includes/libs/teamspeak
+	scanFiles:
+		- includes/constants.php
+		- includes/dbtables.php
+		- includes/GeneralFunctions.php
+	treatPhpDocTypesAsCertain: false
+	# Baseline entries drop as code is fixed; keep CI from failing on leftovers.
+	reportUnmatchedIgnoredErrors: false
+	ignoreErrors:
+		# Runtime install artifact — gitignored; present locally, absent in CI.
+		-
+			identifier: require.fileNotFound
+			message: '#includes/config\.php#'
+		-
+			identifier: require.fileNotFound
+			message: '#includes/push\.config\.php#'
