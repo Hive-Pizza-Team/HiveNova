@@ -114,6 +114,37 @@ class SQLDumperFakeDatabase implements DatabaseInterface
     public function rollback(): void {}
 }
 
+/**
+ * Records native client invocations so dump/restore argument assembly can be tested
+ * without requiring a live mysqldump/mysql binary or database.
+ */
+class SQLDumperNativeSpy extends SQLDumper
+{
+    /** @var list<array{binary:string,database:array,arguments:list<string>,descriptorSpec:?array}> */
+    public array $nativeCalls = [];
+
+    public bool $forceNativeAvailable = true;
+
+    protected function canNative($command)
+    {
+        if ($this->forceNativeAvailable) {
+            return true;
+        }
+
+        return parent::canNative($command);
+    }
+
+    protected function runNativeClient(string $binary, array $database, array $arguments, ?array $descriptorSpec = null): void
+    {
+        $this->nativeCalls[] = [
+            'binary' => $binary,
+            'database' => $database,
+            'arguments' => $arguments,
+            'descriptorSpec' => $descriptorSpec,
+        ];
+    }
+}
+
 class SQLDumperTest extends TestCase
 {
     private ?DatabaseInterface $savedDatabaseInstance = null;
@@ -416,5 +447,226 @@ PHP;
         $this->assertSame('`uni1_users`', SQLDumper::quoteIdentifier('uni1_users'));
         $this->expectException(Exception::class);
         SQLDumper::quoteIdentifier('uni1_users`; DROP TABLE x; --');
+    }
+
+    public function testFormatClientDefaultsQuotesCredentials(): void
+    {
+        $body = SQLDumper::formatClientDefaults([
+            'host' => 'db.example',
+            'port' => '3307',
+            'user' => 'nova"admin',
+            'userpw' => 'p\\ass"word',
+        ]);
+
+        $this->assertStringContainsString("[client]\n", $body);
+        $this->assertStringContainsString('host="db.example"', $body);
+        $this->assertStringContainsString('port=3307', $body);
+        $this->assertStringContainsString('user="nova\\"admin"', $body);
+        $this->assertStringContainsString('password="p\\\\ass\\"word"', $body);
+    }
+
+    public function testFormatClientDefaultsUsesSafeDefaultsWhenKeysMissing(): void
+    {
+        $body = SQLDumper::formatClientDefaults([]);
+
+        $this->assertStringContainsString('host="127.0.0.1"', $body);
+        $this->assertStringContainsString('port=3306', $body);
+        $this->assertStringContainsString('user=""', $body);
+        $this->assertStringContainsString('password=""', $body);
+    }
+
+    public function testCreateClientDefaultsFileIsPrivateReadableAndRemovedByCallerPattern(): void
+    {
+        $dumper = new SQLDumper();
+        $path = $this->invokePrivate($dumper, 'createClientDefaultsFile', [
+            'host' => '127.0.0.1',
+            'port' => 3306,
+            'user' => 'test',
+            'userpw' => 'secret',
+        ]);
+
+        try {
+            $this->assertFileExists($path);
+            $contents = file_get_contents($path);
+            $this->assertIsString($contents);
+            $this->assertStringContainsString('password="secret"', $contents);
+            $perms = fileperms($path) & 0777;
+            $this->assertSame(0600, $perms);
+        } finally {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+    }
+
+    /**
+     * @return array{host:string,port:int,user:string,userpw:string,databasename:string}
+     */
+    private function sampleDatabaseConfig(): array
+    {
+        return [
+            'host' => '127.0.0.1',
+            'port' => 3306,
+            'user' => 'test',
+            'userpw' => 'secret',
+            'databasename' => 'hivenova_test',
+        ];
+    }
+
+    private function writeExecutableScript(string $contents): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'hn-cli-');
+        $this->assertNotFalse($path);
+        file_put_contents($path, $contents);
+        chmod($path, 0755);
+
+        return $path;
+    }
+
+    public function testRunNativeClientSucceedsAndRemovesDefaultsFile(): void
+    {
+        $script = $this->writeExecutableScript("#!/bin/sh\nexit 0\n");
+        $dumper = new SQLDumper();
+
+        try {
+            $this->invokePrivate($dumper, 'runNativeClient', $script, $this->sampleDatabaseConfig(), []);
+            $this->assertTrue(true);
+        } finally {
+            if (is_file($script)) {
+                unlink($script);
+            }
+        }
+    }
+
+    public function testRunNativeClientWritesStdoutToFileDescriptor(): void
+    {
+        $script = $this->writeExecutableScript("#!/bin/sh\necho dumped\n");
+        $outFile = tempnam(sys_get_temp_dir(), 'hn-out-');
+        $this->assertNotFalse($outFile);
+        $dumper = new SQLDumper();
+
+        try {
+            $this->invokePrivate(
+                $dumper,
+                'runNativeClient',
+                $script,
+                $this->sampleDatabaseConfig(),
+                [escapeshellarg('unused')],
+                [
+                    0 => ['pipe', 'r'],
+                    1 => ['file', $outFile, 'w'],
+                    2 => ['pipe', 'w'],
+                ]
+            );
+
+            $this->assertSame("dumped\n", file_get_contents($outFile));
+        } finally {
+            if (is_file($script)) {
+                unlink($script);
+            }
+            if (is_file($outFile)) {
+                unlink($outFile);
+            }
+        }
+    }
+
+    public function testRunNativeClientThrowsStderrFromFailedProcess(): void
+    {
+        $script = $this->writeExecutableScript("#!/bin/sh\necho boom >&2\nexit 2\n");
+        $dumper = new SQLDumper();
+
+        try {
+            $this->expectException(Exception::class);
+            $this->expectExceptionMessage('boom');
+            $this->invokePrivate($dumper, 'runNativeClient', $script, $this->sampleDatabaseConfig(), []);
+        } finally {
+            if (is_file($script)) {
+                unlink($script);
+            }
+        }
+    }
+
+    public function testRunNativeClientThrowsStdoutWhenStderrEmpty(): void
+    {
+        $script = $this->writeExecutableScript("#!/bin/sh\necho only-out\nexit 1\n");
+        $dumper = new SQLDumper();
+
+        try {
+            $this->expectException(Exception::class);
+            $this->expectExceptionMessage('only-out');
+            $this->invokePrivate($dumper, 'runNativeClient', $script, $this->sampleDatabaseConfig(), ['--flag']);
+        } finally {
+            if (is_file($script)) {
+                unlink($script);
+            }
+        }
+    }
+
+    public function testRunNativeClientThrowsGenericMessageWhenNoOutput(): void
+    {
+        $script = $this->writeExecutableScript("#!/bin/sh\nexit 7\n");
+        $dumper = new SQLDumper();
+
+        try {
+            $this->expectException(Exception::class);
+            $this->expectExceptionMessage($script . ' failed with exit code 7');
+            $this->invokePrivate($dumper, 'runNativeClient', $script, $this->sampleDatabaseConfig(), []);
+        } finally {
+            if (is_file($script)) {
+                unlink($script);
+            }
+        }
+    }
+
+    public function testNativeDumpToFileAssemblesMysqldumpArguments(): void
+    {
+        $spy = new SQLDumperNativeSpy();
+        $outFile = tempnam(sys_get_temp_dir(), 'hn-dump-');
+        $this->assertNotFalse($outFile);
+
+        try {
+            $result = $this->invokePrivate($spy, 'nativeDumpToFile', ['uni1_users', 'uni1_config'], $outFile);
+
+            $this->assertNull($result);
+            $this->assertCount(1, $spy->nativeCalls);
+            $call = $spy->nativeCalls[0];
+            $this->assertSame('mysqldump', $call['binary']);
+            $this->assertSame('hivenova_test', $call['database']['databasename']);
+            $this->assertContains('--no-tablespaces', $call['arguments']);
+            $this->assertContains('--complete-insert', $call['arguments']);
+            $this->assertContains(escapeshellarg('hivenova_test'), $call['arguments']);
+            $this->assertContains(escapeshellarg('uni1_users'), $call['arguments']);
+            $this->assertContains(escapeshellarg('uni1_config'), $call['arguments']);
+            $this->assertSame('file', $call['descriptorSpec'][1][0]);
+            $this->assertSame($outFile, $call['descriptorSpec'][1][1]);
+        } finally {
+            if (is_file($outFile)) {
+                unlink($outFile);
+            }
+        }
+    }
+
+    public function testRestoreDatabaseNativePathUsesMysqlClient(): void
+    {
+        $spy = new SQLDumperNativeSpy();
+        $file = tempnam(sys_get_temp_dir(), 'sqlrestore-');
+        $this->assertNotFalse($file);
+        file_put_contents($file, "SELECT 1;\n");
+
+        try {
+            $spy->restoreDatabase($file);
+
+            $this->assertCount(1, $spy->nativeCalls);
+            $call = $spy->nativeCalls[0];
+            $this->assertSame('mysql', $call['binary']);
+            $this->assertSame([escapeshellarg('hivenova_test')], $call['arguments']);
+            $this->assertSame('file', $call['descriptorSpec'][0][0]);
+            $this->assertSame($file, $call['descriptorSpec'][0][1]);
+            $this->assertSame([], $this->db->nativeQueries);
+        } finally {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
     }
 }

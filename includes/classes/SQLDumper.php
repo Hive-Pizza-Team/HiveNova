@@ -58,6 +58,32 @@ class SQLDumper
 		return '`' . $name . '`';
 	}
 
+	/**
+	 * Build a MySQL/MariaDB option-file body for [client] credentials.
+	 * Avoids MYSQL_PWD (discouraged) and CLI --password (process-list exposure),
+	 * which also trigger MariaDB "passwordless login" SSL warnings on stderr.
+	 *
+	 * @param array{host?:string,port?:int|string,user?:string,userpw?:string} $database
+	 */
+	public static function formatClientDefaults(array $database): string
+	{
+		$host = (string) ($database['host'] ?? '127.0.0.1');
+		$port = (int) ($database['port'] ?? 3306);
+		$user = (string) ($database['user'] ?? '');
+		$password = (string) ($database['userpw'] ?? '');
+
+		return "[client]\n"
+			. 'host=' . self::quoteOptionValue($host) . "\n"
+			. 'port=' . $port . "\n"
+			. 'user=' . self::quoteOptionValue($user) . "\n"
+			. 'password=' . self::quoteOptionValue($password) . "\n";
+	}
+
+	private static function quoteOptionValue(string $value): string
+	{
+		return '"' . str_replace(['\\', '"'], ['\\\\', '\\"'], $value) . '"';
+	}
+
 	public function dumpTablesToFile($dbTables, $filePath)
 	{
 		if($this->canNative('mysqldump'))
@@ -75,9 +101,88 @@ class SQLDumper
 		@set_time_limit(600); // 10 Minutes
 	}
 		
-	private function canNative($command)
+	protected function canNative($command)
 	{
-		return function_exists('shell_exec') && function_exists('escapeshellarg') && shell_exec("which " . $command) !== "";
+		if (!function_exists('proc_open') || !function_exists('shell_exec') || !function_exists('escapeshellarg')) {
+			return false;
+		}
+
+		$path = shell_exec('command -v ' . escapeshellarg($command) . ' 2>/dev/null');
+
+		return is_string($path) && trim($path) !== '';
+	}
+
+	/**
+	 * @param array{host?:string,port?:int|string,user?:string,userpw?:string,databasename?:string} $database
+	 */
+	private function createClientDefaultsFile(array $database): string
+	{
+		$path = tempnam(sys_get_temp_dir(), 'hn-my-');
+		if ($path === false) {
+			throw new Exception('Unable to create temporary MySQL defaults file.');
+		}
+
+		if (file_put_contents($path, self::formatClientDefaults($database)) === false) {
+			@unlink($path);
+			throw new Exception('Unable to write temporary MySQL defaults file.');
+		}
+
+		@chmod($path, 0600);
+
+		return $path;
+	}
+
+	/**
+	 * @param list<string> $arguments Shell-escaped argument tokens (not including the binary)
+	 * @param array{0?:array{0:string,1:string,2?:string},1?:array{0:string,1:string,2?:string},2?:array{0:string,1:string,2?:string}}|null $descriptorSpec
+	 */
+	protected function runNativeClient(string $binary, array $database, array $arguments, ?array $descriptorSpec = null): void
+	{
+		$defaultsFile = $this->createClientDefaultsFile($database);
+		try {
+			$command = escapeshellarg($binary)
+				. ' --defaults-extra-file=' . escapeshellarg($defaultsFile)
+				. (empty($arguments) ? '' : ' ' . implode(' ', $arguments));
+
+			if ($descriptorSpec === null) {
+				$descriptorSpec = [
+					0 => ['pipe', 'r'],
+					1 => ['pipe', 'w'],
+					2 => ['pipe', 'w'],
+				];
+			}
+
+			$process = proc_open($command, $descriptorSpec, $pipes);
+			if (!is_resource($process)) {
+				throw new Exception('Unable to start ' . $binary);
+			}
+
+			if (isset($pipes[0]) && is_resource($pipes[0])) {
+				fclose($pipes[0]);
+			}
+
+			$stdout = '';
+			if (isset($pipes[1]) && is_resource($pipes[1])) {
+				$stdout = stream_get_contents($pipes[1]) ?: '';
+				fclose($pipes[1]);
+			}
+
+			$stderr = '';
+			if (isset($pipes[2]) && is_resource($pipes[2])) {
+				$stderr = stream_get_contents($pipes[2]) ?: '';
+				fclose($pipes[2]);
+			}
+
+			$exitCode = proc_close($process);
+			if ($exitCode !== 0) {
+				$message = trim($stderr !== '' ? $stderr : $stdout);
+				throw new Exception($message !== '' ? $message : $binary . ' failed with exit code ' . $exitCode);
+			}
+		} finally {
+			if (is_file($defaultsFile)) {
+				@unlink($defaultsFile);
+			}
+		}
 	}
 	
 	private function nativeDumpToFile($dbTables, $filePath)
@@ -85,21 +190,28 @@ class SQLDumper
 		$database	= array();
 		require 'includes/config.php';
 
-        $dbVersion	= Database::get()->selectSingle('SELECT @@version', array(), '@@version');
-        if(version_compare($dbVersion, '5.5') >= 0) {
-            putenv('MYSQL_PWD='.$database['userpw']);
-            $passwordArgument = '';
-        } else {
-            $passwordArgument = "--password='".escapeshellarg($database['userpw'])."'";
-        }
+		$dbTables	= array_map(static fn($table) => escapeshellarg((string) $table), $dbTables);
+		$arguments	= array_merge(
+			[
+				'--no-tablespaces',
+				'--no-create-db',
+				'--order-by-primary',
+				'--add-drop-table',
+				'--comments',
+				'--complete-insert',
+				'--hex-blob',
+				escapeshellarg((string) $database['databasename']),
+			],
+			$dbTables
+		);
 
-		$dbTables	= array_map(escapeshellarg(...), $dbTables);
-		$sqlDump	= shell_exec("mysqldump --host=".escapeshellarg($database['host'])." --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' ".$passwordArgument." --no-tablespaces --no-create-db --order-by-primary --add-drop-table --comments --complete-insert --hex-blob ".escapeshellarg($database['databasename'])." ".implode(' ', $dbTables)." 2>&1 1> ".$filePath);
-		if($sqlDump !== null && strlen($sqlDump) !== 0) #mysqldump error
-		{
-			throw new Exception($sqlDump);
-		}
-		return $sqlDump;
+		$this->runNativeClient('mysqldump', $database, $arguments, [
+			0 => ['pipe', 'r'],
+			1 => ['file', $filePath, 'w'],
+			2 => ['pipe', 'w'],
+		]);
+
+		return null;
 	}
 	
 	private function softwareDumpToFile($dbTables, $filePath)
@@ -265,19 +377,13 @@ UNLOCK TABLES;
 			$database	= array();
 			require 'includes/config.php';
 
-			$dbVersion	= Database::get()->selectSingle('SELECT @@version', array(), '@@version');
-			if(version_compare($dbVersion, '5.5') >= 0) {
-				putenv('MYSQL_PWD='.$database['userpw']);
-				$passwordArgument = '';
-			} else {
-				$passwordArgument = "--password='".escapeshellarg($database['userpw'])."'";
-			}
-
-			$sqlDump	= shell_exec("mysql --host=".escapeshellarg($database['host'])." --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' ".$passwordArgument." ".escapeshellarg($database['databasename'])." < ".escapeshellarg((string) $filePath)." 2>&1");
-			if($sqlDump !== null && strlen($sqlDump) !== 0)
-			{
-				throw new Exception($sqlDump);
-			}
+			$this->runNativeClient('mysql', $database, [
+				escapeshellarg((string) $database['databasename']),
+			], [
+				0 => ['file', $filePath, 'r'],
+				1 => ['pipe', 'w'],
+				2 => ['pipe', 'w'],
+			]);
 		}
 		else
 		{
