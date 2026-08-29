@@ -35,7 +35,7 @@ class ShowImperiumPage extends AbstractGamePage
 	{
 		global $USER, $PLANET, $resource, $reslist, $LNG;
 
-		$planets = $this->loadPlanets(false);
+		$planets = $this->loadPlanets();
 		$planetList = $this->buildHeaderPlanetList($planets, $USER, $resource, $reslist);
 
 		$this->assign(array(
@@ -53,24 +53,23 @@ class ShowImperiumPage extends AbstractGamePage
 	{
 		global $USER, $resource, $reslist, $LNG;
 
-		$planets = $this->loadPlanets(true);
+		$planets = $this->loadPlanets();
 		$payload = self::buildMatrixPayload($planets, $USER, $resource, $reslist, $LNG['tech'] ?? []);
 
 		$this->sendJSON($payload);
 	}
 
 	/**
-	 * @param bool $includeMatrixColumns fleet/defense/missile counts for the expand matrix
 	 * @return list<array<string, mixed>>
 	 */
-	private function loadPlanets(bool $includeMatrixColumns): array
+	private function loadPlanets(): array
 	{
 		global $USER, $PLANET, $resource, $reslist;
 
 		$db = Database::get();
 		$order = $USER['planet_sort_order'] == 1 ? 'DESC' : 'ASC';
 
-		$selectColumns = self::imperiumPlanetSelectColumns($resource, $reslist, $includeMatrixColumns);
+		$selectColumns = self::imperiumPlanetSelectColumns($resource, $reslist);
 		$selectList = implode(', ', array_map(
 			static fn(string $col): string => $col === 'system' ? '`system`' : $col,
 			$selectColumns
@@ -268,8 +267,14 @@ class ShowImperiumPage extends AbstractGamePage
 	}
 
 	/**
-	 * Planet columns required for the empire overview: template fields, optional
-	 * matrix buckets, CalcResource production, and queue/persist gates.
+	 * Planet columns required for the empire overview: template fields,
+	 * CalcResource production, hangar/building persist, and matrix buckets.
+	 *
+	 * Fleet/defense/missile must be selected even when the matrix UI is deferred:
+	 * header eco still runs ShipyardQueue when b_hangar_id is set, and
+	 * SavePlanetToDB only persists elements present on $PLANET. Omitting them
+	 * caused undefined-key warnings and silently dropped completed hangar units
+	 * (e.g. interceptor_misil).
 	 *
 	 * @param array<int|string, string> $resource
 	 * @param array<string, list<int>> $reslist
@@ -277,8 +282,7 @@ class ShowImperiumPage extends AbstractGamePage
 	 */
 	public static function imperiumPlanetSelectColumns(
 		array $resource,
-		array $reslist,
-		bool $includeMatrixColumns = true
+		array $reslist
 	): array {
 		$columns = [
 			'id', 'name', 'image',
@@ -291,9 +295,7 @@ class ShowImperiumPage extends AbstractGamePage
 			'b_hangar_id', 'b_hangar', 'b_building', 'b_building_id',
 		];
 
-		$buckets = $includeMatrixColumns
-			? ['build', 'fleet', 'defense', 'missile', 'storage', 'prod']
-			: ['build', 'storage', 'prod'];
+		$buckets = ['build', 'fleet', 'defense', 'missile', 'storage', 'prod'];
 
 		foreach ($buckets as $bucket) {
 			if (empty($reslist[$bucket]) || !is_array($reslist[$bucket])) {

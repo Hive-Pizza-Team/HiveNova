@@ -93,13 +93,13 @@ class ShowImperiumPageTest extends TestCase
 		$this->assertSame(count($columns), count(array_unique($columns)));
 	}
 
-	public function test_header_select_omits_fleet_defense_missile_columns(): void
+	public function test_select_includes_hangar_target_columns_for_shipyard_persist(): void
 	{
 		$resource = [
 			1   => 'metal_mine',
 			202 => 'light_fighter',
 			401 => 'rocket_launcher',
-			502 => 'interceptor',
+			502 => 'interceptor_misil',
 			22  => 'solar_plant',
 		];
 		$reslist = [
@@ -111,13 +111,14 @@ class ShowImperiumPageTest extends TestCase
 			'prod'    => [1, 22],
 		];
 
-		$columns = ShowImperiumPage::imperiumPlanetSelectColumns($resource, $reslist, false);
+		$columns = ShowImperiumPage::imperiumPlanetSelectColumns($resource, $reslist);
 
 		$this->assertContains('metal_mine', $columns);
 		$this->assertContains('solar_plant', $columns);
-		$this->assertNotContains('light_fighter', $columns);
-		$this->assertNotContains('rocket_launcher', $columns);
-		$this->assertNotContains('interceptor', $columns);
+		// Required so ShipyardQueue / SavePlanetToDB can complete hangar jobs.
+		$this->assertContains('light_fighter', $columns);
+		$this->assertContains('rocket_launcher', $columns);
+		$this->assertContains('interceptor_misil', $columns);
 	}
 
 	public function test_compact_matrix_values_drops_zeros(): void
