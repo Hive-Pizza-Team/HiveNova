@@ -7,6 +7,9 @@ namespace HiveNova\Core;
  *
  * Settings share links use index.php?ref={userid}. Visitors stay on the lobby; cookies
  * plus register CTAs preserve tracking until signup.
+ *
+ * ref_active is evaluated for the referrer's (or target) universe — not Universe::current()
+ * on the multi-uni lobby, which often has referrals disabled while live unis do not.
  */
 class ReferralCaptureService
 {
@@ -17,13 +20,20 @@ class ReferralCaptureService
 	/** @var callable(string, string, int): void */
 	private $cookieWriter;
 
+	/** @var callable(int): bool */
+	private $refActiveChecker;
+
 	/**
 	 * @param callable(string $name, string $value, int $expire): void|null $cookieWriter
+	 * @param callable(int $universeId): bool|null $refActiveChecker
 	 */
-	public function __construct(?callable $cookieWriter = null)
+	public function __construct(?callable $cookieWriter = null, ?callable $refActiveChecker = null)
 	{
 		$this->cookieWriter = $cookieWriter ?? static function (string $name, string $value, int $expire): void {
 			HTTP::sendCookie($name, $value, $expire);
+		};
+		$this->refActiveChecker = $refActiveChecker ?? static function (int $universeId): bool {
+			return (int) (Config::get($universeId)->ref_active ?? 0) === 1;
 		};
 	}
 
@@ -36,6 +46,20 @@ class ReferralCaptureService
 			'ref'        => HTTP::_GP('ref', 0),
 			'referralID' => HTTP::_GP('referralID', 0),
 		];
+	}
+
+	/**
+	 * True when any available universe has referral links enabled.
+	 */
+	public static function anyUniverseHasReferralsActive(): bool
+	{
+		foreach (Universe::availableUniverses() as $uniId) {
+			if ((int) (Config::get((int) $uniId)->ref_active ?? 0) === 1) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -91,9 +115,9 @@ class ReferralCaptureService
 	 * @param array<string, mixed> $cookies
 	 * @return array{id: int, name: string, universe: int}
 	 */
-	public function capture(DatabaseInterface $db, bool $refActive, array $request, array $cookies): array
+	public function capture(DatabaseInterface $db, array $request, array $cookies): array
 	{
-		return $this->resolve($db, $refActive, $request, $cookies, null);
+		return $this->resolve($db, $request, $cookies, null);
 	}
 
 	/**
@@ -106,12 +130,11 @@ class ReferralCaptureService
 	 */
 	public function resolveForRegister(
 		DatabaseInterface $db,
-		bool $refActive,
 		array $request,
 		array $cookies,
 		?int $universeId = null,
 	): array {
-		return $this->resolve($db, $refActive, $request, $cookies, $universeId);
+		return $this->resolve($db, $request, $cookies, $universeId);
 	}
 
 	/**
@@ -121,15 +144,10 @@ class ReferralCaptureService
 	 */
 	private function resolve(
 		DatabaseInterface $db,
-		bool $refActive,
 		array $request,
 		array $cookies,
 		?int $universeId,
 	): array {
-		if (!$refActive) {
-			return $this->emptyReferral();
-		}
-
 		$fromRequest = $this->requestReferralId($request);
 		$id = $fromRequest;
 		$fromCookie = false;
@@ -164,9 +182,27 @@ class ReferralCaptureService
 			return $this->emptyReferral();
 		}
 
+		// Gate on the referrer's universe (lobby) or the scoped register universe — never
+		// the lobby's ambient Universe::current(), which may have referrals disabled.
+		$activeUni = ($universeId !== null && $universeId > 0)
+			? $universeId
+			: (int) $referrer['universe'];
+		if (!$this->isRefActive($activeUni)) {
+			return $this->emptyReferral();
+		}
+
 		$this->persistCookies($referrer['id'], $referrer['universe']);
 
 		return $referrer;
+	}
+
+	private function isRefActive(int $universeId): bool
+	{
+		if ($universeId <= 0) {
+			return false;
+		}
+
+		return (bool) ($this->refActiveChecker)($universeId);
 	}
 
 	/**

@@ -48,7 +48,6 @@ class ShowRegisterPage extends AbstractLoginPage
 		$referralCapture	= new ReferralCaptureService();
 		$referralResolved	= $referralCapture->resolveForRegister(
 			Database::get(),
-			(int) Config::get()->ref_active === 1,
 			ReferralCaptureService::requestBag(),
 			$_COOKIE
 		);
@@ -93,7 +92,7 @@ class ShowRegisterPage extends AbstractLoginPage
 		}
 
 		$config			= Config::get();
-		if($config->ref_active == 1 && $referralID > 0 && $referralResolved['name'] !== '')
+		if ($referralID > 0 && $referralResolved['name'] !== '')
 		{
 			$referralData	= array('id' => $referralID, 'name' => $referralResolved['name']);
 		}
@@ -148,7 +147,6 @@ class ShowRegisterPage extends AbstractLoginPage
 		
 		$referralResolved	= (new ReferralCaptureService())->resolveForRegister(
 			Database::get(),
-			(int) $config->ref_active === 1,
 			ReferralCaptureService::requestBag(),
 			$_COOKIE,
 			(int) Universe::current()
@@ -320,7 +318,8 @@ class ShowRegisterPage extends AbstractLoginPage
 			}
 		}
 
-		if($config->ref_active != 1)
+		// resolveForRegister already requires ref_active on Universe::current().
+		if ((int) $config->ref_active !== 1)
 		{
 			$referralID	= 0;
 		}

@@ -58,7 +58,6 @@ class ShowIndexPage extends AbstractLoginPage
 		$referralCapture	= new ReferralCaptureService();
 		$referral			= $referralCapture->capture(
 			Database::get(),
-			(int) ($config->ref_active ?? 0) === 1,
 			ReferralCaptureService::requestBag(),
 			$_COOKIE
 		);
