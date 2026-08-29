@@ -46,13 +46,18 @@ class ShowRegisterPage extends AbstractLoginPage
 		
 		$externalAuth	= HTTP::_GP('externalAuth', array());
 		$referralCapture	= new ReferralCaptureService();
-		$referralResolved	= $referralCapture->resolveForRegister(
+		$referralRequest	= ReferralCaptureService::requestBag();
+		$referralPublicCode	= ReferralCaptureService::publicCodeFrom($referralRequest, $_COOKIE);
+		$referralByUniverse	= $referralCapture->resolveByUniverse(
 			Database::get(),
-			ReferralCaptureService::requestBag(),
+			$referralPublicCode
+		);
+		// Refresh cookies / validate public code without locking the universe dropdown.
+		$referralCapture->resolveForRegister(
+			Database::get(),
+			$referralRequest,
 			$_COOKIE
 		);
-		$referralRegUni	= $referralCapture->registrationUniverseId($referralResolved);
-		$referralID 	= $referralRegUni > 0 ? (int) $referralResolved['id'] : 0;
 
 		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
@@ -91,22 +96,20 @@ class ShowRegisterPage extends AbstractLoginPage
 			$accountName	= $accountData['name'];
 		}
 
-		$config			= Config::get();
-		if ($referralID > 0 && $referralResolved['name'] !== '')
-		{
-			$referralData	= array('id' => $referralID, 'name' => $referralResolved['name']);
-		}
-
 		$defaultEmailUniverse = $this->getDefaultEmailUniverseId(true);
 		$defaultHiveUniverse = $this->getDefaultHiveUniverseId(true);
-		if ($referralRegUni > 0) {
-			$defaultEmailUniverse = $referralRegUni;
-			$defaultHiveUniverse = $referralRegUni;
+		$referralSeed = $referralByUniverse[$defaultEmailUniverse] ?? array('id' => 0, 'name' => '');
+		if ((int) ($referralSeed['id'] ?? 0) > 0 && ($referralSeed['name'] ?? '') !== '')
+		{
+			$referralData = array(
+				'id'   => (int) $referralSeed['id'],
+				'name' => (string) $referralSeed['name'],
+			);
 		}
 		
 		$this->assign(array(
 			'referralData'		=> $referralData,
-			'referralUniverse'	=> $referralRegUni,
+			'referralByUniverse'	=> $referralByUniverse,
 			'accountName'		=> $accountName,
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,

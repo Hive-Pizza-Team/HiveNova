@@ -81,20 +81,29 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	});
 
-	var tabsWrapper = document.querySelector('.reg-tabs-wrapper');
-	var referrerId = tabsWrapper ? String(tabsWrapper.getAttribute('data-referrer-id') || '0') : '0';
-	var referrerUni = tabsWrapper ? String(tabsWrapper.getAttribute('data-referrer-uni') || '0') : '0';
+	var referralByUniverse = {};
+	var referralMapNode = document.getElementById('reg-referral-by-uni');
+	if (referralMapNode) {
+		try {
+			referralByUniverse = JSON.parse(referralMapNode.textContent || '{}') || {};
+		} catch (e) {
+			referralByUniverse = {};
+		}
+	}
 
 	function syncReferralWithUniverse(uniId) {
-		if (referrerId === '0' || referrerUni === '0') {
-			return;
-		}
-		var match = String(uniId) === referrerUni;
+		var entry = referralByUniverse[uniId] || referralByUniverse[String(uniId)] || null;
+		var id = entry && entry.id ? String(entry.id) : '0';
+		var name = entry && entry.name ? String(entry.name) : '';
 		document.querySelectorAll('.reg-referral-id').forEach(function(input) {
-			input.value = match ? referrerId : '0';
+			input.value = id;
 		});
 		document.querySelectorAll('.reg-referral-row').forEach(function(row) {
-			if (match) {
+			var nameEl = row.querySelector('.reg-referral-name');
+			if (nameEl) {
+				nameEl.textContent = name;
+			}
+			if (id !== '0' && name) {
 				row.removeAttribute('hidden');
 			} else {
 				row.setAttribute('hidden', 'hidden');

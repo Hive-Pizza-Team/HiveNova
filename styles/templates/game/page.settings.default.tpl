@@ -199,6 +199,18 @@
 			</td>
 		</tr>
 		{/if}
+		{if $ref_active && $referralLink}
+		<tr>
+			<th colspan="2">{$LNG.op_referral_link}</th>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<input type="text" id="referral-link" value="{$referralLink|escape}" readonly="readonly" style="width:70%; max-width:450px;">
+				<button type="button" id="copy-referral-link">{$LNG.op_copy_referral_link}</button>
+				<span id="referral-link-copied" hidden>{$LNG.op_referral_link_copied}</span>
+			</td>
+		</tr>
+		{/if}
 		<tr>
 			<td colspan="2"><input id="saveChanges" value="{$LNG.op_save_changes}" type="submit"></td>
 		</tr>
@@ -214,6 +226,34 @@
 			var img = document.getElementById('userpic');
 			if (img && img.dataset.src && !img.getAttribute('src')) {
 				img.setAttribute('src', img.dataset.src);
+			}
+		});
+	}
+
+	var referralInput = document.getElementById('referral-link');
+	var copyBtn = document.getElementById('copy-referral-link');
+	var copiedLabel = document.getElementById('referral-link-copied');
+	if (referralInput && copyBtn) {
+		copyBtn.addEventListener('click', function () {
+			var value = referralInput.value;
+			function showCopied() {
+				if (!copiedLabel) return;
+				copiedLabel.hidden = false;
+				window.setTimeout(function () { copiedLabel.hidden = true; }, 1500);
+			}
+			function fallbackCopy() {
+				referralInput.focus();
+				referralInput.select();
+				try {
+					if (document.execCommand('copy')) {
+						showCopied();
+					}
+				} catch (e) {}
+			}
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				navigator.clipboard.writeText(value).then(showCopied).catch(fallbackCopy);
+			} else {
+				fallbackCopy();
 			}
 		});
 	}

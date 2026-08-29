@@ -1439,3 +1439,6 @@ $LNG['ef_headline_vs'] = '%s vs %s';
 $LNG['ef_headline_moon'] = '%s formed a moon';
 $LNG['ef_headline_feat'] = '%s claimed a feat';
 $LNG['ef_event_feat'] = 'Feat';
+$LNG['op_referral_link'] = 'Referral link';
+$LNG['op_copy_referral_link'] = 'Copy referral link';
+$LNG['op_referral_link_copied'] = 'Copied';
