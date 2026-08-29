@@ -618,20 +618,28 @@ class SeasonService
 		$now = $this->now();
 		$closes = (int) ($config->season_closes_at ?? 0);
 		$preclose = max(60, (int) ($config->season_preclose_seconds ?? self::DEFAULT_PRECLOSE));
+		$inPreclose = $now >= ($closes - $preclose) && $now < $closes;
 
 		if (!in_array('start', $flags, true)) {
 			$this->broadcastReminder($config, 'start', $lng);
 			return;
 		}
 
-		$day = gmdate('Y-m-d', $now);
-		$dailyKey = 'daily:' . $day;
-		if (!in_array($dailyKey, $flags, true) && $now < $closes) {
-			$this->broadcastReminder($config, 'daily', $lng);
+		// Preclose wins over daily — never send a "N day(s)" notice once hours remain.
+		if (!in_array('preclose', $flags, true) && $inPreclose) {
+			$this->broadcastReminder($config, 'preclose', $lng);
+			return;
 		}
 
-		if (!in_array('preclose', $flags, true) && $now >= ($closes - $preclose) && $now < $closes) {
-			$this->broadcastReminder($config, 'preclose', $lng);
+		$day = gmdate('Y-m-d', $now);
+		$dailyKey = 'daily:' . $day;
+		if (
+			!in_array($dailyKey, $flags, true)
+			&& !in_array('preclose', $flags, true)
+			&& !$inPreclose
+			&& $now < $closes
+		) {
+			$this->broadcastReminder($config, 'daily', $lng);
 		}
 	}
 
@@ -680,10 +688,15 @@ class SeasonService
 		}
 
 		$flags = $this->reminderFlags($config);
-		$flags = array_values(array_filter($flags, static function ($flag) {
-			return !str_starts_with($flag, 'daily:');
-		}));
-		$flags[] = $kind === 'daily' ? 'daily:' . gmdate('Y-m-d', $this->now()) : $kind;
+		if ($kind === 'daily') {
+			// Rotate only the dated daily keys; keep start/preclose/close markers.
+			$flags = array_values(array_filter($flags, static function ($flag) {
+				return !str_starts_with($flag, 'daily:');
+			}));
+			$flags[] = 'daily:' . gmdate('Y-m-d', $this->now());
+		} else {
+			$flags[] = $kind;
+		}
 		$config->season_last_reminder = implode('|', array_unique($flags));
 		$config->save();
 

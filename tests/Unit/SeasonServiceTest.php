@@ -348,6 +348,40 @@ class SeasonServiceTest extends TestCase
 		$svc = $this->service($this->now + 604800 - 1000);
 		$svc->fireReminders($config);
 		$this->assertStringContainsString('preclose', $config->season_last_reminder);
+		$this->assertStringContainsString('daily:', $config->season_last_reminder);
+	}
+
+	public function testPrecloseDoesNotRetriggerDaily(): void
+	{
+		$config = $this->makeConfig([
+			'season_last_reminder' => 'start|daily:' . gmdate('Y-m-d', $this->now + 604800 - 3600),
+		]);
+		$this->store->players = [['id' => 10, 'hive_account' => 'aliceaaa', 'lang' => 'en']];
+		$svc = $this->service($this->now + 604800 - 3600);
+		$svc->fireReminders($config);
+		$this->assertStringContainsString('preclose', $config->season_last_reminder);
+		$this->assertCount(1, $this->messages);
+		$this->assertStringContainsString('hour', strtolower($this->messages[0][2]));
+
+		$this->messages = [];
+		$svc = $this->service($this->now + 604800 - 2700);
+		$svc->fireReminders($config);
+		$this->assertSame([], $this->messages);
+		$this->assertStringContainsString('daily:', $config->season_last_reminder);
+		$this->assertStringContainsString('preclose', $config->season_last_reminder);
+	}
+
+	public function testDailySkippedOnceInsidePrecloseWindow(): void
+	{
+		$config = $this->makeConfig(['season_last_reminder' => 'start']);
+		$this->store->players = [['id' => 10, 'hive_account' => 'aliceaaa', 'lang' => 'en']];
+		$svc = $this->service($this->now + 604800 - 3600);
+		$svc->fireReminders($config);
+		$this->assertCount(1, $this->messages);
+		$this->assertStringContainsString('hour', strtolower($this->messages[0][2]));
+		$this->assertStringNotContainsString('day(s)', strtolower($this->messages[0][2]));
+		$this->assertStringContainsString('preclose', $config->season_last_reminder);
+		$this->assertStringNotContainsString('daily:', $config->season_last_reminder);
 	}
 
 	public function testTickSkipsNonSeasonalUniverses(): void
