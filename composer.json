@@ -33,6 +33,7 @@
     "require": {
         "php": "^8.3",
         "mahdiyari/hive-php": "^1.1",
+        "stephenhill/base58": "2.1.0 as 1.1.5",
         "phpmailer/phpmailer": "^6.9",
         "smarty/smarty": "^4.5",
         "erusev/parsedown": "^1.7",

@@ -171,37 +171,20 @@ class HiveUtilTest extends TestCase
         $this->assertCount(1, HiveUtil::rpcNodesToTry(0));
     }
 
-    public function testInstallHiveClientErrorHandlerSwallowsDeprecations(): void
+    public function testStephenHillBase58ConstructsUnderThrowingErrorHandler(): void
     {
-        $previous = set_error_handler(static function (int $errno, string $errstr): bool {
-            throw new ErrorException('outer:' . $errstr, 0, $errno);
+        // mahdiyari/hive-php installs this style of handler; Base58 1.1.5 tripped PHP 8.4
+        // nullable deprecations and aborted season blog privateKeyFrom().
+        $previous = set_error_handler(static function (int $errno, string $errstr, string $errfile, int $errline): bool {
+            if (0 === error_reporting()) {
+                return false;
+            }
+            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
         });
 
         try {
-            $saw = HiveUtil::withHiveClient(function (): string {
-                // Simulate mahdiyari Hive::__construct() overwriting the handler.
-                set_error_handler(static function (int $errno, string $errstr, string $errfile, int $errline): bool {
-                    if (0 === error_reporting()) {
-                        return false;
-                    }
-                    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-                });
-                HiveUtil::installHiveClientErrorHandler();
-
-                trigger_error('fake base58 nullable deprecation', E_USER_DEPRECATED);
-
-                try {
-                    trigger_error('real problem', E_USER_WARNING);
-                    return 'should-not-reach';
-                } catch (ErrorException $e) {
-                    if ($e->getMessage() !== 'real problem') {
-                        throw $e;
-                    }
-                }
-
-                return 'ok';
-            });
-            $this->assertSame('ok', $saw);
+            $codec = new StephenHill\Base58();
+            $this->assertNotSame('', $codec->encode('hi'));
         } finally {
             if ($previous !== null) {
                 set_error_handler($previous);
