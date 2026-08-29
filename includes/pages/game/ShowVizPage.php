@@ -2,9 +2,8 @@
 
 namespace HiveNova\Page\Game;
 
-use HiveNova\Core\Database;
 use HiveNova\Core\Config;
-use HiveNova\Core\Universe;
+use HiveNova\Core\FleetVizSnapshotService;
 
 /**
  *  2Moons
@@ -22,61 +21,31 @@ use HiveNova\Core\Universe;
 
 class ShowVizPage extends AbstractGamePage
 {
-    function __construct()
-    {
-        parent::__construct();
-    }
+	function __construct()
+	{
+		parent::__construct();
+	}
 
-    public function show()
-    {
-        global $USER;
-        $config    = Config::get($USER['universe']);
+	public function show()
+	{
+		global $USER;
 
-        // startGroup,startCircle,startPoint,endGroup,endCircle,endPoint,duration,color
-        $fleetData = Database::get()->select(
-            'SELECT fleet_start_galaxy as startGroup,
-            CASE
-                WHEN fleet_start_system < 6 THEN fleet_start_system + FLOOR(RAND() * 6)
-                WHEN fleet_start_system > :maxSystem - 6 THEN fleet_start_system - FLOOR(RAND() * 6)
-                ELSE fleet_start_system + FLOOR(RAND() * 11) - 5
-            END AS startCircle,
+		$snap = (new FleetVizSnapshotService())->forUniverse((int) $USER['universe']);
+		$config = Config::get($USER['universe']);
+		$version = (string) ($config->VERSION ?? '');
 
-            fleet_start_planet as startPoint,
-            fleet_end_galaxy as endGroup,
+		$vizConfigJson = json_encode([
+			'threeSrc'   => './scripts/threejs/three.min.js?v=' . substr($version, -4),
+			'maxGalaxy'  => $snap['maxGalaxy'],
+			'maxSystem'  => $snap['maxSystem'],
+			'maxPlanets' => $snap['maxPlanets'],
+			'fleets'     => $snap['fleets'],
+		]);
 
-            CASE
-                WHEN fleet_end_system < 6 THEN fleet_end_system + FLOOR(RAND() * 6)
-                WHEN fleet_end_system > :maxSystem - 6 THEN fleet_end_system - FLOOR(RAND() * 6)
-                ELSE fleet_end_system + FLOOR(RAND() * 11) - 5
-            END AS endCircle,
+		$this->assign([
+			'vizConfigJson' => $vizConfigJson,
+		]);
 
-            fleet_end_planet as endPoint,
-            (fleet_end_time - fleet_start_time)/100 as duration,
-            fleet_mission as mission,
-            GREATEST(1, LEAST(5, CEIL(LOG10(GREATEST(fleet_amount, 1) + 1)))) AS sizeClass
-            FROM %%FLEETS%%
-            WHERE fleet_universe = :fleet_universe
-            ORDER BY fleet_id
-            LIMIT 100',
-            array(
-                #':maxGalaxy'    => $config->max_galaxy,
-                ':maxSystem'    => $config->max_system,
-                #':maxPlanets'   => $config->max_planets
-                'fleet_universe' => Universe::current()
-            )
-        );
-        $vizConfigJson = json_encode(array(
-            'threeSrc'   => './scripts/threejs/three.min.js?v=' . substr((string) $config->VERSION, -4),
-            'maxGalaxy'  => (int) $config->max_galaxy,
-            'maxSystem'  => (int) $config->max_system,
-            'maxPlanets' => (int) $config->max_planets,
-            'fleets'     => $fleetData,
-        ));
-
-        $this->assign(array(
-            'vizConfigJson' => $vizConfigJson,
-        ));
-
-        $this->display('page.viz.default.tpl');
-    }
+		$this->display('page.viz.default.tpl');
+	}
 }

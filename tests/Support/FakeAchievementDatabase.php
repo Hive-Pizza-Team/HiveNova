@@ -537,6 +537,8 @@ class FakeAchievementDatabase implements DatabaseInterface
                 'event_type' => (string) ($params[':eventType'] ?? ''),
                 'size_bucket' => (string) ($params[':sizeBucket'] ?? ''),
                 'outcome' => (string) ($params[':outcome'] ?? ''),
+                'actor_name' => (string) ($params[':actorName'] ?? ''),
+                'target_name' => (string) ($params[':targetName'] ?? ''),
             ];
         }
 

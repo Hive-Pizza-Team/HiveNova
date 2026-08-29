@@ -26,6 +26,7 @@ class EventFirehoseFeedTest extends TestCase
 			'php_tdformat' => 'Y-m-d',
 			'ef_event_battle' => 'Battle',
 			'ef_event_moon' => 'Moon',
+			'ef_event_feat' => 'Feat',
 			'ef_size_small' => 'Skirmish',
 			'ef_size_medium' => 'Clash',
 			'ef_size_large' => 'Major battle',
@@ -36,6 +37,9 @@ class EventFirehoseFeedTest extends TestCase
 			'ef_outcome_defender' => 'Defenders held',
 			'ef_outcome_draw' => 'Stalemate',
 			'ef_outcome_formed' => 'Formed',
+			'ef_headline_vs' => '%s vs %s',
+			'ef_headline_moon' => '%s formed a moon',
+			'ef_headline_feat' => '%s claimed a feat',
 		];
 	}
 
@@ -118,10 +122,28 @@ class EventFirehoseFeedTest extends TestCase
 			'event_type' => 'moon',
 			'size_bucket' => 'large',
 			'outcome' => 'formed',
+			'actor_name' => 'Selene',
 		], $this->lng, 'UTC');
 
 		$this->assertSame('Moon', $presented['eventType']);
 		$this->assertSame('Large', $presented['size']);
 		$this->assertSame('Formed', $presented['outcome']);
+		$this->assertSame('Selene formed a moon', $presented['headline']);
+	}
+
+	public function test_present_builds_battle_headline(): void
+	{
+		$presented = EventFirehoseFeed::present([
+			'id' => 5,
+			'time' => 1_700_000_000,
+			'event_type' => 'battle',
+			'size_bucket' => 'small',
+			'outcome' => 'defender',
+			'actor_name' => 'Alpha',
+			'target_name' => 'Beta',
+		], $this->lng, 'UTC');
+
+		$this->assertSame('Alpha vs Beta', $presented['headline']);
+		$this->assertSame('Defenders held', $presented['outcome']);
 	}
 }

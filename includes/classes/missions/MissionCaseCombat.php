@@ -514,7 +514,9 @@ abstract class MissionCaseCombat extends MissionFunctions implements Mission
 			(int) $this->_fleet['fleet_universe'],
 			(int) $this->_fleet['fleet_start_time'],
 			(float) ($combatResult['unitLost']['attacker'] + $combatResult['unitLost']['defender']),
-			(string) $combatResult['won']
+			(string) $combatResult['won'],
+			(string) (reset($userAttack) ?: ''),
+			(string) (reset($userDefend) ?: '')
 		);
 
 		if ($this->shouldUpdateAttackerStats($userAttack)) {

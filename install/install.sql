@@ -918,6 +918,8 @@ CREATE TABLE `%PREFIX%universe_events` (
   `event_type` varchar(16) NOT NULL,
   `size_bucket` varchar(16) NOT NULL,
   `outcome` varchar(16) NOT NULL,
+  `actor_name` varchar(32) NOT NULL DEFAULT '',
+  `target_name` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `universe_id` (`universe`,`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

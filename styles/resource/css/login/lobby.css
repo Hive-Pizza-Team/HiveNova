@@ -9,10 +9,10 @@
 
 .lobby-hero {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-	gap: 36px 40px;
+	grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
+	gap: 28px 32px;
 	align-items: center;
-	min-height: min(68vh, 580px);
+	min-height: min(70vh, 620px);
 	margin-bottom: 36px;
 }
 
@@ -159,76 +159,127 @@
 .lobby-hero-visual {
 	margin: 0;
 	position: relative;
-	background: transparent;
+	display: flex;
+	flex-direction: column;
+	min-height: min(64vh, 560px);
+	border: 1px solid rgba(70, 210, 255, 0.22);
+	background:
+		radial-gradient(ellipse at 50% 45%, rgba(20, 60, 100, 0.28), transparent 58%),
+		rgba(0, 4, 12, 0.42);
+	box-shadow:
+		inset 0 0 48px rgba(0, 40, 80, 0.28),
+		0 18px 40px rgba(0, 0, 0, 0.35);
+	overflow: hidden;
 	animation: lobby-visual-in 0.9s ease both;
 }
 
-/* Room for a tiny DVD-style drift without escaping the column */
-.lobby-hero-stage {
-	overflow: hidden;
-	padding: 14px;
-}
-
-.lobby-hero-dvd--x {
-	animation: lobby-dvd-x 19s linear infinite alternate;
-	will-change: transform;
-}
-
-.lobby-hero-dvd--y {
-	animation: lobby-dvd-y 13s linear infinite alternate;
-	will-change: transform;
-}
-
-@keyframes lobby-dvd-x {
-	from { transform: translateX(-12px); }
-	to   { transform: translateX(12px); }
-}
-
-@keyframes lobby-dvd-y {
-	from { transform: translateY(-10px); }
-	to   { transform: translateY(10px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.lobby-hero-dvd--x,
-	.lobby-hero-dvd--y {
-		animation: none;
-	}
-}
-
-/* Hive-hex frame: flat-top hex, wide enough to hold the logo */
-.lobby-hero-visual-frame {
+.lobby-viz-stage {
 	position: relative;
-	overflow: hidden;
-	background: #050e18;
-	/* wide flat-top hexagon — Hive mark language without crushing the art */
-	clip-path: polygon(12% 0%, 88% 0%, 100% 50%, 88% 100%, 12% 100%, 0% 50%);
-	-webkit-clip-path: polygon(12% 0%, 88% 0%, 100% 50%, 88% 100%, 12% 100%, 0% 50%);
-	filter:
-		drop-shadow(0 0 1px rgba(227, 19, 55, 0.95))
-		drop-shadow(0 0 12px rgba(227, 19, 55, 0.35))
-		drop-shadow(0 18px 36px rgba(0, 0, 0, 0.55));
+	flex: 1 1 auto;
+	min-height: min(48vh, 420px);
 }
 
-.lobby-hero-visual-frame::before {
-	content: "";
+.lobby-viz {
 	position: absolute;
 	inset: 0;
-	pointer-events: none;
-	background: linear-gradient(135deg, rgba(227, 19, 55, 0.18), transparent 42%, transparent 58%, rgba(227, 19, 55, 0.12));
-	z-index: 1;
+	width: 100%;
+	height: 100%;
 }
 
-.lobby-hero-visual-frame img {
+.lobby-viz canvas {
 	display: block;
 	width: 100%;
-	height: auto;
-	max-height: min(62vh, 560px);
-	object-fit: contain;
-	object-position: center center;
-	filter: saturate(1.05) contrast(1.04);
-	padding: 4% 10%;
+	height: 100%;
+}
+
+.lobby-viz-labels {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.lobby-viz.is-fallback,
+.lobby-viz.is-empty {
+	background: transparent;
+}
+
+.lobby-viz-caption {
+	position: relative;
+	z-index: 2;
+	flex: 0 0 auto;
+	margin: 0;
+	padding: 12px 14px 14px;
+	border-top: 1px solid rgba(70, 210, 255, 0.18);
+	background: rgba(2, 10, 18, 0.62);
+}
+
+.lobby-viz-caption-title {
+	margin: 0 0 2px;
+	font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #9fe0ff;
+}
+
+.lobby-viz-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	list-style: none;
+	margin: 8px 0 0;
+	padding: 0;
+}
+
+.lobby-viz-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: rgba(200, 220, 235, 0.88);
+}
+
+.lobby-viz-legend-item::before {
+	content: "";
+	flex: 0 0 auto;
 	box-sizing: border-box;
+}
+
+.lobby-viz-legend-item--galaxy::before {
+	width: 11px;
+	height: 11px;
+	background: #6ad4ff;
+	clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+	box-shadow: 0 0 8px rgba(106, 212, 255, 0.55);
+}
+
+.lobby-viz-legend-item--fleet::before {
+	width: 18px;
+	height: 3px;
+	border-radius: 2px;
+	background: linear-gradient(90deg, rgba(90, 216, 255, 0.2), #5ad8ff 55%, #fff);
+	box-shadow: 0 0 8px rgba(90, 216, 255, 0.45);
+}
+
+.lobby-viz-legend-item--attack::before {
+	width: 12px;
+	height: 12px;
+	border: 2px solid #ff9646;
+	border-radius: 50%;
+	box-shadow:
+		inset 0 0 0 2px rgba(0, 0, 0, 0.35),
+		0 0 0 1px rgba(255, 150, 70, 0.35),
+		0 0 10px rgba(255, 120, 50, 0.45);
+	background:
+		linear-gradient(#ff9646, #ff9646) center/2px 100% no-repeat,
+		linear-gradient(#ff9646, #ff9646) center/100% 2px no-repeat;
 }
 
 .lobby-hero-hook {
@@ -322,7 +373,7 @@
 
 .lobby-feed-item {
 	display: grid;
-	grid-template-columns: 7.5rem 6.5rem minmax(4rem, 1fr) minmax(6rem, 1.2fr) 9rem;
+	grid-template-columns: 7rem minmax(8rem, 1.4fr) 5.5rem 4.5rem minmax(6rem, 1fr) 8.5rem;
 	gap: 8px;
 	align-items: center;
 	padding: 9px 4px;
@@ -341,9 +392,33 @@
 	color: #E31337;
 }
 
+.lobby-feed-headline {
+	font-weight: 700;
+	color: #f2f7fc;
+	letter-spacing: 0.01em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .lobby-feed-size {
 	color: #9fd0ff;
 	font-weight: 700;
+}
+
+.lobby-feed-type {
+	color: #7f96aa;
+	text-transform: uppercase;
+	font-size: 11px;
+	letter-spacing: 0.06em;
+}
+
+.lobby-feed-outcome {
+	color: #c5d7e6;
+}
+
+.lobby-feed-item--moon .lobby-feed-headline {
+	color: #d7e8ff;
 }
 
 .lobby-feed-time {
@@ -401,24 +476,46 @@
 
 	.lobby-hero-visual {
 		order: -1;
+		min-height: 0;
+		margin-top: 4px;
+		overflow: hidden;
 	}
 
-	.lobby-hero-visual-frame img {
-		max-height: min(48vh, 420px);
-		object-fit: contain;
-		padding: 6% 12%;
+	.lobby-viz-stage {
+		min-height: min(36vh, 280px);
+	}
+
+	.lobby-viz {
+		inset: 4px 4px 6px;
+		width: auto;
+		height: auto;
+	}
+
+	.lobby-viz-caption {
+		padding: 10px 12px 12px;
+	}
+
+	.lobby-viz-caption-body {
+		font-size: 12px;
+	}
+
+	.lobby-viz-legend {
+		gap: 6px 12px;
+		margin-top: 8px;
 	}
 
 	.lobby-feed-item {
 		grid-template-columns: 1fr 1fr;
 		grid-template-areas:
 			"uni time"
+			"headline headline"
 			"size type"
 			"outcome outcome";
 	}
 
 	.lobby-feed-uni { grid-area: uni; }
 	.lobby-feed-time { grid-area: time; justify-self: end; }
+	.lobby-feed-headline { grid-area: headline; white-space: normal; }
 	.lobby-feed-size { grid-area: size; }
 	.lobby-feed-type { grid-area: type; }
 	.lobby-feed-outcome { grid-area: outcome; }

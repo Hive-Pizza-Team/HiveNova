@@ -1489,3 +1489,7 @@ $LNG['battle_share_footer'] = 'Shared via HiveNova';
 $LNG['battle_share_result_label'] = 'Result';
 $LNG['battle_share_vs'] = 'vs';
 $LNG['fl_not_enough_resource'] = 'Not enough resources on this planet.';
+$LNG['ef_headline_vs'] = '%s vs %s';
+$LNG['ef_headline_moon'] = '%s formed a moon';
+$LNG['ef_headline_feat'] = '%s claimed a feat';
+$LNG['ef_event_feat'] = 'Feat';

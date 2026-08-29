@@ -6,18 +6,20 @@ use ArrayAccess;
 
 /**
  * Public lobby activity feed — privacy-safe universe events for guests.
+ *
+ * Player display names are public game identities (same as rankings / combat reports).
  */
 class LobbyActivityFeed
 {
 	public const LIMIT = 25;
 
-	public const JSON_KEYS = ['id', 'ts', 'time', 'eventType', 'size', 'outcome', 'universe', 'universeId'];
+	public const JSON_KEYS = ['id', 'ts', 'time', 'eventType', 'size', 'outcome', 'headline', 'universe', 'universeId'];
 
 	/**
 	 * @param list<int> $universeIds
 	 * @param array<string, string>|ArrayAccess $LNG
 	 * @param array<int, string> $universeNames uniId => display name
-	 * @return list<array{id: int, ts: int, time: string, eventType: string, size: string, outcome: string, universe: string, universeId: int}>
+	 * @return list<array{id: int, ts: int, time: string, eventType: string, size: string, outcome: string, headline: string, universe: string, universeId: int}>
 	 */
 	public static function fetch(
 		array $universeIds,
@@ -36,14 +38,14 @@ class LobbyActivityFeed
 		$inList = implode(',', $universeIds);
 
 		if ($sinceId > 0) {
-			$sql = 'SELECT id, universe, time, event_type, size_bucket, outcome
+			$sql = 'SELECT id, universe, time, event_type, size_bucket, outcome, actor_name, target_name
 				FROM %%UNIVERSE_EVENTS%%
 				WHERE universe IN ('.$inList.') AND id > :sinceId
 				ORDER BY id ASC
 				LIMIT '.$limit;
 			$params = [':sinceId' => $sinceId];
 		} else {
-			$sql = 'SELECT id, universe, time, event_type, size_bucket, outcome
+			$sql = 'SELECT id, universe, time, event_type, size_bucket, outcome, actor_name, target_name
 				FROM %%UNIVERSE_EVENTS%%
 				WHERE universe IN ('.$inList.')
 				ORDER BY id DESC
@@ -74,7 +76,7 @@ class LobbyActivityFeed
 	 * @param array<string, mixed> $row
 	 * @param array<string, string>|ArrayAccess $LNG
 	 * @param array<int, string> $universeNames
-	 * @return array{id: int, ts: int, time: string, eventType: string, size: string, outcome: string, universe: string, universeId: int}
+	 * @return array{id: int, ts: int, time: string, eventType: string, size: string, outcome: string, headline: string, universe: string, universeId: int}
 	 */
 	public static function present(
 		array $row,
@@ -93,6 +95,7 @@ class LobbyActivityFeed
 			'eventType'  => $base['eventType'],
 			'size'       => $base['size'],
 			'outcome'    => $base['outcome'],
+			'headline'   => $base['headline'],
 			'universe'   => $name,
 			'universeId' => $uniId,
 		];

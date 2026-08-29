@@ -51,6 +51,10 @@
 		uni.className = 'lobby-feed-uni';
 		uni.textContent = event.universe == null ? '' : String(event.universe);
 
+		var headline = document.createElement('span');
+		headline.className = 'lobby-feed-headline';
+		headline.textContent = event.headline == null ? '' : String(event.headline);
+
 		var size = document.createElement('span');
 		size.className = 'lobby-feed-size';
 		size.textContent = event.size == null ? '' : String(event.size);
@@ -69,6 +73,9 @@
 		time.textContent = event.time == null ? '' : String(event.time);
 
 		li.appendChild(uni);
+		if (headline.textContent) {
+			li.appendChild(headline);
+		}
 		li.appendChild(size);
 		li.appendChild(type);
 		li.appendChild(outcome);

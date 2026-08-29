@@ -5,6 +5,7 @@ namespace HiveNova\Page\Login;
 use HiveNova\Core\Database;
 use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Config;
+use HiveNova\Core\FleetVizSnapshotService;
 use HiveNova\Core\GameAssetPrefetchService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\LobbyActivityFeed;
@@ -165,6 +166,22 @@ class ShowIndexPage extends AbstractLoginPage
 			(string) ($LNG[$feedTitleKey] ?? '%s universes are live'),
 			number_format($liveUniverseCount)
 		);
+		$lobbyVizConfig = (new FleetVizSnapshotService())->forOpenUniverses();
+		$lobbyVizConfigJson = json_encode($lobbyVizConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$lobbyVizUniNames = [];
+		foreach (($lobbyVizConfig['universes'] ?? []) as $uniRow) {
+			$name = trim((string) ($uniRow['name'] ?? ''));
+			if ($name !== '') {
+				$lobbyVizUniNames[] = $name;
+			}
+		}
+		$lobbyVizCaptionTitle = (string) ($LNG['lobby_viz_caption_title'] ?? 'Live fleet map');
+		if ($lobbyVizUniNames !== []) {
+			$lobbyVizCaptionTitle = sprintf(
+				(string) ($LNG['lobby_viz_caption_title_uni'] ?? 'Live fleet map · %s'),
+				implode(', ', $lobbyVizUniNames)
+			);
+		}
 
 		$this->assign(array(
 			'universeSelect'		=> $universeSelect,
@@ -183,10 +200,12 @@ class ShowIndexPage extends AbstractLoginPage
 			'prefetchUrls'			=> $prefetchUrls,
 			'activityEvents'		=> $activityEvents,
 			'activityPollUrl'		=> 'index.php?page=index&mode=activity&ajax=1',
-			'lobbyHeroImage'		=> 'styles/resource/images/login/HiveNova.png',
-			'lobbyHeroAlt'			=> $LNG['lobby_hero_alt'] ?? $config->game_name,
+			'lobbyVizConfigJson'		=> $lobbyVizConfigJson,
+			'lobbyVizCaptionTitle'	=> $lobbyVizCaptionTitle,
 			'lobbyHook'				=> (string) ($LNG['lobby_hook'] ?? 'Come get'),
 			'lobbyHookEm'			=> (string) ($LNG['lobby_hook_em'] ?? 'MOONed'),
+			'lobbyVizMtime'			=> (string) (@filemtime(ROOT_PATH . 'scripts/login/lobby-viz.js') ?: 0),
+			'lobbyCssMtime'			=> (string) (@filemtime(ROOT_PATH . 'styles/resource/css/login/lobby.css') ?: 0),
 		));
 
 		if ($loginErrorMessage) {

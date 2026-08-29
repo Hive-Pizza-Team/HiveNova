@@ -54,9 +54,13 @@
 	function renderRow(event) {
 		var tr = createElement('tr');
 		tr.setAttribute('data-event-id', String(event.id));
-		['time', 'eventType', 'size', 'outcome'].forEach(function (key) {
+		['time', 'headline', 'size', 'outcome'].forEach(function (key) {
 			var td = createElement('td');
-			td.textContent = event[key] == null ? '' : String(event[key]);
+			var value = event[key];
+			if ((value == null || value === '') && key === 'headline') {
+				value = event.eventType;
+			}
+			td.textContent = value == null ? '' : String(value);
 			tr.appendChild(td);
 		});
 		return tr;

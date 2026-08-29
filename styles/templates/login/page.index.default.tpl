@@ -13,16 +13,19 @@
 			</div>
 			<ul class="lobby-bullets" id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul>
 		</div>
-		<figure class="lobby-hero-visual">
-			<div class="lobby-hero-stage">
-				<div class="lobby-hero-dvd lobby-hero-dvd--x">
-					<div class="lobby-hero-dvd lobby-hero-dvd--y">
-						<div class="lobby-hero-visual-frame">
-							<img src="{$lobbyHeroImage}" alt="{$lobbyHeroAlt|escape}" width="960" height="540" loading="eager" decoding="async">
-						</div>
-					</div>
-				</div>
+		<figure class="lobby-hero-visual" aria-label="{$LNG.lobby_viz_label|escape}">
+			<div class="lobby-viz-stage">
+				<div id="lobby-viz" class="lobby-viz" role="img" aria-hidden="true"></div>
+				<script type="application/json" id="lobby-viz-config">{$lobbyVizConfigJson nofilter}</script>
 			</div>
+			<figcaption class="lobby-viz-caption">
+				<p class="lobby-viz-caption-title">{$lobbyVizCaptionTitle|escape}</p>
+				<ul class="lobby-viz-legend" aria-hidden="true">
+					<li class="lobby-viz-legend-item lobby-viz-legend-item--galaxy">{$LNG.lobby_viz_legend_galaxy}</li>
+					<li class="lobby-viz-legend-item lobby-viz-legend-item--fleet">{$LNG.lobby_viz_legend_fleet}</li>
+					<li class="lobby-viz-legend-item lobby-viz-legend-item--attack">{$LNG.lobby_viz_legend_attack}</li>
+				</ul>
+			</figcaption>
 		</figure>
 	</section>
 
@@ -36,6 +39,7 @@
 			{foreach $activityEvents as $event}
 			<li class="lobby-feed-item lobby-feed-item--{$event.eventType|lower|escape}" data-event-id="{$event.id}" data-ts="{$event.ts}">
 				<span class="lobby-feed-uni">{$event.universe|escape}</span>
+				{if $event.headline}<span class="lobby-feed-headline">{$event.headline|escape}</span>{/if}
 				<span class="lobby-feed-size">{$event.size|escape}</span>
 				<span class="lobby-feed-type">{$event.eventType|escape}</span>
 				<span class="lobby-feed-outcome">{$event.outcome|escape}</span>
@@ -209,10 +213,11 @@
 {block name="script" append}
 <script>{if $code}alert({$code|default:0|json});{/if}</script>
 <link rel="stylesheet" type="text/css" href="styles/resource/css/login/register.css?v={$REV}">
-<link rel="stylesheet" type="text/css" href="styles/resource/css/login/lobby.css?v={$REV}">
+<link rel="stylesheet" type="text/css" href="styles/resource/css/login/lobby.css?v={$REV}.{$lobbyCssMtime}">
 <script type="application/json" id="prefetch-assets-data">{$prefetchUrls|default:[]|json}</script>
 <script src="scripts/login/prefetch-assets.js?v={$REV}" defer></script>
 <script src="scripts/login/lobby-feed.js?v={$REV}" defer></script>
+<script src="scripts/login/lobby-viz.js?v={$REV}.{$lobbyVizMtime}" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	var btns = document.querySelectorAll('.reg-tab-btn');
