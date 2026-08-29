@@ -92,4 +92,79 @@ class ShowImperiumPageTest extends TestCase
 		$this->assertContains('lunar_base', $columns);
 		$this->assertSame(count($columns), count(array_unique($columns)));
 	}
+
+	public function test_header_select_omits_fleet_defense_missile_columns(): void
+	{
+		$resource = [
+			1   => 'metal_mine',
+			202 => 'light_fighter',
+			401 => 'rocket_launcher',
+			502 => 'interceptor',
+			22  => 'solar_plant',
+		];
+		$reslist = [
+			'build'   => [1],
+			'fleet'   => [202],
+			'defense' => [401],
+			'missile' => [502],
+			'storage' => [22],
+			'prod'    => [1, 22],
+		];
+
+		$columns = ShowImperiumPage::imperiumPlanetSelectColumns($resource, $reslist, false);
+
+		$this->assertContains('metal_mine', $columns);
+		$this->assertContains('solar_plant', $columns);
+		$this->assertNotContains('light_fighter', $columns);
+		$this->assertNotContains('rocket_launcher', $columns);
+		$this->assertNotContains('interceptor', $columns);
+	}
+
+	public function test_compact_matrix_values_drops_zeros(): void
+	{
+		$this->assertSame(
+			['10' => 5, '12' => 3],
+			ShowImperiumPage::compactMatrixValues(['10' => 5, '11' => 0, '12' => 3])
+		);
+	}
+
+	public function test_build_matrix_payload_omits_empty_rows_and_zero_cells(): void
+	{
+		$resource = [
+			1   => 'metal_mine',
+			202 => 'light_fighter',
+			401 => 'rocket_launcher',
+			502 => 'interceptor',
+			503 => 'interplanetary_missile',
+			106 => 'spy_tech',
+		];
+		$reslist = [
+			'build'   => [1],
+			'fleet'   => [202],
+			'defense' => [401],
+			'missile' => [502, 503],
+			'tech'    => [106],
+		];
+		$planets = [
+			['id' => 10, 'metal_mine' => 3, 'light_fighter' => 0, 'rocket_launcher' => 0, 'interceptor' => 0, 'interplanetary_missile' => 0],
+			['id' => 11, 'metal_mine' => 0, 'light_fighter' => 7, 'rocket_launcher' => 0, 'interceptor' => 0, 'interplanetary_missile' => 0],
+		];
+		$user = ['spy_tech' => 2];
+
+		$payload = ShowImperiumPage::buildMatrixPayload($planets, $user, $resource, $reslist, [
+			1 => 'Metal Mine',
+			202 => 'Light Fighter',
+			106 => 'Espionage Technology',
+		]);
+
+		$this->assertSame(['10', '11'], $payload['planetIds']);
+		$this->assertSame(4, $payload['colspan']);
+		$this->assertCount(1, $payload['sections']['build']);
+		$this->assertSame(['10' => 3], $payload['sections']['build'][0]['values']);
+		$this->assertSame(['11' => 7], $payload['sections']['fleet'][0]['values']);
+		$this->assertSame([], $payload['sections']['defense']);
+		$this->assertSame([], $payload['sections']['missiles']);
+		$this->assertCount(1, $payload['sections']['tech']);
+		$this->assertSame(2, $payload['sections']['tech'][0]['total']);
+	}
 }

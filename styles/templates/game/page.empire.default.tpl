@@ -69,6 +69,6 @@
 	<table><tbody id="empire-tech"></tbody></table>
 </details>
 
-<script type="application/json" id="empire-matrix-data">{$empireMatrixJson nofilter}</script>
+<script type="application/json" id="empire-matrix-config" data-url="game.php?page=imperium&amp;mode=matrix&amp;ajax=1"></script>
 <script src="./scripts/game/imperium.js?v={$REV}"></script>
 {/block}
