@@ -9,6 +9,7 @@ use HiveNova\Core\FleetVizSnapshotService;
 use HiveNova\Core\GameAssetPrefetchService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\LobbyActivityFeed;
+use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
 
@@ -53,11 +54,19 @@ class ShowIndexPage extends AbstractLoginPage
 	{
 		global $LNG;
 
-		$referralID		= HTTP::_GP('ref', 0);
-		if(!empty($referralID))
-		{
-			$this->redirectTo('index.php?page=register&referralID='.$referralID);
-		}
+		$config				= Config::get();
+		$referralCapture	= new ReferralCaptureService();
+		$referral			= $referralCapture->capture(
+			Database::get(),
+			(int) ($config->ref_active ?? 0) === 1,
+			ReferralCaptureService::requestBag(),
+			$_COOKIE
+		);
+		$referralRegUni		= $referralCapture->registrationUniverseId($referral);
+		$registerUrl		= $referralCapture->registerUrl(
+			(int) $referral['id'],
+			(int) $referral['universe']
+		);
 
 		$universeSelect	= array();
 		$universeStats	= array();
@@ -146,7 +155,6 @@ class ShowIndexPage extends AbstractLoginPage
 			$loginErrorMessage	= $LNG['login_error_'.$Code];
 		}
 
-		$config				= Config::get();
 		$verkey = array(
 			'capaktiv'	=> $config->capaktiv ?? 0,
 			'cappublic'	=> $config->cappublic ?? '',
@@ -155,6 +163,10 @@ class ShowIndexPage extends AbstractLoginPage
 		$prefetchUrls = (new GameAssetPrefetchService())->listUrls();
 		$defaultEmailUniverse = $this->getDefaultEmailUniverseId();
 		$defaultHiveUniverse = $this->getDefaultHiveUniverseId();
+		if ($referralRegUni > 0) {
+			$defaultEmailUniverse = $referralRegUni;
+			$defaultHiveUniverse = $referralRegUni;
+		}
 		$activityEvents = LobbyActivityFeed::fetch(
 			array_keys($universeNames),
 			$LNG,
@@ -206,6 +218,7 @@ class ShowIndexPage extends AbstractLoginPage
 			'lobbyHookEm'			=> (string) ($LNG['lobby_hook_em'] ?? 'MOONed'),
 			'lobbyVizMtime'			=> (string) (@filemtime(ROOT_PATH . 'scripts/login/lobby-viz.js') ?: 0),
 			'lobbyCssMtime'			=> (string) (@filemtime(ROOT_PATH . 'styles/resource/css/login/lobby.css') ?: 0),
+			'registerUrl'			=> $registerUrl,
 		));
 
 		if ($loginErrorMessage) {

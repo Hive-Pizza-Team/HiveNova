@@ -46,7 +46,14 @@ class HTTP {
 
 	static public function sendCookie($name, $value = "", $toTime = NULL)
 	{
-		setcookie($name, (string) $value, $toTime);
+		$secure = defined('HTTPS') ? (bool) HTTPS : (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on');
+		setcookie((string) $name, (string) $value, [
+			'expires'  => $toTime ?? 0,
+			'path'     => '/',
+			'secure'   => $secure,
+			'httponly' => true,
+			'samesite' => 'Lax',
+		]);
 	}
 	
 	static public function _GP($name, $default, $multibyte = false, $highnum = false)
