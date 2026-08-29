@@ -2,7 +2,7 @@
 {block name="title"}{$documentTitle}{/block}
 {block name="content"}
 <h1>{$pageHeading}</h1>
-<div class="reg-tabs-wrapper">
+<div class="reg-tabs-wrapper" data-referrer-id="{$referralData.id|default:0}" data-referrer-uni="{$referralUniverse|default:0}">
 	<script type="application/json" id="reg-seasonal-unis">{$universeSeasonal|json}</script>
 	<div class="reg-tab-nav" role="tablist">
 		<button class="reg-tab-btn active" data-tab="reg-email" role="tab" aria-selected="true" aria-controls="reg-email">
@@ -21,7 +21,7 @@
 		</div>
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
-		<input type="hidden" value="{$referralData.id}" name="referralID">
+		<input type="hidden" value="{$referralData.id}" name="referralID" class="reg-referral-id">
 			<div class="rowForm">
 				<label for="universe">{$LNG.universe}</label>
 				<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$defaultEmailUniverse}</select>
@@ -81,9 +81,9 @@
 			</div>
 			{/if}
 			{if !empty($referralData.name)}
-			<div class="rowForm">
+			<div class="rowForm reg-referral-row">
 				<label>{$LNG.registerReferral}</label>
-				<span class="text">{$referralData.name}</span>
+				<span class="text">{$referralData.name|escape}</span>
 				<div class="clear"></div>
 			</div>
 			{/if}
@@ -113,7 +113,7 @@
 		<input type="hidden" value="send" name="mode">
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
-		<input type="hidden" value="{$referralData.id}" name="referralID">
+		<input type="hidden" value="{$referralData.id}" name="referralID" class="reg-referral-id">
 			<div class="rowForm reg-hive-info">
 				<p>{$registerHiveKeychainInfo}</p>
 				<p class="reg-season-hive-notice" hidden>{$LNG.registerErrorHiveRequiredSeason}</p>
