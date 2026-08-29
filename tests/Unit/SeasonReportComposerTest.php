@@ -36,7 +36,7 @@ class SeasonReportComposerTest extends TestCase
 
 		$this->assertSame('HiveNova Season 12 Recap', $report['title']);
 		$this->assertSame('hivenova-u2-season-12', $report['permlink']);
-		$this->assertSame(['hivenova', 'hive-pizza', 'gaming', 'season'], $report['tags']);
+		$this->assertSame(['moon', 'hive-pizza', 'gaming', 'season'], $report['tags']);
 		$this->assertStringContainsString('4.800 PIZZA', $report['body']);
 		$this->assertStringContainsString('0.480', $report['body']);
 		$this->assertStringContainsString('4.320', $report['body']);
