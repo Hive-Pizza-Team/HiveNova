@@ -11,17 +11,30 @@ class ReferralCaptureServiceTest extends TestCase
 	/** @var list<array{name: string, value: string, expire: int}> */
 	private array $cookiesWritten = [];
 
-	private function service(): ReferralCaptureService
+	/** @var array<int, bool> */
+	private array $refActiveByUni = [];
+
+	private function service(?array $refActiveByUni = null): ReferralCaptureService
 	{
 		$this->cookiesWritten = [];
+		$this->refActiveByUni = $refActiveByUni ?? [];
 
-		return new ReferralCaptureService(function (string $name, string $value, int $expire): void {
-			$this->cookiesWritten[] = [
-				'name'   => $name,
-				'value'  => $value,
-				'expire' => $expire,
-			];
-		});
+		return new ReferralCaptureService(
+			function (string $name, string $value, int $expire): void {
+				$this->cookiesWritten[] = [
+					'name'   => $name,
+					'value'  => $value,
+					'expire' => $expire,
+				];
+			},
+			function (int $universeId): bool {
+				if ($this->refActiveByUni === []) {
+					return true;
+				}
+
+				return (bool) ($this->refActiveByUni[$universeId] ?? false);
+			}
+		);
 	}
 
 	private function dbWithReferrer(?array $row): DatabaseInterface
@@ -54,12 +67,10 @@ class ReferralCaptureServiceTest extends TestCase
 		);
 	}
 
-	public function testCaptureInactiveReturnsEmpty(): void
+	public function testCaptureInactiveOnReferrerUniverseReturnsEmpty(): void
 	{
-		$service = $this->service();
-		$result = $service->capture(
-			$this->dbWithReferrer(['id' => 5, 'username' => 'Alice', 'universe' => 1]),
-			false,
+		$result = $this->service([2 => false])->capture(
+			$this->dbWithReferrer(['id' => 5, 'username' => 'Alice', 'universe' => 2]),
 			['ref' => 5],
 			[]
 		);
@@ -68,12 +79,25 @@ class ReferralCaptureServiceTest extends TestCase
 		$this->assertSame([], $this->cookiesWritten);
 	}
 
+	public function testCaptureIgnoresAmbientUniverseRefFlag(): void
+	{
+		// Referrer lives in uni 2 with refs on; ambient/current uni 1 may be off.
+		$result = $this->service([1 => false, 2 => true])->capture(
+			$this->dbWithReferrer(['id' => 712, 'username' => 'Referrer', 'universe' => 2]),
+			['ref' => 712],
+			[]
+		);
+
+		$this->assertSame(712, $result['id']);
+		$this->assertSame(2, $result['universe']);
+		$this->assertCount(2, $this->cookiesWritten);
+		$this->assertSame('712', $this->cookiesWritten[0]['value']);
+	}
+
 	public function testCaptureFromQueryPersistsCookies(): void
 	{
-		$service = $this->service();
-		$result = $service->capture(
+		$result = $this->service([2 => true])->capture(
 			$this->dbWithReferrer(['id' => 12, 'username' => 'Bob', 'universe' => 2]),
-			true,
 			['ref' => 12],
 			[]
 		);
@@ -96,9 +120,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testCaptureFromReferralIdQueryPersistsCookies(): void
 	{
-		$result = $this->service()->capture(
+		$result = $this->service([2 => true])->capture(
 			$this->dbWithReferrer(['id' => 12, 'username' => 'Bob', 'universe' => 2]),
-			true,
 			['referralID' => 12],
 			[]
 		);
@@ -119,9 +142,8 @@ class ReferralCaptureServiceTest extends TestCase
 			)
 			->willReturn(['id' => 7, 'username' => 'Carol', 'universe' => 1]);
 
-		$result = $this->service()->capture(
+		$result = $this->service([1 => true])->capture(
 			$db,
-			true,
 			['ref' => 7, 'referralID' => 99],
 			[]
 		);
@@ -131,9 +153,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testCaptureQueryOverwritesStaleCookie(): void
 	{
-		$result = $this->service()->capture(
+		$result = $this->service([1 => true])->capture(
 			$this->dbWithReferrer(['id' => 7, 'username' => 'Carol', 'universe' => 1]),
-			true,
 			['ref' => 7],
 			[
 				ReferralCaptureService::COOKIE_REF     => '99',
@@ -148,9 +169,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testCaptureFallsBackToCookie(): void
 	{
-		$result = $this->service()->capture(
+		$result = $this->service([1 => true])->capture(
 			$this->dbWithReferrer(['id' => 9, 'username' => 'Dana', 'universe' => 1]),
-			true,
 			[],
 			[ReferralCaptureService::COOKIE_REF => '9']
 		);
@@ -170,9 +190,8 @@ class ReferralCaptureServiceTest extends TestCase
 			)
 			->willReturn(['id' => 9, 'username' => 'Dana', 'universe' => 3]);
 
-		$result = $this->service()->capture(
+		$result = $this->service([3 => true])->capture(
 			$db,
-			true,
 			[],
 			[
 				ReferralCaptureService::COOKIE_REF     => '9',
@@ -188,7 +207,6 @@ class ReferralCaptureServiceTest extends TestCase
 	{
 		$result = $this->service()->capture(
 			$this->dbWithReferrer(null),
-			true,
 			['ref' => 404],
 			[
 				ReferralCaptureService::COOKIE_REF     => '9',
@@ -205,9 +223,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testResolveForRegisterUsesReferralIdThenCookie(): void
 	{
-		$result = $this->service()->resolveForRegister(
+		$result = $this->service([1 => true])->resolveForRegister(
 			$this->dbWithReferrer(['id' => 3, 'username' => 'Eve', 'universe' => 1]),
-			true,
 			['referralID' => 3],
 			[ReferralCaptureService::COOKIE_REF => '99']
 		);
@@ -219,9 +236,8 @@ class ReferralCaptureServiceTest extends TestCase
 
 	public function testResolveForRegisterCookieFallbackPersists(): void
 	{
-		$result = $this->service()->resolveForRegister(
+		$result = $this->service([2 => true])->resolveForRegister(
 			$this->dbWithReferrer(['id' => 8, 'username' => 'Frank', 'universe' => 2]),
-			true,
 			[],
 			[ReferralCaptureService::COOKIE_REF => '8']
 		);
@@ -244,9 +260,8 @@ class ReferralCaptureServiceTest extends TestCase
 			)
 			->willReturn([]);
 
-		$result = $this->service()->resolveForRegister(
+		$result = $this->service([2 => true])->resolveForRegister(
 			$db,
-			true,
 			['referralID' => 4],
 			[],
 			2
@@ -268,9 +283,8 @@ class ReferralCaptureServiceTest extends TestCase
 			)
 			->willReturn(['id' => 4, 'username' => 'Gina', 'universe' => 2]);
 
-		$result = $this->service()->resolveForRegister(
+		$result = $this->service([2 => true])->resolveForRegister(
 			$db,
-			true,
 			['referralID' => 4],
 			[],
 			2
@@ -286,16 +300,17 @@ class ReferralCaptureServiceTest extends TestCase
 		$this->assertSame('2', $this->cookiesWritten[1]['value']);
 	}
 
-	public function testResolveForRegisterInactive(): void
+	public function testResolveForRegisterInactiveOnTargetUniverse(): void
 	{
-		$result = $this->service()->resolveForRegister(
-			$this->dbWithReferrer(['id' => 1, 'username' => 'X', 'universe' => 1]),
-			false,
+		$result = $this->service([2 => false])->resolveForRegister(
+			$this->dbWithReferrer(['id' => 1, 'username' => 'X', 'universe' => 2]),
 			['referralID' => 1],
-			[]
+			[],
+			2
 		);
 
 		$this->assertSame(0, $result['id']);
+		$this->assertSame([], $this->cookiesWritten);
 	}
 
 	public function testRegistrationUniverseIdWhenOpen(): void
