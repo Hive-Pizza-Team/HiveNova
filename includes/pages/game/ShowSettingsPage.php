@@ -101,6 +101,9 @@ class ShowSettingsPage extends AbstractGamePage
 				'pushConfigured'	=> PushNotificationService::isConfigured(),
 				'userid'		 	=> $USER['id'],
 				'ref_active'		=> Config::get()->ref_active,
+				'referralLink'		=> ((int) Config::get()->ref_active === 1)
+					? PROTOCOL.HTTP_HOST.HTTP_ROOT.'index.php?ref='.(int) $USER['id']
+					: '',
 				'SELF_URL'          => PROTOCOL.HTTP_HOST.HTTP_ROOT
 			));
 			

@@ -61,10 +61,8 @@ class ShowIndexPage extends AbstractLoginPage
 			ReferralCaptureService::requestBag(),
 			$_COOKIE
 		);
-		$referralRegUni		= $referralCapture->registrationUniverseId($referral);
 		$registerUrl		= $referralCapture->registerUrl(
-			(int) $referral['id'],
-			(int) $referral['universe']
+			(int) ($referral['code'] ?? $referral['id'])
 		);
 
 		$universeSelect	= array();
@@ -162,10 +160,6 @@ class ShowIndexPage extends AbstractLoginPage
 		$prefetchUrls = (new GameAssetPrefetchService())->listUrls();
 		$defaultEmailUniverse = $this->getDefaultEmailUniverseId();
 		$defaultHiveUniverse = $this->getDefaultHiveUniverseId();
-		if ($referralRegUni > 0) {
-			$defaultEmailUniverse = $referralRegUni;
-			$defaultHiveUniverse = $referralRegUni;
-		}
 		$activityEvents = LobbyActivityFeed::fetch(
 			array_keys($universeNames),
 			$LNG,

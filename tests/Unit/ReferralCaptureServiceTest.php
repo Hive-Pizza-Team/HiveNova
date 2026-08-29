@@ -69,6 +69,32 @@ class ReferralCaptureServiceTest extends TestCase
 		);
 	}
 
+	public function testIsAliasAndAliasUserId(): void
+	{
+		$this->assertTrue(ReferralCaptureService::isAlias(1));
+		$this->assertFalse(ReferralCaptureService::isAlias(712));
+		$this->assertSame(1, ReferralCaptureService::aliasUserId(1, 1));
+		$this->assertSame(712, ReferralCaptureService::aliasUserId(1, 3));
+		$this->assertSame(0, ReferralCaptureService::aliasUserId(1, 2));
+		$this->assertSame(0, ReferralCaptureService::aliasUserId(712, 3));
+	}
+
+	public function testPublicCodeFromPrefersRefThenCookieThenReferralId(): void
+	{
+		$this->assertSame(1, ReferralCaptureService::publicCodeFrom(
+			['ref' => 1, 'referralID' => 99],
+			[ReferralCaptureService::COOKIE_REF => '7']
+		));
+		$this->assertSame(7, ReferralCaptureService::publicCodeFrom(
+			['referralID' => 99],
+			[ReferralCaptureService::COOKIE_REF => '7']
+		));
+		$this->assertSame(99, ReferralCaptureService::publicCodeFrom(
+			['referralID' => 99],
+			[]
+		));
+	}
+
 	public function testCaptureInactiveOnReferrerUniverseReturnsEmpty(): void
 	{
 		$result = $this->service([2 => false])->capture(
@@ -77,7 +103,7 @@ class ReferralCaptureServiceTest extends TestCase
 			[]
 		);
 
-		$this->assertSame(['id' => 0, 'name' => '', 'universe' => 0], $result);
+		$this->assertSame(['id' => 0, 'name' => '', 'universe' => 0, 'code' => 0], $result);
 		$this->assertSame([], $this->cookiesWritten);
 	}
 
@@ -92,6 +118,7 @@ class ReferralCaptureServiceTest extends TestCase
 
 		$this->assertSame(712, $result['id']);
 		$this->assertSame(2, $result['universe']);
+		$this->assertSame(712, $result['code']);
 		$this->assertCount(2, $this->cookiesWritten);
 		$this->assertSame('712', $this->cookiesWritten[0]['value']);
 	}
@@ -108,6 +135,7 @@ class ReferralCaptureServiceTest extends TestCase
 			'id'       => 12,
 			'name'     => 'Bob',
 			'universe' => 2,
+			'code'     => 12,
 		], $result);
 		$this->assertCount(2, $this->cookiesWritten);
 		$this->assertSame(ReferralCaptureService::COOKIE_REF, $this->cookiesWritten[0]['name']);
@@ -216,24 +244,26 @@ class ReferralCaptureServiceTest extends TestCase
 			]
 		);
 
-		$this->assertSame(['id' => 0, 'name' => '', 'universe' => 0], $result);
+		$this->assertSame(['id' => 0, 'name' => '', 'universe' => 0, 'code' => 0], $result);
 		$this->assertCount(2, $this->cookiesWritten);
 		$this->assertSame('', $this->cookiesWritten[0]['value']);
 		$this->assertSame('', $this->cookiesWritten[1]['value']);
 		$this->assertSame(TIMESTAMP - 3600, $this->cookiesWritten[0]['expire']);
 	}
 
-	public function testResolveForRegisterUsesReferralIdThenCookie(): void
+	public function testResolveForRegisterPrefersCookieOverReferralId(): void
 	{
 		$result = $this->service([1 => true])->resolveForRegister(
-			$this->dbWithReferrer(['id' => 3, 'username' => 'Eve', 'universe' => 1]),
+			$this->dbWithReferrer(['id' => 99, 'username' => 'Cookie', 'universe' => 1]),
 			['referralID' => 3],
 			[ReferralCaptureService::COOKIE_REF => '99']
 		);
 
-		$this->assertSame(3, $result['id']);
-		$this->assertSame('Eve', $result['name']);
+		$this->assertSame(99, $result['id']);
+		$this->assertSame('Cookie', $result['name']);
+		$this->assertSame(99, $result['code']);
 		$this->assertCount(2, $this->cookiesWritten);
+		$this->assertSame('99', $this->cookiesWritten[0]['value']);
 	}
 
 	public function testResolveForRegisterCookieFallbackPersists(): void
@@ -296,6 +326,7 @@ class ReferralCaptureServiceTest extends TestCase
 			'id'       => 4,
 			'name'     => 'Gina',
 			'universe' => 2,
+			'code'     => 4,
 		], $result);
 		$this->assertCount(2, $this->cookiesWritten);
 		$this->assertSame('4', $this->cookiesWritten[0]['value']);
@@ -305,14 +336,186 @@ class ReferralCaptureServiceTest extends TestCase
 	public function testResolveForRegisterInactiveOnTargetUniverse(): void
 	{
 		$result = $this->service([2 => false])->resolveForRegister(
-			$this->dbWithReferrer(['id' => 1, 'username' => 'X', 'universe' => 2]),
-			['referralID' => 1],
+			$this->dbWithReferrer(['id' => 5, 'username' => 'X', 'universe' => 2]),
+			['referralID' => 5],
 			[],
 			2
 		);
 
 		$this->assertSame(0, $result['id']);
 		$this->assertSame([], $this->cookiesWritten);
+	}
+
+	public function testAliasCapturePersistsPublicCode(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->once())
+			->method('selectSingle')
+			->with(
+				$this->stringContains('AND universe = :universe'),
+				[':referralID' => 1, ':universe' => 1]
+			)
+			->willReturn(['id' => 1, 'username' => 'Alpha', 'universe' => 1]);
+
+		$result = $this->service([1 => true, 3 => true])->capture(
+			$db,
+			['ref' => 1],
+			[]
+		);
+
+		$this->assertSame(1, $result['id']);
+		$this->assertSame(1, $result['code']);
+		$this->assertSame('1', $this->cookiesWritten[0]['value']);
+		$this->assertSame('1', $this->cookiesWritten[1]['value']);
+	}
+
+	public function testAliasResolveForRegisterPerUniverse(): void
+	{
+		$dbUni1 = $this->createMock(DatabaseInterface::class);
+		$dbUni1->expects($this->once())
+			->method('selectSingle')
+			->with(
+				$this->stringContains('AND universe = :universe'),
+				[':referralID' => 1, ':universe' => 1]
+			)
+			->willReturn(['id' => 1, 'username' => 'Alpha', 'universe' => 1]);
+
+		$result1 = $this->service([1 => true, 3 => true])->resolveForRegister(
+			$dbUni1,
+			[],
+			[ReferralCaptureService::COOKIE_REF => '1'],
+			1
+		);
+		$this->assertSame(1, $result1['id']);
+		$this->assertSame(1, $result1['code']);
+		$this->assertSame('1', $this->cookiesWritten[0]['value']);
+
+		$dbUni3 = $this->createMock(DatabaseInterface::class);
+		$dbUni3->expects($this->once())
+			->method('selectSingle')
+			->with(
+				$this->stringContains('AND universe = :universe'),
+				[':referralID' => 712, ':universe' => 3]
+			)
+			->willReturn(['id' => 712, 'username' => 'Gamma', 'universe' => 3]);
+
+		$result3 = $this->service([1 => true, 3 => true])->resolveForRegister(
+			$dbUni3,
+			[],
+			[ReferralCaptureService::COOKIE_REF => '1'],
+			3
+		);
+		$this->assertSame(712, $result3['id']);
+		$this->assertSame(1, $result3['code']);
+		$this->assertSame('1', $this->cookiesWritten[0]['value']);
+		$this->assertSame('3', $this->cookiesWritten[1]['value']);
+	}
+
+	public function testAliasResolveUnknownUniverseReturnsEmptyWithoutClearingCookie(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->never())->method('selectSingle');
+
+		$result = $this->service([2 => true])->resolveForRegister(
+			$db,
+			[],
+			[
+				ReferralCaptureService::COOKIE_REF     => '1',
+				ReferralCaptureService::COOKIE_REF_UNI => '1',
+			],
+			2
+		);
+
+		$this->assertSame(0, $result['id']);
+		$this->assertSame([], $this->cookiesWritten);
+	}
+
+	public function testAliasCookiePreferredOverResolvedReferralIdPost(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->once())
+			->method('selectSingle')
+			->with(
+				$this->stringContains('AND universe = :universe'),
+				[':referralID' => 712, ':universe' => 3]
+			)
+			->willReturn(['id' => 712, 'username' => 'Gamma', 'universe' => 3]);
+
+		$result = $this->service([3 => true])->resolveForRegister(
+			$db,
+			['referralID' => 712],
+			[ReferralCaptureService::COOKIE_REF => '1'],
+			3
+		);
+
+		$this->assertSame(712, $result['id']);
+		$this->assertSame(1, $result['code']);
+		$this->assertSame('1', $this->cookiesWritten[0]['value']);
+	}
+
+	public function testNonAlias712ScopedToWrongUniverseReturnsEmpty(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->once())
+			->method('selectSingle')
+			->with(
+				$this->stringContains('AND universe = :universe'),
+				[':referralID' => 712, ':universe' => 1]
+			)
+			->willReturn([]);
+
+		$result = $this->service([1 => true])->resolveForRegister(
+			$db,
+			['ref' => 712],
+			[],
+			1
+		);
+
+		$this->assertSame(0, $result['id']);
+	}
+
+	public function testResolveByUniverseForAlias(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->exactly(2))
+			->method('selectSingle')
+			->willReturnCallback(function (string $sql, array $params) {
+				$id = (int) $params[':referralID'];
+				$uni = (int) $params[':universe'];
+				if ($id === 1 && $uni === 1) {
+					return ['id' => 1, 'username' => 'Alpha', 'universe' => 1];
+				}
+				if ($id === 712 && $uni === 3) {
+					return ['id' => 712, 'username' => 'Gamma', 'universe' => 3];
+				}
+
+				return [];
+			});
+
+		$map = $this->service([1 => true, 3 => true])->resolveByUniverse($db, 1);
+
+		$this->assertSame([
+			1 => ['id' => 1, 'name' => 'Alpha'],
+			3 => ['id' => 712, 'name' => 'Gamma'],
+		], $map);
+	}
+
+	public function testResolveByUniverseOmitsInactiveUniverse(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->once())
+			->method('selectSingle')
+			->with(
+				$this->anything(),
+				[':referralID' => 1, ':universe' => 1]
+			)
+			->willReturn(['id' => 1, 'username' => 'Alpha', 'universe' => 1]);
+
+		$map = $this->service([1 => true, 3 => false])->resolveByUniverse($db, 1);
+
+		$this->assertSame([
+			1 => ['id' => 1, 'name' => 'Alpha'],
+		], $map);
 	}
 
 	public function testRegistrationUniverseIdWhenOpen(): void
@@ -447,8 +650,8 @@ class ReferralCaptureServiceTest extends TestCase
 	public function testCaptureRejectsReferrerWithZeroUniverse(): void
 	{
 		$result = $this->service()->capture(
-			$this->dbWithReferrer(['id' => 1, 'username' => 'Broken', 'universe' => 0]),
-			['ref' => 1],
+			$this->dbWithReferrer(['id' => 5, 'username' => 'Broken', 'universe' => 0]),
+			['ref' => 5],
 			[]
 		);
 

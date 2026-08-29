@@ -2,8 +2,9 @@
 {block name="title"}{$documentTitle}{/block}
 {block name="content"}
 <h1>{$pageHeading}</h1>
-<div class="reg-tabs-wrapper" data-referrer-id="{$referralData.id|default:0}" data-referrer-uni="{$referralUniverse|default:0}">
+<div class="reg-tabs-wrapper" data-referrer-id="{$referralData.id|default:0}">
 	<script type="application/json" id="reg-seasonal-unis">{$universeSeasonal|json}</script>
+	<script type="application/json" id="reg-referral-by-uni">{$referralByUniverse|json}</script>
 	<div class="reg-tab-nav" role="tablist">
 		<button class="reg-tab-btn active" data-tab="reg-email" role="tab" aria-selected="true" aria-controls="reg-email">
 			&#9993;&nbsp; {$registerTabEmail}
@@ -80,13 +81,11 @@
 				<div class="clear"></div>
 			</div>
 			{/if}
-			{if !empty($referralData.name)}
-			<div class="rowForm reg-referral-row">
+			<div class="rowForm reg-referral-row"{if empty($referralData.name)} hidden{/if}>
 				<label>{$LNG.registerReferral}</label>
-				<span class="text">{$referralData.name|escape}</span>
+				<span class="text reg-referral-name">{$referralData.name|escape}</span>
 				<div class="clear"></div>
 			</div>
-			{/if}
 			{if $recaptchaEnable}
 			<div class="rowForm" id="captchaRow">
 				<div>

@@ -8,6 +8,9 @@ namespace HiveNova\Core;
  * Settings share links use index.php?ref={userid}. Visitors stay on the lobby; cookies
  * plus register CTAs preserve tracking until signup.
  *
+ * Public codes may be aliases (multi-uni maps) or raw user ids. Cookie `ref` always stores
+ * the public code; the resolved user id is per selected universe.
+ *
  * ref_active is evaluated for the referrer's (or target) universe — not Universe::current()
  * on the multi-uni lobby, which often has referrals disabled while live unis do not.
  */
@@ -16,6 +19,15 @@ class ReferralCaptureService
 	public const COOKIE_REF = 'ref';
 	public const COOKIE_REF_UNI = 'ref_uni';
 	public const COOKIE_TTL_SECONDS = 2592000; // 30 days
+
+	/**
+	 * Public referral codes that map to different user ids per universe.
+	 *
+	 * @var array<int, array<int, int>> publicCode => [universeId => userId]
+	 */
+	private const ALIASES = [
+		1 => [1 => 1, 3 => 712],
+	];
 
 	/** @var callable(string, string, int): void */
 	private $cookieWriter;
@@ -46,6 +58,45 @@ class ReferralCaptureService
 			'ref'        => HTTP::_GP('ref', 0),
 			'referralID' => HTTP::_GP('referralID', 0),
 		];
+	}
+
+	public static function isAlias(int $code): bool
+	{
+		return $code > 0 && isset(self::ALIASES[$code]);
+	}
+
+	/**
+	 * Resolved user id for an alias in a universe, or 0 if unmapped.
+	 */
+	public static function aliasUserId(int $code, int $universeId): int
+	{
+		if ($code <= 0 || $universeId <= 0 || !isset(self::ALIASES[$code][$universeId])) {
+			return 0;
+		}
+
+		return (int) self::ALIASES[$code][$universeId];
+	}
+
+	/**
+	 * Public code priority: query ref, then cookie, then referralID.
+	 * Cookie wins over form referralID so resolved ids do not rewrite alias cookies.
+	 *
+	 * @param array<string, mixed> $request
+	 * @param array<string, mixed> $cookies
+	 */
+	public static function publicCodeFrom(array $request, array $cookies): int
+	{
+		$ref = (int) ($request['ref'] ?? 0);
+		if ($ref > 0) {
+			return $ref;
+		}
+
+		$cookie = (int) ($cookies[self::COOKIE_REF] ?? 0);
+		if ($cookie > 0) {
+			return $cookie;
+		}
+
+		return (int) ($request['referralID'] ?? 0);
 	}
 
 	/**
@@ -109,11 +160,11 @@ class ReferralCaptureService
 	}
 
 	/**
-	 * Lobby capture: prefer query `ref` / `referralID`, else cookies. Persist on success.
+	 * Lobby capture: prefer query `ref`, else cookies, else `referralID`. Persist on success.
 	 *
 	 * @param array<string, mixed> $request
 	 * @param array<string, mixed> $cookies
-	 * @return array{id: int, name: string, universe: int}
+	 * @return array{id: int, name: string, universe: int, code: int}
 	 */
 	public function capture(DatabaseInterface $db, array $request, array $cookies): array
 	{
@@ -121,12 +172,11 @@ class ReferralCaptureService
 	}
 
 	/**
-	 * Register show/send: prefer `referralID` / `ref` query, else cookies.
-	 * When $universeId is set, require the referrer to exist in that universe.
+	 * Register show/send. When $universeId is set, resolve for that universe only.
 	 *
 	 * @param array<string, mixed> $request
 	 * @param array<string, mixed> $cookies
-	 * @return array{id: int, name: string, universe: int}
+	 * @return array{id: int, name: string, universe: int, code: int}
 	 */
 	public function resolveForRegister(
 		DatabaseInterface $db,
@@ -138,9 +188,52 @@ class ReferralCaptureService
 	}
 
 	/**
+	 * Per-universe resolved referrers for a public code (JS dropdown sync).
+	 *
+	 * @return array<int, array{id: int, name: string}>
+	 */
+	public function resolveByUniverse(DatabaseInterface $db, int $publicCode): array
+	{
+		if ($publicCode <= 0) {
+			return [];
+		}
+
+		$map = [];
+		$universeIds = self::isAlias($publicCode)
+			? array_keys(self::ALIASES[$publicCode])
+			: Universe::availableUniverses();
+
+		foreach ($universeIds as $uniId) {
+			$uniId = (int) $uniId;
+			if ($uniId <= 0 || !$this->isRefActive($uniId)) {
+				continue;
+			}
+
+			$userId = self::isAlias($publicCode)
+				? self::aliasUserId($publicCode, $uniId)
+				: $publicCode;
+			if ($userId <= 0) {
+				continue;
+			}
+
+			$referrer = $this->lookupReferrerInUniverse($db, $userId, $uniId);
+			if ($referrer === null) {
+				continue;
+			}
+
+			$map[$uniId] = [
+				'id'   => $referrer['id'],
+				'name' => $referrer['name'],
+			];
+		}
+
+		return $map;
+	}
+
+	/**
 	 * @param array<string, mixed> $request
 	 * @param array<string, mixed> $cookies
-	 * @return array{id: int, name: string, universe: int}
+	 * @return array{id: int, name: string, universe: int, code: int}
 	 */
 	private function resolve(
 		DatabaseInterface $db,
@@ -148,17 +241,85 @@ class ReferralCaptureService
 		array $cookies,
 		?int $universeId,
 	): array {
-		$fromRequest = $this->requestReferralId($request);
-		$id = $fromRequest;
-		$fromCookie = false;
-		if ($id <= 0) {
-			$id = (int) ($cookies[self::COOKIE_REF] ?? 0);
-			$fromCookie = $id > 0;
-		}
-		if ($id <= 0) {
+		$publicCode = self::publicCodeFrom($request, $cookies);
+		if ($publicCode <= 0) {
 			return $this->emptyReferral();
 		}
 
+		$fromRefQuery = (int) ($request['ref'] ?? 0) > 0;
+		$fromCookie = !$fromRefQuery && (int) ($cookies[self::COOKIE_REF] ?? 0) > 0;
+		$clearOnMiss = $fromRefQuery
+			|| (!$fromCookie && (int) ($request['referralID'] ?? 0) > 0);
+
+		if (self::isAlias($publicCode)) {
+			$referrer = $this->resolveAlias($db, $publicCode, $universeId);
+		} else {
+			$referrer = $this->resolveRawId($db, $publicCode, $universeId, $fromCookie, $cookies);
+		}
+
+		if ($referrer === null) {
+			if ($clearOnMiss) {
+				$this->clearCookies();
+			}
+
+			return $this->emptyReferral();
+		}
+
+		$activeUni = ($universeId !== null && $universeId > 0)
+			? $universeId
+			: (int) $referrer['universe'];
+		if (!$this->isRefActive($activeUni)) {
+			return $this->emptyReferral();
+		}
+
+		$this->persistCookies($publicCode, (int) $referrer['universe']);
+
+		$referrer['code'] = $publicCode;
+
+		return $referrer;
+	}
+
+	/**
+	 * @return array{id: int, name: string, universe: int}|null
+	 */
+	private function resolveAlias(DatabaseInterface $db, int $publicCode, ?int $universeId): ?array
+	{
+		if ($universeId !== null && $universeId > 0) {
+			$userId = self::aliasUserId($publicCode, $universeId);
+			if ($userId <= 0) {
+				return null;
+			}
+
+			return $this->lookupReferrerInUniverse($db, $userId, $universeId);
+		}
+
+		foreach (self::ALIASES[$publicCode] as $uniId => $userId) {
+			$uniId = (int) $uniId;
+			$userId = (int) $userId;
+			if ($uniId <= 0 || $userId <= 0 || !$this->isRefActive($uniId)) {
+				continue;
+			}
+
+			$referrer = $this->lookupReferrerInUniverse($db, $userId, $uniId);
+			if ($referrer !== null) {
+				return $referrer;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param array<string, mixed> $cookies
+	 * @return array{id: int, name: string, universe: int}|null
+	 */
+	private function resolveRawId(
+		DatabaseInterface $db,
+		int $id,
+		?int $universeId,
+		bool $fromCookie,
+		array $cookies,
+	): ?array {
 		$scopeUni = ($universeId !== null && $universeId > 0) ? $universeId : 0;
 		if ($scopeUni <= 0 && $fromCookie) {
 			$scopeUni = (int) ($cookies[self::COOKIE_REF_UNI] ?? 0);
@@ -170,30 +331,11 @@ class ReferralCaptureService
 			if ($referrer === null && $fromCookie && ($universeId === null || $universeId <= 0)) {
 				$referrer = $this->lookupReferrer($db, $id);
 			}
-		} else {
-			$referrer = $this->lookupReferrer($db, $id);
+
+			return $referrer;
 		}
 
-		if ($referrer === null) {
-			if ($fromRequest > 0) {
-				$this->clearCookies();
-			}
-
-			return $this->emptyReferral();
-		}
-
-		// Gate on the referrer's universe (lobby) or the scoped register universe — never
-		// the lobby's ambient Universe::current(), which may have referrals disabled.
-		$activeUni = ($universeId !== null && $universeId > 0)
-			? $universeId
-			: (int) $referrer['universe'];
-		if (!$this->isRefActive($activeUni)) {
-			return $this->emptyReferral();
-		}
-
-		$this->persistCookies($referrer['id'], $referrer['universe']);
-
-		return $referrer;
+		return $this->lookupReferrer($db, $id);
 	}
 
 	private function isRefActive(int $universeId): bool
@@ -206,24 +348,11 @@ class ReferralCaptureService
 	}
 
 	/**
-	 * @return array{id: int, name: string, universe: int}
+	 * @return array{id: int, name: string, universe: int, code: int}
 	 */
 	private function emptyReferral(): array
 	{
-		return ['id' => 0, 'name' => '', 'universe' => 0];
-	}
-
-	/**
-	 * @param array<string, mixed> $request
-	 */
-	private function requestReferralId(array $request): int
-	{
-		$id = (int) ($request['ref'] ?? 0);
-		if ($id > 0) {
-			return $id;
-		}
-
-		return (int) ($request['referralID'] ?? 0);
+		return ['id' => 0, 'name' => '', 'universe' => 0, 'code' => 0];
 	}
 
 	/**
@@ -272,10 +401,10 @@ class ReferralCaptureService
 		];
 	}
 
-	private function persistCookies(int $referralId, int $universeId): void
+	private function persistCookies(int $publicCode, int $universeId): void
 	{
 		$expire = TIMESTAMP + self::COOKIE_TTL_SECONDS;
-		($this->cookieWriter)(self::COOKIE_REF, (string) $referralId, $expire);
+		($this->cookieWriter)(self::COOKIE_REF, (string) $publicCode, $expire);
 		($this->cookieWriter)(self::COOKIE_REF_UNI, (string) $universeId, $expire);
 	}
 
