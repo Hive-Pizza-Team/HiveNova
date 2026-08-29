@@ -42,13 +42,13 @@ class DirectiveServiceTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function testPeriodWindowAnchorsToMondayUtc(): void
+	public function testPeriodWindowAnchorsToUtcDay(): void
 	{
-		$thursday = (new DateTime('2026-08-20 12:00:00', new DateTimeZone('UTC')))->getTimestamp();
-		$monday = (new DateTime('2026-08-17 00:00:00', new DateTimeZone('UTC')))->getTimestamp();
-		$window = DirectiveService::periodWindow($thursday);
-		$this->assertSame($monday, $window['start']);
-		$this->assertSame($monday + 7 * 86400, $window['end']);
+		$afternoon = (new DateTime('2026-08-20 12:00:00', new DateTimeZone('UTC')))->getTimestamp();
+		$dayStart = (new DateTime('2026-08-20 00:00:00', new DateTimeZone('UTC')))->getTimestamp();
+		$window = DirectiveService::periodWindow($afternoon);
+		$this->assertSame($dayStart, $window['start']);
+		$this->assertSame($dayStart + DirectiveService::PERIOD_SECONDS, $window['end']);
 	}
 
 	public function testSelectDirectiveLocksChoice(): void
@@ -268,7 +268,8 @@ class DirectiveServiceTest extends TestCase
 
 	public function testNotifyPeriodEndingSkipsWhenFarFromEnd(): void
 	{
-		DirectiveService::ensureCurrentPeriod(1);
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE);
+		$this->db->periods[0]['period_end'] = TIMESTAMP + DirectiveService::PERIOD_ENDING_SECONDS + 1;
 		DirectiveService::notifyPeriodEndingIfNeeded(1);
 		$this->assertSame([], $this->db->updates);
 	}

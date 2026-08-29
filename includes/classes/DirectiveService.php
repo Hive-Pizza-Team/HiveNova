@@ -17,6 +17,12 @@ class DirectiveService
 	public const ERROR_NO_DIRECTIVE = 'no_directive';
 	public const ERROR_NO_PERIOD = 'no_period';
 
+	/** Directive periods reset each UTC calendar day. */
+	public const PERIOD_SECONDS = 86400;
+
+	/** Push “period ending” when this many seconds remain. */
+	public const PERIOD_ENDING_SECONDS = 3600;
+
 	/**
 	 * @return array{start: int, end: int}
 	 */
@@ -24,16 +30,12 @@ class DirectiveService
 	{
 		$dt = new DateTime('@' . $timestamp);
 		$dt->setTimezone(new DateTimeZone('UTC'));
-		$dow = (int) $dt->format('N');
-		if ($dow !== 1) {
-			$dt->modify('-' . ($dow - 1) . ' days');
-		}
 		$dt->setTime(0, 0, 0);
 		$start = (int) $dt->getTimestamp();
 
 		return [
 			'start' => $start,
-			'end' => $start + 7 * 86400,
+			'end' => $start + self::PERIOD_SECONDS,
 		];
 	}
 
@@ -406,7 +408,7 @@ class DirectiveService
 			return;
 		}
 		$remaining = (int) $period['period_end'] - TIMESTAMP;
-		if ($remaining > 86400 || $remaining < 0) {
+		if ($remaining > self::PERIOD_ENDING_SECONDS || $remaining < 0) {
 			return;
 		}
 
