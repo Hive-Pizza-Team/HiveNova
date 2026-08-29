@@ -3,10 +3,12 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Config;
 use HiveNova\Core\Cache;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
+use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
 use HiveNova\Core\BuildFunctions;
 use HiveNova\Core\DirectiveService;
@@ -319,10 +321,16 @@ class ShowOverviewPage extends AbstractGamePage
 			$commanderBriefing = DirectiveService::getBriefingData((int) $USER['id'], (int) Universe::current());
 		}
 
+		$seasonWipe = (new SeasonService(new DatabaseSeasonStore()))->overviewWipeCountdown($config);
+		if (!empty($seasonWipe['show'])) {
+			$seasonWipe['wipe_label'] = pretty_time((int) $seasonWipe['wipe_seconds']);
+		}
+
 		$this->assign(array(
 			'rankInfo'					=> $rankInfo,
 			'is_news'					=> $config->OverviewNewsFrame,
 			'news'						=> makebr(htmlspecialchars((string) ($config->OverviewNewsText ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')),
+			'seasonWipe'				=> $seasonWipe,
 			'featBanner'				=> $this->featBannerAssign($config, $USER, $LNG),
 			'usersOnline'				=> $usersOnline,
 			'fleetsOnline'				=> $fleetsOnline,

@@ -2,6 +2,7 @@
 
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
+use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\HiveCommentPoster;
 use HiveNova\Core\HiveEngineClient;
 use HiveNova\Core\HiveEngineTransfer;
@@ -35,6 +36,9 @@ class SeasonServiceTest extends TestCase
 	/** @var list<array{0: int, 1: string, 2: string, 3: int}> */
 	private array $messages = [];
 
+	/** @var list<array{url: string, json: string}> */
+	private array $discordPosts = [];
+
 	protected function setUp(): void
 	{
 		parent::setUp();
@@ -53,6 +57,11 @@ class SeasonServiceTest extends TestCase
 		$this->sendFail = false;
 		$this->blogFail = false;
 		$this->messages = [];
+		$this->discordPosts = [];
+		DiscordWebhookService::setPoster(function (string $url, string $json): int {
+			$this->discordPosts[] = ['url' => $url, 'json' => $json];
+			return 204;
+		});
 
 		HiveEngineTransfer::setBroadcaster(function (...$args) {
 			if ($this->sendFail) {
@@ -83,6 +92,7 @@ class SeasonServiceTest extends TestCase
 		HiveCommentPoster::setBroadcaster(null);
 		HiveCommentPoster::setErrorLogger(null);
 		HiveEngineClient::setFetcher(null);
+		DiscordWebhookService::setPoster(null);
 		$ref = new ReflectionProperty(Config::class, 'instances');
 		$ref->setAccessible(true);
 		$ref->setValue(null, []);
@@ -114,6 +124,7 @@ class SeasonServiceTest extends TestCase
 			'season_last_reminder' => 'start',
 			'OverviewNewsFrame' => 0,
 			'OverviewNewsText' => '',
+			'discord_feat_webhook' => '',
 			'metal_start' => 500,
 			'crystal_start' => 500,
 			'deuterium_start' => 0,
@@ -505,6 +516,57 @@ class SeasonServiceTest extends TestCase
 		$this->assertFalse($panel['wipe_live']);
 		$this->assertSame(SeasonService::STATUS_PAYING, $panel['status']);
 		$this->assertSame(0, $panel['wipe_seconds']);
+	}
+
+	public function testOverviewWipeCountdownWhileRunning(): void
+	{
+		$wipe = $this->service()->overviewWipeCountdown($this->makeConfig());
+		$this->assertTrue($wipe['show']);
+		$this->assertSame($this->now + 604800, $wipe['closes_at']);
+		$this->assertSame(604800, $wipe['wipe_seconds']);
+	}
+
+	public function testOverviewWipeCountdownHiddenWhenNotRunning(): void
+	{
+		$paying = $this->service()->overviewWipeCountdown($this->makeConfig([
+			'season_status' => SeasonService::STATUS_PAYING,
+		]));
+		$this->assertFalse($paying['show']);
+
+		$permanent = $this->service()->overviewWipeCountdown($this->makeConfig(['season_mode' => 0]));
+		$this->assertFalse($permanent['show']);
+	}
+
+	public function testBroadcastReminderPostsDiscordOnce(): void
+	{
+		$token = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0123456789-_xx';
+		$config = $this->makeConfig([
+			'season_last_reminder' => 'start',
+			'discord_feat_webhook' => 'https://discord.com/api/webhooks/123456789012345678/' . $token,
+		]);
+		Config::setInstance($config, 2);
+		$this->store->players = [['id' => 10, 'hive_account' => 'aliceaaa', 'lang' => 'en']];
+
+		$svc = $this->service($this->now + 86400);
+		$svc->fireReminders($config);
+		$this->assertCount(1, $this->discordPosts);
+		$payload = json_decode($this->discordPosts[0]['json'], true);
+		$this->assertStringContainsString('countdown', strtolower((string) ($payload['content'] ?? '')));
+		$this->assertStringContainsString('daily:', $config->season_last_reminder);
+
+		$svc->fireReminders($config);
+		$this->assertCount(1, $this->discordPosts);
+	}
+
+	public function testBroadcastReminderSkipsDiscordWithoutWebhook(): void
+	{
+		$config = $this->makeConfig(['season_last_reminder' => 'start', 'discord_feat_webhook' => '']);
+		Config::setInstance($config, 2);
+		$this->store->players = [['id' => 10, 'hive_account' => 'aliceaaa', 'lang' => 'en']];
+		$this->service($this->now + 86400)->fireReminders($config);
+		$this->assertSame([], $this->discordPosts);
+		$this->assertNotEmpty($this->messages);
+		$this->assertNotEmpty($config->OverviewNewsText);
 	}
 
 	public function testFailedBlogDoesNotWipe(): void

@@ -1442,3 +1442,4 @@ $LNG['ef_event_feat'] = 'Feat';
 $LNG['op_referral_link'] = 'Referral link';
 $LNG['op_copy_referral_link'] = 'Copy referral link';
 $LNG['op_referral_link_copied'] = 'Copied';
+$LNG['ov_season_reset'] = 'Season reset';

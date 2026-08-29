@@ -81,6 +81,12 @@ $("#tn3").hide();
 {if !empty($featBanner.show)}
 <div class="feat-banner" style="margin:8px 0;padding:8px;border:1px solid #fc0;color:#fc0;">{$featBanner.text}</div>
 {/if}
+{if !empty($seasonWipe.show)}
+<div class="season-wipe-countdown" data-closes-at="{$seasonWipe.closes_at}">
+	<div>{$LNG.ov_season_reset}: <span class="season-wipe-reset-at"></span></div>
+	<div>{$LNG.page_season_countdown}: <span class="timer" data-time="{$seasonWipe.wipe_seconds}">{$seasonWipe.wipe_label}</span></div>
+</div>
+{/if}
 {if $is_news}
 
                 <div class="hidden-div" id="hidden-div">

@@ -229,6 +229,35 @@ class DiscordWebhookService
 		}
 	}
 
+	/**
+	 * Season countdown / close news for the universe webhook (same URL as feats).
+	 * Fail-open: skips quietly when unset or invalid.
+	 */
+	public static function notifySeasonReminder(int $universe, string $text): void
+	{
+		try {
+			$text = trim($text);
+			if ($text === '') {
+				return;
+			}
+
+			$raw = (string) (Config::get($universe)->discord_feat_webhook ?? '');
+			$webhook = self::normalizeUrl($raw);
+			if ($webhook === null) {
+				return;
+			}
+
+			self::post($webhook, [
+				'username'         => self::USERNAME,
+				'avatar_url'       => self::AVATAR_URL,
+				'allowed_mentions' => ['parse' => []],
+				'content'          => $text,
+			]);
+		} catch (\Throwable) {
+			return;
+		}
+	}
+
 	private static function npcName(int $attackerOwnerId, string $fleetArray): ?string
 	{
 		if ($attackerOwnerId !== 0) {
