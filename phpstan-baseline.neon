@@ -1,0 +1,79 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Instantiated class HiveNova\\Core\\HTML_BBCodeParser2 not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/classes/BBCode.php
+
+		-
+			message: '#^Method HiveNova\\Core\\DatabaseBC\:\:multi_query\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/classes/DatabaseBC.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value 48 \(48, 48\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: includes/classes/FleetFunctions.php
+
+		-
+			message: '#^Instantiated class HiveNova\\Core\\PHPMailer\\PHPMailer\\PHPMailer not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/classes/Mail.php
+
+		-
+			message: '#^Regex pattern is invalid\: No ending delimiter ''\^'' found in pattern\: \^\[a\-zA\-Z0\-9_\.\+\-\]\+@\[a\-zA\-Z0\-9\-\]\+\\\.\[a\-zA\-Z0\-9\-\.\]\+\$$#'
+			identifier: regexp.pattern
+			count: 1
+			path: includes/classes/PlayerUtil.php
+
+		-
+			message: '#^Call to static method getTempFolder\(\) on an unknown class HiveNova\\Core\\BasicFileUtil\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/classes/Session.php
+
+		-
+			message: '#^Undefined variable\: \$THEMESETTINGS$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/classes/Theme.php
+
+		-
+			message: '#^Call to static method getDB\(\) on an unknown class HiveNova\\Core\\Cache\\Core\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/classes/cache/builder/BannedBuildCache.php
+
+		-
+			message: '#^Instantiated class HiveNova\\Core\\Cache\\cyts not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/classes/cache/builder/TeamspeakBuildCache.php
+
+		-
+			message: '#^Instantiated class HiveNova\\Core\\Cache\\ts3admin not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/classes/cache/builder/TeamspeakBuildCache.php
+
+		-
+			message: '#^Caught class HiveNova\\Cronjob\\Exception not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: includes/classes/cronjob/TrackingCronjob.php
+
+		-
+			message: '#^Instantiated class HiveNova\\Auth\\Facebook not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/classes/extauth/FacebookAuth.php
+
+		-
+			message: '#^Instantiated class HiveNova\\Auth\\LightOpenID not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/classes/extauth/OpenIDAuth.php

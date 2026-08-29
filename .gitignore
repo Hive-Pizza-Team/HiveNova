@@ -3,6 +3,7 @@ coverage/
 .claude/
 CLAUDE.md
 .phpunit.result.cache
+phpstan.neon
 throwaway
 .DS_Store
 cache

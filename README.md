@@ -30,7 +30,7 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 - **PHP 8.3**, **Smarty 4.5** templates, **MySQL** (utf8mb4 charset), **PDO**
 - Hive blockchain integration via [`mahdiyari/hive-php`](https://github.com/mahdiyari/hive-php)
 - **PHPMailer**, **Google reCAPTCHA**, **Parsedown**
-- Testing: **PHPUnit 10.5** (`./vendor/bin/phpunit`)
+- Testing: **PHPUnit 10.5** (`./vendor/bin/phpunit`); static analysis: **PHPStan** (`composer phpstan`)
 
 ## Architecture Overview
 
@@ -125,6 +125,7 @@ Individual test commands:
 
 ```bash
 php vendor/bin/phpunit                  # unit tests
+composer phpstan                        # static analysis (includes/classes, level 0 + baseline)
 php tests/smoke.php                     # smoke test (local dev defaults)
 php .github/scripts/check-language-files.php  # language key validation
 php .github/scripts/add-language-key.php INGAME.php my_key "English text"  # add key + stub all locales
@@ -150,6 +151,7 @@ Compare branch defaults to `origin/develop`; override with `DIFF_COVER_COMPARE_B
 GitHub Actions runs on every push and pull request (`.github/workflows/ci.yaml`):
 
 - **language-check** — validates that all language files are syntactically valid PHP and that every key present in the English reference file exists in each translation
+- **phpstan** — runs PHPStan level 0 on `includes/classes/` (existing findings baselined in `phpstan-baseline.neon`)
 - **test** — runs the PHPUnit unit test suite on PHP 8.3 with xdebug coverage; uploads `coverage/clover.xml`
 - **integration** — MySQL + PHPUnit integration suite with coverage; uploads `coverage/integration-clover.xml`
 - **coverage-gate** (pull requests only) — `diff-cover` on merged reports; fails if changed `includes/classes/` lines are below 80% covered vs the PR base branch

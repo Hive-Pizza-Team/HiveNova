@@ -1,0 +1,21 @@
+includes:
+	- phpstan-baseline.neon
+
+parameters:
+	level: 0
+	paths:
+		- includes/classes
+	scanDirectories:
+		- includes/libs/opbe
+		- includes/libs/tdcron
+		- includes/libs/wcf
+		- includes/libs/BBCodeParser2
+		- includes/libs/steemconnect
+		- includes/libs/teamspeak
+	scanFiles:
+		- includes/constants.php
+		- includes/dbtables.php
+		- includes/GeneralFunctions.php
+	treatPhpDocTypesAsCertain: false
+	# Baseline entries drop as code is fixed; keep CI from failing on leftovers.
+	reportUnmatchedIgnoredErrors: false

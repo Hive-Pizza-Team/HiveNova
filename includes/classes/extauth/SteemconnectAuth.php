@@ -14,6 +14,7 @@
  * @link https://github.com/steemnova/steemnova
  */
 
+use HiveNova\Auth\externalAuth;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
