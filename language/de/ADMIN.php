@@ -1321,6 +1321,11 @@ $LNG['cronName_databasedump'] = 'Datenbank-Backup';
 $LNG['cronName_pve_spawn'] = 'PvE spawn';
 $LNG['cronName_pushing'] = 'Pushing-Erkennung';
 $LNG['cronName_botdetect'] = 'Bot-Erkennung';
+$LNG['cronName_achievement_backfill'] = 'Achievement backfill';
+$LNG['cronName_hive_inactive_memo'] = 'Hive inactive memo';
+$LNG['cronName_hive_social_memo'] = 'Hive social memo';
+$LNG['cronName_directive_period'] = 'Directive period';
+$LNG['cronName_season'] = 'Season';
 
 
 $LNG['cronjob_id'] = 'ID';
@@ -1592,4 +1597,3 @@ $LNG['ref_stats_status_paid']         = 'Paid';
 $LNG['ref_stats_no_referrers']        = 'No referral signups yet.';
 $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
-
