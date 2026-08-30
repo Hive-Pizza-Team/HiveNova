@@ -4,6 +4,7 @@ use HiveNova\Core\DatabaseInterface;
 
 require_once __DIR__ . '/FakeAchievementDatabase.php';
 require_once __DIR__ . '/SessionDatabaseStub.php';
+require_once __DIR__ . '/CommanderDatabaseStub.php';
 require_once __DIR__ . '/FakeFleetQueryHandler.php';
 require_once __DIR__ . '/FakePlanetQueryHandler.php';
 require_once __DIR__ . '/FakeFrequentLocationQueryHandler.php';
@@ -21,6 +22,8 @@ class FakeDatabase implements DatabaseInterface
     public FakeAchievementDatabase $achievement;
 
     public SessionDatabaseStub $session;
+
+    public CommanderDatabaseStub $commander;
 
     public int $lastUserInsertId = 0;
 
@@ -53,10 +56,14 @@ class FakeDatabase implements DatabaseInterface
     ) {
         $this->achievement = $achievement ?? new FakeAchievementDatabase();
         $this->session = $session ?? new SessionDatabaseStub();
+        $this->commander = new CommanderDatabaseStub();
     }
 
     private function route(string $qry): string
     {
+        if (str_contains($qry, '%%USER_DIRECTIVES%%') || str_contains($qry, '%%DIRECTIVE_PERIODS%%')) {
+            return 'commander';
+        }
         if ($this->isFrequentLocationQuery($qry)) {
             return 'frequent';
         }
@@ -101,6 +108,7 @@ class FakeDatabase implements DatabaseInterface
         }
 
         return match ($this->route($qry)) {
+            'commander' => $this->commander->select($qry, $params),
             'frequent' => $this->frequentLocationSelect($qry, $params),
             'fleet' => $this->fleetSelect($qry, $params),
             'planet' => $this->planetSelect($qry, $params),
@@ -263,6 +271,7 @@ class FakeDatabase implements DatabaseInterface
         }
 
         return match ($this->route($qry)) {
+            'commander' => $this->commander->selectSingle($qry, $params, $field),
             'frequent' => $this->frequentLocationSelectSingle($qry, $params, $field),
             'fleet' => $this->fleetSelectSingle($qry, $params, $field),
             'planet' => $this->planetSelectSingle($qry, $params, $field),
@@ -400,6 +409,7 @@ class FakeDatabase implements DatabaseInterface
         }
 
         return match ($this->route($qry)) {
+            'commander' => $this->commander->insert($qry, $params),
             'frequent' => $this->frequentLocationInsert($qry, $params),
             'fleet' => true,
             'session' => $this->session->insert($qry, $params),
@@ -443,6 +453,7 @@ class FakeDatabase implements DatabaseInterface
             return true;
         }
         return match ($this->route($qry)) {
+            'commander' => $this->commander->update($qry, $params),
             'frequent' => $this->frequentLocationUpdate($qry, $params),
             'fleet' => $this->fleetUpdate($qry, $params),
             'planet' => $this->planetUpdate($qry, $params),

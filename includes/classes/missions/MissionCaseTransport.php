@@ -115,13 +115,17 @@ class MissionCaseTransport extends MissionFunctions implements Mission
 				);
 			}
 
+			// StoreGoodsToPlanet zeros fleet_resource_* in memory; snapshot cargo for Trade Surplus first.
+			$deliveredMetal     = (int) $this->_fleet['fleet_resource_metal'];
+			$deliveredCrystal   = (int) $this->_fleet['fleet_resource_crystal'];
+			$deliveredDeuterium = (int) $this->_fleet['fleet_resource_deuterium'];
 			$this->StoreGoodsToPlanet();
 			if ((int) $this->_fleet['fleet_target_owner'] !== (int) $this->_fleet['fleet_owner']) {
 				\HiveNova\Core\DirectiveHooks::afterTransport(
 					(int) $this->_fleet['fleet_owner'],
-					(int) $this->_fleet['fleet_resource_metal'],
-					(int) $this->_fleet['fleet_resource_crystal'],
-					(int) $this->_fleet['fleet_resource_deuterium'],
+					$deliveredMetal,
+					$deliveredCrystal,
+					$deliveredDeuterium,
 					(int) $this->_fleet['fleet_universe']
 				);
 			}
