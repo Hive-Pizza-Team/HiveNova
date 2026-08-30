@@ -1645,15 +1645,21 @@ table.tablesorter thead tr .headerSortDown {
         bottom: calc(56px + env(safe-area-inset-bottom, 0px));
         z-index: 200;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         background: var(--color-bg-surface);
         border-top: none;
         margin: 0;
-        padding-top: calc(8px + env(safe-area-inset-top, 0px));
+        padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 12px;
+        font-size: 17px;
+        line-height: 1.35;
+        box-sizing: border-box;
     }
 
     menu .fixed {
         position: static;
         width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
     }
 
     menu li {
@@ -1662,12 +1668,24 @@ table.tablesorter thead tr .headerSortDown {
         border-bottom: 1px solid var(--color-border);
     }
 
+    menu .menu-separator {
+        min-height: 12px;
+        border-bottom: none;
+        background: transparent;
+    }
+
     #menu a {
-        padding: 14px 16px;
-        min-height: 44px;
+        padding: 14px 20px;
+        min-height: 48px;
         display: flex;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
+        text-align: center;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        box-sizing: border-box;
+        width: 100%;
     }
 
     .no-mobile {
