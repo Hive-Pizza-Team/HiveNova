@@ -224,6 +224,40 @@ class FeatServiceTest extends TestCase
         $this->assertTrue(FeatService::tryClaim(1, FeatCatalog::FIRST_COLONY, 1, TIMESTAMP));
     }
 
+    public function testResetForSeasonWipeClearsClaimsAndReseedsOpenStates(): void
+    {
+        $config = new Config([
+            'uni' => 1,
+            'moduls' => implode(';', array_fill(0, MODULE_AMOUNT, 1)),
+            'feat_banner_key' => FeatCatalog::FIRST_SHIP,
+            'feat_banner_user_id' => 1,
+            'feat_banner_at' => TIMESTAMP,
+            'feat_tracking_from_start' => 1,
+        ]);
+        Config::setInstance($config, 1);
+
+        $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_SHIP] = [
+            'status' => FeatCatalog::STATUS_CLAIMED,
+            'winner_id' => 1,
+            'claimed_at' => TIMESTAMP,
+        ];
+        $this->fake->achievement->featClaims['1:' . FeatCatalog::FIRST_SHIP] = [
+            'user_id' => 1,
+            'claimed_at' => TIMESTAMP,
+        ];
+
+        FeatService::resetForSeasonWipe(1, $config);
+
+        $this->assertSame('', $config->feat_banner_key);
+        $this->assertSame(0, $config->feat_banner_user_id);
+        $this->assertSame(0, $config->feat_banner_at);
+        $this->assertArrayNotHasKey('1:' . FeatCatalog::FIRST_SHIP, $this->fake->achievement->featClaims);
+        $this->assertSame(
+            FeatCatalog::STATUS_OPEN,
+            $this->fake->achievement->featStates['1:' . FeatCatalog::FIRST_SHIP]['status']
+        );
+    }
+
     public function testBroadcastWritesBannerInboxAndFeed(): void
     {
         Config::setInstance(new Config([

@@ -618,6 +618,25 @@ class FakeAchievementDatabase implements DatabaseInterface
     public function delete($qry, array $params = array())
     {
         $this->deleteLog[] = $qry;
+
+        if (str_contains($qry, '%%FEAT_CLAIMS%%') && str_contains($qry, 'universe = :uni')) {
+            $uni = (int) ($params[':uni'] ?? 0);
+            foreach (array_keys($this->featClaims) as $key) {
+                if (str_starts_with($key, $uni . ':')) {
+                    unset($this->featClaims[$key]);
+                }
+            }
+        }
+
+        if (str_contains($qry, '%%FEAT_STATES%%') && str_contains($qry, 'universe = :uni')) {
+            $uni = (int) ($params[':uni'] ?? 0);
+            foreach (array_keys($this->featStates) as $key) {
+                if (str_starts_with($key, $uni . ':')) {
+                    unset($this->featStates[$key]);
+                }
+            }
+        }
+
         return true;
     }
     public function replace($qry, array $params = array()) { return true; }
