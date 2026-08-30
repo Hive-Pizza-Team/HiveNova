@@ -764,7 +764,7 @@ function exceptionHandler($exception)
 			<b>Message: </b>' . $exception->getMessage() . '<br>
 			<b>File: </b>' . $exception->getFile() . '<br>
 			<b>Line: </b>' . $exception->getLine() . '<br>
-			<b>URL: </b>' . PROTOCOL . HTTP_HOST . $_SERVER['REQUEST_URI'] . '<br>
+			<b>URL: </b>' . PROTOCOL . HTTP_HOST . ($_SERVER['REQUEST_URI'] ?? '(cli)') . '<br>
 			<b>PHP-Version: </b>' . PHP_VERSION . '<br>
 			<b>PHP-API: </b>' . php_sapi_name() . '<br>
 			<b>2Moons Version: </b>' . $VERSION . '<br>
@@ -779,7 +779,7 @@ function exceptionHandler($exception)
 
 	$errorText	= date("[d-M-Y H:i:s]", TIMESTAMP) . ' ' . $errorType[$errno] . ': "' . strip_tags((string) $exception->getMessage()) . "\"\r\n";
 	$errorText	.= 'File: ' . $exception->getFile() . ' | Line: ' . $exception->getLine() . "\r\n";
-	$errorText	.= 'URL: ' . PROTOCOL . HTTP_HOST . $_SERVER['REQUEST_URI'] . ' | Version: ' . $VERSION . "\r\n";
+	$errorText	.= 'URL: ' . PROTOCOL . HTTP_HOST . ($_SERVER['REQUEST_URI'] ?? '(cli)') . ' | Version: ' . $VERSION . "\r\n";
 	$errorText	.= "Stack trace:\r\n";
 	$errorText	.= str_replace(ROOT_PATH, '/', htmlspecialchars(str_replace('\\', '/', $exception->getTraceAsString()))) . "\r\n";
 

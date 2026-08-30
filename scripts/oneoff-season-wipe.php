@@ -20,14 +20,24 @@ if ($universe < 1) {
 	exit(1);
 }
 
-define('MODE', 'CRON');
+define('MODE', 'CLI');
 define('ROOT_PATH', str_replace('\\', '/', dirname(__DIR__)) . '/');
+define('TIMESTAMP', time());
+chdir(ROOT_PATH);
 set_include_path(ROOT_PATH);
 
-require ROOT_PATH . 'includes/common.php';
+require 'includes/constants.php';
+require 'includes/config.php';
+require 'includes/dbtables.php';
+require 'vendor/autoload.php';
+require 'includes/GeneralFunctions.php';
 
 use HiveNova\Core\Config;
+use HiveNova\Core\Database;
 use HiveNova\Core\SeasonWipeService;
+
+Database::get();
+require 'includes/vars.php';
 
 $config = Config::get($universe);
 SeasonWipeService::fromGlobals(null, null, $config)->wipe($universe, $config);
