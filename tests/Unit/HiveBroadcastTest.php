@@ -2,6 +2,7 @@
 
 use HiveNova\Core\HiveBroadcast;
 use HiveNova\Core\HiveEcdsaSignature;
+use HiveNova\Core\HiveUtil;
 use Hive\Helpers\PrivateKey;
 use Hive\Helpers\Transaction;
 
@@ -16,7 +17,19 @@ class HiveBroadcastTest extends TestCase
 		parent::setUp();
 		HiveBroadcast::setHiveFactory(null);
 		HiveBroadcast::setTransactionBroadcaster(null);
+		HiveBroadcast::setNodeBroadcaster(null);
 		require_once dirname(__DIR__, 2) . '/vendor/mahdiyari/hive-php/lib/Hive.php';
+		if (!defined('HIVE_RPC_TIMEOUT')) {
+			define('HIVE_RPC_TIMEOUT', 5);
+		}
+		if (!defined('HIVE_RPC_NODES')) {
+			define('HIVE_RPC_NODES', [
+				'https://api.hive.blog',
+				'https://api.deathwing.me',
+				'https://rpc.mahdiyari.info',
+				'https://hapi.ecency.com',
+			]);
+		}
 		// Avoid Hive::__construct — it installs a process-wide throwing error handler.
 		$this->key = new PrivateKey(hash('sha256', 'hivenova-broadcast-test|unit-pass|posting'), true);
 	}
@@ -25,6 +38,7 @@ class HiveBroadcastTest extends TestCase
 	{
 		HiveBroadcast::setHiveFactory(null);
 		HiveBroadcast::setTransactionBroadcaster(null);
+		HiveBroadcast::setNodeBroadcaster(null);
 		parent::tearDown();
 	}
 
@@ -216,5 +230,125 @@ class HiveBroadcastTest extends TestCase
 
 		$result = HiveBroadcast::operation($key->stringKey, 'vote', ['alice', 'bob', 'a-post', 10000]);
 		$this->assertStringStartsWith('via-hive-', $result['trx_id']);
+	}
+
+	public function testIsSuccessfulBroadcastRequiresTrxId(): void
+	{
+		$this->assertTrue(HiveBroadcast::isSuccessfulBroadcast(['trx_id' => 'abc']));
+		$this->assertTrue(HiveBroadcast::isSuccessfulBroadcast(['id' => 'abc']));
+		$this->assertFalse(HiveBroadcast::isSuccessfulBroadcast(['code' => 1, 'message' => 'Missing Posting Authority']));
+		$this->assertFalse(HiveBroadcast::isSuccessfulBroadcast([]));
+	}
+
+	public function testBroadcastToNodesSkipsAuthorityErrorsUntilSuccess(): void
+	{
+		$trx = new Transaction();
+		$trx->ref_block_num = 1;
+		$trx->ref_block_prefix = 1;
+		$trx->expiration = '2030-01-01T00:00:00';
+		$trx->extensions = [];
+		$trx->signatures = [str_repeat('a', 130)];
+		$trx->operations = [];
+		$trx->setTrxId('deadbeef');
+
+		$tried = [];
+		$result = HiveBroadcast::broadcastToNodes(
+			$trx,
+			['https://bad.example', 'https://api.hive.blog', 'https://unused.example'],
+			static function (string $node, Transaction $signed) use (&$tried) {
+				$tried[] = $node;
+				if ($node === 'https://bad.example') {
+					return [
+						'code' => 403010000,
+						'message' => 'missing required posting authority',
+					];
+				}
+				if ($node === 'https://api.hive.blog') {
+					return ['trx_id' => $signed->getTrxId()];
+				}
+
+				return ['code' => -1, 'message' => 'should not reach'];
+			}
+		);
+
+		$this->assertSame(['https://bad.example', 'https://api.hive.blog'], $tried);
+		$this->assertSame('deadbeef', $result['trx_id']);
+	}
+
+	public function testBroadcastToNodesReturnsLastErrorWhenAllFail(): void
+	{
+		$trx = new Transaction();
+		$trx->ref_block_num = 1;
+		$trx->ref_block_prefix = 1;
+		$trx->expiration = '2030-01-01T00:00:00';
+		$trx->extensions = [];
+		$trx->signatures = [];
+		$trx->operations = [];
+		$trx->setTrxId('x');
+
+		$result = HiveBroadcast::broadcastToNodes(
+			$trx,
+			['https://a.example', 'https://b.example'],
+			static function (string $node): array {
+				return ['code' => 1, 'message' => 'fail-' . $node];
+			}
+		);
+
+		$this->assertTrue(HiveUtil::isRpcError($result));
+		$this->assertSame('fail-https://b.example', $result['message']);
+	}
+
+	public function testOperationFailsoverAcrossNodesViaNodeBroadcaster(): void
+	{
+		$key = $this->key;
+		$tried = [];
+
+		HiveBroadcast::setHiveFactory(static function () use ($key) {
+			return new class ($key) {
+				public string $chainId = 'beeab0de00000000000000000000000000000000000000000000000000000000';
+
+				public function __construct(private PrivateKey $key)
+				{
+				}
+
+				public function privateKeyFrom(string $wif): PrivateKey
+				{
+					return $this->key;
+				}
+
+				public function createTransaction(array $operations): Transaction
+				{
+					$trx = new Transaction();
+					$trx->ref_block_num = 1;
+					$trx->ref_block_prefix = 2;
+					$trx->expiration = '2030-01-01T00:00:00';
+					$trx->extensions = [];
+					$trx->signatures = [];
+					$trx->operations = $operations;
+
+					return $trx;
+				}
+
+				public function broadcastTransaction(Transaction $trx): array
+				{
+					return ['trx_id' => 'should-not-use-single-hive'];
+				}
+			};
+		});
+
+		HiveBroadcast::setNodeBroadcaster(static function (string $node, Transaction $trx) use (&$tried) {
+			$tried[] = $node;
+			if (count($tried) === 1) {
+				return ['code' => 1, 'message' => 'Missing Posting Authority'];
+			}
+
+			return ['trx_id' => 'failover-' . $trx->getTrxId()];
+		});
+
+		$result = HiveBroadcast::operation($key->stringKey, 'vote', ['alice', 'bob', 'a-post', 10000]);
+
+		$this->assertGreaterThanOrEqual(2, count($tried));
+		$this->assertStringStartsWith('failover-', $result['trx_id']);
+		$this->assertSame(HiveUtil::getRpcNodes()[0], $tried[0]);
 	}
 }

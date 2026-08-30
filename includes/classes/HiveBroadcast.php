@@ -7,9 +7,13 @@ use Hive\Helpers\PrivateKey;
 use Hive\Helpers\Serializer;
 use Hive\Helpers\Transaction;
 use stdClass;
+use Throwable;
 
 /**
  * Build / sign / broadcast Hive operations with padded ECDSA signatures.
+ *
+ * Broadcasts try every configured RPC node: mahdiyari only retries on connection
+ * failure, so a node that returns Missing Posting Authority would otherwise stick.
  */
 final class HiveBroadcast
 {
@@ -19,6 +23,13 @@ final class HiveBroadcast
 	/** @var callable|null fn(Transaction $trx): mixed */
 	private static $transactionBroadcaster = null;
 
+	/**
+	 * Test seam: fn(string $node, Transaction $trx): mixed
+	 *
+	 * @var callable|null
+	 */
+	private static $nodeBroadcaster = null;
+
 	public static function setHiveFactory(?callable $factory): void
 	{
 		self::$hiveFactory = $factory;
@@ -27,6 +38,11 @@ final class HiveBroadcast
 	public static function setTransactionBroadcaster(?callable $broadcaster): void
 	{
 		self::$transactionBroadcaster = $broadcaster;
+	}
+
+	public static function setNodeBroadcaster(?callable $broadcaster): void
+	{
+		self::$nodeBroadcaster = $broadcaster;
 	}
 
 	/**
@@ -44,10 +60,11 @@ final class HiveBroadcast
 		});
 		$previousTz = date_default_timezone_get();
 		try {
+			$nodes = HiveUtil::getRpcNodes();
 			$hive = self::$hiveFactory !== null
 				? (self::$hiveFactory)()
 				: new Hive([
-					'rpcNodes' => HiveUtil::rpcNodesToTry(1),
+					'rpcNodes' => $nodes !== [] ? $nodes : ['https://api.hive.blog'],
 					'timeout'  => \HIVE_RPC_TIMEOUT,
 				]);
 			$key = $hive->privateKeyFrom($wif);
@@ -57,7 +74,12 @@ final class HiveBroadcast
 				return (self::$transactionBroadcaster)($trx);
 			}
 
-			return $hive->broadcastTransaction($trx);
+			// Injected Hive (tests): single broadcast path.
+			if (self::$hiveFactory !== null && self::$nodeBroadcaster === null) {
+				return $hive->broadcastTransaction($trx);
+			}
+
+			return self::broadcastToNodes($trx, $nodes);
 		} finally {
 			if ($previousHandler !== null) {
 				set_error_handler($previousHandler);
@@ -66,6 +88,73 @@ final class HiveBroadcast
 			}
 			date_default_timezone_set($previousTz);
 		}
+	}
+
+	/**
+	 * Sign once, then try each RPC node until one accepts the transaction.
+	 *
+	 * @param list<string> $nodes
+	 * @param (callable(string, Transaction): mixed)|null $attempt
+	 */
+	public static function broadcastToNodes(Transaction $trx, array $nodes, ?callable $attempt = null): mixed
+	{
+		$last = [
+			'code'    => -1,
+			'message' => 'No Hive RPC nodes configured',
+		];
+		$attempt ??= self::$nodeBroadcaster;
+
+		foreach ($nodes as $node) {
+			$node = trim((string) $node);
+			if ($node === '') {
+				continue;
+			}
+
+			try {
+				$result = $attempt !== null
+					? $attempt($node, $trx)
+					: self::broadcastToNode($node, $trx);
+			} catch (Throwable $e) {
+				$last = [
+					'code'    => -1,
+					'message' => $e->getMessage(),
+				];
+				continue;
+			}
+
+			if (self::isSuccessfulBroadcast($result)) {
+				return $result;
+			}
+
+			$last = $result;
+		}
+
+		return $last;
+	}
+
+	public static function isSuccessfulBroadcast(mixed $result): bool
+	{
+		if (!is_array($result) || HiveUtil::isRpcError($result)) {
+			return false;
+		}
+
+		foreach (['trx_id', 'id'] as $key) {
+			if (!empty($result[$key]) && is_string($result[$key])) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static function broadcastToNode(string $node, Transaction $trx): mixed
+	{
+		$hive = new Hive([
+			'rpcNodes' => [$node],
+			'timeout'  => \HIVE_RPC_TIMEOUT,
+		]);
+
+		return $hive->broadcastTransaction($trx);
 	}
 
 	/**
