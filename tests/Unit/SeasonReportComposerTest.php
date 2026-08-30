@@ -20,6 +20,7 @@ class SeasonReportComposerTest extends TestCase
 				'house_cut_pizza' => 0.48,
 				'payout_budget' => 4.32,
 				'entrants' => 48,
+				'game_name' => 'HiveNova',
 			],
 			[
 				['rank' => 1, 'username' => 'NovaQueen', 'hive_account' => 'novaqueen', 'points' => 1842500, 'pizza_amount' => 0.92],
@@ -34,7 +35,7 @@ class SeasonReportComposerTest extends TestCase
 			]
 		);
 
-		$this->assertSame('HiveNova Season 12 Recap', $report['title']);
+		$this->assertSame('HiveNova Universe 2 Season 12 Recap', $report['title']);
 		$this->assertSame('hivenova-u2-season-12', $report['permlink']);
 		$this->assertSame(['moon', 'hive-pizza', 'gaming', 'season'], $report['tags']);
 		$this->assertStringContainsString('4.800 PIZZA', $report['body']);
@@ -111,6 +112,29 @@ class SeasonReportComposerTest extends TestCase
 		$this->assertStringContainsString('@inacct', $report['body']);
 		$this->assertStringNotContainsString('First colony', $report['body']);
 		$this->assertStringNotContainsString('First moon', $report['body']);
+	}
+
+	public function testTitleUsesConfiguredGameNameAndUniverse(): void
+	{
+		$report = (new SeasonReportComposer())->compose(
+			[
+				'universe' => 3,
+				'season_id' => 1,
+				'starts_at' => 100,
+				'closes_at' => 200,
+				'pool_pizza' => 0,
+				'house_cut_pizza' => 0,
+				'payout_budget' => 0,
+				'game_name' => 'Moon',
+			],
+			[],
+			[],
+			[]
+		);
+
+		$this->assertSame('Moon Universe 3 Season 1 Recap', $report['title']);
+		$this->assertSame('moon-u3-season-1', $report['permlink']);
+		$this->assertStringContainsString('*— Moon automated season log. Immutable on Hive.*', $report['body']);
 	}
 
 	public function testEmptyHofAndFeatsSections(): void
