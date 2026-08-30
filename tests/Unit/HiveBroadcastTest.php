@@ -9,12 +9,16 @@ use PHPUnit\Framework\TestCase;
 
 class HiveBroadcastTest extends TestCase
 {
+	private PrivateKey $key;
+
 	protected function setUp(): void
 	{
 		parent::setUp();
 		HiveBroadcast::setHiveFactory(null);
 		HiveBroadcast::setTransactionBroadcaster(null);
 		require_once dirname(__DIR__, 2) . '/vendor/mahdiyari/hive-php/lib/Hive.php';
+		// Avoid Hive::__construct — it installs a process-wide throwing error handler.
+		$this->key = new PrivateKey(hash('sha256', 'hivenova-broadcast-test|unit-pass|posting'), true);
 	}
 
 	protected function tearDown(): void
@@ -62,9 +66,6 @@ class HiveBroadcastTest extends TestCase
 
 	public function testSignTransactionSetsPaddedSignatureAndTrxId(): void
 	{
-		$key = (new Hive\Hive(['rpcNodes' => ['https://api.hive.blog'], 'timeout' => 5]))
-			->privateKeyFromLogin('hivenova-broadcast-test', 'unit-pass', 'posting');
-
 		$hive = new class {
 			public string $chainId = 'beeab0de00000000000000000000000000000000000000000000000000000000';
 		};
@@ -77,7 +78,7 @@ class HiveBroadcastTest extends TestCase
 		$trx->signatures = [];
 		$trx->operations = [HiveBroadcast::buildOperation('vote', ['voter', 'author', 'permlink', 10000])];
 
-		HiveBroadcast::signTransaction($hive, $trx, $key);
+		HiveBroadcast::signTransaction($hive, $trx, $this->key);
 
 		$this->assertNotSame('', $trx->getTrxId());
 		$this->assertCount(1, $trx->signatures);
@@ -87,8 +88,7 @@ class HiveBroadcastTest extends TestCase
 
 	public function testOperationUsesInjectedHiveAndBroadcaster(): void
 	{
-		$key = (new Hive\Hive(['rpcNodes' => ['https://api.hive.blog'], 'timeout' => 5]))
-			->privateKeyFromLogin('hivenova-broadcast-test', 'unit-pass', 'posting');
+		$key = $this->key;
 		$wif = $key->stringKey;
 		$seen = [];
 
@@ -142,10 +142,7 @@ class HiveBroadcastTest extends TestCase
 
 	public function testCreateSignedTransactionSignsBuiltOp(): void
 	{
-		$key = (new Hive\Hive(['rpcNodes' => ['https://api.hive.blog'], 'timeout' => 5]))
-			->privateKeyFromLogin('hivenova-broadcast-test', 'unit-pass', 'posting');
-
-		$hive = new class ($key) {
+		$hive = new class ($this->key) {
 			public string $chainId = 'beeab0de00000000000000000000000000000000000000000000000000000000';
 
 			public function __construct(private PrivateKey $key)
@@ -166,7 +163,7 @@ class HiveBroadcastTest extends TestCase
 			}
 		};
 
-		$trx = HiveBroadcast::createSignedTransaction($hive, $key, 'transfer', [
+		$trx = HiveBroadcast::createSignedTransaction($hive, $this->key, 'transfer', [
 			'fromacct',
 			'toacct',
 			'1.000 HIVE',
