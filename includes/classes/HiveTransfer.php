@@ -2,7 +2,6 @@
 
 namespace HiveNova\Core;
 
-use Hive\Hive;
 use Throwable;
 
 /**
@@ -73,31 +72,7 @@ class HiveTransfer
 			return (self::$broadcaster)($from, $to, $amountAsset, $memo, $wif);
 		}
 
-		$hivePhp = __DIR__ . '/../../vendor/mahdiyari/hive-php/lib/Hive.php';
-		if (is_readable($hivePhp)) {
-			require_once $hivePhp;
-		}
-
-		$previousHandler = set_error_handler(static function () {
-			return false;
-		});
-		$previousTz = date_default_timezone_get();
-		try {
-			$hive = new Hive([
-				'rpcNodes' => HiveUtil::rpcNodesToTry(1),
-				'timeout'  => \HIVE_RPC_TIMEOUT,
-			]);
-			$key = $hive->privateKeyFrom($wif);
-
-			return $hive->broadcast($key, 'transfer', [$from, $to, $amountAsset, $memo]);
-		} finally {
-			if ($previousHandler !== null) {
-				set_error_handler($previousHandler);
-			} else {
-				restore_error_handler();
-			}
-			date_default_timezone_set($previousTz);
-		}
+		return HiveBroadcast::operation($wif, 'transfer', [$from, $to, $amountAsset, $memo]);
 	}
 
 	private static function extractTrxId(mixed $result): string
