@@ -66,12 +66,14 @@ if(!defined('CACHE_PATH')) {
 define('DISCORD_URL'				, 'https://discord.gg/BWqmGbtuDn');
 
 // Hive RPC — tried in order; each node gets HIVE_RPC_TIMEOUT seconds before the next.
+// Broadcasts (HiveBroadcast) also fail over on RPC errors, not only connection failures.
+// Prefer api.hive.blog first: api.openhive.network has rejected valid comment txs (MPA).
 define('HIVE_RPC_TIMEOUT'			, 5);
 define('HIVE_RPC_NODES'				, [
-	'https://api.openhive.network',
-	'https://hapi.ecency.com',
+	'https://api.hive.blog',
 	'https://api.deathwing.me',
 	'https://rpc.mahdiyari.info',
+	'https://hapi.ecency.com',
 	'https://api.c0ff33a.uk',
 	'https://techcoderx.com',
 	'https://hiveapi.actifit.io',
@@ -79,7 +81,7 @@ define('HIVE_RPC_NODES'				, [
 	'https://rpc.ausbit.dev',
 	'https://rpc.ecency.com',
 	'https://api.pharesim.me',
-	'https://api.hive.blog',
+	'https://api.openhive.network',
 ]);
 
 // =============================================================================
