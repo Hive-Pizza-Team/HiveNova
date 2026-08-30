@@ -30,6 +30,16 @@ final class HiveBroadcast
 	 */
 	private static $nodeBroadcaster = null;
 
+	/** @var list<string>|null */
+	private static $rpcNodesOverride = null;
+
+	/**
+	 * Test seam: fn(string $node): object  object must provide broadcastTransaction
+	 *
+	 * @var callable|null
+	 */
+	private static $hiveNodeFactory = null;
+
 	public static function setHiveFactory(?callable $factory): void
 	{
 		self::$hiveFactory = $factory;
@@ -43,6 +53,42 @@ final class HiveBroadcast
 	public static function setNodeBroadcaster(?callable $broadcaster): void
 	{
 		self::$nodeBroadcaster = $broadcaster;
+	}
+
+	/**
+	 * @param list<string>|null $nodes
+	 */
+	public static function setRpcNodes(?array $nodes): void
+	{
+		self::$rpcNodesOverride = $nodes;
+	}
+
+	public static function setHiveNodeFactory(?callable $factory): void
+	{
+		self::$hiveNodeFactory = $factory;
+	}
+
+	/**
+	 * Strip blank nodes; fall back to the public Hive API when none remain.
+	 *
+	 * @param list<mixed>|null $nodes
+	 * @return list<string>
+	 */
+	public static function resolveRpcNodes(?array $nodes = null): array
+	{
+		if ($nodes === null) {
+			$nodes = self::$rpcNodesOverride ?? HiveUtil::getRpcNodes();
+		}
+
+		$resolved = [];
+		foreach ($nodes as $node) {
+			$node = trim((string) $node);
+			if ($node !== '') {
+				$resolved[] = $node;
+			}
+		}
+
+		return $resolved !== [] ? $resolved : ['https://api.hive.blog'];
 	}
 
 	/**
@@ -60,11 +106,11 @@ final class HiveBroadcast
 		});
 		$previousTz = date_default_timezone_get();
 		try {
-			$nodes = HiveUtil::getRpcNodes();
+			$nodes = self::resolveRpcNodes();
 			$hive = self::$hiveFactory !== null
 				? (self::$hiveFactory)()
 				: new Hive([
-					'rpcNodes' => $nodes !== [] ? $nodes : ['https://api.hive.blog'],
+					'rpcNodes' => $nodes,
 					'timeout'  => \HIVE_RPC_TIMEOUT,
 				]);
 			$key = $hive->privateKeyFrom($wif);
@@ -149,10 +195,12 @@ final class HiveBroadcast
 
 	private static function broadcastToNode(string $node, Transaction $trx): mixed
 	{
-		$hive = new Hive([
-			'rpcNodes' => [$node],
-			'timeout'  => \HIVE_RPC_TIMEOUT,
-		]);
+		$hive = self::$hiveNodeFactory !== null
+			? (self::$hiveNodeFactory)($node)
+			: new Hive([
+				'rpcNodes' => [$node],
+				'timeout'  => \HIVE_RPC_TIMEOUT,
+			]);
 
 		return $hive->broadcastTransaction($trx);
 	}
