@@ -345,17 +345,19 @@ class DirectiveService
 			if (!is_array($progress)) {
 				$progress = [];
 			}
+			$targets = is_array($def) ? ($def['targets'] ?? []) : [];
 			$selected = [
 				'key' => $userDirective['directive_key'],
 				'title_key' => $def['title_key'] ?? '',
 				'desc_key' => $def['desc_key'] ?? '',
 				'suggestion_key' => $def['suggestion_key'] ?? '',
 				'recommended_stance' => $def['recommended_stance'] ?? 'balanced',
-				'targets' => $def['targets'] ?? [],
+				'targets' => $targets,
 				'progress' => $progress,
+				'bars' => DirectiveCatalog::progressBars($targets, $progress),
 				'completed' => !empty($userDirective['completed_at']),
 				'claimed' => !empty($userDirective['reward_claimed_at']),
-				'reward' => DirectiveCatalog::scaledReward($def['reward'] ?? [], $points),
+				'reward' => DirectiveCatalog::scaledReward(is_array($def) ? ($def['reward'] ?? []) : [], $points),
 			];
 		}
 

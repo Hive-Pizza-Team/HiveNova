@@ -21,12 +21,23 @@ $(function () {
 
 	$(root).on('click', '.commander-briefing__select', function () {
 		var btn = $(this);
+		if (btn.prop('disabled')) {
+			return;
+		}
+		root.querySelectorAll('.commander-briefing__select').forEach(function (el) {
+			el.disabled = true;
+		});
+		btn.addClass('is-pending');
 		post('selectDirective', {
-			directive_key: btn.data('key'),
-			token: btn.data('token')
+			directive_key: btn.attr('data-key'),
+			token: btn.attr('data-token')
 		}).done(function () {
 			window.location.reload();
 		}).fail(function (xhr) {
+			root.querySelectorAll('.commander-briefing__select').forEach(function (el) {
+				el.disabled = false;
+			});
+			btn.removeClass('is-pending');
 			var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Error';
 			alert(msg);
 		});

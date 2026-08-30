@@ -2593,9 +2593,15 @@ table.tablesorter thead tr .headerSortDown {
 }
 
 #overview .commander-briefing__select:hover,
-#overview .commander-briefing__branch:hover {
+#overview .commander-briefing__branch:hover,
+#overview .commander-briefing__select.is-pending {
     border-color: var(--dir-accent, var(--color-accent));
     background: color-mix(in srgb, var(--dir-accent, var(--color-accent)) 12%, var(--color-bg-surface-dark));
+}
+
+#overview .commander-briefing__select:disabled:not(.is-pending) {
+    opacity: 0.55;
+    cursor: wait;
 }
 
 #overview .commander-briefing__select:focus-visible,
@@ -2619,6 +2625,18 @@ table.tablesorter thead tr .headerSortDown {
     line-height: 1.35;
     color: var(--color-text);
     opacity: 0.85;
+}
+
+#overview .commander-briefing__select-targets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 4px;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--color-text-bright);
+    opacity: 0.9;
 }
 
 #overview .commander-briefing__directive {
@@ -2691,6 +2709,8 @@ table.tablesorter thead tr .headerSortDown {
 
 #overview .commander-briefing__bar > span {
     display: block;
+    width: 0;
+    max-width: 100%;
     height: 100%;
     background: var(--dir-accent, var(--color-accent));
 }
