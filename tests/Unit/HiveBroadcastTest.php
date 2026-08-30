@@ -174,4 +174,47 @@ class HiveBroadcastTest extends TestCase
 		$this->assertSame('fromacct', $trx->operations[0][1]->from);
 		$this->assertSame(HiveEcdsaSignature::LENGTH, strlen($trx->signatures[0]));
 	}
+
+	public function testOperationFallsBackToHiveBroadcastTransaction(): void
+	{
+		$key = $this->key;
+		HiveBroadcast::setHiveFactory(static function () use ($key) {
+			return new class ($key) {
+				public string $chainId = 'beeab0de00000000000000000000000000000000000000000000000000000000';
+				public bool $usedHiveBroadcast = false;
+
+				public function __construct(private PrivateKey $key)
+				{
+				}
+
+				public function privateKeyFrom(string $wif): PrivateKey
+				{
+					return $this->key;
+				}
+
+				public function createTransaction(array $operations): Transaction
+				{
+					$trx = new Transaction();
+					$trx->ref_block_num = 1;
+					$trx->ref_block_prefix = 2;
+					$trx->expiration = '2030-01-01T00:00:00';
+					$trx->extensions = [];
+					$trx->signatures = [];
+					$trx->operations = $operations;
+
+					return $trx;
+				}
+
+				public function broadcastTransaction(Transaction $trx): array
+				{
+					$this->usedHiveBroadcast = true;
+
+					return ['trx_id' => 'via-hive-' . $trx->getTrxId()];
+				}
+			};
+		});
+
+		$result = HiveBroadcast::operation($key->stringKey, 'vote', ['alice', 'bob', 'a-post', 10000]);
+		$this->assertStringStartsWith('via-hive-', $result['trx_id']);
+	}
 }

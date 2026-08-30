@@ -148,4 +148,60 @@ class HiveCommentPosterTest extends TestCase
 		);
 		$this->assertFalse($result['ok']);
 	}
+
+	public function testDefaultBroadcastPathUsesHiveBroadcast(): void
+	{
+		require_once dirname(__DIR__, 2) . '/vendor/mahdiyari/hive-php/lib/Hive.php';
+		$key = new \Hive\Helpers\PrivateKey(hash('sha256', 'comment-poster-broadcast|posting'), true);
+
+		HiveCommentPoster::setBroadcaster(null);
+		HiveNova\Core\HiveBroadcast::setHiveFactory(static function () use ($key) {
+			return new class ($key) {
+				public string $chainId = 'beeab0de00000000000000000000000000000000000000000000000000000000';
+
+				public function __construct(private \Hive\Helpers\PrivateKey $key)
+				{
+				}
+
+				public function privateKeyFrom(string $wif): \Hive\Helpers\PrivateKey
+				{
+					return $this->key;
+				}
+
+				public function createTransaction(array $operations): \Hive\Helpers\Transaction
+				{
+					$trx = new \Hive\Helpers\Transaction();
+					$trx->ref_block_num = 1;
+					$trx->ref_block_prefix = 1;
+					$trx->expiration = '2030-01-01T00:00:00';
+					$trx->extensions = [];
+					$trx->signatures = [];
+					$trx->operations = $operations;
+
+					return $trx;
+				}
+
+				public function broadcastTransaction(\Hive\Helpers\Transaction $trx): array
+				{
+					return ['trx_id' => 'comment-live-path'];
+				}
+			};
+		});
+
+		try {
+			$result = (new HiveCommentPoster())->post(
+				'goodacct',
+				'hivenova-u3-season-1',
+				'Title',
+				'Body',
+				['moon'],
+				$key->stringKey
+			);
+			$this->assertTrue($result['ok']);
+			$this->assertSame('comment-live-path', $result['trx_id']);
+		} finally {
+			HiveNova\Core\HiveBroadcast::setHiveFactory(null);
+			HiveNova\Core\HiveBroadcast::setTransactionBroadcaster(null);
+		}
+	}
 }
