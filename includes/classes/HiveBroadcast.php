@@ -13,6 +13,22 @@ use stdClass;
  */
 final class HiveBroadcast
 {
+	/** @var callable|null fn(): object  object must provide privateKeyFrom, createTransaction, chainId, broadcastTransaction */
+	private static $hiveFactory = null;
+
+	/** @var callable|null fn(Transaction $trx): mixed */
+	private static $transactionBroadcaster = null;
+
+	public static function setHiveFactory(?callable $factory): void
+	{
+		self::$hiveFactory = $factory;
+	}
+
+	public static function setTransactionBroadcaster(?callable $broadcaster): void
+	{
+		self::$transactionBroadcaster = $broadcaster;
+	}
+
 	/**
 	 * @param list<mixed> $opParams Positional params matching mahdiyari OperationSerializers field order
 	 */
@@ -28,12 +44,18 @@ final class HiveBroadcast
 		});
 		$previousTz = date_default_timezone_get();
 		try {
-			$hive = new Hive([
-				'rpcNodes' => HiveUtil::rpcNodesToTry(1),
-				'timeout'  => \HIVE_RPC_TIMEOUT,
-			]);
+			$hive = self::$hiveFactory !== null
+				? (self::$hiveFactory)()
+				: new Hive([
+					'rpcNodes' => HiveUtil::rpcNodesToTry(1),
+					'timeout'  => \HIVE_RPC_TIMEOUT,
+				]);
 			$key = $hive->privateKeyFrom($wif);
 			$trx = self::createSignedTransaction($hive, $key, $opName, $opParams);
+
+			if (self::$transactionBroadcaster !== null) {
+				return (self::$transactionBroadcaster)($trx);
+			}
 
 			return $hive->broadcastTransaction($trx);
 		} finally {
@@ -48,8 +70,9 @@ final class HiveBroadcast
 
 	/**
 	 * @param list<mixed> $opParams
+	 * @return array{0: string, 1: stdClass}
 	 */
-	private static function createSignedTransaction(Hive $hive, PrivateKey $key, string $opName, array $opParams): Transaction
+	public static function buildOperation(string $opName, array $opParams): array
 	{
 		$serializer = new Serializer();
 		$serializers = $serializer->OperationSerializers();
@@ -72,13 +95,25 @@ final class HiveBroadcast
 			$i++;
 		}
 
-		$trx = $hive->createTransaction([[$opName, $operation]]);
+		return [$opName, $operation];
+	}
+
+	/**
+	 * @param object{privateKeyFrom?: mixed, createTransaction: callable, chainId: string, broadcastTransaction?: callable} $hive
+	 * @param list<mixed> $opParams
+	 */
+	public static function createSignedTransaction(object $hive, PrivateKey $key, string $opName, array $opParams): Transaction
+	{
+		$trx = $hive->createTransaction([self::buildOperation($opName, $opParams)]);
 		self::signTransaction($hive, $trx, $key);
 
 		return $trx;
 	}
 
-	private static function signTransaction(Hive $hive, Transaction $trx, PrivateKey $key): void
+	/**
+	 * @param object{chainId: string} $hive
+	 */
+	public static function signTransaction(object $hive, Transaction $trx, PrivateKey $key): void
 	{
 		$buffer = '';
 		$serializer = new Serializer();
