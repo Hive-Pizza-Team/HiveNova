@@ -500,6 +500,34 @@ PHP;
         }
     }
 
+    public function testCreateClientDefaultsFileThrowsAndUnlinksWhenSecureFails(): void
+    {
+        $dumper = new class extends SQLDumper {
+            public ?string $lastPath = null;
+
+            protected function secureClientDefaultsFile(string $path): bool
+            {
+                $this->lastPath = $path;
+
+                return false;
+            }
+        };
+
+        try {
+            $this->invokePrivate($dumper, 'createClientDefaultsFile', [
+                'host' => '127.0.0.1',
+                'port' => 3306,
+                'user' => 'test',
+                'userpw' => 'secret',
+            ]);
+            $this->fail('Expected Exception when securing defaults file fails');
+        } catch (Exception $e) {
+            $this->assertSame('Unable to secure temporary MySQL defaults file.', $e->getMessage());
+            $this->assertNotNull($dumper->lastPath);
+            $this->assertFileDoesNotExist($dumper->lastPath);
+        }
+    }
+
     /**
      * @return array{host:string,port:int,user:string,userpw:string,databasename:string}
      */

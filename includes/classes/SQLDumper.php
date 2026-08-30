@@ -130,7 +130,7 @@ class SQLDumper
 			throw new Exception('Unable to create temporary MySQL defaults file.');
 		}
 
-		if (!@chmod($path, 0600)) {
+		if (!$this->secureClientDefaultsFile($path)) {
 			@unlink($path);
 			throw new Exception('Unable to secure temporary MySQL defaults file.');
 		}
@@ -141,6 +141,14 @@ class SQLDumper
 		}
 
 		return $path;
+	}
+
+	/**
+	 * Owner-only perms before credentials are written. Overridable for tests.
+	 */
+	protected function secureClientDefaultsFile(string $path): bool
+	{
+		return @chmod($path, 0600);
 	}
 
 	/**
