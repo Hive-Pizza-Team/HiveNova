@@ -573,6 +573,11 @@ class SeasonService
 
 		$startsAt = (int) ($week['starts_at'] ?? $config->season_starts_at ?? 0);
 		$closesAt = (int) ($week['closes_at'] ?? $config->season_closes_at ?? 0);
+		$gameName = trim((string) ($config->game_name ?? ''));
+		if ($gameName === '') {
+			$gameName = 'HiveNova';
+		}
+
 		$report = $this->composer->compose(
 			[
 				'universe'         => $uni,
@@ -583,6 +588,7 @@ class SeasonService
 				'house_cut_pizza'  => (float) ($week['house_cut_pizza'] ?? 0),
 				'payout_budget'    => (float) ($week['payout_budget'] ?? 0),
 				'entrants'         => $this->store->countEntries($uni, $seasonId),
+				'game_name'        => $gameName,
 			],
 			$this->store->reportRanking($uni, $seasonId, SeasonReportComposer::RANKING_LIMIT),
 			$this->store->reportFeats($uni, $startsAt, $closesAt),

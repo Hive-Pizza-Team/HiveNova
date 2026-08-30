@@ -42,7 +42,8 @@ class SeasonReportComposer
 	 *   pool_pizza: float|string,
 	 *   house_cut_pizza: float|string,
 	 *   payout_budget: float|string,
-	 *   entrants?: int
+	 *   entrants?: int,
+	 *   game_name?: string
 	 * } $week
 	 * @param list<array{rank: int, username?: string, hive_account: string, points: int|float|string, pizza_amount?: float|string|null}> $ranking
 	 * @param list<array{feat_key: string, username?: string, hive_account?: string, claimed_at: int}> $feats
@@ -59,13 +60,14 @@ class SeasonReportComposer
 		$house = (float) ($week['house_cut_pizza'] ?? 0);
 		$budget = (float) ($week['payout_budget'] ?? 0);
 		$entrants = (int) ($week['entrants'] ?? count($ranking));
+		$gameName = $this->resolveGameName((string) ($week['game_name'] ?? ''));
 
 		$ranking = array_slice(array_values($ranking), 0, self::RANKING_LIMIT);
 		$feats = $this->filterFeatsInWindow($feats, $startsAt, $closesAt);
 		$hallOfFame = array_slice(array_values($hallOfFame), 0, self::HOF_LIMIT);
 
-		$title = sprintf('HiveNova Season %d Recap', $seasonId);
-		$permlink = sprintf('hivenova-u%d-season-%d', $uni, $seasonId);
+		$title = sprintf('%s Universe %d Season %d Recap', $gameName, $uni, $seasonId);
+		$permlink = sprintf('%s-u%d-season-%d', $this->gameSlug($gameName), $uni, $seasonId);
 		$tags = ['moon', 'hive-pizza', 'gaming', 'season'];
 
 		$lines = [];
@@ -170,7 +172,7 @@ class SeasonReportComposer
 		$lines[] = '- Only entrants meeting the minimum points threshold were eligible for prizes.';
 		$lines[] = '- Play the next season at [moon.hive.pizza](https://moon.hive.pizza)';
 		$lines[] = '';
-		$lines[] = '*— HiveNova automated season log. Immutable on Hive.*';
+		$lines[] = sprintf('*— %s automated season log. Immutable on Hive.*', $gameName);
 
 		return [
 			'title'    => $title,
@@ -196,6 +198,20 @@ class SeasonReportComposer
 		}
 
 		return $out;
+	}
+
+	private function resolveGameName(string $gameName): string
+	{
+		$gameName = trim($gameName);
+
+		return $gameName !== '' ? $gameName : 'HiveNova';
+	}
+
+	private function gameSlug(string $gameName): string
+	{
+		$slug = preg_replace('/[^a-z0-9]+/', '', strtolower($this->resolveGameName($gameName))) ?? '';
+
+		return $slug !== '' ? $slug : 'game';
 	}
 
 	private function formatUtc(int $ts): string

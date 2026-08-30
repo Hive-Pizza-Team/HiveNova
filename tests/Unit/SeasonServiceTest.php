@@ -280,7 +280,7 @@ class SeasonServiceTest extends TestCase
 		$this->assertSame('LocalMoon season 1 prize', $this->sends[0][4]);
 		$this->assertSame('18.00', sprintf('%.2f', $this->sends[0][2]));
 		$this->assertSame(1, count($this->blogPosts));
-		$this->assertSame('hivenova-u2-season-1', $this->blogPosts[0][3]);
+		$this->assertSame('localmoon-u2-season-1', $this->blogPosts[0][3]);
 		$week = $this->store->getWeek(2, 1);
 		$this->assertSame('blog1', $week['blog_trx_id']);
 		$this->assertSame(2, (int) $config->season_id);
