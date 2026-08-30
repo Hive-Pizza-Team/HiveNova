@@ -1,7 +1,6 @@
 <?php
 
 use HiveNova\Core\Config;
-use HiveNova\Core\Database;
 use HiveNova\Core\SeasonWipeService;
 
 use PHPUnit\Framework\TestCase;
@@ -41,19 +40,30 @@ class SeasonWipeServiceTest extends TestCase
 		$this->assertStringContainsString('`metal_mine` = \'0\'', $wipe->planetSetSql());
 		$this->assertStringContainsString('`metal` = :metal', $wipe->planetSetSql());
 		$this->assertStringContainsString('`last_update` = :now', $wipe->planetSetSql());
+		$this->assertStringContainsString('`b_hangar_plus` = \'0\'', $wipe->planetSetSql());
 		$this->assertStringContainsString('`darkmatter` = :darkmatter', $wipe->userSetSql());
 		$this->assertStringContainsString('`b_tech_queue` = \'\'', $wipe->userSetSql());
 	}
 
 	public function testWipeDeletesFleetsExtraPlanetsAndStats(): void
 	{
+		$moduls = array_fill(0, MODULE_AMOUNT, 0);
+		$moduls[MODULE_FEATS] = 1;
 		$config = new Config([
 			'uni' => 2,
 			'metal_start' => 500,
 			'crystal_start' => 400,
 			'deuterium_start' => 0,
 			'darkmatter_start' => 10,
+			'moduls' => implode(';', $moduls),
+			'feat_tracking_from_start' => 1,
 		]);
+		Config::setInstance($config, 2);
+		Config::setInstance(new Config([
+			'uni' => 1,
+			'moduls' => implode(';', $moduls),
+		]), 1);
+
 		$wipe = new SeasonWipeService('`metal` = :metal', '`darkmatter` = :darkmatter');
 		$wipe->wipe(2, $config);
 
@@ -64,6 +74,17 @@ class SeasonWipeServiceTest extends TestCase
 		$this->assertTrue($this->containsHay($deleteSql, '%%USER_DIRECTIVES%%'));
 		$this->assertTrue($this->containsHay($deleteSql, '%%EXPEDITION_PENDING_CHOICES%%'));
 		$this->assertTrue($this->containsHay($deleteSql, '%%DIRECTIVE_PERIODS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%RECORDS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%TOPKB_USERS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%RW%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%SALVAGE_PACKAGES%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%UNIVERSE_EVENTS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%USER_ACHIEVEMENTS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%ALLIANCE%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%TRADES%%'));
+		$this->assertTrue($this->containsHay($deleteSql, 'planet_type'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%FEAT_CLAIMS%%'));
+		$this->assertTrue($this->containsHay($deleteSql, '%%FEAT_STATES%%'));
 
 		$updateSql = array_column($this->db->updates, 0);
 		$this->assertTrue($this->containsHay($updateSql, '%%PLANETS%%'));

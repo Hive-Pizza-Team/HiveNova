@@ -21,6 +21,7 @@ class SeasonCronjob implements CronjobTask
 			$service = $this->service ?? new SeasonService(new DatabaseSeasonStore());
 			$service->tick($this->englishIngameStrings());
 		} catch (Throwable $e) {
+			error_log('SeasonCronjob: ' . $e->getMessage());
 			return;
 		}
 	}

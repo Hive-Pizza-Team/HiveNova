@@ -108,6 +108,46 @@ class FeatService
         return $list;
     }
 
+
+    /**
+     * Clear feat progress for a seasonal universe wipe and re-seed open states.
+     */
+    public static function resetForSeasonWipe(int $universe, ?Config $config = null): void
+    {
+        if (!isModuleAvailable(MODULE_FEATS)) {
+            return;
+        }
+
+        $db = Database::get();
+        $params = [':uni' => $universe];
+        $db->delete('DELETE FROM %%FEAT_CLAIMS%% WHERE universe = :uni', $params);
+        $db->delete('DELETE FROM %%FEAT_STATES%% WHERE universe = :uni', $params);
+
+        $cfg = $config;
+        if ($cfg === null) {
+            try {
+                $cfg = Config::get($universe);
+            } catch (Throwable) {
+                $cfg = null;
+            }
+        }
+
+        if ($cfg !== null) {
+            if (isset($cfg->feat_banner_key)) {
+                $cfg->feat_banner_key = '';
+            }
+            if (isset($cfg->feat_banner_user_id)) {
+                $cfg->feat_banner_user_id = 0;
+            }
+            if (isset($cfg->feat_banner_at)) {
+                $cfg->feat_banner_at = 0;
+            }
+        }
+
+        $fromStart = $cfg !== null && (int) ($cfg->feat_tracking_from_start ?? 0) === 1;
+        self::seedUniverse($universe, $fromStart);
+    }
+
     public static function ensureSeeded(int $universe): void
     {
         $db = Database::get();

@@ -31,8 +31,13 @@ class SeasonWipeService
 		$planet[] = '`b_building_id` = \'\'';
 		$planet[] = '`b_hangar` = \'0\'';
 		$planet[] = '`b_hangar_id` = \'\'';
+		$planet[] = '`b_hangar_plus` = \'0\'';
 		$planet[] = '`field_current` = \'0\'';
 		$planet[] = '`id_luna` = \'0\'';
+		$planet[] = '`destruyed` = \'0\'';
+		$planet[] = '`der_metal` = \'0\'';
+		$planet[] = '`der_crystal` = \'0\'';
+		$planet[] = '`last_jump_time` = \'0\'';
 		$planet[] = '`metal` = :metal';
 		$planet[] = '`crystal` = :crystal';
 		$planet[] = '`deuterium` = :deuterium';
@@ -72,12 +77,22 @@ class SeasonWipeService
 		$db->beginTransaction();
 		try {
 			$db->delete(
+				'DELETE FROM %%TRADES%% WHERE `seller_fleet_id` IN (SELECT `fleet_id` FROM %%FLEETS%% WHERE `fleet_universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
 				'DELETE FROM %%FLEETS_EVENT%% WHERE `fleetID` IN (SELECT `fleet_id` FROM %%FLEETS%% WHERE `fleet_universe` = :uni)',
 				$paramsUni
 			);
 			$db->delete('DELETE FROM %%FLEETS%% WHERE `fleet_universe` = :uni', $paramsUni);
 			$db->delete(
-				'DELETE FROM %%PLANETS%% WHERE `universe` = :uni AND `id` NOT IN (SELECT `id_planet` FROM %%USERS%% WHERE `universe` = :uni2)',
+				'DELETE FROM %%PLANETS%% WHERE `universe` = :uni AND `planet_type` = \'3\'',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%PLANETS%% WHERE `universe` = :uni AND `id` NOT IN (
+					SELECT `id_planet` FROM %%USERS%% WHERE `universe` = :uni2 AND `id_planet` > 0
+				)',
 				[':uni' => $universe, ':uni2' => $universe]
 			);
 
@@ -105,9 +120,26 @@ class SeasonWipeService
 				]
 			);
 
-			$db->delete('DELETE FROM %%STATPOINTS%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete(
+				'DELETE FROM %%TOPKB_USERS%% WHERE `rid` IN (SELECT `rid` FROM %%TOPKB%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%RW%% WHERE `rid` IN (SELECT `rid` FROM %%TOPKB%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
 			$db->delete('DELETE FROM %%TOPKB%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%STATPOINTS%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%RECORDS%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%NOTES%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%SALVAGE_PACKAGES%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%UNIVERSE_EVENTS%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%MESSAGES%% WHERE `message_universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%BUDDY%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%DIPLO%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%LOG_BUILDINGS%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%LOG_RESEARCH%% WHERE `universe` = :uni', $paramsUni);
+			$db->delete('DELETE FROM %%LOG_SHIPYARD%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete(
 				'DELETE FROM %%USER_DIRECTIVES%% WHERE `user_id` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
 				$paramsUni
@@ -116,7 +148,37 @@ class SeasonWipeService
 				'DELETE FROM %%EXPEDITION_PENDING_CHOICES%% WHERE `user_id` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
 				$paramsUni
 			);
+			$db->delete(
+				'DELETE FROM %%USER_ACHIEVEMENTS%% WHERE `user_id` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%USER_ACHIEVEMENT_PROGRESS%% WHERE `user_id` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%ACHIEVEMENT_GRANTS%% WHERE `user_id` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%SHORTCUTS%% WHERE `ownerID` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%FREQUENT_LOCATIONS%% WHERE `ownerID` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%ALLIANCE_REQUEST%% WHERE `allianceID` IN (SELECT `id` FROM %%ALLIANCE%% WHERE `ally_universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete(
+				'DELETE FROM %%ALLIANCE_RANK%% WHERE `allianceID` IN (SELECT `id` FROM %%ALLIANCE%% WHERE `ally_universe` = :uni)',
+				$paramsUni
+			);
+			$db->delete('DELETE FROM %%ALLIANCE%% WHERE `ally_universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%DIRECTIVE_PERIODS%% WHERE `universe` = :uni', $paramsUni);
+			FeatService::resetForSeasonWipe($universe, $config);
 			$db->commit();
 		} catch (\Throwable $e) {
 			$db->rollback();
