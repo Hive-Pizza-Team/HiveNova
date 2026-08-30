@@ -279,4 +279,33 @@ class DirectiveServiceTest extends TestCase
 		$this->assertSame([], DirectiveCatalog::emptyProgress('missing'));
 		$this->assertNull(DirectiveCatalog::counterForEvent('missing', 'build_complete'));
 	}
+
+	public function testProgressPercentIsEmptyAtZeroAndCapsAtComplete(): void
+	{
+		$this->assertSame(0, DirectiveCatalog::progressPercent(0, 3));
+		$this->assertSame(0, DirectiveCatalog::progressPercent(1, 0));
+		$this->assertSame(67, DirectiveCatalog::progressPercent(2, 3));
+		$this->assertSame(100, DirectiveCatalog::progressPercent(3, 3));
+		$this->assertSame(100, DirectiveCatalog::progressPercent(9, 3));
+	}
+
+	public function testGetBriefingDataTradeBarsAreEmptyAtZero(): void
+	{
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE);
+		$data = DirectiveService::getBriefingData(10, 1);
+		$this->assertSame([
+			[
+				'counter' => 'trade_run',
+				'have' => 0,
+				'need' => 3,
+				'pct' => 0,
+			],
+		], $data['directive']['bars']);
+
+		$this->db->userDirectives[0]['progress_json'] = json_encode(['trade_run' => 2, 'ending_push_sent' => 1]);
+		$partial = DirectiveService::getBriefingData(10, 1);
+		$this->assertSame(2, $partial['directive']['bars'][0]['have']);
+		$this->assertSame(67, $partial['directive']['bars'][0]['pct']);
+		$this->assertCount(1, $partial['directive']['bars']);
+	}
 }

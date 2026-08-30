@@ -27,21 +27,14 @@
 				{/if}
 				<p class="commander-briefing__suggestion">{$LNG.cm_suggestion}: {$LNG[$commanderBriefing.directive.suggestion_key]} ({$LNG["cm_stance_{$commanderBriefing.directive.recommended_stance}"]})</p>
 				<ul class="commander-briefing__progress">
-					{foreach $commanderBriefing.directive.targets as $counter => $need}
-						{assign var="have" value=$commanderBriefing.directive.progress[$counter]|default:0}
-						{if $need > 0}
-							{$_v=$have/$need*100}
-							{if $_v > 100}{assign var="pct" value=100}{else}{assign var="pct" value=$_v|round}{/if}
-						{else}
-							{assign var="pct" value=0}
-						{/if}
+					{foreach $commanderBriefing.directive.bars as $bar}
 						<li>
 							<div class="commander-briefing__progress-meta">
-								<span>{$LNG["cm_counter_{$counter}"]|default:$counter}</span>
-								<span>{$have} / {$need}</span>
+								<span>{$LNG["cm_counter_{$bar.counter}"]|default:$bar.counter}</span>
+								<span>{$bar.have} / {$bar.need}</span>
 							</div>
-							<div class="commander-briefing__bar" role="progressbar" aria-valuemin="0" aria-valuenow="{$have}" aria-valuemax="{$need}">
-								<span style="width: {$pct}%"></span>
+							<div class="commander-briefing__bar" role="progressbar" aria-valuemin="0" aria-valuenow="{$bar.have}" aria-valuemax="{$bar.need}">
+								<span style="width: {$bar.pct}%"></span>
 							</div>
 						</li>
 					{/foreach}
@@ -58,6 +51,11 @@
 						<button type="button" class="commander-briefing__select" data-key="{$option.key}" data-token="{$commanderBriefing.csrf}">
 							<strong class="commander-briefing__select-title">{$LNG[$option.title_key]}</strong>
 							<span class="commander-briefing__select-desc">{$LNG[$option.desc_key]}</span>
+							<span class="commander-briefing__select-targets">
+								{foreach $option.targets as $counter => $need}
+									<span>{$LNG["cm_counter_{$counter}"]|default:$counter}: {$need}</span>
+								{/foreach}
+							</span>
 						</button>
 					{/foreach}
 				</div>

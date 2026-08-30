@@ -171,4 +171,35 @@ class DirectiveCatalog
 
 		return self::counterForEvent($directiveKey, $eventType, $context) !== null;
 	}
+
+	public static function progressPercent(int $have, int $need): int
+	{
+		if ($need <= 0) {
+			return 0;
+		}
+
+		return (int) min(100, max(0, round($have / $need * 100)));
+	}
+
+	/**
+	 * @param array<string, int> $targets
+	 * @param array<string, mixed> $progress
+	 * @return list<array{counter: string, have: int, need: int, pct: int}>
+	 */
+	public static function progressBars(array $targets, array $progress): array
+	{
+		$bars = [];
+		foreach ($targets as $counter => $need) {
+			$need = (int) $need;
+			$have = (int) ($progress[$counter] ?? 0);
+			$bars[] = [
+				'counter' => (string) $counter,
+				'have' => $have,
+				'need' => $need,
+				'pct' => self::progressPercent($have, $need),
+			];
+		}
+
+		return $bars;
+	}
 }
