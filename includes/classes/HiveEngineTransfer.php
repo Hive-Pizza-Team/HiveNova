@@ -2,7 +2,6 @@
 
 namespace HiveNova\Core;
 
-use Hive\Hive;
 use Throwable;
 
 /**
@@ -101,32 +100,11 @@ class HiveEngineTransfer
 			return (self::$broadcaster)($from, $to, $quantity, $symbol, $memo, $wif);
 		}
 
-		$hivePhp = __DIR__ . '/../../vendor/mahdiyari/hive-php/lib/Hive.php';
-		if (is_readable($hivePhp)) {
-			require_once $hivePhp;
-		}
-
-		$previousHandler = set_error_handler(static function () {
-			return false;
-		});
-		$previousTz = date_default_timezone_get();
-		try {
-			$hive = new Hive([
-				'rpcNodes' => HiveUtil::rpcNodesToTry(1),
-				'timeout'  => \HIVE_RPC_TIMEOUT,
-			]);
-			$key = $hive->privateKeyFrom($wif);
-			$params = self::customJsonParams($from, $to, $quantity, $symbol, $memo);
-
-			return $hive->broadcast($key, 'custom_json', $params);
-		} finally {
-			if ($previousHandler !== null) {
-				set_error_handler($previousHandler);
-			} else {
-				restore_error_handler();
-			}
-			date_default_timezone_set($previousTz);
-		}
+		return HiveBroadcast::operation(
+			$wif,
+			'custom_json',
+			self::customJsonParams($from, $to, $quantity, $symbol, $memo)
+		);
 	}
 
 	private static function extractTrxId(mixed $result): string

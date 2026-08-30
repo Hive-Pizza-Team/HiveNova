@@ -2,7 +2,6 @@
 
 namespace HiveNova\Core;
 
-use Hive\Hive;
 use Throwable;
 
 /**
@@ -10,10 +9,13 @@ use Throwable;
  */
 class HiveCommentPoster
 {
-	/** Empty for top-level/root posts; set only for replies or community posts. */
+	/**
+	 * Root posts: empty parent_author + parent_permlink = primary category (first tag).
+	 * Override only for replies / community posts.
+	 */
 	public const DEFAULT_PARENT_PERMLINK = '';
 
-	/** Used when the caller passes no valid tags. */
+	/** Used when the caller passes no valid tags (also default root category). */
 	public const FALLBACK_TAG = 'moon';
 
 	/** @var callable|null fn(string $parentAuthor, string $parentPermlink, string $author, string $permlink, string $title, string $body, string $jsonMetadata, string $wif): mixed */
@@ -60,8 +62,8 @@ class HiveCommentPoster
 			if ($permlink === '' || $title === '' || $body === '') {
 				return self::fail();
 			}
-			// Replies/community posts need both parent fields; root posts use empty parent_author
-			// and empty parent_permlink by default.
+			// Replies/community posts need both parent fields; root posts use empty
+			// parent_author and parent_permlink = first tag (Hive category).
 			if ($parentAuthor !== '') {
 				if (!HiveUtil::isAccountValid($parentAuthor) || $parentPermlink === '') {
 					return self::fail();
@@ -84,6 +86,9 @@ class HiveCommentPoster
 			$cleanTags = array_values(array_unique($cleanTags));
 			if ($cleanTags === []) {
 				$cleanTags = [self::FALLBACK_TAG];
+			}
+			if ($parentAuthor === '' && $parentPermlink === '') {
+				$parentPermlink = $cleanTags[0];
 			}
 
 			$jsonMetadata = (string) json_encode([
@@ -140,39 +145,15 @@ class HiveCommentPoster
 			);
 		}
 
-		$hivePhp = __DIR__ . '/../../vendor/mahdiyari/hive-php/lib/Hive.php';
-		if (is_readable($hivePhp)) {
-			require_once $hivePhp;
-		}
-
-		$previousHandler = set_error_handler(static function () {
-			return false;
-		});
-		$previousTz = date_default_timezone_get();
-		try {
-			$hive = new Hive([
-				'rpcNodes' => HiveUtil::rpcNodesToTry(1),
-				'timeout'  => \HIVE_RPC_TIMEOUT,
-			]);
-			$key = $hive->privateKeyFrom($wif);
-
-			return $hive->broadcast($key, 'comment', [
-				$parentAuthor,
-				$parentPermlink,
-				$author,
-				$permlink,
-				$title,
-				$body,
-				$jsonMetadata,
-			]);
-		} finally {
-			if ($previousHandler !== null) {
-				set_error_handler($previousHandler);
-			} else {
-				restore_error_handler();
-			}
-			date_default_timezone_set($previousTz);
-		}
+		return HiveBroadcast::operation($wif, 'comment', [
+			$parentAuthor,
+			$parentPermlink,
+			$author,
+			$permlink,
+			$title,
+			$body,
+			$jsonMetadata,
+		]);
 	}
 
 	private static function extractTrxId(mixed $result): string
