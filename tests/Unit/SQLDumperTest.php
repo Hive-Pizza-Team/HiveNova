@@ -490,6 +490,7 @@ PHP;
             $contents = file_get_contents($path);
             $this->assertIsString($contents);
             $this->assertStringContainsString('password="secret"', $contents);
+            // Must be owner-only after createClientDefaultsFile (chmod before write).
             $perms = fileperms($path) & 0777;
             $this->assertSame(0600, $perms);
         } finally {

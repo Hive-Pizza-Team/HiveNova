@@ -117,17 +117,28 @@ class SQLDumper
 	 */
 	private function createClientDefaultsFile(array $database): string
 	{
-		$path = tempnam(sys_get_temp_dir(), 'hn-my-');
+		// Restrict umask so tempnam() never creates a world-readable empty file,
+		// then chmod(0600) before writing credentials so secrets never land in a
+		// briefly world-readable file on hosts where umask is ignored/reset.
+		$previousUmask = umask(0177);
+		try {
+			$path = tempnam(sys_get_temp_dir(), 'hn-my-');
+		} finally {
+			umask($previousUmask);
+		}
 		if ($path === false) {
 			throw new Exception('Unable to create temporary MySQL defaults file.');
+		}
+
+		if (!@chmod($path, 0600)) {
+			@unlink($path);
+			throw new Exception('Unable to secure temporary MySQL defaults file.');
 		}
 
 		if (file_put_contents($path, self::formatClientDefaults($database)) === false) {
 			@unlink($path);
 			throw new Exception('Unable to write temporary MySQL defaults file.');
 		}
-
-		@chmod($path, 0600);
 
 		return $path;
 	}
