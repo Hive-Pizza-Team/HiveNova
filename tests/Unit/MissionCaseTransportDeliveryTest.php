@@ -1,6 +1,8 @@
 <?php
 
 use HiveNova\Core\Config;
+use HiveNova\Core\DirectiveCatalog;
+use HiveNova\Core\DirectiveService;
 use HiveNova\Mission\MissionCaseTransport;
 
 use PHPUnit\Framework\TestCase;
@@ -132,6 +134,90 @@ class MissionCaseTransportDeliveryTest extends TestCase
         $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
         $this->assertCount(1, $this->fake->achievement->messages);
         $this->assertSame('0', $mission->_fleet['fleet_resource_metal']);
+    }
+
+    public function test_foreign_delivery_above_threshold_counts_trade_surplus(): void
+    {
+        $this->lockTradeSurplus(1);
+
+        $fleet = transportFleetForeign([
+            'fleet_resource_metal' => 8000,
+            'fleet_resource_crystal' => 2000,
+            'fleet_resource_deuterium' => 0,
+        ]);
+
+        $mission = new MissionCaseTransport($fleet);
+        $mission->TargetEvent();
+
+        $this->assertSame('0', $mission->_fleet['fleet_resource_metal']);
+        $this->assertSame(1, $this->tradeRunCount());
+    }
+
+    public function test_own_planet_delivery_does_not_count_trade_surplus(): void
+    {
+        $this->lockTradeSurplus(1);
+        $this->fake->planetRowsById[99] = ['id' => 99, 'name' => 'Colony', 'id_owner' => 1];
+
+        $fleet = transportFleetSelf([
+            'fleet_resource_metal' => 8000,
+            'fleet_resource_crystal' => 2000,
+            'fleet_resource_deuterium' => 0,
+        ]);
+
+        $mission = new MissionCaseTransport($fleet);
+        $mission->TargetEvent();
+
+        $this->assertSame('0', $mission->_fleet['fleet_resource_metal']);
+        $this->assertSame(0, $this->tradeRunCount());
+    }
+
+    public function test_foreign_delivery_below_threshold_does_not_count_trade_surplus(): void
+    {
+        $this->lockTradeSurplus(1);
+
+        $fleet = transportFleetForeign([
+            'fleet_resource_metal' => 100,
+            'fleet_resource_crystal' => 0,
+            'fleet_resource_deuterium' => 0,
+        ]);
+
+        $mission = new MissionCaseTransport($fleet);
+        $mission->TargetEvent();
+
+        $this->assertSame(0, $this->tradeRunCount());
+    }
+
+    private function lockTradeSurplus(int $userId): void
+    {
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'moduls' => implode(';', array_fill(0, MODULE_COMMANDER + 1, 1)),
+        ]), 1);
+
+        $window = DirectiveService::periodWindow(TIMESTAMP);
+        $this->fake->commander->periods[] = [
+            'id' => 1,
+            'universe' => 1,
+            'period_start' => $window['start'],
+            'period_end' => $window['end'],
+            'created_at' => TIMESTAMP,
+        ];
+        $this->fake->commander->userDirectives[] = [
+            'id' => 1,
+            'user_id' => $userId,
+            'period_id' => 1,
+            'directive_key' => DirectiveCatalog::TRADE,
+            'progress_json' => json_encode(DirectiveCatalog::emptyProgress(DirectiveCatalog::TRADE)),
+            'completed_at' => null,
+            'reward_claimed_at' => null,
+        ];
+    }
+
+    private function tradeRunCount(): int
+    {
+        $progress = json_decode((string) $this->fake->commander->userDirectives[0]['progress_json'], true);
+
+        return (int) ($progress['trade_run'] ?? 0);
     }
 
     /**
