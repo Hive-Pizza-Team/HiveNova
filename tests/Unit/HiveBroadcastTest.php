@@ -508,7 +508,7 @@ class HiveBroadcastTest extends TestCase
 
 		$result = HiveBroadcast::operation($key->stringKey, 'vote', ['alice', 'bob', 'a-post', 10000]);
 
-		$this->assertSame(['https://override-a.example'], $tried);
+		$this->assertSame(['https://override-a.example', 'https://override-b.example'], $tried);
 		$this->assertStringStartsWith('override-', $result['trx_id']);
 	}
 }
