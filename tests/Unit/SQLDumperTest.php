@@ -490,12 +490,41 @@ PHP;
             $contents = file_get_contents($path);
             $this->assertIsString($contents);
             $this->assertStringContainsString('password="secret"', $contents);
+            // Must be owner-only after createClientDefaultsFile (chmod before write).
             $perms = fileperms($path) & 0777;
             $this->assertSame(0600, $perms);
         } finally {
             if (is_file($path)) {
                 unlink($path);
             }
+        }
+    }
+
+    public function testCreateClientDefaultsFileThrowsAndUnlinksWhenSecureFails(): void
+    {
+        $dumper = new class extends SQLDumper {
+            public ?string $lastPath = null;
+
+            protected function secureClientDefaultsFile(string $path): bool
+            {
+                $this->lastPath = $path;
+
+                return false;
+            }
+        };
+
+        try {
+            $this->invokePrivate($dumper, 'createClientDefaultsFile', [
+                'host' => '127.0.0.1',
+                'port' => 3306,
+                'user' => 'test',
+                'userpw' => 'secret',
+            ]);
+            $this->fail('Expected Exception when securing defaults file fails');
+        } catch (Exception $e) {
+            $this->assertSame('Unable to secure temporary MySQL defaults file.', $e->getMessage());
+            $this->assertNotNull($dumper->lastPath);
+            $this->assertFileDoesNotExist($dumper->lastPath);
         }
     }
 
