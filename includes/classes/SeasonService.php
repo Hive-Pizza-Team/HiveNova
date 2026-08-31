@@ -677,13 +677,17 @@ class SeasonService
 			return;
 		}
 
-		$day = gmdate('Y-m-d', $now);
-		$dailyKey = 'daily:' . $day;
+		// Key by displayed day-count, not UTC calendar date. The season cron runs
+		// every 15 minutes; near UTC midnight a date-based key would re-fire within
+		// minutes and repeat the same "N day(s)" text.
+		$daysLeft = max(0, (int) ceil(($closes - $now) / 86400));
+		$dailyKey = 'daily:' . $daysLeft;
 		if (
 			!in_array($dailyKey, $flags, true)
 			&& !in_array('preclose', $flags, true)
 			&& !$inPreclose
 			&& $now < $closes
+			&& $daysLeft > 0
 		) {
 			$this->broadcastReminder($config, 'daily', $lng);
 		}
@@ -735,11 +739,12 @@ class SeasonService
 
 		$flags = $this->reminderFlags($config);
 		if ($kind === 'daily') {
-			// Rotate only the dated daily keys; keep start/preclose/close markers.
+			// Replace prior daily:N; each remaining-day count still fires once because
+			// fireReminders only sends when daily:$daysLeft is absent.
 			$flags = array_values(array_filter($flags, static function ($flag) {
 				return !str_starts_with($flag, 'daily:');
 			}));
-			$flags[] = 'daily:' . gmdate('Y-m-d', $this->now());
+			$flags[] = 'daily:' . $daysLeft;
 		} else {
 			$flags[] = $kind;
 		}

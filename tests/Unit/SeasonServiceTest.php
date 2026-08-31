@@ -576,6 +576,36 @@ class SeasonServiceTest extends TestCase
 		$this->assertFalse($permanent['show']);
 	}
 
+	public function testDailyReminderKeyedByDaysLeftNotCalendarDate(): void
+	{
+		// ~6.5 days remaining → ceil = 7. Fifteen minutes later (UTC date rolled)
+		// still ceil = 7, so a date-keyed daily would spam the same text.
+		$nearMidnight = gmmktime(23, 50, 0, 8, 28, 2026);
+		$closes = $nearMidnight + (int) (6.5 * 86400);
+		$config = $this->makeConfig([
+			'season_last_reminder' => 'start',
+			'season_closes_at' => $closes,
+			'season_starts_at' => $closes - 604800,
+		]);
+		$this->store->players = [['id' => 10, 'hive_account' => 'aliceaaa', 'lang' => 'en']];
+
+		$this->service($nearMidnight)->fireReminders($config);
+		$this->assertCount(1, $this->messages);
+		$this->assertStringContainsString('7 day(s)', $this->messages[0][2]);
+		$this->assertStringContainsString('daily:7', $config->season_last_reminder);
+
+		$this->messages = [];
+		$this->service($nearMidnight + 900)->fireReminders($config);
+		$this->assertSame([], $this->messages);
+		$this->assertStringContainsString('daily:7', $config->season_last_reminder);
+
+		$this->service($nearMidnight + 86400)->fireReminders($config);
+		$this->assertCount(1, $this->messages);
+		$this->assertStringContainsString('6 day(s)', $this->messages[0][2]);
+		$this->assertStringContainsString('daily:6', $config->season_last_reminder);
+		$this->assertStringNotContainsString('daily:7', $config->season_last_reminder);
+	}
+
 	public function testBroadcastReminderPostsDiscordOnce(): void
 	{
 		$token = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0123456789-_xx';
