@@ -182,6 +182,31 @@ class DiscordWebhookServiceTest extends TestCase
 		$this->assertSame('Alice', $payload['embeds'][0]['fields'][0]['value']);
 	}
 
+	public function testBotUsernameUsesGameNameFromConfig(): void
+	{
+		$ref = new ReflectionProperty(\HiveNova\Core\Config::class, 'instances');
+		$ref->setAccessible(true);
+		$ref->setValue(null, []);
+		\HiveNova\Core\Config::setInstance(new \HiveNova\Core\Config([
+			'uni' => 1,
+			'game_name' => 'Moon',
+		]), 1);
+
+		$this->assertSame('Moon', DiscordWebhookService::botUsername(1));
+		$payload = DiscordWebhookService::buildPayload(
+			'Incoming Attack to Alice at [1:2:3] (planet)',
+			true,
+			'Alice',
+			1,
+			'[1:2:3] (planet)',
+			null,
+			1
+		);
+		$this->assertSame('Moon', $payload['username']);
+
+		$ref->setValue(null, []);
+	}
+
 	public function testCombatFormatterDiffersFromIncoming(): void
 	{
 		$incoming = DiscordWebhookService::formatIncoming('Alice', 1, 1, 2, 3, 1);

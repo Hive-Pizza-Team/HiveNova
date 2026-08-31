@@ -9,7 +9,7 @@ namespace HiveNova\Core;
 class DiscordWebhookService
 {
 	private const USER_AGENT = 'DiscordBot (https://github.com/Hive-Pizza-Team/HiveNova, 1.0)';
-	private const USERNAME = 'HiveNova';
+	private const USERNAME_FALLBACK = 'HiveNova';
 	private const AVATAR_URL = 'https://moon.hive.pizza/styles/resource/images/login/HiveNova.png';
 	private const COLOR_INCOMING = 0xE74C3C;
 	private const COLOR_COMBAT = 0x3498DB;
@@ -210,7 +210,7 @@ class DiscordWebhookService
 				: sprintf($lang['feat_banner_text'] ?? '%s claimed %s', $player, $featName);
 
 			self::post($webhook, [
-				'username'         => self::USERNAME,
+				'username'         => self::botUsername($universe),
 				'avatar_url'       => self::AVATAR_URL,
 				'allowed_mentions' => ['parse' => []],
 				'embeds'           => [[
@@ -248,7 +248,7 @@ class DiscordWebhookService
 			}
 
 			self::post($webhook, [
-				'username'         => self::USERNAME,
+				'username'         => self::botUsername($universe),
 				'avatar_url'       => self::AVATAR_URL,
 				'allowed_mentions' => ['parse' => []],
 				'content'          => $text,
@@ -300,20 +300,21 @@ class DiscordWebhookService
 				? self::formatIncoming($username, $mission, $galaxy, $system, $planet, $planetType, $npcName)
 				: self::formatCombat($username, $mission, $galaxy, $system, $planet, $planetType, $npcName);
 
-			self::post($webhook, self::buildPayload($content, $incoming, $username, $mission, $coords, $npcName));
+			$universe = (int) ($row['universe'] ?? 0);
+			self::post($webhook, self::buildPayload($content, $incoming, $username, $mission, $coords, $npcName, $universe));
 		} catch (\Throwable $e) {
 			return;
 		}
 	}
 
 	/**
-	 * @return array{username: string, ally_id: int, ally_discord_webhook: string}|null
+	 * @return array{username: string, ally_id: int, ally_discord_webhook: string, universe?: int}|null
 	 */
 	private static function loadDefender(int $userId): ?array
 	{
 		$db = Database::get();
 		$row = $db->selectSingle(
-			'SELECT u.username, u.ally_id, a.ally_discord_webhook
+			'SELECT u.username, u.ally_id, u.universe, a.ally_discord_webhook
 			FROM %%USERS%% u
 			LEFT JOIN %%ALLIANCE%% a ON a.id = u.ally_id
 			WHERE u.id = :userId',
@@ -325,6 +326,23 @@ class DiscordWebhookService
 		}
 
 		return $row;
+	}
+
+	/**
+	 * Discord webhook display name from config game_name (global), with hard-coded fallback.
+	 */
+	public static function botUsername(int $universe = 0): string
+	{
+		try {
+			$name = trim((string) (Config::get($universe)->game_name ?? ''));
+			if ($name !== '') {
+				return $name;
+			}
+		} catch (\Throwable) {
+			// Fail-open when config is unavailable (unit tests, early boot).
+		}
+
+		return self::USERNAME_FALLBACK;
 	}
 
 	/**
@@ -341,7 +359,8 @@ class DiscordWebhookService
 		string $username,
 		int $mission,
 		string $coords,
-		?string $npcName = null
+		?string $npcName = null,
+		int $universe = 0
 	): array {
 		$missionName = self::missionName($mission);
 		$title = $incoming
@@ -360,7 +379,7 @@ class DiscordWebhookService
 		}
 
 		return [
-			'username'         => self::USERNAME,
+			'username'         => self::botUsername($universe),
 			'avatar_url'       => self::AVATAR_URL,
 			'allowed_mentions' => ['parse' => []],
 			'embeds'           => [[

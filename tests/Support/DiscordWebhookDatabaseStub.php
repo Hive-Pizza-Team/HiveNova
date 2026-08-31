@@ -37,6 +37,7 @@ class DiscordWebhookDatabaseStub implements DatabaseInterface
 			$row = [
 				'username'              => $user['username'] ?? 'player',
 				'ally_id'               => $allyId,
+				'universe'              => (int) ($user['universe'] ?? 1),
 				'ally_discord_webhook'  => $webhook,
 			];
 			return $field === false ? $row : ($row[$field] ?? false);

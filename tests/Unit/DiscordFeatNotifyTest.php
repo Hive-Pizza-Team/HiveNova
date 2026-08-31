@@ -98,6 +98,7 @@ class DiscordFeatNotifyTest extends TestCase
         $token = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0123456789-_xx';
         Config::setInstance(new Config([
             'uni' => 1,
+            'game_name' => 'Moon',
             'discord_feat_webhook' => 'https://discord.com/api/webhooks/123456789012345678/' . $token,
         ]), 1);
 
@@ -105,7 +106,7 @@ class DiscordFeatNotifyTest extends TestCase
         $this->assertCount(1, $this->posts);
         $payload = json_decode($this->posts[0]['json'], true);
         $this->assertSame('Season 3 countdown: 2 day(s) until close.', $payload['content']);
-        $this->assertSame('HiveNova', $payload['username']);
+        $this->assertSame('Moon', $payload['username']);
     }
 
     public function testNotifySeasonReminderSkipsWhenWebhookMissing(): void
