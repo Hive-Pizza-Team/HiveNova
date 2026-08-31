@@ -682,14 +682,25 @@ height: 133px;
 .planeth img {
     	margin: 8px;}
 
+.buildlist-item {
+  clear: both;
+  overflow: hidden;
+  border-bottom: solid 1px #00d2be;
+}
+
 .bulida {
 	float: left;
     width: 35%;
     line-height: 1.4;
     padding: 8px;
-    height: 69px;
-    border-bottom: solid 1px #00d2be;
+    min-height: 69px;
 }
+
+.bulida .timer {
+  display: block;
+  margin-top: 4px;
+}
+
 .queue-total {
   clear: both;
   width: 100%;
@@ -704,8 +715,15 @@ height: 133px;
 	width: 65%;
 	line-height: 1.4;
 	padding: 12px;
-	height: 69px;
-	border-bottom: solid 1px #00d2be;
+	min-height: 69px;
+}
+
+#buildlist #progressbar {
+  margin-top: 8px;
+}
+
+#buildlist #time {
+  min-height: 1.4em;
 }
 
 .hidden-div {
@@ -827,12 +845,9 @@ input:hover {
 }
 
 @media screen and (max-width: 520px) {
-    div .buildb {
-        border: none;
-    }
-    div .bulida {
-        border: none;
-    }
+  .buildlist-item {
+    border-bottom-color: rgba(0, 210, 190, 0.45);
+  }
 }
 
 .card {

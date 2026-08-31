@@ -8,12 +8,12 @@
 <div id="buildlist" class="infos1">
 		{foreach $Queue as $List}
 		{$ID = $List.element}
+		<div class="buildlist-item">
 		<div class="buildb">
-			
 				{if isset($ResearchList[$List.element])}
 				{$CQueue = $ResearchList[$List.element]}
 				{/if}
-				{$List@iteration}.: 
+				{$List@iteration}.:
 				{if isset($CQueue) && $CQueue.maxLevel != $CQueue.level && !$IsFullQueue && $CQueue.buyable}
 				<form action="game.php?page=research" method="post" class="build_form">
 					<input type="hidden" name="cmd" value="insert">
@@ -24,24 +24,26 @@
 				{$LNG.tech.{$ID}} {$List.level}{if !empty($List.planet)} @ {$List.planet}{/if}
 				{/if}
 				{if $List@first}
-				<br><br><div id="progressbar" data-time="{$List.resttime}"></div></div>
-			<div class="bulida">
-				<div id="time" data-time="{$List.time}"><br></div>
+				<div id="progressbar" data-time="{$List.resttime}"></div>
+				{/if}
+		</div>
+		<div class="bulida">
+				{if $List@first}
+				<div id="time" data-time="{$List.time}"></div>
 				<form action="game.php?page=research" method="post" class="build_form">
 					<input type="hidden" name="cmd" value="cancel">
 					<button type="submit" class="build_submit onlist">{$LNG.bd_cancel}</button>
 				</form>
 				{else}
-			</div>
-			<div class="bulida">
 				<form action="game.php?page=research" method="post" class="build_form">
 					<input type="hidden" name="cmd" value="remove">
 					<input type="hidden" name="listid" value="{$List@iteration}">
 					<button type="submit" class="build_submit onlist">{$LNG.bd_cancel}</button>
 				</form>
 				{/if}
-				<br><span style="color:lime" data-time="{$List.endtime}" class="timer">{$List.display}</span>
-			</div>
+				<span style="color:lime" data-time="{$List.endtime}" class="timer">{$List.display}</span>
+		</div>
+		</div>
 	{/foreach}
 
 	{if $Queue|count > 1}
