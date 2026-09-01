@@ -28,7 +28,7 @@
 				{/foreach}
 				<option value="custom">{$LNG.battle_share_community_custom}</option>
 			</select>
-			<input type="text" id="battleShareCommunityCustom" placeholder="hive-123456 / community-id" hidden>
+			<input type="text" id="battleShareCommunityCustom" placeholder="hive-gaming or hive-123456 community-id" hidden>
 		</div>
 		<div class="battle-report__share-actions">
 			<button type="button" class="battle-report__share-cancel" id="battleShareCancel">{$LNG.battle_share_cancel}</button>
@@ -381,12 +381,15 @@ $(function() {
 					alert(window.battleShareMessages.communityRequired);
 					return;
 				}
-				var parts = raw.split(/[\s/]+/);
-				if (parts.length < 2) {
+				var parts = raw.split(/[\s/]+/).filter(Boolean);
+				if (parts.length === 1) {
+					destination = { type: 'community', parent_author: '', parent_permlink: parts[0] };
+				} else if (parts.length >= 2) {
+					destination = { type: 'community', parent_author: parts[0], parent_permlink: parts[1] };
+				} else {
 					alert(window.battleShareMessages.communityRequired);
 					return;
 				}
-				destination = { type: 'community', parent_author: parts[0], parent_permlink: parts[1] };
 			} else {
 				var pair = raw.split('|');
 				destination = { type: 'community', parent_author: pair[0], parent_permlink: pair[1] };
