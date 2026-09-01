@@ -52,6 +52,7 @@ class BattleShareComposer
 		string $defenderName,
 		string $formattedTime,
 		array $labels,
+		string $raportMode = '',
 	): array {
 		$suggested = self::suggestedCommunities();
 
@@ -93,7 +94,7 @@ class BattleShareComposer
 		$attackerLoss = $this->formatNumber($combatReport['units'][0] ?? 0);
 		$defenderLoss = $this->formatNumber($combatReport['units'][1] ?? 0);
 
-		$ctaUrl = $this->buildCtaUrl($baseUrl, $userId, $refActive);
+		$ctaUrl = $this->buildCtaUrl($baseUrl, $raportId, $userId, $refActive, $raportMode);
 		$gameName = $this->sanitizeText((string) ($labels['game_name'] ?? ''));
 		if ($gameName === '') {
 			$gameName = 'Game';
@@ -151,14 +152,25 @@ class BattleShareComposer
 		];
 	}
 
-	public function buildCtaUrl(string $baseUrl, int $userId, bool $refActive): string
-	{
-		$url = rtrim($baseUrl, '/') . '/index.php';
+	public function buildCtaUrl(
+		string $baseUrl,
+		string $raportId,
+		int $userId,
+		bool $refActive,
+		string $raportMode = '',
+	): string {
+		$params = [
+			'page'   => 'raport',
+			'raport' => $raportId,
+		];
+		if ($raportMode !== '') {
+			$params['mode'] = $raportMode;
+		}
 		if ($refActive && $userId > 0) {
-			$url .= '?ref=' . $userId;
+			$params['ref'] = (string) $userId;
 		}
 
-		return $url;
+		return rtrim($baseUrl, '/') . '/game.php?' . http_build_query($params);
 	}
 
 	public function buildPermlink(string $raportId, int $timestamp): string

@@ -63,6 +63,7 @@ class ShowRaportPage extends AbstractGamePage
 		string $defenderName,
 		string $formattedTime,
 		int $rawTime,
+		string $raportMode = '',
 	): array {
 		global $USER;
 
@@ -76,7 +77,8 @@ class ShowRaportPage extends AbstractGamePage
 			$attackerName,
 			$defenderName,
 			$formattedTime,
-			$this->battleShareLabels()
+			$this->battleShareLabels(),
+			$raportMode
 		);
 
 		return [
@@ -243,7 +245,8 @@ class ShowRaportPage extends AbstractGamePage
 			$attackerName,
 			$defenderName,
 			$formattedTime,
-			$rawTime
+			$rawTime,
+			'battlehall'
 		));
 		
 		$this->display('shared.mission.raport.tpl');

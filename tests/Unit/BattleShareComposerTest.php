@@ -70,7 +70,7 @@ class BattleShareComposerTest extends TestCase
 		$this->assertSame('', $result['draft']['title']);
 		$this->assertStringContainsString('Alice vs Bob', $result['draft']['body']);
 		$this->assertStringContainsString('Attacker won', $result['draft']['body']);
-		$this->assertStringContainsString('https://moon.hive.pizza/index.php?ref=42', $result['draft']['body']);
+		$this->assertStringContainsString('https://moon.hive.pizza/game.php?page=raport&raport=abc123&ref=42', $result['draft']['body']);
 		$this->assertStringStartsWith('re-peaksnaps-', $result['draft']['permlink']);
 		$this->assertSame('peak.snaps', $result['draft']['parent_author']);
 		$this->assertSame('', $result['draft']['parent_permlink']);
@@ -96,8 +96,8 @@ class BattleShareComposerTest extends TestCase
 		);
 
 		$this->assertTrue($result['canShare']);
-		$this->assertStringContainsString('https://moon.hive.pizza/index.php', $result['draft']['body']);
-		$this->assertStringNotContainsString('?ref=', $result['draft']['body']);
+		$this->assertStringContainsString('https://moon.hive.pizza/game.php?page=raport&raport=abc123', $result['draft']['body']);
+		$this->assertStringNotContainsString('ref=', $result['draft']['body']);
 	}
 
 	public function testMissingHiveAccountBlocksShare(): void
@@ -268,5 +268,55 @@ class BattleShareComposerTest extends TestCase
 	{
 		$permlink = $this->composer->buildSnapPermlink();
 		$this->assertStringStartsWith('re-peaksnaps-', $permlink);
+	}
+
+	public function testBuildCtaUrlIncludesRaportAndRef(): void
+	{
+		$url = $this->composer->buildCtaUrl(
+			'https://moon.hive.pizza/uni1',
+			'1002c6a3ab8aff2c6faeb1fbb6a9320b',
+			42,
+			true,
+			'battlehall'
+		);
+
+		$this->assertSame(
+			'https://moon.hive.pizza/uni1/game.php?page=raport&raport=1002c6a3ab8aff2c6faeb1fbb6a9320b&mode=battlehall&ref=42',
+			$url
+		);
+	}
+
+	public function testBuildCtaUrlOmitsModeWhenNotBattlehall(): void
+	{
+		$url = $this->composer->buildCtaUrl(
+			'https://moon.hive.pizza/uni1/',
+			'abc123',
+			0,
+			false
+		);
+
+		$this->assertSame('https://moon.hive.pizza/uni1/game.php?page=raport&raport=abc123', $url);
+	}
+
+	public function testSnapBodyFitsTypicalRaportUrlWithinLimit(): void
+	{
+		$url = $this->composer->buildCtaUrl(
+			'https://moon.hive.pizza/uni1',
+			'1002c6a3ab8aff2c6faeb1fbb6a9320b',
+			42,
+			true,
+			'battlehall'
+		);
+		$body = sprintf(
+			"⚔️ %s vs %s — %s\nLosses: %s / %s\n%s",
+			'Alice',
+			'Bob',
+			'Attacker won',
+			'1,200',
+			'800',
+			$url
+		);
+
+		$this->assertLessThanOrEqual(BattleShareComposer::SNAP_CHAR_LIMIT, strlen($body));
 	}
 }
