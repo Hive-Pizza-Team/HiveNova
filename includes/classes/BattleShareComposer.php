@@ -52,6 +52,7 @@ class BattleShareComposer
 		string $defenderName,
 		string $formattedTime,
 		array $labels,
+		string $raportMode = '',
 	): array {
 		$suggested = self::suggestedCommunities();
 
@@ -93,7 +94,7 @@ class BattleShareComposer
 		$attackerLoss = $this->formatNumber($combatReport['units'][0] ?? 0);
 		$defenderLoss = $this->formatNumber($combatReport['units'][1] ?? 0);
 
-		$ctaUrl = $this->buildCtaUrl($baseUrl, $userId, $refActive);
+		$ctaUrl = $this->buildCtaUrl($baseUrl, $raportId, $userId, $refActive, $raportMode);
 		$gameName = $this->sanitizeText((string) ($labels['game_name'] ?? ''));
 		if ($gameName === '') {
 			$gameName = 'Game';
@@ -104,13 +105,20 @@ class BattleShareComposer
 
 		$titleFormat = $labels['title_format'] ?? '%s Battle: %s vs %s';
 		$previewTitle = sprintf($titleFormat, $gameName, $attackerName, $defenderName);
+		$formattedTime = $this->sanitizeText($formattedTime);
 
 		$body = $this->buildSnapBody(
+			$gameName,
 			$attackerName,
 			$defenderName,
+			$resultKey,
 			$resultText,
 			$attackerLoss,
 			$defenderLoss,
+			$formattedTime,
+			$combatReport['debris'] ?? [],
+			$combatReport['steal'] ?? [],
+			$combatReport['koords'] ?? [],
 			$ctaUrl
 		);
 
@@ -151,14 +159,25 @@ class BattleShareComposer
 		];
 	}
 
-	public function buildCtaUrl(string $baseUrl, int $userId, bool $refActive): string
-	{
-		$url = rtrim($baseUrl, '/') . '/index.php';
+	public function buildCtaUrl(
+		string $baseUrl,
+		string $raportId,
+		int $userId,
+		bool $refActive,
+		string $raportMode = '',
+	): string {
+		$params = [
+			'page'   => 'raport',
+			'raport' => $raportId,
+		];
+		if ($raportMode !== '') {
+			$params['mode'] = $raportMode;
+		}
 		if ($refActive && $userId > 0) {
-			$url .= '?ref=' . $userId;
+			$params['ref'] = (string) $userId;
 		}
 
-		return $url;
+		return rtrim($baseUrl, '/') . '/game.php?' . http_build_query($params);
 	}
 
 	public function buildPermlink(string $raportId, int $timestamp): string
@@ -179,27 +198,108 @@ class BattleShareComposer
 	}
 
 	private function buildSnapBody(
+		string $gameName,
 		string $attackerName,
 		string $defenderName,
+		string $resultKey,
 		string $resultText,
 		string $attackerLoss,
 		string $defenderLoss,
+		string $formattedTime,
+		array $debris,
+		array $steal,
+		array $koords,
 		string $ctaUrl,
 	): string {
-		$body = sprintf(
-			"⚔️ %s vs %s — %s\nLosses: %s / %s\n%s",
-			$attackerName,
-			$defenderName,
-			$resultText,
-			$attackerLoss,
-			$defenderLoss,
-			$ctaUrl
-		);
+		$lines = [];
+		$lines[] = sprintf('⚔️ %s: %s vs %s', $gameName, $attackerName, $defenderName);
+		$lines[] = sprintf('%s · Loss %s/%s', $resultText, $attackerLoss, $defenderLoss);
+
+		$debrisLine = $this->formatCompactResourceLine($debris);
+		if ($debrisLine !== '') {
+			$lines[] = '💥 ' . $debrisLine;
+		}
+
+		if ($resultKey === 'a') {
+			$stealLine = $this->formatCompactResourceLine($steal);
+			if ($stealLine !== '') {
+				$lines[] = '📦 ' . $stealLine;
+			}
+		}
+
+		$location = $this->formatKoords($koords);
+		if ($location !== '') {
+			$lines[] = '📍 ' . $location;
+		}
+
+		if ($formattedTime !== '') {
+			$lines[] = '🕐 ' . $formattedTime;
+		}
+
+		$lines[] = $ctaUrl;
+
+		$optionalCount = count($lines) - 2;
+		while ($optionalCount > 0 && strlen(implode("\n", $lines)) > self::SNAP_CHAR_LIMIT) {
+			array_splice($lines, count($lines) - 2, 1);
+			$optionalCount--;
+		}
+
+		$body = implode("\n", $lines);
 		if (strlen($body) > self::SNAP_CHAR_LIMIT) {
 			$body = substr($body, 0, self::SNAP_CHAR_LIMIT - 3) . '...';
 		}
 
 		return $body;
+	}
+
+	/**
+	 * @param array<int|string, int|float|string> $resources
+	 */
+	private function formatCompactResourceLine(array $resources): string
+	{
+		$parts = [];
+		foreach ([901 => 'M', 902 => 'C', 903 => 'D'] as $elementId => $abbrev) {
+			$amount = (float) ($resources[$elementId] ?? 0);
+			if ($amount <= 0) {
+				continue;
+			}
+			$parts[] = $this->formatCompactNumber($amount) . $abbrev;
+		}
+
+		return implode(' · ', $parts);
+	}
+
+	/**
+	 * @param array<int|string, int|float|string> $koords
+	 */
+	private function formatKoords(array $koords): string
+	{
+		if (count($koords) < 3) {
+			return '';
+		}
+
+		$galaxy = (int) ($koords[0] ?? 0);
+		$system = (int) ($koords[1] ?? 0);
+		$planet = (int) ($koords[2] ?? 0);
+		if ($galaxy <= 0 && $system <= 0 && $planet <= 0) {
+			return '';
+		}
+
+		return sprintf('[%d:%d:%d]', $galaxy, $system, $planet);
+	}
+
+	private function formatCompactNumber(float $value): string
+	{
+		if ($value >= 1000000) {
+			$n = $value / 1000000;
+			return rtrim(rtrim(number_format($n, 1, '.', ''), '0'), '.') . 'M';
+		}
+		if ($value >= 1000) {
+			$n = $value / 1000;
+			return rtrim(rtrim(number_format($n, 1, '.', ''), '0'), '.') . 'K';
+		}
+
+		return number_format($value, 0, '.', ',');
 	}
 
 	private function formatNumber(int|float|string $value): string
