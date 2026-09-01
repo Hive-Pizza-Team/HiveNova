@@ -9,17 +9,18 @@
 <div class="battle-report__share-modal" id="battleShareModal" hidden>
 	<div class="battle-report__share-modal-inner">
 		<h3 class="battle-report__share-modal-title">{$LNG.battle_share_modal_title}</h3>
-		<p class="battle-report__share-preview"><strong>{$shareDraft.title|escape:'html'}</strong></p>
+		<p class="battle-report__share-preview"><strong>{$shareDraft.preview_title|default:$shareDraft.title|escape:'html'}</strong></p>
 		<fieldset class="battle-report__share-dest">
 			<label class="battle-report__share-option">
-				<input type="radio" name="battleShareDest" value="blog" checked>
-				<span>{$LNG.battle_share_dest_blog}</span>
+				<input type="radio" name="battleShareDest" value="snaps" checked>
+				<span>{$LNG.battle_share_dest_snaps}</span>
 			</label>
 			<label class="battle-report__share-option">
 				<input type="radio" name="battleShareDest" value="community">
 				<span>{$LNG.battle_share_dest_community}</span>
 			</label>
 		</fieldset>
+		<p class="battle-report__share-container" id="battleShareContainerStatus" hidden></p>
 		<div class="battle-report__share-community" id="battleShareCommunityPanel" hidden>
 			<label for="battleShareCommunitySelect">{$LNG.battle_share_community_hint}</label>
 			<select id="battleShareCommunitySelect">
@@ -310,7 +311,9 @@ window.battleShareMessages = {
 	keychainMissing: "{$LNG.battle_share_keychain_missing|escape:'javascript'}",
 	success: "{$LNG.battle_share_success|escape:'javascript'}",
 	failure: "{$LNG.battle_share_failure|escape:'javascript'}",
-	communityRequired: "{$LNG.battle_share_community_required|escape:'javascript'}"
+	communityRequired: "{$LNG.battle_share_community_required|escape:'javascript'}",
+	containerLoading: "{$LNG.battle_share_container_loading|escape:'javascript'}",
+	containerError: "{$LNG.battle_share_container_error|escape:'javascript'}"
 };
 {/if}
 $(function() {
@@ -339,6 +342,7 @@ $(function() {
 	var $communitySelect = $('#battleShareCommunitySelect');
 	var $communityCustom = $('#battleShareCommunityCustom');
 	var $status = $('#battleShareStatus');
+	var $containerStatus = $('#battleShareContainerStatus');
 
 	function setShareStatus(message, isError) {
 		if (!message) {
@@ -348,9 +352,29 @@ $(function() {
 		$status.prop('hidden', false).text(message).toggleClass('is-error', !!isError);
 	}
 
+	function setContainerStatus(message, isError) {
+		if (!message) {
+			$containerStatus.prop('hidden', true).text('');
+			return;
+		}
+		$containerStatus.prop('hidden', false).text(message).toggleClass('is-error', !!isError);
+	}
+
 	function toggleCommunityPanel() {
 		var isCommunity = $('input[name="battleShareDest"]:checked').val() === 'community';
 		$communityPanel.prop('hidden', !isCommunity);
+		if (isCommunity) {
+			setContainerStatus('');
+		} else if (typeof prefetchBattleShareSnapContainer === 'function') {
+			setContainerStatus(window.battleShareMessages.containerLoading, false);
+			prefetchBattleShareSnapContainer(function(err) {
+				if (err) {
+					setContainerStatus(window.battleShareMessages.containerError, true);
+				} else {
+					setContainerStatus('');
+				}
+			});
+		}
 	}
 
 	$('#battleShareOpen').on('click', function() {
@@ -359,7 +383,18 @@ $(function() {
 			return;
 		}
 		setShareStatus('');
+		setContainerStatus(window.battleShareMessages.containerLoading, false);
+		if (typeof prefetchBattleShareSnapContainer === 'function') {
+			prefetchBattleShareSnapContainer(function(err) {
+				if (err) {
+					setContainerStatus(window.battleShareMessages.containerError, true);
+				} else {
+					setContainerStatus('');
+				}
+			});
+		}
 		$modal.prop('hidden', false);
+		toggleCommunityPanel();
 	});
 
 	$('#battleShareCancel').on('click', function() {
@@ -372,7 +407,7 @@ $(function() {
 	});
 
 	$('#battleShareConfirm').on('click', function() {
-		var destination = { type: 'blog' };
+		var destination = { type: 'snaps' };
 		if ($('input[name="battleShareDest"]:checked').val() === 'community') {
 			var raw = $communitySelect.val();
 			if (raw === 'custom') {
