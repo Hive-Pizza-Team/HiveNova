@@ -193,6 +193,77 @@ class SocialHiveMemoServiceTest extends TestCase
 		$this->assertNull($this->db->queue[0]['sent_at']);
 	}
 
+	public function testCronUsesRecipientUniverseGameName(): void
+	{
+		Config::setInstance($this->makeConfig(['game_name' => 'Andromeda']), 2);
+		$ref = new ReflectionProperty(Universe::class, 'availableUniverses');
+		$ref->setAccessible(true);
+		$ref->setValue(null, [1, 2]);
+
+		$this->db->users[] = [
+			'id' => 7,
+			'hive_account' => 'playerone',
+			'universe' => 2,
+			'onlinetime' => 1_000_000 - SocialHiveMemoService::OFFLINE_AFTER - 1,
+			'lang' => 'en',
+		];
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertCount(1, $this->sends);
+		$this->assertStringContainsString('Andromeda', $this->sends[0][3]);
+	}
+
+	public function testCronFallsBackToRootGameNameWhenUniverseConfigMissing(): void
+	{
+		$this->db->users[] = [
+			'id' => 7,
+			'hive_account' => 'playerone',
+			'universe' => 2,
+			'onlinetime' => 1_000_000 - SocialHiveMemoService::OFFLINE_AFTER - 1,
+			'lang' => 'en',
+		];
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertCount(1, $this->sends);
+		$this->assertStringContainsString('Moon', $this->sends[0][3]);
+	}
+
+	public function testMissingSenderMemoPublicKeySkipsSend(): void
+	{
+		SocialHiveMemoService::setMemoKeyFetcher(static function (string $account): string {
+			if ($account === 'gameacct') {
+				return '';
+			}
+
+			return 'STM8LbCRyqtXk5VKbdFwK1YBgiafqprAd7yysN49PnDwAsyoMqQME';
+		});
+		$this->addOfflineLinkedUser();
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertSame([], $this->sends);
+		$this->assertNull($this->db->queue[0]['sent_at']);
+	}
+
+	public function testInvalidMemoWifSkipsSend(): void
+	{
+		Config::setInstance($this->makeConfig([
+			'hive_social_memo_memo_key' => 'not-a-valid-wif',
+		]), 1);
+		$this->addOfflineLinkedUser();
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertSame([], $this->sends);
+		$this->assertNull($this->db->queue[0]['sent_at']);
+	}
+
 	public function testFailedBroadcastLeavesRowRetryable(): void
 	{
 		HiveTransfer::setBroadcaster(static fn () => ['code' => -32000, 'message' => 'fail']);
