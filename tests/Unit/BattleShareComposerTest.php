@@ -66,14 +66,18 @@ class BattleShareComposerTest extends TestCase
 
 		$this->assertTrue($result['canShare']);
 		$this->assertNotNull($result['draft']);
-		$this->assertSame('LocalMoon Battle: Alice vs Bob', $result['draft']['title']);
+		$this->assertSame('LocalMoon Battle: Alice vs Bob', $result['draft']['preview_title']);
+		$this->assertSame('', $result['draft']['title']);
+		$this->assertStringContainsString('Alice vs Bob', $result['draft']['body']);
 		$this->assertStringContainsString('Attacker won', $result['draft']['body']);
 		$this->assertStringContainsString('https://moon.hive.pizza/index.php?ref=42', $result['draft']['body']);
-		$this->assertSame('hivenova-battle-abc123-1700000000', $result['draft']['permlink']);
-		$this->assertSame('', $result['draft']['parent_author']);
-		$this->assertSame('moon', $result['draft']['parent_permlink']);
+		$this->assertStringStartsWith('re-peaksnaps-', $result['draft']['permlink']);
+		$this->assertSame('peak.snaps', $result['draft']['parent_author']);
+		$this->assertSame('', $result['draft']['parent_permlink']);
+		$this->assertTrue($result['draft']['snap_mode']);
 		$meta = json_decode($result['draft']['json_metadata'], true);
 		$this->assertSame('hivenova/battle-share', $meta['app']);
+		$this->assertContains('snaps', $meta['tags']);
 	}
 
 	public function testReferralsOffOmitsRefQuery(): void
@@ -213,7 +217,7 @@ class BattleShareComposerTest extends TestCase
 
 	public function testBodyTruncatedWhenTooLong(): void
 	{
-		$longName = str_repeat('X', 9000);
+		$longName = str_repeat('X', 300);
 		$result = $this->composer->compose(
 			$this->sampleReport(),
 			'abc123',
@@ -228,7 +232,7 @@ class BattleShareComposerTest extends TestCase
 		);
 
 		$this->assertTrue($result['canShare']);
-		$this->assertLessThanOrEqual(BattleShareComposer::MAX_BODY_BYTES, strlen($result['draft']['body']));
+		$this->assertLessThanOrEqual(BattleShareComposer::SNAP_CHAR_LIMIT, strlen($result['draft']['body']));
 		$this->assertStringEndsWith('...', $result['draft']['body']);
 	}
 
@@ -240,7 +244,7 @@ class BattleShareComposerTest extends TestCase
 		);
 	}
 
-	public function testIncludesDebrisAndStealLines(): void
+	public function testIncludesLossesInSnapBody(): void
 	{
 		$result = $this->composer->compose(
 			$this->sampleReport(),
@@ -255,7 +259,14 @@ class BattleShareComposerTest extends TestCase
 			$this->labels
 		);
 
-		$this->assertStringContainsString('Debris', $result['draft']['body']);
-		$this->assertStringContainsString('Captured', $result['draft']['body']);
+		$this->assertStringContainsString('Losses:', $result['draft']['body']);
+		$this->assertStringContainsString('1,200', $result['draft']['body']);
+		$this->assertStringContainsString('800', $result['draft']['body']);
+	}
+
+	public function testBuildSnapPermlinkFormat(): void
+	{
+		$permlink = $this->composer->buildSnapPermlink();
+		$this->assertStringStartsWith('re-peaksnaps-', $permlink);
 	}
 }

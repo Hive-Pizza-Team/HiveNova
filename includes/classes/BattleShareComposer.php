@@ -9,6 +9,8 @@ class BattleShareComposer
 {
 	public const APP_TAG = 'hivenova/battle-share';
 	public const MAX_BODY_BYTES = 8192;
+	public const SNAP_CHAR_LIMIT = 280;
+	public const SNAP_CONTAINER_AUTHOR = 'peak.snaps';
 
 	/**
 	 * @return list<array{author: string, permlink: string, label: string}>
@@ -96,63 +98,28 @@ class BattleShareComposer
 		if ($gameName === '') {
 			$gameName = 'Game';
 		}
-		$ctaLabel = $labels['cta'] ?? sprintf('Play on %s', $gameName);
-		$footer = $labels['footer'] ?? sprintf('Shared via %s', $gameName);
 
 		$attackerName = $this->sanitizeText($attackerName);
 		$defenderName = $this->sanitizeText($defenderName);
 
 		$titleFormat = $labels['title_format'] ?? '%s Battle: %s vs %s';
-		$title = sprintf($titleFormat, $gameName, $attackerName, $defenderName);
+		$previewTitle = sprintf($titleFormat, $gameName, $attackerName, $defenderName);
 
-		$lines = [];
-		$lines[] = '# ' . $title;
-		$lines[] = '';
-		$lines[] = sprintf('**%s** %s **%s**', $attackerName, $labels['vs'] ?? 'vs', $defenderName);
-		$lines[] = '';
-		$lines[] = sprintf('**%s** %s', $labels['result_label'] ?? 'Result', $resultText);
-		$lines[] = sprintf('**%s** %s', $labels['time_label'] ?? 'Time', $this->sanitizeText($formattedTime));
-		$lines[] = sprintf(
-			'**%s** %s',
-			$labels['attacker_lost'] ?? 'Attacker losses',
-			$attackerLoss
-		);
-		$lines[] = sprintf(
-			'**%s** %s',
-			$labels['defender_lost'] ?? 'Defender losses',
-			$defenderLoss
+		$body = $this->buildSnapBody(
+			$attackerName,
+			$defenderName,
+			$resultText,
+			$attackerLoss,
+			$defenderLoss,
+			$ctaUrl
 		);
 
-		$debrisLine = $this->formatResourceLine($combatReport['debris'] ?? [], $labels);
-		if ($debrisLine !== '') {
-			$lines[] = sprintf('**%s** %s', $labels['debris'] ?? 'Debris', $debrisLine);
-		}
-
-		if ($resultKey === 'a') {
-			$stealLine = $this->formatResourceLine($combatReport['steal'] ?? [], $labels);
-			if ($stealLine !== '') {
-				$lines[] = sprintf('**%s** %s', $labels['steal'] ?? 'Captured', $stealLine);
-			}
-		}
-
-		$lines[] = '';
-		$lines[] = '---';
-		$lines[] = '';
-		$lines[] = sprintf('[%s](%s)', $ctaLabel, $ctaUrl);
-		$lines[] = '';
-		$lines[] = '*' . $this->sanitizeText($footer) . '*';
-
-		$body = implode("\n", $lines);
-		if (strlen($body) > self::MAX_BODY_BYTES) {
-			$body = substr($body, 0, self::MAX_BODY_BYTES - 3) . '...';
-		}
-
-		$permlink = $this->buildPermlink($raportId, $rawTime);
-		$tags = ['moon', 'hivenova', 'gaming', 'hive-pizza', 'battle'];
+		$permlink = $this->buildSnapPermlink();
+		$tags = ['snaps', 'hivenova', 'gaming', 'hive-pizza', 'battle'];
 		$metadata = [
-			'tags'   => $tags,
-			'app'    => self::APP_TAG,
-			'format' => 'markdown',
+			'tags'  => $tags,
+			'app'   => self::APP_TAG,
+			'image' => [],
 		];
 		$jsonMetadata = (string) json_encode($metadata, JSON_UNESCAPED_SLASHES);
 		if ($jsonMetadata === '') {
@@ -170,14 +137,16 @@ class BattleShareComposer
 			'suggestedCommunities' => $suggested,
 			'draft'                => [
 				'hive_account'     => strtolower($hiveAccount),
-				'title'            => $title,
+				'title'            => '',
+				'preview_title'    => $previewTitle,
 				'body'             => $body,
 				'permlink'         => $permlink,
 				'tags'             => $tags,
-				'parent_author'    => '',
-				'parent_permlink'  => $tags[0],
+				'parent_author'    => self::SNAP_CONTAINER_AUTHOR,
+				'parent_permlink'  => '',
 				'json_metadata'    => $jsonMetadata,
 				'cta_url'          => $ctaUrl,
+				'snap_mode'        => true,
 			],
 		];
 	}
@@ -204,23 +173,33 @@ class BattleShareComposer
 		return sprintf('hivenova-battle-%s-%d', $slug, $timestamp);
 	}
 
-	/**
-	 * @param array<int|string, int|float|string> $resources
-	 * @param array<string, string> $labels
-	 */
-	private function formatResourceLine(array $resources, array $labels): string
+	public function buildSnapPermlink(): string
 	{
-		$parts = [];
-		foreach ([901, 902, 903] as $elementId) {
-			$amount = (float) ($resources[$elementId] ?? 0);
-			if ($amount <= 0) {
-				continue;
-			}
-			$name = $labels['resource_' . $elementId] ?? ('R' . $elementId);
-			$parts[] = $this->formatNumber($amount) . ' ' . $this->sanitizeText($name);
+		return 're-peaksnaps-' . base_convert((string) (int) (microtime(true) * 1000), 10, 36);
+	}
+
+	private function buildSnapBody(
+		string $attackerName,
+		string $defenderName,
+		string $resultText,
+		string $attackerLoss,
+		string $defenderLoss,
+		string $ctaUrl,
+	): string {
+		$body = sprintf(
+			"⚔️ %s vs %s — %s\nLosses: %s / %s\n%s",
+			$attackerName,
+			$defenderName,
+			$resultText,
+			$attackerLoss,
+			$defenderLoss,
+			$ctaUrl
+		);
+		if (strlen($body) > self::SNAP_CHAR_LIMIT) {
+			$body = substr($body, 0, self::SNAP_CHAR_LIMIT - 3) . '...';
 		}
 
-		return implode(', ', $parts);
+		return $body;
 	}
 
 	private function formatNumber(int|float|string $value): string

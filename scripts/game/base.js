@@ -561,17 +561,24 @@ const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
 	}
 }
 
+const BATTLE_SHARE_SNAP_CONTAINER = 'peak.snaps';
+const BATTLE_SHARE_SNAP_CHAR_LIMIT = 280;
+const BATTLE_SHARE_HIVE_API = 'https://api.hive.blog';
+
+let battleShareSnapContainer = null;
+let battleShareSnapContainerFetching = false;
+
 const buildBattleShareCommentOptions = (author, permlink) => ({
 	author,
 	permlink,
 	max_accepted_payout: '1000000.000 HBD',
-	percent_steem_dollars: 10000,
+	percent_hbd: 10000,
 	allow_votes: true,
 	allow_curation_rewards: true,
-	extensions: [[0, { beneficiaries: [] }]],
+	extensions: [],
 });
 
-const parseBattleShareMetadata = (draft, tags) => {
+const parseBattleShareMetadata = (draft, tags, snapMode) => {
 	let meta = draft.json_metadata;
 	if (typeof meta === 'string') {
 		try {
@@ -581,18 +588,95 @@ const parseBattleShareMetadata = (draft, tags) => {
 		}
 	}
 	if (!meta || typeof meta !== 'object') {
-		meta = { tags, app: 'hivenova/battle-share', format: 'markdown' };
+		meta = snapMode
+			? { tags, app: 'hivenova/battle-share', image: [] }
+			: { tags, app: 'hivenova/battle-share', format: 'markdown' };
 	}
 	if (!Array.isArray(meta.tags) || meta.tags.length === 0) {
 		meta.tags = tags;
 	}
-	if (!meta.format) {
+	if (!snapMode && !meta.format) {
 		meta.format = 'markdown';
 	}
 	if (!meta.app) {
 		meta.app = 'hivenova/battle-share';
 	}
+	if (snapMode && !Array.isArray(meta.image)) {
+		meta.image = [];
+	}
 	return meta;
+};
+
+const fetchBattleShareSnapContainer = (callback) => {
+	if (battleShareSnapContainer) {
+		callback(null, battleShareSnapContainer);
+		return;
+	}
+	if (battleShareSnapContainerFetching) {
+		callback('Container loading');
+		return;
+	}
+	battleShareSnapContainerFetching = true;
+	fetch(BATTLE_SHARE_HIVE_API, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			jsonrpc: '2.0',
+			method: 'condenser_api.get_discussions_by_blog',
+			params: [{ tag: BATTLE_SHARE_SNAP_CONTAINER, limit: 1 }],
+			id: 1,
+		}),
+	})
+		.then((response) => response.json())
+		.then((data) => {
+			battleShareSnapContainerFetching = false;
+			if (data.result && data.result.length > 0 && data.result[0].permlink) {
+				battleShareSnapContainer = data.result[0].permlink;
+				callback(null, battleShareSnapContainer);
+				return;
+			}
+			callback('No active Snap container');
+		})
+		.catch((error) => {
+			battleShareSnapContainerFetching = false;
+			callback(error && error.message ? error.message : 'Container fetch failed');
+		});
+};
+
+const broadcastBattleShare = (draft, parentAuthor, parentPermlink, title, tags, snapMode, callback) => {
+	if (typeof hive_keychain.requestBroadcast !== 'function') {
+		callback('Keychain requestBroadcast unavailable');
+		return;
+	}
+
+	const metadata = parseBattleShareMetadata(draft, tags, snapMode);
+	const jsonMetadata = typeof metadata === 'string' ? metadata : JSON.stringify(metadata);
+	const permlink = draft.permlink || ('re-peaksnaps-' + Date.now().toString(36));
+	const ops = [[
+		'comment',
+		{
+			parent_author: parentAuthor,
+			parent_permlink: parentPermlink,
+			author: draft.hive_account,
+			permlink,
+			title: title || '',
+			body: draft.body,
+			json_metadata: jsonMetadata,
+		},
+	]];
+
+	if (!snapMode) {
+		ops.push(['comment_options', buildBattleShareCommentOptions(draft.hive_account, permlink)]);
+	}
+
+	hive_keychain.requestBroadcast(draft.hive_account, ops, 'Posting', (response) => {
+		if (!response || !response.success) {
+			const err = (response && response.message) ? response.message : (response && response.error) ? response.error : 'Broadcast failed';
+			callback(err);
+			return;
+		}
+		callback(null, extractHiveTxId(response));
+	});
 };
 
 const HiveKeychainShareBattle = (draft, destination, callback) => {
@@ -609,56 +693,58 @@ const HiveKeychainShareBattle = (draft, destination, callback) => {
 		return;
 	}
 
-	const tags = Array.isArray(draft.tags) && draft.tags.length ? draft.tags.slice() : ['moon', 'hivenova', 'gaming'];
+	const destType = (destination && destination.type) || 'snaps';
+	const snapMode = destType === 'snaps';
+	const tags = Array.isArray(draft.tags) && draft.tags.length
+		? draft.tags.slice()
+		: (snapMode ? ['snaps', 'hivenova', 'gaming'] : ['moon', 'hivenova', 'gaming']);
+
+	if (snapMode) {
+		fetchBattleShareSnapContainer((err, containerPermlink) => {
+			if (err) {
+				if (typeof callback === 'function') {
+					callback(err);
+				}
+				return;
+			}
+			broadcastBattleShare(
+				draft,
+				BATTLE_SHARE_SNAP_CONTAINER,
+				containerPermlink,
+				'',
+				tags,
+				true,
+				callback
+			);
+		});
+		return;
+	}
+
 	let parentPerm = tags[0] || 'moon';
-	let parentAccount = null;
+	let parentAuthor = '';
+	let title = draft.preview_title || draft.title || '';
 
 	if (destination && destination.type === 'community') {
 		parentPerm = (destination.parent_permlink || '').trim();
-		const parentAuthor = (destination.parent_author || '').trim();
+		parentAuthor = (destination.parent_author || '').trim();
 		if (!parentPerm) {
 			if (typeof callback === 'function') {
 				callback('Community required');
 			}
 			return;
 		}
-		parentAccount = parentAuthor || null;
 		if (!tags.includes(parentPerm)) {
 			tags.unshift(parentPerm);
 		}
 	}
 
-	const metadata = parseBattleShareMetadata(draft, tags);
-	const commentOptions = buildBattleShareCommentOptions(draft.hive_account, draft.permlink);
+	broadcastBattleShare(draft, parentAuthor, parentPerm, title, tags, false, callback);
+};
 
-	if (typeof hive_keychain.requestPost !== 'function') {
+const prefetchBattleShareSnapContainer = (callback) => {
+	fetchBattleShareSnapContainer((err, permlink) => {
 		if (typeof callback === 'function') {
-			callback('Keychain requestPost unavailable');
+			callback(err, permlink);
 		}
-		return;
-	}
-
-	hive_keychain.requestPost(
-		draft.hive_account,
-		draft.title || '',
-		draft.body,
-		parentPerm,
-		parentAccount,
-		metadata,
-		draft.permlink,
-		commentOptions,
-		(response) => {
-			if (!response || !response.success) {
-				const err = (response && response.message) ? response.message : (response && response.error) ? response.error : 'Broadcast failed';
-				if (typeof callback === 'function') {
-					callback(err);
-				}
-				return;
-			}
-			const txid = extractHiveTxId(response);
-			if (typeof callback === 'function') {
-				callback(null, txid);
-			}
-		}
-	);
+	});
 };
