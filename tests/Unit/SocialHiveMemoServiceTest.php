@@ -29,7 +29,13 @@ class SocialHiveMemoServiceTest extends TestCase
 			$this->sends[] = $args;
 			return ['trx_id' => 'trx' . count($this->sends)];
 		});
-		SocialHiveMemoService::setMemoKeyFetcher(static fn (string $account): string => 'STM8LbCRyqtXk5VKbdFwK1YBgiafqprAd7yysN49PnDwAsyoMqQME');
+		SocialHiveMemoService::setMemoKeyFetcher(static function (string $account): string {
+			if ($account === 'gameacct') {
+				return 'STM6TqSJaS1aRj6p6yZEo5xicX7bvLhrfdVqi5ToNrKxHU3FRBEdW';
+			}
+
+			return 'STM8LbCRyqtXk5VKbdFwK1YBgiafqprAd7yysN49PnDwAsyoMqQME';
+		});
 		SocialHiveMemoService::setEncryptor(static fn (string $wif, string $pub, string $memo): string => '#enc:' . $memo);
 		SocialHiveMemoService::setNow(1_000_000);
 		Config::setInstance($this->makeConfig(), 1);
@@ -55,7 +61,7 @@ class SocialHiveMemoServiceTest extends TestCase
 	{
 		return new Config(array_merge([
 			'uni' => 1,
-			'game_name' => 'HiveNova',
+			'game_name' => 'Moon',
 			'hive_inactive_memo_account' => 'gameacct',
 			'hive_inactive_memo_active_key' => '5Ktestwifxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 			'hive_inactive_memo_asset' => 'HIVE',
@@ -70,6 +76,7 @@ class SocialHiveMemoServiceTest extends TestCase
 		$this->db->users[] = [
 			'id' => $id,
 			'hive_account' => 'playerone',
+			'universe' => 1,
 			'onlinetime' => 1_000_000 - SocialHiveMemoService::OFFLINE_AFTER - 1,
 			'lang' => 'en',
 		];
@@ -77,14 +84,16 @@ class SocialHiveMemoServiceTest extends TestCase
 
 	public function testBuildMemoPrefixesHashAndNamesSender(): void
 	{
-		$buddy = SocialHiveMemoService::buildMemo([], SocialHiveMemoService::KIND_BUDDY, 'Alice', 'HiveNova');
-		$pm = SocialHiveMemoService::buildMemo([], SocialHiveMemoService::KIND_PM, 'Bob', 'HiveNova');
+		$buddy = SocialHiveMemoService::buildMemo([], SocialHiveMemoService::KIND_BUDDY, 'Alice', 'Moon');
+		$pm = SocialHiveMemoService::buildMemo([], SocialHiveMemoService::KIND_PM, 'Bob', 'Moon');
 		$this->assertStringStartsWith('#', $buddy);
 		$this->assertStringContainsString('Alice', $buddy);
 		$this->assertStringContainsString('friend request', $buddy);
+		$this->assertStringContainsString('Moon', $buddy);
 		$this->assertStringStartsWith('#', $pm);
 		$this->assertStringContainsString('Bob', $pm);
 		$this->assertStringContainsString('private message', $pm);
+		$this->assertStringContainsString('Moon', $pm);
 	}
 
 	public function testDisabledConfigDoesNotEnqueue(): void
@@ -166,7 +175,93 @@ class SocialHiveMemoServiceTest extends TestCase
 			$this->sends[0][3]
 		);
 		$this->assertStringContainsString('Alice', $decoded);
-		$this->assertStringContainsString('HiveNova', $decoded);
+		$this->assertStringContainsString('Moon', $decoded);
+	}
+
+	public function testWrongMemoKeyDoesNotBroadcastUndecryptableMemo(): void
+	{
+		SocialHiveMemoService::setEncryptor(null);
+		Config::setInstance($this->makeConfig([
+			'hive_social_memo_memo_key' => '5K1gv5rEtHiACVTFq9ikhEijezMh4rkbbTPqu4CAGMnXcTLC1su',
+		]), 1);
+		$this->addOfflineLinkedUser();
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertSame([], $this->sends);
+		$this->assertNull($this->db->queue[0]['sent_at']);
+	}
+
+	public function testCronUsesRecipientUniverseGameName(): void
+	{
+		Config::setInstance($this->makeConfig(['game_name' => 'Andromeda']), 2);
+		$ref = new ReflectionProperty(Universe::class, 'availableUniverses');
+		$ref->setAccessible(true);
+		$ref->setValue(null, [1, 2]);
+
+		$this->db->users[] = [
+			'id' => 7,
+			'hive_account' => 'playerone',
+			'universe' => 2,
+			'onlinetime' => 1_000_000 - SocialHiveMemoService::OFFLINE_AFTER - 1,
+			'lang' => 'en',
+		];
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertCount(1, $this->sends);
+		$this->assertStringContainsString('Andromeda', $this->sends[0][3]);
+	}
+
+	public function testCronFallsBackToRootGameNameWhenUniverseConfigMissing(): void
+	{
+		$this->db->users[] = [
+			'id' => 7,
+			'hive_account' => 'playerone',
+			'universe' => 2,
+			'onlinetime' => 1_000_000 - SocialHiveMemoService::OFFLINE_AFTER - 1,
+			'lang' => 'en',
+		];
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertCount(1, $this->sends);
+		$this->assertStringContainsString('Moon', $this->sends[0][3]);
+	}
+
+	public function testMissingSenderMemoPublicKeySkipsSend(): void
+	{
+		SocialHiveMemoService::setMemoKeyFetcher(static function (string $account): string {
+			if ($account === 'gameacct') {
+				return '';
+			}
+
+			return 'STM8LbCRyqtXk5VKbdFwK1YBgiafqprAd7yysN49PnDwAsyoMqQME';
+		});
+		$this->addOfflineLinkedUser();
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertSame([], $this->sends);
+		$this->assertNull($this->db->queue[0]['sent_at']);
+	}
+
+	public function testInvalidMemoWifSkipsSend(): void
+	{
+		Config::setInstance($this->makeConfig([
+			'hive_social_memo_memo_key' => 'not-a-valid-wif',
+		]), 1);
+		$this->addOfflineLinkedUser();
+		$service = new SocialHiveMemoService();
+		$service->notifyBuddyRequest(7, 'Alice');
+		$service->run();
+
+		$this->assertSame([], $this->sends);
+		$this->assertNull($this->db->queue[0]['sent_at']);
 	}
 
 	public function testFailedBroadcastLeavesRowRetryable(): void

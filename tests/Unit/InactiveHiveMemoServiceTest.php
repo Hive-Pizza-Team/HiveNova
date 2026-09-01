@@ -62,7 +62,7 @@ class InactiveHiveMemoServiceTest extends TestCase
 	{
 		return new Config(array_merge([
 			'uni' => 1,
-			'game_name' => 'HiveNova',
+			'game_name' => 'Moon',
 			'del_user_automatic' => 90,
 			'hive_inactive_memo_active' => 1,
 			'hive_inactive_memo_armed' => 1,
@@ -224,7 +224,7 @@ class InactiveHiveMemoServiceTest extends TestCase
 
 	public function testBuildMemoNeverStartsWithHash(): void
 	{
-		$memo = InactiveHiveMemoService::buildMemo([], 'HiveNova', true);
+		$memo = InactiveHiveMemoService::buildMemo([], 'Moon', true);
 		$this->assertStringStartsNotWith('#', $memo);
 		$this->assertStringContainsString('(I)', $memo);
 	}
