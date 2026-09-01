@@ -317,12 +317,22 @@ function showGameToast(text, className, durationMs) {
 		.show();
 	window.setTimeout(function () {
 		tip.fadeOut(400, function () {
-			tip.removeClass('notify notify-error notify-toast notify-success').css({
-				transform: '',
-				zIndex: '',
-				bottom: '',
-				top: ''
-			});
+			if (typeof resetTooltipOverlay === 'function') {
+				resetTooltipOverlay(tip);
+			} else {
+				tip.removeClass('notify notify-error notify-toast notify-success').css({
+					position: '',
+					top: '',
+					left: '',
+					right: '',
+					bottom: '',
+					transform: '',
+					zIndex: '',
+					maxWidth: '',
+					textAlign: ''
+				});
+			}
+			tip.hide();
 		});
 	}, durationMs || 2500);
 }
