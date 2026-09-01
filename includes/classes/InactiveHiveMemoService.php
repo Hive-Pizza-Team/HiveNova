@@ -147,7 +147,7 @@ class InactiveHiveMemoService
 		$uniConfig = Config::get((int) $player['universe']);
 		$wipeOn = (int) $uniConfig->del_user_automatic !== 0;
 		$lang = $this->languageStrings($langCache, (string) ($player['lang'] ?? 'en'));
-		$memo = self::buildMemo($lang, (string) $config->game_name, $wipeOn);
+		$memo = self::buildMemo($lang, (string) $uniConfig->game_name, $wipeOn);
 
 		$result = $this->transfer->send($from, $to, $amount, $asset, $memo, $wif);
 		if ($result['ok']) {
