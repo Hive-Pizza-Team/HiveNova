@@ -42,6 +42,7 @@ class BattleShareComposerTest extends TestCase
 			'units'  => [1200, 800],
 			'debris' => [901 => 50000, 902 => 25000],
 			'steal'  => [901 => 100000, 902 => 50000, 903 => 10000],
+			'koords' => [4, 128, 7, 1],
 			'players' => [
 				1 => ['name' => 'Alice'],
 				2 => ['name' => 'Bob'],
@@ -259,9 +260,12 @@ class BattleShareComposerTest extends TestCase
 			$this->labels
 		);
 
-		$this->assertStringContainsString('Losses:', $result['draft']['body']);
-		$this->assertStringContainsString('1,200', $result['draft']['body']);
-		$this->assertStringContainsString('800', $result['draft']['body']);
+		$this->assertStringContainsString('Loss 1,200/800', $result['draft']['body']);
+		$this->assertStringContainsString('LocalMoon:', $result['draft']['body']);
+		$this->assertStringContainsString('💥 50KM · 25KC', $result['draft']['body']);
+		$this->assertStringContainsString('📦 100KM · 50KC · 10KD', $result['draft']['body']);
+		$this->assertStringContainsString('📍 [4:128:7]', $result['draft']['body']);
+		$this->assertStringContainsString('🕐 2024-01-01 12:00', $result['draft']['body']);
 	}
 
 	public function testBuildSnapPermlinkFormat(): void
@@ -307,16 +311,21 @@ class BattleShareComposerTest extends TestCase
 			true,
 			'battlehall'
 		);
-		$body = sprintf(
-			"⚔️ %s vs %s — %s\nLosses: %s / %s\n%s",
+		$result = $this->composer->compose(
+			$this->sampleReport(),
+			'1002c6a3ab8aff2c6faeb1fbb6a9320b',
+			42,
+			'aliceaaa',
+			true,
+			'https://moon.hive.pizza/uni1',
 			'Alice',
 			'Bob',
-			'Attacker won',
-			'1,200',
-			'800',
-			$url
+			'2024-01-01 12:00',
+			$this->labels,
+			'battlehall'
 		);
 
-		$this->assertLessThanOrEqual(BattleShareComposer::SNAP_CHAR_LIMIT, strlen($body));
+		$this->assertLessThanOrEqual(BattleShareComposer::SNAP_CHAR_LIMIT, strlen($result['draft']['body']));
+		$this->assertStringContainsString($url, $result['draft']['body']);
 	}
 }
