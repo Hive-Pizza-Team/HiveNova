@@ -561,6 +561,40 @@ const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
 	}
 }
 
+const buildBattleShareCommentOptions = (author, permlink) => ({
+	author,
+	permlink,
+	max_accepted_payout: '1000000.000 HBD',
+	percent_steem_dollars: 10000,
+	allow_votes: true,
+	allow_curation_rewards: true,
+	extensions: [[0, { beneficiaries: [] }]],
+});
+
+const parseBattleShareMetadata = (draft, tags) => {
+	let meta = draft.json_metadata;
+	if (typeof meta === 'string') {
+		try {
+			meta = JSON.parse(meta);
+		} catch (e) {
+			meta = null;
+		}
+	}
+	if (!meta || typeof meta !== 'object') {
+		meta = { tags, app: 'hivenova/battle-share', format: 'markdown' };
+	}
+	if (!Array.isArray(meta.tags) || meta.tags.length === 0) {
+		meta.tags = tags;
+	}
+	if (!meta.format) {
+		meta.format = 'markdown';
+	}
+	if (!meta.app) {
+		meta.app = 'hivenova/battle-share';
+	}
+	return meta;
+};
+
 const HiveKeychainShareBattle = (draft, destination, callback) => {
 	if (typeof hive_keychain === 'undefined') {
 		if (typeof callback === 'function') {
@@ -575,37 +609,44 @@ const HiveKeychainShareBattle = (draft, destination, callback) => {
 		return;
 	}
 
-	let parentAuthor = '';
-	let parentPermlink = '';
+	const tags = Array.isArray(draft.tags) && draft.tags.length ? draft.tags.slice() : ['moon', 'hivenova', 'gaming'];
+	let parentPerm = tags[0] || 'moon';
+	let parentAccount = null;
+
 	if (destination && destination.type === 'community') {
-		parentAuthor = destination.parent_author || '';
-		parentPermlink = destination.parent_permlink || '';
-		if (!parentAuthor || !parentPermlink) {
+		parentPerm = (destination.parent_permlink || '').trim();
+		const parentAuthor = (destination.parent_author || '').trim();
+		if (!parentPerm) {
 			if (typeof callback === 'function') {
 				callback('Community required');
 			}
 			return;
 		}
-	} else {
-		// Root blog post: parent_permlink is the primary category (first tag), same as HiveCommentPoster.
-		const tags = draft.tags || [];
-		parentPermlink = draft.parent_permlink || tags[0] || 'moon';
+		parentAccount = parentAuthor || null;
+		if (!tags.includes(parentPerm)) {
+			tags.unshift(parentPerm);
+		}
 	}
 
-	const comment = {
-		parent_author: parentAuthor,
-		parent_permlink: parentPermlink,
-		author: draft.hive_account,
-		permlink: draft.permlink,
-		title: draft.title || '',
-		body: draft.body,
-		json_metadata: draft.json_metadata || JSON.stringify({ tags: draft.tags || ['hivenova'], app: 'hivenova/battle-share' }),
-	};
+	const metadata = parseBattleShareMetadata(draft, tags);
+	const commentOptions = buildBattleShareCommentOptions(draft.hive_account, draft.permlink);
 
-	hive_keychain.requestBroadcast(
+	if (typeof hive_keychain.requestPost !== 'function') {
+		if (typeof callback === 'function') {
+			callback('Keychain requestPost unavailable');
+		}
+		return;
+	}
+
+	hive_keychain.requestPost(
 		draft.hive_account,
-		[['comment', comment]],
-		'Posting',
+		draft.title || '',
+		draft.body,
+		parentPerm,
+		parentAccount,
+		metadata,
+		draft.permlink,
+		commentOptions,
 		(response) => {
 			if (!response || !response.success) {
 				const err = (response && response.message) ? response.message : (response && response.error) ? response.error : 'Broadcast failed';

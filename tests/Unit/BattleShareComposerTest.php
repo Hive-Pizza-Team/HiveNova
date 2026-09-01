@@ -165,7 +165,6 @@ class BattleShareComposerTest extends TestCase
 		$communities = BattleShareComposer::suggestedCommunities();
 		$this->assertNotEmpty($communities);
 		foreach ($communities as $community) {
-			$this->assertNotSame('', $community['author']);
 			$this->assertNotSame('', $community['permlink']);
 		}
 	}
