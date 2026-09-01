@@ -51,6 +51,9 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public bool $schemaReady = true;
 
+    /** @var array<int, array<string, mixed>> */
+    public array $alliances = [];
+
     public int $planetCount = 1;
 
     public int $expeditionCount = 0;
@@ -434,6 +437,18 @@ class FakeAchievementDatabase implements DatabaseInterface
 
         if (str_contains($qry, 'MAX(') && str_contains($qry, 'FROM %%PLANETS%%')) {
             return $this->planetMaxLevels;
+        }
+
+        if (str_contains($qry, 'ally_tag FROM %%ALLIANCE%%') && str_contains($qry, 'WHERE id')) {
+            $allyId = (int) ($params[':id'] ?? 0);
+            $row = $this->alliances[$allyId] ?? null;
+            if ($row === null) {
+                return $field === false ? null : false;
+            }
+            if ($field === 'ally_tag') {
+                return $row['ally_tag'] ?? false;
+            }
+            return $field === false ? $row : ($row[$field] ?? false);
         }
 
         if (str_contains($qry, 'COUNT(*) FROM %%ALLIANCE%%')) {

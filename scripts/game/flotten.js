@@ -10,6 +10,29 @@ function updateVars($reset_acs = true)
 	dataFlyConsumption = GetConsumption();
 	dataFlyCargoSpace = storage();
 	refreshFormData();
+	updateTargetInfo();
+}
+
+function updateTargetInfo()
+{
+	var targetInfoEl = document.getElementById('targetInfo');
+	if (!targetInfoEl) {
+		return;
+	}
+
+	var galaxy = parseInt(document.getElementsByName("galaxy")[0].value, 10);
+	var system = parseInt(document.getElementsByName("system")[0].value, 10);
+	var planet = parseInt(document.getElementsByName("planet")[0].value, 10);
+	var type = document.getElementsByName("type")[0].value;
+
+	if (!(galaxy > 0) || !(system > 0) || !(planet > 0)) {
+		targetInfoEl.textContent = '';
+		return;
+	}
+
+	$.getJSON('game.php?page=fleetStep1&mode=targetInfo&galaxy=' + galaxy + '&system=' + system + '&planet=' + planet + '&type=' + type, function(data) {
+		targetInfoEl.textContent = data && data.label ? data.label : '';
+	});
 }
 
 function GetDistance() {

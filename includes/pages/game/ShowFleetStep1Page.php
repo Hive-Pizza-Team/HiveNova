@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FrequentLocationService;
+use HiveNova\Core\FleetTargetInfoService;
 use HiveNova\Core\Session;
 
 /**
@@ -339,6 +340,30 @@ class ShowFleetStep1Page extends AbstractGamePage
 		return $ACSList;
 	}
 	
+	function targetInfo()
+	{
+		$targetGalaxy = HTTP::_GP('galaxy', 0);
+		$targetSystem = HTTP::_GP('system', 0);
+		$targetPlanet = HTTP::_GP('planet', 0);
+		$targetType = HTTP::_GP('type', 1);
+
+		if (!FleetFunctions::HasCompleteTargetCoords($targetGalaxy, $targetSystem, $targetPlanet)) {
+			$this->sendJSON(['label' => '']);
+		}
+
+		$info = FleetTargetInfoService::resolve(
+			$targetGalaxy,
+			$targetSystem,
+			$targetPlanet,
+			$targetType,
+			Universe::current()
+		);
+
+		$this->sendJSON([
+			'label' => FleetTargetInfoService::formatLabel($info),
+		]);
+	}
+
 	function checkTarget()
 	{
 		global $PLANET, $LNG, $USER, $resource;

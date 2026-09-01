@@ -1503,3 +1503,4 @@ $LNG['season_discord_wipe_start'] = 'Season %d wipe starting — universe closed
 $LNG['season_discord_wipe_done'] = 'Season wipe complete — universe online. Season %d has started.';
 $LNG['season_discord_payouts'] = 'Season %d Pizza payouts have been sent.';
 $LNG['season_discord_blog'] = 'Season %d recap posted: %s';
+$LNG['fl_target_uninhabited'] = 'Uninhabited';
