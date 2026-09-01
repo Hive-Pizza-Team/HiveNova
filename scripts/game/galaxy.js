@@ -52,12 +52,4 @@ $(function () {
 		$('#auto').removeAttr('name');
 		form.submit();
 	});
-
-	// Mobile: sticky tooltips are omitted server-side when hn_compact=1; strip any leftover.
-	if (window.matchMedia('(max-width: 699px)').matches) {
-		document.querySelectorAll('[data-tooltip-content]').forEach(function (el) {
-			el.removeAttribute('data-tooltip-content');
-			el.classList.remove('tooltip_sticky', 'tooltip');
-		});
-	}
 });

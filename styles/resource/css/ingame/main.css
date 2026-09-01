@@ -1964,6 +1964,18 @@ table.tablesorter thead tr .headerSortDown {
         height: 22px;
     }
 
+    .galaxy-planet-row td:nth-child(2) a,
+    .galaxy-planet-row td:nth-child(4) a,
+    .galaxy-planet-row td:nth-child(5) a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        min-height: 32px;
+        position: relative;
+        z-index: 1;
+    }
+
     .galaxy-planet-row td:nth-child(3) {
         order: 2;
         flex: 1 1 4rem;
