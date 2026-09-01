@@ -93,13 +93,18 @@ class BattleShareComposer
 		$defenderLoss = $this->formatNumber($combatReport['units'][1] ?? 0);
 
 		$ctaUrl = $this->buildCtaUrl($baseUrl, $userId, $refActive);
-		$ctaLabel = $labels['cta'] ?? 'Play Moon on HiveNova';
-		$footer = $labels['footer'] ?? 'Shared via HiveNova';
+		$gameName = $this->sanitizeText((string) ($labels['game_name'] ?? ''));
+		if ($gameName === '') {
+			$gameName = 'Game';
+		}
+		$ctaLabel = $labels['cta'] ?? sprintf('Play on %s', $gameName);
+		$footer = $labels['footer'] ?? sprintf('Shared via %s', $gameName);
 
 		$attackerName = $this->sanitizeText($attackerName);
 		$defenderName = $this->sanitizeText($defenderName);
 
-		$title = sprintf('HiveNova Battle: %s vs %s', $attackerName, $defenderName);
+		$titleFormat = $labels['title_format'] ?? '%s Battle: %s vs %s';
+		$title = sprintf($titleFormat, $gameName, $attackerName, $defenderName);
 
 		$lines = [];
 		$lines[] = '# ' . $title;

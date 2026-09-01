@@ -24,8 +24,10 @@ class BattleShareComposerTest extends TestCase
 			'debris'          => 'Debris',
 			'steal'           => 'Captured',
 			'vs'              => 'vs',
-			'cta'             => 'Play Moon on HiveNova',
-			'footer'          => 'Shared via HiveNova',
+			'game_name'       => 'LocalMoon',
+			'title_format'    => '%s Battle: %s vs %s',
+			'cta'             => 'Play on LocalMoon',
+			'footer'          => 'Shared via LocalMoon',
 			'resource_901'    => 'Metal',
 			'resource_902'    => 'Crystal',
 			'resource_903'    => 'Deuterium',
@@ -64,6 +66,7 @@ class BattleShareComposerTest extends TestCase
 
 		$this->assertTrue($result['canShare']);
 		$this->assertNotNull($result['draft']);
+		$this->assertSame('LocalMoon Battle: Alice vs Bob', $result['draft']['title']);
 		$this->assertStringContainsString('Attacker won', $result['draft']['body']);
 		$this->assertStringContainsString('https://moon.hive.pizza/index.php?ref=42', $result['draft']['body']);
 		$this->assertSame('hivenova-battle-abc123-1700000000', $result['draft']['permlink']);

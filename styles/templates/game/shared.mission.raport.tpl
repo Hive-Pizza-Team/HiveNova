@@ -317,23 +317,21 @@ $(function() {
 	var $tabs = $('.battle-report__round-tab');
 	var $panels = $('.battle-report__round');
 
-	if (!$tabs.length) {
-		return;
-	}
-
-	$panels.hide().addClass('is-hidden');
-	$panels.first().show().removeClass('is-hidden');
-	$tabs.removeClass('is-active');
-	$tabs.first().addClass('is-active');
-
-	$tabs.on('click', function(event) {
-		event.preventDefault();
-		var index = $(this).data('round-tab');
-		$tabs.removeClass('is-active');
-		$(this).addClass('is-active');
+	if ($tabs.length) {
 		$panels.hide().addClass('is-hidden');
-		$panels.filter('[data-round-panel="' + index + '"]').show().removeClass('is-hidden');
-	});
+		$panels.first().show().removeClass('is-hidden');
+		$tabs.removeClass('is-active');
+		$tabs.first().addClass('is-active');
+
+		$tabs.on('click', function(event) {
+			event.preventDefault();
+			var index = $(this).data('round-tab');
+			$tabs.removeClass('is-active');
+			$(this).addClass('is-active');
+			$panels.hide().addClass('is-hidden');
+			$panels.filter('[data-round-panel="' + index + '"]').show().removeClass('is-hidden');
+		});
+	}
 
 {if $canShareToHive}
 	var $modal = $('#battleShareModal');

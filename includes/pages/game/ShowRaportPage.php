@@ -53,9 +53,55 @@ class ShowRaportPage extends AbstractGamePage
 		return implode(' & ', $names);
 	}
 
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function battleShareAssignVars(
+		array $combatReport,
+		string $raportId,
+		string $attackerName,
+		string $defenderName,
+		string $formattedTime,
+		int $rawTime,
+	): array {
+		global $USER;
+
+		$shareContext = (new BattleShareComposer())->compose(
+			$combatReport + ['time' => $rawTime],
+			$raportId,
+			(int) $USER['id'],
+			(string) ($USER['hive_account'] ?? ''),
+			(int) Config::get()->ref_active === 1,
+			PROTOCOL . HTTP_HOST . HTTP_ROOT,
+			$attackerName,
+			$defenderName,
+			$formattedTime,
+			$this->battleShareLabels()
+		);
+
+		return [
+			'canShareToHive' => $shareContext['canShare'],
+			'shareDraft' => $shareContext['draft'],
+			'shareDraftJson' => $shareContext['draft'] !== null
+				? json_encode($shareContext['draft'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)
+				: '',
+			'suggestedCommunities' => $shareContext['suggestedCommunities'],
+			'suggestedCommunitiesJson' => json_encode(
+				$shareContext['suggestedCommunities'],
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
+			),
+			'hiveAccount' => (string) ($USER['hive_account'] ?? ''),
+		];
+	}
+
 	private function battleShareLabels(): array
 	{
 		global $LNG;
+
+		$gameName = trim((string) Config::get()->game_name);
+		if ($gameName === '') {
+			$gameName = 'Game';
+		}
 
 		return [
 			'result_attacker' => $LNG['sys_attacker_won'],
@@ -68,8 +114,10 @@ class ShowRaportPage extends AbstractGamePage
 			'debris'          => $LNG['debree_field_1'],
 			'steal'           => $LNG['sys_stealed_ressources'],
 			'vs'              => $LNG['battle_share_vs'],
-			'cta'             => $LNG['battle_share_cta'],
-			'footer'          => $LNG['battle_share_footer'],
+			'game_name'       => $gameName,
+			'title_format'    => $LNG['battle_share_title'],
+			'cta'             => sprintf($LNG['battle_share_cta'], $gameName),
+			'footer'          => sprintf($LNG['battle_share_footer'], $gameName),
 			'resource_901'    => $LNG['tech'][901],
 			'resource_902'    => $LNG['tech'][902],
 			'resource_903'    => $LNG['tech'][903],
@@ -136,7 +184,7 @@ class ShowRaportPage extends AbstractGamePage
 	{
 		global $LNG, $USER;
 		
-		$LNG->includeData(array('FLEET'));
+		$LNG->includeData(array('FLEET', 'TECH'));
 		$this->setWindow('popup');
 
 		$db = Database::get();
@@ -169,16 +217,33 @@ class ShowRaportPage extends AbstractGamePage
 		return;
 		}
 		
-		$combatReport			= safe_unserialize($reportData['raport']);
-		$combatReport['time']	= _date($LNG['php_tdformat'], $combatReport['time'], $USER['timezone']);
-		$combatReport			= $this->BCWrapperPreRev2321($combatReport);
+		$combatReport = safe_unserialize($reportData['raport']);
+		if (!is_array($combatReport)) {
+			$this->printMessage($LNG['sys_raport_not_found']);
+			return;
+		}
+
+		$rawTime = (int) ($combatReport['time'] ?? 0);
+		$combatReport = $this->BCWrapperPreRev2321($combatReport);
 		$combatReport['stealUnprofitable'] = $this->isStealUnprofitable($combatReport);
+		$formattedTime = _date($LNG['php_tdformat'], $rawTime, $USER['timezone']);
+		$combatReport['time'] = $formattedTime;
+
+		$attackerName = (string) ($reportData['attacker'] ?? '');
+		$defenderName = (string) ($reportData['defender'] ?? '');
 
 		$this->assign(array(
 			'Raport'	=> $combatReport,
 			'Info'		=> array($reportData["attacker"], $reportData["defender"]),
 			'pageTitle'	=> $LNG['lm_topkb'],
 			'hideSidebarMenu' => true,
+		) + $this->battleShareAssignVars(
+			$combatReport,
+			$RID,
+			$attackerName,
+			$defenderName,
+			$formattedTime,
+			$rawTime
 		));
 		
 		$this->display('shared.mission.raport.tpl');
@@ -232,34 +297,18 @@ class ShowRaportPage extends AbstractGamePage
 
 		$attackerName = $this->resolveParticipantNames($combatReport, (string) ($reportData['attacker'] ?? ''));
 		$defenderName = $this->resolveParticipantNames($combatReport, (string) ($reportData['defender'] ?? ''));
-		$shareContext = (new BattleShareComposer())->compose(
-			$combatReport + ['time' => $rawTime],
-			$RID,
-			(int) $USER['id'],
-			(string) ($USER['hive_account'] ?? ''),
-			(int) Config::get()->ref_active === 1,
-			PROTOCOL . HTTP_HOST . HTTP_ROOT,
-			$attackerName,
-			$defenderName,
-			$formattedTime,
-			$this->battleShareLabels()
-		);
 
 		$this->assign(array(
 			'Raport'	=> $combatReport,
 			'pageTitle'	=> $LNG['sys_mess_attack_report'],
 			'hideSidebarMenu' => true,
-			'canShareToHive' => $shareContext['canShare'],
-			'shareDraft' => $shareContext['draft'],
-			'shareDraftJson' => $shareContext['draft'] !== null
-				? json_encode($shareContext['draft'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)
-				: '',
-			'suggestedCommunities' => $shareContext['suggestedCommunities'],
-			'suggestedCommunitiesJson' => json_encode(
-				$shareContext['suggestedCommunities'],
-				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
-			),
-			'hiveAccount' => (string) ($USER['hive_account'] ?? ''),
+		) + $this->battleShareAssignVars(
+			$combatReport,
+			$RID,
+			$attackerName,
+			$defenderName,
+			$formattedTime,
+			$rawTime
 		));
 		
 		$this->display('shared.mission.raport.tpl');
