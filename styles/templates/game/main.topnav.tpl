@@ -217,6 +217,7 @@ $(function() {
 	}, true);
 {/if}
 {/foreach}
+	HiveNovaTopnav.initVisibilityResync();
 });
 </script>
 <script src="scripts/game/topnav.js"></script>

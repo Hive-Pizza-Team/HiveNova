@@ -51,12 +51,16 @@
 	var needHiveForDeposit = "{$LNG.js_need_hive_for_deposit|escape:'javascript'}";
 	var relativeTime = Math.floor(Date.now() / 1000);
 
-	setInterval(function() {
-		if(relativeTime < Math.floor(Date.now() / 1000)) {
-		serverTime.setSeconds(serverTime.getSeconds()+1);
-		relativeTime++;
+	function syncGameClockToWall() {
+		var nowSec = Math.floor(Date.now() / 1000);
+		var drift = nowSec - relativeTime;
+		if (drift > 0) {
+			serverTime.setTime(serverTime.getTime() + drift * 1000);
+			relativeTime = nowSec;
 		}
-	}, 1000);
+	}
+
+	setInterval(syncGameClockToWall, 1000);
 	</script>
 	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
