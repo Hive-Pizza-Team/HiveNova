@@ -2,6 +2,7 @@
 
 namespace HiveNova\Mission;
 
+use HiveNova\Core\BattleReportId;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\EventFirehoseWriter;
@@ -365,7 +366,7 @@ abstract class MissionCaseCombat extends MissionFunctions implements Mission
 		require_once 'includes/classes/missions/functions/GenerateReport.php';
 		$reportData	= GenerateReport($combatResult, $reportInfo);
 
-		$reportID	= md5(uniqid('', true).TIMESTAMP);
+		$reportID	= BattleReportId::generate();
 
 		$sql	= 'INSERT INTO %%RW%% SET
 		rid 		= :reportId,
