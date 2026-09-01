@@ -18,12 +18,12 @@ class BattleShareComposer
 	{
 		return [
 			[
-				'author'   => 'hive-127918',
+				'author'   => '',
 				'permlink' => 'hive-gaming',
 				'label'    => 'Hive Gaming',
 			],
 			[
-				'author'   => 'hive-193084',
+				'author'   => '',
 				'permlink' => 'hivepizza',
 				'label'    => 'Hive Pizza',
 			],
