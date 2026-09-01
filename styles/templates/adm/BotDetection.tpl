@@ -7,6 +7,7 @@
 		<th>Fleets</th>
 		<th>Buildings</th>
 		<th>Research</th>
+		<th>Shipyard</th>
 		<th>Longest Break</th>
 	</tr>
 	{if $suspects}
@@ -18,12 +19,13 @@
 			<td class="center" style="padding:3px;">{$s.fleet_count}</td>
 			<td class="center" style="padding:3px;">{$s.building_count}</td>
 			<td class="center" style="padding:3px;">{$s.research_count}</td>
+			<td class="center" style="padding:3px;">{$s.shipyard_count}</td>
 			<td class="center" style="padding:3px;">{$s.max_gap_human}</td>
 		</tr>
 		{/foreach}
 	{else}
 	<tr>
-		<td colspan="7" class="center" style="padding:6px;">No suspicious players detected.</td>
+		<td colspan="8" class="center" style="padding:6px;">No suspicious players detected.</td>
 	</tr>
 	{/if}
 </table>

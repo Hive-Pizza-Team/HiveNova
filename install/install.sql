@@ -510,7 +510,8 @@ CREATE TABLE `%PREFIX%log_fleets` (
   `fleet_state` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `fleet_meta` text,
   PRIMARY KEY (`fleet_id`),
-  KEY `BashRule` (`fleet_owner`,`fleet_end_id`,`fleet_start_time`,`fleet_mission`,`fleet_state`)
+  KEY `BashRule` (`fleet_owner`,`fleet_end_id`,`fleet_start_time`,`fleet_mission`,`fleet_state`),
+  KEY `universe_start` (`fleet_universe`,`fleet_start_time`,`fleet_owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%lostpassword` (
@@ -1614,7 +1615,8 @@ CREATE TABLE `%PREFIX%log_buildings` (
   `deuterium` bigint(20) unsigned NOT NULL DEFAULT 0,
   `queued_at` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `owner_time` (`owner_id`, `queued_at`)
+  KEY `owner_time` (`owner_id`, `queued_at`),
+  KEY `universe_time` (`universe`, `queued_at`, `owner_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%log_research` (
@@ -1628,7 +1630,8 @@ CREATE TABLE `%PREFIX%log_research` (
   `deuterium` bigint(20) unsigned NOT NULL DEFAULT 0,
   `queued_at` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `owner_time` (`owner_id`, `queued_at`)
+  KEY `owner_time` (`owner_id`, `queued_at`),
+  KEY `universe_time` (`universe`, `queued_at`, `owner_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%log_shipyard` (
@@ -1643,8 +1646,16 @@ CREATE TABLE `%PREFIX%log_shipyard` (
   `deuterium` bigint(20) unsigned NOT NULL DEFAULT 0,
   `queued_at` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `owner_time` (`owner_id`, `queued_at`)
+  KEY `owner_time` (`owner_id`, `queued_at`),
+  KEY `universe_time` (`universe`, `queued_at`, `owner_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `%PREFIX%bot_detection_state` (
+  `universe` tinyint(3) unsigned NOT NULL,
+  `last_digest_hash` char(64) NOT NULL DEFAULT '',
+  `updated_at` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`universe`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%achievements` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
