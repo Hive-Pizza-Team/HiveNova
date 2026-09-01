@@ -575,8 +575,8 @@ const HiveKeychainShareBattle = (draft, destination, callback) => {
 		return;
 	}
 
-	let parentAuthor = draft.parent_author || '';
-	let parentPermlink = draft.parent_permlink || 'hivenova';
+	let parentAuthor = '';
+	let parentPermlink = '';
 	if (destination && destination.type === 'community') {
 		parentAuthor = destination.parent_author || '';
 		parentPermlink = destination.parent_permlink || '';
@@ -586,6 +586,10 @@ const HiveKeychainShareBattle = (draft, destination, callback) => {
 			}
 			return;
 		}
+	} else {
+		// Root blog post: parent_permlink is the primary category (first tag), same as HiveCommentPoster.
+		const tags = draft.tags || [];
+		parentPermlink = draft.parent_permlink || tags[0] || 'moon';
 	}
 
 	const comment = {
