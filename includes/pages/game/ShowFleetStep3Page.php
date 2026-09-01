@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FleetDispatchService;
+use HiveNova\Core\FleetTargetInfoService;
 use HiveNova\Repository\UserRepository;
 
 /**
@@ -308,12 +309,19 @@ class ShowFleetStep3Page extends AbstractGamePage
 		}
 
 		$this->tplObj->gotoside('game.php?page=fleetTable');
+		$targetInfo = FleetTargetInfoService::resolve(
+			$targetGalaxy,
+			$targetSystem,
+			$targetPlanet,
+			$targetType,
+			Universe::current()
+		);
 		$this->assign(array(
 			'targetMission'  => $targetMission,
 			'distance'       => $distance,
 			'consumption'    => $consumption,
 			'from'           => $PLANET['galaxy'] . ":" . $PLANET['system'] . ":" . $PLANET['planet'],
-			'destination'    => $targetGalaxy . ":" . $targetSystem . ":" . $targetPlanet,
+			'destination'    => FleetTargetInfoService::formatLabel($targetInfo),
 			'fleetStartTime' => _date($LNG['php_tdformat'], $fleetStartTime, $USER['timezone']),
 			'fleetEndTime'   => _date($LNG['php_tdformat'], $fleetEndTime, $USER['timezone']),
 			'MaxFleetSpeed'  => $fleetMaxSpeed,

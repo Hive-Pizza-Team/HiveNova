@@ -2209,6 +2209,13 @@ table.tablesorter thead tr .headerSortDown {
         background: var(--color-accent);
     }
 
+    .fleet-target-info {
+        margin-top: 6px;
+        color: var(--color-text-muted, #9aa0a6);
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
     .fleet-select-table .fleet-ship-stepper button.fleet-ship-btn {
         min-height: 36px;
         min-width: 36px;

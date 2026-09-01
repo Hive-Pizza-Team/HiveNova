@@ -42,8 +42,18 @@ trait FakePlanetQueryHandler
                 if ((int) ($row['id_owner'] ?? 0) !== (int) $params[':userId']) {
                     continue;
                 }
-                if (str_contains($qry, 'planet_type') && (int) ($row['planet_type'] ?? 1) !== 1) {
-                    continue;
+                if (str_contains($qry, 'planet_type')) {
+                    $expectedType = 1;
+                    if (isset($params[':type'])) {
+                        $expectedType = (int) $params[':type'];
+                    } elseif (isset($params[':planetType'])) {
+                        $expectedType = (int) $params[':planetType'];
+                    } elseif (isset($params[':targetType'])) {
+                        $expectedType = (int) $params[':targetType'];
+                    }
+                    if ((int) ($row['planet_type'] ?? 1) !== $expectedType) {
+                        continue;
+                    }
                 }
                 if (str_contains($qry, 'destruyed') && (int) ($row['destruyed'] ?? 0) !== 0) {
                     continue;
@@ -68,8 +78,18 @@ trait FakePlanetQueryHandler
                     && (int) $row['universe'] !== (int) $params[':universe']) {
                     continue;
                 }
-                if (str_contains($qry, 'planet_type') && (int) ($row['planet_type'] ?? 1) !== 1) {
-                    continue;
+                if (str_contains($qry, 'planet_type')) {
+                    $expectedType = 1;
+                    if (isset($params[':type'])) {
+                        $expectedType = (int) $params[':type'];
+                    } elseif (isset($params[':planetType'])) {
+                        $expectedType = (int) $params[':planetType'];
+                    } elseif (isset($params[':targetType'])) {
+                        $expectedType = (int) $params[':targetType'];
+                    }
+                    if ((int) ($row['planet_type'] ?? 1) !== $expectedType) {
+                        continue;
+                    }
                 }
                 if (str_contains($qry, 'destruyed') && (int) ($row['destruyed'] ?? 0) !== 0) {
                     continue;

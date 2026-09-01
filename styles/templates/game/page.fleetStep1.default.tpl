@@ -22,6 +22,7 @@
 				<select id="type" name="type" onchange="updateVars()">
 					{html_options options=$typeSelect selected=$type}
 				</select>
+				<div id="targetInfo" class="fleet-target-info"></div>
 				{if $frequentLocationList}
 				<select id="frequentLocation" name="frequentLocation" onchange="setFrequentLocation(this)">
 					<option value="">{$LNG.fl_recent_destinations}</option>

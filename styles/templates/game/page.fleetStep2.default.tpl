@@ -9,7 +9,7 @@
 <input type="hidden" name="token" value="{$token}">
    	<table class="table519">
         <tr>
-        	<th colspan="2">{$galaxy}:{$system}:{$planet} - {$LNG["type_planet_{$type}"]}</th>
+        	<th colspan="2">{if $targetInfo.label}{$targetInfo.label|escape}{else}[{$targetGalaxy}:{$targetSystem}:{$targetPlanet}]{/if}</th>
         </tr>
 		<tr>
 			<th>{$LNG.fl_mission}</th>

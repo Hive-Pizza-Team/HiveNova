@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\FleetTargetInfoService;
 
 /**
  *  2Moons
@@ -149,11 +150,25 @@ class ShowFleetStep2Page extends AbstractGamePage
 			'consumption'		=> floatToString($consumption),
 		);
 
+		$targetInfo = FleetTargetInfoService::resolve(
+			$targetGalaxy,
+			$targetSystem,
+			$targetPlanet,
+			$targetType,
+			Universe::current()
+		);
+		$targetInfo['label'] = FleetTargetInfoService::formatLabel($targetInfo);
+
 		$this->tplObj->execscript('calculateTransportCapacity();');
 		$this->assign(array(
 			'fleetdata'						=> $fleetData,
 			'consumption'					=> floatToString($consumption),
 			'mission'						=> $targetMission,
+			'targetGalaxy'					=> $targetGalaxy,
+			'targetSystem'					=> $targetSystem,
+			'targetPlanet'					=> $targetPlanet,
+			'targetType'					=> $targetType,
+			'targetInfo'					=> $targetInfo,
 			'galaxy'			 			=> $PLANET['galaxy'],
 			'system'			 			=> $PLANET['system'],
 			'planet'			 			=> $PLANET['planet'],
