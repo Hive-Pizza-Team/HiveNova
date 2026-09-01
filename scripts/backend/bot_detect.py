@@ -1,12 +1,14 @@
 import argparse
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import mysql.connector
 import requests
 
 CONFIG_PHP_PATH = "includes/config.php"
+NPC_BOT_EMAIL = "bot"
+AUTH_USR = 0
 
 
 def load_db_config(cli_args):
@@ -18,7 +20,6 @@ def load_db_config(cli_args):
     """
     import os
 
-    # Start from environment variables as the lowest-priority base
     cfg = {
         "host": os.environ.get("DB_HOST", "localhost"),
         "port": int(os.environ.get("DB_PORT", 3306)),
@@ -28,7 +29,6 @@ def load_db_config(cli_args):
         "prefix": os.environ.get("DB_PREFIX", "uni1_"),
     }
 
-    # Parse config.php
     php_map = {
         "host": r"\$database\['host'\]\s*=\s*'([^']*)'",
         "port": r"\$database\['port'\]\s*=\s*'([^']*)'",
@@ -46,9 +46,8 @@ def load_db_config(cli_args):
                 cfg[key] = m.group(1)
         cfg["port"] = int(cfg["port"])
     except FileNotFoundError:
-        pass  # fall back to env vars
+        pass
 
-    # CLI args override everything
     if cli_args.db_host:
         cfg["host"] = cli_args.db_host
     if cli_args.db_port:
@@ -75,119 +74,131 @@ def connect_db(cfg):
     )
 
 
-def analyze_player(event_times, sleep_seconds):
-    """
-    Given a sorted list of Unix timestamps, compute the max gap between
-    consecutive events and whether the player never rested long enough.
-
-    Returns (max_gap_seconds, is_flagged).
-    is_flagged is True when max_gap < sleep_seconds (never took a long-enough break).
-    """
-    if len(event_times) < 2:
-        return (None, False)
-
-    max_gap = 0
-    for i in range(1, len(event_times)):
-        gap = event_times[i] - event_times[i - 1]
-        if gap > max_gap:
-            max_gap = gap
-
-    is_flagged = max_gap < sleep_seconds
-    return (max_gap, is_flagged)
-
-
 def fetch_flagged_players(conn, prefix, sleep_seconds, days, min_actions, universe):
-    """
-    Query fleet dispatches, building queues, and research queues.
-    Merge all event timestamps per player and flag those who never take a break.
-    """
-    universe_filter_fleets   = "AND lf.fleet_universe = %s" if universe is not None else ""
-    universe_filter_activity = "AND al.universe = %s"       if universe is not None else ""
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+    cutoff_ts = now_ts - (days * 86400)
 
-    # Build param lists — each sub-query needs its own copy of the days param,
-    # plus an optional universe param.
+    universe_filter_fleets = "AND lf.fleet_universe = %s" if universe is not None else ""
+    universe_filter_activity = "AND al.universe = %s" if universe is not None else ""
+
     def sub_params():
-        p = [days]
+        p = [cutoff_ts]
         if universe is not None:
             p.append(universe)
         return p
 
     query = f"""
-        SELECT u.id, u.username, u.universe, ev.event_time, ev.source
-        FROM (
-            SELECT lf.fleet_owner  AS owner_id,
-                   lf.fleet_start_time AS event_time,
-                   'fleet' AS source
-            FROM {prefix}log_fleets lf
-            WHERE lf.fleet_start_time >= UNIX_TIMESTAMP(NOW() - INTERVAL %s DAY)
-            {universe_filter_fleets}
+        WITH events AS (
+            SELECT owner_id AS user_id, event_time, source FROM (
+                SELECT lf.fleet_owner AS owner_id,
+                       lf.fleet_start_time AS event_time,
+                       'fleet' AS source
+                FROM {prefix}log_fleets lf
+                WHERE lf.fleet_start_time >= %s
+                {universe_filter_fleets}
 
-            UNION ALL
+                UNION ALL
 
-            SELECT al.owner_id,
-                   al.queued_at AS event_time,
-                   'building' AS source
-            FROM {prefix}log_buildings al
-            WHERE al.queued_at >= UNIX_TIMESTAMP(NOW() - INTERVAL %s DAY)
-            {universe_filter_activity}
+                SELECT al.owner_id,
+                       al.queued_at AS event_time,
+                       'building' AS source
+                FROM {prefix}log_buildings al
+                WHERE al.queued_at >= %s
+                {universe_filter_activity}
 
-            UNION ALL
+                UNION ALL
 
-            SELECT al.owner_id,
-                   al.queued_at AS event_time,
-                   'research' AS source
-            FROM {prefix}log_research al
-            WHERE al.queued_at >= UNIX_TIMESTAMP(NOW() - INTERVAL %s DAY)
-            {universe_filter_activity}
-        ) ev
-        JOIN {prefix}users u ON u.id = ev.owner_id
+                SELECT al.owner_id,
+                       al.queued_at AS event_time,
+                       'research' AS source
+                FROM {prefix}log_research al
+                WHERE al.queued_at >= %s
+                {universe_filter_activity}
+
+                UNION ALL
+
+                SELECT al.owner_id,
+                       al.queued_at AS event_time,
+                       'shipyard' AS source
+                FROM {prefix}log_shipyard al
+                WHERE al.queued_at >= %s
+                {universe_filter_activity}
+            ) raw
+        ),
+        ordered AS (
+            SELECT user_id, event_time, source,
+                   LAG(event_time) OVER (PARTITION BY user_id ORDER BY event_time) AS prev_time
+            FROM events
+        ),
+        gaps AS (
+            SELECT user_id,
+                   MAX(event_time - prev_time) AS max_internal_gap,
+                   MIN(event_time) AS first_time,
+                   MAX(event_time) AS last_time,
+                   COUNT(*) AS action_count,
+                   SUM(CASE WHEN source = 'fleet' THEN 1 ELSE 0 END) AS fleet_count,
+                   SUM(CASE WHEN source = 'building' THEN 1 ELSE 0 END) AS building_count,
+                   SUM(CASE WHEN source = 'research' THEN 1 ELSE 0 END) AS research_count,
+                   SUM(CASE WHEN source = 'shipyard' THEN 1 ELSE 0 END) AS shipyard_count
+            FROM ordered
+            GROUP BY user_id
+            HAVING action_count >= %s
+        )
+        SELECT u.id, u.username, u.universe,
+               GREATEST(
+                 COALESCE(g.max_internal_gap, 0),
+                 g.first_time - %s,
+                 %s - g.last_time
+               ) AS max_gap_seconds,
+               g.action_count AS total_actions,
+               g.fleet_count,
+               g.building_count,
+               g.research_count,
+               g.shipyard_count
+        FROM gaps g
+        JOIN {prefix}users u ON u.id = g.user_id
         WHERE u.bana = 0
           AND u.urlaubs_modus = 0
-        ORDER BY u.id, ev.event_time ASC
+          AND u.email != %s
+          AND u.authlevel = %s
+          AND GREATEST(
+                 COALESCE(g.max_internal_gap, 0),
+                 g.first_time - %s,
+                 %s - g.last_time
+               ) < %s
+        ORDER BY max_gap_seconds ASC
     """
 
-    params = sub_params() + sub_params() + sub_params()
+    params = (
+        sub_params()
+        + sub_params()
+        + sub_params()
+        + sub_params()
+        + [min_actions, cutoff_ts, now_ts, NPC_BOT_EMAIL, AUTH_USR, cutoff_ts, now_ts, sleep_seconds]
+    )
 
     cursor = conn.cursor(dictionary=True)
     cursor.execute(query, params)
     rows = cursor.fetchall()
     cursor.close()
 
-    # Group events by player
-    players = {}
-    for row in rows:
-        pid = row["id"]
-        if pid not in players:
-            players[pid] = {
-                "id": pid,
-                "username": row["username"],
-                "universe": row["universe"],
-                "times": [],
-                "counts": {"fleet": 0, "building": 0, "research": 0},
-            }
-        players[pid]["times"].append(int(row["event_time"]))
-        players[pid]["counts"][row["source"]] += 1
-
-    window_start = datetime.now(timezone.utc) - timedelta(days=days)
-    window_end = datetime.now(timezone.utc)
+    window_start = datetime.fromtimestamp(cutoff_ts, tz=timezone.utc)
+    window_end = datetime.fromtimestamp(now_ts, tz=timezone.utc)
 
     flagged = []
-    for pid, data in players.items():
-        times = sorted(data["times"])
-        if len(times) < min_actions:
-            continue
-
-        max_gap, is_flagged = analyze_player(times, sleep_seconds)
-        if not is_flagged:
-            continue
-
+    for row in rows:
         flagged.append(
             {
-                "username": data["username"],
-                "universe": data["universe"],
-                "total_actions": len(times),
-                "counts": data["counts"],
-                "max_gap_seconds": max_gap,
+                "username": row["username"],
+                "universe": row["universe"],
+                "total_actions": int(row["total_actions"]),
+                "counts": {
+                    "fleet": int(row["fleet_count"]),
+                    "building": int(row["building_count"]),
+                    "research": int(row["research_count"]),
+                    "shipyard": int(row["shipyard_count"]),
+                },
+                "max_gap_seconds": int(row["max_gap_seconds"]),
                 "window_start": window_start,
                 "window_end": window_end,
             }
@@ -223,7 +234,8 @@ def format_console_report(players):
         print(f"  Player   : {p['username']}")
         print(f"  Universe : {p['universe']}")
         print(f"  Actions  : {p['total_actions']} total  "
-              f"(fleets: {c['fleet']}, buildings: {c['building']}, research: {c['research']})")
+              f"(fleets: {c['fleet']}, buildings: {c['building']}, "
+              f"research: {c['research']}, shipyard: {c['shipyard']})")
         print(f"  Max gap  : {_fmt_gap(p['max_gap_seconds'])} (longest break)")
         print(f"  Window   : {ws} → {we}")
         print(f"  {'-'*40}")
@@ -238,7 +250,7 @@ def send_discord_webhook(url, players):
         embed = {
             "title": f"Bot Detection Report — {now_str}",
             "description": "All clear. No suspicious players detected.",
-            "color": 0x2ECC71,  # green
+            "color": 0x2ECC71,
             "footer": {"text": "HiveNova Anti-Bot Monitor"},
         }
     else:
@@ -250,7 +262,8 @@ def send_discord_webhook(url, players):
             value = (
                 f"Universe: **{p['universe']}**\n"
                 f"Total actions: **{p['total_actions']}** "
-                f"(fleets: {c['fleet']}, buildings: {c['building']}, research: {c['research']})\n"
+                f"(fleets: {c['fleet']}, buildings: {c['building']}, "
+                f"research: {c['research']}, shipyard: {c['shipyard']})\n"
                 f"Longest break: **{_fmt_gap(p['max_gap_seconds'])}**\n"
                 f"Window: {ws} → {we}"
             )
@@ -259,7 +272,7 @@ def send_discord_webhook(url, players):
         embed = {
             "title": f"Bot Detection Report — {now_str}",
             "description": f"**{len(players)} suspicious player(s) flagged.**",
-            "color": 0xE74C3C,  # red
+            "color": 0xE74C3C,
             "fields": fields,
             "footer": {"text": "HiveNova Anti-Bot Monitor"},
         }
@@ -295,7 +308,7 @@ def main():
 
     args = parser.parse_args()
 
-    sleep_seconds = args.sleep_hours * 3600
+    sleep_seconds = int(args.sleep_hours * 3600)
 
     cfg = load_db_config(args)
     prefix = cfg["prefix"]
@@ -313,11 +326,9 @@ def main():
     finally:
         conn.close()
 
-    # Always print to console when --dry-run or no webhook configured
     if args.dry_run or not args.discord_webhook:
         format_console_report(flagged)
 
-    # Send to Discord if webhook provided (and not dry-run)
     if args.discord_webhook and not args.dry_run:
         send_discord_webhook(args.discord_webhook, flagged)
         action = "all-clear" if not flagged else f"{len(flagged)} flagged"

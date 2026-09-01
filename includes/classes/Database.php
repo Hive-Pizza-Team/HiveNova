@@ -171,7 +171,12 @@ class Database implements DatabaseInterface
             throw new Exception("Invalid query $qry!");
         }
 
-		return strtolower($match[1]);
+		$type = strtolower($match[1]);
+		if ($type === 'with' && preg_match('/\bselect\b/i', (string) $qry)) {
+			return 'select';
+		}
+
+		return $type;
 	}
 
 	public function delete($qry, array $params = array())

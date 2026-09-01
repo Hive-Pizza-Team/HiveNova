@@ -663,6 +663,18 @@ class DatabaseTest extends TestCase
         $method->invoke($db, '   ');
     }
 
+    public function testGetQueryTypeTreatsWithSelectCteAsSelect(): void
+    {
+        $db = TestableDatabase::withMockPdo($this->mockPdo());
+        $method = new ReflectionMethod(Database::class, 'getQueryType');
+        $method->setAccessible(true);
+
+        $this->assertSame(
+            'select',
+            $method->invoke($db, 'WITH events AS (SELECT id FROM users) SELECT * FROM events')
+        );
+    }
+
     public function testQueryRejectsUnsupportedType(): void
     {
         $db = TestableDatabase::withMockPdo($this->mockPdo());
