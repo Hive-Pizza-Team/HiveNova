@@ -244,7 +244,7 @@ class SocialHiveMemoService
 
 		$db = Database::get();
 		$player = $db->selectSingle(
-			'SELECT `hive_account` FROM %%USERS%% WHERE `id` = :userId',
+			'SELECT `hive_account`, `universe` FROM %%USERS%% WHERE `id` = :userId',
 			[':userId' => (int) $row['user_id']]
 		);
 		$to = is_array($player) ? strtolower(trim((string) $player['hive_account'])) : '';
@@ -258,15 +258,20 @@ class SocialHiveMemoService
 			return;
 		}
 
+		$memoWif = ConfigSecret::resolve(ConfigSecret::ENV_SOCIAL_MEMO_KEY, $config->hive_social_memo_memo_key ?? '');
+		if (!$this->memoWifMatchesAccount($memoWif, $from)) {
+			return;
+		}
+
 		$lang = $this->languageStrings($langCache, (string) ($row['lang'] ?? 'en'));
 		$plaintext = self::buildMemo(
 			$lang,
 			(string) $row['kind'],
 			(string) $row['sender_name'],
-			(string) $config->game_name
+			$this->resolveGameName(is_array($player) ? (int) ($player['universe'] ?? 0) : 0, $config)
 		);
 		$encrypted = $this->encrypt(
-			ConfigSecret::resolve(ConfigSecret::ENV_SOCIAL_MEMO_KEY, $config->hive_social_memo_memo_key ?? ''),
+			$memoWif,
 			$memoPub,
 			$plaintext
 		);
@@ -319,6 +324,42 @@ class SocialHiveMemoService
 		}
 
 		return HiveUtil::getMemoPublicKey($account);
+	}
+
+	private function resolveGameName(int $universe, Config $fallback): string
+	{
+		if ($universe > 0) {
+			try {
+				$name = trim((string) Config::get($universe)->game_name);
+				if ($name !== '') {
+					return $name;
+				}
+			} catch (Throwable $e) {
+			}
+		}
+
+		return trim((string) $fallback->game_name);
+	}
+
+	private function memoWifMatchesAccount(string $wif, string $account): bool
+	{
+		$wif = trim($wif);
+		if ($wif === '') {
+			return false;
+		}
+
+		$expected = $this->memoPublicKey($account);
+		if ($expected === '') {
+			return false;
+		}
+
+		try {
+			require_once ROOT_PATH . 'vendor/mahdiyari/hive-php/lib/Hive.php';
+
+			return hash_equals((new \Hive\Helpers\PrivateKey($wif))->createPublic()->toString(), $expected);
+		} catch (Throwable $e) {
+			return false;
+		}
 	}
 
 	private function encrypt(string $wif, string $pub, string $memo): string
