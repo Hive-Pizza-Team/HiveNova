@@ -71,7 +71,7 @@ class BattleShareComposerTest extends TestCase
 		$this->assertStringContainsString('https://moon.hive.pizza/index.php?ref=42', $result['draft']['body']);
 		$this->assertSame('hivenova-battle-abc123-1700000000', $result['draft']['permlink']);
 		$this->assertSame('', $result['draft']['parent_author']);
-		$this->assertSame('hivenova', $result['draft']['parent_permlink']);
+		$this->assertSame('moon', $result['draft']['parent_permlink']);
 		$meta = json_decode($result['draft']['json_metadata'], true);
 		$this->assertSame('hivenova/battle-share', $meta['app']);
 	}
