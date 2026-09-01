@@ -7,7 +7,6 @@ namespace HiveNova\Core;
  */
 class BattleShareComposer
 {
-	public const DEFAULT_PARENT_PERMLINK = 'hivenova';
 	public const APP_TAG = 'hivenova/battle-share';
 	public const MAX_BODY_BYTES = 8192;
 
@@ -149,7 +148,7 @@ class BattleShareComposer
 		}
 
 		$permlink = $this->buildPermlink($raportId, $rawTime);
-		$tags = ['hivenova', 'gaming', 'hive-pizza', 'battle'];
+		$tags = ['moon', 'hivenova', 'gaming', 'hive-pizza', 'battle'];
 		$metadata = [
 			'tags'   => $tags,
 			'app'    => self::APP_TAG,
@@ -176,7 +175,7 @@ class BattleShareComposer
 				'permlink'         => $permlink,
 				'tags'             => $tags,
 				'parent_author'    => '',
-				'parent_permlink'  => self::DEFAULT_PARENT_PERMLINK,
+				'parent_permlink'  => $tags[0],
 				'json_metadata'    => $jsonMetadata,
 				'cta_url'          => $ctaUrl,
 			],
