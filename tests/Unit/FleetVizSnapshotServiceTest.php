@@ -14,7 +14,7 @@ class FleetVizSnapshotServiceTest extends TestCase
 {
 	use SwapDatabaseInstance;
 
-	/** @var FakeDatabase&object{vizFleets: list<array<string, mixed>>} */
+	/** @var FakeDatabase&object{vizFleets: list<array<string, mixed>>, lastVizQuery: string, lastVizParams: array<string, mixed>} */
 	private FakeDatabase $fake;
 
 	/** @var array<int|string, Config> */
@@ -27,9 +27,17 @@ class FleetVizSnapshotServiceTest extends TestCase
 			/** @var list<array<string, mixed>> */
 			public array $vizFleets = [];
 
+			public string $lastVizQuery = '';
+
+			/** @var array<string, mixed> */
+			public array $lastVizParams = [];
+
 			public function select($qry, array $params = [])
 			{
-				if (str_contains($qry, '%%FLEETS%%') && str_contains($qry, 'sizeClass')) {
+				if (str_contains($qry, '%%FLEETS%%') && str_contains($qry, 'startCircle')) {
+					$this->lastVizQuery = $qry;
+					$this->lastVizParams = $params;
+
 					return $this->vizFleets;
 				}
 
@@ -80,6 +88,42 @@ class FleetVizSnapshotServiceTest extends TestCase
 		$this->assertSame(3, $fleet['sizeClass']);
 		$this->assertArrayNotHasKey('fleet_id', $fleet);
 		$this->assertArrayNotHasKey('username', $fleet);
+		$this->assertStringContainsString('fleet_start_galaxy as startGroup', $this->fake->lastVizQuery);
+		$this->assertStringContainsString('fleet_mission as mission', $this->fake->lastVizQuery);
+		$this->assertArrayNotHasKey(':maxGalaxy', $this->fake->lastVizParams);
+	}
+
+	public function test_for_open_universes_anonymizes_public_fleet_payload(): void
+	{
+		Config::setInstance($this->uniConfig(1, 'Classic', true), 1);
+		Config::setInstance($this->uniConfig(3, 'Season', false), 3);
+		$this->fake->vizFleets = [[
+			'startGroup' => '2',
+			'startCircle' => '55',
+			'startPoint' => '7',
+			'endGroup' => '4',
+			'endCircle' => '90',
+			'endPoint' => '3',
+		]];
+
+		$payload = (new FleetVizSnapshotService())->forOpenUniverses([1, 3]);
+		$this->assertStringContainsString('scripts/threejs/three.min.js', $payload['threeSrc']);
+		$this->assertCount(1, $payload['universes']);
+		$this->assertSame(1, $payload['universes'][0]['id']);
+
+		$fleet = $payload['universes'][0]['fleets'][0];
+		$this->assertSame([
+			'startGroup', 'startCircle', 'startPoint',
+			'endGroup', 'endCircle', 'endPoint',
+		], array_keys($fleet));
+		$this->assertArrayNotHasKey('mission', $fleet);
+		$this->assertArrayNotHasKey('duration', $fleet);
+		$this->assertArrayNotHasKey('sizeClass', $fleet);
+		$this->assertStringContainsString('FLOOR(RAND() * 3) - 1', $this->fake->lastVizQuery);
+		$this->assertStringContainsString('FLOOR(RAND() * :maxPlanets)', $this->fake->lastVizQuery);
+		$this->assertStringNotContainsString('fleet_mission', $this->fake->lastVizQuery);
+		$this->assertSame(9, $this->fake->lastVizParams[':maxGalaxy']);
+		$this->assertSame(15, $this->fake->lastVizParams[':maxPlanets']);
 	}
 
 	public function test_for_open_universes_skips_closed_and_embeds_three_src(): void
