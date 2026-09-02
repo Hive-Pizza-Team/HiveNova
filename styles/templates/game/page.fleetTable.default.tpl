@@ -25,7 +25,7 @@
 	<td>{$smarty.foreach.FlyingFleets.iteration}</td>
 	<td>
 		<a data-tooltip-content="<table style='width:200px'><tr><td style='width:50%;color:white'>{$LNG['tech'][901]}</td><td style='width:50%;color:white'>{$FlyingFleetRow.metal}</td></tr><tr><td style='width:50%;color:white'>{$LNG['tech'][902]}</td><td style='width:50%;color:white'>{$FlyingFleetRow.crystal}</td></tr><tr><td style='width:50%;color:white'>{$LNG['tech'][903]}</td><td style='width:50%;color:white'>{$FlyingFleetRow.deuterium}</td></tr><tr><td style='width:50%;color:white'>{$LNG['tech'][921]}</td><td style='width:50%;color:white'>{$FlyingFleetRow.dm}</td></tr></table>" class="tooltip">
-			{$LNG["type_mission_{$FlyingFleetRow.mission}"]}{if $FlyingFleetRow.mission == 15 && $FlyingFleetRow.stance} <span class="expedition-stance expedition-stance-{$FlyingFleetRow.stance}">{$LNG["fl_stance_{$FlyingFleetRow.stance}"]}</span>{/if}
+			{$LNG["type_mission_{$FlyingFleetRow.mission}"]}{if $FlyingFleetRow.mission == 15 && $FlyingFleetRow.stance} <span class="expedition-stance expedition-stance-{$FlyingFleetRow.stance}">{$LNG["cm_stance_{$FlyingFleetRow.stance}"]}</span>{/if}
 		</a>
 	{if $FlyingFleetRow.state == 1}
 		<br><a title="{$LNG.fl_returning}">{$LNG.fl_r}</a>
@@ -86,7 +86,7 @@
 <div class="fleet-mobile-list{if $activeFleetSlots < $maxFleetSlots} fleet-mobile-list--collapsed{/if}" id="fleetMobileList">
 	{foreach name=FlyingFleetsMobile item=FlyingFleetRow from=$FlyingFleetList}
 	<div class="fleet-mobile-card">
-		<div class="fleet-mobile-row"><strong>#{$smarty.foreach.FlyingFleetsMobile.iteration}</strong> {$LNG["type_mission_{$FlyingFleetRow.mission}"]}{if $FlyingFleetRow.state == 1} ({$LNG.fl_r}){else} ({$LNG.fl_a}){/if}{if $FlyingFleetRow.mission == 15 && $FlyingFleetRow.stance} · {$LNG["fl_stance_{$FlyingFleetRow.stance}"]}{/if}</div>
+		<div class="fleet-mobile-row"><strong>#{$smarty.foreach.FlyingFleetsMobile.iteration}</strong> {$LNG["type_mission_{$FlyingFleetRow.mission}"]}{if $FlyingFleetRow.state == 1} ({$LNG.fl_r}){else} ({$LNG.fl_a}){/if}{if $FlyingFleetRow.mission == 15 && $FlyingFleetRow.stance} · {$LNG["cm_stance_{$FlyingFleetRow.stance}"]}{/if}</div>
 		<div class="fleet-mobile-row"><span>{$LNG.fl_beginning}</span> [{$FlyingFleetRow.startGalaxy}:{$FlyingFleetRow.startSystem}:{$FlyingFleetRow.startPlanet}]</div>
 		<div class="fleet-mobile-row"><span>{$LNG.fl_destiny}</span> [{$FlyingFleetRow.endGalaxy}:{$FlyingFleetRow.endSystem}:{$FlyingFleetRow.endPlanet}]</div>
 		<div class="fleet-mobile-row"><span>{$LNG.fl_arrival}</span> <span class="fleets" data-fleet-end-time="{$FlyingFleetRow.returntime}" data-fleet-time="{$FlyingFleetRow.resttime}">{$FlyingFleetRow.resttime|pretty_fly_time}</span></div>

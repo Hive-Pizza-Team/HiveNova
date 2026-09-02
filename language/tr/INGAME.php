@@ -1507,3 +1507,4 @@ $LNG['battle_share_title'] = '%s Battle: %s vs %s';
 $LNG['battle_share_dest_snaps'] = 'PeakD Snaps';
 $LNG['battle_share_container_loading'] = 'Loading Snaps container…';
 $LNG['battle_share_container_error'] = 'Could not load Snaps container. Try again.';
+$LNG['fl_expedition_stance'] = 'Expedition stance';

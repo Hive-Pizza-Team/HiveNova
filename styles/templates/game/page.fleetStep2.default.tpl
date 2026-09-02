@@ -127,9 +127,9 @@
 		</tr>
 		<tr style="height:20px;">
 			<td>
-				<label><input type="radio" name="expedition_stance" value="cautious"> {$LNG.fl_stance_cautious}</label>
-				<label><input type="radio" name="expedition_stance" value="balanced" checked="checked"> {$LNG.fl_stance_balanced}</label>
-				<label><input type="radio" name="expedition_stance" value="aggressive"> {$LNG.fl_stance_aggressive}</label>
+				<label><input type="radio" name="expedition_stance" value="cautious"> {$LNG.cm_stance_cautious}</label>
+				<label><input type="radio" name="expedition_stance" value="balanced" checked="checked"> {$LNG.cm_stance_balanced}</label>
+				<label><input type="radio" name="expedition_stance" value="aggressive"> {$LNG.cm_stance_aggressive}</label>
 			</td>
 		</tr>
 		{/if}
