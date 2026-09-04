@@ -58,19 +58,20 @@
 			tr.appendChild(nameTd);
 
 			var totalTd = document.createElement('td');
-			totalTd.textContent = fmtNumber(row.total);
+			// shortly_number returns HTML (&nbsp; + unit); textContent would show the entity literally.
+			totalTd.innerHTML = fmtNumber(row.total);
 			tr.appendChild(totalTd);
 
 			if (section === 'tech') {
 				var spanTd = document.createElement('td');
 				spanTd.colSpan = Math.max(1, cfg.colspan - 2);
-				spanTd.textContent = fmtNumber(row.total);
+				spanTd.innerHTML = fmtNumber(row.total);
 				tr.appendChild(spanTd);
 			} else {
 				var values = row.values || {};
 				planetIds.forEach(function (planetId) {
 					var td = document.createElement('td');
-					td.textContent = fmtNumber(values[planetId] || 0);
+					td.innerHTML = fmtNumber(values[planetId] || 0);
 					tr.appendChild(td);
 				});
 			}
