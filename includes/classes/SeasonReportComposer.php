@@ -12,11 +12,31 @@ class SeasonReportComposer
 
 	/**
 	 * English display names for feats (on-chain body is English-only).
+	 * Keep in sync with language/en/INGAME.php `*_name` keys / FeatCatalog::keys().
 	 *
 	 * @var array<string, string>
 	 */
 	private const FEAT_NAMES = [
 		FeatCatalog::FIRST_SHIP => 'First ship',
+		FeatCatalog::FIRST_SMALL_CARGO => 'First Small Cargo',
+		FeatCatalog::FIRST_LARGE_CARGO => 'First Large Cargo',
+		FeatCatalog::FIRST_LIGHT_FIGHTER => 'First Light Fighter',
+		FeatCatalog::FIRST_HEAVY_FIGHTER => 'First Heavy Fighter',
+		FeatCatalog::FIRST_CRUISER => 'First Cruiser',
+		FeatCatalog::FIRST_BATTLESHIP => 'First Battleship',
+		FeatCatalog::FIRST_COLONY_SHIP => 'First Colony Ship',
+		FeatCatalog::FIRST_RECYCLER => 'First Recycler',
+		FeatCatalog::FIRST_SPY_PROBE => 'First Spy Probe',
+		FeatCatalog::FIRST_BOMBER => 'First Planet Bomber',
+		FeatCatalog::FIRST_SOLAR_SATELLITE => 'First Solar Satellite',
+		FeatCatalog::FIRST_DESTROYER => 'First Destroyer',
+		FeatCatalog::FIRST_DEATHSTAR => 'First deathstar',
+		FeatCatalog::FIRST_BATTLE_CRUISER => 'First Battle Cruiser',
+		FeatCatalog::FIRST_BLACK_MOON => 'First Black Moon',
+		FeatCatalog::FIRST_BATTLE_TRANSPORTER => 'First Battle Transporter',
+		FeatCatalog::FIRST_AVATAR => 'First Avatar',
+		FeatCatalog::FIRST_BATTLE_RECYCLER => 'First Battle Recycler',
+		FeatCatalog::FIRST_PIZZABITS_COLLECTOR => 'First Pizzabits Collector',
 		FeatCatalog::FIRST_COLONY => 'First colony',
 		FeatCatalog::FIRST_EXPEDITION => 'First expedition',
 		FeatCatalog::FIRST_GRAVITON => 'First graviton',
@@ -24,7 +44,6 @@ class SeasonReportComposer
 		FeatCatalog::FIRST_MOON => 'First moon',
 		FeatCatalog::GIVE_MOON => 'First to give a moon',
 		FeatCatalog::MOON_DESTRUCTION => 'First moon destruction',
-		FeatCatalog::FIRST_DEATHSTAR => 'First deathstar',
 		FeatCatalog::LOSE_DEATHSTAR => 'First to lose a deathstar',
 		FeatCatalog::DEFEAT_DEATHSTAR => 'First to defeat a deathstar',
 		FeatCatalog::RAID_DEFENSES => 'First raider to overcome defenses',
@@ -64,7 +83,7 @@ class SeasonReportComposer
 
 		$ranking = array_slice(array_values($ranking), 0, self::RANKING_LIMIT);
 		$feats = $this->filterFeatsInWindow($feats, $startsAt, $closesAt);
-		$hallOfFame = array_slice(array_values($hallOfFame), 0, self::HOF_LIMIT);
+		$hallOfFame = $this->filterHallOfFame($hallOfFame);
 
 		$title = sprintf('%s Universe %d Season %d Recap', $gameName, $uni, $seasonId);
 		$permlink = sprintf('%s-u%d-season-%d', $this->gameSlug($gameName), $uni, $seasonId);
@@ -157,7 +176,7 @@ class SeasonReportComposer
 					'| %d | %s | %s | %s | %s |',
 					$i,
 					number_format((float) ($row['units'] ?? 0), 0, '.', ','),
-					$this->escapeCell((string) ($row['result'] ?? '')),
+					$this->escapeCell($this->formatBattleResult((string) ($row['result'] ?? ''))),
 					$this->escapeCell((string) ($row['attacker'] ?? '')),
 					$this->escapeCell((string) ($row['defender'] ?? ''))
 				);
@@ -198,6 +217,46 @@ class SeasonReportComposer
 		}
 
 		return $out;
+	}
+
+	/**
+	 * Drop empty/spy pad rows and keep the top N real battles.
+	 *
+	 * @param list<array{units: int|float|string, result?: string, attacker?: string, defender?: string}> $hallOfFame
+	 * @return list<array{units: int|float|string, result?: string, attacker?: string, defender?: string}>
+	 */
+	public function filterHallOfFame(array $hallOfFame): array
+	{
+		$out = [];
+		foreach ($hallOfFame as $row) {
+			if ((float) ($row['units'] ?? 0) <= 0) {
+				continue;
+			}
+			$out[] = $row;
+		}
+
+		return array_slice(array_values($out), 0, self::HOF_LIMIT);
+	}
+
+	/**
+	 * Map TOPKB result codes (a/r/w) to English words for the on-chain body.
+	 */
+	public function formatBattleResult(string $result): string
+	{
+		return match ($result) {
+			'a' => 'attacker',
+			'r' => 'defender',
+			'w' => 'draw',
+			default => $result,
+		};
+	}
+
+	/**
+	 * @return array<string, string>
+	 */
+	public static function featNames(): array
+	{
+		return self::FEAT_NAMES;
 	}
 
 	private function resolveGameName(string $gameName): string

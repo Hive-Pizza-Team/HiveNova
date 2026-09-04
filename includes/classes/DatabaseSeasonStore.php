@@ -312,7 +312,8 @@ class DatabaseSeasonStore implements SeasonStore
 			FROM %%TOPKB_USERS%% INNER JOIN %%USERS%% ON uid = id
 			WHERE %%TOPKB_USERS%%.rid = %%TOPKB%%.`rid` AND `role` = 2
 		) AS defender
-		FROM %%TOPKB%% WHERE universe = :universe ORDER BY %%TOPKB%%.units DESC LIMIT ' . $limit;
+		FROM %%TOPKB%% WHERE universe = :universe AND %%TOPKB%%.units > 0
+		ORDER BY %%TOPKB%%.units DESC LIMIT ' . $limit;
 		$rows = Database::get()->select($sql, [':universe' => $universe]);
 		$out = [];
 		foreach ($rows as $row) {

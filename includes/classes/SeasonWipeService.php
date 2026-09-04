@@ -64,6 +64,13 @@ class SeasonWipeService
 		$user[] = '`ally_id` = \'0\'';
 		$user[] = '`ally_register_time` = \'0\'';
 		$user[] = '`ally_rank_id` = \'0\'';
+		$user[] = '`wons` = \'0\'';
+		$user[] = '`loos` = \'0\'';
+		$user[] = '`draws` = \'0\'';
+		$user[] = '`kbmetal` = \'0\'';
+		$user[] = '`kbcrystal` = \'0\'';
+		$user[] = '`lostunits` = \'0\'';
+		$user[] = '`desunits` = \'0\'';
 		$user[] = '`darkmatter` = :darkmatter';
 
 		return new self(implode(', ', $planet), implode(', ', $user));

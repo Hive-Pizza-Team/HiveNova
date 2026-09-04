@@ -43,6 +43,13 @@ class SeasonWipeServiceTest extends TestCase
 		$this->assertStringContainsString('`b_hangar_plus` = \'0\'', $wipe->planetSetSql());
 		$this->assertStringContainsString('`darkmatter` = :darkmatter', $wipe->userSetSql());
 		$this->assertStringContainsString('`b_tech_queue` = \'\'', $wipe->userSetSql());
+		$this->assertStringContainsString('`wons` = \'0\'', $wipe->userSetSql());
+		$this->assertStringContainsString('`loos` = \'0\'', $wipe->userSetSql());
+		$this->assertStringContainsString('`draws` = \'0\'', $wipe->userSetSql());
+		$this->assertStringContainsString('`kbmetal` = \'0\'', $wipe->userSetSql());
+		$this->assertStringContainsString('`kbcrystal` = \'0\'', $wipe->userSetSql());
+		$this->assertStringContainsString('`lostunits` = \'0\'', $wipe->userSetSql());
+		$this->assertStringContainsString('`desunits` = \'0\'', $wipe->userSetSql());
 	}
 
 	public function testWipeDeletesFleetsExtraPlanetsAndStats(): void

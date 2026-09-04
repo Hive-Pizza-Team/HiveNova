@@ -31,7 +31,7 @@ class SeasonReportComposerTest extends TestCase
 				['feat_key' => FeatCatalog::FIRST_MOON, 'username' => 'NovaQueen', 'hive_account' => 'novaqueen', 'claimed_at' => 1_724_200_000],
 			],
 			[
-				['units' => 2450000, 'result' => 'awon', 'attacker' => 'NovaQueen', 'defender' => 'MoonRaider'],
+				['units' => 2450000, 'result' => 'a', 'attacker' => 'NovaQueen', 'defender' => 'MoonRaider'],
 			]
 		);
 
@@ -53,6 +53,7 @@ class SeasonReportComposerTest extends TestCase
 		$this->assertStringContainsString('First ship', $report['body']);
 		$this->assertStringContainsString('@novaqueen', $report['body']);
 		$this->assertStringContainsString('2,450,000', $report['body']);
+		$this->assertStringContainsString('| attacker |', $report['body']);
 	}
 
 	public function testRankingIsTruncatedToTwenty(): void
@@ -157,5 +158,71 @@ class SeasonReportComposerTest extends TestCase
 		$this->assertStringContainsString('_No ranked entrants this season._', $body);
 		$this->assertStringContainsString('_No feats claimed during this season window._', $body);
 		$this->assertStringContainsString('_No Hall of Fame battles recorded this season._', $body);
+	}
+
+	public function testFeatNamesCoverEntireCatalog(): void
+	{
+		$names = SeasonReportComposer::featNames();
+		foreach (FeatCatalog::keys() as $key) {
+			$this->assertArrayHasKey($key, $names, 'Missing English label for ' . $key);
+			$this->assertNotSame($key, $names[$key]);
+		}
+	}
+
+	public function testShipFeatNamesAppearInBody(): void
+	{
+		$body = (new SeasonReportComposer())->compose(
+			[
+				'universe' => 3,
+				'season_id' => 1,
+				'starts_at' => 100,
+				'closes_at' => 200,
+				'pool_pizza' => 0,
+				'house_cut_pizza' => 0,
+				'payout_budget' => 0,
+			],
+			[],
+			[
+				['feat_key' => FeatCatalog::FIRST_SMALL_CARGO, 'username' => 'Cargo', 'hive_account' => 'cargo', 'claimed_at' => 150],
+				['feat_key' => FeatCatalog::FIRST_SPY_PROBE, 'username' => 'Spy', 'hive_account' => 'spy', 'claimed_at' => 160],
+			],
+			[]
+		)['body'];
+
+		$this->assertStringContainsString('First Small Cargo', $body);
+		$this->assertStringContainsString('First Spy Probe', $body);
+		$this->assertStringNotContainsString('feat_first_small_cargo', $body);
+		$this->assertStringNotContainsString('feat_first_spy_probe', $body);
+	}
+
+	public function testHallOfFameDropsZeroUnitRowsAndLabelsResults(): void
+	{
+		$body = (new SeasonReportComposer())->compose(
+			[
+				'universe' => 3,
+				'season_id' => 1,
+				'starts_at' => 100,
+				'closes_at' => 200,
+				'pool_pizza' => 0,
+				'house_cut_pizza' => 0,
+				'payout_budget' => 0,
+			],
+			[],
+			[],
+			[
+				['units' => 217000, 'result' => 'a', 'attacker' => 'frugal-fun', 'defender' => 'alkalineyo'],
+				['units' => 17000, 'result' => 'w', 'attacker' => 'ga-sm', 'defender' => 'gameexp'],
+				['units' => 0, 'result' => 'a', 'attacker' => 'ga-sm', 'defender' => 'gameexp'],
+				['units' => 5000, 'result' => 'r', 'attacker' => 'raid', 'defender' => 'hold'],
+			]
+		)['body'];
+
+		$this->assertStringContainsString('| 1 | 217,000 | attacker |', $body);
+		$this->assertStringContainsString('| 2 | 17,000 | draw |', $body);
+		$this->assertStringContainsString('| 3 | 5,000 | defender |', $body);
+		$this->assertStringNotContainsString('| 0 |', $body);
+		$this->assertStringNotContainsString('| a |', $body);
+		$this->assertStringNotContainsString('| w |', $body);
+		$this->assertStringNotContainsString('| r |', $body);
 	}
 }
