@@ -163,6 +163,7 @@ class DatabaseSeasonStoreTest extends TestCase
 		$hof = $store->reportHallOfFame(2, 10);
 		$this->assertSame(100, $hof[0]['units']);
 		$this->assertStringContainsString('%%TOPKB%%', $this->db->selects[1][0]);
+		$this->assertStringContainsString('units > 0', $this->db->selects[1][0]);
 
 		$this->db->selectResult = [
 			['feat_key' => 'feat_first_ship', 'claimed_at' => 50, 'username' => 'Sam', 'hive_account' => 'samacct'],
