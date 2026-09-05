@@ -27,7 +27,7 @@ require_once('HTML/BBCodeParser2.php');
 require 'includes/common.php';
 
 
-if ($USER['authlevel'] == AUTH_USR)
+if (!\HiveNova\Core\AuthLevel::canEnterAdmin((int) $USER['authlevel']))
 {
 	\HiveNova\Core\HTTP::redirectTo('game.php');
 }

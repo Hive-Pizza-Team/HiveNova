@@ -38,9 +38,10 @@ $LNG['select_option']                  = 'Выбрать...';
 
 // Должности
 $LNG['rank_0']                        = 'Игрок';
-$LNG['rank_1']                        = 'Модератор';
-$LNG['rank_2']                        = 'Оператор';
-$LNG['rank_3']                        = 'Администратор';
+$LNG['rank_1']                        = 'Promoter';
+$LNG['rank_2']                        = 'Модератор';
+$LNG['rank_3']                        = 'Оператор';
+$LNG['rank_4']                        = 'Администратор';
 
 // Время
 $LNG['time_days']                      = 'Дней';
@@ -1524,3 +1525,4 @@ $LNG['ref_stats_status_paid']         = 'Paid';
 $LNG['ref_stats_no_referrers']        = 'No referral signups yet.';
 $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
+$LNG['ad_authlevel_pp'] = '[See Promoters]';

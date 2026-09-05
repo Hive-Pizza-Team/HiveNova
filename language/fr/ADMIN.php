@@ -26,9 +26,10 @@ $LNG['select_option']	 				= 'Sélectionnez ...';
 
 // 	RANGO - RANK
 $LNG['rank_0']							= 'Joueur';
-$LNG['rank_1']							= 'Modérateur';
-$LNG['rank_2']							= 'Opérateur';
-$LNG['rank_3']							= 'Administrateur';
+$LNG['rank_1']							= 'Promoter';
+$LNG['rank_2']							= 'Modérateur';
+$LNG['rank_3']							= 'Opérateur';
+$LNG['rank_4']							= 'Administrateur';
 
 // 	TIEMPO - TIME
 $LNG['time_days']						= 'Jours';
@@ -1634,3 +1635,4 @@ $LNG['ref_stats_status_paid']         = 'Paid';
 $LNG['ref_stats_no_referrers']        = 'No referral signups yet.';
 $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
+$LNG['ad_authlevel_pp'] = '[See Promoters]';

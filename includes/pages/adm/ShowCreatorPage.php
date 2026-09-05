@@ -110,13 +110,15 @@ function ShowCreatorPage()
 
 			$AUTH			= array();
 			$AUTH[AUTH_USR]	= $LNG['user_level_'.AUTH_USR];
-			
+
+			if($USER['authlevel'] >= AUTH_MOD) {
+				$AUTH[AUTH_PROMO]	= $LNG['user_level_'.AUTH_PROMO];
+				$AUTH[AUTH_MOD]	= $LNG['user_level_'.AUTH_MOD];
+			}
+
 			if($USER['authlevel'] >= AUTH_OPS)
 				$AUTH[AUTH_OPS]	= $LNG['user_level_'.AUTH_OPS];
-				
-			if($USER['authlevel'] >= AUTH_MOD)
-				$AUTH[AUTH_MOD]	= $LNG['user_level_'.AUTH_MOD];
-				
+
 			if($USER['authlevel'] >= AUTH_ADM)
 				$AUTH[AUTH_ADM]	= $LNG['user_level_'.AUTH_ADM];
 				

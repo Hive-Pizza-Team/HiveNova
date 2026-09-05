@@ -4,7 +4,7 @@
 <input type="hidden" name="mode" value="send">
 	<table>
 	<tbody>
-		{if $userAuthlevel > 0}
+		{if $showAdminLink}
 		<tr>
 			<th colspan="2">{$LNG.op_admin_title_options}</th>
 		</tr>

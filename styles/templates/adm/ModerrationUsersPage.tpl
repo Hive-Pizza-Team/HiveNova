@@ -17,6 +17,7 @@
 	<a href="?page=rights&amp;mode=users&amp;sid={$sid}&amp;get=adm">{$ad_authlevel_aa}</a>&nbsp;
 	<a href="?page=rights&amp;mode=users&amp;sid={$sid}&amp;get=ope">{$ad_authlevel_oo}</a>&nbsp;
 	<a href="?page=rights&amp;mode=users&amp;sid={$sid}&amp;get=mod">{$ad_authlevel_mm}</a>&nbsp;
+	<a href="?page=rights&amp;mode=users&amp;sid={$sid}&amp;get=pro">{$ad_authlevel_pp}</a>&nbsp;
 	<a href="?page=rights&amp;mode=users&amp;sid={$sid}&amp;get=pla">{$ad_authlevel_jj}</a>&nbsp;
 	<a href="?page=rights&amp;mode=users&amp;sid={$sid}">{$ad_authlevel_tt}</a>&nbsp;
 	<br><br>
