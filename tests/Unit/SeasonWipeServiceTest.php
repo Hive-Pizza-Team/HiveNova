@@ -64,6 +64,14 @@ class SeasonWipeServiceTest extends TestCase
 			'darkmatter_start' => 10,
 			'moduls' => implode(';', $moduls),
 			'feat_tracking_from_start' => 1,
+			'LastSettedGalaxyPos' => 4,
+			'LastSettedSystemPos' => 200,
+			'LastSettedPlanetPos' => 3,
+			'max_galaxy' => 5,
+			'max_system' => 499,
+			'max_planets' => 15,
+			'initial_fields' => 163,
+			'planet_factor' => 1.0,
 		]);
 		Config::setInstance($config, 2);
 		Config::setInstance(new Config([
@@ -114,6 +122,14 @@ class SeasonWipeServiceTest extends TestCase
 			'darkmatter_start' => 10,
 			'moduls' => implode(';', $moduls),
 			'feat_tracking_from_start' => 1,
+			'LastSettedGalaxyPos' => 4,
+			'LastSettedSystemPos' => 200,
+			'LastSettedPlanetPos' => 3,
+			'max_galaxy' => 5,
+			'max_system' => 499,
+			'max_planets' => 15,
+			'initial_fields' => 163,
+			'planet_factor' => 1.0,
 		]);
 		Config::setInstance($config, 3);
 		Config::setInstance(new Config([
@@ -143,6 +159,77 @@ class SeasonWipeServiceTest extends TestCase
 		$this->assertStringContainsString('r.attacker', $raportByCombatant[0][0]);
 		$this->assertStringContainsString('r.defender', $raportByCombatant[0][0]);
 		$this->assertSame(3, $raportByCombatant[0][1][':uni']);
+	}
+
+	public function testWipeRelocatesHomeworldsAndResetsSpawnCursor(): void
+	{
+		$moduls = array_fill(0, MODULE_AMOUNT, 0);
+		$moduls[MODULE_FEATS] = 1;
+		$config = new Config([
+			'uni' => 3,
+			'metal_start' => 500,
+			'crystal_start' => 400,
+			'deuterium_start' => 0,
+			'darkmatter_start' => 10,
+			'moduls' => implode(';', $moduls),
+			'feat_tracking_from_start' => 1,
+			'LastSettedGalaxyPos' => 4,
+			'LastSettedSystemPos' => 200,
+			'LastSettedPlanetPos' => 3,
+			'max_galaxy' => 5,
+			'max_system' => 499,
+			'max_planets' => 15,
+			'initial_fields' => 163,
+			'planet_factor' => 1.0,
+		]);
+		Config::setInstance($config, 3);
+		Config::setInstance(new Config([
+			'uni' => 1,
+			'moduls' => implode(';', $moduls),
+		]), 1);
+
+		$this->db->selectResult = [
+			['id' => 10, 'id_owner' => 5],
+			['id' => 11, 'id_owner' => 6],
+		];
+
+		$wipe = new SeasonWipeService('`metal` = :metal', '`darkmatter` = :darkmatter');
+		$wipe->wipe(3, $config);
+
+		$park = array_values(array_filter(
+			$this->db->updates,
+			static fn (array $row): bool => str_contains($row[0], '`galaxy` = 0')
+		));
+		$this->assertCount(1, $park);
+
+		$planetMoves = array_values(array_filter(
+			$this->db->updates,
+			static fn (array $row): bool => str_contains($row[0], '%%PLANETS%%')
+				&& str_contains($row[0], '`image`')
+				&& isset($row[1][':planetId'])
+		));
+		$this->assertCount(2, $planetMoves);
+		$this->assertSame(10, $planetMoves[0][1][':planetId']);
+		$this->assertSame(11, $planetMoves[1][1][':planetId']);
+		$this->assertGreaterThanOrEqual(1, $planetMoves[0][1][':galaxy']);
+		$this->assertGreaterThanOrEqual(1, $planetMoves[0][1][':system']);
+		$this->assertGreaterThanOrEqual(1, $planetMoves[0][1][':position']);
+
+		$userMoves = array_values(array_filter(
+			$this->db->updates,
+			static fn (array $row): bool => str_contains($row[0], '%%USERS%%')
+				&& isset($row[1][':userId'])
+				&& isset($row[1][':galaxy'])
+		));
+		$this->assertCount(2, $userMoves);
+		$this->assertSame(5, $userMoves[0][1][':userId']);
+		$this->assertSame(6, $userMoves[1][1][':userId']);
+		$this->assertSame($planetMoves[0][1][':galaxy'], $userMoves[0][1][':galaxy']);
+		$this->assertSame($planetMoves[1][1][':position'], $userMoves[1][1][':position']);
+
+		$this->assertSame(1, $config->LastSettedGalaxyPos);
+		$this->assertSame(1, $config->LastSettedSystemPos);
+		$this->assertSame(3, $config->LastSettedPlanetPos);
 	}
 
 	/**
