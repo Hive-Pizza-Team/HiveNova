@@ -171,4 +171,31 @@ class PlayerUtilCreatePlayerTest extends TestCase
 
         PlayerUtil::deletePlanet($planetId);
     }
+
+    public function testNextFreeHomePositionUsesRegistrationWalker(): void
+    {
+        $this->fake->planetPositionCount = 0;
+        $config = Config::get(1);
+
+        $first = PlayerUtil::nextFreeHomePosition(1, $config);
+        $this->assertSame(1, $first['galaxy']);
+        $this->assertSame(1, $first['system']);
+        $this->assertGreaterThanOrEqual(3, $first['position']);
+        $this->assertLessThanOrEqual(12, $first['position']);
+        $this->assertSame(2, $config->LastSettedPlanetPos);
+
+        $second = PlayerUtil::nextFreeHomePosition(1, $config);
+        $this->assertSame(1, $second['galaxy']);
+        $this->assertSame(1, $second['system']);
+        $this->assertSame(3, $config->LastSettedPlanetPos);
+    }
+
+    public function testPlanetAppearanceHomeUsesInitialFields(): void
+    {
+        $look = PlayerUtil::planetAppearance(8, Config::get(1), true);
+        $this->assertSame(163, $look['fieldMax']);
+        $this->assertSame((int) floor(1000 * sqrt(163)), $look['diameter']);
+        $this->assertNotSame('', $look['image']);
+        $this->assertLessThanOrEqual($look['tempMax'], $look['tempMin'] + 40);
+    }
 }

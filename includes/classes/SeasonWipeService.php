@@ -127,6 +127,8 @@ class SeasonWipeService
 				]
 			);
 
+			$this->relocateHomeworlds($universe, $config, $db);
+
 			$db->delete(
 				'DELETE FROM %%TOPKB_USERS%% WHERE `rid` IN (SELECT `rid` FROM %%TOPKB%% WHERE `universe` = :uni)',
 				$paramsUni
@@ -198,6 +200,7 @@ class SeasonWipeService
 			$db->delete('DELETE FROM %%ALLIANCE%% WHERE `ally_universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%DIRECTIVE_PERIODS%% WHERE `universe` = :uni', $paramsUni);
 			FeatService::resetForSeasonWipe($universe, $config);
+			$config->save();
 			$db->commit();
 		} catch (\Throwable $e) {
 			$db->rollback();
@@ -213,5 +216,76 @@ class SeasonWipeService
 	public function userSetSql(): string
 	{
 		return $this->userSetSql;
+	}
+
+	private function relocateHomeworlds(int $universe, Config $config, DatabaseInterface $db): void
+	{
+		$config->LastSettedGalaxyPos = 1;
+		$config->LastSettedSystemPos = 1;
+		$config->LastSettedPlanetPos = 1;
+
+		$homeworlds = $db->select(
+			'SELECT `id`, `id_owner` FROM %%PLANETS%% WHERE `universe` = :uni',
+			[':uni' => $universe]
+		);
+		if ($homeworlds === [] || $homeworlds === false) {
+			return;
+		}
+
+		// Park occupied slots so the registration walker can reuse last season's coords.
+		$db->update(
+			'UPDATE %%PLANETS%% SET `galaxy` = 0, `system` = 0, `planet` = 0 WHERE `universe` = :uni',
+			[':uni' => $universe]
+		);
+
+		foreach ($homeworlds as $row) {
+			$planetId = (int) ($row['id'] ?? 0);
+			$ownerId  = (int) ($row['id_owner'] ?? 0);
+			if ($planetId < 1 || $ownerId < 1) {
+				continue;
+			}
+
+			$coords = PlayerUtil::nextFreeHomePosition($universe, $config);
+			$look   = PlayerUtil::planetAppearance($coords['position'], $config, true);
+
+			$db->update(
+				'UPDATE %%PLANETS%% SET
+					`galaxy` = :galaxy,
+					`system` = :system,
+					`planet` = :position,
+					`image` = :image,
+					`diameter` = :diameter,
+					`field_max` = :fieldMax,
+					`temp_min` = :tempMin,
+					`temp_max` = :tempMax
+				WHERE `id` = :planetId AND `universe` = :uni',
+				[
+					':galaxy'   => $coords['galaxy'],
+					':system'   => $coords['system'],
+					':position' => $coords['position'],
+					':image'    => $look['image'],
+					':diameter' => $look['diameter'],
+					':fieldMax' => $look['fieldMax'],
+					':tempMin'  => $look['tempMin'],
+					':tempMax'  => $look['tempMax'],
+					':planetId' => $planetId,
+					':uni'      => $universe,
+				]
+			);
+			$db->update(
+				'UPDATE %%USERS%% SET
+					`galaxy` = :galaxy,
+					`system` = :system,
+					`planet` = :position
+				WHERE `id` = :userId AND `universe` = :uni',
+				[
+					':galaxy'   => $coords['galaxy'],
+					':system'   => $coords['system'],
+					':position' => $coords['position'],
+					':userId'   => $ownerId,
+					':uni'      => $universe,
+				]
+			);
+		}
 	}
 }
