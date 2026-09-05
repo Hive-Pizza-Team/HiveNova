@@ -9,6 +9,7 @@ class MessageRepositoryTest extends TestCase
 {
     private array $lastSelect = [];
     private array $lastSelectSingle = [];
+    private array $lastUpdate = [];
 
     protected function tearDown(): void
     {
@@ -33,6 +34,12 @@ class MessageRepositoryTest extends TestCase
             function ($qry, array $params = []) {
                 $this->lastSelect = ['sql' => $qry, 'params' => $params];
                 return [['message_id' => 1]];
+            }
+        );
+        $db->method('update')->willReturnCallback(
+            function ($qry, array $params = []) {
+                $this->lastUpdate = ['sql' => $qry, 'params' => $params];
+                return true;
             }
         );
         Database::setInstance($db);
@@ -83,55 +90,95 @@ class MessageRepositoryTest extends TestCase
     public function testCountMessagesAppliesLostFilterForCombat(): void
     {
         $this->stubDatabase();
-        $count = MessageRepository::countMessages(9, 3, false, 'lost');
+        $count = MessageRepository::countMessages(9, 3, false, 'lost', 3);
         $this->assertSame(4, $count);
         $this->assertStringContainsString('REGEXP :lostNeedle', $this->lastSelectSingle['sql']);
+        $this->assertStringContainsString('message_universe = :universe', $this->lastSelectSingle['sql']);
         $this->assertSame(MessageRepository::COMBAT_UNIT_LOSS_REGEXP, $this->lastSelectSingle['params'][':lostNeedle']);
         $this->assertSame(9, $this->lastSelectSingle['params'][':userId']);
         $this->assertSame(3, $this->lastSelectSingle['params'][':category']);
+        $this->assertSame(3, $this->lastSelectSingle['params'][':universe']);
     }
 
     public function testCountMessagesSkipsLostFilterForOutbox(): void
     {
         $this->stubDatabase();
-        MessageRepository::countMessages(9, 999, false, 'lost');
+        MessageRepository::countMessages(9, 999, false, 'lost', 3);
         $this->assertArrayNotHasKey(':lostNeedle', $this->lastSelectSingle['params']);
         $this->assertStringNotContainsString('lostNeedle', $this->lastSelectSingle['sql']);
+        $this->assertSame(3, $this->lastSelectSingle['params'][':universe']);
     }
 
     public function testCountMessagesAllInboxAppliesLostFilter(): void
     {
         $this->stubDatabase();
-        MessageRepository::countMessages(9, 100, false, 'lost');
+        MessageRepository::countMessages(9, 100, false, 'lost', 3);
         $this->assertSame(MessageRepository::COMBAT_UNIT_LOSS_REGEXP, $this->lastSelectSingle['params'][':lostNeedle']);
         $this->assertSame(MessageRepository::LOST_SPY_LIKE, $this->lastSelectSingle['params'][':lostNeedleSpy']);
+        $this->assertSame(3, $this->lastSelectSingle['params'][':universe']);
     }
 
     public function testGetMessagesPagedAppliesLostFilterForSpy(): void
     {
         $this->stubDatabase();
-        $rows = MessageRepository::getMessagesPaged(9, 0, 0, 10, 'lost');
+        $rows = MessageRepository::getMessagesPaged(9, 0, 0, 10, 'lost', 3);
         $this->assertSame([['message_id' => 1]], $rows);
         $this->assertStringContainsString('LIKE :lostNeedle', $this->lastSelect['sql']);
+        $this->assertStringContainsString('message_universe = :universe', $this->lastSelect['sql']);
         $this->assertSame(MessageRepository::LOST_SPY_LIKE, $this->lastSelect['params'][':lostNeedle']);
         $this->assertSame(0, $this->lastSelect['params'][':offset']);
         $this->assertSame(10, $this->lastSelect['params'][':limit']);
+        $this->assertSame(3, $this->lastSelect['params'][':universe']);
     }
 
     public function testGetMessagesPagedAllCategoryAppliesLostFilter(): void
     {
         $this->stubDatabase();
-        MessageRepository::getMessagesPaged(9, 100, 5, 10, 'lost');
+        MessageRepository::getMessagesPaged(9, 100, 5, 10, 'lost', 3);
         $this->assertSame(MessageRepository::COMBAT_UNIT_LOSS_REGEXP, $this->lastSelect['params'][':lostNeedle']);
         $this->assertSame(MessageRepository::LOST_SPY_LIKE, $this->lastSelect['params'][':lostNeedleSpy']);
         $this->assertSame(5, $this->lastSelect['params'][':offset']);
+        $this->assertSame(3, $this->lastSelect['params'][':universe']);
     }
 
     public function testGetMessagesPagedOutboxIgnoresLostFilter(): void
     {
         $this->stubDatabase();
-        MessageRepository::getMessagesPaged(9, 999, 0, 10, 'lost');
+        MessageRepository::getMessagesPaged(9, 999, 0, 10, 'lost', 3);
         $this->assertArrayNotHasKey(':lostNeedle', $this->lastSelect['params']);
+        $this->assertSame(3, $this->lastSelect['params'][':universe']);
+    }
+
+    public function testUniverseClauseOmitsFilterWhenUniverseIsZero(): void
+    {
+        $clause = MessageRepository::universeClause(0);
+        $this->assertSame('', $clause['sql']);
+        $this->assertSame([], $clause['params']);
+    }
+
+    public function testUniverseClauseFiltersPositiveUniverse(): void
+    {
+        $clause = MessageRepository::universeClause(3);
+        $this->assertSame(' AND message_universe = :universe', $clause['sql']);
+        $this->assertSame([':universe' => 3], $clause['params']);
+    }
+
+    public function testMarkAsReadScopesToUniverse(): void
+    {
+        $this->stubDatabase();
+        MessageRepository::markAsRead(9, 3, 3);
+        $this->assertStringContainsString('message_universe = :universe', $this->lastUpdate['sql']);
+        $this->assertSame(9, $this->lastUpdate['params'][':userId']);
+        $this->assertSame(3, $this->lastUpdate['params'][':category']);
+        $this->assertSame(3, $this->lastUpdate['params'][':universe']);
+    }
+
+    public function testCountMessagesOmitsUniverseWhenNotProvided(): void
+    {
+        $this->stubDatabase();
+        MessageRepository::countMessages(9, 3, false, '');
+        $this->assertStringNotContainsString('message_universe', $this->lastSelectSingle['sql']);
+        $this->assertArrayNotHasKey(':universe', $this->lastSelectSingle['params']);
     }
 
     public function testCombatUnitLossMatchesWinWithCasualties(): void

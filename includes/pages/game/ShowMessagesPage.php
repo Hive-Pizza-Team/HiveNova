@@ -108,10 +108,10 @@ class ShowMessagesPage extends AbstractGamePage
         switch($action)
         {
             case 'readall':
-                MessageRepository::markAsRead($USER['id']);
+                MessageRepository::markAsRead($USER['id'], null, (int) $USER['universe']);
 			break;
             case 'readtypeall':
-                MessageRepository::markAsRead($USER['id'], $MessCategory);
+                MessageRepository::markAsRead($USER['id'], $MessCategory, (int) $USER['universe']);
 			break;
             case 'readmarked':
                 if(empty($messageIDs))
@@ -297,17 +297,19 @@ class ShowMessagesPage extends AbstractGamePage
 
         $TitleColor    	= array ( 0 => '#FFFF00', 1 => '#FF6699', 2 => '#FF3300', 3 => '#FF9900', 4 => '#773399', 5 => '#009933', 15 => '#6495ed', 50 => '#666600', 99 => '#007070', 100 => '#ABABAB', 999 => '#CCCCCC');
 
-        $sql = "SELECT COUNT(*) as state FROM %%MESSAGES%% WHERE message_sender = :userID AND message_type != 50;";
+        $sql = "SELECT COUNT(*) as state FROM %%MESSAGES%% WHERE message_sender = :userID AND message_type != 50 AND message_universe = :universe;";
         $MessOut = $db->selectSingle($sql, array(
-            ':userID'   => $USER['id']
+            ':userID'   => $USER['id'],
+            ':universe' => (int) $USER['universe'],
         ), 'state');
 
         $Total			= array(0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 15 => 0, 50 => 0, 99 => 0, 100 => 0, 999 => 0);
         $UnRead			= array(0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 15 => 0, 50 => 0, 99 => 0, 100 => 0, 999 => 0);
 
-        $sql = "SELECT message_type, SUM(message_unread) as message_unread, COUNT(*) as count FROM %%MESSAGES%% WHERE message_owner = :userID AND message_deleted IS NULL GROUP BY message_type;";
+        $sql = "SELECT message_type, SUM(message_unread) as message_unread, COUNT(*) as count FROM %%MESSAGES%% WHERE message_owner = :userID AND message_deleted IS NULL AND message_universe = :universe GROUP BY message_type;";
         $CategoryResult = $db->select($sql, array(
-            ':userID'   => $USER['id']
+            ':userID'   => $USER['id'],
+            ':universe' => (int) $USER['universe'],
         ));
 
         foreach ($CategoryResult as $CategoryRow)
@@ -332,10 +334,10 @@ class ShowMessagesPage extends AbstractGamePage
 
 		//// view()
 
-        $MessageCount  = MessageRepository::countMessages($USER['id'], $MessCategory, false, $filter);
+        $MessageCount  = MessageRepository::countMessages($USER['id'], $MessCategory, false, $filter, (int) $USER['universe']);
         $maxPage       = max(1, ceil($MessageCount / MESSAGES_PER_PAGE));
         $page          = max(1, min($page, $maxPage));
-        $MessageResult = MessageRepository::getMessagesPaged($USER['id'], $MessCategory, ($page - 1) * MESSAGES_PER_PAGE, MESSAGES_PER_PAGE, $filter);
+        $MessageResult = MessageRepository::getMessagesPaged($USER['id'], $MessCategory, ($page - 1) * MESSAGES_PER_PAGE, MESSAGES_PER_PAGE, $filter, (int) $USER['universe']);
 
 		////
 

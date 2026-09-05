@@ -71,20 +71,21 @@ class MessageRepository
      * Count messages for a user. Pass category=100 for all categories.
      * Pass category=999 for sent messages (message_sender).
      */
-    public static function countMessages(int $userId, int $category, bool $deletedOnly = false, string $filter = ''): int
+    public static function countMessages(int $userId, int $category, bool $deletedOnly = false, string $filter = '', int $universe = 0): int
     {
         $db = Database::get();
         $lost = self::lostFilterClause($category, $filter);
+        $uni = self::universeClause($universe);
 
         if ($category === 999) {
-            $sql = 'SELECT COUNT(*) as c FROM %%MESSAGES%% WHERE message_sender = :userId AND message_type != 50 AND message_deleted IS NULL;';
-            $params = [':userId' => $userId];
+            $sql = 'SELECT COUNT(*) as c FROM %%MESSAGES%% WHERE message_sender = :userId AND message_type != 50 AND message_deleted IS NULL' . $uni['sql'] . ';';
+            $params = [':userId' => $userId] + $uni['params'];
         } elseif ($category === 100) {
-            $sql = 'SELECT COUNT(*) as c FROM %%MESSAGES%% WHERE message_owner = :userId AND message_deleted IS NULL' . $lost['sql'] . ';';
-            $params = [':userId' => $userId] + $lost['params'];
+            $sql = 'SELECT COUNT(*) as c FROM %%MESSAGES%% WHERE message_owner = :userId AND message_deleted IS NULL' . $uni['sql'] . $lost['sql'] . ';';
+            $params = [':userId' => $userId] + $uni['params'] + $lost['params'];
         } else {
-            $sql = 'SELECT COUNT(*) as c FROM %%MESSAGES%% WHERE message_owner = :userId AND message_type = :category AND message_deleted IS NULL' . $lost['sql'] . ';';
-            $params = [':userId' => $userId, ':category' => $category] + $lost['params'];
+            $sql = 'SELECT COUNT(*) as c FROM %%MESSAGES%% WHERE message_owner = :userId AND message_type = :category AND message_deleted IS NULL' . $uni['sql'] . $lost['sql'] . ';';
+            $params = [':userId' => $userId, ':category' => $category] + $uni['params'] + $lost['params'];
         }
 
         return (int) $db->selectSingle($sql, $params, 'c');
@@ -93,53 +94,70 @@ class MessageRepository
     /**
      * Fetch a paged list of messages. Category 999 = sent, 100 = all.
      */
-    public static function getMessagesPaged(int $userId, int $category, int $offset, int $limit, string $filter = ''): array
+    public static function getMessagesPaged(int $userId, int $category, int $offset, int $limit, string $filter = '', int $universe = 0): array
     {
         $db = Database::get();
         $lost = self::lostFilterClause($category, $filter);
+        $uni = self::universeClause($universe);
 
         if ($category === 999) {
             $sql = 'SELECT message_id, message_time,
                         CONCAT(username, \' [\', galaxy, \':\', `system`, \':\', planet, \']\') as message_from,
                         message_subject, message_sender, message_type, message_unread, message_text
                     FROM %%MESSAGES%% INNER JOIN %%USERS%% ON id = message_owner
-                    WHERE message_sender = :userId AND message_type != 50 AND message_deleted IS NULL
+                    WHERE message_sender = :userId AND message_type != 50 AND message_deleted IS NULL' . $uni['sql'] . '
                     ORDER BY message_time DESC
                     LIMIT :offset, :limit;';
-            $params = [':userId' => $userId, ':offset' => $offset, ':limit' => $limit];
+            $params = [':userId' => $userId, ':offset' => $offset, ':limit' => $limit] + $uni['params'];
         } elseif ($category === 100) {
             $sql = 'SELECT message_id, message_time, message_from, message_subject, message_sender, message_type, message_unread, message_text
                     FROM %%MESSAGES%%
-                    WHERE message_owner = :userId AND message_deleted IS NULL' . $lost['sql'] . '
+                    WHERE message_owner = :userId AND message_deleted IS NULL' . $uni['sql'] . $lost['sql'] . '
                     ORDER BY message_time DESC
                     LIMIT :offset, :limit;';
-            $params = [':userId' => $userId, ':offset' => $offset, ':limit' => $limit] + $lost['params'];
+            $params = [':userId' => $userId, ':offset' => $offset, ':limit' => $limit] + $uni['params'] + $lost['params'];
         } else {
             $sql = 'SELECT message_id, message_time, message_from, message_subject, message_sender, message_type, message_unread, message_text
                     FROM %%MESSAGES%%
-                    WHERE message_owner = :userId AND message_type = :category AND message_deleted IS NULL' . $lost['sql'] . '
+                    WHERE message_owner = :userId AND message_type = :category AND message_deleted IS NULL' . $uni['sql'] . $lost['sql'] . '
                     ORDER BY message_time DESC
                     LIMIT :offset, :limit;';
-            $params = [':userId' => $userId, ':category' => $category, ':offset' => $offset, ':limit' => $limit] + $lost['params'];
+            $params = [':userId' => $userId, ':category' => $category, ':offset' => $offset, ':limit' => $limit] + $uni['params'] + $lost['params'];
         }
 
         return $db->select($sql, $params);
     }
 
-    public static function markAsRead(int $userId, ?int $category = null): void
+    public static function markAsRead(int $userId, ?int $category = null, int $universe = 0): void
     {
         $db = Database::get();
+        $uni = self::universeClause($universe);
 
         if ($category === null) {
             $db->update(
-                'UPDATE %%MESSAGES%% SET message_unread = 0 WHERE message_owner = :userId;',
-                [':userId' => $userId]
+                'UPDATE %%MESSAGES%% SET message_unread = 0 WHERE message_owner = :userId' . $uni['sql'] . ';',
+                [':userId' => $userId] + $uni['params']
             );
         } else {
             $db->update(
-                'UPDATE %%MESSAGES%% SET message_unread = 0 WHERE message_owner = :userId AND message_type = :category;',
-                [':userId' => $userId, ':category' => $category]
+                'UPDATE %%MESSAGES%% SET message_unread = 0 WHERE message_owner = :userId AND message_type = :category' . $uni['sql'] . ';',
+                [':userId' => $userId, ':category' => $category] + $uni['params']
             );
         }
+    }
+
+    /**
+     * @return array{sql: string, params: array<string, int>}
+     */
+    public static function universeClause(int $universe): array
+    {
+        if ($universe < 1) {
+            return ['sql' => '', 'params' => []];
+        }
+
+        return [
+            'sql'    => ' AND message_universe = :universe',
+            'params' => [':universe' => $universe],
+        ];
     }
 }

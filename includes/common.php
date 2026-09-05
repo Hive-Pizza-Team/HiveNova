@@ -134,7 +134,7 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	user.*,
 	COUNT(message.message_id) as messages
 	FROM %%USERS%% as user
-	LEFT JOIN %%MESSAGES%% as message ON message.message_owner = user.id AND message.message_unread = :unread
+	LEFT JOIN %%MESSAGES%% as message ON message.message_owner = user.id AND message.message_unread = :unread AND message.message_universe = user.universe
 	WHERE user.id = :userId
 	GROUP BY message.message_owner;";
 
