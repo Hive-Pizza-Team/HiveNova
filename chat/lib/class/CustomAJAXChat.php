@@ -161,7 +161,7 @@ class CustomAJAXChat extends AJAXChat
 		
 		if($sqlData['authlevel'] == AUTH_ADM)
 			$userData['userRole'] = AJAX_CHAT_ADMIN;
-		elseif($sqlData['authlevel'] > AUTH_USR)
+		elseif($sqlData['authlevel'] >= AUTH_MOD)
 			$userData['userRole'] = AJAX_CHAT_MODERATOR;
 		else
 			$userData['userRole'] = AJAX_CHAT_USER;

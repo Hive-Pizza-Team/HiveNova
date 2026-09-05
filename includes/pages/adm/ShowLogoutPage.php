@@ -15,10 +15,11 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Session;
 
 
-if ($USER['authlevel'] == AUTH_USR)
+if (!AuthLevel::canEnterAdmin((int) $USER['authlevel']))
 {
     throw new PagePermissionException("Permission error!");
 }

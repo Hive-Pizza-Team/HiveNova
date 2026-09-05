@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\DatabaseSeasonStore;
@@ -272,7 +273,7 @@ class ShowSettingsPage extends AbstractGamePage
 		$vacation			= HTTP::_GP('vacation', 0);	
 		$delete				= HTTP::_GP('delete', 0);
 		
-		$adminprotection	= ($adminprotection == 1 && $USER['authlevel'] != AUTH_USR) ? $USER['authlevel'] : 0;
+		$adminprotection	= ($adminprotection == 1 && AuthLevel::isStaff((int) $USER['authlevel'])) ? $USER['authlevel'] : 0;
 		
 		$spycount			= min(max(round($spycount), 1), 4294967295);
 		$fleetactions		= min(max($fleetactions, 1), 99);

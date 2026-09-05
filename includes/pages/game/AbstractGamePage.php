@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\AchievementService;
+use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
 use HiveNova\Core\IncomingHostileFleetQuery;
@@ -312,6 +313,8 @@ abstract class AbstractGamePage
 		$this->assign(array(
 			'vmode'				=> $USER['urlaubs_modus'],
 			'authlevel'			=> $USER['authlevel'],
+			'showAdminLink'			=> AuthLevel::canEnterAdmin((int) ($USER['authlevel'] ?? 0)),
+			'showReferralDashboard'		=> AuthLevel::canViewReferralDashboard((int) ($USER['authlevel'] ?? 0)),
 			'userID'			=> $USER['id'],
 			'bodyclass'			=> $this->getWindow(),
 			'game_name'			=> $config->game_name,

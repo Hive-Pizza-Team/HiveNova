@@ -63,7 +63,7 @@ class SeasonService
 		if (!$this->isSeasonal($config)) {
 			return true;
 		}
-		if ((int) ($user['authlevel'] ?? 0) > AUTH_USR) {
+		if (AuthLevel::isStaff((int) ($user['authlevel'] ?? 0))) {
 			return true;
 		}
 

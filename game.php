@@ -24,6 +24,7 @@ require 'includes/common.php';
 /** @var $LNG Language */
 
 use HiveNova\Page\Game\ShowErrorPage;
+use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Config;
 use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Language;
@@ -38,7 +39,7 @@ $pageClass	= 'Show'.ucwords($page).'Page';
 $fqcn		= 'HiveNova\\Page\\Game\\' . $pageClass;
 
 $uniConfig = Config::get();
-if (isset($uniConfig->season_mode) && (int) $uniConfig->season_mode === 1 && isset($USER) && !empty($USER['id']) && (int) $USER['authlevel'] === AUTH_USR) {
+if (isset($uniConfig->season_mode) && (int) $uniConfig->season_mode === 1 && isset($USER) && !empty($USER['id']) && !AuthLevel::isStaff((int) $USER['authlevel'])) {
 	$seasonGate = new SeasonService(new DatabaseSeasonStore());
 	if ($seasonGate->mustRedirect($USER, $uniConfig, $page)) {
 		\HiveNova\Core\HTTP::redirectTo('game.php?page=season');

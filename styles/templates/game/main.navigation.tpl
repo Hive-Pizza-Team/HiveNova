@@ -38,8 +38,9 @@
     {if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="javascript:OpenPopup('?page=notes', 'notes', 720, 300);">{$LNG.lm_notes}</a></li>{/if}
     {if $smarty.const.MODULE_BUDDYLIST|isModuleAvailable}<li><a href="game.php?page=buddyList">{$LNG.lm_buddylist}</a></li>{/if}
     <li><a href="game.php?page=settings">{$LNG.lm_options}</a></li>
+    {if $showReferralDashboard}<li><a href="game.php?page=referrals">{$LNG.lm_referrals}</a></li>{/if}
     <li><a href="game.php?page=logout">{$LNG.lm_logout}</a></li>
-    {if $authlevel > 0}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
+    {if $showAdminLink}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
 </ul>
 <div id="disclamer" class="no-mobile">
     {if $commit != ''}<a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}

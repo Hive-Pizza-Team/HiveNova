@@ -219,6 +219,13 @@ class SeasonServiceTest extends TestCase
 		$this->assertTrue($this->service()->canPlay(['id' => 1, 'hive_account' => '', 'authlevel' => AUTH_ADM], $config));
 	}
 
+	public function testPromoterDoesNotBypassSeasonGate(): void
+	{
+		$config = $this->makeConfig();
+		$promo = ['id' => 2, 'hive_account' => '', 'authlevel' => AUTH_PROMO];
+		$this->assertFalse($this->service()->canPlay($promo, $config));
+	}
+
 	public function testAcceptsEntryDepositOncePerWeek(): void
 	{
 		$config = $this->makeConfig();

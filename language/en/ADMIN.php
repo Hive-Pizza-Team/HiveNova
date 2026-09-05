@@ -41,9 +41,10 @@ $LNG['select_option'] = 'Choose the option ...';
 
 // 	Rank
 $LNG['rank_0'] = 'Player';
-$LNG['rank_1'] = 'Moderator';
-$LNG['rank_2'] = 'Operator';
-$LNG['rank_3'] = 'Admin';
+$LNG['rank_1'] = 'Promoter';
+$LNG['rank_2'] = 'Moderator';
+$LNG['rank_3'] = 'Operator';
+$LNG['rank_4'] = 'Admin';
 
 
 // 	Tempo
@@ -1563,3 +1564,4 @@ $LNG['se_season_status'] = 'Season status';
 $LNG['se_season_blog'] = 'Season blog Hive account';
 $LNG['se_season_blog_key'] = 'Season blog posting key';
 $LNG['se_season_blog_key_info'] = 'Leave blank to keep the stored key. Used to publish the end-of-season Hive post. The key is never shown again.';
+$LNG['ad_authlevel_pp'] = '[See Promoters]';

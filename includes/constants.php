@@ -118,10 +118,11 @@ define('UNIS_WILDCAST'				, false);
 // AUTH LEVELS
 // =============================================================================
 
-// Used in $USER['authlevel'] — check with: $USER['authlevel'] >= AUTH_MOD
-define('AUTH_ADM'					, 3);
-define('AUTH_OPS'					, 2);
-define('AUTH_MOD'					, 1);
+// Used in $USER['authlevel'] — staff check: $USER['authlevel'] >= AUTH_MOD
+define('AUTH_ADM'					, 4);
+define('AUTH_OPS'					, 3);
+define('AUTH_MOD'					, 2);
+define('AUTH_PROMO'					, 1);
 define('AUTH_USR'					, 0);
 
 // =============================================================================

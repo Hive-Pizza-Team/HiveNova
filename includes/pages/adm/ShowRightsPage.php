@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
@@ -98,13 +99,7 @@ function ShowRightsPage()
 				exit;
 			}
 
-			$authlevelFilter = match($_GET['get'] ?? '') {
-				'adm' => AUTH_ADM,
-				'ope' => AUTH_OPS,
-				'mod' => AUTH_MOD,
-				'pla' => AUTH_USR,
-				default => null,
-			};
+			$authlevelFilter = authlevelFilterFromGet();
 
 			if ($authlevelFilter !== null) {
 				$rows = Database::get()->select(
@@ -124,7 +119,7 @@ function ShowRightsPage()
 			}
 
 			$template->assign_vars(array(
-				'Selector'					=> array(0 => $LNG['rank_0'], 1 => $LNG['rank_1'], 2 => $LNG['rank_2'], 3 => $LNG['rank_3']),
+				'Selector'					=> AuthLevel::rankLabels($LNG),
 				'UserList'					=> $UserList,
 				'ad_authlevel_title'		=> $LNG['ad_authlevel_title'],
 				'bo_select_title'			=> $LNG['bo_select_title'],
@@ -136,6 +131,7 @@ function ShowRightsPage()
 				'ad_authlevel_aa'			=> $LNG['ad_authlevel_aa'],
 				'ad_authlevel_oo'			=> $LNG['ad_authlevel_oo'],
 				'ad_authlevel_mm'			=> $LNG['ad_authlevel_mm'],
+				'ad_authlevel_pp'			=> $LNG['ad_authlevel_pp'],
 				'ad_authlevel_jj'			=> $LNG['ad_authlevel_jj'],
 				'ad_authlevel_tt'			=> $LNG['ad_authlevel_tt'],
 				'sid'						=> session_id(),
@@ -191,13 +187,7 @@ function ShowRightsPage()
 				exit;
 			}
 
-			$authlevelFilter = match($_GET['get'] ?? '') {
-				'adm' => AUTH_ADM,
-				'ope' => AUTH_OPS,
-				'mod' => AUTH_MOD,
-				'pla' => AUTH_USR,
-				default => null,
-			};
+			$authlevelFilter = authlevelFilterFromGet();
 
 			if ($authlevelFilter !== null) {
 				$rows = Database::get()->select(
@@ -217,7 +207,7 @@ function ShowRightsPage()
 			}
 
 			$template->assign_vars(array(
-				'Selector'					=> array(0 => $LNG['rank_0'], 1 => $LNG['rank_1'], 2 => $LNG['rank_2'], 3 => $LNG['rank_3']),
+				'Selector'					=> AuthLevel::rankLabels($LNG),
 				'UserList'					=> $UserList,
 				'ad_authlevel_title'		=> $LNG['ad_authlevel_title'],
 				'bo_select_title'			=> $LNG['bo_select_title'],
@@ -229,6 +219,7 @@ function ShowRightsPage()
 				'ad_authlevel_aa'			=> $LNG['ad_authlevel_aa'],
 				'ad_authlevel_oo'			=> $LNG['ad_authlevel_oo'],
 				'ad_authlevel_mm'			=> $LNG['ad_authlevel_mm'],
+				'ad_authlevel_pp'			=> $LNG['ad_authlevel_pp'],
 				'ad_authlevel_jj'			=> $LNG['ad_authlevel_jj'],
 				'ad_authlevel_tt'			=> $LNG['ad_authlevel_tt'],
 				'sid'						=> session_id(),
@@ -242,4 +233,16 @@ function ShowRightsPage()
 function prepare($val)
 {
 	return str_replace('.php', '', $val);
+}
+
+function authlevelFilterFromGet(): ?int
+{
+	return match ($_GET['get'] ?? '') {
+		'adm' => AUTH_ADM,
+		'ope' => AUTH_OPS,
+		'mod' => AUTH_MOD,
+		'pro' => AUTH_PROMO,
+		'pla' => AUTH_USR,
+		default => null,
+	};
 }

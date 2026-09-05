@@ -47,9 +47,10 @@ $LNG['select_option'] = 'Seçiniz ...';
 
 // 	Derece
 $LNG['rank_0'] = 'Oyuncu';
-$LNG['rank_1'] = 'Moderatör';
-$LNG['rank_2'] = 'Yönetici';
-$LNG['rank_3'] = 'Admin';
+$LNG['rank_1'] = 'Promoter';
+$LNG['rank_2'] = 'Moderatör';
+$LNG['rank_3'] = 'Yönetici';
+$LNG['rank_4'] = 'Admin';
 
 
 // 	Zaman
@@ -1625,3 +1626,4 @@ $LNG['ref_stats_status_paid']         = 'Paid';
 $LNG['ref_stats_no_referrers']        = 'No referral signups yet.';
 $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
+$LNG['ad_authlevel_pp'] = '[See Promoters]';

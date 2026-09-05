@@ -28,6 +28,11 @@ if (!defined('MARKET_TRADE_HISTORY_LIMIT')) define('MARKET_TRADE_HISTORY_LIMIT',
 if (!defined('INACTIVE'))      define('INACTIVE',       7 * 86400);
 if (!defined('INACTIVE_LONG')) define('INACTIVE_LONG',  28 * 86400);
 if (!defined('ROOT_UNI'))      define('ROOT_UNI',        1);
+if (!defined('AUTH_USR'))      define('AUTH_USR',        0);
+if (!defined('AUTH_PROMO'))    define('AUTH_PROMO',      1);
+if (!defined('AUTH_MOD'))      define('AUTH_MOD',        2);
+if (!defined('AUTH_OPS'))      define('AUTH_OPS',        3);
+if (!defined('AUTH_ADM'))      define('AUTH_ADM',        4);
 
 require_once __DIR__ . '/../includes/GeneralFunctions.php';
 
