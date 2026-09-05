@@ -245,7 +245,95 @@ class PlayerUtil
 			|| $config->max_system < $system
 			|| $config->max_planets < $position);
 	}
-	
+
+	/**
+	 * Next unused homeworld slot, using the same galaxy/system walk as registration.
+	 *
+	 * Updates LastSetted* on $config; the caller must save config.
+	 *
+	 * @return array{galaxy: int, system: int, position: int}
+	 */
+	static public function nextFreeHomePosition(int $universe, Config $config): array
+	{
+		$galaxy = (int) $config->LastSettedGalaxyPos;
+		$system = (int) $config->LastSettedSystemPos;
+		$planet = (int) $config->LastSettedPlanetPos;
+
+		if ($galaxy > $config->max_galaxy) {
+			$galaxy = 1;
+		}
+		if ($system > $config->max_system) {
+			$system = 1;
+		}
+
+		do {
+			$position = (int) mt_rand((int) round($config->max_planets * 0.2), (int) round($config->max_planets * 0.8));
+
+			if ($planet < 3) {
+				$planet += 1;
+			} else {
+				$planet = 1;
+
+				if ($system >= $config->max_system) {
+					$system = 1;
+					if ($galaxy >= $config->max_galaxy) {
+						$galaxy = 1;
+					} else {
+						$galaxy += 1;
+					}
+				} else {
+					$system += 1;
+				}
+			}
+		} while (self::isPositionFree($universe, $galaxy, $system, $position) === false);
+
+		$config->LastSettedGalaxyPos = $galaxy;
+		$config->LastSettedSystemPos = $system;
+		$config->LastSettedPlanetPos = $planet;
+
+		return [
+			'galaxy'   => $galaxy,
+			'system'   => $system,
+			'position' => $position,
+		];
+	}
+
+	/**
+	 * Image, size, and temperature for a planet slot.
+	 *
+	 * @return array{image: string, diameter: int, fieldMax: int, tempMin: int, tempMax: int}
+	 */
+	static public function planetAppearance(int $position, Config $config, bool $isHome): array
+	{
+		$planetData = array();
+		require 'includes/PlanetData.php';
+
+		$dataIndex      = (int) ceil($position / ($config->max_planets / count($planetData)));
+		$maxTemperature = $planetData[$dataIndex]['temp'];
+		$minTemperature = $maxTemperature - 40;
+
+		if ($isHome) {
+			$maxFields = (int) $config->initial_fields;
+		} else {
+			$maxFields = (int) floor($planetData[$dataIndex]['fields'] * $config->planet_factor);
+		}
+
+		$diameter       = (int) floor(1000 * sqrt($maxFields));
+		$imageNames     = $planetData[$dataIndex]['image'];
+		$imageNameType  = $imageNames[array_rand($imageNames)];
+		$avgTemperature = (int) floor(($minTemperature + $maxTemperature) / 2);
+		[$rangeMin, $rangeMax] = PlanetImageUtil::familyRange($imageNameType);
+		$imageVariant   = PlanetImageUtil::variantFromTemperature($avgTemperature, $rangeMin, $rangeMax);
+
+		return [
+			'image'    => PlanetImageUtil::buildImageName($imageNameType, $imageVariant),
+			'diameter' => $diameter,
+			'fieldMax' => $maxFields,
+			'tempMin'  => $minTemperature,
+			'tempMax'  => $maxTemperature,
+		];
+	}
+
 	static public function createPlayer($universe, $userName, $userPassword, $userMail, $hiveAccount, $userLanguage = NULL, $galaxy = NULL, $system = NULL, $position = NULL, $name = NULL, $authlevel = 0, $userIpAddress = NULL)
 	{
 		$config	= Config::get($universe);
@@ -262,50 +350,10 @@ class PlayerUtil
 				throw new Exception(sprintf("Position is not empty: %s:%s:%s!", $galaxy, $system, $position));
 			}
 		} else {
-			// Retrieve the last set positions from the configuration
-			$galaxy = $config->LastSettedGalaxyPos;
-			$system = $config->LastSettedSystemPos;
-			$planet = $config->LastSettedPlanetPos;
-
-			// Validate galaxy/system bounds
-			if ($galaxy > $config->max_galaxy) {
-				$galaxy = 1;
-			}
-			if ($system > $config->max_system) {
-				$system = 1;
-			}
-
-			// Loop until a free position is found
-			do {
-				// Randomly select a planet position within the specified range
-				$position = mt_rand(round($config->max_planets * 0.2), round($config->max_planets * 0.8));
-
-				// Increment the planet-per-system counter if it's less than 3
-				if ($planet < 3) {
-					$planet += 1;
-				} else {
-					// Reset planet-per-system counter
-					$planet = 1;
-
-					// If the system position is at its maximum, reset it and increment the galaxy
-					if ($system >= $config->max_system) {
-						$system = 1;
-						if ($galaxy >= $config->max_galaxy) {
-							$galaxy = 1;
-						} else {
-							$galaxy += 1;
-						}
-					} else {
-						// Otherwise, just increment the system position
-						$system += 1;
-					}
-				}
-			} while (self::isPositionFree($universe, $galaxy, $system, $position) === false);
-
-			// Update the last set positions in the configuration
-			$config->LastSettedGalaxyPos = $galaxy;
-			$config->LastSettedSystemPos = $system;
-			$config->LastSettedPlanetPos = $planet;
+			$coords		= self::nextFreeHomePosition((int) $universe, $config);
+			$galaxy		= $coords['galaxy'];
+			$system		= $coords['system'];
+			$position	= $coords['position'];
 		}
 
 		$params			= array(
@@ -410,29 +458,13 @@ class PlayerUtil
 			throw new Exception(sprintf("Position is not empty: %s:%s:%s!", $galaxy, $system, $position));
 		}
 
-		$planetData	= array();
-		require 'includes/PlanetData.php';
-
 		$config		= Config::get($universe);
-
-		$dataIndex		= (int) ceil($position / ($config->max_planets / count($planetData)));
-		$maxTemperature	= $planetData[$dataIndex]['temp'];
-		$minTemperature	= $maxTemperature - 40;
-
-		if($isHome) {
-			$maxFields				= $config->initial_fields;
-		} else {
-			$maxFields				= (int) floor($planetData[$dataIndex]['fields'] * $config->planet_factor);
-		}
-
-		$diameter			= (int) floor(1000 * sqrt($maxFields));
-
-		$imageNames			= $planetData[$dataIndex]['image'];
-		$imageNameType		= $imageNames[array_rand($imageNames)];
-		$avgTemperature		= (int) floor(($minTemperature + $maxTemperature) / 2);
-		[$rangeMin, $rangeMax] = PlanetImageUtil::familyRange($imageNameType);
-		$imageVariant		= PlanetImageUtil::variantFromTemperature($avgTemperature, $rangeMin, $rangeMax);
-		$imageName			= PlanetImageUtil::buildImageName($imageNameType, $imageVariant);
+		$look		= self::planetAppearance((int) $position, $config, $isHome);
+		$imageName	= $look['image'];
+		$diameter	= $look['diameter'];
+		$maxFields	= $look['fieldMax'];
+		$minTemperature	= $look['tempMin'];
+		$maxTemperature	= $look['tempMax'];
 
 		if(empty($name))
 		{
