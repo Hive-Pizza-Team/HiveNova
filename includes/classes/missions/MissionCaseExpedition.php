@@ -2,6 +2,7 @@
 
 namespace HiveNova\Mission;
 
+use HiveNova\Core\BattleReportId;
 use HiveNova\Core\ArrayUtil;
 use HiveNova\Core\BuildFunctions;
 use HiveNova\Core\Config;
@@ -605,7 +606,7 @@ HTML;
 			
 			$reportData	= GenerateReport($combatResult, $reportInfo);
 		
-			$reportID	= md5(uniqid('', true).TIMESTAMP);
+			$reportID	= BattleReportId::generate();
 
 			$sql		= "INSERT INTO %%RW%% SET
 			rid			= :reportId,

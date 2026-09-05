@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\BattleReportId;
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
@@ -218,7 +219,7 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		);
 		
 		$reportData	= GenerateReport($combatResult, $reportInfo);
-		$reportID	= md5(uniqid('', true).TIMESTAMP);
+		$reportID	= BattleReportId::generate();
 
         $db = Database::get();
 
