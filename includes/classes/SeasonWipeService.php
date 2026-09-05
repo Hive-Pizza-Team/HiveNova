@@ -135,13 +135,25 @@ class SeasonWipeService
 				'DELETE FROM %%RW%% WHERE `rid` IN (SELECT `rid` FROM %%TOPKB%% WHERE `universe` = :uni)',
 				$paramsUni
 			);
+			// Raports have no universe column. Combat hall rids come from TOPKB;
+			// expedition reports and leftover combat HTML are tagged by attacker/defender user ids.
+			$db->delete(
+				'DELETE r FROM %%RW%% r
+				INNER JOIN %%USERS%% u ON u.universe = :uni
+					AND (FIND_IN_SET(u.id, r.attacker) OR FIND_IN_SET(u.id, r.defender))',
+				$paramsUni
+			);
 			$db->delete('DELETE FROM %%TOPKB%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%STATPOINTS%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%RECORDS%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%NOTES%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%SALVAGE_PACKAGES%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%UNIVERSE_EVENTS%% WHERE `universe` = :uni', $paramsUni);
-			$db->delete('DELETE FROM %%MESSAGES%% WHERE `message_universe` = :uni', $paramsUni);
+			$db->delete(
+				'DELETE FROM %%MESSAGES%% WHERE `message_universe` = :uni
+					OR `message_owner` IN (SELECT `id` FROM %%USERS%% WHERE `universe` = :uni2)',
+				[':uni' => $universe, ':uni2' => $universe]
+			);
 			$db->delete('DELETE FROM %%BUDDY%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%DIPLO%% WHERE `universe` = :uni', $paramsUni);
 			$db->delete('DELETE FROM %%LOG_BUILDINGS%% WHERE `universe` = :uni', $paramsUni);
