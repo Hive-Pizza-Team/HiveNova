@@ -1535,3 +1535,5 @@ $LNG['ref_stats_status_paid'] = 'Paid';
 $LNG['ref_stats_no_referrers'] = 'No referral signups yet.';
 $LNG['ref_stats_no_recruits'] = 'No recruits found.';
 $LNG['ref_stats_note'] = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
+$LNG['op_push_error_denied'] = 'Browser notifications are blocked for this site. Enable them in your browser settings, then try again.';
+$LNG['op_push_error_failed'] = 'Could not enable push notifications.';

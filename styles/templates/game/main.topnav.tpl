@@ -203,6 +203,7 @@
 </table>
 -->
 {if !$vmode}
+<script src="scripts/game/topnav.js"></script>
 <script type="text/javascript">
 var viewShortlyNumber	= {$shortlyNumber|json};
 var vacation			= {$vmode};
@@ -217,9 +218,7 @@ $(function() {
 	}, true);
 {/if}
 {/foreach}
-	HiveNovaTopnav.initVisibilityResync();
 });
 </script>
-<script src="scripts/game/topnav.js"></script>
 {if $hasGate}<script src="scripts/game/gate.js"></script>{/if}
 {/if}

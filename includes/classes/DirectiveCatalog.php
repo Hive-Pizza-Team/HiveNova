@@ -95,25 +95,62 @@ class DirectiveCatalog
 		return isset(self::all()[$key]);
 	}
 
-	public static function rewardFactor(int $points): float
+	/**
+	 * Clamp a points/reward scalar to a non-negative int without overflowing PHP_INT_MAX.
+	 */
+	public static function clampNonNegativeInt(mixed $value): int
 	{
-		$points = max(0, $points);
+		if (!is_numeric($value)) {
+			return 0;
+		}
+		$asFloat = (float) $value;
+		if ($asFloat <= 0) {
+			return 0;
+		}
+		if (!is_finite($asFloat) || $asFloat >= (float) PHP_INT_MAX) {
+			return PHP_INT_MAX;
+		}
+
+		return (int) $asFloat;
+	}
+
+	public static function rewardFactor(mixed $points): float
+	{
+		$points = self::clampNonNegativeInt($points);
 
 		return max(self::REWARD_MIN_FACTOR, $points / self::REWARD_REFERENCE_POINTS);
 	}
 
+	public static function scaleAmount(float $base, float $factor): int
+	{
+		if ($base <= 0 || $factor <= 0) {
+			return 0;
+		}
+		$scaled = $base * $factor;
+		$max = (float) PHP_INT_MAX;
+		if (!is_finite($scaled) || $scaled >= $max) {
+			return PHP_INT_MAX;
+		}
+		$floored = floor($scaled);
+		if ($floored >= $max) {
+			return PHP_INT_MAX;
+		}
+
+		return (int) $floored;
+	}
+
 	/**
-	 * @param array{metal?: int, crystal?: int, deuterium?: int} $reward
+	 * @param array{metal?: int|float, crystal?: int|float, deuterium?: int|float} $reward
 	 * @return array{metal: int, crystal: int, deuterium: int}
 	 */
-	public static function scaledReward(array $reward, int $points): array
+	public static function scaledReward(array $reward, mixed $points): array
 	{
 		$factor = self::rewardFactor($points);
 
 		return [
-			'metal' => (int) floor(((int) ($reward['metal'] ?? 0)) * $factor),
-			'crystal' => (int) floor(((int) ($reward['crystal'] ?? 0)) * $factor),
-			'deuterium' => (int) floor(((int) ($reward['deuterium'] ?? 0)) * $factor),
+			'metal' => self::scaleAmount((float) ($reward['metal'] ?? 0), $factor),
+			'crystal' => self::scaleAmount((float) ($reward['crystal'] ?? 0), $factor),
+			'deuterium' => self::scaleAmount((float) ($reward['deuterium'] ?? 0), $factor),
 		];
 	}
 

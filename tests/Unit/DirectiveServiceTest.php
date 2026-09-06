@@ -151,6 +151,32 @@ class DirectiveServiceTest extends TestCase
 		);
 	}
 
+	public function testScaledRewardClampsHugePointsWithoutOverflow(): void
+	{
+		$base = DirectiveCatalog::get(DirectiveCatalog::INDUSTRIAL)['reward'];
+		$fromMaxInt = DirectiveCatalog::scaledReward($base, PHP_INT_MAX);
+		$this->assertSame(PHP_INT_MAX, $fromMaxInt['metal']);
+		$this->assertSame(PHP_INT_MAX, $fromMaxInt['crystal']);
+		$this->assertSame(PHP_INT_MAX, $fromMaxInt['deuterium']);
+
+		$fromFloat = DirectiveCatalog::scaledReward($base, 4.2793347320036E+19);
+		$this->assertSame(PHP_INT_MAX, $fromFloat['metal']);
+		$this->assertSame(0, DirectiveCatalog::clampNonNegativeInt('nope'));
+		$this->assertSame(0, DirectiveCatalog::clampNonNegativeInt(-3));
+		$this->assertSame(PHP_INT_MAX, DirectiveCatalog::clampNonNegativeInt(INF));
+		$this->assertSame(0, DirectiveCatalog::scaleAmount(0, 2));
+		$this->assertSame(0, DirectiveCatalog::scaleAmount(10, 0));
+		$this->assertSame(5, DirectiveCatalog::scaleAmount(10.9, 0.5));
+	}
+
+	public function testGetBriefingDataSurvivesHugeStatpoints(): void
+	{
+		$this->db->statpoints[10] = 4.2793347320036E+19;
+		$data = DirectiveService::getBriefingData(10, 1);
+		$this->assertSame(PHP_INT_MAX, $data['options'][0]['reward']['metal']);
+		$this->assertSame(PHP_INT_MAX, DirectiveService::playerPoints(10));
+	}
+
 	public function testModuleDisabledRejectsSelect(): void
 	{
 		$modules = array_fill(0, 49, 1);

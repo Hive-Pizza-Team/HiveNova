@@ -1,4 +1,4 @@
-(function () {
+(function (root) {
 	function urlBase64ToUint8Array(base64String) {
 		var padding = '='.repeat((4 - base64String.length % 4) % 4);
 		var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -31,24 +31,83 @@
 		}).catch(function () {});
 	}
 
+	function pushAlertsCheckbox() {
+		if (typeof $ === 'undefined') {
+			return { length: 0, prop: function () { return this; } };
+		}
+		return $('#pushAlerts');
+	}
+
+	function uncheckPushAlerts() {
+		var box = pushAlertsCheckbox();
+		if (box.length) {
+			box.prop('checked', false);
+		}
+	}
+
+	function errorElement() {
+		if (typeof document === 'undefined' || !document.getElementById) {
+			return null;
+		}
+		return document.getElementById('pushAlertsError');
+	}
+
+	function clearPushError() {
+		var el = errorElement();
+		if (!el) {
+			return;
+		}
+		el.textContent = '';
+		el.hidden = true;
+	}
+
+	function showPushError(code) {
+		var el = errorElement();
+		if (!el) {
+			return;
+		}
+		var msg = '';
+		if (code === 'denied') {
+			msg = el.getAttribute('data-msg-denied') || '';
+		} else {
+			msg = el.getAttribute('data-msg-failed') || '';
+		}
+		if (!msg) {
+			return;
+		}
+		el.textContent = msg;
+		el.hidden = false;
+	}
+
+	function shouldUncheckOnError(code) {
+		return code === 'denied'
+			|| code === 'not_configured'
+			|| code === 'unsupported'
+			|| code === 'no_sw'
+			|| code === 'disabled'
+			|| SUBSCRIBE_FATAL_ERRORS.indexOf(code) !== -1;
+	}
+
+	function shouldSyncPreferenceOff(code) {
+		return code === 'denied'
+			|| code === 'unsupported'
+			|| code === 'no_sw'
+			|| isSubscribeFatalError({ message: code });
+	}
+
 	function handleSubscribeFailure(err, options) {
 		options = options || {};
 		if (!err) {
 			return Promise.resolve();
 		}
-		if (err.message === 'denied' || err.message === 'disabled') {
-			return Promise.resolve();
+		var code = err.message || '';
+		if (options.uncheckSettings && shouldUncheckOnError(code)) {
+			uncheckPushAlerts();
 		}
-		if (err.message === 'not_configured') {
-			if (options.uncheckSettings && $('#pushAlerts').length) {
-				$('#pushAlerts').prop('checked', false);
-			}
-			return Promise.resolve();
+		if (options.showError && code !== 'disabled' && code !== 'not_configured') {
+			showPushError(code);
 		}
-		if (isSubscribeFatalError(err)) {
-			if (options.uncheckSettings && $('#pushAlerts').length) {
-				$('#pushAlerts').prop('checked', false);
-			}
+		if (shouldSyncPreferenceOff(code)) {
 			return syncServerPushPreferenceOff();
 		}
 		return Promise.resolve();
@@ -102,8 +161,11 @@
 		});
 	}
 
-	window.HiveNovaPush = {
+	var api = {
 		fetchStatus: fetchStatus,
+		handleSubscribeFailure: handleSubscribeFailure,
+		clearPushError: clearPushError,
+		showPushError: showPushError,
 
 		enable: function (options) {
 			options = options || {};
@@ -114,7 +176,7 @@
 				if (!cfg.configured || !cfg.publicKey) {
 					throw new Error('not_configured');
 				}
-				if (!cfg.enabled) {
+				if (!cfg.enabled && !options.activate) {
 					throw new Error('disabled');
 				}
 
@@ -175,34 +237,52 @@
 				return Promise.resolve();
 			}
 			if (Notification.permission === 'denied') {
-				return Promise.resolve();
+				return fetchStatus().then(function (cfg) {
+					if (cfg && cfg.enabled) {
+						return handleSubscribeFailure(new Error('denied'), {
+							uncheckSettings: true,
+							showError: true
+						});
+					}
+				});
 			}
 			return fetchStatus().then(function (cfg) {
 				if (!cfg.configured || !cfg.enabled) {
 					return;
 				}
-				return HiveNovaPush.enable({
+				return api.enable({
 					skipPermissionRequest: Notification.permission === 'granted'
 				}).catch(function (err) {
-					return handleSubscribeFailure(err, {});
+					return handleSubscribeFailure(err, {
+						uncheckSettings: true,
+						showError: true
+					});
 				});
 			});
 		}
 	};
 
-	$(function () {
-		registerServiceWorker().then(function () {
-			HiveNovaPush.maybeAutoSubscribe();
-		});
+	root.HiveNovaPush = api;
+	if (typeof module !== 'undefined' && module.exports) {
+		module.exports = api;
+	}
 
-		$('#pushAlerts').on('change', function () {
-			if (!this.checked) {
-				HiveNovaPush.disable();
-			} else {
-				HiveNovaPush.enable().catch(function (err) {
-					handleSubscribeFailure(err, { uncheckSettings: true });
-				});
-			}
+	if (typeof $ === 'function') {
+		$(function () {
+			registerServiceWorker().then(function () {
+				api.maybeAutoSubscribe();
+			});
+
+			$('#pushAlerts').on('change', function () {
+				clearPushError();
+				if (!this.checked) {
+					api.disable();
+				} else {
+					api.enable({ activate: true }).catch(function (err) {
+						handleSubscribeFailure(err, { uncheckSettings: true, showError: true });
+					});
+				}
+			});
 		});
-	});
-})();
+	}
+})(typeof window !== 'undefined' ? window : globalThis);

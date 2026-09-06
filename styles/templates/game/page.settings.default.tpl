@@ -66,9 +66,12 @@
 			<th colspan="2">{$LNG.op_general_settings}</th>
 		</tr>
 		<tr>
-			<td>{$LNG.op_push_enable}</td>
+			<td>{$LNG.op_push_notifications}</td>
 			<td>
 				<input id="pushAlerts" name="pushAlerts" type="checkbox" value="1"{if $pushAlerts == 1} checked="checked"{/if}>
+				<small id="pushAlertsError" class="push-settings-hint" hidden
+					data-msg-denied="{$LNG.op_push_error_denied|escape:'html'}"
+					data-msg-failed="{$LNG.op_push_error_failed|escape:'html'}"></small>
 				{if !$pushConfigured}<br><small class="push-settings-hint">{$LNG.op_push_not_configured}</small>{/if}
 			</td>
 		</tr>

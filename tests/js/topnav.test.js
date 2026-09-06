@@ -242,4 +242,36 @@ describe('HiveNovaTopnav', () => {
 		assert.equal(clockCalls, 1);
 		assert.equal(updateCalls, 1);
 	});
+
+	it('auto-binds visibility resync when document exists at load', () => {
+		var listeners = {};
+		global.document = {
+			hidden: true,
+			addEventListener(name, fn) {
+				listeners[name] = fn;
+			}
+		};
+		global.window = { addEventListener() {} };
+
+		delete require.cache[require.resolve('../../scripts/game/topnav.js')];
+		topnav = require('../../scripts/game/topnav.js');
+		assert.equal(typeof listeners.visibilitychange, 'function');
+	});
+});
+
+describe('main.topnav.tpl script order', () => {
+	it('loads topnav.js before resourceTicker use', () => {
+		const fs = require('fs');
+		const path = require('path');
+		const tpl = fs.readFileSync(
+			path.join(__dirname, '../../styles/templates/game/main.topnav.tpl'),
+			'utf8'
+		);
+		const srcIdx = tpl.indexOf('scripts/game/topnav.js');
+		const tickerIdx = tpl.indexOf('resourceTicker(');
+		assert.ok(srcIdx !== -1);
+		assert.ok(tickerIdx !== -1);
+		assert.ok(srcIdx < tickerIdx);
+		assert.equal(tpl.includes('HiveNovaTopnav.initVisibilityResync'), false);
+	});
 });
