@@ -25,7 +25,7 @@ class CommanderDatabaseStub implements DatabaseInterface
 	/** @var list<array<string, mixed>> */
 	public array $fleets = [];
 
-	/** @var array<int, int> userId => total_points */
+	/** @var array<int, int|float|string> userId => total_points */
 	public array $statpoints = [];
 
 	public int $lastInsertIdValue = 0;
@@ -107,7 +107,7 @@ class CommanderDatabaseStub implements DatabaseInterface
 			if (!isset($this->statpoints[$userId])) {
 				return false;
 			}
-			$row = ['total_points' => (int) $this->statpoints[$userId]];
+			$row = ['total_points' => $this->statpoints[$userId]];
 			return $field ? ($row[$field] ?? false) : $row;
 		}
 		if (str_contains($qry, '%%USERS%%') && str_contains($qry, 'settings_push')) {

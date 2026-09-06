@@ -122,4 +122,5 @@
 	if (typeof module !== 'undefined' && module.exports) {
 		module.exports = api;
 	}
+	initVisibilityResync();
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -281,7 +281,7 @@ class DirectiveService
 			return 0;
 		}
 
-		return (int) ($row['total_points'] ?? 0);
+		return DirectiveCatalog::clampNonNegativeInt($row['total_points'] ?? 0);
 	}
 
 	public static function issueCsrfToken(): string
