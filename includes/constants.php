@@ -16,7 +16,6 @@
  */
 
 use HiveNova\Core\HTTP;
-use HiveNova\Core\HttpPathResolver;
 use HiveNova\Core\Session;
 
 
@@ -32,21 +31,22 @@ define('HTTPS'						, isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]  == 'on');
 define('PROTOCOL'					, HTTPS ? 'https://' : 'http://');
 if(PHP_SAPI === 'cli')
 {
-	$httpRoot = HttpPathResolver::rootFromScriptName($_SERVER['SCRIPT_NAME'] ?? '/');
+	$requestUrl	= str_replace(array(dirname(dirname(__FILE__)), '\\'), array('', '/'), $_SERVER["PHP_SELF"]);
 
-	define('HTTP_BASE'					, $httpRoot);
-	define('HTTP_ROOT'					, $httpRoot);
-	define('HTTP_FILE'					, basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+	//debug mode
+	define('HTTP_BASE'					, str_replace(array('\\', '//'), '/', dirname((string) $_SERVER['SCRIPT_NAME']).'/'));
+	define('HTTP_ROOT'					, str_replace(basename((string) $_SERVER['SCRIPT_FILENAME']), '', parse_url($requestUrl, PHP_URL_PATH)));
+
+	define('HTTP_FILE'					, basename((string) $_SERVER['SCRIPT_NAME']));
 	define('HTTP_HOST'					, '127.0.0.1');
 	define('HTTP_PATH'					, PROTOCOL.HTTP_HOST.HTTP_ROOT);
 }
 else
 {
-	$httpRoot = HttpPathResolver::rootFromScriptName($_SERVER['SCRIPT_NAME'] ?? '/');
+	define('HTTP_BASE'					, str_replace(array('\\', '//'), '/', dirname((string) $_SERVER['SCRIPT_NAME']).'/'));
+	define('HTTP_ROOT'					, str_replace(basename((string) $_SERVER['SCRIPT_FILENAME']), '', parse_url((string) $_SERVER['REQUEST_URI'], PHP_URL_PATH)));
 
-	define('HTTP_BASE'					, $httpRoot);
-	define('HTTP_ROOT'					, $httpRoot);
-	define('HTTP_FILE'					, basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+	define('HTTP_FILE'					, basename((string) $_SERVER['SCRIPT_NAME']));
 	define('HTTP_HOST'					, $_SERVER['HTTP_HOST']);
 	define('HTTP_PATH'					, PROTOCOL.HTTP_HOST.HTTP_ROOT);
 }
