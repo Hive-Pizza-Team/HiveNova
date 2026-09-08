@@ -38,6 +38,10 @@ function galaxy_submit(value) {
 }
 
 $(function () {
+	if (window.top && window.top !== window) {
+		$('#galaxy_form').attr('target', '_top');
+	}
+
 	if (!window.matchMedia('(max-width: 699px)').matches) {
 		return;
 	}
