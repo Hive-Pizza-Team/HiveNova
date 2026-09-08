@@ -5,34 +5,16 @@
 		<th>{$LNG.faq_overview}</th>
 	</tr>
 	<tr>
-		<td class="left">{foreach $LNG.questions as $categoryID => $categoryRow}<h2>{$categoryRow.category}</h2>
-		<ul>
-		{foreach $categoryRow as $questionID => $questionRow}
-		{if $questionID|is_numeric}
-			<li><a href="game.php?page=questions&amp;mode=single&amp;categoryID={$categoryID}&amp;questionID={$questionID}">{$questionRow.title}</a></li>
-		{/if}
+		<td class="left">
+		{foreach $faqIndex as $categoryRow}
+			<h2>{$categoryRow.category}</h2>
+			<ul>
+			{foreach $categoryRow.questions as $questionRow}
+				<li><a class="faq-index-link" href="game.php?page=questions&amp;mode=single&amp;categoryID={$questionRow.categoryId}&amp;questionID={$questionRow.questionId}">{$questionRow.title}</a></li>
+			{/foreach}
+			</ul>
 		{/foreach}
-		</ul>
-		{/foreach}</td>
+		</td>
 	</tr>
 </table>
 {/block}
-
-
-
-	{*{foreach $LNG.questions as $categoryID => $categoryRow}
-	<tr>
-		<th>{$categoryRow.category}</th>
-	</tr>
-	{foreach $categoryRow as $questionID => $questionRow}
-	{if is_numeric($questionID)}
-	<tr>
-		<th>{$questionRow.title}</th>
-	</tr>
-	<tr>
-		<td class="left">
-		{$questionRow.body}
-	</tr>
-	{/if}
-	{/foreach}
-	{/foreach}*}

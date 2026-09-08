@@ -556,6 +556,16 @@ a {
   text-decoration: none
 }
 
+a.faq-index-link {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+a.faq-index-link:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
 th a,
 .res_current {
   color: #FFF
