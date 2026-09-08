@@ -135,4 +135,20 @@ $(document).ready(function () {
 		tip.removeClass('tooltip_sticky_div');
 		tip.hide();
 	});
+
+	$(window).on('pageshow', function (e) {
+		var persisted = !!(e.originalEvent && e.originalEvent.persisted);
+		var overlay = $('#fancybox-overlay');
+		var wrap = $('#fancybox-wrap');
+		if (!persisted && !overlay.is(':visible') && !wrap.is(':visible')) {
+			return;
+		}
+		if ($.fancybox && typeof $.fancybox.close === 'function') {
+			$.fancybox.close();
+		}
+		overlay.hide();
+		wrap.hide();
+		resetTooltipOverlay($('#tooltip'));
+		$('#tooltip').hide().removeData('mobile-source');
+	});
 });
