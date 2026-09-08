@@ -238,7 +238,7 @@ class GalaxyRows
 			5	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && isModuleAvailable(MODULE_MISSION_HOLD),
 			6	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && isModuleAvailable(MODULE_MISSION_SPY),
 			8	=> isModuleAvailable(MODULE_MISSION_RECYCLE),
-			9	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && $planet[$resource[214]] > 0 && isModuleAvailable(MODULE_MISSION_DESTROY),
+			9	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && FleetMissionAvailability::planetHasMoonDestroyer($planet, $resource) && isModuleAvailable(MODULE_MISSION_DESTROY),
 			10	=> !$this->galaxyData[$this->galaxyRow['planet']]['ownPlanet'] && $planet[$resource[503]] > 0 && isModuleAvailable(MODULE_MISSION_ATTACK) && isModuleAvailable(MODULE_MISSILEATTACK) && $this->inMissileRange(),
 			18	=> isModuleAvailable(MODULE_MISSION_SALVAGE) && isset($this->salvageByPlanet[(int) $this->galaxyRow['planet']]),
 		);
