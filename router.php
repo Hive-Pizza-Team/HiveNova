@@ -24,7 +24,7 @@ if (preg_match('#^/react(?:/|$)#', $uri) === 1) {
 
 	http_response_code(404);
 	header('Content-Type: text/plain; charset=UTF-8');
-	echo "React UI is not built. From frontend/ run: npm install && npm run build\n";
+	echo "React UI is not built. Run: ./scripts/build-spa.sh\n";
 	return true;
 }
 

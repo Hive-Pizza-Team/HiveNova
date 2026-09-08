@@ -84,7 +84,7 @@ Trajectory: carve god-objects (`FleetFunctions`, `ResourceUpdate`, `ShowAlliance
 ## JavaScript
 
 - Game scripts live in `scripts/game/` as globals (no bundler required for gameplay).
-- Dual-run React SPA lives in `frontend/` (Vite, `base: '/react/'`). JSON API is `api.php` (`MODE=API`). Do not reuse `ajax=1` for SPA page loads — that flag skips economy and fleet processing.
+- Dual-run React SPA lives in `frontend/` (Vite, `base: '/react/'`). Build with `./scripts/build-spa.sh` (Docker; output in `react/`). JSON API is `api.php` (`MODE=API`). Do not reuse `ajax=1` for SPA page loads — that flag skips economy and fleet processing.
 - Prefer small pure helpers with `tests/js/` coverage when extracting from large files (`overview-planet.js`, `base.js`, `flotten.js`).
 
 ## Testing and coverage gate

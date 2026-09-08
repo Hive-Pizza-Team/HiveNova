@@ -9,6 +9,7 @@
 # Prerequisites:
 #   - composer install
 #   - Local PHP dev server running on :8000  (php -S localhost:8000 router.php)
+#   - For smoke against /react/: ./scripts/build-spa.sh (Docker; no host npm)
 #   - For --integration: MySQL with game installed (php tests/ci-install.php)
 #   - For --coverage: PHP with Xdebug coverage mode; pip install diff-cover
 

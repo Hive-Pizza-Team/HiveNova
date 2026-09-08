@@ -110,7 +110,13 @@ For quick local development without Apache/NGINX, you can use PHP's built-in ser
 php -S localhost:8000 router.php
 ```
 
-`router.php` serves the React SPA at `/react/` when `frontend/` has been built (`cd frontend && npm install && npm run build`). Classic Smarty stays at `/` and `game.php`.
+`router.php` serves the React SPA at `/react/` after a Docker build (Node stays in the container; no host `npm install`):
+
+```bash
+./scripts/build-spa.sh
+```
+
+Classic Smarty stays at `/` and `game.php`. CI builds the same way (see `.github/workflows/spa.yaml` and the smoke job in `ci.yaml`).
 
 ### Testing
 

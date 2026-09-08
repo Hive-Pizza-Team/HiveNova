@@ -28,6 +28,21 @@ class ApiRouteTableTest extends TestCase
 		$this->assertTrue(ApiTickClass::Mutate->runsEconomy());
 	}
 
+	public function testI18nResourceKeepsDigits(): void
+	{
+		$this->assertSame('i18n', ApiRouteTable::sanitizeResource('i18n'));
+		$this->assertSame('i18n', ApiRouteTable::sanitizeResource('I18N'));
+		$this->assertTrue(ApiRouteTable::isKnown(ApiRouteTable::sanitizeResource('i18n')));
+	}
+
+	public function testOverviewDeleteIsUnknownAction(): void
+	{
+		$this->assertFalse(ApiRouteTable::isKnownAction('overview', 'delete'));
+		$this->assertSame(ApiTickClass::Read, ApiRouteTable::tickClass('overview', 'delete', 'POST'));
+		$this->assertTrue(ApiRouteTable::isKnownAction('overview', 'rename'));
+		$this->assertTrue(ApiRouteTable::isKnownAction('overview', 'show'));
+	}
+
 	public function testUnknownResourceIsNotKnown(): void
 	{
 		$this->assertFalse(ApiRouteTable::isKnown('alliance'));

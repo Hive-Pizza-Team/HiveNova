@@ -8,12 +8,21 @@ class ApiFrontController
 	{
 		global $USER, $PLANET, $LNG;
 
-		$resourceName = preg_replace('/[^a-z]/', '', strtolower((string) HTTP::_GP('r', 'bootstrap'))) ?? 'bootstrap';
-		$action = preg_replace('/[^a-z]/', '', strtolower((string) HTTP::_GP('action', 'show'))) ?? 'show';
+		$resourceName = ApiRouteTable::sanitizeResource((string) HTTP::_GP('r', 'bootstrap'));
+		if ($resourceName === '') {
+			$resourceName = 'bootstrap';
+		}
+		$action = ApiRouteTable::sanitizeAction((string) HTTP::_GP('action', 'show'));
+		if ($action === '') {
+			$action = 'show';
+		}
 		$method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
 		if (!ApiRouteTable::isKnown($resourceName)) {
 			ApiJsonResponse::sendError('module', 404);
+		}
+		if (!ApiRouteTable::isKnownAction($resourceName, $action)) {
+			ApiJsonResponse::sendError('action', 404);
 		}
 
 		$tick = ApiRouteTable::tickClass($resourceName, $action, $method);
@@ -75,19 +84,29 @@ class ApiFrontController
 	 */
 	private function applyPlanetId(array $user): void
 	{
-		$planetId = (int) HTTP::_GP('planetId', 0);
-		if ($planetId <= 0) {
+		$raw = array_key_exists('planetId', $_REQUEST) ? (string) $_REQUEST['planetId'] : null;
+		$resolved = ApiPlanetIdResolver::fromRequest($raw);
+		if (!$resolved['ok']) {
+			ApiJsonResponse::sendError($resolved['error'], $resolved['status']);
+		}
+
+		$requested = $resolved['planetId'];
+		if ($requested === null) {
 			return;
 		}
 
 		$sql = 'SELECT id FROM %%PLANETS%% WHERE id = :planetId AND id_owner = :userId AND destruyed = 0;';
 		$owned = Database::get()->selectSingle($sql, [
-			':planetId' => $planetId,
+			':planetId' => $requested,
 			':userId' => (int) $user['id'],
 		], 'id');
-		if (!empty($owned)) {
-			Session::load()->planetId = (int) $owned;
+		$ownedId = !empty($owned) ? (int) $owned : null;
+		$ownedCheck = ApiPlanetIdResolver::requireOwned($requested, $ownedId);
+		if (!$ownedCheck['ok']) {
+			ApiJsonResponse::sendError($ownedCheck['error'], $ownedCheck['status']);
 		}
+
+		Session::load()->planetId = $requested;
 	}
 
 	/**
