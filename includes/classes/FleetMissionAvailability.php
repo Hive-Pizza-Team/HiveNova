@@ -5,6 +5,40 @@ namespace HiveNova\Core;
 class FleetMissionAvailability
 {
 	/**
+	 * Deathstar and Black Moon can run Destroy (mission 9).
+	 *
+	 * @param array<int, mixed> $ships
+	 */
+	public static function hasMoonDestroyer(array $ships): bool
+	{
+		return isset($ships[SHIP_DEATHSTAR]) || isset($ships[SHIP_BLACK_MOON]);
+	}
+
+	/**
+	 * @param array<string, mixed> $planet
+	 * @param array<int, string> $resource
+	 */
+	public static function planetHasMoonDestroyer(array $planet, array $resource): bool
+	{
+		foreach ([SHIP_DEATHSTAR, SHIP_BLACK_MOON] as $shipId) {
+			$column = $resource[$shipId] ?? null;
+			if ($column !== null && ($planet[$column] ?? 0) > 0) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param array<int, mixed> $units
+	 */
+	public static function moonDestroyerCount(array $units): float
+	{
+		return (float) ($units[SHIP_DEATHSTAR] ?? 0) + (float) ($units[SHIP_BLACK_MOON] ?? 0);
+	}
+
+	/**
 	 * @param array<string, mixed> $USER
 	 * @param array<string, mixed> $MissionInfo
 	 * @param array<string, mixed>|false $GetInfoPlanet
@@ -72,7 +106,7 @@ class FleetMissionAvailability
 			if (!empty($MissionInfo['IsAKS']) && !$YourPlanet && isModuleAvailable(MODULE_MISSION_ATTACK) && isModuleAvailable(MODULE_MISSION_ACS))
 				$availableMissions[]	= FLEET_MISSION_ACS;
 
-			if (!$YourPlanet && $MissionInfo['planettype'] == 3 && isset($MissionInfo['Ship'][SHIP_DEATHSTAR]) && isModuleAvailable(MODULE_MISSION_DESTROY))
+			if (!$YourPlanet && $MissionInfo['planettype'] == 3 && self::hasMoonDestroyer($MissionInfo['Ship'] ?? []) && isModuleAvailable(MODULE_MISSION_DESTROY))
 				$availableMissions[]	= FLEET_MISSION_DESTROY;
 
 			if ($YourPlanet && $MissionInfo['planettype'] == 3 && FleetFunctions::OnlyShipByID($MissionInfo['Ship'], SHIP_DARK_MATTER) && isModuleAvailable(MODULE_MISSION_DARKMATTER))
