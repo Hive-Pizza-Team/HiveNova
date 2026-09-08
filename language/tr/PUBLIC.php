@@ -217,7 +217,7 @@ $LNG['disclamerLabelNotice']		= 'Ayrıntılı bilgi';
 $LNG['loginHiveAccount'] = 'Hive Hesabı';
 $LNG['loginKeychainButton'] = 'Keychain ile giriş yap';
 
-$LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';
+$LNG['registerErrorHiveRequiredSeason'] = 'Bu evren bağlı bir Hive hesabı gerektirir.';
 $LNG['lobby_kicker'] = 'Free to play on Hive';
 $LNG['lobby_hero_alt'] = 'In-game view of Moon — build, fight, and expand across the galaxy';
 $LNG['lobby_hero_caption'] = 'Built on Hive';
