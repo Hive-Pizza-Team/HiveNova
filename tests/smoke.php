@@ -157,6 +157,39 @@ echo "=== HiveNova Smoke Test ===\n";
 echo "Base URL : $baseUrl\n";
 echo "User     : $username\n\n";
 
+$emptyCookies = tempnam(sys_get_temp_dir(), 'smoke_nocookie_');
+echo "[ API  ] unauthenticated bootstrap ... ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/api.php?r=bootstrap", $emptyCookies);
+$apiUnauth = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status !== 401 || !is_array($apiUnauth) || ($apiUnauth['ok'] ?? true) !== false || ($apiUnauth['error'] ?? '') !== 'auth') {
+    echo "FAIL expected 401 JSON {ok:false,error:auth} (HTTP $status)\n";
+    $fail++;
+} elseif (!str_contains((string) $body, '"ok"') || str_starts_with(ltrim((string) $body), '<')) {
+    echo "FAIL body is not JSON\n";
+    $fail++;
+} else {
+    echo "OK\n";
+    $pass++;
+}
+
+echo "[ REACT ] /react/ ... ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/react/", $emptyCookies);
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif (is_string($body) && str_contains($body, 'React UI is not built')) {
+    echo "SKIP (frontend not built)\n";
+} elseif ($status === 200 && is_string($body) && str_contains($body, 'id="root"')) {
+    echo "OK\n";
+    $pass++;
+} else {
+    echo "FAIL expected SPA shell (HTTP $status)\n";
+    $fail++;
+}
+
 // --- Login ---
 echo "[ LOGIN ] POST $baseUrl/index.php?page=login ... ";
 [$status,$body,] = curl_post("$baseUrl/index.php?page=login", [
@@ -293,6 +326,37 @@ if ($curlErr) {
     $fail++;
 } else {
     echo "OK (events=" . count($feed['events']) . ")\n";
+    $pass++;
+}
+
+echo "[ API  ] bootstrap           ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/api.php?r=bootstrap", $cookieFile);
+$boot = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status >= 400) {
+    echo "FAIL HTTP $status\n";
+    $fail++;
+} elseif (!is_array($boot) || ($boot['ok'] ?? false) !== true || !isset($boot['data']['user']['id'])) {
+    echo "FAIL expected JSON {ok:true,data.user}\n";
+    $fail++;
+} else {
+    echo "OK (userId=" . (int) $boot['data']['user']['id'] . ")\n";
+    $pass++;
+}
+
+echo "[ API  ] overview rename GET ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/api.php?r=overview&action=rename", $cookieFile);
+$renameGet = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status !== 405 || !is_array($renameGet) || ($renameGet['error'] ?? '') !== 'method') {
+    echo "FAIL expected 405 method (HTTP $status)\n";
+    $fail++;
+} else {
+    echo "OK\n";
     $pass++;
 }
 

@@ -78,10 +78,18 @@ jobs:
           php-version: "8.3"
           extensions: pdo_mysql, gd, gmp
           tools: composer:2.9.8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
       - run: composer install --no-interaction --prefer-dist
       - run: php tests/ci-install.php
       - run: mkdir -p cache/sessions cache/templates
-      - run: php -S localhost:8000 &> /tmp/php-server.log & sleep 2
+      - name: Build React SPA
+        run: |
+          cd frontend
+          npm install
+          npm run build
+      - run: php -S localhost:8000 router.php &> /tmp/php-server.log & sleep 2
       - run: php tests/smoke.php
       - run: php tests/check-bottom-nav.php
       - name: Check error log is empty

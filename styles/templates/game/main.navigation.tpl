@@ -39,6 +39,7 @@
     {if $smarty.const.MODULE_BUDDYLIST|isModuleAvailable}<li><a href="game.php?page=buddyList">{$LNG.lm_buddylist}</a></li>{/if}
     <li><a href="game.php?page=settings">{$LNG.lm_options}</a></li>
     {if $showReferralDashboard}<li><a href="game.php?page=referrals">{$LNG.lm_referrals}</a></li>{/if}
+    <li><a href="react/" id="hn-try-react" onclick="document.cookie='hn_ui=react;path=/;max-age=31536000;samesite=lax'">{$LNG.hn_try_new_ui}</a></li>
     <li><a href="game.php?page=logout">{$LNG.lm_logout}</a></li>
     {if $showAdminLink}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
 </ul>

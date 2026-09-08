@@ -5,6 +5,10 @@ nova.hive.pizza {
     tls internal
     php_fastcgi unix//run/php/php7.4-fpm.sock
 
+    handle_path /react* {
+        try_files {path} /react/index.html
+    }
+
 
     # Block sensitive extensions/paths, but allow /robots.txt for crawlers.
     @blocked {

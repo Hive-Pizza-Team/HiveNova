@@ -235,3 +235,4 @@ $LNG['lobby_viz_legend_galaxy'] = 'Galaxy';
 $LNG['lobby_viz_legend_fleet'] = 'Fleet in flight';
 $LNG['lobby_viz_legend_attack'] = 'Source / destination';
 $LNG['lobby_viz_caption_title_uni'] = 'Live fleet map · %s';
+$LNG['hn_try_new_ui'] = 'Try new UI';

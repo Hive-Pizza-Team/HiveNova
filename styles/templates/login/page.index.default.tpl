@@ -10,6 +10,7 @@
 			<div class="lobby-cta-row">
 				<a class="lobby-cta lobby-cta--primary" href="{$registerUrl|escape}">{$LNG.buttonRegister}</a>
 				<a class="lobby-cta lobby-cta--ghost" href="#lobby-login">{$LNG.loginHeader}</a>
+				<a class="lobby-cta lobby-cta--ghost" href="react/" onclick="document.cookie='hn_ui=react;path=/;max-age=31536000;samesite=lax'">{$LNG.hn_try_new_ui}</a>
 			</div>
 			<ul class="lobby-bullets" id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul>
 		</div>

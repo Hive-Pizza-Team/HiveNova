@@ -28,6 +28,7 @@ Code is located at [https://github.com/Hive-Pizza-Team/HiveNova](https://github.
 ## Tech Stack
 
 - **PHP 8.3**, **Smarty 4.5** templates, **MySQL** (utf8mb4 charset), **PDO**
+- Optional dual-run player UI: **React** (Vite) at `/react/` talking to `api.php`
 - Hive blockchain integration via [`mahdiyari/hive-php`](https://github.com/mahdiyari/hive-php)
 - **PHPMailer**, **Google reCAPTCHA**, **Parsedown**
 - Testing: **PHPUnit 10.5** (`./vendor/bin/phpunit`); static analysis: **PHPStan** (`composer phpstan`)
@@ -106,8 +107,10 @@ Add `install/migrations/migration_N.sql` and bump `install/VERSION`.
 For quick local development without Apache/NGINX, you can use PHP's built-in server:
 
 ```bash
-php -S localhost:8000
+php -S localhost:8000 router.php
 ```
+
+`router.php` serves the React SPA at `/react/` when `frontend/` has been built (`cd frontend && npm install && npm run build`). Classic Smarty stays at `/` and `game.php`.
 
 ### Testing
 

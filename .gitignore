@@ -17,6 +17,8 @@ includes/ENABLE_INSTALL_TOOL
 .worktrees/
 reports/
 node_modules/
-package-lock.json
+/package-lock.json
+/react/
+frontend/node_modules/
 swarm-state.md
 templates_c/
