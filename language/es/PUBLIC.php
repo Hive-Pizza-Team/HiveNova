@@ -210,7 +210,7 @@ $LNG['disclamerLabelPhone']			= 'Número de teléfono:';
 $LNG['disclamerLabelMail']			= 'Correo de soporte:';
 $LNG['disclamerLabelNotice']		= 'Más información';
 
-$LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';
+$LNG['registerErrorHiveRequiredSeason'] = 'Este universo requiere una cuenta de Hive vinculada.';
 $LNG['lobby_kicker'] = 'Free to play on Hive';
 $LNG['lobby_hero_alt'] = 'In-game view of Moon — build, fight, and expand across the galaxy';
 $LNG['lobby_hero_caption'] = 'Built on Hive';
