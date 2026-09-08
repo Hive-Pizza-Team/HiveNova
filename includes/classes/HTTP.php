@@ -29,7 +29,7 @@ class HTTP {
 		}
 		else
 		{
-			self::sendHeader('Location', HttpPathResolver::absolute(HTTP_PATH, $URL));
+			self::sendHeader('Location', HTTP_PATH.$URL);
 		}
 		exit;
 	}
