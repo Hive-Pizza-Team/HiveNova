@@ -19,7 +19,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td><labal for="text">{$LNG.nt_note}</label> (<span id="cntChars">0</span>&nbsp;/&nbsp;10.000&nbsp;{$LNG.nt_characters})</th>
+			<td><labal for="text">{$LNG.nt_note}</label> (<span id="cntChars">0</span>&nbsp;/&nbsp;{10000|number}&nbsp;{$LNG.nt_characters})</th>
 			<td>
 				<textarea name="text" id="text" cols="60" rows="10" maxlength="10000" onkeyup="$('#cntChars').text($(this).val().length);">{$noteDetail.text|htmlspecialchars}</textarea>
 			</td>

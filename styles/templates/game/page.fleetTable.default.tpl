@@ -105,7 +105,7 @@
 {if !empty($acsData)}
 {include file="shared.fleetTable.acsTable.tpl"}
 {/if}
-<form action="?page=fleetStep1" method="post">
+<form action="?page=fleetStep1" method="post" id="fleetSelectForm" data-empty-msg="{$LNG.fl_select_ships}">
 <input type="hidden" name="galaxy" value="{$targetGalaxy}">
 <input type="hidden" name="system" value="{$targetSystem}">
 <input type="hidden" name="planet" value="{$targetPlanet}">

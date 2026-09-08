@@ -315,6 +315,23 @@ class DirectiveServiceTest extends TestCase
 		$this->assertSame(100, DirectiveCatalog::progressPercent(9, 3));
 	}
 
+	public function testProgressBarsClampDisplayedHaveToNeed(): void
+	{
+		$bars = DirectiveCatalog::progressBars(
+			['build_complete' => 8],
+			['build_complete' => 9]
+		);
+
+		$this->assertSame([
+			[
+				'counter' => 'build_complete',
+				'have' => 8,
+				'need' => 8,
+				'pct' => 100,
+			],
+		], $bars);
+	}
+
 	public function testGetBriefingDataTradeBarsAreEmptyAtZero(): void
 	{
 		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE);

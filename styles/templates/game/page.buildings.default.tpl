@@ -107,7 +107,8 @@
 					{/if}
 						
 				<br>
-						{$LNG.fgf_time}:{$Element.elementTime|time}
+						{$LNG.fgf_time}
+						{$Element.elementTime|time}
 {if $Element.level > 0}
 							{if $ID == 43}<a href="#" onclick="return Dialog.info({$ID})">{$LNG.bd_jump_gate_action}</a>{/if}
 							{if ($ID == 44 && !$HaveMissiles) ||  $ID != 44}<br>
@@ -194,7 +195,8 @@
 					{/if}
 						
 				<br>
-						{$LNG.fgf_time}:{$Element.elementTime|time}
+						{$LNG.fgf_time}
+						{$Element.elementTime|time}
 {if $Element.level > 0}
 							{if $ID == 43}<a href="#" onclick="return Dialog.info({$ID})">{$LNG.bd_jump_gate_action}</a>{/if}
 							{if ($ID == 44 && !$HaveMissiles) ||  $ID != 44}<br>

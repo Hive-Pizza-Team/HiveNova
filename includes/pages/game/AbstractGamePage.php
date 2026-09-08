@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\AchievementService;
+use HiveNova\Core\AssetRevision;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
@@ -325,7 +326,7 @@ abstract class AbstractGamePage
 			'VERSION'			=> $config->VERSION,
 			'date'				=> explode("|", date('Y\|n\|j\|G\|i\|s\|Z', TIMESTAMP)),
 			'isPlayerCardActive' => isModuleAvailable(MODULE_PLAYERCARD),
-			'REV'				=> substr((string) $config->VERSION, -4),
+			'REV'				=> AssetRevision::fromFilesystem((string) $config->VERSION),
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'queryString'		=> $this->getQueryString(),
 			'themeSettings'		=> $THEME->getStyleSettings(),

@@ -43,12 +43,14 @@ class ShowTraderPage extends AbstractGamePage
 		global $LNG, $USER, $resource;
 
 		$darkmatter_cost_trader	= Config::get()->darkmatter_cost_trader;
+		$showShortage = HTTP::_GP('error', '') === 'dm'
+			&& $USER['darkmatter'] < $darkmatter_cost_trader;
 
 		$this->assign(array(
 			'tr_cost_dm_trader'		=> sprintf($LNG['tr_cost_dm_trader'], pretty_number($darkmatter_cost_trader), $LNG['tech'][921]),
 			'charge'				=> self::$Charge,
 			'resource'				=> $resource,
-			'requiredDarkMatter'	=> $USER['darkmatter'] < $darkmatter_cost_trader ? sprintf($LNG['tr_not_enought'], $LNG['tech'][921]) : false,
+			'requiredDarkMatter'	=> $showShortage ? sprintf($LNG['tr_not_enought'], $LNG['tech'][921]) : false,
 		));
 		
 		$this->display("page.trader.default.tpl");
@@ -59,7 +61,7 @@ class ShowTraderPage extends AbstractGamePage
 		global $USER, $LNG;
 		
 		if ($USER['darkmatter'] < Config::get()->darkmatter_cost_trader) {
-			$this->redirectTo('game.php?page=trader');
+			$this->redirectTo('game.php?page=trader&error=dm');
 		}
 		
 		$resourceID	= HTTP::_GP('resource', 0);
@@ -87,7 +89,7 @@ class ShowTraderPage extends AbstractGamePage
 		global $USER, $PLANET, $LNG, $resource;
 		
 		if ($USER['darkmatter'] < Config::get()->darkmatter_cost_trader) {
-			$this->redirectTo('game.php?page=trader');
+			$this->redirectTo('game.php?page=trader&error=dm');
 		}
 		
 		$resourceID	= HTTP::_GP('resource', 0);

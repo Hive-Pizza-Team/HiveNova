@@ -400,7 +400,7 @@ function MyCrazyLittleSearch($SpecifyItems, $WhereItem, $SpecifyWhere, $SpecialS
 		{
 			$Search['LIST']	 .= "<tr>";
 			if ($Table == "users"){				
-				$WhileResult[3] = $_GET['search'] == "online" ? pretty_time( TIMESTAMP - $WhileResult[3] ) : _date($LNG['php_tdformat'], $WhileResult[3] , $USER['timezone']);
+				$WhileResult[3] = $SearchFile == "online" ? pretty_time( TIMESTAMP - $WhileResult[3] ) : _date($LNG['php_tdformat'], $WhileResult[3] , $USER['timezone']);
 				$WhileResult[4]	= _date($LNG['php_tdformat'], $WhileResult[4], $USER['timezone']);
 				
 				$WhileResult[6]	= $LNG['rank_'.$WhileResult[6]];

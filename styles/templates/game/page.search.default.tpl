@@ -8,7 +8,8 @@
 		<td>
 			{html_options options=$modeSelector name="type" id="type"}
 			<input type="text" name="searchtext" id="searchtext">
-			<input type="button" value="{$LNG.sh_search}">
+			<input type="button" id="searchbutton" value="{$LNG.sh_search}">
+			<p id="searchEmpty" class="text-danger" hidden>{$LNG.sh_enter_search_term}</p>
 		</td>
 	</tr>
 </table>

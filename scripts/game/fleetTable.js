@@ -22,4 +22,17 @@ $(function() {
 			}
 		});
 	}, 1000);
+
+	$('#fleetSelectForm').on('submit', function(event) {
+		var total = 0;
+		$(this).find('input.fleet-ship-input').each(function() {
+			total += parseInt($(this).val(), 10) || 0;
+		});
+		if (total < 1) {
+			event.preventDefault();
+			if (typeof showGameToast === 'function') {
+				showGameToast($('#fleetSelectForm').data('empty-msg') || '', 'notify-error', 3500);
+			}
+		}
+	});
 });

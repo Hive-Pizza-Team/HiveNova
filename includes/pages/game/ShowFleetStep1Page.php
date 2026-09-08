@@ -61,8 +61,12 @@ class ShowFleetStep1Page extends AbstractGamePage
 		
 		$FleetRoom	= FleetFunctions::GetFleetRoom($Fleet, $USER);
 		
-		if (empty($Fleet))
-			FleetFunctions::GotoFleetPage();
+		if (empty($Fleet)) {
+			$this->printMessage($LNG['fl_select_ships'], array(array(
+				'label'	=> $LNG['sys_back'],
+				'url'	=> 'game.php?page=fleetTable'
+			)));
+		}
 	
 		$FleetData	= array(
 			'fleetroom'			=> floatToString($FleetRoom),
