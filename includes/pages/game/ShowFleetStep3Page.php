@@ -199,6 +199,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 		$MisInfo['planettype'] = $targetType;
 		$MisInfo['IsAKS']    = $fleetGroup;
 		$MisInfo['Ship']     = $fleetArray;
+		$MisInfo['startPlanetId'] = (int) $PLANET['id'];
 
 		$availableMissions = FleetFunctions::GetFleetMissions($USER, $MisInfo, $targetPlanetData);
 
