@@ -10,6 +10,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\PasswordPolicy;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\Theme;
 use HiveNova\Core\PushNotificationService;
@@ -332,6 +333,14 @@ class ShowSettingsPage extends AbstractGamePage
 			}
 		}
 		
+		if (!empty($newpassword) && !PasswordPolicy::isLongEnough($newpassword))
+		{
+			$this->printMessage(sprintf($LNG['op_password_too_short'], PasswordPolicy::minLength()), array(array(
+				'label'	=> $LNG['sys_back'],
+				'url'	=> 'game.php?page=settings'
+			)));
+		}
+
 		if (!empty($newpassword) && !empty($password) && password_verify((string) $password, (string) $USER['password']) && $newpassword == $newpassword2)
 		{
 			$newpass 	 = PlayerUtil::cryptPassword($newpassword);

@@ -33,6 +33,7 @@ if (!defined('AUTH_PROMO'))    define('AUTH_PROMO',      1);
 if (!defined('AUTH_MOD'))      define('AUTH_MOD',        2);
 if (!defined('AUTH_OPS'))      define('AUTH_OPS',        3);
 if (!defined('AUTH_ADM'))      define('AUTH_ADM',        4);
+if (!defined('PASSWORD_MIN_LENGTH')) define('PASSWORD_MIN_LENGTH', 8);
 
 require_once __DIR__ . '/../includes/GeneralFunctions.php';
 

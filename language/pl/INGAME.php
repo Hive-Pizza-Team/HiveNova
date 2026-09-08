@@ -1537,3 +1537,4 @@ $LNG['op_push_error_denied'] = 'Browser notifications are blocked for this site.
 $LNG['op_push_error_failed'] = 'Could not enable push notifications.';
 $LNG['sh_enter_search_term'] = 'Enter a search term';
 $LNG['fl_select_ships'] = 'Select at least one ship.';
+$LNG['op_password_too_short'] = 'The password must be at least %s characters long.';

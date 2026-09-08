@@ -10,6 +10,8 @@ use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\PasswordPolicy;
+use HiveNova\Core\RegisterValidation;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\Mail;
 
@@ -117,7 +119,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			'defaultUniverse'		=> $defaultEmailUniverse,
 			'defaultEmailUniverse'	=> $defaultEmailUniverse,
 			'defaultHiveUniverse'	=> $defaultHiveUniverse,
-			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], 6),
+			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], PasswordPolicy::minLength()),
 			'registerRulesDesc'			=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
 			'registerTabEmail'			=> $LNG['registerTabEmail'],
 			'registerTabHive'			=> $LNG['registerTabHive'],
@@ -185,20 +187,17 @@ class ShowRegisterPage extends AbstractLoginPage
 			$errors[]	= $LNG['registerErrorUsernameChar'];
 		}
 
-		if(strlen((string) $password) < 6) {
-			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], 6);
+		if(!PasswordPolicy::isLongEnough((string) $password)) {
+			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], PasswordPolicy::minLength());
 		}
 			
 		if($password != $password2) {
 			$errors[]	= $LNG['registerErrorPasswordSame'];
 		}
-			
-		if(!PlayerUtil::isMailValid($mailAddress)) {
-			$errors[]	= $LNG['registerErrorMailInvalid'];
-		}
-			
-		if(empty($mailAddress)) {
-			$errors[]	= $LNG['registerErrorMailEmpty'];
+
+		$mailErrorKey = RegisterValidation::mailErrorKey($mailAddress);
+		if($mailErrorKey !== null) {
+			$errors[]	= $LNG[$mailErrorKey];
 		}
 		
 		if($mailAddress != $mailAddress2) {
