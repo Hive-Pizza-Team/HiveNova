@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Cronjob;
+use HiveNova\Core\AllianceNameDisplay;
 
 /**
  *  2Moons 
@@ -149,7 +150,7 @@ class ShowStatisticsPage extends AbstractGamePage
                         'points'    => pretty_number($StatRow[$Points]),
                         'allyid'    => $StatRow['ally_id'],
                         'rank'        => $StatRow[$Rank],
-                        'allyname'    => $StatRow['ally_name'],
+                        'allyname'    => AllianceNameDisplay::plain($StatRow['ally_name']),
                         'ranking'    => $StatRow[$OldRank] - $StatRow[$Rank],
                         'badges'     => PlayerUtil::getPlayerBadges($StatRow),
                     );
@@ -192,7 +193,7 @@ class ShowStatisticsPage extends AbstractGamePage
                 foreach ($query as $StatRow) {
                     $RangeList[]    = array(
                         'id'        => $StatRow['id'],
-                        'name'        => $StatRow['ally_name'],
+                        'name'        => AllianceNameDisplay::plain($StatRow['ally_name']),
                         'members'    => $StatRow['ally_members'],
                         'rank'        => $StatRow[$Rank],
                         'mppoints'    => pretty_number(floor($StatRow[$Points] / $StatRow['ally_members'])),
