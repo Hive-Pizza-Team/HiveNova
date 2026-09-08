@@ -125,6 +125,30 @@ class FleetMissionAvailabilityTest extends TestCase
 		$this->assertNotContains(FLEET_MISSION_DESTROY, $missions);
 	}
 
+	public function testDarkmatterMissionOfferedForCollectorsOnOwnMoonFromDifferentBody(): void
+	{
+		$missions = FleetMissionAvailability::forTarget(
+			$this->user(),
+			$this->missionInfo([SHIP_DARK_MATTER => 1], 3, ['startPlanetId' => 10]),
+			$this->ownMoon(['id' => 20])
+		);
+
+		$this->assertContains(FLEET_MISSION_DARKMATTER, $missions);
+	}
+
+	public function testDarkmatterMissionNotOfferedWhenStartEqualsOwnMoon(): void
+	{
+		$missions = FleetMissionAvailability::forTarget(
+			$this->user(),
+			$this->missionInfo([SHIP_DARK_MATTER => 1], 3, ['startPlanetId' => 20]),
+			$this->ownMoon(['id' => 20])
+		);
+
+		$this->assertNotContains(FLEET_MISSION_DARKMATTER, $missions);
+		$this->assertNotContains(FLEET_MISSION_TRANSPORT, $missions);
+		$this->assertNotContains(FLEET_MISSION_STATION, $missions);
+	}
+
 	/**
 	 * @return array<string, mixed>
 	 */
@@ -135,17 +159,18 @@ class FleetMissionAvailabilityTest extends TestCase
 
 	/**
 	 * @param array<int, int> $ships
+	 * @param array<string, mixed> $overrides
 	 * @return array<string, mixed>
 	 */
-	private function missionInfo(array $ships, int $planetType = 3): array
+	private function missionInfo(array $ships, int $planetType = 3, array $overrides = []): array
 	{
-		return [
+		return array_merge([
 			'planet' => 9,
 			'planettype' => $planetType,
 			'galaxy' => 1,
 			'system' => 50,
 			'Ship' => $ships,
-		];
+		], $overrides);
 	}
 
 	/**
@@ -155,7 +180,21 @@ class FleetMissionAvailabilityTest extends TestCase
 	private function enemyMoon(array $overrides = []): array
 	{
 		return array_merge([
+			'id' => 99,
 			'id_owner' => 2,
+			'planet_type' => 3,
+		], $overrides);
+	}
+
+	/**
+	 * @param array<string, mixed> $overrides
+	 * @return array<string, mixed>
+	 */
+	private function ownMoon(array $overrides = []): array
+	{
+		return array_merge([
+			'id' => 20,
+			'id_owner' => 1,
 			'planet_type' => 3,
 		], $overrides);
 	}
