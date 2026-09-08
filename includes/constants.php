@@ -132,6 +132,9 @@ define('AUTH_USR'					, 0);
 // Max. User Session in Seconds
 define('SESSION_LIFETIME'			, 604800);
 
+// Minimum length for account passwords (register + settings)
+define('PASSWORD_MIN_LENGTH'			, 8);
+
 // Prevent the use of one account on multiple devices simultaneously
 define('PREVENT_MULTISESSIONS'		, false);
 
