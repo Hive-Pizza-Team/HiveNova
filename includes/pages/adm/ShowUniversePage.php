@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminUniverseAuth;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
@@ -24,20 +25,24 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\UniverseRewriteProbe;
 use HiveNova\Core\Template;
 
- 
-if ($USER['authlevel'] != AUTH_ADM || HTTP::_GP('sid', '') != session_id())
-{
-	throw new Exception("Permission error!");
-}
-
 function ShowUniversePage() {
 	global $LNG, $USER;
 	$template	= new Template();
+
+	$isPost	= ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST';
+	if ($isPost) {
+		if (!AdminUniverseAuth::canMutate((int) $USER['authlevel'], (string) HTTP::_GP('sid', ''), (string) session_id())) {
+			throw new Exception("Permission error!");
+		}
+	} elseif (!AdminUniverseAuth::canView((int) $USER['authlevel'])) {
+		$template->message('Permission error!', 'admin.php?page=overview', 3, true);
+		exit;
+	}
 	
 	$action		= HTTP::_GP('action', '');
 	$universe	= HTTP::_GP('uniID', 0);
 	
-	if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+	if ($isPost) {
 		switch($action)
 		{
 			case 'open':

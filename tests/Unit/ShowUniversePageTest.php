@@ -46,9 +46,15 @@ final class ShowUniversePageTest extends TestCase
         $this->assertStringContainsString("case 'closed':", $src);
         $this->assertStringContainsString("case 'delete':", $src);
         $this->assertStringContainsString("HTTP::_GP('sid', '')", $src);
+        $this->assertStringContainsString('AdminUniverseAuth::canView', $src);
+        $this->assertStringContainsString('AdminUniverseAuth::canMutate', $src);
         $this->assertStringContainsString('UniverseRewriteProbe', $src);
         $this->assertStringContainsString('skip_rewrite_check', $src);
         $this->assertStringContainsString('{CADDY-CODE}', $src);
         $this->assertStringNotContainsString('$httpCode != 302', $src);
+        $this->assertDoesNotMatchRegularExpression(
+            '/^if \(\$USER\[\'authlevel\'\] != AUTH_ADM \|\| HTTP::_GP\(\'sid\'/m',
+            $src
+        );
     }
 }
