@@ -7,6 +7,13 @@ use PHPUnit\Framework\TestCase;
 
 class AuthLevelTest extends TestCase
 {
+	public function testStaffMinAuthlevelExcludesPromoters(): void
+	{
+		$this->assertSame(AUTH_MOD, AuthLevel::staffMinAuthlevel());
+		$this->assertFalse(AuthLevel::isStaff(AUTH_PROMO));
+		$this->assertTrue(AuthLevel::isStaff(AUTH_MOD));
+	}
+
 	public function testUsrIsNotStaffAndCannotEnterAdminOrDashboard(): void
 	{
 		$this->assertFalse(AuthLevel::isStaff(AUTH_USR));

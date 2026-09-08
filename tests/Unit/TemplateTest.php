@@ -355,7 +355,10 @@ class TemplateTest extends TestCase
         $this->assertSame('HiveNova - Administration Panel', $template->getTemplateVars('title'));
         $this->assertSame('Info', $template->getTemplateVars('fcm_info'));
         $this->assertSame('en', $template->getTemplateVars('lang'));
-        $this->assertSame('.0.0', $template->getTemplateVars('REV'));
+        $this->assertSame(
+            \HiveNova\Core\AssetRevision::fromFilesystem('1.0.0.0'),
+            $template->getTemplateVars('REV')
+        );
         $this->assertSame('1.0.0.0', $template->getTemplateVars('VERSION'));
         $this->assertSame('styles/theme/hive/', $template->getTemplateVars('dpath'));
         $this->assertSame('full', $template->getTemplateVars('bodyclass'));

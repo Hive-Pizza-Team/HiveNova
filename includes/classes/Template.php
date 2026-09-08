@@ -114,7 +114,7 @@ class Template extends Smarty
 			'title'				=> $config->game_name.' - '.$LNG['adm_cp_title'],
 			'fcm_info'			=> $LNG['fcm_info'],
             'lang'    			=> $LNG->getLanguage(),
-			'REV'				=> substr((string) $config->VERSION, -4),
+			'REV'				=> AssetRevision::fromFilesystem((string) $config->VERSION),
 			'date'				=> explode("|", date('Y\|n\|j\|G\|i\|s\|Z', TIMESTAMP)),
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'VERSION'			=> $config->VERSION,

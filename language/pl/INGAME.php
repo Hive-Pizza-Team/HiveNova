@@ -1535,3 +1535,5 @@ $LNG['ref_stats_no_recruits'] = 'No recruits found.';
 $LNG['ref_stats_note'] = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
 $LNG['op_push_error_denied'] = 'Browser notifications are blocked for this site. Enable them in your browser settings, then try again.';
 $LNG['op_push_error_failed'] = 'Could not enable push notifications.';
+$LNG['sh_enter_search_term'] = 'Enter a search term';
+$LNG['fl_select_ships'] = 'Select at least one ship.';

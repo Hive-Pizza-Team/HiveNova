@@ -229,11 +229,12 @@ class DirectiveCatalog
 		foreach ($targets as $counter => $need) {
 			$need = (int) $need;
 			$have = (int) ($progress[$counter] ?? 0);
+			$pct = self::progressPercent($have, $need);
 			$bars[] = [
 				'counter' => (string) $counter,
-				'have' => $have,
+				'have' => $need > 0 ? min($have, $need) : $have,
 				'need' => $need,
-				'pct' => self::progressPercent($have, $need),
+				'pct' => $pct,
 			];
 		}
 

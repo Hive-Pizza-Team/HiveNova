@@ -14,6 +14,7 @@ use HiveNova\Core\BuildFunctions;
 use HiveNova\Core\DirectiveService;
 use HiveNova\Core\FlyingFleetsTable;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\AuthLevel;
 
 /**
  *  2Moons 
@@ -245,11 +246,11 @@ class ShowOverviewPage extends AbstractGamePage
 		}
 		
 		
-		$sql = "SELECT id,username FROM %%USERS%% WHERE universe = :universe AND onlinetime >= :onlinetime AND authlevel > :authlevel;";
+		$sql = "SELECT id,username FROM %%USERS%% WHERE universe = :universe AND onlinetime >= :onlinetime AND authlevel >= :authlevel;";
         $onlineAdmins = $db->select($sql, array(
             ':universe'     => Universe::current(),
             ':onlinetime'   => TIMESTAMP-10*60,
-            ':authlevel'    => AUTH_USR
+            ':authlevel'    => AuthLevel::staffMinAuthlevel()
         ));
 
         foreach ($onlineAdmins as $AdminRow) {

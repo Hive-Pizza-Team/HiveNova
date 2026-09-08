@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Login;
 
+use HiveNova\Core\AssetRevision;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
@@ -141,7 +142,7 @@ abstract class AbstractLoginPage
 			'lang'					=> $LNG->getLanguage(),
 			'UNI'					=> Universe::current(),
 			'VERSION'				=> $config->VERSION,
-			'REV'					=> substr((string) $config->VERSION, -4),
+			'REV'					=> AssetRevision::fromFilesystem((string) $config->VERSION),
 			'languages'				=> Language::getAllowedLangs(false),
 		));
 	}

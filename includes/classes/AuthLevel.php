@@ -6,7 +6,13 @@ class AuthLevel
 {
 	public static function isStaff(int $authlevel): bool
 	{
-		return $authlevel >= AUTH_MOD;
+		return $authlevel >= self::staffMinAuthlevel();
+	}
+
+	/** Lowest authlevel shown as staff (Active Admins, Administration link). Promoters are below this. */
+	public static function staffMinAuthlevel(): int
+	{
+		return AUTH_MOD;
 	}
 
 	public static function canEnterAdmin(int $authlevel): bool

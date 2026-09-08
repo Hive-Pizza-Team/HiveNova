@@ -1,8 +1,43 @@
-function instant(event){
-	if (event.keyCode == 13) {
+function searchQuery() {
+	return $.trim($('#searchtext').val());
+}
+
+function fetchResults() {
+	var term = searchQuery();
+	if (!term) {
+		return;
+	}
+
+	$('#searchEmpty').prop('hidden', true);
+	$('#loading').show();
+	$.get('game.php?page=search&mode=result&type='+$('#type').val()+'&search='+encodeURIComponent(term)+'&ajax=1', function(data) {
+		$('#resulttable').remove();
+		$('content > table:not(.hack)').after(data);
+		$('#loading').hide();
+	});
+}
+
+function submitSearch(event) {
+	if (event) {
 		event.preventDefault();
 	}
-	
+
+	if (!searchQuery()) {
+		$('#resulttable').remove();
+		$('#searchEmpty').prop('hidden', false);
+		return;
+	}
+
+	fetchResults();
+}
+
+function instant(event) {
+	if (event.keyCode == 13) {
+		event.preventDefault();
+		submitSearch();
+		return;
+	}
+
 	if ($.inArray(event.keyCode, [
 		91, // WINDOWS
 		18, // ALT
@@ -14,7 +49,6 @@ function instant(event){
 		17, // CONTROL
 		40, // DOWN
 		35, // END
-		13, // ENTER
 		27, // ESCAPE
 		36, // HOME
 		45, // INSERT
@@ -38,16 +72,22 @@ function instant(event){
 	]) !== -1) {
 		return;
 	}
-	
-	$('#loading').show();
-	$.get('game.php?page=search&mode=result&type='+$('#type').val()+'&search='+$('#searchtext').val()+'&ajax=1', function(data) {
+
+	$('#searchEmpty').prop('hidden', true);
+	if (!searchQuery()) {
 		$('#resulttable').remove();
-		$('content > table:not(.hack)').after(data);	
-		$('#loading').hide();
-	});
+		return;
+	}
+
+	fetchResults();
 }
 
 $(document).ready(function() {
 	$('#searchtext').on('keyup', instant);
-	$('#type').on('change', instant);
+	$('#searchbutton').on('click', submitSearch);
+	$('#type').on('change', function() {
+		if (searchQuery()) {
+			fetchResults();
+		}
+	});
 });
