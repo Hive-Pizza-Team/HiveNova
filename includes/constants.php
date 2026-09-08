@@ -63,7 +63,7 @@ if(!defined('CACHE_PATH')) {
 // EXTERNAL LINKS
 // =============================================================================
 
-define('DISCORD_URL'				, 'https://discord.gg/BWqmGbtuDn');
+define('DISCORD_URL'				, 'https://discord.gg/bP6ksCeEUk');
 
 // Hive RPC — tried in order; each node gets HIVE_RPC_TIMEOUT seconds before the next.
 // Broadcasts (HiveBroadcast) also fail over on RPC errors, not only connection failures.

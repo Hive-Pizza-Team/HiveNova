@@ -7,7 +7,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/Hive-Pizza-Team/HiveNova?style=social)](https://github.com/Hive-Pizza-Team/HiveNova/network/members)
 [![GitHub issues](https://img.shields.io/github/issues/Hive-Pizza-Team/HiveNova)](https://github.com/Hive-Pizza-Team/HiveNova/issues)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Hive-Pizza-Team/HiveNova)](https://github.com/Hive-Pizza-Team/HiveNova/commits)
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/BWqmGbtuDn)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/bP6ksCeEUk)
 [![Powered By Hive](https://img.shields.io/static/v1?label=Hive&message=Powered%20By%20Hive&color=E31337&labelColor=212529&logo=hive_blockchain&logoColor=white&style=flat)](https://hive.io/)
 ---
 
