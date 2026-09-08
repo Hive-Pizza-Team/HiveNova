@@ -67,7 +67,7 @@ $LNG['sys_mess_qg'] 					= "Central de Operações";
 $LNG['sys_mess_spy_report_moon']		= "(Lua)";
 $LNG['sys_mess_head'] 					= 'Relatório de Espionagem %s [%d:%d:%d] em %s';
 $LNG['sys_mess_spy_report'] 			= "Relatório de espionagem";
-$LNG['sys_mess_spy_lostproba'] 			= "A probabilidade das suas sondas serem detetadas é de: %d %% ";
+$LNG['sys_mess_spy_lostproba'] 			= "Probabilidade de as sondas-espia terem sido destruídas: %d%%";
 
 $LNG['sys_mess_spy_control'] 			= "Controlador espacial";
 $LNG['sys_mess_spy_activity'] 			= "Atividade de espionagem";
