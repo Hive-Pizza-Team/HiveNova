@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\FaqIndexService;
 use HiveNova\Core\HTTP;
 
 /**
@@ -33,6 +34,11 @@ class ShowQuestionsPage extends AbstractGamePage
 		global $LNG;
 		
 		$LNG->includeData(array('FAQ'));
+
+		$questions = $LNG['questions'] ?? [];
+		$this->assign(array(
+			'faqIndex' => FaqIndexService::fromQuestions(is_array($questions) ? $questions : []),
+		));
 		
 		$this->display('page.questions.default.tpl');
 	}
