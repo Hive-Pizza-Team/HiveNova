@@ -47,14 +47,36 @@ class ApiCsrf
 		return $site === 'cross-site';
 	}
 
-	public static function enforceMutate(): void
+	/**
+	 * @return array{ok: false, error: string, status: int, message: string}|null
+	 */
+	public static function rejectMutate(): ?array
 	{
 		if (self::isCrossSiteFetch()) {
-			ApiJsonResponse::sendError('csrf', 403, 'Cross-site requests are not allowed.');
+			return [
+				'ok' => false,
+				'error' => 'csrf',
+				'status' => 403,
+				'message' => 'Cross-site requests are not allowed.',
+			];
+		}
+		if (!self::isValidHeader()) {
+			return [
+				'ok' => false,
+				'error' => 'csrf',
+				'status' => 403,
+				'message' => 'Invalid security token.',
+			];
 		}
 
-		if (!self::isValidHeader()) {
-			ApiJsonResponse::sendError('csrf', 403, 'Invalid security token.');
+		return null;
+	}
+
+	public static function enforceMutate(): void
+	{
+		$fail = self::rejectMutate();
+		if ($fail !== null) {
+			ApiJsonResponse::sendError($fail['error'], $fail['status'], $fail['message']);
 		}
 	}
 

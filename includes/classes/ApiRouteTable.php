@@ -11,11 +11,25 @@ class ApiRouteTable
 		'i18n' => ApiTickClass::Poll,
 		'alerts' => ApiTickClass::Poll,
 		'events' => ApiTickClass::Poll,
+		'buildings' => ApiTickClass::Read,
+		'research' => ApiTickClass::Read,
+		'shipyard' => ApiTickClass::Read,
+		'fleet' => ApiTickClass::Read,
+		'galaxy' => ApiTickClass::Read,
+		'messages' => ApiTickClass::Read,
+		'config' => ApiTickClass::Poll,
+		'catalog' => ApiTickClass::Poll,
 	];
 
 	/** @var array<string, list<string>> */
 	private const MUTATE_ACTIONS = [
 		'overview' => ['rename'],
+		'buildings' => ['insert', 'cancel'],
+		'research' => ['insert'],
+		'shipyard' => ['build'],
+		'fleet' => ['send', 'recall'],
+		'galaxy' => ['spy'],
+		'catalog' => ['prod', 'note'],
 	];
 
 	public static function sanitizeResource(string $raw): string
@@ -42,6 +56,11 @@ class ApiRouteTable
 		return isset(self::RESOURCES[$resource]);
 	}
 
+	public static function isPublic(string $resource): bool
+	{
+		return $resource === 'config';
+	}
+
 	public static function isKnownAction(string $resource, string $action): bool
 	{
 		if ($action === '' || $action === 'show') {
@@ -59,7 +78,8 @@ class ApiRouteTable
 	public static function seasonPageAlias(string $resource): string
 	{
 		return match ($resource) {
-			'bootstrap', 'overview', 'alerts', 'events', 'i18n' => 'overview',
+			'bootstrap', 'overview', 'alerts', 'events', 'i18n', 'config', 'catalog',
+			'buildings', 'research', 'shipyard', 'fleet', 'galaxy', 'messages' => 'overview',
 			default => $resource,
 		};
 	}

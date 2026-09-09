@@ -47,12 +47,19 @@ class ApiRouteTableTest extends TestCase
 	{
 		$this->assertFalse(ApiRouteTable::isKnown('alliance'));
 		$this->assertTrue(ApiRouteTable::isKnown('bootstrap'));
+		$this->assertTrue(ApiRouteTable::isKnown('catalog'));
+		$this->assertSame('overview', ApiRouteTable::seasonPageAlias('catalog'));
+		$this->assertSame(ApiTickClass::Poll, ApiRouteTable::tickClass('catalog', 'show', 'GET'));
+		$this->assertSame('overview', ApiRouteTable::seasonPageAlias('config'));
+		$this->assertSame('alliance', ApiRouteTable::seasonPageAlias('alliance'));
 	}
 
-	public function testSeasonAliasMapsChromeToOverview(): void
+	public function testPublicConfigRoute(): void
 	{
-		$this->assertSame('overview', ApiRouteTable::seasonPageAlias('bootstrap'));
-		$this->assertSame('overview', ApiRouteTable::seasonPageAlias('alerts'));
+		$this->assertTrue(ApiRouteTable::isPublic('config'));
+		$this->assertFalse(ApiRouteTable::isPublic('bootstrap'));
+		$this->assertTrue(ApiRouteTable::isKnown('config'));
+		$this->assertSame(ApiTickClass::Poll, ApiRouteTable::tickClass('config', 'show', 'GET'));
 	}
 
 	public function testSessionCookiePathIsRoot(): void

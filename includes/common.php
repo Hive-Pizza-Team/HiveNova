@@ -16,6 +16,7 @@
  */
 
 use HiveNova\Core\ApiJsonResponse;
+use HiveNova\Core\ApiRouteTable;
 use HiveNova\Core\Cache;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
@@ -118,8 +119,16 @@ if(defined('DATABASE_VERSION') && DATABASE_VERSION === 'OLD')
 $config = Config::get();
 date_default_timezone_set($config->timezone);
 
+$apiPublic = false;
+if (MODE === 'API') {
+	$apiResource = ApiRouteTable::sanitizeResource((string) HTTP::_GP('r', 'bootstrap'));
+	if ($apiResource === '') {
+		$apiResource = 'bootstrap';
+	}
+	$apiPublic = ApiRouteTable::isPublic($apiResource);
+}
 
-if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON' || MODE === 'API')
+if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON' || (MODE === 'API' && !$apiPublic))
 {
 	$session	= Session::load();
 

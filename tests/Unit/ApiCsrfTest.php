@@ -43,11 +43,16 @@ class ApiCsrfTest extends TestCase
 		$this->assertFalse(ApiCsrf::isValidHeader());
 	}
 
-	public function testDetectsCrossSiteFetch(): void
+	public function testRejectMutateCrossSiteAndBadToken(): void
 	{
 		$_SERVER['HTTP_SEC_FETCH_SITE'] = 'cross-site';
-		$this->assertTrue(ApiCsrf::isCrossSiteFetch());
+		$fail = ApiCsrf::rejectMutate();
+		$this->assertSame('csrf', $fail['error']);
 		$_SERVER['HTTP_SEC_FETCH_SITE'] = 'same-origin';
-		$this->assertFalse(ApiCsrf::isCrossSiteFetch());
+		$_SERVER['HTTP_X_CSRF_TOKEN'] = 'nope';
+		$fail = ApiCsrf::rejectMutate();
+		$this->assertSame('csrf', $fail['error']);
+		$_SERVER['HTTP_X_CSRF_TOKEN'] = ApiCsrf::token();
+		$this->assertNull(ApiCsrf::rejectMutate());
 	}
 }

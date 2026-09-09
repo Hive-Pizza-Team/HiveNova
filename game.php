@@ -54,7 +54,7 @@ if(!class_exists($fqcn)) {
 if (isset($_COOKIE['hn_ui']) && $_COOKIE['hn_ui'] === 'react' && $page === 'overview'
 	&& (int) HTTP::_GP('stay', 0) === 0 && empty($_POST)
 	&& is_file(ROOT_PATH.'react/index.html')) {
-	HTTP::redirectTo('react/');
+	HTTP::redirectTo('react/overview');
 }
 
 $pageObj	= new $fqcn;
