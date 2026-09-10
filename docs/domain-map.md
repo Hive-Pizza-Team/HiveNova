@@ -26,6 +26,7 @@ Quick index for agents. Prefer the service/class column for logic; pages are HTT
 | PvE salvage / NPC fleets | `PvePackageService`, `PveNpcFleetFactory`, `FLEET_MISSION_SALVAGE` | |
 | Battle share to Hive | `BattleShareComposer` | |
 | Admin CSRF / auth helpers | `AdminCsrf`, pages under `includes/pages/adm/` | |
+| Web Push (buildings / fleets) | `PushNotificationService`, `BuildingCompletePushService` | Opt-in via Options + `sw.js`; VAPID in `includes/push.config.php` |
 | Cron tasks | `includes/classes/cronjob/*` | Register in `%%CRONJOBS%%` |
 | DB table name tokens | `includes/dbtables.php` | `%%USERS%%`, `%%PLANETS%%`, … |
 | Named mission / ship / resource IDs | `includes/constants.php` | See `docs/architecture.md` |
