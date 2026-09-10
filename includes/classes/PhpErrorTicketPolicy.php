@@ -55,8 +55,7 @@ class PhpErrorTicketPolicy
 	/**
 	 * File-backed dedupe. Returns true once per fingerprint per window.
 	 *
-	 * Fail-open on unreadable cache so a real fatal can still notify;
-	 * fail-closed on lock/write errors to avoid a ticket flood.
+	 * Fail-closed on I/O or lock errors so a broken cache cannot flood tickets.
 	 */
 	public static function claimFingerprint(
 		string $fingerprint,

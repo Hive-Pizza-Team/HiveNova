@@ -84,4 +84,35 @@ class PhpErrorTicketPolicyTest extends TestCase
 		$this->assertFalse(PhpErrorTicketPolicy::claimFingerprint('', 1, $this->cacheFile));
 		$this->assertFalse(PhpErrorTicketPolicy::claimFingerprint('abc', 1, ''));
 	}
+
+	public function testClaimFingerprintIgnoresCorruptCacheAndJunkEntries(): void
+	{
+		file_put_contents($this->cacheFile, 'not-json');
+		$fp = PhpErrorTicketPolicy::fingerprint(E_ERROR, '/app/corrupt.php', 1, 'x');
+		$this->assertTrue(PhpErrorTicketPolicy::claimFingerprint($fp, 100, $this->cacheFile, 3600));
+
+		file_put_contents($this->cacheFile, json_encode([
+			0 => 100,
+			'nested' => ['nope' => 1],
+			'stale' => 1,
+			$fp => 50,
+		]));
+		$this->assertTrue(PhpErrorTicketPolicy::claimFingerprint($fp, 100, $this->cacheFile, 10));
+	}
+
+	public function testClaimFingerprintCreatesMissingCacheDirectory(): void
+	{
+		$dir = sys_get_temp_dir() . '/hivenova-php-error-tickets-' . uniqid('', true);
+		$file = $dir . '/nested/php-error-tickets.json';
+		$fp = PhpErrorTicketPolicy::fingerprint(E_ERROR, '/app/dir.php', 2, 'y');
+
+		try {
+			$this->assertTrue(PhpErrorTicketPolicy::claimFingerprint($fp, 1, $file, 3600));
+			$this->assertFileExists($file);
+		} finally {
+			@unlink($file);
+			@rmdir($dir . '/nested');
+			@rmdir($dir);
+		}
+	}
 }
