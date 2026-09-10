@@ -59,6 +59,7 @@ Four themes: `hive` (default), `nova`, `gow`, `EpicBlueXIII`.
 **Configuration**:
 - `includes/constants.php` — 240+ game constants
 - `includes/config.php` — DB credentials; created by the web installer, not in git
+- `includes/push.config.php` — Web Push VAPID keys (optional; installer can generate). Copy `includes/push.config.sample.php` or run `Minishlink\WebPush\VAPID::createVapidKeys()`. Never commit the private key. Needed for building-complete and fleet push alerts.
 
 **Cron job system** — classes in `includes/classes/cronjob/`, one class per job, implementing `CronjobTask`. Jobs are registered in the `uni1_cronjobs` DB table.
 

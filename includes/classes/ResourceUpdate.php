@@ -291,6 +291,15 @@ class ResourceUpdate
 			$this->PLANET['field_current']		+= 1;
 			$this->PLANET[$this->resource[$Element]]	+= 1;
 			$this->Builded[$Element]			+= 1;
+			BuildingCompletePushService::notifyCompletedJob(
+				(int) ($this->USER['id'] ?? 0),
+				(int) ($this->PLANET['id'] ?? 0),
+				(string) ($this->PLANET['name'] ?? ''),
+				(int) $Element,
+				(int) ($CurrentQueue[0][1] ?? 0),
+				(int) $BuildEndTime,
+				(string) ($this->USER['lang'] ?? 'en')
+			);
 		}
 		else
 		{

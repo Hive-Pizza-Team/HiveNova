@@ -69,6 +69,7 @@
 			<td>{$LNG.op_push_notifications}</td>
 			<td>
 				<input id="pushAlerts" name="pushAlerts" type="checkbox" value="1"{if $pushAlerts == 1} checked="checked"{/if}>
+				<br><small class="push-settings-hint">{$LNG.op_push_hint}</small>
 				<small id="pushAlertsError" class="push-settings-hint" hidden
 					data-msg-denied="{$LNG.op_push_error_denied|escape:'html'}"
 					data-msg-failed="{$LNG.op_push_error_failed|escape:'html'}"></small>

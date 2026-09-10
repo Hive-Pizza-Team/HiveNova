@@ -1538,3 +1538,6 @@ $LNG['op_push_error_failed'] = 'Could not enable push notifications.';
 $LNG['sh_enter_search_term'] = 'Enter a search term';
 $LNG['fl_select_ships'] = 'Select at least one ship.';
 $LNG['op_password_too_short'] = 'The password must be at least %s characters long.';
+$LNG['op_push_hint'] = 'Get a notification when a building finishes, and for incoming fleets. Requires browser permission. On iPhone, add the app to your Home Screen first (iOS 16.4+).';
+$LNG['push_building_title'] = 'Building complete';
+$LNG['push_building_body'] = '%s (level %d) finished on %s';

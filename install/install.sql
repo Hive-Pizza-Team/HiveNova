@@ -1200,7 +1200,8 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'hive_inactive_memo', 1, '0', '4', '*', '*', '*', 'HiveNova\\Cronjob\\InactiveHiveMemoCronjob', 0, NULL),
 (NULL, 'hive_social_memo', 1, '*/5', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SocialHiveMemoCronjob', 0, NULL),
 (NULL, 'directive_period', 1, '0', '*', '*', '*', '*', 'HiveNova\\Cronjob\\DirectivePeriodCronjob', 0, NULL),
-(NULL, 'season', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SeasonCronjob', 0, NULL);
+(NULL, 'season', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SeasonCronjob', 0, NULL),
+(NULL, 'building_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\BuildingCompletePushCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);
@@ -1655,6 +1656,15 @@ CREATE TABLE `%PREFIX%bot_detection_state` (
   `last_digest_hash` char(64) NOT NULL DEFAULT '',
   `updated_at` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`universe`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%push_building_notified` (
+  `planet_id` int(10) unsigned NOT NULL,
+  `element_id` smallint(5) unsigned NOT NULL,
+  `level` smallint(5) unsigned NOT NULL,
+  `build_end` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`planet_id`, `element_id`, `level`, `build_end`),
+  KEY `build_end` (`build_end`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%achievements` (
