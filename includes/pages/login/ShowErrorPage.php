@@ -23,6 +23,8 @@ class ShowErrorPage extends AbstractLoginPage
 	public static $requireModule = 0;
 	
 	protected $disableEcoSystem = true;
+	/** @var bool Unknown login routes are not indexable. */
+	protected $seoAllowIndex = false;
 
 	function __construct() 
 	{

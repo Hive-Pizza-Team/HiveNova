@@ -32,14 +32,20 @@ class PublicSeo
 		'register',
 	];
 
-	/** Pages listed in sitemap.xml (public marketing surface). */
+	/** Twitter card @site handle (public lobby head tags). */
+	public const TWITTER_SITE = '@PizzaOnHive';
+
+	/**
+	 * Pages listed in sitemap.xml (public marketing surface).
+	 * Omit empty/noindex URLs (news) until they have indexable content.
+	 * `disclamer` stays once Contact Admin has Discord fallback content.
+	 */
 	public const SITEMAP_PAGES = [
 		'index',
 		'register',
 		'rules',
 		'screens',
 		'battleHall',
-		'news',
 		'disclamer',
 		'banList',
 	];
@@ -55,6 +61,33 @@ class PublicSeo
 		}
 
 		return $page;
+	}
+
+	/**
+	 * Correct-spelling alias → 2Moons login page id.
+	 * Admin `?page=disclamer` is intentional legacy and is not redirected.
+	 */
+	public static function loginPageAlias(string $page): ?string
+	{
+		$page = trim($page);
+		if ($page === 'disclaimer') {
+			return 'disclamer';
+		}
+
+		return null;
+	}
+
+	/**
+	 * Relative Location target for a login-page alias (301).
+	 */
+	public static function aliasRedirectLocation(string $canonicalPage, string $lang = '', string $defaultLang = 'en'): string
+	{
+		$query = ['page' => $canonicalPage];
+		if ($lang !== '' && $lang !== $defaultLang) {
+			$query['lang'] = $lang;
+		}
+
+		return 'index.php?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 	}
 
 	/**
