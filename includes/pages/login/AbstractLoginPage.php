@@ -240,6 +240,7 @@ abstract class AbstractLoginPage
 			'ogImageUrl'		=> $ogImageUrl,
 			'ogImageWidth'		=> 1024,
 			'ogImageHeight'		=> 768,
+			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
 			'jsonLd'			=> $jsonLd,
 		));

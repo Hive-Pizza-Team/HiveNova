@@ -27,6 +27,9 @@
 	<meta property="og:locale" content="{$lang}">
 	<!-- Twitter card -->
 	<meta name="twitter:card" content="summary_large_image">
+	{if $twitterSite}
+	<meta name="twitter:site" content="{$twitterSite}">
+	{/if}
 	<meta name="twitter:title" content="{block name="twitter_title"}{$documentTitle}{/block}">
 	<meta name="twitter:description" content="{block name='twitter_description'}{$metaDescription}{/block}">
 	<meta name="twitter:image" content="{$ogImageUrl}">

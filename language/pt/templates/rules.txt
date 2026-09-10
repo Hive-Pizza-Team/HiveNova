@@ -1,35 +1,35 @@
 <ul id="rules">
 	<li>
-		<h1>1. Contas e Jogo</h1>
+		<h2>1. Contas e Jogo</h2>
 		<p>Não conseguimos monitorizar quantas contas cada jogador utiliza, pelo que será permitido a todos os jogadores jogar com tantas contas de jogo quantas acharem divertidas. O tempo e atenção humanos são os limites reais, não as "contas".
 <br /></p>
 <br /><p>Apoiamos um "espírito de jogo" justo e divertido. Por isso, qualquer automação desenvolvida (ou seja, "botting") deve ser divulgada à equipa para que possamos disponibilizar ferramentas semelhantes a todos os jogadores.
 
 </p>
 
-		<h1>2. Não Empurres "Para Cima"</h1>
+		<h2>2. Não Empurres "Para Cima"</h2>
 		<p>No espírito do jogo justo e divertido, encorajamos todas as formas de trabalho em equipa, especialmente para fora e para baixo em pontos, e isto inclui recursos do jogo. Tentaremos criar condições de jogo que apoiem este tipo de trabalho em equipa - e evitar condições de jogo que apoiem estratégias de bola de neve. Os pontos do jogador no topo determinarão os limites do empurrão, e geralmente deve ser encorajado que jogadores com menos pontos do que o jogador do topo façam tudo o que acharem divertido para "recuperar".
 
 <br />Não conseguimos monitorizar ou avaliar transações externas de natureza tangível ou intangível, pelo que os jogadores podem oferecer, trocar, negociar ou comprar ativos do jogo fora do jogo.
 </p>
 	</li>
 	<li>
-		<h1>3. Bashing</h1>
+		<h2>3. Bashing</h2>
 		<p>Não é permitido atacar qualquer planeta ou lua de um jogador mais de 6 vezes num período de 24 horas.
 O bashing só é permitido quando a tua Aliança está em guerra com outra Aliança. A guerra deve ser anunciada no fórum e ambos os líderes devem concordar com os termos.
 A regra de bashing aplica-se apenas a utilizadores ativos e exclui ataques de mísseis e missões de espionagem.</p>
 	</li>
 	<li>
-		<h1>4. Exploração de Bugs</h1>
+		<h2>4. Exploração de Bugs</h2>
 		<p>Usar um bug para proveito de alguém, intencionalmente ou não reportar um bug intencionalmente, é estritamente proibido.</p>
 	</li>
 	<li>
-		<h1>5. Conteúdo Proibido</h1>
+		<h2>5. Conteúdo Proibido</h2>
 		<p>Insinuar que vais localizar e prejudicar outro jogador é proibido.
 <br />Também spam, envio em massa de mensagens e publicidade de jogos/produtos externos não são permitidos.</p>
 	</li>
 	<li>
-		<h1>6. Guerras</h1>
+		<h2>6. Guerras</h2>
 		<p>Após os Líderes das alianças concordarem com a guerra, esta é oficialmente declarada. E continuará até uma das alianças a cancelar. Para cancelar oficialmente a guerra, precisam de cancelar o pacto de guerra dentro do jogo e anunciá-lo na thread que iniciaram inicialmente.
 Enquanto a guerra estiver ativa, a regra de bashing entre as alianças envolvidas não se aplica. Ou seja, quaisquer membros pertencentes às alianças em guerra podem ser atacados um número infinito de vezes sem punição.
 Se uma das alianças desistir e cancelar a guerra, a regra de bashing voltará a ser aplicada, e qualquer membro que a violar após o fim da guerra será punido com um ban de 1 dia, ou mais se o grau de ataque for extremamente elevado.

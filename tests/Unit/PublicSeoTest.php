@@ -123,5 +123,32 @@ class PublicSeoTest extends TestCase
 		$this->assertSame('noindex, follow', PublicSeo::robotsContent('lostPassword'));
 		$this->assertSame('noindex, follow', PublicSeo::robotsContent('news', false));
 		$this->assertSame('index, follow', PublicSeo::robotsContent('rules', true));
+		$this->assertSame('index, follow', PublicSeo::robotsContent('disclamer', true));
+	}
+
+	public function testSitemapPagesOmitNewsAndKeepContact(): void
+	{
+		$this->assertNotContains('news', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('disclamer', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('index', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('register', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('rules', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('screens', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('battleHall', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('banList', PublicSeo::SITEMAP_PAGES);
+	}
+
+	public function testTwitterSiteHandle(): void
+	{
+		$this->assertSame('@PizzaOnHive', PublicSeo::TWITTER_SITE);
+	}
+
+	public function testDisclaimerAliasRedirectsToLegacySpelling(): void
+	{
+		$this->assertSame('disclamer', PublicSeo::loginPageAlias('disclaimer'));
+		$this->assertNull(PublicSeo::loginPageAlias('disclamer'));
+		$this->assertNull(PublicSeo::loginPageAlias('rules'));
+		$this->assertSame('index.php?page=disclamer', PublicSeo::aliasRedirectLocation('disclamer', 'en'));
+		$this->assertSame('index.php?page=disclamer&lang=de', PublicSeo::aliasRedirectLocation('disclamer', 'de'));
 	}
 }

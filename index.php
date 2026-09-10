@@ -34,6 +34,7 @@ $pageClass	= 'Show'.ucfirst($page).'Page';
 $fqcn		= 'HiveNova\\Page\\Login\\' . $pageClass;
 
 if(!class_exists($fqcn)) {
+	http_response_code(404);
 	ShowErrorPage::printError($LNG['page_doesnt_exist']);
 }
 
@@ -48,6 +49,7 @@ if(isset($pageProps['requireModule']) && $pageProps['requireModule'] !== 0 && !i
 
 if(!is_callable(array($pageObj, $mode))) {
 	if(!isset($pageProps['defaultController']) || !is_callable(array($pageObj, $pageProps['defaultController']))) {
+		http_response_code(404);
 		ShowErrorPage::printError($LNG['page_doesnt_exist']);
 	}
 	$mode	= $pageProps['defaultController'];
