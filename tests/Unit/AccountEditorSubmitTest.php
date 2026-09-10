@@ -34,4 +34,22 @@ class AccountEditorSubmitTest extends TestCase
 		$this->assertFalse(AccountEditorSubmit::isAdd(['add' => '']));
 		$this->assertFalse(AccountEditorSubmit::isDelete(['delete' => '']));
 	}
+
+	public function testMissingSubmitKeysDoNotWarn(): void
+	{
+		$warnings = [];
+		set_error_handler(static function (int $severity, string $message) use (&$warnings): bool {
+			$warnings[] = $message;
+			return true;
+		});
+
+		try {
+			$this->assertFalse(AccountEditorSubmit::isAdd(['delete' => 'Delete']));
+			$this->assertFalse(AccountEditorSubmit::isDelete(['add' => 'Add']));
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame([], $warnings);
+	}
 }
