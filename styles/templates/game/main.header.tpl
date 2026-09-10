@@ -11,6 +11,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 	<link rel="manifest" href="manifest.php?uni={$USER.universe}">
 	<meta name="theme-color" content="#1a1a2e">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<link rel="apple-touch-icon" href="styles/resource/images/pwa/apple-touch-icon.png">
 	<meta name="robots" content="noindex, nofollow">
 	{if !empty($goto)}
 	<meta http-equiv="refresh" content="{$gotoinsec};URL={$goto}">

@@ -454,8 +454,19 @@ if ($status >= 400) {
     echo "[ FAIL ] $label unexpected Content-Type: $ctype\n";
     $fail++;
 } else {
-    echo "[ OK   ] $label HTTP $status (name: {$manifest['name']})\n";
-    $pass++;
+    $iconSizes = [];
+    foreach (($manifest['icons'] ?? []) as $icon) {
+        if (($icon['type'] ?? '') === 'image/png') {
+            $iconSizes[] = $icon['sizes'] ?? '';
+        }
+    }
+    if (!in_array('192x192', $iconSizes, true) || !in_array('512x512', $iconSizes, true)) {
+        echo "[ FAIL ] $label missing 192/512 PNG icons\n";
+        $fail++;
+    } else {
+        echo "[ OK   ] $label HTTP $status (name: {$manifest['name']})\n";
+        $pass++;
+    }
 }
 
 // CombatReport.php: must issue a redirect (not crash with class-not-found).
