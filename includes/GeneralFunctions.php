@@ -375,14 +375,17 @@ function parse_ship_amount($value): int
 
 function pretty_number_plain($n, $dec = 0)
 {
+	$n = \HiveNova\Core\NumericCast::toFiniteFloat($n);
 	return number_format(floatToString($n, $dec), $dec, ',', '.');
 }
 
 function pretty_number($n, $dec = 0)
 {
+	$n = \HiveNova\Core\NumericCast::toFiniteFloat($n);
 	$formatted = number_format(floatToString($n, $dec), $dec, ',', '.');
 	if (isset($GLOBALS['userNumberFormat']) && $GLOBALS['userNumberFormat'] !== 'eu') {
-		$raw = $dec > 0 ? floatToString($n, $dec) : intval($n);
+		// floatToString, not intval: tiny/huge STATPOINTS floats must not fatal or wrap.
+		$raw = floatToString($n, $dec);
 		return "<span class='ln' data-n='" . $raw . "'>" . $formatted . '</span>';
 	}
 	return $formatted;

@@ -78,6 +78,19 @@ class PublicSeo
 	}
 
 	/**
+	 * Relative Location for a known login-page alias, or null if $page is canonical.
+	 */
+	public static function loginAliasRedirectTarget(string $page, string $lang = '', string $defaultLang = 'en'): ?string
+	{
+		$canonical = self::loginPageAlias($page);
+		if ($canonical === null) {
+			return null;
+		}
+
+		return self::aliasRedirectLocation($canonical, $lang, $defaultLang);
+	}
+
+	/**
 	 * Relative Location target for a login-page alias (301).
 	 */
 	public static function aliasRedirectLocation(string $canonicalPage, string $lang = '', string $defaultLang = 'en'): string
