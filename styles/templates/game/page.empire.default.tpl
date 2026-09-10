@@ -1,15 +1,15 @@
 {block name="title" prepend}{$LNG.lm_empire}{/block}
 {block name="content"}
-<table>
+<table class="empire-overview">
 	<tbody>
 		<tr>
 			<th colspan="{$colspan}">{$LNG.lv_imperium_title}</th>
 		</tr>
 		<tr>
 			<td style="width:100px">{$LNG.lv_planet}</td>
-			<td style="width:100px;font-size: 50px;">&Sigma;</td>
+			<td class="empire-total-col" style="width:100px">{$LNG.lv_total}</td>
 			{foreach $planetList.image as $planetID => $image}
-			<td style="width:100px"><a href="game.php?page=overview&amp;cp={$planetID}">{include file="shared.planet-thumb.tpl" texture=$image dpath=$dpath width=48 height=48 border=0 preferLite=true loading="lazy"}</a></td>
+			<td class="empire-planet-thumb" style="width:100px"><a href="game.php?page=overview&amp;cp={$planetID}">{include file="shared.planet-thumb.tpl" texture=$image dpath=$dpath width=48 height=48 border=0 preferLite=true loading="lazy"}</a></td>
 			{/foreach}
 		</tr>
 		<tr>
@@ -37,11 +37,23 @@
 			<th colspan="{$colspan}">{$LNG.lv_resources}</th>
 		</tr>
 		{foreach $planetList.resource as $elementID => $resourceArray}
-		<tr>
+		<tr class="empire-resource-row">
 			<td><a href='#' onclick='return Dialog.info({$elementID});'>{$LNG.tech.$elementID}</a></td>
-			<td>{$resourceArray|array_sum|number} {if $elementID|in_array:[901,902,903]}<span style="color:lime">{$planetList.resourcePerHour[$elementID]|array_sum|number}/h</span>{/if}</td>
+			<td>
+				{if $elementID == $energyElementId}
+					{$planetList.energyAvailable|array_sum|number} / {$resourceArray|array_sum|number}
+				{else}
+					{$resourceArray|array_sum|number} <span style="color:lime">{$planetList.resourcePerHour[$elementID]|array_sum|number}/h</span>
+				{/if}
+			</td>
 			{foreach $resourceArray as $planetID => $resource}
-				<td>{$resource|number} {if $elementID|in_array:[901,902,903] && $planetList.planet_type[$planetID] == 1}<span style="color:lime">{$planetList.resourcePerHour[$elementID][$planetID]|number}/h</span>{/if}</td>
+				<td>
+					{if $elementID == $energyElementId}
+						{$planetList.energyAvailable[$planetID]|number} / {$resource|number}
+					{else}
+						{$resource|number}{if $planetList.planet_type[$planetID] == 1} <span style="color:lime">{$planetList.resourcePerHour[$elementID][$planetID]|number}/h</span>{/if}
+					{/if}
+				</td>
 			{/foreach}
 		</tr>
 		{/foreach}
@@ -69,6 +81,6 @@
 	<table><tbody id="empire-tech"></tbody></table>
 </details>
 
-<script type="application/json" id="empire-matrix-config" data-url="game.php?page=imperium&amp;mode=matrix&amp;ajax=1"></script>
+<script type="application/json" id="empire-matrix-config" data-url="game.php?page=imperium&amp;mode=matrix&amp;ajax=1">{$matrixPayloadJson nofilter}</script>
 <script src="./scripts/game/imperium.js?v={$REV}"></script>
 {/block}

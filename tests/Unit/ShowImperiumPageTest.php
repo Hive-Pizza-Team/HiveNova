@@ -168,4 +168,24 @@ class ShowImperiumPageTest extends TestCase
 		$this->assertCount(1, $payload['sections']['tech']);
 		$this->assertSame(2, $payload['sections']['tech'][0]['total']);
 	}
+
+	public function test_empire_template_uses_normal_total_header_and_opaque_resource_rows(): void
+	{
+		$tpl = file_get_contents(__DIR__ . '/../../styles/templates/game/page.empire.default.tpl');
+		$this->assertIsString($tpl);
+		$this->assertStringNotContainsString('font-size: 50px', $tpl);
+		$this->assertStringNotContainsString('&Sigma;', $tpl);
+		$this->assertStringContainsString('{$LNG.lv_total}', $tpl);
+		$this->assertStringContainsString('empire-overview', $tpl);
+		$this->assertStringContainsString('empire-resource-row', $tpl);
+		$this->assertStringContainsString('energyAvailable', $tpl);
+		$this->assertStringContainsString('matrixPayloadJson', $tpl);
+	}
+
+	public function test_game_front_controller_resolves_pages_through_router(): void
+	{
+		$front = file_get_contents(__DIR__ . '/../../game.php');
+		$this->assertIsString($front);
+		$this->assertStringContainsString('GamePageRouter::resolve', $front);
+	}
 }

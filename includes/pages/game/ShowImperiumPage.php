@@ -4,6 +4,8 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\ImperiumView;
 use HiveNova\Core\ResourceUpdate;
 
 /**
@@ -37,10 +39,14 @@ class ShowImperiumPage extends AbstractGamePage
 
 		$planets = $this->loadPlanets();
 		$planetList = $this->buildHeaderPlanetList($planets, $USER, $resource, $reslist);
+		$techNames = ImperiumView::techNamesFromLanguage($LNG);
+		$matrixPayload = self::buildMatrixPayload($planets, $USER, $resource, $reslist, $techNames);
 
 		$this->assign(array(
-			'colspan'    => count($planets) + 2,
-			'planetList' => $planetList,
+			'colspan'           => count($planets) + 2,
+			'planetList'        => $planetList,
+			'energyElementId'   => RESOURCE_ENERGY,
+			'matrixPayloadJson' => ImperiumView::encodeMatrixJson($matrixPayload),
 		));
 
 		$this->display('page.empire.default.tpl');
@@ -54,8 +60,15 @@ class ShowImperiumPage extends AbstractGamePage
 		global $USER, $resource, $reslist, $LNG;
 
 		$planets = $this->loadPlanets();
-		$payload = self::buildMatrixPayload($planets, $USER, $resource, $reslist, $LNG['tech'] ?? []);
+		$payload = self::buildMatrixPayload(
+			$planets,
+			$USER,
+			$resource,
+			$reslist,
+			ImperiumView::techNamesFromLanguage($LNG)
+		);
 
+		HTTP::sendHeader('Content-Type', 'application/json; charset=UTF-8');
 		$this->sendJSON($payload);
 	}
 
@@ -120,13 +133,14 @@ class ShowImperiumPage extends AbstractGamePage
 	{
 		$config = Config::get($user['universe']);
 		$planetList = array(
-			'image'           => array(),
-			'name'            => array(),
-			'coords'          => array(),
-			'field'           => array(),
-			'resource'        => array(),
-			'resourcePerHour' => array(),
-			'planet_type'     => array(),
+			'image'            => array(),
+			'name'             => array(),
+			'coords'           => array(),
+			'field'            => array(),
+			'resource'         => array(),
+			'resourcePerHour'  => array(),
+			'energyAvailable'  => array(),
+			'planet_type'      => array(),
 		);
 
 		foreach ($planets as $Planet) {
@@ -140,10 +154,14 @@ class ShowImperiumPage extends AbstractGamePage
 			$planetList['field'][$Planet['id']]['current'] = $Planet['field_current'];
 			$planetList['field'][$Planet['id']]['max'] = CalculateMaxPlanetFields($Planet);
 
-			$planetList['resource'][901][$Planet['id']] = $Planet['metal'];
-			$planetList['resource'][902][$Planet['id']] = $Planet['crystal'];
-			$planetList['resource'][903][$Planet['id']] = $Planet['deuterium'];
-			$planetList['resource'][911][$Planet['id']] = $Planet['energy'];
+			$planetList['resource'][RESOURCE_METAL][$Planet['id']] = $Planet['metal'];
+			$planetList['resource'][RESOURCE_CRYSTAL][$Planet['id']] = $Planet['crystal'];
+			$planetList['resource'][RESOURCE_DEUTERIUM][$Planet['id']] = $Planet['deuterium'];
+			$planetList['resource'][RESOURCE_ENERGY][$Planet['id']] = $Planet['energy'];
+			$planetList['energyAvailable'][$Planet['id']] = ImperiumView::energyAvailable(
+				$Planet['energy'] ?? 0,
+				$Planet['energy_used'] ?? 0
+			);
 
 			if ($Planet['planet_type'] == 1) {
 				$basic901 = $config->metal_basic_income * $config->resource_multiplier;
@@ -155,9 +173,9 @@ class ShowImperiumPage extends AbstractGamePage
 				$basic903 = 0;
 			}
 
-			$planetList['resourcePerHour'][901][$Planet['id']] = $basic901 + $Planet['metal_perhour'];
-			$planetList['resourcePerHour'][902][$Planet['id']] = $basic902 + $Planet['crystal_perhour'];
-			$planetList['resourcePerHour'][903][$Planet['id']] = $basic903 + $Planet['deuterium_perhour'];
+			$planetList['resourcePerHour'][RESOURCE_METAL][$Planet['id']] = $basic901 + $Planet['metal_perhour'];
+			$planetList['resourcePerHour'][RESOURCE_CRYSTAL][$Planet['id']] = $basic902 + $Planet['crystal_perhour'];
+			$planetList['resourcePerHour'][RESOURCE_DEUTERIUM][$Planet['id']] = $basic903 + $Planet['deuterium_perhour'];
 
 			$planetList['planet_type'][$Planet['id']] = $Planet['planet_type'];
 		}
