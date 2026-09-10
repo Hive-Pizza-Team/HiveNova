@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hivenova-static-v2';
+const CACHE_NAME = 'hivenova-static-v3';
 const DEFAULT_GAME_URL = 'game.php?page=overview';
 
 function safeGameUrl(url) {
@@ -15,7 +15,7 @@ function safeGameUrl(url) {
 const CACHE_URLS = [
   './styles/resource/css/tokens.css',
   './scripts/game/base.js',
-  './favicon.ico'
+  './styles/resource/images/pwa/icon-192.png'
 ];
 
 self.addEventListener('install', function (event) {
@@ -76,7 +76,7 @@ self.addEventListener('push', function (event) {
   event.waitUntil(
     self.registration.showNotification(payload.title, {
       body: payload.body,
-      icon: 'favicon.ico',
+      icon: 'styles/resource/images/pwa/icon-192.png',
       data: { url: safeGameUrl(payload.url) }
     })
   );
