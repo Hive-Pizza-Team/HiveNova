@@ -9,6 +9,8 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FrequentLocationService;
 use HiveNova\Core\FleetTargetInfoService;
+use HiveNova\Core\FleetTargetValidationService;
+use HiveNova\Core\PvePackageService;
 use HiveNova\Core\Session;
 
 /**
@@ -412,6 +414,31 @@ class ShowFleetStep1Page extends AbstractGamePage
             if ($targetPlanetType == 3 && !is_array($planetData))
 			{
 				$this->sendJSON($LNG['fl_error_no_moon']);
+			}
+
+			if ($targetPlanetType == FleetTargetValidationService::TYPE_PLANET && !is_array($planetData))
+			{
+				$ships = FleetTargetValidationService::resolveShipsForCheck(
+					$_SESSION['fleet'] ?? [],
+					HTTP::_GP('token', ''),
+					HTTP::_GP('kolo', 0) == 1
+				);
+				$hasPve = PvePackageService::findAt(
+					Universe::current(),
+					$targetGalaxy,
+					$targetSystem,
+					$targetPlanet
+				) !== null;
+
+				if (!FleetTargetValidationService::allowsMissingPlanet(
+					$ships,
+					(int) $targetPlanetType,
+					$targetPlanet,
+					(int) Config::get()->max_planets,
+					$hasPve
+				)) {
+					$this->sendJSON($LNG['fl_target_not_exists']);
+				}
 			}
 
 			if ($targetPlanetType != 2 && is_array($planetData) && !empty($planetData['urlaubs_modus']) && isVacationMode($planetData))

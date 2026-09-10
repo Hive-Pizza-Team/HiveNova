@@ -404,8 +404,26 @@ div#disclamer a {
 }
 
 .msg-cat-counts {
-	font-size: 11px;
-	opacity: 0.75;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.msg-cat-current {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.msg-empty-row td {
+  padding: 16px 10px !important;
+  text-align: center !important;
+}
+
+.fleet-target-error {
+  margin-top: 6px;
+  color: #e74c3c;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .msg-table {

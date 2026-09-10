@@ -7,7 +7,7 @@
 	{foreach $CategoryList as $CategoryID => $CategoryRow}
 	{if ($CategoryRow@iteration % 6) === 1}<tr>{/if}
 	{if $CategoryRow@last && ($CategoryRow@iteration % 6) !== 0}<td>&nbsp;</td>{/if}
-	<td class="msg-cat-cell"><a href="game.php?page=messages&category={$CategoryID}" class="msg-cat-link" style="color:{$CategoryRow.color};">{$LNG.mg_type.{$CategoryID}}</a>
+	<td class="msg-cat-cell"><a href="game.php?page=messages&category={$CategoryID}" class="msg-cat-link{if $CategoryID == $MessID} msg-cat-current{/if}" style="color:{$CategoryRow.color};">{$LNG.mg_type.{$CategoryID}}</a>
 	<br><span class="msg-cat-counts"><span id="unread_{$CategoryID}">{$CategoryRow.unread}</span>/<span id="total_{$CategoryID}">{$CategoryRow.total}</span></span>
 	</td>
 	{if $CategoryRow@last || ($CategoryRow@iteration % 6) === 0}</tr>{/if}
@@ -23,7 +23,7 @@
 	<tr>
 		<th colspan="4">{$LNG.mg_message_title}{if $canFilterLost} — {if $lostFilter}<a href="game.php?page=messages&amp;category={$MessID}">{$LNG.mg_filter_all}</a>{else}<a href="game.php?page=messages&amp;category={$MessID}&amp;filter=lost">{$LNG.mg_filter_lost}</a>{/if}{/if}</th>
 	</tr>
-	{if $MessID != 999}
+	{if $MessID != 999 && $MessageCount > 0}
 	<tr>
 		<td colspan="4" class="msg-action-bar">
 			<select name="actionTop">
@@ -39,15 +39,14 @@
 		</td>
 	</tr>
 	{/if}
-	<tr class="msg-pagination-row">
-		<td class="right" colspan="4">{$LNG.mg_page}: {if $page != 1}<a href="game.php?page=messages&category={$MessID}{$filterQuery}&side=1">&laquo;</a>&nbsp;{/if}{if $page > 5}..&nbsp;{/if}{for $site=1 to $maxPage}<a href="game.php?page=messages&category={$MessID}{$filterQuery}&side={$site}">{if $site == $page}<b>[{$site}]&nbsp;</b>{elseif ($site > $page-5 && $site < $page+5)}[{$site}]&nbsp;{/if}</a>{/for}{if $page < $maxPage-4}..&nbsp;{/if}{if $page != $maxPage}&nbsp;<a href="game.php?page=messages&category={$MessID}{$filterQuery}&side={$maxPage}">&raquo;</a>{/if}</td>
-	</tr>
+	{if $MessageCount > 0}
 	<tr class="msg-col-header">
 		<td class="msg-action-col">{$LNG.mg_action}</td>
 		<td class="msg-date-col">{$LNG.mg_date}</td>
 		<td class="msg-from-col">{if $MessID != 999}{$LNG.mg_from}{else}{$LNG.mg_to}{/if}</td>
 		<td>{$LNG.mg_subject}</td>
 	</tr>
+	{/if}
 	{foreach $MessageList as $Message}
 	<tr id="message_{$Message.id}" class="message_{$Message.id} message_head{if $MessID != 999 && $Message.unread == 1} mes_unread{/if}">
 		<td rowspan="2" class="msg-action-col">
@@ -68,24 +67,14 @@
 		{$Message.text}
 		</td>
 	</tr>
+	{foreachelse}
+	<tr class="msg-empty-row">
+		<td colspan="4">{$LNG.mg_no_messages}</td>
+	</tr>
 	{/foreach}
+	{if $maxPage > 1}
 	<tr class="msg-pagination-row">
 		<td class="right" colspan="4">{$LNG.mg_page}: {if $page != 1}<a href="game.php?page=messages&category={$MessID}{$filterQuery}&side=1">&laquo;</a>&nbsp;{/if}{if $page > 5}..&nbsp;{/if}{for $site=1 to $maxPage}<a href="game.php?page=messages&category={$MessID}{$filterQuery}&side={$site}">{if $site == $page}<b>[{$site}]&nbsp;</b>{elseif ($site > $page-5 && $site < $page+5)}[{$site}]&nbsp;{/if}</a>{/for}{if $page < $maxPage-4}..&nbsp;{/if}{if $page != $maxPage}&nbsp;<a href="game.php?page=messages&category={$MessID}{$filterQuery}&side={$maxPage}">&raquo;</a>{/if}</td>
-	</tr>
-	{if $MessID != 999}
-	<tr>
-		<td colspan="4" class="msg-action-bar">
-			<select name="actionBottom">
-				<option value="readmarked">{$LNG.mg_read_marked}</option>
-				<option value="readtypeall">{$LNG.mg_read_type_all}</option>
-				<option value="readall">{$LNG.mg_read_all}</option>
-				<option value="deletemarked">{$LNG.mg_delete_marked}</option>
-				<option value="deleteunmarked">{$LNG.mg_delete_unmarked}</option>
-				<option value="deletetypeall">{$LNG.mg_delete_type_all}</option>
-				<option value="deleteall">{$LNG.mg_delete_all}</option>
-			</select>
-			<input value="{$LNG.mg_confirm}" type="submit" name="submitBottom">
-		</td>
 	</tr>
 	{/if}
 </table>
