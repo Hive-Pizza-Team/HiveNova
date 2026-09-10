@@ -34,5 +34,4 @@
 </tr>
 </table>
 </form>
-</body>
 {include file="overall_footer.tpl"}
