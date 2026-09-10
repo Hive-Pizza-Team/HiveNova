@@ -171,6 +171,7 @@ abstract class AbstractGamePage
 			$resourceTable[$resourceID]['name']			= $resource[$resourceID];
 			$resourceTable[$resourceID]['current']		= $PLANET[$resource[$resourceID]];
 			$resourceTable[$resourceID]['max']			= $PLANET[$resource[$resourceID].'_max'];
+			$resourceTable[$resourceID]['tickerLimit']	= $PLANET[$resource[$resourceID].'_max'] * $config->max_overflow;
 			if($USER['urlaubs_modus'] == 1 || $PLANET['planet_type'] != 1)
 			{
 				$resourceTable[$resourceID]['production']	= $PLANET[$resource[$resourceID].'_perhour'];

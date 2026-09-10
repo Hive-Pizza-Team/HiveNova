@@ -13,11 +13,33 @@
 		return $('[id="' + valueElem + '"]');
 	}
 
+	function storageLimit(config) {
+		return parseFloat(config.limit && config.limit[1]);
+	}
+
 	function computeResource(config) {
-		return Math.max(0, Math.floor(
-			parseFloat(config.available) +
+		var available = parseFloat(config.available);
+		var produced = Math.max(0, Math.floor(
+			available +
 			parseFloat(config.production) / 3600 * (serverTime.getTime() - startTime) / 1000
 		));
+		var limit = storageLimit(config);
+		if (!isFinite(limit)) {
+			return produced;
+		}
+		if (available >= limit) {
+			return Math.max(0, Math.floor(available));
+		}
+		return Math.min(produced, Math.floor(limit));
+	}
+
+	function renderAmount(element, nrResource) {
+		if (viewShortlyNumber) {
+			element.attr('data-tooltip-content', NumberGetHumanReadable(nrResource));
+			element.html(shortly_number(nrResource));
+		} else {
+			element.html(NumberGetHumanReadable(nrResource));
+		}
 	}
 
 	function updateElements(config) {
@@ -25,31 +47,19 @@
 		if (!elements.length) {
 			return false;
 		}
-		if (elements.filter('.res_current_max').length === elements.length) {
-			return false;
-		}
 
 		var nrResource = computeResource(config);
-		var atMax = nrResource >= config.limit[1];
+		var limit = storageLimit(config);
+		var atMax = isFinite(limit) && nrResource >= limit;
 
 		elements.each(function () {
 			var element = $(this);
-			if (element.hasClass('res_current_max')) {
-				return;
-			}
-			if (!atMax) {
-				if (!element.hasClass('res_current_warn') && nrResource >= config.limit[1] * 0.9) {
-					element.addClass('res_current_warn');
-				}
-				if (viewShortlyNumber) {
-					element.attr('data-tooltip-content', NumberGetHumanReadable(nrResource));
-					element.html(shortly_number(nrResource));
-				} else {
-					element.html(NumberGetHumanReadable(nrResource));
-				}
-			} else {
+			if (atMax) {
 				element.addClass('res_current_max');
+			} else if (!element.hasClass('res_current_warn') && isFinite(limit) && nrResource >= limit * 0.9) {
+				element.addClass('res_current_warn');
 			}
+			renderAmount(element, nrResource);
 		});
 		return true;
 	}

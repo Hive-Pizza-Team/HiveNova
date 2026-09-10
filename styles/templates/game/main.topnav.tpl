@@ -212,7 +212,7 @@ $(function() {
 {if isset($resourceData.production)}
 	resourceTicker({
 		available: {$resourceData.current|json},
-		limit: [0, {$resourceData.max|json}],
+		limit: [0, {$resourceData.tickerLimit|json}],
 		production: {$resourceData.production|json},
 		valueElem: "current_{$resourceData.name}"
 	}, true);

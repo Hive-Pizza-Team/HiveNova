@@ -159,6 +159,26 @@ describe('HiveNovaTopnav', () => {
 		assert.equal(value, 4600);
 	});
 
+	it('computeResource stops at storage max when growing into the cap', () => {
+		global.serverTime = new Date(global.startTime + 3600 * 1000);
+		var value = topnav.computeResource({
+			available: 900,
+			production: 3600,
+			limit: [0, 1000]
+		});
+		assert.equal(value, 1000);
+	});
+
+	it('computeResource keeps an over-cap stockpile from growing', () => {
+		global.serverTime = new Date(global.startTime + 3600 * 1000);
+		var value = topnav.computeResource({
+			available: 52950825,
+			production: 181460,
+			limit: [0, 1000000]
+		});
+		assert.equal(value, 52950825);
+	});
+
 	it('updateElements updates every node with the same id', () => {
 		var desktop = makeElement('0');
 		var mobile = makeElement('0');
@@ -179,6 +199,56 @@ describe('HiveNovaTopnav', () => {
 
 		assert.equal(desktop._html, 'S1000');
 		assert.equal(mobile._html, 'S1000');
+	});
+
+	it('updateElements still writes over-cap amounts and marks them maxed', () => {
+		var desktop = makeElement('53 M');
+		var mobile = makeElement('53 M');
+		global.$ = function (arg) {
+			if (typeof arg === 'string') {
+				return mockJQueryCollection([desktop, mobile]);
+			}
+			return mockJQueryCollection([arg]);
+		};
+
+		var config = {
+			available: 52950825,
+			production: 181460,
+			limit: [0, 1000000],
+			valueElem: 'current_metal'
+		};
+		topnav.updateElements(config);
+		assert.equal(desktop._html, 'S52950825');
+		assert.equal(mobile._html, 'S52950825');
+		assert.equal(desktop.hasClass('res_current_max'), true);
+		assert.equal(mobile.hasClass('res_current_max'), true);
+
+		global.serverTime = new Date(global.startTime + 10000);
+		topnav.updateElements(config);
+		assert.equal(desktop._html, 'S52950825');
+		assert.equal(mobile._html, 'S52950825');
+	});
+
+	it('updateElements writes the cap value when production would exceed storage', () => {
+		var node = makeElement('0');
+		global.$ = function (arg) {
+			if (typeof arg === 'string') {
+				return mockJQueryCollection([node]);
+			}
+			return mockJQueryCollection([arg]);
+		};
+		global.serverTime = new Date(global.startTime + 3600 * 1000);
+
+		topnav.updateElements({
+			available: 900,
+			production: 3600,
+			limit: [0, 1000],
+			valueElem: 'current_metal'
+		});
+
+		assert.equal(node._html, 'S1000');
+		assert.equal(node.hasClass('res_current_max'), true);
+		assert.equal(node.attrs['data-tooltip-content'], '1000');
 	});
 
 	it('resyncAll runs every registered ticker', () => {
@@ -273,5 +343,7 @@ describe('main.topnav.tpl script order', () => {
 		assert.ok(tickerIdx !== -1);
 		assert.ok(srcIdx < tickerIdx);
 		assert.equal(tpl.includes('HiveNovaTopnav.initVisibilityResync'), false);
+		assert.equal(tpl.includes('resourceData.tickerLimit'), true);
+		assert.equal(tpl.includes('resourceData.max|json'), false);
 	});
 });
