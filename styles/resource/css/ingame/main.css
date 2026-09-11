@@ -1514,6 +1514,47 @@ table.tablesorter thead tr .headerSortDown {
 
 }
 
+/* PWA install banner is a sibling of .wrapper, but the left nav is
+   position:fixed. Without a viewport-wide fixed layer, Options/Logout
+   (and #disclamer) paint through the in-flow banner on desktop (#566). */
+.pwa-install-banner:not([hidden]) {
+    display: block;
+    position: fixed;
+    z-index: 550;
+    padding: 12px 14px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
+    right: 16px;
+    bottom: 16px;
+    left: auto;
+    width: min(420px, calc(100vw - 32px));
+}
+
+.pwa-install-banner__title {
+    font-weight: bold;
+    margin: 0 0 6px;
+}
+
+.pwa-install-banner__text {
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.pwa-install-banner__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pwa-install-banner__actions .button {
+    flex: 1 1 auto;
+    min-height: 44px;
+}
+
 @media screen and (max-width: 699px) {
     body.full {
         padding-top: max(12px, env(safe-area-inset-top, 0px));
@@ -1812,39 +1853,14 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     .pwa-install-banner:not([hidden]) {
-        display: block;
-        position: fixed;
         left: 8px;
         right: 8px;
+        width: auto;
         bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 8px);
-        z-index: 550;
-        padding: 12px 14px;
-        background: var(--color-bg-surface);
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
 
-    .pwa-install-banner__title {
-        font-weight: bold;
-        margin: 0 0 6px;
-    }
-
-    .pwa-install-banner__text {
-        margin: 0 0 10px;
-        font-size: 13px;
-        line-height: 1.4;
-    }
-
-    .pwa-install-banner__actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .pwa-install-banner__actions .button {
-        flex: 1 1 auto;
-        min-height: 44px;
+    body:has(#toggle-menu:checked) .pwa-install-banner:not([hidden]) {
+        display: none;
     }
 
     #bottom-nav {
