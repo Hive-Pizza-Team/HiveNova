@@ -7,6 +7,7 @@ use HiveNova\Core\AssetRevision;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
+use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\HTTP;
@@ -82,22 +83,14 @@ abstract class AbstractGamePage
 
 	protected function getUser(): array
 	{
-		if ($this->user !== null) {
-			return $this->user;
-		}
-
 		global $USER;
-		return $USER;
+		return GamePageState::resolve($this->user, $USER ?? null);
 	}
 
 	protected function getPlanet(): array
 	{
-		if ($this->planet !== null) {
-			return $this->planet;
-		}
-
 		global $PLANET;
-		return $PLANET;
+		return GamePageState::resolve($this->planet, $PLANET ?? null);
 	}
 
 	protected function initTemplate() {
