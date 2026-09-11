@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use HiveNova\Core\Database;
 use HiveNova\Core\DatabaseInterface;
+use HiveNova\Core\PushNotificationService;
 use HiveNova\Page\Game\ShowPushPage;
 use PHPUnit\Framework\TestCase;
 
@@ -22,8 +23,20 @@ final class TestableShowPushPage extends ShowPushPage
 
 	public string $testBody = '';
 
+	public int $testAt = 0;
+
 	public function __construct()
 	{
+	}
+
+	protected function lastTestAt(): int
+	{
+		return $this->testAt;
+	}
+
+	protected function rememberTestAt(int $now): void
+	{
+		$this->testAt = $now;
 	}
 
 	protected function sendJSON($data): void
@@ -151,5 +164,48 @@ class ShowPushPageTest extends TestCase
 		$this->assertSame(['ok' => true], $page->jsonResponse);
 		$this->assertCount(1, $stub->inserts);
 		$this->assertSame(1, $stub->settingsPushByUser[42] ?? 0);
+	}
+
+	public function testStatusIncludesSubscribedBoolean(): void
+	{
+		$stub = new PushSubscriptionDatabaseStub();
+		Database::setInstance($stub);
+		$page = new TestableShowPushPage();
+		$page->status();
+		$this->assertFalse($page->jsonResponse['subscribed']);
+
+		$stub->subscriptionsByEndpoint['https://fcm.googleapis.com/fcm/send/example'] = [
+			'user_id'  => 42,
+			'endpoint' => 'https://fcm.googleapis.com/fcm/send/example',
+			'p256dh'   => 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpY',
+			'auth'     => 'tBHItJI5svbpez7KI4CCXg',
+		];
+		$page->status();
+		$this->assertTrue($page->jsonResponse['subscribed']);
+		$this->assertArrayHasKey('configured', $page->jsonResponse);
+		$this->assertArrayHasKey('enabled', $page->jsonResponse);
+	}
+
+	public function testTestPingRejectsGetAndRateLimits(): void
+	{
+		$stub = new PushSubscriptionDatabaseStub();
+		Database::setInstance($stub);
+		$page = new TestableShowPushPage();
+
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+		$page->test();
+		$this->assertSame(['error' => 'method_not_allowed'], $page->jsonResponse);
+
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$page->testAt = TIMESTAMP;
+		$page->test();
+		$this->assertSame('rate_limited', $page->jsonResponse['error']);
+		$this->assertSame(PushNotificationService::TEST_COOLDOWN, $page->jsonResponse['retryAfter']);
+
+		$page->testAt = 0;
+		$page->test();
+		$this->assertFalse($page->jsonResponse['ok']);
+		$this->assertFalse($page->jsonResponse['subscribed']);
+		$this->assertGreaterThan(0, $page->testAt);
 	}
 }

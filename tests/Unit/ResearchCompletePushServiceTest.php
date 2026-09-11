@@ -17,10 +17,12 @@ class ResearchCompletePushServiceTest extends TestCase
 		parent::setUp();
 		$this->db = new ResearchCompletePushDatabaseStub();
 		$this->swapDatabaseInstance($this->db);
+		\HiveNova\Core\PushNotificationService::setErrorLogger(static function (): void {});
 	}
 
 	protected function tearDown(): void
 	{
+		\HiveNova\Core\PushNotificationService::setErrorLogger(null);
 		$this->restoreDatabaseInstance();
 		parent::tearDown();
 	}
@@ -222,10 +224,11 @@ class ResearchCompletePushServiceTest extends TestCase
 	public function testNotifyJobsIgnoresAlreadyNotifiedJobsWhenMerging(): void
 	{
 		$this->db->notified['7:113:8:100'] = [
-			'user_id'    => 7,
-			'element_id' => 113,
-			'level'      => 8,
-			'tech_end'   => 100,
+			'user_id'     => 7,
+			'element_id'  => 113,
+			'level'       => 8,
+			'tech_end'    => 100,
+			'notified_at' => 50,
 		];
 
 		$sent = [];
@@ -291,14 +294,65 @@ class ResearchCompletePushServiceTest extends TestCase
 		$this->assertFalse($service->isConfigured());
 	}
 
-	public function testNotifyJobsDefaultNotifierDoesNotThrow(): void
+	public function testNotifyJobsDefaultNotifierDoesNotMarkSentWhenPushServiceNoops(): void
 	{
 		$service = new ResearchCompletePushService(configured: true);
-		$this->assertSame(1, $service->notifyJobs(1, [[
+		$this->assertSame(0, $service->notifyJobs(1, [[
 			'elementId' => 113,
 			'level'     => 5,
 			'techEnd'   => 100,
 		]], 'en'));
+		$this->assertSame(0, $this->db->notified['1:113:5:100']['notified_at'] ?? 1);
+	}
+
+	public function testNotifyJobsDoesNotMarkSentWhenDeliveryFailsAndRetries(): void
+	{
+		$failing = new ResearchCompletePushService(
+			notifier: static fn (): bool => false,
+			configured: true,
+			languageLoader: static fn (): array => ['tech' => [113 => 'Energy Technology']],
+		);
+		$this->assertSame(0, $failing->notifyJobs(7, [[
+			'elementId' => 113,
+			'level'     => 8,
+			'techEnd'   => 100,
+		]], 'en'));
+		$this->assertSame(0, $this->db->notified['7:113:8:100']['notified_at']);
+
+		$sent = [];
+		$retry = $this->serviceCollecting($sent);
+		$this->assertSame(1, $retry->notifyJobs(7, [[
+			'elementId' => 113,
+			'level'     => 8,
+			'techEnd'   => 100,
+		]], 'en'));
+		$this->assertCount(1, $sent);
+		$this->assertGreaterThan(0, $this->db->notified['7:113:8:100']['notified_at']);
+	}
+
+	public function testRunRetriesPendingAfterQueueWasCleared(): void
+	{
+		$this->db->notified['7:113:8:100'] = [
+			'user_id'     => 7,
+			'element_id'  => 113,
+			'level'       => 8,
+			'tech_end'    => 100,
+			'notified_at' => 0,
+		];
+		$this->db->users[] = [
+			'user_id'          => 7,
+			'b_tech_queue'     => '',
+			'b_tech'           => 0,
+			'lang'             => 'en',
+			'has_subscription' => true,
+			'settings_push'    => 1,
+		];
+
+		$sent = [];
+		$service = $this->serviceCollecting($sent);
+		$this->assertSame(1, $service->run(1_700_000_200));
+		$this->assertSame([7], array_column($sent, 'userId'));
+		$this->assertGreaterThan(0, $this->db->notified['7:113:8:100']['notified_at']);
 	}
 
 	public function testLanguageLoaderNonArrayUsesFallbackName(): void

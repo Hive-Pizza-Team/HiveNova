@@ -19,8 +19,35 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	/** @var list<array{qry: string, params: array<string, mixed>}> */
 	public array $deletes = [];
 
+	/** @var list<array{qry: string, params: array<string, mixed>}> */
+	public array $updates = [];
+
 	public function select($qry, array $params = [])
 	{
+		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%') && str_contains($qry, 'notified_at = 0')) {
+			$pending = [];
+			foreach ($this->notified as $row) {
+				if ((int) ($row['notified_at'] ?? 0) !== 0) {
+					continue;
+				}
+				$planet = $this->planetById((int) ($row['planet_id'] ?? 0));
+				if ($planet === null || empty($planet['has_subscription']) || (int) ($planet['settings_push'] ?? 1) !== 1) {
+					continue;
+				}
+				$pending[] = [
+					'planet_id'   => $row['planet_id'],
+					'element_id'  => $row['element_id'],
+					'level'       => $row['level'],
+					'build_end'   => $row['build_end'],
+					'planet_name' => $planet['planet_name'] ?? '',
+					'user_id'     => $planet['user_id'] ?? 0,
+					'lang'        => $planet['lang'] ?? 'en',
+				];
+			}
+
+			return $pending;
+		}
+
 		if (str_contains($qry, '%%PLANETS%%')) {
 			$now = (int) ($params[':now'] ?? 0);
 
@@ -49,6 +76,9 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 			);
 			$row = $this->notified[$key] ?? null;
 			if ($row === null) {
+				return false;
+			}
+			if (str_contains($qry, 'notified_at > 0') && (int) ($row['notified_at'] ?? 0) <= 0) {
 				return false;
 			}
 
@@ -86,7 +116,9 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%') && isset($params[':old'])) {
 			$old = (int) $params[':old'];
 			foreach ($this->notified as $key => $row) {
-				if ((int) ($row['notified_at'] ?? 0) > 0 && (int) $row['notified_at'] < $old) {
+				$notifiedAt = (int) ($row['notified_at'] ?? 0);
+				$buildEnd = (int) ($row['build_end'] ?? 0);
+				if (($notifiedAt > 0 && $notifiedAt < $old) || ($notifiedAt === 0 && $buildEnd < $old)) {
 					unset($this->notified[$key]);
 				}
 			}
@@ -95,7 +127,23 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 		return 1;
 	}
 
-	public function update($qry, array $params = []) { return 0; }
+	public function update($qry, array $params = [])
+	{
+		$this->updates[] = ['qry' => $qry, 'params' => $params];
+		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%')) {
+			$key = $this->key(
+				(int) ($params[':planetId'] ?? 0),
+				(int) ($params[':elementId'] ?? 0),
+				(int) ($params[':level'] ?? 0),
+				(int) ($params[':buildEnd'] ?? 0)
+			);
+			if (isset($this->notified[$key])) {
+				$this->notified[$key]['notified_at'] = (int) ($params[':notifiedAt'] ?? 0);
+			}
+		}
+
+		return 1;
+	}
 	public function replace($qry, array $params = []) { return 0; }
 	public function query($qry) { return 0; }
 	public function nativeQuery($qry) { return false; }
@@ -112,5 +160,19 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	private function key(int $planetId, int $elementId, int $level, int $buildEnd): string
 	{
 		return $planetId . ':' . $elementId . ':' . $level . ':' . $buildEnd;
+	}
+
+	/**
+	 * @return array<string, mixed>|null
+	 */
+	private function planetById(int $planetId): ?array
+	{
+		foreach ($this->planets as $planet) {
+			if ((int) ($planet['planet_id'] ?? 0) === $planetId) {
+				return $planet;
+			}
+		}
+
+		return null;
 	}
 }

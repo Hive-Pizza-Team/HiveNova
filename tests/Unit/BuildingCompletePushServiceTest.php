@@ -17,10 +17,12 @@ class BuildingCompletePushServiceTest extends TestCase
 		parent::setUp();
 		$this->db = new BuildingCompletePushDatabaseStub();
 		$this->swapDatabaseInstance($this->db);
+		\HiveNova\Core\PushNotificationService::setErrorLogger(static function (): void {});
 	}
 
 	protected function tearDown(): void
 	{
+		\HiveNova\Core\PushNotificationService::setErrorLogger(null);
 		$this->restoreDatabaseInstance();
 		parent::tearDown();
 	}
@@ -236,10 +238,83 @@ class BuildingCompletePushServiceTest extends TestCase
 		$this->assertFalse($service->isConfigured());
 	}
 
-	public function testNotifyJobDefaultNotifierDoesNotThrow(): void
+	public function testNotifyJobDefaultNotifierDoesNotMarkSentWhenPushServiceNoops(): void
 	{
 		$service = new BuildingCompletePushService(configured: true);
-		$this->assertTrue($service->notifyJob(1, 2, 'Home', 1, 5, 100, 'en'));
+		$this->assertFalse($service->notifyJob(1, 2, 'Home', 1, 5, 100, 'en'));
+		$this->assertSame(0, $this->db->notified['2:1:5:100']['notified_at'] ?? 1);
+	}
+
+	public function testNotifyJobsDoesNotMarkSentWhenDeliveryFailsAndRetries(): void
+	{
+		$failing = new BuildingCompletePushService(
+			notifier: static fn (): bool => false,
+			configured: true,
+			languageLoader: static fn (): array => ['tech' => [1 => 'Ore Extractor']],
+		);
+		$this->assertSame(0, $failing->notifyJobs(7, [[
+			'planetId'   => 3,
+			'planetName' => 'Home',
+			'elementId'  => 1,
+			'level'      => 10,
+			'buildEnd'   => 100,
+		]], 'en'));
+		$this->assertSame(0, $this->db->notified['3:1:10:100']['notified_at']);
+
+		$sent = [];
+		$retry = new BuildingCompletePushService(
+			notifier: static function () use (&$sent): void {
+				$sent[] = 1;
+			},
+			configured: true,
+			languageLoader: static fn (): array => [
+				'push_building_body' => '%s (level %d) finished on %s',
+				'tech'               => [1 => 'Ore Extractor'],
+			],
+		);
+		$this->assertSame(1, $retry->notifyJobs(7, [[
+			'planetId'   => 3,
+			'planetName' => 'Home',
+			'elementId'  => 1,
+			'level'      => 10,
+			'buildEnd'   => 100,
+		]], 'en'));
+		$this->assertCount(1, $sent);
+		$this->assertGreaterThan(0, $this->db->notified['3:1:10:100']['notified_at']);
+	}
+
+	public function testRunRetriesPendingAfterQueueWasCleared(): void
+	{
+		$this->db->notified['3:1:10:100'] = [
+			'planet_id'   => 3,
+			'element_id'  => 1,
+			'level'       => 10,
+			'build_end'   => 100,
+			'notified_at' => 0,
+		];
+		$this->db->planets[] = [
+			'planet_id'        => 3,
+			'planet_name'      => 'Homeworld',
+			'b_building_id'    => '',
+			'b_building'       => 0,
+			'user_id'          => 7,
+			'lang'             => 'en',
+			'has_subscription' => true,
+			'settings_push'    => 1,
+		];
+
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function (int $userId) use (&$sent): void {
+				$sent[] = $userId;
+			},
+			configured: true,
+			languageLoader: static fn (): array => ['tech' => [1 => 'Ore Extractor']],
+		);
+
+		$this->assertSame(1, $service->run(1_700_000_200));
+		$this->assertSame([7], $sent);
+		$this->assertGreaterThan(0, $this->db->notified['3:1:10:100']['notified_at']);
 	}
 
 	public function testLanguageLoaderNonArrayUsesFallbackName(): void

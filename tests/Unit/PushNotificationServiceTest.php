@@ -222,4 +222,71 @@ class PushNotificationServiceTest extends TestCase
 			],
 		]));
 	}
+
+	public function testHasSubscriptionReportsPersistedRow(): void
+	{
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub): void {
+			$this->assertFalse(PushNotificationService::hasSubscription(0));
+			$this->assertFalse(PushNotificationService::hasSubscription(42));
+			$stub->subscriptionsByEndpoint['https://fcm.googleapis.com/fcm/send/example'] = [
+				'user_id'  => 42,
+				'endpoint' => 'https://fcm.googleapis.com/fcm/send/example',
+				'p256dh'   => 'key',
+				'auth'     => 'auth',
+			];
+			$this->assertTrue(PushNotificationService::hasSubscription(42));
+			$this->assertFalse(PushNotificationService::hasSubscription(99));
+		});
+	}
+
+	public function testFormatDeliveryFailureUsesHostAndStripsEndpoint(): void
+	{
+		$endpoint = 'https://fcm.googleapis.com/fcm/send/secret-token';
+		$line = PushNotificationService::formatDeliveryFailure(
+			$endpoint,
+			false,
+			'Forbidden for ' . $endpoint,
+			403
+		);
+		$this->assertStringContainsString('host=fcm.googleapis.com', $line);
+		$this->assertStringContainsString('status=403', $line);
+		$this->assertStringNotContainsString('secret-token', $line);
+	}
+
+	public function testTestCooldownAndMessage(): void
+	{
+		$this->assertSame(0, PushNotificationService::testCooldownRemaining(0, 1_000));
+		$this->assertSame(40, PushNotificationService::testCooldownRemaining(980, 1_000));
+		$this->assertSame(0, PushNotificationService::testCooldownRemaining(900, 1_000));
+
+		$message = PushNotificationService::testMessage([
+			'push_test_title' => 'HiveNova push test',
+			'push_test_body'  => 'If you see this, Web Push delivery works.',
+		]);
+		$this->assertSame('HiveNova push test', $message['title']);
+		$this->assertSame('push_test', $message['data']['type']);
+		$this->assertSame('game.php?page=overview', $message['data']['url']);
+	}
+
+	public function testSendTestNotificationSkippedWhenNotConfigured(): void
+	{
+		$result = PushNotificationService::sendTestNotification(42);
+		$this->assertFalse($result['ok']);
+		$this->assertSame(PushNotificationService::SKIP_NOT_CONFIGURED, $result['skipped']);
+	}
+
+	public function testNotifyUserSkippedWhenNotConfigured(): void
+	{
+		$result = PushNotificationService::notifyUser(1, 't', 'b');
+		$this->assertFalse($result['ok']);
+		$this->assertSame(PushNotificationService::SKIP_NOT_CONFIGURED, $result['skipped']);
+	}
+
+	public function testEndpointHostFallsBackWhenInvalid(): void
+	{
+		$this->assertSame('unknown', PushNotificationService::endpointHost('not-a-url'));
+		$this->assertSame('updates.push.services.mozilla.com', PushNotificationService::endpointHost(
+			'https://updates.push.services.mozilla.com/wpush/v2/token'
+		));
+	}
 }

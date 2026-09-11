@@ -20,7 +20,7 @@ class BuildingCompletePushService
 	public const CLEANUP_AFTER = 7 * 86400;
 
 	/**
-	 * @param callable(int, string, string, array<string, mixed>): void|null $notifier
+	 * @param callable(int, string, string, array<string, mixed>): (bool|void)|null $notifier
 	 * @param callable(string): array<string, mixed>|null $languageLoader
 	 */
 	public function __construct(
@@ -224,13 +224,22 @@ class BuildingCompletePushService
 			$pending = array_values($pending);
 
 			foreach ($pending as $job) {
-				$this->markNotified($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
+				$this->claimPending($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
 			}
 			$message = $this->buildMessage($pending, $lang);
-			$this->deliver($userId, $message);
+			if (!$this->deliver($userId, $message)) {
+				PushNotificationService::logFailure('BuildingCompletePushService: delivery failed user=' . $userId);
+
+				return 0;
+			}
+			foreach ($pending as $job) {
+				$this->markSent($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
+			}
 
 			return 1;
 		} catch (Throwable $e) {
+			PushNotificationService::logFailure('BuildingCompletePushService::notifyJobs: ' . $e->getMessage());
+
 			return 0;
 		}
 	}
@@ -257,28 +266,39 @@ class BuildingCompletePushService
 				[':now' => $now]
 			);
 
-			if (!is_array($planets) || $planets === []) {
+			$byUser = [];
+			if (is_array($planets)) {
+				foreach ($planets as $row) {
+					$userId = (int) ($row['user_id'] ?? 0);
+					$planetId = (int) ($row['planet_id'] ?? 0);
+					$planetName = (string) ($row['planet_name'] ?? '');
+					$lang = (string) ($row['lang'] ?? 'en');
+					foreach (self::currentDueConstructionJobs($row['b_building_id'] ?? '', $now) as $job) {
+						$byUser[$userId]['lang'] = $lang;
+						$byUser[$userId]['jobs'][] = [
+							'planetId'   => $planetId,
+							'planetName' => $planetName,
+							'elementId'  => $job['elementId'],
+							'level'      => $job['level'],
+							'buildEnd'   => $job['buildEnd'],
+						];
+					}
+				}
+			}
+
+			foreach ($this->pendingNotifiedJobs() as $job) {
+				$userId = (int) ($job['userId'] ?? 0);
+				if ($userId <= 0) {
+					continue;
+				}
+				$byUser[$userId]['lang'] = (string) ($job['lang'] ?? $byUser[$userId]['lang'] ?? 'en');
+				$byUser[$userId]['jobs'][] = $job;
+			}
+
+			if ($byUser === []) {
 				$this->cleanup($now);
 
 				return 0;
-			}
-
-			$byUser = [];
-			foreach ($planets as $row) {
-				$userId = (int) ($row['user_id'] ?? 0);
-				$planetId = (int) ($row['planet_id'] ?? 0);
-				$planetName = (string) ($row['planet_name'] ?? '');
-				$lang = (string) ($row['lang'] ?? 'en');
-				foreach (self::currentDueConstructionJobs($row['b_building_id'] ?? '', $now) as $job) {
-					$byUser[$userId]['lang'] = $lang;
-					$byUser[$userId]['jobs'][] = [
-						'planetId'   => $planetId,
-						'planetName' => $planetName,
-						'elementId'  => $job['elementId'],
-						'level'      => $job['level'],
-						'buildEnd'   => $job['buildEnd'],
-					];
-				}
 			}
 
 			$sent = 0;
@@ -294,6 +314,8 @@ class BuildingCompletePushService
 
 			return $sent;
 		} catch (Throwable $e) {
+			PushNotificationService::logFailure('BuildingCompletePushService::run: ' . $e->getMessage());
+
 			return 0;
 		}
 	}
@@ -382,22 +404,65 @@ class BuildingCompletePushService
 	/**
 	 * @param array{title: string, body: string, data: array<string, mixed>} $message
 	 */
-	private function deliver(int $userId, array $message): void
+	private function deliver(int $userId, array $message): bool
 	{
 		if (is_callable($this->notifier)) {
-			($this->notifier)($userId, $message['title'], $message['body'], $message['data']);
-
-			return;
+			return ($this->notifier)($userId, $message['title'], $message['body'], $message['data']) !== false;
 		}
 
-		PushNotificationService::notifyUser($userId, $message['title'], $message['body'], $message['data']);
+		$result = PushNotificationService::notifyUser($userId, $message['title'], $message['body'], $message['data']);
+
+		return !empty($result['ok']);
+	}
+
+	/**
+	 * @return list<array{planetId: int, planetName: string, elementId: int, level: int, buildEnd: int, userId: int, lang: string}>
+	 */
+	private function pendingNotifiedJobs(): array
+	{
+		$rows = Database::get()->select(
+			'SELECT n.planet_id, n.element_id, n.level, n.build_end, p.name AS planet_name, p.id_owner AS user_id, u.lang
+			FROM %%PUSH_BUILDING_NOTIFIED%% n
+			INNER JOIN %%PLANETS%% p ON p.id = n.planet_id
+			INNER JOIN %%USERS%% u ON u.id = p.id_owner
+			WHERE n.notified_at = 0
+			AND (u.settings_push IS NULL OR u.settings_push = 1)
+			AND EXISTS (
+				SELECT 1 FROM %%PUSH_SUBSCRIPTIONS%% s WHERE s.user_id = p.id_owner
+			)'
+		);
+
+		if (!is_array($rows)) {
+			return [];
+		}
+
+		$jobs = [];
+		foreach ($rows as $row) {
+			$normalized = self::normalizeJob([
+				'planetId'   => $row['planet_id'] ?? 0,
+				'planetName' => $row['planet_name'] ?? '',
+				'elementId'  => $row['element_id'] ?? 0,
+				'level'      => $row['level'] ?? 0,
+				'buildEnd'   => $row['build_end'] ?? 0,
+			]);
+			if ($normalized === null) {
+				continue;
+			}
+			$jobs[] = $normalized + [
+				'userId' => (int) ($row['user_id'] ?? 0),
+				'lang'   => (string) ($row['lang'] ?? 'en'),
+			];
+		}
+
+		return $jobs;
 	}
 
 	private function wasNotified(int $planetId, int $elementId, int $level, int $buildEnd): bool
 	{
 		$row = Database::get()->selectSingle(
 			'SELECT planet_id FROM %%PUSH_BUILDING_NOTIFIED%%
-			WHERE planet_id = :planetId AND element_id = :elementId AND level = :level AND build_end = :buildEnd',
+			WHERE planet_id = :planetId AND element_id = :elementId AND level = :level AND build_end = :buildEnd
+			AND notified_at > 0',
 			[
 				':planetId'  => $planetId,
 				':elementId' => $elementId,
@@ -410,11 +475,27 @@ class BuildingCompletePushService
 		return $row !== false && $row !== null && $row !== '';
 	}
 
-	private function markNotified(int $planetId, int $elementId, int $level, int $buildEnd): void
+	private function claimPending(int $planetId, int $elementId, int $level, int $buildEnd): void
 	{
 		Database::get()->insert(
 			'INSERT IGNORE INTO %%PUSH_BUILDING_NOTIFIED%% (planet_id, element_id, level, build_end, notified_at)
 			VALUES (:planetId, :elementId, :level, :buildEnd, :notifiedAt)',
+			[
+				':planetId'   => $planetId,
+				':elementId'  => $elementId,
+				':level'      => $level,
+				':buildEnd'   => $buildEnd,
+				':notifiedAt' => 0,
+			]
+		);
+	}
+
+	private function markSent(int $planetId, int $elementId, int $level, int $buildEnd): void
+	{
+		Database::get()->update(
+			'UPDATE %%PUSH_BUILDING_NOTIFIED%% SET notified_at = :notifiedAt
+			WHERE planet_id = :planetId AND element_id = :elementId AND level = :level AND build_end = :buildEnd
+			AND notified_at = 0',
 			[
 				':planetId'   => $planetId,
 				':elementId'  => $elementId,
@@ -428,7 +509,9 @@ class BuildingCompletePushService
 	private function cleanup(int $now): void
 	{
 		Database::get()->delete(
-			'DELETE FROM %%PUSH_BUILDING_NOTIFIED%% WHERE notified_at > 0 AND notified_at < :old',
+			'DELETE FROM %%PUSH_BUILDING_NOTIFIED%%
+			WHERE (notified_at > 0 AND notified_at < :old)
+			OR (notified_at = 0 AND build_end < :old)',
 			[':old' => $now - self::CLEANUP_AFTER]
 		);
 	}

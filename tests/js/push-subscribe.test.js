@@ -145,6 +145,21 @@ describe('HiveNovaPush', () => {
 		assert.equal(subscribed, true);
 	});
 
+	it('sendTest posts a logged-in test ping', async () => {
+		const { api, fetches } = loadPush({
+			runReady: false,
+			fetchImpl() {
+				return Promise.resolve({
+					ok: true,
+					json: async () => ({ ok: true, delivered: 1, subscribed: true })
+				});
+			}
+		});
+		const result = await api.sendTest();
+		assert.deepEqual(result, { ok: true, delivered: 1, subscribed: true });
+		assert.equal(fetches.some((f) => String(f.url).includes('mode=test') && f.init.method === 'POST'), true);
+	});
+
 	it('denied subscribe unchecks, shows error, and turns preference off', async () => {
 		const { api, checkbox, errorEl, fetches } = loadPush({ runReady: false });
 		checkbox.checked = true;
@@ -158,6 +173,93 @@ describe('HiveNovaPush', () => {
 		assert.equal(errorEl.hidden, false);
 		assert.equal(errorEl.textContent, 'blocked');
 		assert.equal(fetches.some((f) => String(f.url).includes('mode=unsubscribe')), true);
+	});
+
+	it('resubscribes when the existing PushManager key does not match VAPID', async () => {
+		let unsubscribed = false;
+		let subscribedWith;
+		const { api } = loadPush({
+			runReady: false,
+			Notification: { permission: 'granted' },
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						pushManager: {
+							getSubscription: async () => ({
+								options: { applicationServerKey: api.urlBase64ToUint8Array('old-key') },
+								toJSON() { return { endpoint: 'old' }; },
+								async unsubscribe() { unsubscribed = true; }
+							}),
+							subscribe: async (opts) => {
+								subscribedWith = opts;
+								return { toJSON() { return { endpoint: 'new' }; } };
+							}
+						}
+					})
+				}
+			},
+			fetchImpl(url) {
+				if (String(url).includes('mode=status')) {
+					return Promise.resolve({
+						ok: true,
+						json: async () => ({ configured: true, publicKey: 'new-key', enabled: true })
+					});
+				}
+				return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+			}
+		});
+
+		assert.equal(api.applicationServerKeysMatch({
+			options: { applicationServerKey: api.urlBase64ToUint8Array('new-key') }
+		}, 'new-key'), true);
+		assert.equal(api.applicationServerKeysMatch({
+			options: { applicationServerKey: api.urlBase64ToUint8Array('old-key') }
+		}, 'new-key'), false);
+
+		const result = await api.enable({ activate: true });
+		assert.deepEqual(result, { ok: true });
+		assert.equal(unsubscribed, true);
+		assert.ok(subscribedWith.applicationServerKey);
+	});
+
+	it('reuses an existing subscription when the VAPID key matches', async () => {
+		let subscribeCalls = 0;
+		const { api } = loadPush({
+			runReady: false,
+			Notification: { permission: 'granted' },
+			navigator: {
+				serviceWorker: {
+					register: async () => {
+						const key = api.urlBase64ToUint8Array('pk');
+						return {
+							pushManager: {
+								getSubscription: async () => ({
+									options: { applicationServerKey: key },
+									toJSON() { return { endpoint: 'same' }; }
+								}),
+								subscribe: async () => {
+									subscribeCalls += 1;
+									throw new Error('subscribe should not run when the key matches');
+								}
+							}
+						};
+					}
+				}
+			},
+			fetchImpl(url) {
+				if (String(url).includes('mode=status')) {
+					return Promise.resolve({
+						ok: true,
+						json: async () => ({ configured: true, publicKey: 'pk', enabled: true })
+					});
+				}
+				return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+			}
+		});
+
+		const result = await api.enable({ activate: true });
+		assert.deepEqual(result, { ok: true });
+		assert.equal(subscribeCalls, 0);
 	});
 
 	it('maybeAutoSubscribe turns preference off when notifications are blocked', async () => {
