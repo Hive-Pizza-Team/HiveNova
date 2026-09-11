@@ -552,6 +552,7 @@ $LNG['mg_type'][100]						= 'Alle Nachrichten';
 $LNG['mg_type'][999]						= 'Postausgang';
 $LNG['mg_no_subject']						= 'Kein Betreff';
 $LNG['mg_no_text']						= 'Kein Text angegeben';
+$LNG['mg_no_messages']						= 'Keine Nachrichten';
 $LNG['mg_msg_sended']						= 'Nachricht gesendet!';
 $LNG['mg_read_marked']						= 'Markierte Nachrichten als gelesen markieren';
 $LNG['mg_delete_marked']					= 'Markierte Nachrichten löschen';

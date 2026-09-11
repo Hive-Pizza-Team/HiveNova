@@ -534,6 +534,7 @@ $LNG['mg_type'][100]						= 'Voir tous les messages';
 $LNG['mg_type'][999]						= 'Boîte d\'envoi';
 $LNG['mg_no_subject']						= 'Pas de sujet';
 $LNG['mg_no_text']							= 'Aucun texte fourni';
+$LNG['mg_no_messages']						= 'Aucun message';
 $LNG['mg_msg_sended']						= 'Message envoyé !';
 $LNG['mg_delete_marked']					= 'Supprimer le(s) message(s) sélectionné(s)';
 $LNG['mg_delete_type_all']					= 'Supprimer tous les messages de ce type';

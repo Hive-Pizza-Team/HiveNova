@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\SocialHiveMemoService;
+use HiveNova\Core\MessageInboxService;
 use HiveNova\Repository\MessageRepository;
 
 /**
@@ -286,7 +287,7 @@ class ShowMessagesPage extends AbstractGamePage
     {
         global $LNG, $USER;
 
-        $MessCategory      	= HTTP::_GP('category', -1);
+        $MessCategory      	= (int) HTTP::_GP('category', -1);
         $page			= HTTP::_GP('side', 1);
         $filter			= HTTP::_GP('filter', '') === 'lost' ? 'lost' : '';
 
@@ -321,6 +322,8 @@ class ShowMessagesPage extends AbstractGamePage
         $UnRead[100]	= array_sum($UnRead);
         $Total[100]		= array_sum($Total);
         $Total[999]		= $MessOut;
+
+        $MessCategory	= MessageInboxService::resolveCategory($MessCategory, $UnRead);
 
         $CategoryList        = array();
 

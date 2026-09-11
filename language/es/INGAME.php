@@ -543,6 +543,7 @@ $LNG['mg_type'][100]						= 'Ver todos los Mensajes';
 $LNG['mg_type'][999]						= 'Bandeja de Salida';
 $LNG['mg_no_subject']						= 'Sin asunto';
 $LNG['mg_no_text']							= 'Falta el mensaje';
+$LNG['mg_no_messages']						= 'No hay mensajes';
 $LNG['mg_msg_sended']						= '¡Mensaje enviado!';
 $LNG['mg_read_marked']						= 'Marcar los mensajes señalados como leídos';
 $LNG['mg_delete_marked']					= 'Borrar mensajes marcados';

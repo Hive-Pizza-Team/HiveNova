@@ -547,6 +547,7 @@ $LNG['mg_type'][100]						= 'Zobacz wszystkie wiadomości';
 $LNG['mg_type'][999]						= 'Wiadomości wysłane';
 $LNG['mg_no_subject']						= 'Brak tematu';
 $LNG['mg_no_text']							= 'Brak tekstu';
+$LNG['mg_no_messages']						= 'Brak wiadomości';
 $LNG['mg_msg_sended']						= 'Wiadomość wysłano!';
 $LNG['mg_read_marked']						= 'Zaznacz jako przeczytaną';
 $LNG['mg_delete_marked']					= 'Usuń zaznaczone wiadomości';

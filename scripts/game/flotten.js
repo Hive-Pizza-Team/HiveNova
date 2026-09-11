@@ -10,6 +10,7 @@ function updateVars($reset_acs = true)
 	dataFlyConsumption = GetConsumption();
 	dataFlyCargoSpace = storage();
 	refreshFormData();
+	setFleetTargetError('');
 	updateTargetInfo();
 }
 
@@ -220,27 +221,48 @@ function setNumber(name, number) {
 	}
 }
 
+function setFleetTargetError(message)
+{
+	var el = document.getElementById('targetError');
+	if (!el) {
+		return;
+	}
+	if (message) {
+		el.textContent = message;
+		el.hidden = false;
+	} else {
+		el.textContent = '';
+		el.hidden = true;
+	}
+}
+
 function CheckTarget()
 {
 	var galaxy = parseInt(document.getElementsByName("galaxy")[0].value, 10);
 	var system = parseInt(document.getElementsByName("system")[0].value, 10);
 	var planet = parseInt(document.getElementsByName("planet")[0].value, 10);
+	var tokenEl = document.getElementsByName("token")[0];
+	var token = tokenEl ? tokenEl.value : '';
 	if (!(galaxy > 0) || !(system > 0) || !(planet > 0)) {
+		setFleetTargetError(fl_incomplete_coords);
 		NotifyBox(fl_incomplete_coords);
 		return false;
 	}
 	updateVars(false);
 	if (typeof dataFlyDistance === "undefined" || isNaN(dataFlyDistance) || dataFlyDistance < 1) {
+		setFleetTargetError(fl_incomplete_coords);
 		NotifyBox(fl_incomplete_coords);
 		return false;
 	}
 
 	kolo	= (typeof data.ships[208] == "object") ? 1 : 0;
 		
-	$.getJSON('game.php?page=fleetStep1&mode=checkTarget&galaxy='+document.getElementsByName("galaxy")[0].value+'&system='+document.getElementsByName("system")[0].value+'&planet='+document.getElementsByName("planet")[0].value+'&planet_type='+document.getElementsByName("type")[0].value+'&lang='+Lang+'&kolo='+kolo, function(data) {
+	$.getJSON('game.php?page=fleetStep1&mode=checkTarget&galaxy='+document.getElementsByName("galaxy")[0].value+'&system='+document.getElementsByName("system")[0].value+'&planet='+document.getElementsByName("planet")[0].value+'&planet_type='+document.getElementsByName("type")[0].value+'&token='+encodeURIComponent(token)+'&lang='+Lang+'&kolo='+kolo, function(data) {
 		if(data == "OK") {
+			setFleetTargetError('');
 			document.getElementById('form').submit();
 		} else {
+			setFleetTargetError(data);
 			NotifyBox(data);
 		}
 	});
