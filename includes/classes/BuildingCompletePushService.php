@@ -7,9 +7,12 @@ use Throwable;
 /**
  * Web Push when a building construction job finishes.
  *
- * Two delivery paths share one-notify-per-job dedup:
+ * Multiple completions in one processing window (one ResourceUpdate tick or
+ * one cron run) are merged into a single digest per user so a queued catch-up
+ * does not spam the player. Incoming hostile fleets stay one-per-event.
+ * Two delivery paths share per-job dedup:
  * - Cron inspects overdue queues so AFK / other-planet jobs notify without a visit
- * - ResourceUpdate notifies when the economy tick actually applies the job
+ * - ResourceUpdate notifies when the economy tick actually applies the jobs
  */
 class BuildingCompletePushService
 {
@@ -81,18 +84,51 @@ class BuildingCompletePushService
 	 */
 	public static function buildingCompleteMessage(string $buildingName, int $level, string $planetName, ?array $lng = null): array
 	{
+		return self::buildingCompleteDigest([
+			['name' => $buildingName, 'level' => $level, 'planetName' => $planetName],
+		], $lng);
+	}
+
+	/**
+	 * @param list<array{name: string, level: int, planetName: string}> $namedJobs
+	 * @param array<string, mixed>|null $lng
+	 * @return array{title: string, body: string, data: array<string, mixed>}
+	 */
+	public static function buildingCompleteDigest(array $namedJobs, ?array $lng = null): array
+	{
 		$lng = $lng ?? (isset($GLOBALS['LNG']) && is_array($GLOBALS['LNG']) ? $GLOBALS['LNG'] : []);
 		$title = $lng['push_building_title'] ?? 'Building complete';
-		$template = $lng['push_building_body'] ?? '%s (level %d) finished on %s';
+		$count = count($namedJobs);
+		$first = $namedJobs[0] ?? ['name' => 'Building', 'level' => 1, 'planetName' => ''];
+		$name = is_string($first['name'] ?? null) ? $first['name'] : 'Building';
+		$level = (int) ($first['level'] ?? 1);
+		$planetName = is_string($first['planetName'] ?? null) ? $first['planetName'] : '';
+
+		if ($count <= 1) {
+			$template = $lng['push_building_body'] ?? '%s (level %d) finished on %s';
+			$body = sprintf($template, $name, $level, $planetName);
+		} else {
+			$template = $lng['push_building_body_many'] ?? '%s (level %d) on %s and %d more finished';
+			$body = sprintf($template, $name, $level, $planetName, $count - 1);
+		}
 
 		return [
 			'title' => $title,
-			'body'  => sprintf($template, $buildingName, $level, $planetName),
+			'body'  => $body,
 			'data'  => [
-				'url'  => self::NOTIFY_URL,
-				'type' => 'building_complete',
+				'url'   => self::NOTIFY_URL,
+				'type'  => 'building_complete',
+				'count' => max(1, $count),
 			],
 		];
+	}
+
+	/**
+	 * @param list<array{planetId?: int, planetName?: string, elementId?: int, level?: int, buildEnd?: int}> $jobs
+	 */
+	public static function notifyCompletedJobs(int $userId, array $jobs, string $lang = 'en'): int
+	{
+		return (new self())->notifyJobs($userId, $jobs, $lang);
 	}
 
 	public static function notifyCompletedJob(
@@ -104,7 +140,13 @@ class BuildingCompletePushService
 		int $buildEnd,
 		string $lang = 'en'
 	): bool {
-		return (new self())->notifyJob($userId, $planetId, $planetName, $elementId, $level, $buildEnd, $lang);
+		return self::notifyCompletedJobs($userId, [[
+			'planetId'   => $planetId,
+			'planetName' => $planetName,
+			'elementId'  => $elementId,
+			'level'      => $level,
+			'buildEnd'   => $buildEnd,
+		]], $lang) > 0;
 	}
 
 	public function notifyJob(
@@ -116,26 +158,62 @@ class BuildingCompletePushService
 		int $buildEnd,
 		string $lang = 'en'
 	): bool {
-		if ($userId <= 0 || $planetId <= 0 || $elementId < 1 || $elementId > 99 || $level < 1 || $buildEnd <= 0) {
-			return false;
-		}
+		return $this->notifyJobs($userId, [[
+			'planetId'   => $planetId,
+			'planetName' => $planetName,
+			'elementId'  => $elementId,
+			'level'      => $level,
+			'buildEnd'   => $buildEnd,
+		]], $lang) > 0;
+	}
 
-		if (!$this->isConfigured()) {
-			return false;
+	/**
+	 * Send at most one push covering every pending job in this window.
+	 *
+	 * @param list<array{planetId?: int, planetName?: string, elementId?: int, level?: int, buildEnd?: int}> $jobs
+	 */
+	public function notifyJobs(int $userId, array $jobs, string $lang = 'en'): int
+	{
+		if ($userId <= 0 || !$this->isConfigured()) {
+			return 0;
 		}
 
 		try {
-			if ($this->wasNotified($planetId, $elementId, $level, $buildEnd)) {
-				return false;
+			$pending = [];
+			foreach ($jobs as $job) {
+				$normalized = self::normalizeJob($job);
+				if ($normalized === null) {
+					continue;
+				}
+				$key = self::jobKey(
+					$normalized['planetId'],
+					$normalized['elementId'],
+					$normalized['level'],
+					$normalized['buildEnd']
+				);
+				if (isset($pending[$key])) {
+					continue;
+				}
+				if ($this->wasNotified($normalized['planetId'], $normalized['elementId'], $normalized['level'], $normalized['buildEnd'])) {
+					continue;
+				}
+				$pending[$key] = $normalized;
 			}
 
-			$message = $this->buildMessage($elementId, $level, $planetName, $lang);
-			$this->deliver($userId, $message);
-			$this->markNotified($planetId, $elementId, $level, $buildEnd);
+			if ($pending === []) {
+				return 0;
+			}
+			$pending = array_values($pending);
 
-			return true;
+			$message = $this->buildMessage($pending, $lang);
+			$this->deliver($userId, $message);
+			foreach ($pending as $job) {
+				$this->markNotified($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
+			}
+
+			return 1;
 		} catch (Throwable $e) {
-			return false;
+			return 0;
 		}
 	}
 
@@ -167,22 +245,31 @@ class BuildingCompletePushService
 				return 0;
 			}
 
-			$sent = 0;
+			$byUser = [];
 			foreach ($planets as $row) {
-				$jobs = self::dueConstructionJobs($row['b_building_id'] ?? '', $now);
-				foreach ($jobs as $job) {
-					if ($this->notifyJob(
-						(int) ($row['user_id'] ?? 0),
-						(int) ($row['planet_id'] ?? 0),
-						(string) ($row['planet_name'] ?? ''),
-						$job['elementId'],
-						$job['level'],
-						$job['buildEnd'],
-						(string) ($row['lang'] ?? 'en')
-					)) {
-						$sent++;
-					}
+				$userId = (int) ($row['user_id'] ?? 0);
+				$planetId = (int) ($row['planet_id'] ?? 0);
+				$planetName = (string) ($row['planet_name'] ?? '');
+				$lang = (string) ($row['lang'] ?? 'en');
+				foreach (self::dueConstructionJobs($row['b_building_id'] ?? '', $now) as $job) {
+					$byUser[$userId]['lang'] = $lang;
+					$byUser[$userId]['jobs'][] = [
+						'planetId'   => $planetId,
+						'planetName' => $planetName,
+						'elementId'  => $job['elementId'],
+						'level'      => $job['level'],
+						'buildEnd'   => $job['buildEnd'],
+					];
 				}
+			}
+
+			$sent = 0;
+			foreach ($byUser as $userId => $payload) {
+				$sent += $this->notifyJobs(
+					(int) $userId,
+					$payload['jobs'] ?? [],
+					(string) ($payload['lang'] ?? 'en')
+				);
 			}
 
 			$this->cleanup($now);
@@ -194,17 +281,52 @@ class BuildingCompletePushService
 	}
 
 	/**
+	 * @param array{planetId?: mixed, planetName?: mixed, elementId?: mixed, level?: mixed, buildEnd?: mixed} $job
+	 * @return array{planetId: int, planetName: string, elementId: int, level: int, buildEnd: int}|null
+	 */
+	public static function normalizeJob(array $job): ?array
+	{
+		$planetId = (int) ($job['planetId'] ?? 0);
+		$elementId = (int) ($job['elementId'] ?? 0);
+		$level = (int) ($job['level'] ?? 0);
+		$buildEnd = (int) ($job['buildEnd'] ?? 0);
+		$planetName = is_string($job['planetName'] ?? null) ? $job['planetName'] : '';
+
+		if ($planetId <= 0 || $elementId < 1 || $elementId > 99 || $level < 1 || $buildEnd <= 0) {
+			return null;
+		}
+
+		return [
+			'planetId'   => $planetId,
+			'planetName' => $planetName,
+			'elementId'  => $elementId,
+			'level'      => $level,
+			'buildEnd'   => $buildEnd,
+		];
+	}
+
+	/**
+	 * @param list<array{planetId: int, planetName: string, elementId: int, level: int, buildEnd: int}> $jobs
 	 * @return array{title: string, body: string, data: array<string, mixed>}
 	 */
-	private function buildMessage(int $elementId, int $level, string $planetName, string $lang): array
+	private function buildMessage(array $jobs, string $lang): array
 	{
 		$lng = $this->loadLanguage($lang);
 		$tech = $lng['tech'] ?? [];
-		$buildingName = is_array($tech) && isset($tech[$elementId]) && is_string($tech[$elementId])
-			? $tech[$elementId]
-			: ('Building #' . $elementId);
+		$named = [];
+		foreach ($jobs as $job) {
+			$elementId = $job['elementId'];
+			$name = is_array($tech) && isset($tech[$elementId]) && is_string($tech[$elementId])
+				? $tech[$elementId]
+				: ('Building #' . $elementId);
+			$named[] = [
+				'name'       => $name,
+				'level'      => $job['level'],
+				'planetName' => $job['planetName'],
+			];
+		}
 
-		return self::buildingCompleteMessage($buildingName, $level, $planetName, $lng);
+		return self::buildingCompleteDigest($named, $lng);
 	}
 
 	/**
