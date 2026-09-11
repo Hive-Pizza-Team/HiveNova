@@ -78,6 +78,11 @@ class GalaxyPlayService
 		$planet = is_array($row['planet'] ?? null) ? $row['planet'] : [];
 		$user = is_array($row['user'] ?? null) ? $row['user'] : [];
 		$missions = is_array($row['missions'] ?? null) ? $row['missions'] : [];
+		$debris = is_array($row['debris'] ?? null) ? $row['debris'] : [];
+		$moon = is_array($row['moon'] ?? null) ? $row['moon'] : [];
+		$alliance = is_array($row['alliance'] ?? null) ? $row['alliance'] : [];
+		$debrisMetal = (int) ($debris['metal'] ?? 0);
+		$debrisCrystal = (int) ($debris['crystal'] ?? 0);
 
 		return [
 			'position' => $position,
@@ -88,9 +93,21 @@ class GalaxyPlayService
 			'image' => PlanetImageUtil::hiveThemeImage((string) ($planet['image'] ?? '')),
 			'username' => (string) ($user['username'] ?? ''),
 			'userId' => (int) ($user['id'] ?? 0),
+			'alliance' => (string) ($alliance['tag'] ?? $alliance['name'] ?? ''),
+			'lastActivity' => (string) ($row['lastActivity'] ?? ''),
+			'debris' => [
+				'metal' => $debrisMetal,
+				'crystal' => $debrisCrystal,
+			],
+			'moon' => isset($moon['id']) ? [
+				'id' => (int) $moon['id'],
+				'name' => (string) ($moon['name'] ?? 'Moon'),
+				'image' => 'mond',
+			] : null,
 			'canSpy' => !empty($missions[FLEET_MISSION_SPY]),
 			'canAttack' => !empty($missions[FLEET_MISSION_ATTACK]),
 			'canTransport' => !empty($missions[FLEET_MISSION_TRANSPORT]),
+			'canRecycle' => !empty($missions[FLEET_MISSION_RECYCLE]) && ($debrisMetal + $debrisCrystal) > 0,
 		];
 	}
 }

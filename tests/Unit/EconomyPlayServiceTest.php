@@ -71,9 +71,17 @@ class EconomyPlayServiceTest extends TestCase
 		$this->assertSame(ApiTickClass::Mutate, ApiRouteTable::tickClass('buildings', 'insert', 'POST'));
 		$this->assertSame(ApiTickClass::Mutate, ApiRouteTable::tickClass('fleet', 'send', 'POST'));
 		$this->assertSame(ApiTickClass::Mutate, ApiRouteTable::tickClass('galaxy', 'spy', 'POST'));
+		$this->assertSame(ApiTickClass::Mutate, ApiRouteTable::tickClass('galaxy', 'recycle', 'POST'));
+		$this->assertSame(ApiTickClass::Mutate, ApiRouteTable::tickClass('galaxy', 'colonize', 'POST'));
+		$this->assertSame(ApiTickClass::Poll, ApiRouteTable::tickClass('fleet', 'preview', 'GET'));
+		$this->assertTrue(ApiRouteTable::isKnownAction('fleet', 'preview'));
+		$this->assertTrue(ApiRouteTable::isPollAction('fleet', 'preview'));
+		$this->assertFalse(ApiRouteTable::isPollAction('fleet', 'send'));
 		$this->assertSame(ApiTickClass::Mutate, ApiRouteTable::tickClass('catalog', 'prod', 'POST'));
+		$this->assertSame(ApiTickClass::Mutate, ApiRouteTable::tickClass('catalog', 'trade', 'POST'));
 		$this->assertTrue(ApiRouteTable::isKnownAction('buildings', 'cancel'));
 		$this->assertTrue(ApiRouteTable::isKnownAction('catalog', 'note'));
+		$this->assertTrue(ApiRouteTable::isKnownAction('catalog', 'trade'));
 	}
 
 	public function testTechNameAndQueues(): void
@@ -112,6 +120,26 @@ class EconomyPlayServiceTest extends TestCase
 		$this->assertTrue($slot['own']);
 		$this->assertTrue($slot['canSpy']);
 		$this->assertSame('eisplanet02', $slot['image']);
+		$this->assertFalse($slot['canRecycle']);
+		$this->assertNull($slot['moon']);
+		$rich = GalaxyPlayService::summarizeSlot(8, [
+			'ownPlanet' => false,
+			'planet' => ['id' => 9, 'name' => 'Target', 'image' => 'wasserplanet01'],
+			'user' => ['username' => 'foe', 'id' => 2],
+			'alliance' => ['tag' => 'HIVE'],
+			'debris' => ['metal' => 400, 'crystal' => 50],
+			'moon' => ['id' => 77, 'name' => 'Luna'],
+			'missions' => [
+				FLEET_MISSION_SPY => true,
+				FLEET_MISSION_ATTACK => true,
+				FLEET_MISSION_RECYCLE => true,
+			],
+			'lastActivity' => '*',
+		]);
+		$this->assertTrue($rich['canRecycle']);
+		$this->assertSame('HIVE', $rich['alliance']);
+		$this->assertSame(77, $rich['moon']['id']);
+		$this->assertSame(400, $rich['debris']['metal']);
 	}
 
 	public function testMessageCategoryLabelsWithoutLng(): void

@@ -28,8 +28,13 @@ class ApiRouteTable
 		'research' => ['insert'],
 		'shipyard' => ['build'],
 		'fleet' => ['send', 'recall'],
-		'galaxy' => ['spy'],
-		'catalog' => ['prod', 'note'],
+		'galaxy' => ['spy', 'recycle', 'colonize'],
+		'catalog' => ['prod', 'note', 'trade'],
+	];
+
+	/** @var array<string, list<string>> */
+	private const POLL_ACTIONS = [
+		'fleet' => ['preview'],
 	];
 
 	public static function sanitizeResource(string $raw): string
@@ -44,8 +49,12 @@ class ApiRouteTable
 
 	public static function tickClass(string $resource, string $action, string $method): ApiTickClass
 	{
-		if (self::isMutateAction($resource, strtolower($action))) {
+		$action = strtolower($action);
+		if (self::isMutateAction($resource, $action)) {
 			return ApiTickClass::Mutate;
+		}
+		if (self::isPollAction($resource, $action)) {
+			return ApiTickClass::Poll;
 		}
 
 		return self::RESOURCES[$resource] ?? ApiTickClass::Read;
@@ -67,12 +76,17 @@ class ApiRouteTable
 			return isset(self::RESOURCES[$resource]);
 		}
 
-		return self::isMutateAction($resource, $action);
+		return self::isMutateAction($resource, $action) || self::isPollAction($resource, $action);
 	}
 
 	public static function isMutateAction(string $resource, string $action): bool
 	{
 		return in_array($action, self::MUTATE_ACTIONS[$resource] ?? [], true);
+	}
+
+	public static function isPollAction(string $resource, string $action): bool
+	{
+		return in_array($action, self::POLL_ACTIONS[$resource] ?? [], true);
 	}
 
 	public static function seasonPageAlias(string $resource): string

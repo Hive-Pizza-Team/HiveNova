@@ -104,6 +104,7 @@ class ApiFrontController
 			),
 			'alerts' => self::ok([
 				'count' => IncomingHostileFleetQuery::countForUser((int) $USER['id']),
+				'unreadMessages' => (int) ($USER['messages'] ?? 0),
 			], $meta),
 			'events' => self::ok([
 				'events' => EventFirehoseFeed::fetch(
@@ -381,25 +382,42 @@ class ApiFrontController
 	{
 		global $USER, $PLANET, $LNG;
 
+		$target = [
+			'galaxy' => (int) HTTP::_GP('galaxy', 0),
+			'system' => (int) HTTP::_GP('system', 0),
+			'planet' => (int) HTTP::_GP('planet', 0),
+			'type' => (int) HTTP::_GP('type', 1),
+		];
+		$cargo = [
+			901 => (int) HTTP::_GP('metal', 0),
+			902 => (int) HTTP::_GP('crystal', 0),
+			903 => (int) HTTP::_GP('deuterium', 0),
+		];
+
+		if ($action === 'preview') {
+			return self::ok(
+				FleetPlayService::preview(
+					$USER,
+					$PLANET,
+					HTTP::_GP('ships', []),
+					$target,
+					(int) HTTP::_GP('speed', 10),
+					$cargo
+				),
+				$meta
+			);
+		}
+
 		try {
 			if ($action === 'send') {
 				$result = FleetPlayService::send(
 					$USER,
 					$PLANET,
 					HTTP::_GP('ships', []),
-					[
-						'galaxy' => (int) HTTP::_GP('galaxy', 0),
-						'system' => (int) HTTP::_GP('system', 0),
-						'planet' => (int) HTTP::_GP('planet', 0),
-						'type' => (int) HTTP::_GP('type', 1),
-					],
+					$target,
 					(int) HTTP::_GP('mission', FLEET_MISSION_ATTACK),
 					(int) HTTP::_GP('speed', 10),
-					[
-						901 => (int) HTTP::_GP('metal', 0),
-						902 => (int) HTTP::_GP('crystal', 0),
-						903 => (int) HTTP::_GP('deuterium', 0),
-					]
+					$cargo
 				);
 				$this->persistPlanet();
 
@@ -428,6 +446,35 @@ class ApiFrontController
 		try {
 			if ($action === 'spy') {
 				$result = FleetPlayService::spy($USER, $PLANET, (int) HTTP::_GP('targetPlanetId', 0));
+				$this->persistPlanet();
+
+				return self::ok($result, $meta);
+			}
+			if ($action === 'recycle') {
+				$result = FleetPlayService::recycle($USER, $PLANET, (int) HTTP::_GP('targetPlanetId', 0));
+				$this->persistPlanet();
+
+				return self::ok($result, $meta);
+			}
+			if ($action === 'colonize') {
+				global $resource;
+				$ships = [
+					SHIP_COLONY_SHIP => min(1, (int) ($PLANET[$resource[SHIP_COLONY_SHIP]] ?? 0)),
+				];
+				$result = FleetPlayService::send(
+					$USER,
+					$PLANET,
+					$ships,
+					[
+						'galaxy' => (int) HTTP::_GP('galaxy', (int) $PLANET['galaxy']),
+						'system' => (int) HTTP::_GP('system', (int) $PLANET['system']),
+						'planet' => (int) HTTP::_GP('planet', 0),
+						'type' => 1,
+					],
+					FLEET_MISSION_COLONISE,
+					10,
+					[]
+				);
 				$this->persistPlanet();
 
 				return self::ok($result, $meta);
@@ -473,6 +520,54 @@ class ApiFrontController
 			], $meta);
 		}
 
+		if ($action === 'trade') {
+			$sellId = (int) HTTP::_GP('resource', 0);
+			$cost = (int) Config::get()->darkmatter_cost_trader;
+			$result = CatalogPlayService::trade(
+				$USER,
+				$PLANET,
+				$sellId,
+				HTTP::_GP('trade', []),
+				$resourceMap,
+				$cost
+			);
+			if (empty($result['ok'])) {
+				$reason = (string) ($result['reason'] ?? 'error');
+				$message = match ($reason) {
+					'pizzabits' => sprintf(
+						(string) ($LNG['tr_not_enought'] ?? "Don't have enough %s."),
+						EconomyPlayService::techName($LNG, RESOURCE_DARKMATTER)
+					),
+					'short' => sprintf(
+						(string) ($LNG['tr_not_enought'] ?? "Don't have enough %s."),
+						EconomyPlayService::techName($LNG, $sellId)
+					),
+					default => (string) ($LNG['tr_exchange_error'] ?? 'Trade failed'),
+				};
+
+				return self::fail('trader', 422, $message);
+			}
+			$this->persistPlanet();
+			if ((int) ($result['cost'] ?? 0) > 0) {
+				try {
+					Database::get()->insert(
+						'INSERT INTO %%DM_TRANSACTIONS%% SET timestamp = NOW(), user_id = :user_id, amount_spent = :amount_spent, memo = :memo;',
+						[
+							':user_id' => (int) $USER['id'],
+							':amount_spent' => (int) $result['cost'],
+							':memo' => 'trader',
+						]
+					);
+				} catch (\Throwable) {
+				}
+			}
+			$payload = CatalogPlayService::traderPayload($USER, $PLANET, $LNG, $resourceMap, $cost);
+			$payload['message'] = (string) ($LNG['tr_exchange_done'] ?? 'Trade successful');
+			$payload['traded'] = $result;
+
+			return self::ok($payload, $meta);
+		}
+
 		if ($action === 'note') {
 			$title = HTTP::_GP('title', '', UTF8_SUPPORT);
 			$text = HTTP::_GP('text', '', UTF8_SUPPORT);
@@ -494,10 +589,13 @@ class ApiFrontController
 		$data = match ($kind) {
 			'officers' => ['items' => CatalogPlayService::officers($USER, $PLANET, $LNG, $listMap, $resourceMap)],
 			'resources' => ['sliders' => CatalogPlayService::productionSliders($PLANET, $LNG, $resourceMap)],
-			'trader' => [
-				'rates' => CatalogPlayService::traderRates(),
-				'cost' => (int) Config::get()->darkmatter_cost_trader,
-			],
+			'trader' => CatalogPlayService::traderPayload(
+				$USER,
+				$PLANET,
+				$LNG,
+				$resourceMap,
+				(int) Config::get()->darkmatter_cost_trader
+			),
 			'empire' => ['bodies' => CatalogPlayService::empireBodies($this->empirePlanetRows((int) $USER['id'], $PLANET), Config::get())],
 			'missiles' => CatalogPlayService::missiles($PLANET, $resourceMap),
 			'phalanx' => CatalogPlayService::phalanx($PLANET, $resourceMap),

@@ -118,6 +118,15 @@ class ApiFrontControllerTest extends TestCase
 		$this->assertSame('csrf', $result['error']);
 	}
 
+	public function testFleetPreviewIsPollPayload(): void
+	{
+		$this->request(['r' => 'fleet', 'action' => 'preview', 'speed' => '10']);
+		$result = (new ApiFrontController())->handle();
+		$this->assertTrue($result['ok']);
+		$this->assertFalse($result['data']['ready']);
+		$this->assertSame(0, $result['data']['consumption']);
+	}
+
 	public function testCatalogKinds(): void
 	{
 		$this->request(['r' => 'catalog', 'kind' => 'officers']);
@@ -137,11 +146,13 @@ class ApiFrontControllerTest extends TestCase
 		$this->request(['r' => 'catalog', 'kind' => 'alliance']);
 		$this->assertArrayHasKey('member', (new ApiFrontController())->handle()['data']);
 
-		$this->request(['r' => 'catalog', 'kind' => 'empire']);
-		$this->assertSame([], (new ApiFrontController())->handle()['data']['bodies']);
-
 		$this->request(['r' => 'catalog', 'kind' => 'trader']);
 		$trader = (new ApiFrontController())->handle();
 		$this->assertSame(2500, $trader['data']['cost']);
+		$this->assertCount(3, $trader['data']['items']);
+		$this->assertArrayHasKey('canCall', $trader['data']);
+
+		$this->request(['r' => 'catalog', 'kind' => 'empire']);
+		$this->assertSame([], (new ApiFrontController())->handle()['data']['bodies']);
 	}
 }

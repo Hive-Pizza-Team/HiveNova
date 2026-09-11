@@ -12,6 +12,7 @@ class ApiRouteTableTest extends TestCase
 		$this->assertSame(ApiTickClass::Poll, ApiRouteTable::tickClass('alerts', 'show', 'GET'));
 		$this->assertSame(ApiTickClass::Poll, ApiRouteTable::tickClass('events', 'show', 'GET'));
 		$this->assertSame(ApiTickClass::Poll, ApiRouteTable::tickClass('i18n', 'show', 'GET'));
+		$this->assertSame(ApiTickClass::Poll, ApiRouteTable::tickClass('fleet', 'preview', 'GET'));
 		$this->assertFalse(ApiTickClass::Poll->runsEconomy());
 	}
 

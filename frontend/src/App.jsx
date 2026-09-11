@@ -7,6 +7,7 @@ import QueueYardPage from './pages/QueueYardPage.jsx'
 import FleetPage from './pages/FleetPage.jsx'
 import GalaxyPage from './pages/GalaxyPage.jsx'
 import MessagesPage from './pages/MessagesPage.jsx'
+import MarketPage from './pages/MarketPage.jsx'
 import StubPage from './pages/StubPage.jsx'
 
 export default function App() {
@@ -19,10 +20,13 @@ export default function App() {
         <Route path="empire" element={<EmpirePage />} />
         <Route path="buildings" element={<QueueYardPage resource="buildings" idField="building" title="Buildings" />} />
         <Route path="research" element={<QueueYardPage resource="research" idField="tech" title="Research" />} />
-        <Route path="shipyard" element={<QueueYardPage resource="shipyard" idField="fmenge" title="Shipyard" />} />
+        <Route path="shipyard" element={<QueueYardPage resource="shipyard" idField="fmenge" title="Shipyard" mode="fleet" />} />
+        <Route path="defense" element={<QueueYardPage resource="shipyard" idField="fmenge" title="Defenses" mode="defense" />} />
         <Route path="fleetTable" element={<FleetPage />} />
         <Route path="galaxy" element={<GalaxyPage />} />
         <Route path="messages" element={<MessagesPage />} />
+        <Route path="trader" element={<MarketPage />} />
+        <Route path="market" element={<Navigate to="/trader" replace />} />
         <Route path=":page" element={<StubPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

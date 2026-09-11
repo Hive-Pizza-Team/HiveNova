@@ -48,6 +48,83 @@ class FleetPlayService
 			'ships' => $ships,
 			'fleets' => $fleets,
 			'missions' => self::missionChoices($lng),
+			'deuterium' => (int) floor((float) ($planet[$resource[RESOURCE_DEUTERIUM] ?? 'deuterium'] ?? 0)),
+		];
+	}
+
+	/**
+	 * @param array<string, mixed> $planet
+	 * @param array<int|string, mixed> $ships
+	 * @return array<int, int>
+	 */
+	public static function pickShips(array $planet, array $ships): array
+	{
+		global $resource;
+
+		$fleetArray = [];
+		foreach ($ships as $id => $count) {
+			$id = (int) $id;
+			$count = (int) $count;
+			if ($count <= 0 || $id === SHIP_SOLAR_SATELLITE) {
+				continue;
+			}
+			$col = $resource[$id] ?? null;
+			$have = $col !== null ? (int) ($planet[$col] ?? 0) : 0;
+			$fleetArray[$id] = min($count, $have);
+		}
+
+		return array_filter($fleetArray);
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
+	 * @param array<int, int> $ships
+	 * @param array{galaxy:int,system:int,planet:int,type?:int} $target
+	 * @param array<int, int> $cargo
+	 * @return array<string, mixed>
+	 */
+	public static function preview(array $user, array $planet, array $ships, array $target, int $speed, array $cargo): array
+	{
+		global $resource;
+
+		$fleetArray = self::pickShips($planet, $ships);
+		$deutCol = $resource[RESOURCE_DEUTERIUM] ?? 'deuterium';
+		$deuterium = (int) floor((float) ($planet[$deutCol] ?? 0));
+		$cargoSum = (int) ($cargo[901] ?? 0) + (int) ($cargo[902] ?? 0) + (int) ($cargo[903] ?? 0);
+		if ($fleetArray === []) {
+			return [
+				'distance' => 0,
+				'duration' => 0,
+				'consumption' => 0,
+				'storage' => 0,
+				'cargo' => $cargoSum,
+				'deuterium' => $deuterium,
+				'enoughFuel' => false,
+				'enoughCargo' => true,
+				'ready' => false,
+			];
+		}
+
+		$speed = min(max($speed, 1), 10);
+		$distance = FleetFunctions::GetTargetDistance(
+			[(int) $planet['galaxy'], (int) $planet['system'], (int) $planet['planet']],
+			[(int) $target['galaxy'], (int) $target['system'], (int) $target['planet']]
+		);
+		$metrics = FleetDispatchService::calculateMetrics($fleetArray, (int) $distance, $speed, $user);
+		$consumption = (float) $metrics['consumption'];
+		$storage = (int) FleetFunctions::GetFleetRoom($fleetArray);
+
+		return [
+			'distance' => (int) $distance,
+			'duration' => (int) $metrics['duration'],
+			'consumption' => (int) $consumption,
+			'storage' => $storage,
+			'cargo' => $cargoSum,
+			'deuterium' => $deuterium,
+			'enoughFuel' => $deuterium >= $consumption,
+			'enoughCargo' => $storage >= ($cargoSum + $consumption),
+			'ready' => true,
 		];
 	}
 
@@ -62,17 +139,7 @@ class FleetPlayService
 	{
 		global $resource, $LNG;
 
-		$fleetArray = [];
-		foreach ($ships as $id => $count) {
-			$id = (int) $id;
-			$count = (int) $count;
-			if ($count <= 0 || $id === SHIP_SOLAR_SATELLITE) {
-				continue;
-			}
-			$have = (int) ($planet[$resource[$id]] ?? 0);
-			$fleetArray[$id] = min($count, $have);
-		}
-		$fleetArray = array_filter($fleetArray);
+		$fleetArray = self::pickShips($planet, $ships);
 		if ($fleetArray === []) {
 			throw new \RuntimeException($LNG['fl_unselect_all_ships'] ?? 'No ships');
 		}
@@ -292,6 +359,99 @@ class FleetPlayService
 		);
 
 		return ['message' => (string) ($LNG['fa_sending'] ?? 'Sent')];
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
+	 * @return array<string, mixed>
+	 */
+	public static function recycle(array &$user, array &$planet, int $targetPlanetId): array
+	{
+		global $resource, $LNG, $pricelist;
+
+		if ($targetPlanetId <= 0) {
+			throw new \RuntimeException($LNG['fa_planet_not_exist'] ?? 'Unknown planet');
+		}
+		if (FleetFunctions::GetCurrentFleets($user['id']) >= FleetFunctions::GetMaxFleetSlots($user)) {
+			throw new \RuntimeException($LNG['fa_no_more_slots'] ?? 'No slots');
+		}
+
+		$db = Database::get();
+		$targetData = $db->selectSingle(
+			'SELECT planet.id as id, planet.id_owner as id_owner, planet.galaxy as galaxy, planet.system as system,
+				planet.planet as planet, planet.planet_type as planet_type,
+				planet.der_metal as der_metal, planet.der_crystal as der_crystal
+			FROM %%PLANETS%% planet WHERE planet.id = :planetID;',
+			[':planetID' => $targetPlanetId]
+		);
+		if (!is_array($targetData)) {
+			throw new \RuntimeException($LNG['fa_planet_not_exist'] ?? 'Unknown planet');
+		}
+
+		$totalDebris = (int) ($targetData['der_metal'] ?? 0) + (int) ($targetData['der_crystal'] ?? 0);
+		$storageFactor = 1 + (float) ($user['factor']['ShipStorage'] ?? 0);
+		$fleetArray = [];
+		foreach ([SHIP_BATTLE_RECYCLER, SHIP_RECYCLER] as $elementId) {
+			$col = $resource[$elementId] ?? null;
+			$have = $col !== null ? (int) ($planet[$col] ?? 0) : 0;
+			if ($have <= 0 || $totalDebris <= 0) {
+				continue;
+			}
+			$capacity = (float) ($pricelist[$elementId]['capacity'] ?? 0) * $storageFactor;
+			if ($capacity <= 0) {
+				continue;
+			}
+			$need = (int) min((int) ceil($totalDebris / $capacity), $have);
+			if ($need <= 0) {
+				continue;
+			}
+			$fleetArray[$elementId] = $need;
+			$totalDebris -= (int) ($need * $capacity);
+		}
+		if ($fleetArray === []) {
+			throw new \RuntimeException($LNG['fa_no_recyclers'] ?? 'No recyclers');
+		}
+
+		$speedFactor = FleetFunctions::GetGameSpeedFactor();
+		$distance = FleetFunctions::GetTargetDistance(
+			[(int) $planet['galaxy'], (int) $planet['system'], (int) $planet['planet']],
+			[(int) $targetData['galaxy'], (int) $targetData['system'], (int) $targetData['planet']]
+		);
+		$speedMin = FleetFunctions::GetFleetMaxSpeed($fleetArray, $user);
+		$duration = FleetFunctions::GetMissionDuration(10, $speedMin, $distance, $speedFactor, $user);
+		$consumption = FleetFunctions::GetFleetConsumption($fleetArray, $duration, $distance, $user, $speedFactor);
+		if ($planet['deuterium'] < $consumption) {
+			throw new \RuntimeException($LNG['fa_not_enough_fuel'] ?? 'Not enough fuel');
+		}
+		$planet['deuterium'] -= $consumption;
+		$start = $duration + TIMESTAMP;
+		FleetFunctions::sendFleet(
+			$fleetArray,
+			FLEET_MISSION_RECYCLE,
+			$user['id'],
+			$planet['id'],
+			$planet['galaxy'],
+			$planet['system'],
+			$planet['planet'],
+			$planet['planet_type'],
+			(int) ($targetData['id_owner'] ?? 0),
+			$targetPlanetId,
+			$targetData['galaxy'],
+			$targetData['system'],
+			$targetData['planet'],
+			$targetData['planet_type'],
+			[901 => 0, 902 => 0, 903 => 0],
+			$start,
+			$start,
+			$start + $duration,
+			0,
+			0,
+			0,
+			$consumption
+		);
+
+		return ['message' => (string) ($LNG['fa_sending'] ?? 'Sent'), 'ships' => $fleetArray];
 	}
 
 	/**

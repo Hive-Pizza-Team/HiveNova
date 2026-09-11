@@ -114,6 +114,7 @@ php -S localhost:8000 router.php
 
 ```bash
 ./scripts/build-spa.sh
+./scripts/deploy-spa.sh user@host   # rsyncs ./react/ → /var/www/NextMoon/react/
 ```
 
 Classic Smarty stays at `/` and `game.php`. CI builds the same way (see `.github/workflows/spa.yaml` and the smoke job in `ci.yaml`).
@@ -184,6 +185,33 @@ php migrate.php run --dry-run
 Run from the project root. The tool requires `includes/config.php` to exist (created by the web installer).
 
 If the game redirects to `install/index.php?mode=upgrade` (`dbVersion` behind `DB_VERSION_REQUIRED` in `includes/dbtables.php`), either run the CLI commands above or use the web wizard: create `includes/ENABLE_INSTALL_TOOL`, open the upgrade page, and confirm. The wizard dumps prefixed tables to `includes/backups/` then applies the same `install/migrations/` files as the CLI. PHP migrations are included in-process (not copied to the web root). Do not commit `includes/FIRST_INSTALL` or `includes/ENABLE_INSTALL_TOOL` — create them on the host only when you intentionally unlock the installer.
+
+### Production deploy
+
+Merging a PR into `master` runs `.github/workflows/deploy.yaml`: SSH as `deploy`, fast-forward the game git checkout, `composer install --no-dev`, `php migrate.php run` (no-op when current), clear compiled Smarty, then rsync the React SPA built in Actions. Protect `master` with required CI checks so a red PR cannot merge. Manual run: Actions → Deploy → Run workflow (`dry_run` prints remote actions only).
+
+**GitHub** (Settings → Secrets and variables → Actions):
+
+| Name | Kind | Purpose |
+|------|------|---------|
+| `DEPLOY_HOST` | secret | Hostname or IP (no `user@`) |
+| `DEPLOY_SSH_KEY` | secret | Private key for the `deploy` user |
+| `DEPLOY_KNOWN_HOSTS` | secret (recommended) | `ssh-keyscan -H HOST` output |
+| `DEPLOY_USER` | variable | SSH user (default `deploy`) |
+| `DEPLOY_PATH` | variable | Checkout path (default `/var/www/NextMoon`) |
+| `DEPLOY_PORT` | variable | SSH port (default `22`) |
+
+The workflow uses the `production` environment so you can add reviewers later. It only runs on `Hive-Pizza-Team/HiveNova` (forks are skipped).
+
+**Server:** a `deploy` user that can read/write the checkout, `vendor/`, and `cache/` (not `cache/sessions` ownership if php-fpm uses another user — group-write is enough). `git`, `php`, and `composer` on that user's `PATH`. Public key in `~deploy/.ssh/authorized_keys`. Same tree GitHub pulls: `git clone git@github.com:Hive-Pizza-Team/HiveNova.git` (or HTTPS — the repo is public). `includes/config.php` stays untracked.
+
+On the host, without Actions:
+
+```bash
+HN_DEPLOY_ROOT=/var/www/NextMoon ./scripts/deploy.sh
+```
+
+Optional `HN_DEPLOY_POST_CMD` (for example `sudo -n systemctl reload php8.3-fpm`) runs after a successful non-dry-run deploy.
 
 ### If you run HiveNova on NGINX - Read nginx.md file!
 

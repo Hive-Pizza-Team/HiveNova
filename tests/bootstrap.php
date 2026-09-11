@@ -111,6 +111,7 @@ if (!defined('RESOURCE_DARKMATTER'))        define('RESOURCE_DARKMATTER',       
 if (!defined('SHIP_COLONY_SHIP'))           define('SHIP_COLONY_SHIP',           208);
 if (!defined('SHIP_RECYCLER'))              define('SHIP_RECYCLER',              209);
 if (!defined('SHIP_ESPIONAGE_PROBE'))       define('SHIP_ESPIONAGE_PROBE',       210);
+if (!defined('SHIP_SOLAR_SATELLITE'))       define('SHIP_SOLAR_SATELLITE',       212);
 if (!defined('SHIP_DEATHSTAR'))             define('SHIP_DEATHSTAR',             214);
 if (!defined('SHIP_BLACK_MOON'))            define('SHIP_BLACK_MOON',            216);
 if (!defined('SHIP_BATTLE_TRANSPORTER'))    define('SHIP_BATTLE_TRANSPORTER',    217);

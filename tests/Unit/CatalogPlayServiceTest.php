@@ -55,7 +55,7 @@ class CatalogPlayServiceTest extends TestCase
 	public function testTraderMissilesPhalanxAndAlliance(): void
 	{
 		$rates = CatalogPlayService::traderRates();
-		$this->assertSame(2.0, $rates[901][902]);
+		$this->assertSame(2.0, $rates[RESOURCE_METAL][RESOURCE_CRYSTAL]);
 		$missiles = CatalogPlayService::missiles(
 			['interceptor_misil' => 2, 'interplanetary_misil' => 5, 'silo' => 3],
 			[]
@@ -109,6 +109,63 @@ class CatalogPlayServiceTest extends TestCase
 		$labels = CatalogPlayService::chromeLabels(['lm_fleet' => 'Armada']);
 		$this->assertSame('Armada', $labels['lm_fleet']);
 		$this->assertSame('lm_overview', $labels['lm_overview']);
+		$this->assertSame('lm_support', $labels['lm_support']);
 		$this->assertSame('lm_fleet', CatalogPlayService::chromeLabels(null)['lm_fleet']);
+		$this->assertSame('tr_exchange', $labels['tr_exchange']);
+	}
+
+	public function testTraderExchangesPlanetResourcesAndPizzabits(): void
+	{
+		$resource = [
+			RESOURCE_METAL => 'metal',
+			RESOURCE_CRYSTAL => 'crystal',
+			RESOURCE_DEUTERIUM => 'deuterium',
+			RESOURCE_DARKMATTER => 'darkmatter',
+		];
+		$user = ['darkmatter' => 4000];
+		$planet = ['metal' => 1000.0, 'crystal' => 10.0, 'deuterium' => 5.0];
+		$payload = CatalogPlayService::traderPayload($user, $planet, ['tech' => [901 => 'Metal']], $resource, 2500);
+		$this->assertTrue($payload['canCall']);
+		$this->assertSame(1000.0, $payload['items'][0]['amount']);
+
+		$denied = CatalogPlayService::trade($user, $planet, RESOURCE_METAL, [RESOURCE_CRYSTAL => 10], $resource, 5000);
+		$this->assertFalse($denied['ok']);
+		$this->assertSame('pizzabits', $denied['reason']);
+		$this->assertSame(4000, $user['darkmatter']);
+		$this->assertSame(1000.0, $planet['metal']);
+
+		$short = CatalogPlayService::trade($user, $planet, RESOURCE_METAL, [RESOURCE_CRYSTAL => 900], $resource, 2500);
+		$this->assertSame('short', $short['reason']);
+		$this->assertSame(1000.0, $planet['metal']);
+
+		$empty = CatalogPlayService::trade($user, $planet, RESOURCE_METAL, [], $resource, 2500);
+		$this->assertSame('empty', $empty['reason']);
+
+		$bad = CatalogPlayService::trade($user, $planet, 911, [RESOURCE_CRYSTAL => 1], $resource, 2500);
+		$this->assertSame('invalid', $bad['reason']);
+
+		$result = CatalogPlayService::trade(
+			$user,
+			$planet,
+			RESOURCE_METAL,
+			[RESOURCE_CRYSTAL => 100, RESOURCE_DEUTERIUM => 50],
+			$resource,
+			2500
+		);
+		$this->assertTrue($result['ok']);
+		$this->assertSame(400.0, $result['spent']);
+		$this->assertSame(600.0, $planet['metal']);
+		$this->assertSame(110.0, $planet['crystal']);
+		$this->assertSame(55.0, $planet['deuterium']);
+		$this->assertSame(1500, $user['darkmatter']);
+		$this->assertSame(1500, $result['pizzabits']);
+		$this->assertSame(
+			[RESOURCE_CRYSTAL => 100, 911 => 9],
+			CatalogPlayService::parseTradeWant([
+				(string) RESOURCE_CRYSTAL => '100.4',
+				RESOURCE_DEUTERIUM => -3,
+				911 => 9,
+			])
+		);
 	}
 }

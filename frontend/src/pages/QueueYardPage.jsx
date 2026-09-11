@@ -3,19 +3,19 @@ import { GameState } from '../shell/GameState.jsx'
 import { apiGet, apiPost } from '../api/client.js'
 import { Cost, GebaeudeThumb } from '../ui/Thumbs.jsx'
 
-export default function QueueYardPage({ resource, idField, title }) {
+export default function QueueYardPage({ resource, idField, title, mode }) {
   const ctx = useContext(GameState)
   const [data, setData] = useState(null)
   const [msg, setMsg] = useState('')
   const planetId = ctx?.data?.planet?.id
 
   function load() {
-    return apiGet(resource, resource === 'shipyard' ? { planetId, mode: 'fleet' } : { planetId }).then((body) => setData(body.data))
+    return apiGet(resource, resource === 'shipyard' ? { planetId, mode: mode || 'fleet' } : { planetId }).then((body) => setData(body.data))
   }
 
   useEffect(() => {
     load().catch((err) => setMsg(err.message))
-  }, [resource, planetId])
+  }, [resource, planetId, mode])
 
   if (!ctx) return null
 
@@ -82,7 +82,7 @@ export default function QueueYardPage({ resource, idField, title }) {
                 onSubmit={(e) => {
                   e.preventDefault()
                   const n = Number(new FormData(e.target).get('n') || 0)
-                  mutate('build', { fmenge: { [item.id]: n } })
+                  mutate('build', { fmenge: { [item.id]: n }, mode: mode || 'fleet' })
                 }}
               >
                 <input name="n" type="number" min="1" defaultValue="1" />

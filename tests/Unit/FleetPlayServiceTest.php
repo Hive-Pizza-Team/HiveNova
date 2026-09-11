@@ -72,4 +72,39 @@ class FleetPlayServiceTest extends TestCase
 		$this->assertFalse($flight['recallable']);
 		$this->assertSame(10, $flight['restSeconds']);
 	}
+
+	public function testPickShipsIgnoresSatellitesAndEmptyCounts(): void
+	{
+		$previous = $GLOBALS['resource'] ?? null;
+		$GLOBALS['resource'] = [
+			202 => 'small_ship',
+			SHIP_SOLAR_SATELLITE => 'solar_sat',
+		];
+		try {
+			$planet = ['small_ship' => 10, 'solar_sat' => 4];
+			$this->assertSame([202 => 3], FleetPlayService::pickShips($planet, [202 => 3, SHIP_SOLAR_SATELLITE => 2, 203 => 9]));
+			$this->assertSame([], FleetPlayService::pickShips($planet, [202 => 0]));
+		} finally {
+			if ($previous === null) {
+				unset($GLOBALS['resource']);
+			} else {
+				$GLOBALS['resource'] = $previous;
+			}
+		}
+	}
+
+	public function testPreviewWithoutShipsIsNotReady(): void
+	{
+		$preview = FleetPlayService::preview(
+			['id' => 1],
+			['galaxy' => 1, 'system' => 1, 'planet' => 1, 'deuterium' => 80],
+			[],
+			['galaxy' => 1, 'system' => 1, 'planet' => 2],
+			10,
+			[]
+		);
+		$this->assertFalse($preview['ready']);
+		$this->assertSame(80, $preview['deuterium']);
+		$this->assertSame(0, $preview['consumption']);
+	}
 }

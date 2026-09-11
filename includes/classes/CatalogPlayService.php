@@ -138,9 +138,133 @@ class CatalogPlayService
 	public static function traderRates(): array
 	{
 		return [
-			901 => [901 => 1.0, 902 => 2.0, 903 => 4.0],
-			902 => [901 => 0.5, 902 => 1.0, 903 => 2.0],
-			903 => [901 => 0.25, 902 => 0.5, 903 => 1.0],
+			RESOURCE_METAL => [RESOURCE_METAL => 1.0, RESOURCE_CRYSTAL => 2.0, RESOURCE_DEUTERIUM => 4.0],
+			RESOURCE_CRYSTAL => [RESOURCE_METAL => 0.5, RESOURCE_CRYSTAL => 1.0, RESOURCE_DEUTERIUM => 2.0],
+			RESOURCE_DEUTERIUM => [RESOURCE_METAL => 0.25, RESOURCE_CRYSTAL => 0.5, RESOURCE_DEUTERIUM => 1.0],
+		];
+	}
+
+	/**
+	 * @param array<int|string, mixed> $want
+	 * @return array<int, int>
+	 */
+	public static function parseTradeWant(array $want): array
+	{
+		$out = [];
+		foreach ($want as $id => $amount) {
+			$id = (int) $id;
+			$qty = max(0, (int) round((float) $amount));
+			if ($qty <= 0) {
+				continue;
+			}
+			$out[$id] = $qty;
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Exchange planet resources through the merchant. Deducts Pizzabits only when
+	 * the trade is applied.
+	 *
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
+	 * @param array<int|string, mixed> $want Gained amounts keyed by resource ID
+	 * @param array<int|string, string> $resource
+	 * @return array<string, mixed>
+	 */
+	public static function trade(array &$user, array &$planet, int $sellId, array $want, array $resource, int $cost): array
+	{
+		$rates = self::traderRates();
+		if (!isset($rates[$sellId])) {
+			return ['ok' => false, 'reason' => 'invalid', 'sellId' => $sellId];
+		}
+
+		$dmCol = $resource[RESOURCE_DARKMATTER] ?? 'darkmatter';
+		$pizzabits = (int) ($user[$dmCol] ?? $user['darkmatter'] ?? 0);
+		if ($pizzabits < $cost) {
+			return ['ok' => false, 'reason' => 'pizzabits', 'sellId' => $sellId];
+		}
+
+		$sellCol = $resource[$sellId] ?? '';
+		if ($sellCol === '' || !array_key_exists($sellCol, $planet)) {
+			return ['ok' => false, 'reason' => 'invalid', 'sellId' => $sellId];
+		}
+
+		$wanted = self::parseTradeWant($want);
+		$spent = 0.0;
+		$gained = [];
+		foreach ($rates[$sellId] as $buyId => $rate) {
+			if ($buyId === $sellId) {
+				continue;
+			}
+			$amount = $wanted[$buyId] ?? 0;
+			if ($amount <= 0 || $rate <= 0) {
+				continue;
+			}
+			$spent += $amount * $rate;
+			$gained[$buyId] = $amount;
+		}
+		if ($spent <= 0 || $gained === []) {
+			return ['ok' => false, 'reason' => 'empty', 'sellId' => $sellId];
+		}
+		if ($spent > (float) $planet[$sellCol]) {
+			return ['ok' => false, 'reason' => 'short', 'sellId' => $sellId];
+		}
+
+		$planet[$sellCol] = (float) $planet[$sellCol] - $spent;
+		foreach ($gained as $buyId => $amount) {
+			$buyCol = $resource[$buyId] ?? '';
+			if ($buyCol === '') {
+				continue;
+			}
+			if (array_key_exists($buyCol, $planet)) {
+				$planet[$buyCol] = (float) $planet[$buyCol] + $amount;
+			} elseif (array_key_exists($buyCol, $user)) {
+				$user[$buyCol] = (float) $user[$buyCol] + $amount;
+			}
+		}
+		$user[$dmCol] = $pizzabits - $cost;
+		$user['darkmatter'] = $user[$dmCol];
+
+		return [
+			'ok' => true,
+			'sellId' => $sellId,
+			'spent' => $spent,
+			'gained' => $gained,
+			'cost' => $cost,
+			'pizzabits' => (int) $user[$dmCol],
+		];
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
+	 * @param array<int|string, string> $resource
+	 * @return array<string, mixed>
+	 */
+	public static function traderPayload(array $user, array $planet, mixed $lng, array $resource, int $cost): array
+	{
+		$rates = self::traderRates();
+		$items = [];
+		foreach ([RESOURCE_METAL, RESOURCE_CRYSTAL, RESOURCE_DEUTERIUM] as $id) {
+			$col = $resource[$id] ?? '';
+			$items[] = [
+				'id' => $id,
+				'name' => EconomyPlayService::techName($lng, $id),
+				'amount' => (float) ($planet[$col] ?? 0),
+				'rates' => $rates[$id],
+			];
+		}
+		$dmCol = $resource[RESOURCE_DARKMATTER] ?? 'darkmatter';
+		$pizzabits = (int) ($user[$dmCol] ?? $user['darkmatter'] ?? 0);
+
+		return [
+			'rates' => $rates,
+			'cost' => $cost,
+			'pizzabits' => $pizzabits,
+			'canCall' => $pizzabits >= $cost,
+			'items' => $items,
 		];
 	}
 
@@ -342,7 +466,13 @@ class CatalogPlayService
 			'lm_administration', 'hn_classic_ui', 'hn_try_new_ui',
 			'lm_officiers', 'lm_trader', 'lm_technology', 'lm_resources', 'lm_empire',
 			'lm_buddylist', 'lm_notes', 'lm_statistics', 'lm_viz',
+			'lm_support', 'lm_faq', 'lm_search', 'lm_records', 'lm_achievements',
+			'lm_topkb', 'lm_fleettrader', 'lm_battlesim',
 			'ov_newname_done', 'ov_newname_specialchar',
+			'tr_call_trader', 'tr_call_trader_who_buys', 'tr_cost_dm_trader',
+			'tr_exchange_quota', 'tr_sell', 'tr_resource', 'tr_amount',
+			'tr_quota_exchange', 'tr_exchange', 'tr_exchange_done',
+			'tr_not_enought', 'tr_exchange_error',
 		];
 		$out = [];
 		foreach ($keys as $key) {
