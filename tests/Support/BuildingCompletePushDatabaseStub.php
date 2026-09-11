@@ -69,10 +69,11 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 				(int) ($params[':buildEnd'] ?? 0)
 			);
 			$this->notified[$key] = [
-				'planet_id'  => (int) ($params[':planetId'] ?? 0),
-				'element_id' => (int) ($params[':elementId'] ?? 0),
-				'level'      => (int) ($params[':level'] ?? 0),
-				'build_end'  => (int) ($params[':buildEnd'] ?? 0),
+				'planet_id'   => (int) ($params[':planetId'] ?? 0),
+				'element_id'  => (int) ($params[':elementId'] ?? 0),
+				'level'       => (int) ($params[':level'] ?? 0),
+				'build_end'   => (int) ($params[':buildEnd'] ?? 0),
+				'notified_at' => (int) ($params[':notifiedAt'] ?? 0),
 			];
 		}
 
@@ -85,7 +86,7 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%') && isset($params[':old'])) {
 			$old = (int) $params[':old'];
 			foreach ($this->notified as $key => $row) {
-				if ((int) $row['build_end'] < $old) {
+				if ((int) ($row['notified_at'] ?? 0) > 0 && (int) $row['notified_at'] < $old) {
 					unset($this->notified[$key]);
 				}
 			}

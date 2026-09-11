@@ -70,6 +70,25 @@ class ResearchCompletePushService
 		return $jobs;
 	}
 
+	/**
+	 * Cron must not treat later planned queue rows as finished. Only the
+	 * currently running job (queue head) has actually elapsed.
+	 *
+	 * @return list<array{elementId: int, level: int, techEnd: int}>
+	 */
+	public static function currentDueResearchJobs(mixed $serializedOrQueue, int $now): array
+	{
+		$queue = is_string($serializedOrQueue)
+			? safe_unserialize($serializedOrQueue)
+			: $serializedOrQueue;
+
+		if (!is_array($queue) || !isset($queue[0]) || !is_array($queue[0])) {
+			return [];
+		}
+
+		return self::dueResearchJobs([$queue[0]], $now);
+	}
+
 	public static function jobKey(int $userId, int $elementId, int $level, int $techEnd): string
 	{
 		return $userId . ':' . $elementId . ':' . $level . ':' . $techEnd;
@@ -158,11 +177,11 @@ class ResearchCompletePushService
 			}
 			$pending = array_values($pending);
 
-			$message = $this->buildMessage($pending, $lang);
-			$this->deliver($userId, $message);
 			foreach ($pending as $job) {
 				$this->markNotified($userId, $job['elementId'], $job['level'], $job['techEnd']);
 			}
+			$message = $this->buildMessage($pending, $lang);
+			$this->deliver($userId, $message);
 
 			return 1;
 		} catch (Throwable $e) {
@@ -199,7 +218,7 @@ class ResearchCompletePushService
 
 			$sent = 0;
 			foreach ($users as $row) {
-				$jobs = self::dueResearchJobs($row['b_tech_queue'] ?? '', $now);
+				$jobs = self::currentDueResearchJobs($row['b_tech_queue'] ?? '', $now);
 				$sent += $this->notifyJobs(
 					(int) ($row['user_id'] ?? 0),
 					$jobs,
@@ -325,13 +344,14 @@ class ResearchCompletePushService
 	private function markNotified(int $userId, int $elementId, int $level, int $techEnd): void
 	{
 		Database::get()->insert(
-			'INSERT IGNORE INTO %%PUSH_RESEARCH_NOTIFIED%% (user_id, element_id, level, tech_end)
-			VALUES (:userId, :elementId, :level, :techEnd)',
+			'INSERT IGNORE INTO %%PUSH_RESEARCH_NOTIFIED%% (user_id, element_id, level, tech_end, notified_at)
+			VALUES (:userId, :elementId, :level, :techEnd, :notifiedAt)',
 			[
-				':userId'    => $userId,
-				':elementId' => $elementId,
-				':level'     => $level,
-				':techEnd'   => $techEnd,
+				':userId'      => $userId,
+				':elementId'   => $elementId,
+				':level'       => $level,
+				':techEnd'     => $techEnd,
+				':notifiedAt'  => defined('TIMESTAMP') ? TIMESTAMP : time(),
 			]
 		);
 	}
@@ -339,7 +359,7 @@ class ResearchCompletePushService
 	private function cleanup(int $now): void
 	{
 		Database::get()->delete(
-			'DELETE FROM %%PUSH_RESEARCH_NOTIFIED%% WHERE tech_end < :old',
+			'DELETE FROM %%PUSH_RESEARCH_NOTIFIED%% WHERE notified_at > 0 AND notified_at < :old',
 			[':old' => $now - self::CLEANUP_AFTER]
 		);
 	}
