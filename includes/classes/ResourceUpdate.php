@@ -47,6 +47,9 @@ class ResourceUpdate
 	private array $resource	= [];
 	private array $reslist	= [];
 
+	/** @var list<array{elementId: int, level: int, techEnd: int}> */
+	private array $completedResearchJobs = [];
+
 	function __construct($Build = true, $Tech = true)
 	{
 		$this->Build	= $Build;
@@ -463,8 +466,14 @@ class ResourceUpdate
 		
 	private function ResearchQueue()
 	{
+		$this->completedResearchJobs = [];
 		while($this->CheckUserTechQueue())
 			$this->SetNextQueueTechOnTop();
+		ResearchCompletePushService::notifyCompletedJobs(
+			(int) ($this->USER['id'] ?? 0),
+			$this->completedResearchJobs,
+			(string) ($this->USER['lang'] ?? 'en')
+		);
 	}
 	
 	private function CheckUserTechQueue()
@@ -472,14 +481,26 @@ class ResourceUpdate
 		if (empty($this->USER['b_tech_id']) || $this->USER['b_tech'] > $this->TIME)
 			return false;
 
-		if(!isset($this->Builded[$this->USER['b_tech_id']]))
-			$this->Builded[$this->USER['b_tech_id']]	= 0;
+		$elementId = (int) $this->USER['b_tech_id'];
+		$techEnd = (int) $this->USER['b_tech'];
 
-		$this->Builded[$this->USER['b_tech_id']]					+= 1;
-		$this->USER[$this->resource[$this->USER['b_tech_id']]]		+= 1;
-	
+		if(!isset($this->Builded[$elementId]))
+			$this->Builded[$elementId]	= 0;
+
+		$this->Builded[$elementId]					+= 1;
+		$this->USER[$this->resource[$elementId]]		+= 1;
 
 		$CurrentQueue	= safe_unserialize($this->USER['b_tech_queue']);
+		$level = (int) ($this->USER[$this->resource[$elementId]] ?? 0);
+		if (is_array($CurrentQueue) && isset($CurrentQueue[0][1])) {
+			$level = (int) $CurrentQueue[0][1];
+		}
+		$this->completedResearchJobs[] = [
+			'elementId' => $elementId,
+			'level'     => $level,
+			'techEnd'   => $techEnd,
+		];
+
 		if (!is_array($CurrentQueue)) {
 			$this->USER['b_tech']			= 0;
 			$this->USER['b_tech_id']		= 0;
