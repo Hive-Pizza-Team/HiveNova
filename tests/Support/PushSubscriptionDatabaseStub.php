@@ -34,10 +34,36 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 			return $this->settingsPushByUser[$userId] ?? 1;
 		}
 
+		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':userId'])) {
+			$userId = (int) $params[':userId'];
+			foreach ($this->subscriptionsByEndpoint as $row) {
+				if ((int) $row['user_id'] === $userId) {
+					return $field === false ? $row : ($row[$field] ?? false);
+				}
+			}
+
+			return false;
+		}
+
 		return false;
 	}
 
-	public function select($qry, array $params = []) { return []; }
+	public function select($qry, array $params = [])
+	{
+		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':userId'])) {
+			$userId = (int) $params[':userId'];
+			$rows = [];
+			foreach ($this->subscriptionsByEndpoint as $row) {
+				if ((int) $row['user_id'] === $userId) {
+					$rows[] = $row;
+				}
+			}
+
+			return $rows;
+		}
+
+		return [];
+	}
 
 	public function delete($qry, array $params = [])
 	{

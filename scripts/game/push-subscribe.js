@@ -147,10 +147,61 @@
 		});
 	}
 
+	function keyBytes(value) {
+		if (!value) {
+			return null;
+		}
+		if (value instanceof Uint8Array) {
+			return value;
+		}
+		if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
+			return new Uint8Array(value);
+		}
+		if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView && ArrayBuffer.isView(value)) {
+			return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+		}
+		return null;
+	}
+
+	function keysEqual(left, right) {
+		if (!left || !right || left.length !== right.length) {
+			return false;
+		}
+		for (var i = 0; i < left.length; i++) {
+			if (left[i] !== right[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function applicationServerKeysMatch(subscription, publicKey) {
+		if (!subscription || !publicKey) {
+			return false;
+		}
+		var current = subscription.options && subscription.options.applicationServerKey;
+		var currentBytes = keyBytes(current);
+		if (!currentBytes) {
+			return false;
+		}
+		return keysEqual(currentBytes, urlBase64ToUint8Array(publicKey));
+	}
+
 	function subscribeWithRegistration(reg, publicKey) {
 		return reg.pushManager.getSubscription().then(function (existing) {
 			if (existing) {
-				return existing;
+				var current = existing.options && existing.options.applicationServerKey;
+				// Browsers that omit options.applicationServerKey cannot be verified;
+				// reuse to avoid unsubscribe/resubscribe on every page load.
+				if (!current || applicationServerKeysMatch(existing, publicKey)) {
+					return existing;
+				}
+				return existing.unsubscribe().then(function () {
+					return reg.pushManager.subscribe({
+						userVisibleOnly: true,
+						applicationServerKey: urlBase64ToUint8Array(publicKey)
+					});
+				});
 			}
 			return reg.pushManager.subscribe({
 				userVisibleOnly: true,
@@ -166,6 +217,14 @@
 		handleSubscribeFailure: handleSubscribeFailure,
 		clearPushError: clearPushError,
 		showPushError: showPushError,
+		urlBase64ToUint8Array: urlBase64ToUint8Array,
+		applicationServerKeysMatch: applicationServerKeysMatch,
+		sendTest: function () {
+			return fetch('game.php?page=push&mode=test', {
+				method: 'POST',
+				credentials: 'same-origin'
+			}).then(function (r) { return r.json(); });
+		},
 
 		enable: function (options) {
 			options = options || {};

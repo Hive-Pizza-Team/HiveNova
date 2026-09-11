@@ -21,7 +21,7 @@ class ResearchCompletePushService
 	public const MAX_ELEMENT_ID = 199;
 
 	/**
-	 * @param callable(int, string, string, array<string, mixed>): void|null $notifier
+	 * @param callable(int, string, string, array<string, mixed>): (bool|void)|null $notifier
 	 * @param callable(string): array<string, mixed>|null $languageLoader
 	 */
 	public function __construct(
@@ -178,13 +178,22 @@ class ResearchCompletePushService
 			$pending = array_values($pending);
 
 			foreach ($pending as $job) {
-				$this->markNotified($userId, $job['elementId'], $job['level'], $job['techEnd']);
+				$this->claimPending($userId, $job['elementId'], $job['level'], $job['techEnd']);
 			}
 			$message = $this->buildMessage($pending, $lang);
-			$this->deliver($userId, $message);
+			if (!$this->deliver($userId, $message)) {
+				PushNotificationService::logFailure('ResearchCompletePushService: delivery failed user=' . $userId);
+
+				return 0;
+			}
+			foreach ($pending as $job) {
+				$this->markSent($userId, $job['elementId'], $job['level'], $job['techEnd']);
+			}
 
 			return 1;
 		} catch (Throwable $e) {
+			PushNotificationService::logFailure('ResearchCompletePushService::notifyJobs: ' . $e->getMessage());
+
 			return 0;
 		}
 	}
@@ -210,19 +219,40 @@ class ResearchCompletePushService
 				[':now' => $now]
 			);
 
-			if (!is_array($users) || $users === []) {
+			$byUser = [];
+			if (is_array($users)) {
+				foreach ($users as $row) {
+					$userId = (int) ($row['user_id'] ?? 0);
+					$byUser[$userId]['lang'] = (string) ($row['lang'] ?? 'en');
+					$byUser[$userId]['jobs'] = self::currentDueResearchJobs($row['b_tech_queue'] ?? '', $now);
+				}
+			}
+
+			foreach ($this->pendingNotifiedJobs() as $job) {
+				$userId = (int) ($job['userId'] ?? 0);
+				if ($userId <= 0) {
+					continue;
+				}
+				$byUser[$userId]['lang'] = (string) ($job['lang'] ?? $byUser[$userId]['lang'] ?? 'en');
+				$byUser[$userId]['jobs'][] = [
+					'elementId' => $job['elementId'],
+					'level'     => $job['level'],
+					'techEnd'   => $job['techEnd'],
+				];
+			}
+
+			if ($byUser === []) {
 				$this->cleanup($now);
 
 				return 0;
 			}
 
 			$sent = 0;
-			foreach ($users as $row) {
-				$jobs = self::currentDueResearchJobs($row['b_tech_queue'] ?? '', $now);
+			foreach ($byUser as $userId => $payload) {
 				$sent += $this->notifyJobs(
-					(int) ($row['user_id'] ?? 0),
-					$jobs,
-					(string) ($row['lang'] ?? 'en')
+					(int) $userId,
+					$payload['jobs'] ?? [],
+					(string) ($payload['lang'] ?? 'en')
 				);
 			}
 
@@ -230,6 +260,8 @@ class ResearchCompletePushService
 
 			return $sent;
 		} catch (Throwable $e) {
+			PushNotificationService::logFailure('ResearchCompletePushService::run: ' . $e->getMessage());
+
 			return 0;
 		}
 	}
@@ -313,22 +345,62 @@ class ResearchCompletePushService
 	/**
 	 * @param array{title: string, body: string, data: array<string, mixed>} $message
 	 */
-	private function deliver(int $userId, array $message): void
+	private function deliver(int $userId, array $message): bool
 	{
 		if (is_callable($this->notifier)) {
-			($this->notifier)($userId, $message['title'], $message['body'], $message['data']);
-
-			return;
+			return ($this->notifier)($userId, $message['title'], $message['body'], $message['data']) !== false;
 		}
 
-		PushNotificationService::notifyUser($userId, $message['title'], $message['body'], $message['data']);
+		$result = PushNotificationService::notifyUser($userId, $message['title'], $message['body'], $message['data']);
+
+		return !empty($result['ok']);
+	}
+
+	/**
+	 * @return list<array{elementId: int, level: int, techEnd: int, userId: int, lang: string}>
+	 */
+	private function pendingNotifiedJobs(): array
+	{
+		$rows = Database::get()->select(
+			'SELECT n.user_id, n.element_id, n.level, n.tech_end, u.lang
+			FROM %%PUSH_RESEARCH_NOTIFIED%% n
+			INNER JOIN %%USERS%% u ON u.id = n.user_id
+			WHERE n.notified_at = 0
+			AND (u.settings_push IS NULL OR u.settings_push = 1)
+			AND EXISTS (
+				SELECT 1 FROM %%PUSH_SUBSCRIPTIONS%% s WHERE s.user_id = n.user_id
+			)'
+		);
+
+		if (!is_array($rows)) {
+			return [];
+		}
+
+		$jobs = [];
+		foreach ($rows as $row) {
+			$normalized = self::normalizeJob([
+				'elementId' => $row['element_id'] ?? 0,
+				'level'     => $row['level'] ?? 0,
+				'techEnd'   => $row['tech_end'] ?? 0,
+			]);
+			if ($normalized === null) {
+				continue;
+			}
+			$jobs[] = $normalized + [
+				'userId' => (int) ($row['user_id'] ?? 0),
+				'lang'   => (string) ($row['lang'] ?? 'en'),
+			];
+		}
+
+		return $jobs;
 	}
 
 	private function wasNotified(int $userId, int $elementId, int $level, int $techEnd): bool
 	{
 		$row = Database::get()->selectSingle(
 			'SELECT user_id FROM %%PUSH_RESEARCH_NOTIFIED%%
-			WHERE user_id = :userId AND element_id = :elementId AND level = :level AND tech_end = :techEnd',
+			WHERE user_id = :userId AND element_id = :elementId AND level = :level AND tech_end = :techEnd
+			AND notified_at > 0',
 			[
 				':userId'    => $userId,
 				':elementId' => $elementId,
@@ -341,17 +413,33 @@ class ResearchCompletePushService
 		return $row !== false && $row !== null && $row !== '';
 	}
 
-	private function markNotified(int $userId, int $elementId, int $level, int $techEnd): void
+	private function claimPending(int $userId, int $elementId, int $level, int $techEnd): void
 	{
 		Database::get()->insert(
 			'INSERT IGNORE INTO %%PUSH_RESEARCH_NOTIFIED%% (user_id, element_id, level, tech_end, notified_at)
 			VALUES (:userId, :elementId, :level, :techEnd, :notifiedAt)',
 			[
-				':userId'      => $userId,
-				':elementId'   => $elementId,
-				':level'       => $level,
-				':techEnd'     => $techEnd,
-				':notifiedAt'  => defined('TIMESTAMP') ? TIMESTAMP : time(),
+				':userId'     => $userId,
+				':elementId'  => $elementId,
+				':level'      => $level,
+				':techEnd'    => $techEnd,
+				':notifiedAt' => 0,
+			]
+		);
+	}
+
+	private function markSent(int $userId, int $elementId, int $level, int $techEnd): void
+	{
+		Database::get()->update(
+			'UPDATE %%PUSH_RESEARCH_NOTIFIED%% SET notified_at = :notifiedAt
+			WHERE user_id = :userId AND element_id = :elementId AND level = :level AND tech_end = :techEnd
+			AND notified_at = 0',
+			[
+				':userId'     => $userId,
+				':elementId'  => $elementId,
+				':level'      => $level,
+				':techEnd'    => $techEnd,
+				':notifiedAt' => defined('TIMESTAMP') ? TIMESTAMP : time(),
 			]
 		);
 	}
@@ -359,7 +447,9 @@ class ResearchCompletePushService
 	private function cleanup(int $now): void
 	{
 		Database::get()->delete(
-			'DELETE FROM %%PUSH_RESEARCH_NOTIFIED%% WHERE notified_at > 0 AND notified_at < :old',
+			'DELETE FROM %%PUSH_RESEARCH_NOTIFIED%%
+			WHERE (notified_at > 0 AND notified_at < :old)
+			OR (notified_at = 0 AND tech_end < :old)',
 			[':old' => $now - self::CLEANUP_AFTER]
 		);
 	}

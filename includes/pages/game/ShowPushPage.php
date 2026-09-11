@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PushNotificationService;
+use HiveNova\Core\Session;
 
 class ShowPushPage extends AbstractGamePage
 {
@@ -27,7 +28,51 @@ class ShowPushPage extends AbstractGamePage
 			'configured' => PushNotificationService::isConfigured(),
 			'publicKey'  => PushNotificationService::getPublicKey(),
 			'enabled'    => PushNotificationService::isEnabledForUser((int) $USER['id']),
+			'subscribed' => PushNotificationService::hasSubscription((int) $USER['id']),
 		]);
+	}
+
+	public function test()
+	{
+		global $USER;
+
+		if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+			HTTP::sendHeader('HTTP/1.1 405 Method Not Allowed');
+			$this->sendJSON(['error' => 'method_not_allowed']);
+			return;
+		}
+
+		$now = defined('TIMESTAMP') ? TIMESTAMP : time();
+		$wait = PushNotificationService::testCooldownRemaining($this->lastTestAt(), $now);
+		if ($wait > 0) {
+			HTTP::sendHeader('HTTP/1.1 429 Too Many Requests');
+			$this->sendJSON(['error' => 'rate_limited', 'retryAfter' => $wait]);
+			return;
+		}
+
+		$this->rememberTestAt($now);
+		$result = PushNotificationService::sendTestNotification((int) $USER['id']);
+
+		$this->sendJSON([
+			'ok'         => !empty($result['ok']),
+			'delivered'  => (int) ($result['delivered'] ?? 0),
+			'attempted'  => (int) ($result['attempted'] ?? 0),
+			'skipped'    => $result['skipped'] ?? null,
+			'subscribed' => PushNotificationService::hasSubscription((int) $USER['id']),
+		]);
+	}
+
+	protected function lastTestAt(): int
+	{
+		$session = Session::load();
+
+		return isset($session->pushTestAt) ? (int) $session->pushTestAt : 0;
+	}
+
+	protected function rememberTestAt(int $now): void
+	{
+		$session = Session::load();
+		$session->pushTestAt = $now;
 	}
 
 	public function vapidPublicKey()

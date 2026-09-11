@@ -12,8 +12,44 @@ use Minishlink\WebPush\WebPush;
  */
 class PushNotificationService
 {
+	public const CONTENT_ENCODING = 'aes128gcm';
+	public const TEST_COOLDOWN = 60;
+	public const TEST_NOTIFY_URL = 'game.php?page=overview';
+	public const SKIP_NOT_CONFIGURED = 'not_configured';
+	public const SKIP_WEBPUSH_MISSING = 'webpush_missing';
+	public const SKIP_DISABLED = 'disabled';
+	public const SKIP_NO_SUBSCRIPTION = 'no_subscription';
+	public const SKIP_EXCEPTION = 'exception';
+
+	/** @var callable|null fn(list<array{endpoint: string, p256dh: string, auth: string}>, string): iterable */
+	private static $webPushFactory = null;
+
+	/** @var callable|null fn(string $message): void */
+	private static $errorLogger = null;
+
+	private static ?bool $configuredOverride = null;
+
+	public static function setWebPushFactory(?callable $factory): void
+	{
+		self::$webPushFactory = $factory;
+	}
+
+	public static function setErrorLogger(?callable $logger): void
+	{
+		self::$errorLogger = $logger;
+	}
+
+	public static function setConfiguredOverride(?bool $configured): void
+	{
+		self::$configuredOverride = $configured;
+	}
+
 	public static function isConfigured(): bool
 	{
+		if (self::$configuredOverride !== null) {
+			return self::$configuredOverride;
+		}
+
 		return defined('PUSH_VAPID_PUBLIC') && PUSH_VAPID_PUBLIC !== ''
 			&& defined('PUSH_VAPID_PRIVATE') && PUSH_VAPID_PRIVATE !== '';
 	}
@@ -145,6 +181,21 @@ class PushNotificationService
 		return $value === null || (int) $value === 1;
 	}
 
+	public static function hasSubscription(int $userId): bool
+	{
+		if ($userId <= 0) {
+			return false;
+		}
+
+		$row = Database::get()->selectSingle(
+			'SELECT user_id FROM %%PUSH_SUBSCRIPTIONS%% WHERE user_id = :userId LIMIT 1',
+			[':userId' => $userId],
+			'user_id'
+		);
+
+		return $row !== false && $row !== null && $row !== '';
+	}
+
 	public static function setUserPreference(int $userId, bool $enabled): void
 	{
 		$db = Database::get();
@@ -161,10 +212,21 @@ class PushNotificationService
 		}
 	}
 
-	public static function notifyUser(int $userId, string $title, string $body, array $data = []): void
+	/**
+	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null}
+	 */
+	public static function notifyUser(int $userId, string $title, string $body, array $data = []): array
 	{
-		if (!self::isConfigured() || !class_exists(WebPush::class) || !self::isEnabledForUser($userId)) {
-			return;
+		if (!self::isConfigured()) {
+			return self::skipResult(self::SKIP_NOT_CONFIGURED);
+		}
+		if (!is_callable(self::$webPushFactory) && !class_exists(WebPush::class)) {
+			self::logFailure('PushNotificationService: minishlink/web-push is not installed');
+
+			return self::skipResult(self::SKIP_WEBPUSH_MISSING);
+		}
+		if (!self::isEnabledForUser($userId)) {
+			return self::skipResult(self::SKIP_DISABLED);
 		}
 
 		$db = Database::get();
@@ -173,19 +235,10 @@ class PushNotificationService
 			[':userId' => $userId]
 		);
 
-		if (empty($rows)) {
-			return;
+		if (!is_array($rows) || $rows === []) {
+			return self::skipResult(self::SKIP_NO_SUBSCRIPTION);
 		}
 
-		$auth = [
-			'VAPID' => [
-				'subject'    => defined('PUSH_VAPID_SUBJECT') ? PUSH_VAPID_SUBJECT : 'mailto:support@hive.pizza',
-				'publicKey'  => PUSH_VAPID_PUBLIC,
-				'privateKey' => PUSH_VAPID_PRIVATE,
-			],
-		];
-
-		$webPush = new WebPush($auth);
 		$payload = json_encode([
 			'title' => $title,
 			'body'  => $body,
@@ -194,22 +247,131 @@ class PushNotificationService
 			'tag'   => is_string($data['type'] ?? null) ? $data['type'] : 'hivenova',
 		]);
 
-		foreach ($rows as $row) {
-			$sub = Subscription::create([
-				'endpoint' => $row['endpoint'],
-				'keys'     => [
-					'p256dh' => $row['p256dh'],
-					'auth'   => $row['auth'],
-				],
-			]);
-			$webPush->queueNotification($sub, $payload);
+		$delivered = 0;
+		$failed = 0;
+
+		try {
+			foreach (self::flushNotifications($rows, is_string($payload) ? $payload : '{}') as $report) {
+				$success = is_object($report) && method_exists($report, 'isSuccess') && $report->isSuccess();
+				$expired = is_object($report) && method_exists($report, 'isSubscriptionExpired') && $report->isSubscriptionExpired();
+				$endpoint = is_object($report) && method_exists($report, 'getEndpoint')
+					? (string) $report->getEndpoint()
+					: '';
+				$reason = is_object($report) && method_exists($report, 'getReason')
+					? (string) $report->getReason()
+					: '';
+				$status = self::reportStatus($report);
+
+				if ($success) {
+					$delivered++;
+					continue;
+				}
+
+				$failed++;
+				self::logFailure(self::formatDeliveryFailure($endpoint, $expired, $reason, $status));
+				if ($expired && $endpoint !== '') {
+					self::removeSubscription($endpoint);
+				}
+			}
+		} catch (\Throwable $e) {
+			self::logFailure('PushNotificationService::notifyUser: ' . $e->getMessage());
+
+			return [
+				'ok'        => false,
+				'attempted' => count($rows),
+				'delivered' => $delivered,
+				'failed'    => max($failed, 1),
+				'skipped'   => self::SKIP_EXCEPTION,
+			];
 		}
 
-		foreach ($webPush->flush() as $report) {
-			if (!$report->isSuccess() && $report->isSubscriptionExpired()) {
-				self::removeSubscription($report->getEndpoint());
-			}
+		return [
+			'ok'        => $delivered > 0,
+			'attempted' => count($rows),
+			'delivered' => $delivered,
+			'failed'    => $failed,
+			'skipped'   => null,
+		];
+	}
+
+	public static function endpointHost(string $endpoint): string
+	{
+		$host = parse_url($endpoint, PHP_URL_HOST);
+
+		return is_string($host) && $host !== '' ? $host : 'unknown';
+	}
+
+	public static function formatDeliveryFailure(string $endpoint, bool $expired, string $reason, ?int $status = null): string
+	{
+		$reason = trim(preg_replace('/\s+/', ' ', $reason) ?? '');
+		if (strlen($reason) > 180) {
+			$reason = substr($reason, 0, 177) . '...';
 		}
+		$reason = str_replace($endpoint, self::endpointHost($endpoint), $reason);
+
+		return sprintf(
+			'PushNotificationService: flush failed host=%s status=%s expired=%s reason=%s',
+			self::endpointHost($endpoint),
+			$status === null ? 'n/a' : (string) $status,
+			$expired ? '1' : '0',
+			$reason === '' ? 'unknown' : $reason
+		);
+	}
+
+	public static function testCooldownRemaining(int $lastSentAt, int $now): int
+	{
+		if ($lastSentAt <= 0) {
+			return 0;
+		}
+
+		return max(0, self::TEST_COOLDOWN - ($now - $lastSentAt));
+	}
+
+	/**
+	 * @param array<string, mixed>|null $lng
+	 * @return array{title: string, body: string, data: array<string, mixed>}
+	 */
+	public static function testMessage(?array $lng = null): array
+	{
+		$lng = $lng ?? (isset($GLOBALS['LNG']) && is_array($GLOBALS['LNG']) ? $GLOBALS['LNG'] : []);
+		$title = is_string($lng['push_test_title'] ?? null) ? $lng['push_test_title'] : 'HiveNova push test';
+		$body = is_string($lng['push_test_body'] ?? null)
+			? $lng['push_test_body']
+			: 'If you see this, Web Push delivery works.';
+
+		return [
+			'title' => $title,
+			'body'  => $body,
+			'data'  => [
+				'url'  => self::TEST_NOTIFY_URL,
+				'type' => 'push_test',
+			],
+		];
+	}
+
+	/**
+	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null}
+	 */
+	public static function sendTestNotification(int $userId): array
+	{
+		if ($userId <= 0) {
+			return self::skipResult(self::SKIP_DISABLED);
+		}
+
+		$message = self::testMessage();
+
+		return self::notifyUser($userId, $message['title'], $message['body'], $message['data']);
+	}
+
+	public static function logFailure(string $message): void
+	{
+		if (self::$errorLogger !== null) {
+			(self::$errorLogger)($message);
+
+			return;
+		}
+
+		error_log($message);
 	}
 
 	/**
@@ -337,6 +499,70 @@ class PushNotificationService
 		@chmod($path, 0600);
 
 		return true;
+	}
+
+	/**
+	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null}
+	 */
+	private static function skipResult(string $reason): array
+	{
+		return [
+			'ok'        => false,
+			'attempted' => 0,
+			'delivered' => 0,
+			'failed'    => 0,
+			'skipped'   => $reason,
+		];
+	}
+
+	/**
+	 * @param list<array{endpoint?: string, p256dh?: string, auth?: string}> $rows
+	 * @return iterable<object>
+	 */
+	private static function flushNotifications(array $rows, string $payload): iterable
+	{
+		if (is_callable(self::$webPushFactory)) {
+			return (self::$webPushFactory)($rows, $payload);
+		}
+
+		$auth = [
+			'VAPID' => [
+				'subject'    => defined('PUSH_VAPID_SUBJECT') ? PUSH_VAPID_SUBJECT : 'mailto:support@hive.pizza',
+				'publicKey'  => PUSH_VAPID_PUBLIC,
+				'privateKey' => PUSH_VAPID_PRIVATE,
+			],
+		];
+
+		$webPush = new WebPush($auth);
+		foreach ($rows as $row) {
+			$sub = Subscription::create([
+				'endpoint'        => (string) ($row['endpoint'] ?? ''),
+				'contentEncoding' => self::CONTENT_ENCODING,
+				'keys'            => [
+					'p256dh' => (string) ($row['p256dh'] ?? ''),
+					'auth'   => (string) ($row['auth'] ?? ''),
+				],
+			]);
+			$webPush->queueNotification($sub, $payload);
+		}
+
+		return $webPush->flush();
+	}
+
+	private static function reportStatus(mixed $report): ?int
+	{
+		if (!is_object($report) || !method_exists($report, 'getResponse')) {
+			return null;
+		}
+
+		$response = $report->getResponse();
+		if (!is_object($response) || !method_exists($response, 'getStatusCode')) {
+			return null;
+		}
+
+		$code = $response->getStatusCode();
+
+		return is_int($code) ? $code : null;
 	}
 
 	private static function defaultInstallSubject(): string
