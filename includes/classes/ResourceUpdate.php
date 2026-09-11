@@ -50,6 +50,9 @@ class ResourceUpdate
 	/** @var list<array{elementId: int, level: int, techEnd: int}> */
 	private array $completedResearchJobs = [];
 
+	/** @var list<array{planetId: int, planetName: string, elementId: int, level: int, buildEnd: int}> */
+	private array $completedBuildingJobs = [];
+
 	function __construct($Build = true, $Tech = true)
 	{
 		$this->Build	= $Build;
@@ -271,8 +274,14 @@ class ResourceUpdate
 	
 	private function BuildingQueue() 
 	{
+		$this->completedBuildingJobs = [];
 		while($this->CheckPlanetBuildingQueue())
 			$this->SetNextQueueElementOnTop();
+		BuildingCompletePushService::notifyCompletedJobs(
+			(int) ($this->USER['id'] ?? 0),
+			$this->completedBuildingJobs,
+			(string) ($this->USER['lang'] ?? 'en')
+		);
 	}
 	
 	private function CheckPlanetBuildingQueue()
@@ -294,15 +303,13 @@ class ResourceUpdate
 			$this->PLANET['field_current']		+= 1;
 			$this->PLANET[$this->resource[$Element]]	+= 1;
 			$this->Builded[$Element]			+= 1;
-			BuildingCompletePushService::notifyCompletedJob(
-				(int) ($this->USER['id'] ?? 0),
-				(int) ($this->PLANET['id'] ?? 0),
-				(string) ($this->PLANET['name'] ?? ''),
-				(int) $Element,
-				(int) ($CurrentQueue[0][1] ?? 0),
-				(int) $BuildEndTime,
-				(string) ($this->USER['lang'] ?? 'en')
-			);
+			$this->completedBuildingJobs[] = [
+				'planetId'   => (int) ($this->PLANET['id'] ?? 0),
+				'planetName' => (string) ($this->PLANET['name'] ?? ''),
+				'elementId'  => (int) $Element,
+				'level'      => (int) ($CurrentQueue[0][1] ?? 0),
+				'buildEnd'   => (int) $BuildEndTime,
+			];
 		}
 		else
 		{

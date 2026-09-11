@@ -81,6 +81,22 @@ class BuildingCompletePushServiceTest extends TestCase
 		$this->assertSame('Ore Extractor (level 12) finished on Homeworld', $message['body']);
 		$this->assertSame('game.php?page=buildings', $message['data']['url']);
 		$this->assertSame('building_complete', $message['data']['type']);
+		$this->assertSame(1, $message['data']['count']);
+	}
+
+	public function testBuildingCompleteDigestMergesMultipleJobs(): void
+	{
+		$message = BuildingCompletePushService::buildingCompleteDigest([
+			['name' => 'Ore Extractor', 'level' => 12, 'planetName' => 'Homeworld'],
+			['name' => 'Silicon Synthesizer', 'level' => 8, 'planetName' => 'Colony'],
+			['name' => 'Research Lab', 'level' => 3, 'planetName' => 'Homeworld'],
+		], [
+			'push_building_title'     => 'Building complete',
+			'push_building_body_many' => '%s (level %d) on %s and %d more finished',
+		]);
+
+		$this->assertSame('Ore Extractor (level 12) on Homeworld and 2 more finished', $message['body']);
+		$this->assertSame(3, $message['data']['count']);
 	}
 
 	public function testBuildingCompleteMessageFallsBackWithoutLng(): void
@@ -149,6 +165,33 @@ class BuildingCompletePushServiceTest extends TestCase
 		$this->assertSame('Ore Extractor (level 12) finished on Homeworld', $sent[0]['body']);
 		$this->assertSame('game.php?page=buildings', $sent[0]['data']['url']);
 		$this->assertCount(1, $this->db->inserts);
+	}
+
+	public function testNotifyJobsMergesMultipleJobsIntoOnePush(): void
+	{
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function (int $userId, string $title, string $body, array $data) use (&$sent): void {
+				$sent[] = compact('userId', 'title', 'body', 'data');
+			},
+			configured: true,
+			languageLoader: static fn (string $lang): array => [
+				'push_building_title'     => 'Building complete',
+				'push_building_body'      => '%s (level %d) finished on %s',
+				'push_building_body_many' => '%s (level %d) on %s and %d more finished',
+				'tech'                    => [1 => 'Ore Extractor', 2 => 'Silicon Synthesizer'],
+			],
+		);
+
+		$this->assertSame(1, $service->notifyJobs(7, [
+			['planetId' => 3, 'planetName' => 'Homeworld', 'elementId' => 1, 'level' => 10, 'buildEnd' => 100],
+			['planetId' => 3, 'planetName' => 'Homeworld', 'elementId' => 2, 'level' => 4, 'buildEnd' => 110],
+		], 'en'));
+
+		$this->assertCount(1, $sent);
+		$this->assertSame('Ore Extractor (level 10) on Homeworld and 1 more finished', $sent[0]['body']);
+		$this->assertSame(2, $sent[0]['data']['count']);
+		$this->assertCount(2, $this->db->inserts);
 	}
 
 	public function testNotifyJobUsesFallbackBuildingName(): void
@@ -274,6 +317,48 @@ class BuildingCompletePushServiceTest extends TestCase
 		$this->assertSame([7], $sent);
 		$this->assertNotEmpty($this->db->deletes);
 		$this->assertArrayNotHasKey('1:1:1:1', $this->db->notified);
+	}
+
+	public function testRunMergesDueJobsAcrossPlanetsForOneUser(): void
+	{
+		$now = 1_700_000_200;
+		$this->db->planets[] = [
+			'planet_id'        => 3,
+			'planet_name'      => 'Homeworld',
+			'b_building_id'    => serialize([[1, 10, 60, $now - 50, 'build']]),
+			'b_building'       => $now - 50,
+			'user_id'          => 7,
+			'lang'             => 'en',
+			'has_subscription' => true,
+			'settings_push'    => 1,
+		];
+		$this->db->planets[] = [
+			'planet_id'        => 5,
+			'planet_name'      => 'Colony',
+			'b_building_id'    => serialize([[2, 4, 60, $now - 10, 'build']]),
+			'b_building'       => $now - 10,
+			'user_id'          => 7,
+			'lang'             => 'en',
+			'has_subscription' => true,
+			'settings_push'    => 1,
+		];
+
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function (int $userId, string $title, string $body, array $data) use (&$sent): void {
+				$sent[] = compact('userId', 'body', 'data');
+			},
+			configured: true,
+			languageLoader: static fn (): array => [
+				'push_building_body_many' => '%s (level %d) on %s and %d more finished',
+				'tech'                    => [1 => 'Ore Extractor', 2 => 'Silicon Synthesizer'],
+			],
+		);
+
+		$this->assertSame(1, $service->run($now));
+		$this->assertCount(1, $sent);
+		$this->assertSame(7, $sent[0]['userId']);
+		$this->assertSame(2, $sent[0]['data']['count']);
 	}
 
 	public function testRunReturnsZeroWhenNoCandidates(): void

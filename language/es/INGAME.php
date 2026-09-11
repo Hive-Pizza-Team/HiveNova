@@ -1541,3 +1541,4 @@ $LNG['push_building_body'] = '%s (level %d) finished on %s';
 $LNG['push_research_title'] = 'Research complete';
 $LNG['push_research_body'] = '%s (level %d) finished';
 $LNG['push_research_body_many'] = '%s (level %d) and %d more finished';
+$LNG['push_building_body_many'] = '%s (level %d) on %s and %d more finished';
