@@ -277,6 +277,7 @@ class BuildingCompletePushServiceTest extends TestCase
 			'element_id' => 1,
 			'level' => 1,
 			'build_end' => 1,
+			'notified_at' => 1,
 		];
 		$this->db->planets[] = [
 			'planet_id'        => 3,
@@ -359,6 +360,47 @@ class BuildingCompletePushServiceTest extends TestCase
 		$this->assertCount(1, $sent);
 		$this->assertSame(7, $sent[0]['userId']);
 		$this->assertSame(2, $sent[0]['data']['count']);
+	}
+
+	public function testRunDoesNotResendWhenCompletionIsOlderThanCleanupWindow(): void
+	{
+		$now = 1_700_000_200;
+		$buildEnd = $now - (8 * 86400);
+		$this->db->planets[] = [
+			'planet_id'        => 3,
+			'planet_name'      => 'Colony',
+			'b_building_id'    => serialize([[1, 10, 60, $buildEnd, 'build']]),
+			'b_building'       => $buildEnd,
+			'user_id'          => 7,
+			'lang'             => 'en',
+			'has_subscription' => true,
+			'settings_push'    => 1,
+		];
+
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function (int $userId) use (&$sent): void {
+				$sent[] = $userId;
+			},
+			configured: true,
+			languageLoader: static fn (): array => ['tech' => [1 => 'Ore Extractor']],
+		);
+
+		$this->assertSame(1, $service->run($now));
+		$this->assertSame(0, $service->run($now));
+		$this->assertCount(1, $sent);
+	}
+
+	public function testCurrentDueConstructionJobsIgnoresLaterQueuedBuilds(): void
+	{
+		$now = 1_700_000_200;
+		$jobs = BuildingCompletePushService::currentDueConstructionJobs([
+			[1, 10, 60, $now - 50, 'build'],
+			[2, 4, 60, $now - 10, 'build'],
+		], $now);
+
+		$this->assertCount(1, $jobs);
+		$this->assertSame(1, $jobs[0]['elementId']);
 	}
 
 	public function testRunReturnsZeroWhenNoCandidates(): void

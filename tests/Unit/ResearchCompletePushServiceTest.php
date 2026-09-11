@@ -336,10 +336,11 @@ class ResearchCompletePushServiceTest extends TestCase
 	{
 		$now = 1_700_000_200;
 		$this->db->notified['1:113:1:1'] = [
-			'user_id'    => 1,
-			'element_id' => 113,
-			'level'      => 1,
-			'tech_end'   => 1,
+			'user_id'     => 1,
+			'element_id'  => 113,
+			'level'       => 1,
+			'tech_end'    => 1,
+			'notified_at' => 1,
 		];
 		$this->db->users[] = [
 			'user_id'          => 7,
@@ -368,9 +369,44 @@ class ResearchCompletePushServiceTest extends TestCase
 		$this->assertSame(1, $service->run($now));
 		$this->assertCount(1, $sent);
 		$this->assertSame(7, $sent[0]['userId']);
-		$this->assertSame(2, $sent[0]['data']['count']);
+		$this->assertSame(1, $sent[0]['data']['count']);
+		$this->assertStringContainsString('Energy Technology', $sent[0]['body']);
+		$this->assertStringNotContainsString('more', $sent[0]['body']);
 		$this->assertNotEmpty($this->db->deletes);
 		$this->assertArrayNotHasKey('1:113:1:1', $this->db->notified);
+	}
+
+	public function testRunDoesNotResendWhenCompletionIsOlderThanCleanupWindow(): void
+	{
+		$now = 1_700_000_200;
+		$techEnd = $now - (8 * 86400);
+		$this->db->users[] = [
+			'user_id'          => 7,
+			'b_tech_queue'     => serialize([[113, 10, 60, $techEnd, 1]]),
+			'b_tech'           => $techEnd,
+			'lang'             => 'en',
+			'has_subscription' => true,
+			'settings_push'    => 1,
+		];
+
+		$sent = [];
+		$service = $this->serviceCollecting($sent);
+
+		$this->assertSame(1, $service->run($now));
+		$this->assertSame(0, $service->run($now));
+		$this->assertCount(1, $sent);
+	}
+
+	public function testCurrentDueResearchJobsIgnoresLaterQueuedTechs(): void
+	{
+		$now = 1_700_000_200;
+		$jobs = ResearchCompletePushService::currentDueResearchJobs([
+			[113, 10, 60, $now - 50, 1],
+			[115, 4, 60, $now - 10, 1],
+		], $now);
+
+		$this->assertCount(1, $jobs);
+		$this->assertSame(113, $jobs[0]['elementId']);
 	}
 
 	public function testRunSendsSeparateDigestsPerUser(): void

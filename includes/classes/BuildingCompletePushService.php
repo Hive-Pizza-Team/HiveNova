@@ -73,6 +73,24 @@ class BuildingCompletePushService
 		return $jobs;
 	}
 
+	/**
+	 * Cron must not treat later planned queue rows as finished.
+	 *
+	 * @return list<array{elementId: int, level: int, buildEnd: int}>
+	 */
+	public static function currentDueConstructionJobs(mixed $serializedOrQueue, int $now): array
+	{
+		$queue = is_string($serializedOrQueue)
+			? safe_unserialize($serializedOrQueue)
+			: $serializedOrQueue;
+
+		if (!is_array($queue) || !isset($queue[0]) || !is_array($queue[0])) {
+			return [];
+		}
+
+		return self::dueConstructionJobs([$queue[0]], $now);
+	}
+
 	public static function jobKey(int $planetId, int $elementId, int $level, int $buildEnd): string
 	{
 		return $planetId . ':' . $elementId . ':' . $level . ':' . $buildEnd;
@@ -205,11 +223,11 @@ class BuildingCompletePushService
 			}
 			$pending = array_values($pending);
 
-			$message = $this->buildMessage($pending, $lang);
-			$this->deliver($userId, $message);
 			foreach ($pending as $job) {
 				$this->markNotified($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
 			}
+			$message = $this->buildMessage($pending, $lang);
+			$this->deliver($userId, $message);
 
 			return 1;
 		} catch (Throwable $e) {
@@ -251,7 +269,7 @@ class BuildingCompletePushService
 				$planetId = (int) ($row['planet_id'] ?? 0);
 				$planetName = (string) ($row['planet_name'] ?? '');
 				$lang = (string) ($row['lang'] ?? 'en');
-				foreach (self::dueConstructionJobs($row['b_building_id'] ?? '', $now) as $job) {
+				foreach (self::currentDueConstructionJobs($row['b_building_id'] ?? '', $now) as $job) {
 					$byUser[$userId]['lang'] = $lang;
 					$byUser[$userId]['jobs'][] = [
 						'planetId'   => $planetId,
@@ -395,13 +413,14 @@ class BuildingCompletePushService
 	private function markNotified(int $planetId, int $elementId, int $level, int $buildEnd): void
 	{
 		Database::get()->insert(
-			'INSERT IGNORE INTO %%PUSH_BUILDING_NOTIFIED%% (planet_id, element_id, level, build_end)
-			VALUES (:planetId, :elementId, :level, :buildEnd)',
+			'INSERT IGNORE INTO %%PUSH_BUILDING_NOTIFIED%% (planet_id, element_id, level, build_end, notified_at)
+			VALUES (:planetId, :elementId, :level, :buildEnd, :notifiedAt)',
 			[
-				':planetId'  => $planetId,
-				':elementId' => $elementId,
-				':level'     => $level,
-				':buildEnd'  => $buildEnd,
+				':planetId'   => $planetId,
+				':elementId'  => $elementId,
+				':level'      => $level,
+				':buildEnd'   => $buildEnd,
+				':notifiedAt' => defined('TIMESTAMP') ? TIMESTAMP : time(),
 			]
 		);
 	}
@@ -409,7 +428,7 @@ class BuildingCompletePushService
 	private function cleanup(int $now): void
 	{
 		Database::get()->delete(
-			'DELETE FROM %%PUSH_BUILDING_NOTIFIED%% WHERE build_end < :old',
+			'DELETE FROM %%PUSH_BUILDING_NOTIFIED%% WHERE notified_at > 0 AND notified_at < :old',
 			[':old' => $now - self::CLEANUP_AFTER]
 		);
 	}

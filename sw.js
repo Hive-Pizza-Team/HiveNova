@@ -77,6 +77,8 @@ self.addEventListener('push', function (event) {
     self.registration.showNotification(payload.title, {
       body: payload.body,
       icon: 'styles/resource/images/pwa/icon-192.png',
+      tag: payload.tag || 'hivenova',
+      renotify: false,
       data: { url: safeGameUrl(payload.url) }
     })
   );

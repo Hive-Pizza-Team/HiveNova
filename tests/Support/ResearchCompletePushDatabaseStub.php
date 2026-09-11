@@ -69,10 +69,11 @@ class ResearchCompletePushDatabaseStub implements DatabaseInterface
 				(int) ($params[':techEnd'] ?? 0)
 			);
 			$this->notified[$key] = [
-				'user_id'    => (int) ($params[':userId'] ?? 0),
-				'element_id' => (int) ($params[':elementId'] ?? 0),
-				'level'      => (int) ($params[':level'] ?? 0),
-				'tech_end'   => (int) ($params[':techEnd'] ?? 0),
+				'user_id'     => (int) ($params[':userId'] ?? 0),
+				'element_id'  => (int) ($params[':elementId'] ?? 0),
+				'level'       => (int) ($params[':level'] ?? 0),
+				'tech_end'    => (int) ($params[':techEnd'] ?? 0),
+				'notified_at' => (int) ($params[':notifiedAt'] ?? 0),
 			];
 		}
 
@@ -85,7 +86,7 @@ class ResearchCompletePushDatabaseStub implements DatabaseInterface
 		if (str_contains($qry, '%%PUSH_RESEARCH_NOTIFIED%%') && isset($params[':old'])) {
 			$old = (int) $params[':old'];
 			foreach ($this->notified as $key => $row) {
-				if ((int) $row['tech_end'] < $old) {
+				if ((int) ($row['notified_at'] ?? 0) > 0 && (int) $row['notified_at'] < $old) {
 					unset($this->notified[$key]);
 				}
 			}

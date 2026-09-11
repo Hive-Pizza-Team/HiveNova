@@ -1664,8 +1664,10 @@ CREATE TABLE `%PREFIX%push_building_notified` (
   `element_id` smallint(5) unsigned NOT NULL,
   `level` smallint(5) unsigned NOT NULL,
   `build_end` int(10) unsigned NOT NULL,
+  `notified_at` int(10) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`planet_id`, `element_id`, `level`, `build_end`),
-  KEY `build_end` (`build_end`)
+  KEY `build_end` (`build_end`),
+  KEY `notified_at` (`notified_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%push_research_notified` (
@@ -1673,8 +1675,10 @@ CREATE TABLE `%PREFIX%push_research_notified` (
   `element_id` smallint(5) unsigned NOT NULL,
   `level` smallint(5) unsigned NOT NULL,
   `tech_end` int(10) unsigned NOT NULL,
+  `notified_at` int(10) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`user_id`, `element_id`, `level`, `tech_end`),
-  KEY `tech_end` (`tech_end`)
+  KEY `tech_end` (`tech_end`),
+  KEY `notified_at` (`notified_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%achievements` (

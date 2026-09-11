@@ -191,6 +191,7 @@ class PushNotificationService
 			'body'  => $body,
 			'data'  => $data,
 			'url'   => $data['url'] ?? 'game.php?page=overview',
+			'tag'   => is_string($data['type'] ?? null) ? $data['type'] : 'hivenova',
 		]);
 
 		foreach ($rows as $row) {
