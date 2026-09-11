@@ -29,6 +29,11 @@ use HiveNova\Core\Language;
 $page 		= \HiveNova\Core\HTTP::_GP('page', 'index');
 $mode 		= \HiveNova\Core\HTTP::_GP('mode', 'show');
 $page		= str_replace(array('_', '\\', '/', '.', "\0"), '', $page);
+$aliasTarget	= \HiveNova\Core\PublicSeo::loginAliasRedirectTarget($page, \HiveNova\Core\HTTP::_GP('lang', ''));
+if ($aliasTarget !== null) {
+	header('Location: '.$aliasTarget, true, 301);
+	exit;
+}
 $pageClass	= 'Show'.ucfirst($page).'Page';
 
 $fqcn		= 'HiveNova\\Page\\Login\\' . $pageClass;

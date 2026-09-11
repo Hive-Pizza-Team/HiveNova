@@ -150,5 +150,9 @@ class PublicSeoTest extends TestCase
 		$this->assertNull(PublicSeo::loginPageAlias('rules'));
 		$this->assertSame('index.php?page=disclamer', PublicSeo::aliasRedirectLocation('disclamer', 'en'));
 		$this->assertSame('index.php?page=disclamer&lang=de', PublicSeo::aliasRedirectLocation('disclamer', 'de'));
+		$this->assertSame('index.php?page=disclamer', PublicSeo::loginAliasRedirectTarget('disclaimer', 'en'));
+		$this->assertSame('index.php?page=disclamer&lang=de', PublicSeo::loginAliasRedirectTarget('disclaimer', 'de'));
+		$this->assertNull(PublicSeo::loginAliasRedirectTarget('disclamer'));
+		$this->assertNull(PublicSeo::loginAliasRedirectTarget('rules'));
 	}
 }

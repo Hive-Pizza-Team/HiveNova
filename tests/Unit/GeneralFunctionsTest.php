@@ -392,6 +392,24 @@ class GeneralFunctionsTest extends TestCase
         $this->assertSame('1.234,50', pretty_number(1234.5, 2));
     }
 
+    public function testPrettyNumberTinyFloatDoesNotFatal(): void
+    {
+        $GLOBALS['userNumberFormat'] = 'auto';
+        $result = pretty_number(1.4880000378734E-05);
+        $this->assertStringContainsString("data-n='0'", $result);
+        $this->assertStringContainsString('>0<', $result);
+        $this->assertSame('0', pretty_number_plain(1.4880000378734E-05));
+    }
+
+    public function testPrettyNumberHugeFloatDoesNotFatal(): void
+    {
+        $GLOBALS['userNumberFormat'] = 'auto';
+        $result = pretty_number(1.9966429737744E+20);
+        $this->assertStringContainsString("<span class='ln'", $result);
+        $this->assertMatchesRegularExpression("/data-n='[0-9]+'/", $result);
+        $this->assertIsString(pretty_number_plain(1.9966429737744E+20));
+    }
+
     public function testPrettyTimeFormatsHoursMinutesSeconds(): void
     {
         // 1h 2m 3s = 3723s, no days
