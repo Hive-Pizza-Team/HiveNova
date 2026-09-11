@@ -15,8 +15,8 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminPasswordHashService;
 use HiveNova\Core\HTTP;
-use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Template;
 
 
@@ -26,12 +26,13 @@ function ShowPassEncripterPage()
 {
 	global $LNG;
 	$Password	= HTTP::_GP('md5q', '', true);
-	
+	$submitted	= ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST';
+
 	$template	= new Template();
 
 	$template->assign_vars(array(
 		'md5_md5' 			=> $Password,
-		'md5_enc' 			=> PlayerUtil::cryptPassword($Password),
+		'md5_enc' 			=> AdminPasswordHashService::previewHash($Password, $submitted),
 		'et_md5_encripter' 	=> $LNG['et_md5_encripter'],
 		'et_encript' 		=> $LNG['et_encript'],
 		'et_result' 		=> $LNG['et_result'],

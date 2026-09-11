@@ -110,7 +110,7 @@ $LNG['ad_editor_buildings'] = 'Buildings';
 $LNG['ad_editor_ships'] = 'Ships';
 $LNG['ad_editor_defenses'] = 'Defences';
 $LNG['ad_editor_researchs'] = 'Research';
-$LNG['ad_editor_officiers'] = 'Officiers';
+$LNG['ad_editor_officiers'] = 'Officers';
 $LNG['ad_editor_personal'] = 'Personal Data';
 $LNG['ad_editor_planets'] = 'Planet & Moon';
 $LNG['ad_editor_resources'] = 'Resources';
@@ -248,10 +248,10 @@ $LNG['bo_unban'] = 'Unlock';
 
 
 //---------------	Encriptador de MD5	------------------------//
-$LNG['et_md5_encripter'] = 'MD5 Encryptor';
-$LNG['et_pass'] = 'Password entry you want';
-$LNG['et_result'] = 'Result of Encryption';
-$LNG['et_encript'] = 'Generate code';
+$LNG['et_md5_encripter'] = 'Password hash';
+$LNG['et_pass'] = 'Password';
+$LNG['et_result'] = 'Hash';
+$LNG['et_encript'] = 'Hash password';
 //###########################################################//
 
 
@@ -622,7 +622,7 @@ $LNG['mu_planet_list'] = 'Planet List';
 $LNG['mu_error_list'] = 'Errors in Data Base';
 $LNG['mu_active_planets'] = 'Active Planets';
 $LNG['mu_tools'] = 'Tools';
-$LNG['mu_md5_encripter'] = 'MD5 Encryptor';
+$LNG['mu_md5_encripter'] = 'Password hash';
 $LNG['mu_optimize_db'] = 'Verify database';
 $LNG['mu_manual_points_update'] = 'Manual points';
 $LNG['mu_mpu_confirmation'] = 'The Updater is automatico points, this allows you to see what is that your server is currently doing (As memory consumed, SQL, etc.)';
@@ -974,7 +974,7 @@ $LNG['se_limit'] = 'Limit';
 $LNG['se_pagees'] = 'Pages';
 $LNG['se_time_of_page'] = 'Page created in';
 $LNG['se_expand'] = 'Expand';
-$LNG['se_contrac'] = 'Retract';
+$LNG['se_contrac'] = 'Minimize';
 $LNG['se__next'] = 'Following';
 $LNG['se__before'] = 'Previous';
 $LNG['se_search_info'] = 'Search';
@@ -1154,7 +1154,7 @@ $LNG['modul_7'] = 'Chat';
 $LNG['modul_8'] = 'DM Bank';
 $LNG['modul_9'] = 'Fleet';
 $LNG['modul_10'] = 'Fleet - Handler';
-$LNG['modul_40'] = 'Fleets Shourtcuts';
+$LNG['modul_40'] = 'Fleet Shortcuts';
 $LNG['modul_11'] = 'Galaxy';
 $LNG['modul_12'] = 'Hall of Fame';
 $LNG['modul_13'] = 'Trader';
@@ -1192,8 +1192,8 @@ $LNG['mod_module'] = 'Modules';
 $LNG['mod_info'] = 'Modules in the Game';
 $LNG['mod_active'] = 'Active';
 $LNG['mod_deactive'] = 'Inactive';
-$LNG['mod_change_active'] = 'Activated';
-$LNG['mod_change_deactive'] = 'Deactivated';
+$LNG['mod_change_active'] = 'Activate';
+$LNG['mod_change_deactive'] = 'Deactivate';
 
 
 // Noticias
@@ -1565,3 +1565,4 @@ $LNG['se_season_blog'] = 'Season blog Hive account';
 $LNG['se_season_blog_key'] = 'Season blog posting key';
 $LNG['se_season_blog_key_info'] = 'Leave blank to keep the stored key. Used to publish the end-of-season Hive post. The key is never shown again.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
+$LNG['modul_43'] = 'Unused';
