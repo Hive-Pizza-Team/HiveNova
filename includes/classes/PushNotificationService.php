@@ -13,6 +13,7 @@ use Minishlink\WebPush\WebPush;
 class PushNotificationService
 {
 	public const CONTENT_ENCODING = 'aes128gcm';
+	public const CONTENT_ENCODING_AESGCM = 'aesgcm';
 	public const TEST_COOLDOWN = 60;
 	public const TEST_NOTIFY_URL = 'game.php?page=overview';
 	public const SKIP_NOT_CONFIGURED = 'not_configured';
@@ -20,6 +21,7 @@ class PushNotificationService
 	public const SKIP_DISABLED = 'disabled';
 	public const SKIP_NO_SUBSCRIPTION = 'no_subscription';
 	public const SKIP_EXCEPTION = 'exception';
+	public const SKIP_VAPID_MISMATCH = 'vapid_mismatch';
 
 	/** @var callable|null fn(list<array{endpoint: string, p256dh: string, auth: string}>, string): iterable */
 	private static $webPushFactory = null;
@@ -28,6 +30,8 @@ class PushNotificationService
 	private static $errorLogger = null;
 
 	private static ?bool $configuredOverride = null;
+
+	private static ?bool $vapidOkOverride = null;
 
 	public static function setWebPushFactory(?callable $factory): void
 	{
@@ -44,6 +48,11 @@ class PushNotificationService
 		self::$configuredOverride = $configured;
 	}
 
+	public static function setVapidOkOverride(?bool $ok): void
+	{
+		self::$vapidOkOverride = $ok;
+	}
+
 	public static function isConfigured(): bool
 	{
 		if (self::$configuredOverride !== null) {
@@ -57,6 +66,108 @@ class PushNotificationService
 	public static function getPublicKey(): string
 	{
 		return defined('PUSH_VAPID_PUBLIC') ? PUSH_VAPID_PUBLIC : '';
+	}
+
+	/**
+	 * True when configured VAPID private key derives to the configured public key.
+	 * Never returns key material.
+	 */
+	public static function isVapidOk(): bool
+	{
+		if (self::$vapidOkOverride !== null) {
+			return self::$vapidOkOverride;
+		}
+		if (!self::isConfigured()) {
+			return false;
+		}
+		if (!defined('PUSH_VAPID_PUBLIC') || !defined('PUSH_VAPID_PRIVATE')) {
+			return false;
+		}
+
+		return self::vapidKeysMatch((string) PUSH_VAPID_PUBLIC, (string) PUSH_VAPID_PRIVATE);
+	}
+
+	public static function vapidKeysMatch(string $publicKey, string $privateKey): bool
+	{
+		$derived = self::deriveVapidPublicKey($privateKey);
+		$expected = self::decodeBase64Url($publicKey);
+		if ($derived === null || $expected === null) {
+			return false;
+		}
+
+		return hash_equals($expected, $derived);
+	}
+
+	/**
+	 * Uncompressed P-256 public key (65 bytes: 0x04 || X || Y) from a VAPID private scalar.
+	 */
+	public static function deriveVapidPublicKey(string $privateKey): ?string
+	{
+		$d = self::decodeBase64Url($privateKey);
+		if ($d === null) {
+			return null;
+		}
+		if (strlen($d) < 32) {
+			$d = str_pad($d, 32, "\0", STR_PAD_LEFT);
+		}
+		if (strlen($d) !== 32) {
+			return null;
+		}
+
+		$pem = self::p256PrivateKeyPem($d);
+		$key = openssl_pkey_get_private($pem);
+		if ($key === false) {
+			return null;
+		}
+
+		$details = openssl_pkey_get_details($key);
+		$x = is_array($details) && isset($details['ec']['x']) && is_string($details['ec']['x'])
+			? $details['ec']['x']
+			: '';
+		$y = is_array($details) && isset($details['ec']['y']) && is_string($details['ec']['y'])
+			? $details['ec']['y']
+			: '';
+		if ($x === '' || $y === '') {
+			return null;
+		}
+
+		$x = str_pad($x, 32, "\0", STR_PAD_LEFT);
+		$y = str_pad($y, 32, "\0", STR_PAD_LEFT);
+		if (strlen($x) !== 32 || strlen($y) !== 32) {
+			return null;
+		}
+
+		return "\x04" . $x . $y;
+	}
+
+	public static function decodeBase64Url(string $value): ?string
+	{
+		$value = strtr($value, '-_', '+/');
+		$pad = strlen($value) % 4;
+		if ($pad > 0) {
+			$value .= str_repeat('=', 4 - $pad);
+		}
+		$raw = base64_decode($value, true);
+
+		return $raw === false ? null : $raw;
+	}
+
+	/**
+	 * Use the subscription's encoding when the client stored one (aes128gcm / aesgcm).
+	 * Omit (null) instead of forcing aes128gcm — a mismatched encoding is accepted by
+	 * FCM (201) but Chrome drops the payload before the SW push handler runs.
+	 */
+	public static function resolveContentEncoding(mixed $encoding): ?string
+	{
+		if (!is_string($encoding)) {
+			return null;
+		}
+		$encoding = strtolower(trim($encoding));
+		if ($encoding === self::CONTENT_ENCODING || $encoding === self::CONTENT_ENCODING_AESGCM) {
+			return $encoding;
+		}
+
+		return null;
 	}
 
 	public static function isValidSubscription(array $subscription): bool
@@ -213,7 +324,7 @@ class PushNotificationService
 	}
 
 	/**
-	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null}
+	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null, lastError: string|null, failures: list<array{host: string, status: int|null, expired: bool}>}
 	 */
 	public static function notifyUser(int $userId, string $title, string $body, array $data = []): array
 	{
@@ -249,6 +360,8 @@ class PushNotificationService
 
 		$delivered = 0;
 		$failed = 0;
+		$failures = [];
+		$lastError = null;
 
 		try {
 			foreach (self::flushNotifications($rows, is_string($payload) ? $payload : '{}') as $report) {
@@ -268,13 +381,17 @@ class PushNotificationService
 				}
 
 				$failed++;
-				self::logFailure(self::formatDeliveryFailure($endpoint, $expired, $reason, $status));
+				$entry = self::failureEntry($endpoint, $status, $expired);
+				$failures[] = $entry;
+				$lastError = self::formatDeliveryFailure($endpoint, $expired, $reason, $status);
+				self::logFailure($lastError);
 				if ($expired && $endpoint !== '') {
 					self::removeSubscription($endpoint);
 				}
 			}
 		} catch (\Throwable $e) {
-			self::logFailure('PushNotificationService::notifyUser: ' . $e->getMessage());
+			$lastError = self::sanitizeClientError('PushNotificationService::notifyUser: ' . $e->getMessage());
+			self::logFailure($lastError);
 
 			return [
 				'ok'        => false,
@@ -282,6 +399,8 @@ class PushNotificationService
 				'delivered' => $delivered,
 				'failed'    => max($failed, 1),
 				'skipped'   => self::SKIP_EXCEPTION,
+				'lastError' => $lastError,
+				'failures'  => $failures,
 			];
 		}
 
@@ -291,6 +410,8 @@ class PushNotificationService
 			'delivered' => $delivered,
 			'failed'    => $failed,
 			'skipped'   => null,
+			'lastError' => $lastError,
+			'failures'  => $failures,
 		];
 	}
 
@@ -350,7 +471,7 @@ class PushNotificationService
 	}
 
 	/**
-	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null}
+	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null, lastError: string|null, failures: list<array{host: string, status: int|null, expired: bool}>}
 	 */
 	public static function sendTestNotification(int $userId): array
 	{
@@ -361,6 +482,81 @@ class PushNotificationService
 		$message = self::testMessage();
 
 		return self::notifyUser($userId, $message['title'], $message['body'], $message['data']);
+	}
+
+	/**
+	 * JSON body for mode=test — host/status only, never endpoints or key material.
+	 *
+	 * @param array<string, mixed> $result
+	 * @return array{ok: bool, delivered: int, attempted: int, failed: int, skipped: string|null, subscribed: bool, lastError: string|null, failures: list<array{host: string, status: int|null, expired: bool}>}
+	 */
+	public static function testClientPayload(array $result, bool $subscribed): array
+	{
+		return [
+			'ok'         => !empty($result['ok']),
+			'delivered'  => (int) ($result['delivered'] ?? 0),
+			'attempted'  => (int) ($result['attempted'] ?? 0),
+			'failed'     => (int) ($result['failed'] ?? 0),
+			'skipped'    => isset($result['skipped']) && is_string($result['skipped']) ? $result['skipped'] : null,
+			'subscribed' => $subscribed,
+			'lastError'  => isset($result['lastError']) && is_string($result['lastError']) && $result['lastError'] !== ''
+				? $result['lastError']
+				: null,
+			'failures'   => self::sanitizeFailureList($result['failures'] ?? []),
+		];
+	}
+
+	/**
+	 * @param mixed $failures
+	 * @return list<array{host: string, status: int|null, expired: bool}>
+	 */
+	public static function sanitizeFailureList(mixed $failures): array
+	{
+		if (!is_array($failures)) {
+			return [];
+		}
+
+		$out = [];
+		foreach ($failures as $row) {
+			if (!is_array($row)) {
+				continue;
+			}
+			$host = $row['host'] ?? '';
+			if (!is_string($host) || $host === '' || str_contains($host, '/')) {
+				$host = 'unknown';
+			}
+			$status = $row['status'] ?? null;
+			$out[] = [
+				'host'    => $host,
+				'status'  => is_int($status) ? $status : null,
+				'expired' => !empty($row['expired']),
+			];
+		}
+
+		return $out;
+	}
+
+	/**
+	 * @return array{host: string, status: int|null, expired: bool}
+	 */
+	public static function failureEntry(string $endpoint, ?int $status, bool $expired): array
+	{
+		return [
+			'host'    => self::endpointHost($endpoint),
+			'status'  => $status,
+			'expired' => $expired,
+		];
+	}
+
+	public static function sanitizeClientError(string $message): string
+	{
+		$message = trim(preg_replace('/\s+/', ' ', $message) ?? '');
+		$message = preg_replace('/[A-Za-z0-9_-]{40,}/', '[redacted]', $message) ?? $message;
+		if (strlen($message) > 180) {
+			$message = substr($message, 0, 177) . '...';
+		}
+
+		return $message === '' ? 'unknown' : $message;
 	}
 
 	public static function logFailure(string $message): void
@@ -502,9 +698,9 @@ class PushNotificationService
 	}
 
 	/**
-	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null}
+	 * @return array{ok: bool, attempted: int, delivered: int, failed: int, skipped: string|null, lastError: string|null, failures: list<array{host: string, status: int|null, expired: bool}>}
 	 */
-	private static function skipResult(string $reason): array
+	public static function skipResult(string $reason): array
 	{
 		return [
 			'ok'        => false,
@@ -512,6 +708,8 @@ class PushNotificationService
 			'delivered' => 0,
 			'failed'    => 0,
 			'skipped'   => $reason,
+			'lastError' => null,
+			'failures'  => [],
 		];
 	}
 
@@ -535,14 +733,7 @@ class PushNotificationService
 
 		$webPush = new WebPush($auth);
 		foreach ($rows as $row) {
-			$sub = Subscription::create([
-				'endpoint'        => (string) ($row['endpoint'] ?? ''),
-				'contentEncoding' => self::CONTENT_ENCODING,
-				'keys'            => [
-					'p256dh' => (string) ($row['p256dh'] ?? ''),
-					'auth'   => (string) ($row['auth'] ?? ''),
-				],
-			]);
+			$sub = Subscription::create(self::subscriptionCreatePayload($row));
 			$webPush->queueNotification($sub, $payload);
 		}
 
@@ -563,6 +754,37 @@ class PushNotificationService
 		$code = $response->getStatusCode();
 
 		return is_int($code) ? $code : null;
+	}
+
+	/**
+	 * @param array<string, mixed> $row
+	 * @return array{endpoint: string, keys: array{p256dh: string, auth: string}, contentEncoding?: string}
+	 */
+	public static function subscriptionCreatePayload(array $row): array
+	{
+		$payload = [
+			'endpoint' => (string) ($row['endpoint'] ?? ''),
+			'keys'     => [
+				'p256dh' => (string) ($row['p256dh'] ?? ''),
+				'auth'   => (string) ($row['auth'] ?? ''),
+			],
+		];
+		$encoding = self::resolveContentEncoding($row['content_encoding'] ?? $row['contentEncoding'] ?? null);
+		if ($encoding !== null) {
+			$payload['contentEncoding'] = $encoding;
+		}
+
+		return $payload;
+	}
+
+	private static function p256PrivateKeyPem(string $d): string
+	{
+		$seq = "\x02\x01\x01\x04\x20" . $d . hex2bin('a00a06082a8648ce3d030107');
+		$der = "\x30" . chr(strlen($seq)) . $seq;
+
+		return "-----BEGIN EC PRIVATE KEY-----\n"
+			. chunk_split(base64_encode($der), 64, "\n")
+			. "-----END EC PRIVATE KEY-----\n";
 	}
 
 	private static function defaultInstallSubject(): string

@@ -93,6 +93,7 @@ describe('HiveNovaPush', () => {
 			$: global.$,
 			Notification: global.Notification,
 			PushManager: global.PushManager,
+			MessageChannel: global.MessageChannel,
 			navigator: global.navigator
 		};
 	});
@@ -104,6 +105,7 @@ describe('HiveNovaPush', () => {
 		global.$ = saved.$;
 		global.Notification = saved.Notification;
 		global.PushManager = saved.PushManager;
+		global.MessageChannel = saved.MessageChannel;
 		defineNavigator(saved.navigator);
 		delete require.cache[require.resolve(SCRIPT)];
 	});
@@ -143,6 +145,87 @@ describe('HiveNovaPush', () => {
 		const result = await api.enable({ activate: true });
 		assert.deepEqual(result, { ok: true });
 		assert.equal(subscribed, true);
+	});
+
+	it('serviceWorkerUrl uses origin-root sw.js under /uniN/', () => {
+		const { api } = loadPush({ runReady: false });
+		assert.equal(api.serviceWorkerUrl('/uni1/game.php'), '/sw.js');
+		assert.equal(api.serviceWorkerUrl('/uni2/game.php'), '/sw.js');
+		assert.equal(api.serviceWorkerUrl('/index.php'), 'sw.js');
+		assert.equal(api.serviceWorkerUrl('/game.php'), 'sw.js');
+	});
+
+	it('subscriptionPayload copies supportedContentEncodings when toJSON omits it', () => {
+		const { api } = loadPush({ runReady: false });
+		global.PushManager.supportedContentEncodings = ['aes128gcm'];
+		const json = api.subscriptionPayload({
+			toJSON() { return { endpoint: 'https://fcm.googleapis.com/fcm/send/x', keys: { p256dh: 'a', auth: 'b' } }; }
+		});
+		assert.equal(json.contentEncoding, 'aes128gcm');
+		assert.equal(json.endpoint, 'https://fcm.googleapis.com/fcm/send/x');
+	});
+
+	it('showLocalTest uses registration.showNotification', async () => {
+		let shown;
+		const { api } = loadPush({
+			runReady: false,
+			Notification: { permission: 'granted' },
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						showNotification: async (title, opts) => {
+							shown = { title, opts };
+						}
+					})
+				}
+			}
+		});
+		const result = await api.showLocalTest();
+		assert.deepEqual(result, { ok: true, via: 'registration' });
+		assert.equal(shown.title, 'HiveNova local test');
+		assert.equal(shown.opts.renotify, true);
+	});
+
+	it('pingServiceWorker reports the owning worker', async () => {
+		const { api } = loadPush({
+			runReady: false,
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						scope: 'https://example.test/',
+						active: {
+							scriptURL: 'https://example.test/sw.js',
+							postMessage(_data, transfer) {
+								const port = transfer[0];
+								port.postMessage({
+									ok: true,
+									type: 'hivenova-pong',
+									scope: 'https://example.test/',
+									scriptURL: 'https://example.test/sw.js',
+									hasPushSubscription: true
+								});
+							}
+						}
+					})
+				}
+			}
+		});
+		global.MessageChannel = class {
+			constructor() {
+				this.port1 = { onmessage: null };
+				this.port2 = {
+					postMessage: (data) => {
+						if (this.port1.onmessage) {
+							this.port1.onmessage({ data });
+						}
+					}
+				};
+			}
+		};
+		const result = await api.pingServiceWorker();
+		assert.equal(result.ok, true);
+		assert.equal(result.hasPushSubscription, true);
+		assert.equal(result.scriptURL, 'https://example.test/sw.js');
 	});
 
 	it('sendTest posts a logged-in test ping', async () => {

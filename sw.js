@@ -1,5 +1,7 @@
-const CACHE_NAME = 'hivenova-static-v3';
+const CACHE_NAME = 'hivenova-static-v4';
 const DEFAULT_GAME_URL = 'game.php?page=overview';
+const PING_TYPE = 'hivenova-ping';
+const PONG_TYPE = 'hivenova-pong';
 
 function safeGameUrl(url) {
   if (typeof url !== 'string' || url === '') {
@@ -8,7 +10,67 @@ function safeGameUrl(url) {
   if (/^game\.php\?page=[a-zA-Z0-9_]+$/.test(url)) {
     return url;
   }
+  if (/^\/uni[0-9]+\/game\.php\?page=[a-zA-Z0-9_]+$/.test(url)) {
+    return url;
+  }
   return DEFAULT_GAME_URL;
+}
+
+function notificationIconUrl() {
+  try {
+    var scope = (self.registration && self.registration.scope) || (self.location && self.location.href) || '/';
+    return new URL('styles/resource/images/pwa/icon-192.png', scope).href;
+  } catch (e) {
+    return '/styles/resource/images/pwa/icon-192.png';
+  }
+}
+
+function parsePushPayload(event) {
+  var fallback = {
+    title: 'HiveNova',
+    body: 'New update',
+    url: DEFAULT_GAME_URL,
+    tag: 'hivenova'
+  };
+  if (!event || !event.data) {
+    return fallback;
+  }
+  try {
+    var parsed = event.data.json();
+    if (parsed && typeof parsed === 'object') {
+      var nested = parsed.data && typeof parsed.data === 'object' ? parsed.data : {};
+      return {
+        title: parsed.title || fallback.title,
+        body: parsed.body || fallback.body,
+        url: parsed.url || nested.url || fallback.url,
+        tag: parsed.tag || nested.type || fallback.tag
+      };
+    }
+  } catch (e) {
+    try {
+      var text = event.data.text();
+      if (typeof text === 'string' && text !== '') {
+        fallback.body = text;
+      }
+    } catch (e2) {}
+  }
+  return fallback;
+}
+
+function notificationOptions(payload) {
+  return {
+    body: payload.body || 'HiveNova',
+    icon: notificationIconUrl(),
+    tag: payload.tag || 'hivenova',
+    renotify: true,
+    silent: false,
+    data: { url: safeGameUrl(payload.url) }
+  };
+}
+
+function handlePushEvent(event) {
+  var payload = parsePushPayload(event);
+  return self.registration.showNotification(payload.title, notificationOptions(payload));
 }
 
 // Precache only stable assets; main.css uses network-first (see fetch handler).
@@ -67,19 +129,39 @@ self.addEventListener('fetch', function (event) {
 });
 
 self.addEventListener('push', function (event) {
-  var payload = { title: 'HiveNova', body: '', url: DEFAULT_GAME_URL };
-  try {
-    if (event.data) {
-      payload = Object.assign(payload, event.data.json());
+  event.waitUntil(handlePushEvent(event));
+});
+
+self.addEventListener('message', function (event) {
+  var data = event.data || {};
+  if (data.type !== PING_TYPE) {
+    return;
+  }
+  var port = event.ports && event.ports[0];
+  var reply = {
+    ok: true,
+    type: PONG_TYPE,
+    scope: (self.registration && self.registration.scope) || '',
+    scriptURL: (self.registration && self.registration.active && self.registration.active.scriptURL)
+      || (self.location && self.location.href)
+      || '',
+    hasPushSubscription: false
+  };
+  var send = function () {
+    if (port) {
+      port.postMessage(reply);
     }
-  } catch (e) {}
+  };
+  if (!self.registration || !self.registration.pushManager) {
+    send();
+    return;
+  }
   event.waitUntil(
-    self.registration.showNotification(payload.title, {
-      body: payload.body,
-      icon: 'styles/resource/images/pwa/icon-192.png',
-      tag: payload.tag || 'hivenova',
-      renotify: false,
-      data: { url: safeGameUrl(payload.url) }
+    self.registration.pushManager.getSubscription().then(function (sub) {
+      reply.hasPushSubscription = !!sub;
+      send();
+    }).catch(function () {
+      send();
     })
   );
 });
@@ -101,3 +183,17 @@ self.addEventListener('notificationclick', function (event) {
     })
   );
 });
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    CACHE_NAME: CACHE_NAME,
+    DEFAULT_GAME_URL: DEFAULT_GAME_URL,
+    PING_TYPE: PING_TYPE,
+    PONG_TYPE: PONG_TYPE,
+    safeGameUrl: safeGameUrl,
+    notificationIconUrl: notificationIconUrl,
+    parsePushPayload: parsePushPayload,
+    notificationOptions: notificationOptions,
+    handlePushEvent: handlePushEvent
+  };
+}
