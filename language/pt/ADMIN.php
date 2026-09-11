@@ -81,7 +81,7 @@ $LNG['one_is_no_0']	= 'Não';
 
 //---------------	Botões	------------------------// 
 $LNG['button_submit']		= 'Enviar';
-$LNG['button_add']			= 'Perfil';
+$LNG['button_add']			= 'Adicionar';
 $LNG['button_delete']		= 'Apagar';
 $LNG['button_filter']		= 'Filtrar';
 $LNG['button_deselect']		= 'Remover selecionados';
