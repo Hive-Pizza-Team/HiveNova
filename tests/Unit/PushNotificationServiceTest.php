@@ -289,4 +289,117 @@ class PushNotificationServiceTest extends TestCase
 			'https://updates.push.services.mozilla.com/wpush/v2/token'
 		));
 	}
+
+	public function testResolveContentEncodingAcceptsKnownValuesOnly(): void
+	{
+		$this->assertNull(PushNotificationService::resolveContentEncoding(null));
+		$this->assertNull(PushNotificationService::resolveContentEncoding(''));
+		$this->assertNull(PushNotificationService::resolveContentEncoding('identity'));
+		$this->assertSame('aes128gcm', PushNotificationService::resolveContentEncoding('aes128gcm'));
+		$this->assertSame('aesgcm', PushNotificationService::resolveContentEncoding('AESGCM'));
+	}
+
+	public function testSubscriptionCreatePayloadOmitsForcedEncoding(): void
+	{
+		$plain = PushNotificationService::subscriptionCreatePayload([
+			'endpoint' => 'https://fcm.googleapis.com/fcm/send/x',
+			'p256dh'   => 'pk',
+			'auth'     => 'ak',
+		]);
+		$this->assertArrayNotHasKey('contentEncoding', $plain);
+
+		$with = PushNotificationService::subscriptionCreatePayload([
+			'endpoint'          => 'https://fcm.googleapis.com/fcm/send/x',
+			'p256dh'            => 'pk',
+			'auth'              => 'ak',
+			'content_encoding'  => 'aes128gcm',
+		]);
+		$this->assertSame('aes128gcm', $with['contentEncoding']);
+	}
+
+	public function testVapidKeysMatchForGeneratedPair(): void
+	{
+		$key = openssl_pkey_new([
+			'curve_name'       => 'prime256v1',
+			'private_key_type' => OPENSSL_KEYTYPE_EC,
+		]);
+		$this->assertNotFalse($key);
+		$details = openssl_pkey_get_details($key);
+		$this->assertIsArray($details);
+		$d = str_pad((string) $details['ec']['d'], 32, "\0", STR_PAD_LEFT);
+		$x = str_pad((string) $details['ec']['x'], 32, "\0", STR_PAD_LEFT);
+		$y = str_pad((string) $details['ec']['y'], 32, "\0", STR_PAD_LEFT);
+		$public = rtrim(strtr(base64_encode("\x04" . $x . $y), '+/', '-_'), '=');
+		$private = rtrim(strtr(base64_encode($d), '+/', '-_'), '=');
+
+		$this->assertTrue(PushNotificationService::vapidKeysMatch($public, $private));
+		$this->assertFalse(PushNotificationService::vapidKeysMatch($public, strrev($private)));
+		$this->assertFalse(PushNotificationService::vapidKeysMatch('not-a-key', $private));
+	}
+
+	public function testIsVapidOkFalseWhenNotConfigured(): void
+	{
+		PushNotificationService::setVapidOkOverride(null);
+		PushNotificationService::setConfiguredOverride(null);
+		$this->assertFalse(PushNotificationService::isConfigured());
+		$this->assertFalse(PushNotificationService::isVapidOk());
+	}
+
+	public function testTestClientPayloadShapeOmitsSecrets(): void
+	{
+		$payload = PushNotificationService::testClientPayload([
+			'ok'        => true,
+			'delivered' => 1,
+			'attempted' => 1,
+			'failed'    => 0,
+			'skipped'   => null,
+			'lastError' => null,
+			'failures'  => [],
+		], true);
+		$this->assertSame([
+			'ok'         => true,
+			'delivered'  => 1,
+			'attempted'  => 1,
+			'failed'     => 0,
+			'skipped'    => null,
+			'subscribed' => true,
+			'lastError'  => null,
+			'failures'   => [],
+		], $payload);
+
+		$failed = PushNotificationService::testClientPayload([
+			'ok'        => false,
+			'delivered' => 0,
+			'attempted' => 1,
+			'failed'    => 1,
+			'skipped'   => null,
+			'lastError' => PushNotificationService::formatDeliveryFailure(
+				'https://fcm.googleapis.com/fcm/send/secret-token',
+				false,
+				'403 Forbidden',
+				403
+			),
+			'failures'  => [
+				PushNotificationService::failureEntry('https://fcm.googleapis.com/fcm/send/secret-token', 403, false),
+				['host' => 'https://evil.example/token', 'status' => 'nope', 'expired' => 1],
+			],
+		], true);
+		$this->assertFalse($failed['ok']);
+		$this->assertSame(1, $failed['failed']);
+		$this->assertSame('fcm.googleapis.com', $failed['failures'][0]['host']);
+		$this->assertSame(403, $failed['failures'][0]['status']);
+		$this->assertFalse($failed['failures'][0]['expired']);
+		$this->assertSame('unknown', $failed['failures'][1]['host']);
+		$this->assertStringNotContainsString('secret-token', json_encode($failed, JSON_THROW_ON_ERROR));
+		$this->assertStringContainsString('status=403', (string) $failed['lastError']);
+	}
+
+	public function testSkipVapidMismatchPayload(): void
+	{
+		$result = PushNotificationService::skipResult(PushNotificationService::SKIP_VAPID_MISMATCH);
+		$payload = PushNotificationService::testClientPayload($result, true);
+		$this->assertSame('vapid_mismatch', $payload['skipped']);
+		$this->assertSame(0, $payload['attempted']);
+		$this->assertFalse($payload['ok']);
+	}
 }

@@ -113,11 +113,26 @@
 		return Promise.resolve();
 	}
 
+	function serviceWorkerUrl(pathname) {
+		var path = pathname;
+		if (path == null && typeof location !== 'undefined' && location.pathname) {
+			path = location.pathname;
+		}
+		path = path || '';
+		// Relative 'sw.js' from /uni1/game.php registers a second worker at /uni1/sw.js.
+		// Lobby already owns /sw.js (scope /). Share that registration so push
+		// lands on the worker that controls the page.
+		if (/^\/uni[0-9]+(\/|$)/.test(path)) {
+			return '/sw.js';
+		}
+		return 'sw.js';
+	}
+
 	function registerServiceWorker() {
 		if (!('serviceWorker' in navigator)) {
 			return Promise.resolve(null);
 		}
-		return navigator.serviceWorker.register('sw.js').catch(function () {
+		return navigator.serviceWorker.register(serviceWorkerUrl(), { updateViaCache: 'none' }).catch(function () {
 			return null;
 		});
 	}
@@ -127,12 +142,28 @@
 			.then(function (r) { return r.json(); });
 	}
 
+	function subscriptionPayload(subscription) {
+		var json = subscription && typeof subscription.toJSON === 'function'
+			? subscription.toJSON()
+			: {};
+		if (!json || typeof json !== 'object') {
+			json = {};
+		}
+		if (!json.contentEncoding) {
+			var encodings = (typeof PushManager !== 'undefined' && PushManager.supportedContentEncodings) || [];
+			if (encodings && encodings.length && typeof encodings[0] === 'string') {
+				json.contentEncoding = encodings[0];
+			}
+		}
+		return json;
+	}
+
 	function postSubscribe(subscription) {
 		return fetch('game.php?page=push&mode=subscribe', {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(subscription.toJSON())
+			body: JSON.stringify(subscriptionPayload(subscription))
 		}).then(function (response) {
 			if (response.ok) {
 				return response.json();
@@ -219,11 +250,79 @@
 		showPushError: showPushError,
 		urlBase64ToUint8Array: urlBase64ToUint8Array,
 		applicationServerKeysMatch: applicationServerKeysMatch,
+		serviceWorkerUrl: serviceWorkerUrl,
+		subscriptionPayload: subscriptionPayload,
 		sendTest: function () {
 			return fetch('game.php?page=push&mode=test', {
 				method: 'POST',
 				credentials: 'same-origin'
 			}).then(function (r) { return r.json(); });
+		},
+
+		showLocalTest: function () {
+			if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+				return Promise.reject(new Error('denied'));
+			}
+			return registerServiceWorker().then(function (reg) {
+				if (!reg || typeof reg.showNotification !== 'function') {
+					throw new Error('no_sw');
+				}
+				return Promise.resolve(reg.showNotification('HiveNova local test', {
+					body: 'If you see this, permission and notification UI work.',
+					tag: 'hivenova-local-test',
+					renotify: true,
+					silent: false
+				})).then(function () {
+					return { ok: true, via: 'registration' };
+				});
+			});
+		},
+
+		pingServiceWorker: function () {
+			return registerServiceWorker().then(function (reg) {
+				if (!reg) {
+					return { ok: false, reason: 'no_sw' };
+				}
+				var worker = reg.active || (navigator.serviceWorker && navigator.serviceWorker.controller) || null;
+				if (!worker) {
+					return { ok: false, reason: 'no_active_worker', scriptURL: reg.scope || '' };
+				}
+				return new Promise(function (resolve) {
+					var settled = false;
+					var finish = function (value) {
+						if (settled) {
+							return;
+						}
+						settled = true;
+						resolve(value);
+					};
+					var channel = typeof MessageChannel === 'function' ? new MessageChannel() : null;
+					if (!channel) {
+						finish({ ok: false, reason: 'no_channel' });
+						return;
+					}
+					var timer = setTimeout(function () {
+						finish({ ok: false, reason: 'timeout', scope: reg.scope || '' });
+					}, 2000);
+					channel.port1.onmessage = function (event) {
+						clearTimeout(timer);
+						var data = event && event.data && typeof event.data === 'object' ? event.data : {};
+						finish({
+							ok: !!data.ok,
+							type: data.type || 'hivenova-pong',
+							scope: data.scope || reg.scope || '',
+							scriptURL: data.scriptURL || '',
+							hasPushSubscription: !!data.hasPushSubscription
+						});
+					};
+					try {
+						worker.postMessage({ type: 'hivenova-ping' }, [channel.port2]);
+					} catch (e) {
+						clearTimeout(timer);
+						finish({ ok: false, reason: 'postmessage_failed' });
+					}
+				});
+			});
 		},
 
 		enable: function (options) {

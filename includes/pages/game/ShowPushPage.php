@@ -29,6 +29,7 @@ class ShowPushPage extends AbstractGamePage
 			'publicKey'  => PushNotificationService::getPublicKey(),
 			'enabled'    => PushNotificationService::isEnabledForUser((int) $USER['id']),
 			'subscribed' => PushNotificationService::hasSubscription((int) $USER['id']),
+			'vapidOk'    => PushNotificationService::isVapidOk(),
 		]);
 	}
 
@@ -46,20 +47,33 @@ class ShowPushPage extends AbstractGamePage
 		$wait = PushNotificationService::testCooldownRemaining($this->lastTestAt(), $now);
 		if ($wait > 0) {
 			HTTP::sendHeader('HTTP/1.1 429 Too Many Requests');
-			$this->sendJSON(['error' => 'rate_limited', 'retryAfter' => $wait]);
+			$prior = $this->lastTestResult();
+			$this->sendJSON(array_merge(
+				is_array($prior) ? $prior : [],
+				['error' => 'rate_limited', 'retryAfter' => $wait]
+			));
 			return;
 		}
 
-		$this->rememberTestAt($now);
-		$result = PushNotificationService::sendTestNotification((int) $USER['id']);
+		$subscribed = PushNotificationService::hasSubscription((int) $USER['id']);
+		if (PushNotificationService::isConfigured() && !PushNotificationService::isVapidOk()) {
+			$this->sendJSON(PushNotificationService::testClientPayload(
+				PushNotificationService::skipResult(PushNotificationService::SKIP_VAPID_MISMATCH),
+				$subscribed
+			));
+			return;
+		}
 
-		$this->sendJSON([
-			'ok'         => !empty($result['ok']),
-			'delivered'  => (int) ($result['delivered'] ?? 0),
-			'attempted'  => (int) ($result['attempted'] ?? 0),
-			'skipped'    => $result['skipped'] ?? null,
-			'subscribed' => PushNotificationService::hasSubscription((int) $USER['id']),
-		]);
+		$result = PushNotificationService::sendTestNotification((int) $USER['id']);
+		$payload = PushNotificationService::testClientPayload($result, $subscribed);
+		// Only start the 60s cooldown after a real gateway flush so a skip/fail
+		// is not hidden by a subsequent 429 with no diagnostics.
+		if ($payload['attempted'] > 0) {
+			$this->rememberTestAt($now);
+			$this->rememberTestResult($payload);
+		}
+
+		$this->sendJSON($payload);
 	}
 
 	protected function lastTestAt(): int
@@ -73,6 +87,26 @@ class ShowPushPage extends AbstractGamePage
 	{
 		$session = Session::load();
 		$session->pushTestAt = $now;
+	}
+
+	/**
+	 * @return array<string, mixed>|null
+	 */
+	protected function lastTestResult(): ?array
+	{
+		$session = Session::load();
+		$result = $session->pushTestResult ?? null;
+
+		return is_array($result) ? $result : null;
+	}
+
+	/**
+	 * @param array<string, mixed> $result
+	 */
+	protected function rememberTestResult(array $result): void
+	{
+		$session = Session::load();
+		$session->pushTestResult = $result;
 	}
 
 	public function vapidPublicKey()

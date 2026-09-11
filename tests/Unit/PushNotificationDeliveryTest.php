@@ -24,6 +24,7 @@ class PushNotificationDeliveryTest extends TestCase
 		PushNotificationService::setWebPushFactory(null);
 		PushNotificationService::setErrorLogger(null);
 		PushNotificationService::setConfiguredOverride(null);
+		PushNotificationService::setVapidOkOverride(null);
 		parent::tearDown();
 	}
 
@@ -93,6 +94,9 @@ class PushNotificationDeliveryTest extends TestCase
 			$this->assertSame(1, $result['attempted']);
 			$this->assertSame(0, $result['delivered']);
 			$this->assertSame(1, $result['failed']);
+			$this->assertSame('fcm.googleapis.com', $result['failures'][0]['host'] ?? null);
+			$this->assertFalse($result['failures'][0]['expired'] ?? true);
+			$this->assertStringContainsString('host=fcm.googleapis.com', (string) $result['lastError']);
 			$this->assertNotEmpty($logs);
 			$this->assertStringContainsString('host=fcm.googleapis.com', $logs[0]);
 			$this->assertStringNotContainsString('/fcm/send/secret', $logs[0]);
