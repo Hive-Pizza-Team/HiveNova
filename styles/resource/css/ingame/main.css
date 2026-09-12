@@ -63,7 +63,7 @@ header .fixed {
     max-width: 950px;
     height: 100px;
     z-index: 2;
-    padding: 0 0 0 16px;
+    padding: 10px 12px;
 }
 
 menu {
@@ -85,14 +85,15 @@ menu li {
 }
 
 menu a {
-    text-align: center;
+    text-align: left;
     background: var(--color-menu-bg);
-
+    color: var(--color-chrome-menu-item);
 }
 
 menu li:hover>a {
     text-decoration: none;
-    background: var(--color-accent);
+    background: var(--color-chrome-menu-hover-bg);
+    color: var(--color-chrome-menu-hover-text);
     transition: background-color 0.3s;
 }
 
@@ -449,19 +450,95 @@ td.fleet-ship-bulk-actions {
     /* new */
     display: flex;
     justify-content: space-evenly;
+    align-items: stretch;
     flex-grow: 10;
+    min-width: 0;
+    padding: 0 2px;
+    box-sizing: border-box;
 }
 
 #resource,
-#resource_mobile {
+#resource_mobile,
+.resource-cell {
     /* new */
     text-align: center;
     align-items: center;
+    flex: 1 1 0;
+    min-width: 108px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.resource-cell + .resource-cell {
+    border-left: 1px solid var(--color-chrome-res-divider);
+}
+
+.resource-cell a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-height: 44px;
+    text-decoration: none;
+}
+
+.resource-cell__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-chrome-res-divider);
+    border-radius: 4px;
+}
+
+.resource-cell__icon img {
+    display: block;
+    width: 42px;
+    height: 22px;
+    border-radius: 0;
 }
 
 .resource_name {
-    color: var(--color-res-name);
+    color: var(--color-chrome-res-label);
     font-weight: bold;
+}
+
+#resources_mobile .res_current,
+#resources_mobile .res_current_value {
+    color: var(--color-chrome-res-amount);
+}
+
+#resources_mobile .res_max {
+    color: var(--color-chrome-res-max);
+}
+
+#resources_mobile .is-over-capacity,
+#resources_mobile .res_current_max,
+#resources_mobile .is-energy-deficit {
+    color: var(--color-chrome-res-over);
+}
+
+#resources_mobile a:hover,
+#resources_mobile a:hover .resource_name {
+    color: var(--color-chrome-res-label);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#resources_mobile a:hover .res_current,
+#resources_mobile a:hover .res_current_value {
+    color: var(--color-chrome-res-amount);
+}
+
+#resources_mobile a:hover .res_max {
+    color: var(--color-chrome-res-max);
+}
+
+#resources_mobile a:hover .is-over-capacity,
+#resources_mobile a:hover .res_current_max,
+#resources_mobile a:hover .is-energy-deficit {
+    color: var(--color-chrome-res-over);
 }
 
 .planetSelectorWrapper {
@@ -516,22 +593,75 @@ td.fleet-ship-bulk-actions {
 #menu a {
     display: block;
     margin: 0;
-    padding: 4px 24px;
+    padding: 8px 10px;
+    text-align: left;
+    color: var(--color-chrome-menu-item);
+    border-left: 3px solid transparent;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+}
+
+#menu a:hover {
+    background: var(--color-chrome-menu-hover-bg);
+    color: var(--color-chrome-menu-hover-text);
+}
+
+#menu a.active {
+    background: var(--color-chrome-menu-active-bg);
+    border-left-color: var(--color-chrome-menu-active-bar);
+    color: var(--color-chrome-menu-hover-text);
 }
 
 div#disclamer {
-    text-align: center;
+    text-align: left;
     font-size: 11px;
     margin-top: 4px;
     margin-bottom: 16px;
+    padding: 8px 10px 0;
+    color: var(--color-chrome-menu-footer);
+}
+
+div#disclamer a {
+    color: var(--color-chrome-menu-footer);
 }
 
 .menu-separator {
     min-height: 8px;
 }
 
+#menu .menu-section {
+    display: block;
+    min-height: 0;
+    padding: 8px 10px;
+    color: var(--color-chrome-menu-section);
+    background: var(--color-chrome-menu-section-bg);
+    background-image: none;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    box-sizing: border-box;
+}
+
 #options select {
     max-width: 170px;
+}
+
+.res-prod-pos {
+    color: var(--color-success);
+}
+
+.res-prod-neg {
+    color: var(--color-danger);
+}
+
+.res-prod-zero {
+    color: var(--color-text-bright);
+}
+
+.resources-apply-bar {
+    display: none;
 }
 
 /* CONTENT */
@@ -1594,7 +1724,7 @@ table.tablesorter thead tr .headerSortDown {
         width: 100%;
         height: auto;
         min-height: 80px;
-        padding: 8px 6px 6px 6px;
+        padding: 8px 10px 8px 8px;
         max-width: none;
         overflow: visible;
         box-sizing: border-box;
@@ -1636,18 +1766,40 @@ table.tablesorter thead tr .headerSortDown {
         flex-grow: 1;
         min-width: 0;
         align-self: start;
-        padding-top: 2px;
+        justify-content: flex-start;
+        gap: 0;
+        padding: 0 4px 0 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
     }
 
-    #resource_mobile {
-        min-width: 0;
-        font-size: 10px;
+    #resource_mobile,
+    .resource-cell {
+        flex: 0 0 auto;
+        min-width: 72px;
+        min-height: 44px;
+        padding: 4px 10px;
+        font-size: 12px;
         line-height: 1.2;
+        scroll-snap-align: start;
     }
 
-    #resource_mobile img {
+    .resource-cell a {
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    #resource_mobile img,
+    .resource-cell__icon img {
         max-width: 28px;
         height: auto;
+    }
+
+    .resource-cell__icon {
+        padding: 2px 6px;
     }
 
     .planetSelectorWrapper {
@@ -1690,8 +1842,8 @@ table.tablesorter thead tr .headerSortDown {
         background: var(--color-bg-surface);
         border-top: none;
         margin: 0;
-        padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 12px;
-        font-size: 17px;
+        padding: calc(12px + env(safe-area-inset-top, 0px)) 0 12px;
+        font-size: 16px;
         line-height: 1.35;
         box-sizing: border-box;
     }
@@ -1709,24 +1861,43 @@ table.tablesorter thead tr .headerSortDown {
         border-bottom: 1px solid var(--color-border);
     }
 
-    menu .menu-separator {
+    menu .menu-separator:not(.menu-section) {
         min-height: 12px;
         border-bottom: none;
         background: transparent;
     }
 
     #menu a {
-        padding: 14px 20px;
-        min-height: 48px;
+        padding: 10px 12px;
+        min-height: 44px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-size: 17px;
-        font-weight: 600;
+        justify-content: flex-start;
+        text-align: left;
+        font-size: 16px;
+        font-weight: 500;
         letter-spacing: 0.01em;
         box-sizing: border-box;
         width: 100%;
+        color: var(--color-chrome-menu-item);
+        border-left: 3px solid transparent;
+    }
+
+    #menu a:hover,
+    #menu a.active {
+        background: var(--color-chrome-menu-active-bg);
+        color: var(--color-chrome-menu-hover-text);
+    }
+
+    #menu a.active {
+        border-left-color: var(--color-chrome-menu-active-bar);
+    }
+
+    #menu .menu-section {
+        padding: 10px 12px;
+        color: var(--color-chrome-menu-section);
+        background: var(--color-chrome-menu-section-bg);
+        font-size: 12px;
     }
 
     .no-mobile {
@@ -1902,8 +2073,10 @@ table.tablesorter thead tr .headerSortDown {
         text-decoration: none;
         color: var(--color-text);
         min-height: 44px;
+        min-width: 44px;
         padding: 4px 2px;
         cursor: pointer;
+        box-sizing: border-box;
     }
 
     #bottom-nav a.active {
@@ -2378,6 +2551,104 @@ table.tablesorter thead tr .headerSortDown {
     #overview .infos .planeth:not(.overview-planet-visual) {
         clear: both;
         padding: 10px;
+    }
+
+    body#resources content,
+    body#resources .resources-form,
+    body#resources .resources-table {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    body#resources table.resources-table {
+        display: block;
+        width: 100%;
+        overflow: visible;
+        border-spacing: 0;
+    }
+
+    body#resources .resources-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    body#resources .resources-table__cols {
+        display: none;
+    }
+
+    body#resources .resources-table__title th {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    body#resources .resources-table__row {
+        display: block;
+        width: 100%;
+        margin: 0 0 10px;
+        padding: 10px;
+        box-sizing: border-box;
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+    }
+
+    body#resources .resources-table__row td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 6px 0;
+        text-align: left;
+        background: transparent;
+        border: 0;
+    }
+
+    body#resources .resources-table__row td::before {
+        content: attr(data-label);
+        color: var(--color-chrome-res-label);
+        font-weight: 700;
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    body#resources .resources-table__label {
+        display: block;
+        width: 100%;
+        font-weight: 700;
+        padding-bottom: 4px;
+        border-bottom: 1px solid var(--color-chrome-res-divider);
+        margin-bottom: 4px;
+    }
+
+    body#resources .resources-table__label::before {
+        content: none;
+    }
+
+    body#resources .resources-table__factor select,
+    body#resources .resources-apply-bar input,
+    body#resources .resources-table input[type="submit"] {
+        width: 100%;
+        min-height: 44px;
+        box-sizing: border-box;
+    }
+
+    body#resources .resources-apply-inline {
+        display: none;
+    }
+
+    body#resources .resources-apply-bar {
+        display: block;
+        position: sticky;
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+        z-index: 50;
+        margin: 0 -8px;
+        padding: 8px;
+        background: var(--color-bg-surface);
+        border-top: 1px solid var(--color-border);
     }
 
     body#messages content {

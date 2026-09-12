@@ -34,6 +34,18 @@
  * --color-notice          .notice class (yellow)
  * --color-res-name        Resource label (.res_name) — often same as accent
  *
+ * Chrome v1.2 (game chrome only — top bar, sidebar, mobile drawer):
+ * --color-chrome-res-label       Top-bar resource labels (steel; never red)
+ * --color-chrome-res-amount      Amount under capacity
+ * --color-chrome-res-over        Amount at/over capacity, or Energy deficit
+ * --color-chrome-res-max         Capacity / max
+ * --color-chrome-res-divider     Thin cell dividers
+ * --color-chrome-menu-item       Sidebar link text
+ * --color-chrome-menu-hover-bg / --color-chrome-menu-hover-text
+ * --color-chrome-menu-active-bar / --color-chrome-menu-active-bg
+ * --color-chrome-menu-section / --color-chrome-menu-section-bg
+ * --color-chrome-menu-footer     Engine commit footer
+ *
  * --color-ally-member     Galaxy alliance-member highlight
  * --color-ally-friend     Galaxy alliance-friend highlight
  * --color-ally-nap        Galaxy NAP-alliance highlight
@@ -69,6 +81,21 @@
     --color-warning:         #FF8040;
     --color-notice:          #FFFF00;
     --color-res-name:        #E31337;
+
+    /* Chrome v1.2 — top resource bar + left sidebar (hive defaults) */
+    --color-chrome-res-label:       #8aa4b8;
+    --color-chrome-res-amount:      #e8eef5;
+    --color-chrome-res-over:        #e85d5d;
+    --color-chrome-res-max:         #50c878;
+    --color-chrome-res-divider:     #2a3340;
+    --color-chrome-menu-item:       #dce3ec;
+    --color-chrome-menu-hover-bg:   #252a33;
+    --color-chrome-menu-hover-text: #ffffff;
+    --color-chrome-menu-active-bar: #5eb0d4;
+    --color-chrome-menu-active-bg:  #1e2430;
+    --color-chrome-menu-section:    #78b0c8;
+    --color-chrome-menu-section-bg: #1c2129;
+    --color-chrome-menu-footer:     #6a7380;
 
     /* Alliance relations */
     --color-ally-member:     #99FF66;

@@ -222,6 +222,8 @@ describe('HiveNovaTopnav', () => {
 		assert.equal(mobile._html, 'S52950825');
 		assert.equal(desktop.hasClass('res_current_max'), true);
 		assert.equal(mobile.hasClass('res_current_max'), true);
+		assert.equal(desktop.hasClass('is-over-capacity'), true);
+		assert.equal(mobile.hasClass('is-over-capacity'), true);
 
 		global.serverTime = new Date(global.startTime + 10000);
 		topnav.updateElements(config);
@@ -248,6 +250,7 @@ describe('HiveNovaTopnav', () => {
 
 		assert.equal(node._html, 'S1000');
 		assert.equal(node.hasClass('res_current_max'), true);
+		assert.equal(node.hasClass('is-over-capacity'), true);
 		assert.equal(node.attrs['data-tooltip-content'], '1000');
 	});
 
@@ -345,5 +348,11 @@ describe('main.topnav.tpl script order', () => {
 		assert.equal(tpl.includes('HiveNovaTopnav.initVisibilityResync'), false);
 		assert.equal(tpl.includes('resourceData.tickerLimit'), true);
 		assert.equal(tpl.includes('resourceData.max|json'), false);
+		assert.equal(tpl.includes('is-over-capacity'), true);
+		assert.equal(tpl.includes('is-energy-deficit'), true);
+		assert.equal(tpl.includes('Energy!'), false);
+		const live = tpl.split('<!--')[0];
+		assert.equal(live.includes('style="color:red"'), false);
+		assert.equal(live.includes('resource-cell--pizzabits'), true);
 	});
 });
