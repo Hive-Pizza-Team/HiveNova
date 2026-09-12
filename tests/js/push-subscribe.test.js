@@ -165,8 +165,13 @@ describe('HiveNovaPush', () => {
 		assert.equal(json.endpoint, 'https://fcm.googleapis.com/fcm/send/x');
 	});
 
-	it('showLocalTest uses registration.showNotification', async () => {
+	it('showLocalTest lists only the unique tag just created', async () => {
 		let shown;
+		const leftover = {
+			title: 'HiveNova push test',
+			tag: 'push_test',
+			body: 'If you see this, Web Push delivery works.'
+		};
 		const { api } = loadPush({
 			runReady: false,
 			Notification: { permission: 'granted' },
@@ -175,15 +180,128 @@ describe('HiveNovaPush', () => {
 					register: async () => ({
 						showNotification: async (title, opts) => {
 							shown = { title, opts };
+						},
+						async getNotifications() {
+							return [
+								leftover,
+								{ title: shown.title, tag: shown.opts.tag, body: shown.opts.body }
+							];
 						}
 					})
 				}
 			}
 		});
-		const result = await api.showLocalTest();
-		assert.deepEqual(result, { ok: true, via: 'registration' });
-		assert.equal(shown.title, 'HiveNova local test');
+		const result = await api.showLocalTest({ now: 1700000000123 });
+		assert.equal(result.ok, true);
+		assert.equal(result.via, 'registration');
+		assert.equal(result.shown, 1);
+		assert.equal(result.tag, 'hivenova-local-test-1700000000123');
+		assert.deepEqual(result.notifications, [{
+			title: 'HiveNova local test',
+			tag: 'hivenova-local-test-1700000000123',
+			body: 'If you see this, permission and notification UI work.'
+		}]);
+		assert.equal(shown.opts.requireInteraction, true);
+		assert.equal(shown.opts.silent, false);
 		assert.equal(shown.opts.renotify, true);
+		assert.match(shown.opts.icon, /\/styles\/resource\/images\/pwa\/icon-192\.png$/);
+		assert.ok(!shown.opts.icon.startsWith('styles/'));
+	});
+
+	it('showLocalTest is not ok when only a leftover push_test is listed', async () => {
+		const { api } = loadPush({
+			runReady: false,
+			Notification: { permission: 'granted' },
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						showNotification: async () => {},
+						async getNotifications() {
+							return [{
+								title: 'HiveNova push test',
+								tag: 'push_test',
+								body: 'If you see this, Web Push delivery works.'
+							}];
+						}
+					})
+				}
+			}
+		});
+		const result = await api.showLocalTest({ now: 42 });
+		assert.equal(result.ok, false);
+		assert.equal(result.reason, 'not_listed');
+		assert.equal(result.shown, 0);
+		assert.deepEqual(result.notifications, []);
+		assert.equal(result.tag, 'hivenova-local-test-42');
+	});
+
+	it('showLocalTest falls back to page Notification when SW list stays empty', async () => {
+		const created = [];
+		function FakeNotification(title, opts) {
+			created.push({ title, opts });
+			this.title = title;
+			this.body = opts.body;
+			this.tag = opts.tag;
+		}
+		FakeNotification.permission = 'granted';
+		const { api } = loadPush({
+			runReady: false,
+			Notification: FakeNotification,
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						showNotification: async () => {},
+						async getNotifications() { return []; }
+					})
+				}
+			}
+		});
+		const empty = await api.showLocalTest({ now: 7 });
+		assert.equal(empty.ok, false);
+		assert.equal(empty.via, 'page');
+		assert.equal(empty.reason, 'not_listed');
+		assert.equal(empty.pageCreated, true);
+		assert.equal(empty.shown, 0);
+		assert.equal(created.length, 1);
+		assert.equal(created[0].opts.requireInteraction, true);
+		assert.equal(created[0].opts.tag, 'hivenova-local-test-7');
+	});
+
+	it('showLocalTest reports via page when the page path is what gets listed', async () => {
+		let pageCreated = false;
+		function FakeNotification(title, opts) {
+			pageCreated = true;
+			this.title = title;
+			this.body = opts.body;
+			this.tag = opts.tag;
+		}
+		FakeNotification.permission = 'granted';
+		const { api } = loadPush({
+			runReady: false,
+			Notification: FakeNotification,
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						showNotification: async () => {},
+						async getNotifications() {
+							if (!pageCreated) {
+								return [];
+							}
+							return [{
+								title: 'HiveNova local test',
+								tag: 'hivenova-local-test-8',
+								body: 'page'
+							}];
+						}
+					})
+				}
+			}
+		});
+		const listedPage = await api.showLocalTest({ now: 8 });
+		assert.equal(listedPage.ok, true);
+		assert.equal(listedPage.via, 'page');
+		assert.equal(listedPage.shown, 1);
+		assert.equal(listedPage.notifications[0].tag, 'hivenova-local-test-8');
 	});
 
 	it('pingServiceWorker reports the owning worker', async () => {
@@ -228,9 +346,21 @@ describe('HiveNovaPush', () => {
 		assert.equal(result.scriptURL, 'https://example.test/sw.js');
 	});
 
-	it('sendTest posts a logged-in test ping', async () => {
+	it('sendTest posts a logged-in test ping and reports listed push tags', async () => {
 		const { api, fetches } = loadPush({
 			runReady: false,
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						async getNotifications() {
+							return [
+								{ title: 'HiveNova local test', tag: 'hivenova-local-test-1', body: 'local' },
+								{ title: 'HiveNova push test', tag: 'push_test-1700000000', body: 'If you see this, Web Push delivery works.' }
+							];
+						}
+					})
+				}
+			},
 			fetchImpl() {
 				return Promise.resolve({
 					ok: true,
@@ -238,9 +368,97 @@ describe('HiveNovaPush', () => {
 				});
 			}
 		});
-		const result = await api.sendTest();
-		assert.deepEqual(result, { ok: true, delivered: 1, subscribed: true });
+		const result = await api.sendTest({ waitMs: 0 });
+		assert.equal(result.ok, true);
+		assert.equal(result.delivered, 1);
+		assert.equal(result.shown, 1);
+		assert.deepEqual(result.notifications, [{
+			title: 'HiveNova push test',
+			tag: 'push_test-1700000000',
+			body: 'If you see this, Web Push delivery works.'
+		}]);
 		assert.equal(fetches.some((f) => String(f.url).includes('mode=test') && f.init.method === 'POST'), true);
+	});
+
+	it('sendTest reports shown 0 when the browser listed nothing after deliver', async () => {
+		const { api } = loadPush({
+			runReady: false,
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						async getNotifications() { return []; }
+					})
+				}
+			},
+			fetchImpl() {
+				return Promise.resolve({
+					ok: true,
+					json: async () => ({ ok: true, delivered: 2, attempted: 2, failed: 0 })
+				});
+			}
+		});
+		const result = await api.sendTest({ waitMs: 0 });
+		assert.equal(result.ok, true);
+		assert.equal(result.delivered, 2);
+		assert.equal(result.shown, 0);
+		assert.deepEqual(result.notifications, []);
+	});
+
+	it('sendTest tag helpers ignore leftover local-test entries', () => {
+		const { api } = loadPush({ runReady: false });
+		assert.equal(api.isSendTestNotificationTag('push_test'), true);
+		assert.equal(api.isSendTestNotificationTag('push_test-123'), true);
+		assert.equal(api.isSendTestNotificationTag('hivenova'), true);
+		assert.equal(api.isSendTestNotificationTag('hivenova-local-test-9'), false);
+		const listed = api.filterSendTestNotifications([
+			{ title: 'local', tag: 'hivenova-local-test-9', body: 'x' },
+			{ title: 'push', tag: 'push_test-1', body: 'y' }
+		]);
+		assert.equal(listed.length, 1);
+		assert.equal(listed[0].tag, 'push_test-1');
+	});
+
+	it('enable unsubscribes leftover dual-SW registrations', async () => {
+		let staleUnsubscribed = false;
+		const keepReg = {
+			scope: 'https://example.test/',
+			pushManager: {
+				getSubscription: async () => ({ toJSON() { return { endpoint: 'keep' }; } }),
+				subscribe: async () => {
+					throw new Error('subscribe should not run when a subscription exists');
+				}
+			}
+		};
+		const staleReg = {
+			scope: 'https://example.test/uni1/',
+			pushManager: {
+				getSubscription: async () => ({
+					async unsubscribe() { staleUnsubscribed = true; }
+				})
+			}
+		};
+		const { api } = loadPush({
+			runReady: false,
+			Notification: { permission: 'granted' },
+			navigator: {
+				serviceWorker: {
+					register: async () => keepReg,
+					getRegistrations: async () => [keepReg, staleReg]
+				}
+			},
+			fetchImpl(url) {
+				if (String(url).includes('mode=status')) {
+					return Promise.resolve({
+						ok: true,
+						json: async () => ({ configured: true, publicKey: 'pk', enabled: false })
+					});
+				}
+				return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+			}
+		});
+		const result = await api.enable({ activate: true });
+		assert.deepEqual(result, { ok: true });
+		assert.equal(staleUnsubscribed, true);
 	});
 
 	it('denied subscribe unchecks, shows error, and turns preference off', async () => {

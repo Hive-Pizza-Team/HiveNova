@@ -227,6 +227,7 @@ class PushNotificationService
 					':endpoint'  => $subscription['endpoint'],
 				]
 			);
+			self::deleteOtherSubscriptionsForUser($userId, $subscription['endpoint']);
 
 			return true;
 		}
@@ -243,8 +244,28 @@ class PushNotificationService
 				':createdAt' => TIMESTAMP,
 			]
 		);
+		self::deleteOtherSubscriptionsForUser($userId, $subscription['endpoint']);
 
 		return true;
+	}
+
+	/**
+	 * Enable/subscribe replaces leftover dual-SW endpoints so notify/test
+	 * targets the registration that just subscribed.
+	 */
+	public static function deleteOtherSubscriptionsForUser(int $userId, string $keepEndpoint): void
+	{
+		if ($userId <= 0 || $keepEndpoint === '') {
+			return;
+		}
+
+		Database::get()->delete(
+			'DELETE FROM %%PUSH_SUBSCRIPTIONS%% WHERE user_id = :userId AND endpoint <> :endpoint',
+			[
+				':userId'   => $userId,
+				':endpoint' => $keepEndpoint,
+			]
+		);
 	}
 
 	public static function removeSubscriptionForUser(int $userId, string $endpoint): void
@@ -355,7 +376,7 @@ class PushNotificationService
 			'body'  => $body,
 			'data'  => $data,
 			'url'   => $data['url'] ?? 'game.php?page=overview',
-			'tag'   => is_string($data['type'] ?? null) ? $data['type'] : 'hivenova',
+			'tag'   => self::notificationTag($data),
 		]);
 
 		$delivered = 0;
@@ -460,14 +481,32 @@ class PushNotificationService
 			? $lng['push_test_body']
 			: 'If you see this, Web Push delivery works.';
 
+		$stamp = defined('TIMESTAMP') ? (int) TIMESTAMP : time();
+
 		return [
 			'title' => $title,
 			'body'  => $body,
 			'data'  => [
 				'url'  => self::TEST_NOTIFY_URL,
 				'type' => 'push_test',
+				'tag'  => 'push_test-' . $stamp,
 			],
 		];
+	}
+
+	/**
+	 * @param array<string, mixed> $data
+	 */
+	public static function notificationTag(array $data): string
+	{
+		if (isset($data['tag']) && is_string($data['tag']) && $data['tag'] !== '') {
+			return $data['tag'];
+		}
+		if (isset($data['type']) && is_string($data['type']) && $data['type'] !== '') {
+			return $data['type'];
+		}
+
+		return 'hivenova';
 	}
 
 	/**

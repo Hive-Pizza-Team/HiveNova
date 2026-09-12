@@ -73,7 +73,6 @@ class PushNotificationServiceTest extends TestCase
 			$this->assertTrue(PushNotificationService::saveSubscription(99, $this->validSubscription($endpoint)));
 			$this->assertCount(1, array_filter($stub->updates, static fn (array $row): bool => str_contains($row['qry'], '%%PUSH_SUBSCRIPTIONS%%')));
 			$this->assertSame([], $stub->inserts);
-			$this->assertSame([], $stub->deletes);
 			$this->assertSame(99, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
 			$this->assertSame(1, $stub->settingsPushByUser[7]);
 		});
@@ -101,7 +100,25 @@ class PushNotificationServiceTest extends TestCase
 
 			$this->assertSame(99, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
 			$this->assertSame(7, $stub->subscriptionsByEndpoint[$otherEndpoint]['user_id']);
-			$this->assertSame([], $stub->deletes);
+		});
+	}
+
+	public function testSaveSubscriptionDropsOtherEndpointsForSameUser(): void
+	{
+		$keep = 'https://fcm.googleapis.com/fcm/send/keep';
+		$stale = 'https://fcm.googleapis.com/fcm/send/dual-sw-leftover';
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub) use ($keep, $stale): void {
+			$stub->subscriptionsByEndpoint[$stale] = [
+				'user_id'  => 42,
+				'endpoint' => $stale,
+				'p256dh'   => 'old-key',
+				'auth'     => 'old-auth',
+			];
+
+			$this->assertTrue(PushNotificationService::saveSubscription(42, $this->validSubscription($keep)));
+			$this->assertArrayHasKey($keep, $stub->subscriptionsByEndpoint);
+			$this->assertArrayNotHasKey($stale, $stub->subscriptionsByEndpoint);
+			$this->assertSame(42, $stub->subscriptionsByEndpoint[$keep]['user_id']);
 		});
 	}
 
@@ -266,6 +283,10 @@ class PushNotificationServiceTest extends TestCase
 		$this->assertSame('HiveNova push test', $message['title']);
 		$this->assertSame('push_test', $message['data']['type']);
 		$this->assertSame('game.php?page=overview', $message['data']['url']);
+		$this->assertSame('push_test-' . TIMESTAMP, $message['data']['tag']);
+		$this->assertSame('push_test-' . TIMESTAMP, PushNotificationService::notificationTag($message['data']));
+		$this->assertSame('push_test', PushNotificationService::notificationTag(['type' => 'push_test']));
+		$this->assertSame('hivenova', PushNotificationService::notificationTag([]));
 	}
 
 	public function testSendTestNotificationSkippedWhenNotConfigured(): void

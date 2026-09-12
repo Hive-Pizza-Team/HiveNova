@@ -69,16 +69,48 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 	{
 		$this->deletes[] = ['qry' => $qry, 'params' => $params];
 
-		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':userId'])) {
+		if (!str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%')) {
+			return 1;
+		}
+
+		$hasUser = isset($params[':userId']);
+		$hasEndpoint = isset($params[':endpoint']);
+		$dropsOthers = $hasUser && $hasEndpoint && (str_contains($qry, '<>') || str_contains($qry, '!='));
+
+		if ($dropsOthers) {
+			$userId = (int) $params[':userId'];
+			$keep = (string) $params[':endpoint'];
+			foreach ($this->subscriptionsByEndpoint as $endpoint => $row) {
+				if ((int) $row['user_id'] === $userId && $endpoint !== $keep) {
+					unset($this->subscriptionsByEndpoint[$endpoint]);
+				}
+			}
+
+			return 1;
+		}
+
+		if ($hasUser && $hasEndpoint) {
+			$endpoint = (string) $params[':endpoint'];
+			$row = $this->subscriptionsByEndpoint[$endpoint] ?? null;
+			if ($row !== null && (int) $row['user_id'] === (int) $params[':userId']) {
+				unset($this->subscriptionsByEndpoint[$endpoint]);
+			}
+
+			return 1;
+		}
+
+		if ($hasUser) {
 			$userId = (int) $params[':userId'];
 			foreach ($this->subscriptionsByEndpoint as $endpoint => $row) {
 				if ((int) $row['user_id'] === $userId) {
 					unset($this->subscriptionsByEndpoint[$endpoint]);
 				}
 			}
+
+			return 1;
 		}
 
-		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':endpoint']) && !isset($params[':userId'])) {
+		if ($hasEndpoint) {
 			unset($this->subscriptionsByEndpoint[$params[':endpoint']]);
 		}
 
