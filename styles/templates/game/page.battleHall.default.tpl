@@ -46,7 +46,7 @@
 {foreach $TopKBList as $row}
     <tr>
         <td>{$row@iteration}</td>
-        <td><a href="game.php?page=raport&amp;mode=battlehall&amp;raport={$row.rid}" target="_blank">
+        <td><a href="game.php?page=raport&amp;mode=battlehall&amp;raport={$row.rid}">
         {if $row.result == "a"}
         <span style="color:#00FF00">{$row.attacker}</span> VS <span style="color:#FF0000">{$row.defender}</span>
         {elseif $row.result == "r"}
