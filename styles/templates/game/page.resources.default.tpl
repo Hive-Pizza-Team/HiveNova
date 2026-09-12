@@ -16,10 +16,10 @@
 </tr>
 <tr class="resources-table__row">
 	<td class="resources-table__label">{$LNG.rs_basic_income}</td>
-	<td data-label="{$LNG.tech.901}">{$basicProduction.901|number} <span class="res-prod-pos">/h</span></td>
-	<td data-label="{$LNG.tech.902}">{$basicProduction.902|number} <span class="res-prod-pos">/h</span></td>
-	<td data-label="{$LNG.tech.903}">{$basicProduction.903|number} <span class="res-prod-pos">/h</span></td>
-	<td data-label="{$LNG.tech.911}">{$basicProduction.911|number} <span class="res-prod-pos">/h</span></td>
+	<td data-label="{$LNG.tech.901}"><span class="resources-table__value">{$basicProduction.901|number} <span class="res-prod-pos">/h</span></span></td>
+	<td data-label="{$LNG.tech.902}"><span class="resources-table__value">{$basicProduction.902|number} <span class="res-prod-pos">/h</span></span></td>
+	<td data-label="{$LNG.tech.903}"><span class="resources-table__value">{$basicProduction.903|number} <span class="res-prod-pos">/h</span></span></td>
+	<td data-label="{$LNG.tech.911}"><span class="resources-table__value">{$basicProduction.911|number} <span class="res-prod-pos">/h</span></span></td>
 </tr>
 {foreach $productionList as $productionID => $productionRow}
 <tr class="resources-table__row resources-table__prod">

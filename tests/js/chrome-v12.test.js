@@ -90,7 +90,7 @@ describe('chrome-v1.2 mobile', () => {
 	it('snap-scrolls the top strip instead of shrinking type unreadably', () => {
 		assert.match(mobileCss, /#resources_mobile \{[\s\S]*?scroll-snap-type:\s*x mandatory/);
 		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-height:\s*44px/);
-		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-width:\s*72px/);
+		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-width:\s*56px/);
 	});
 
 	it('reuses desktop sidebar tokens in the hamburger drawer', () => {

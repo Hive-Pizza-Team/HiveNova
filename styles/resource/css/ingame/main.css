@@ -63,7 +63,7 @@ header .fixed {
     max-width: 950px;
     height: 100px;
     z-index: 2;
-    padding: 10px 12px;
+    padding: 0 12px 0 16px;
 }
 
 menu {
@@ -453,7 +453,7 @@ td.fleet-ship-bulk-actions {
     align-items: stretch;
     flex-grow: 10;
     min-width: 0;
-    padding: 0 2px;
+    padding: 10px 2px;
     box-sizing: border-box;
 }
 
@@ -1768,8 +1768,9 @@ table.tablesorter thead tr .headerSortDown {
         align-self: start;
         justify-content: flex-start;
         gap: 0;
-        padding: 0 4px 0 0;
+        padding: 0 12px 0 0;
         overflow-x: auto;
+        scroll-padding-inline: 8px;
         overflow-y: hidden;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
@@ -1778,10 +1779,10 @@ table.tablesorter thead tr .headerSortDown {
 
     #resource_mobile,
     .resource-cell {
-        flex: 0 0 auto;
-        min-width: 72px;
+        flex: 1 1 0;
+        min-width: 56px;
         min-height: 44px;
-        padding: 4px 10px;
+        padding: 4px 8px;
         font-size: 12px;
         line-height: 1.2;
         scroll-snap-align: start;
@@ -2593,8 +2594,8 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     body#resources .resources-table__row td {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
         gap: 8px;
         width: 100%;
@@ -2610,9 +2611,14 @@ table.tablesorter thead tr .headerSortDown {
         content: attr(data-label);
         color: var(--color-chrome-res-label);
         font-weight: 700;
-        flex: 0 1 auto;
+        grid-column: 1;
         min-width: 0;
         overflow-wrap: anywhere;
+    }
+
+    body#resources .resources-table__row td > * {
+        grid-column: 2;
+        justify-self: end;
     }
 
     body#resources .resources-table__label {
@@ -2622,6 +2628,8 @@ table.tablesorter thead tr .headerSortDown {
         padding-bottom: 4px;
         border-bottom: 1px solid var(--color-chrome-res-divider);
         margin-bottom: 4px;
+        text-align: left;
+        grid-template-columns: 1fr;
     }
 
     body#resources .resources-table__label::before {
