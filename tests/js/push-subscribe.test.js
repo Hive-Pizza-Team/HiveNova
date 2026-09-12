@@ -52,6 +52,12 @@ function loadPush(opts) {
 	global.document = {
 		getElementById(id) {
 			return id === 'pushAlertsError' ? errorEl : null;
+		},
+		querySelector(sel) {
+			if (String(sel).indexOf('push-subscribe.js') !== -1) {
+				return opts.scriptEl || null;
+			}
+			return null;
 		}
 	};
 	global.fetch = function (url, init) {
@@ -416,6 +422,107 @@ describe('HiveNovaPush', () => {
 		]);
 		assert.equal(listed.length, 1);
 		assert.equal(listed[0].tag, 'push_test-1');
+	});
+
+	it('evaluateSelfCheckPass is client-automatable only (no toast claim)', () => {
+		const { api } = loadPush({ runReady: false });
+		const base = {
+			typeofSendTest: 'function',
+			typeofShowLocalTest: 'function',
+			status: { subscribed: true, vapidOk: true },
+			showLocalTest: { ok: true, shown: 1, reason: null },
+			sendTest: { delivered: 1 },
+			toastVisible: null
+		};
+		assert.equal(api.evaluateSelfCheckPass(base), true);
+		assert.equal(api.evaluateSelfCheckPass({
+			...base,
+			showLocalTest: { ok: false, shown: 0, reason: 'not_listed' }
+		}), true);
+		assert.equal(api.evaluateSelfCheckPass({
+			...base,
+			sendTest: { delivered: 2 }
+		}), false);
+		assert.equal(api.evaluateSelfCheckPass({
+			...base,
+			status: { subscribed: false, vapidOk: true }
+		}), false);
+		assert.equal(api.evaluateSelfCheckPass({
+			...base,
+			showLocalTest: { ok: false, shown: 0, reason: 'denied' }
+		}), false);
+		assert.equal(api.evaluateSelfCheckPass({
+			...base,
+			toastVisible: true
+		}), true);
+	});
+
+	it('selfCheck returns one pasteable JSON object', async () => {
+		let shown;
+		const { api } = loadPush({
+			runReady: false,
+			scriptEl: {
+				getAttribute(name) {
+					return name === 'src' ? 'scripts/game/push-subscribe.js?v=2.0.1789169999' : '';
+				}
+			},
+			Notification: { permission: 'granted' },
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						showNotification: async (title, opts) => {
+							shown = { title, opts };
+						},
+						async getNotifications() {
+							return [
+								{ title: 'HiveNova push test', tag: 'push_test', body: 'leftover' },
+								{ title: shown.title, tag: shown.opts.tag, body: shown.opts.body },
+								{ title: 'HiveNova push test', tag: 'push_test-1700000000', body: 'If you see this, Web Push delivery works.' }
+							];
+						}
+					})
+				}
+			},
+			fetchImpl(url) {
+				if (String(url).includes('mode=status')) {
+					return Promise.resolve({
+						ok: true,
+						json: async () => ({
+							configured: true,
+							publicKey: 'pk',
+							enabled: true,
+							subscribed: true,
+							vapidOk: true
+						})
+					});
+				}
+				if (String(url).includes('mode=test')) {
+					return Promise.resolve({
+						ok: true,
+						json: async () => ({ ok: true, delivered: 1, attempted: 1, failed: 0 })
+					});
+				}
+				return Promise.resolve({ ok: true, json: async () => ({}) });
+			}
+		});
+		const result = await api.selfCheck({ waitMs: 0, now: 99 });
+		assert.equal(result.revQuery, '2.0.1789169999');
+		assert.equal(result.scriptSrc, 'scripts/game/push-subscribe.js?v=2.0.1789169999');
+		assert.equal(result.typeofSendTest, 'function');
+		assert.equal(result.typeofShowLocalTest, 'function');
+		assert.deepEqual(result.status, { subscribed: true, vapidOk: true });
+		assert.equal(result.showLocalTest.ok, true);
+		assert.equal(result.showLocalTest.via, 'registration');
+		assert.equal(result.showLocalTest.shown, 1);
+		assert.equal(result.showLocalTest.tag, 'hivenova-local-test-99');
+		assert.equal(result.showLocalTest.notifications[0].tag, 'hivenova-local-test-99');
+		assert.equal(result.sendTest.ok, true);
+		assert.equal(result.sendTest.delivered, 1);
+		assert.equal(result.sendTest.attempted, 1);
+		assert.equal(result.sendTest.shown, 2);
+		assert.equal(result.pass, true);
+		assert.equal(result.toastVisible, null);
+		assert.ok(!Object.prototype.hasOwnProperty.call(result, 'toastSeen'));
 	});
 
 	it('enable unsubscribes leftover dual-SW registrations', async () => {

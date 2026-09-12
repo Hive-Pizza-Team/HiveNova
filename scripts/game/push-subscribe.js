@@ -324,6 +324,64 @@
 		return out;
 	}
 
+	function readPushScriptInfo() {
+		var src = '';
+		var revQuery = '';
+		try {
+			if (typeof document !== 'undefined' && document.querySelector) {
+				var el = document.querySelector('script[src*="push-subscribe.js"]');
+				if (el && typeof el.getAttribute === 'function') {
+					src = el.getAttribute('src') || '';
+				}
+			}
+		} catch (e) {}
+		if (src) {
+			var match = src.match(/[?&]v=([^&]*)/);
+			if (match) {
+				revQuery = match[1] || '';
+			}
+		}
+		return { scriptSrc: src, revQuery: revQuery };
+	}
+
+	function evaluateSelfCheckPass(result) {
+		if (!result || typeof result !== 'object') {
+			return false;
+		}
+		var status = result.status || {};
+		var local = result.showLocalTest || {};
+		var send = result.sendTest || {};
+		var functionsOk = result.typeofSendTest === 'function' && result.typeofShowLocalTest === 'function';
+		var subscribed = !!status.subscribed;
+		var deliveredOne = send.delivered === 1;
+		var localListed = typeof local.shown === 'number' && local.shown >= 1;
+		var localHonest = local.reason === 'not_listed';
+		return !!(functionsOk && subscribed && deliveredOne && (localListed || localHonest));
+	}
+
+	function summarizeSelfCheckLocal(local) {
+		local = local && typeof local === 'object' ? local : {};
+		return {
+			ok: !!local.ok,
+			via: local.via || '',
+			shown: typeof local.shown === 'number' ? local.shown : 0,
+			tag: local.tag || '',
+			reason: local.reason || null,
+			notifications: summarizeNotifications(local.notifications || [])
+		};
+	}
+
+	function summarizeSelfCheckSend(send) {
+		send = send && typeof send === 'object' ? send : {};
+		return {
+			ok: !!send.ok,
+			delivered: typeof send.delivered === 'number' ? send.delivered : 0,
+			attempted: typeof send.attempted === 'number' ? send.attempted : 0,
+			shown: typeof send.shown === 'number' ? send.shown : 0,
+			notifications: summarizeNotifications(send.notifications || [])
+		};
+	}
+
 	function fetchStatus() {
 		return fetch('game.php?page=push&mode=status', { credentials: 'same-origin' })
 			.then(function (r) { return r.json(); });
@@ -482,6 +540,8 @@
 		filterNotificationsByTags: filterNotificationsByTags,
 		filterSendTestNotifications: filterSendTestNotifications,
 		isSendTestNotificationTag: isSendTestNotificationTag,
+		evaluateSelfCheckPass: evaluateSelfCheckPass,
+		readPushScriptInfo: readPushScriptInfo,
 		SEND_TEST_TAGS: SEND_TEST_TAGS,
 		sendTest: function (options) {
 			options = options || {};
@@ -548,6 +608,58 @@
 						return pageFallback('registration');
 					});
 				});
+			});
+		},
+
+		selfCheck: function (options) {
+			options = options || {};
+			var info = readPushScriptInfo();
+			var result = {
+				revQuery: info.revQuery,
+				scriptSrc: info.scriptSrc,
+				typeofSendTest: typeof api.sendTest,
+				typeofShowLocalTest: typeof api.showLocalTest,
+				status: null,
+				showLocalTest: null,
+				sendTest: null,
+				pass: false,
+				toastVisible: null
+			};
+			var localOpts = {};
+			if (typeof options.now === 'number') {
+				localOpts.now = options.now;
+			}
+			if (typeof options.tag === 'string' && options.tag !== '') {
+				localOpts.tag = options.tag;
+			}
+			var sendOpts = {
+				waitMs: typeof options.waitMs === 'number' ? options.waitMs : SEND_TEST_LIST_WAIT_MS
+			};
+			return fetchStatus().then(function (status) {
+				status = status && typeof status === 'object' ? status : {};
+				result.status = {
+					subscribed: !!status.subscribed,
+					vapidOk: !!status.vapidOk
+				};
+				return api.showLocalTest(localOpts).catch(function (err) {
+					return {
+						ok: false,
+						via: '',
+						shown: 0,
+						tag: '',
+						reason: err && err.message ? String(err.message) : 'failed',
+						notifications: []
+					};
+				});
+			}).then(function (local) {
+				result.showLocalTest = summarizeSelfCheckLocal(local);
+				return api.sendTest(sendOpts).catch(function () {
+					return { ok: false, delivered: 0, attempted: 0, shown: 0, notifications: [] };
+				});
+			}).then(function (send) {
+				result.sendTest = summarizeSelfCheckSend(send);
+				result.pass = evaluateSelfCheckPass(result);
+				return result;
 			});
 		},
 
