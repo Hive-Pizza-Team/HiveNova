@@ -9,6 +9,7 @@ use HiveNova\Core\Session;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\SocialHiveMemoService;
 use HiveNova\Core\MessageInboxService;
+use HiveNova\Mission\CombatReportMessageBuilder;
 use HiveNova\Repository\MessageRepository;
 
 /**
@@ -356,7 +357,7 @@ class ShowMessagesPage extends AbstractGamePage
                 'sender'	=> $MessageRow['message_sender'],
                 'type'		=> $MessageRow['message_type'],
                 'unread'	=> $MessageRow['message_unread'],
-                'text'		=> in_array($MessageRow['message_type'], [1, 50]) ? nl2br($MessageRow['message_text']) : $MessageRow['message_text'],
+                'text'		=> CombatReportMessageBuilder::sameTabHtml(in_array($MessageRow['message_type'], [1, 50]) ? nl2br($MessageRow['message_text']) : $MessageRow['message_text']),
             );
         }
 
