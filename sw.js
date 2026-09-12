@@ -64,6 +64,7 @@ function notificationOptions(payload) {
     tag: payload.tag || 'hivenova',
     renotify: true,
     silent: false,
+    requireInteraction: true,
     data: { url: safeGameUrl(payload.url) }
   };
 }

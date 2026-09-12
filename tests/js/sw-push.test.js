@@ -74,6 +74,7 @@ describe('sw.js push handler', () => {
 		const opts = api.notificationOptions(payload);
 		assert.equal(opts.renotify, true);
 		assert.equal(opts.silent, false);
+		assert.equal(opts.requireInteraction, true);
 		assert.equal(opts.data.url, 'game.php?page=overview');
 		assert.match(opts.icon, /icon-192\.png$/);
 		assert.ok(!opts.icon.startsWith('styles/'), 'icon must be absolute, not relative to SW');

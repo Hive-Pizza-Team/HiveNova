@@ -137,6 +137,251 @@
 		});
 	}
 
+	var SEND_TEST_TAGS = ['push_test', 'hivenova'];
+	var SEND_TEST_LIST_WAIT_MS = 1500;
+	var LOCAL_TEST_TITLE = 'HiveNova local test';
+	var LOCAL_TEST_BODY = 'If you see this, permission and notification UI work.';
+
+	function notificationIconUrl() {
+		try {
+			if (typeof location !== 'undefined' && location.origin) {
+				return location.origin + '/styles/resource/images/pwa/icon-192.png';
+			}
+		} catch (e) {}
+		return '/styles/resource/images/pwa/icon-192.png';
+	}
+
+	function localTestTag(now) {
+		var ts = typeof now === 'number' ? now : Date.now();
+		return 'hivenova-local-test-' + ts;
+	}
+
+	function testNotificationOptions(tag, body) {
+		return {
+			body: body || LOCAL_TEST_BODY,
+			icon: notificationIconUrl(),
+			tag: tag,
+			renotify: true,
+			silent: false,
+			requireInteraction: true
+		};
+	}
+
+	function summarizeNotifications(list) {
+		var out = [];
+		var i;
+		var n;
+		if (!list || !list.length) {
+			return out;
+		}
+		for (i = 0; i < list.length; i++) {
+			n = list[i];
+			if (!n) {
+				continue;
+			}
+			out.push({
+				title: n.title || '',
+				tag: n.tag || '',
+				body: n.body || ''
+			});
+		}
+		return out;
+	}
+
+	function isSendTestNotificationTag(tag) {
+		if (typeof tag !== 'string' || tag === '') {
+			return false;
+		}
+		return tag === 'hivenova' || tag === 'push_test' || tag.indexOf('push_test-') === 0;
+	}
+
+	function filterNotificationsByTags(list, tags) {
+		var out = [];
+		var i;
+		var n;
+		if (!list || !list.length) {
+			return out;
+		}
+		if (!tags || !tags.length) {
+			for (i = 0; i < list.length; i++) {
+				if (list[i]) {
+					out.push(list[i]);
+				}
+			}
+			return out;
+		}
+		for (i = 0; i < list.length; i++) {
+			n = list[i];
+			if (n && tags.indexOf(n.tag) !== -1) {
+				out.push(n);
+			}
+		}
+		return out;
+	}
+
+	function filterSendTestNotifications(list) {
+		var out = [];
+		var i;
+		var n;
+		if (!list || !list.length) {
+			return out;
+		}
+		for (i = 0; i < list.length; i++) {
+			n = list[i];
+			if (n && isSendTestNotificationTag(n.tag)) {
+				out.push(n);
+			}
+		}
+		return out;
+	}
+
+	function getRegistrationNotifications(reg) {
+		if (!reg || typeof reg.getNotifications !== 'function') {
+			return Promise.resolve([]);
+		}
+		return Promise.resolve(reg.getNotifications()).then(function (list) {
+			return Array.isArray(list) ? list : [];
+		}).catch(function () {
+			return [];
+		});
+	}
+
+	function registrationOwnsPushSubscription(reg) {
+		if (!reg || !reg.pushManager || typeof reg.pushManager.getSubscription !== 'function') {
+			return Promise.resolve(false);
+		}
+		return reg.pushManager.getSubscription().then(function (sub) {
+			return !!sub;
+		}).catch(function () {
+			return false;
+		});
+	}
+
+	function registrationForShow() {
+		return registerServiceWorker().then(function (registered) {
+			var readyPromise = (typeof navigator !== 'undefined'
+				&& navigator.serviceWorker
+				&& navigator.serviceWorker.ready)
+				? Promise.resolve(navigator.serviceWorker.ready).catch(function () { return null; })
+				: Promise.resolve(null);
+			return readyPromise.then(function (readyReg) {
+				return registrationOwnsPushSubscription(registered).then(function (regOwns) {
+					if (regOwns) {
+						return registered;
+					}
+					return registrationOwnsPushSubscription(readyReg).then(function (readyOwns) {
+						if (readyOwns) {
+							return readyReg;
+						}
+						return registered || readyReg;
+					});
+				});
+			});
+		});
+	}
+
+	function showPageNotification(title, options) {
+		if (typeof Notification !== 'function') {
+			return null;
+		}
+		try {
+			return new Notification(title, options);
+		} catch (e) {
+			return null;
+		}
+	}
+
+	function visibilityResult(ok, via, listed, extra) {
+		var result = {
+			ok: !!ok,
+			via: via,
+			shown: listed && listed.length ? listed.length : 0,
+			notifications: summarizeNotifications(listed || [])
+		};
+		var key;
+		if (extra) {
+			for (key in extra) {
+				if (Object.prototype.hasOwnProperty.call(extra, key)) {
+					result[key] = extra[key];
+				}
+			}
+		}
+		return result;
+	}
+
+	function mergeServerAndListed(server, listed) {
+		var out = {};
+		var key;
+		if (server && typeof server === 'object') {
+			for (key in server) {
+				if (Object.prototype.hasOwnProperty.call(server, key)) {
+					out[key] = server[key];
+				}
+			}
+		}
+		out.shown = listed && listed.length ? listed.length : 0;
+		out.notifications = summarizeNotifications(listed || []);
+		return out;
+	}
+
+	function readPushScriptInfo() {
+		var src = '';
+		var revQuery = '';
+		try {
+			if (typeof document !== 'undefined' && document.querySelector) {
+				var el = document.querySelector('script[src*="push-subscribe.js"]');
+				if (el && typeof el.getAttribute === 'function') {
+					src = el.getAttribute('src') || '';
+				}
+			}
+		} catch (e) {}
+		if (src) {
+			var match = src.match(/[?&]v=([^&]*)/);
+			if (match) {
+				revQuery = match[1] || '';
+			}
+		}
+		return { scriptSrc: src, revQuery: revQuery };
+	}
+
+	function evaluateSelfCheckPass(result) {
+		if (!result || typeof result !== 'object') {
+			return false;
+		}
+		var status = result.status || {};
+		var local = result.showLocalTest || {};
+		var send = result.sendTest || {};
+		var functionsOk = result.typeofSendTest === 'function' && result.typeofShowLocalTest === 'function';
+		var subscribed = !!status.subscribed;
+		var deliveredOne = send.delivered === 1;
+		var localListed = typeof local.shown === 'number' && local.shown >= 1;
+		var localHonest = local.reason === 'not_listed';
+		return !!(functionsOk && subscribed && deliveredOne && (localListed || localHonest));
+	}
+
+	function summarizeSelfCheckLocal(local) {
+		local = local && typeof local === 'object' ? local : {};
+		return {
+			ok: !!local.ok,
+			via: local.via || '',
+			shown: typeof local.shown === 'number' ? local.shown : 0,
+			tag: local.tag || '',
+			reason: local.reason || null,
+			notifications: summarizeNotifications(local.notifications || [])
+		};
+	}
+
+	function summarizeSelfCheckSend(send) {
+		send = send && typeof send === 'object' ? send : {};
+		return {
+			ok: !!send.ok,
+			delivered: typeof send.delivered === 'number' ? send.delivered : 0,
+			attempted: typeof send.attempted === 'number' ? send.attempted : 0,
+			shown: typeof send.shown === 'number' ? send.shown : 0,
+			notifications: summarizeNotifications(send.notifications || [])
+		};
+	}
+
 	function fetchStatus() {
 		return fetch('game.php?page=push&mode=status', { credentials: 'same-origin' })
 			.then(function (r) { return r.json(); });
@@ -218,6 +463,40 @@
 		return keysEqual(currentBytes, urlBase64ToUint8Array(publicKey));
 	}
 
+	function unsubscribeOtherPushRegistrations(keepReg) {
+		if (typeof navigator === 'undefined'
+			|| !navigator.serviceWorker
+			|| typeof navigator.serviceWorker.getRegistrations !== 'function') {
+			return Promise.resolve();
+		}
+		return navigator.serviceWorker.getRegistrations().then(function (regs) {
+			var tasks = [];
+			var i;
+			var r;
+			if (!regs || !regs.length) {
+				return;
+			}
+			for (i = 0; i < regs.length; i++) {
+				r = regs[i];
+				if (!r || r === keepReg) {
+					continue;
+				}
+				if (keepReg && r.scope && keepReg.scope && r.scope === keepReg.scope) {
+					continue;
+				}
+				if (!r.pushManager || typeof r.pushManager.getSubscription !== 'function') {
+					continue;
+				}
+				tasks.push(r.pushManager.getSubscription().then(function (sub) {
+					if (sub && typeof sub.unsubscribe === 'function') {
+						return sub.unsubscribe();
+					}
+				}).catch(function () {}));
+			}
+			return Promise.all(tasks);
+		}).catch(function () {});
+	}
+
 	function subscribeWithRegistration(reg, publicKey) {
 		return reg.pushManager.getSubscription().then(function (existing) {
 			if (existing) {
@@ -239,7 +518,9 @@
 				applicationServerKey: urlBase64ToUint8Array(publicKey)
 			});
 		}).then(function (subscription) {
-			return postSubscribe(subscription);
+			return unsubscribeOtherPushRegistrations(reg).then(function () {
+				return postSubscribe(subscription);
+			});
 		});
 	}
 
@@ -252,29 +533,133 @@
 		applicationServerKeysMatch: applicationServerKeysMatch,
 		serviceWorkerUrl: serviceWorkerUrl,
 		subscriptionPayload: subscriptionPayload,
-		sendTest: function () {
+		notificationIconUrl: notificationIconUrl,
+		localTestTag: localTestTag,
+		testNotificationOptions: testNotificationOptions,
+		summarizeNotifications: summarizeNotifications,
+		filterNotificationsByTags: filterNotificationsByTags,
+		filterSendTestNotifications: filterSendTestNotifications,
+		isSendTestNotificationTag: isSendTestNotificationTag,
+		evaluateSelfCheckPass: evaluateSelfCheckPass,
+		readPushScriptInfo: readPushScriptInfo,
+		SEND_TEST_TAGS: SEND_TEST_TAGS,
+		sendTest: function (options) {
+			options = options || {};
+			var waitMs = typeof options.waitMs === 'number' ? options.waitMs : SEND_TEST_LIST_WAIT_MS;
 			return fetch('game.php?page=push&mode=test', {
 				method: 'POST',
 				credentials: 'same-origin'
-			}).then(function (r) { return r.json(); });
+			}).then(function (r) { return r.json(); }).then(function (server) {
+				var wait = (server && server.delivered > 0 && waitMs > 0)
+					? new Promise(function (resolve) { setTimeout(resolve, waitMs); })
+					: Promise.resolve();
+				return wait.then(function () {
+					return registrationForShow().then(function (reg) {
+						return getRegistrationNotifications(reg).then(function (all) {
+							return mergeServerAndListed(server, filterSendTestNotifications(all));
+						});
+					}).catch(function () {
+						return mergeServerAndListed(server, []);
+					});
+				});
+			});
 		},
 
-		showLocalTest: function () {
+		showLocalTest: function (options) {
+			options = options || {};
 			if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
 				return Promise.reject(new Error('denied'));
 			}
-			return registerServiceWorker().then(function (reg) {
+			var title = LOCAL_TEST_TITLE;
+			var body = LOCAL_TEST_BODY;
+			var tag = typeof options.tag === 'string' && options.tag !== ''
+				? options.tag
+				: localTestTag(options.now);
+			var notifyOpts = testNotificationOptions(tag, body);
+			return registrationForShow().then(function (reg) {
+				var pageFallback = function (viaWhenPageFails) {
+					var pageNote = showPageNotification(title, notifyOpts);
+					if (!pageNote) {
+						return visibilityResult(false, viaWhenPageFails, [], { reason: 'not_listed', tag: tag });
+					}
+					if (!reg || typeof reg.getNotifications !== 'function') {
+						return visibilityResult(false, 'page', [], { reason: 'not_listed', tag: tag, pageCreated: true });
+					}
+					return getRegistrationNotifications(reg).then(function (after) {
+						var listed = filterNotificationsByTags(after, [tag]);
+						if (listed.length > 0) {
+							return visibilityResult(true, 'page', listed, { tag: tag });
+						}
+						return visibilityResult(false, 'page', [], { reason: 'not_listed', tag: tag, pageCreated: true });
+					});
+				};
 				if (!reg || typeof reg.showNotification !== 'function') {
+					if (typeof Notification === 'function') {
+						return pageFallback('registration');
+					}
 					throw new Error('no_sw');
 				}
-				return Promise.resolve(reg.showNotification('HiveNova local test', {
-					body: 'If you see this, permission and notification UI work.',
-					tag: 'hivenova-local-test',
-					renotify: true,
-					silent: false
-				})).then(function () {
-					return { ok: true, via: 'registration' };
+				return Promise.resolve(reg.showNotification(title, notifyOpts)).then(function () {
+					return getRegistrationNotifications(reg).then(function (all) {
+						var listed = filterNotificationsByTags(all, [tag]);
+						if (listed.length > 0) {
+							return visibilityResult(true, 'registration', listed, { tag: tag });
+						}
+						return pageFallback('registration');
+					});
 				});
+			});
+		},
+
+		selfCheck: function (options) {
+			options = options || {};
+			var info = readPushScriptInfo();
+			var result = {
+				revQuery: info.revQuery,
+				scriptSrc: info.scriptSrc,
+				typeofSendTest: typeof api.sendTest,
+				typeofShowLocalTest: typeof api.showLocalTest,
+				status: null,
+				showLocalTest: null,
+				sendTest: null,
+				pass: false,
+				toastVisible: null
+			};
+			var localOpts = {};
+			if (typeof options.now === 'number') {
+				localOpts.now = options.now;
+			}
+			if (typeof options.tag === 'string' && options.tag !== '') {
+				localOpts.tag = options.tag;
+			}
+			var sendOpts = {
+				waitMs: typeof options.waitMs === 'number' ? options.waitMs : SEND_TEST_LIST_WAIT_MS
+			};
+			return fetchStatus().then(function (status) {
+				status = status && typeof status === 'object' ? status : {};
+				result.status = {
+					subscribed: !!status.subscribed,
+					vapidOk: !!status.vapidOk
+				};
+				return api.showLocalTest(localOpts).catch(function (err) {
+					return {
+						ok: false,
+						via: '',
+						shown: 0,
+						tag: '',
+						reason: err && err.message ? String(err.message) : 'failed',
+						notifications: []
+					};
+				});
+			}).then(function (local) {
+				result.showLocalTest = summarizeSelfCheckLocal(local);
+				return api.sendTest(sendOpts).catch(function () {
+					return { ok: false, delivered: 0, attempted: 0, shown: 0, notifications: [] };
+				});
+			}).then(function (send) {
+				result.sendTest = summarizeSelfCheckSend(send);
+				result.pass = evaluateSelfCheckPass(result);
+				return result;
 			});
 		},
 
