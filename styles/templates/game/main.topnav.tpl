@@ -24,42 +24,36 @@
 
 <div id="resources_mobile">
 	{foreach $resourceTable as $resourceID => $resourceData}
-	<div id="resource_mobile">
+	<div id="resource_mobile" class="resource-cell{if $resourceID == $smarty.const.RESOURCE_ENERGY} resource-cell--energy{elseif $resourceID == $smarty.const.RESOURCE_DARKMATTER} resource-cell--pizzabits{/if}" data-resource-id="{$resourceID}">
 		<a href="#" onclick="return Dialog.info({$resourceID});">
-			<img src="{$dpath}images/{$resourceData.name}.gif">
+			<span class="resource-cell__icon"><img src="{$dpath}images/{$resourceData.name}.gif" alt=""></span>
 			<div class="resource_name no-mobile">{$LNG.tech.$resourceID}</div>
 			
 			<div class="no-mobile">
 				{if !isset($resourceData.current)}
 					{$resourceData.currentt = $resourceData.max + $resourceData.used}
-						<td class="res_current tooltip" data-tooltip-content="{$resourceData.currentt|number_plain}">
-							<span{if $resourceData.currentt < 0} style="color:red"{/if}>{$resourceData.currentt|number}&nbsp;/&nbsp;{$resourceData.max|number} </span>
-						</td>
+					<div class="res_current tooltip" data-tooltip-content="{$resourceData.currentt|number_plain}">
+						<span class="res_current_value{if $resourceData.currentt < 0} is-energy-deficit{/if}">{$resourceData.currentt|number}</span>
+						{if isset($resourceData.max)}&nbsp;/&nbsp;<span class="res_max">{$resourceData.max|number}</span>{/if}
+					</div>
 				{else}
-					<div class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|number}{if $resourceID == 921} <br><!--<a href="google.com/wallet">piniondz</a>-->{/if} </div>
+					<div class="res_current{if isset($resourceData.max) && $resourceData.current >= $resourceData.max} is-over-capacity res_current_max{/if}" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|number}</div>
 				{/if}
 				{if !isset($resourceData.current) || !isset($resourceData.max)}
 					<div>&nbsp;</div>
 				{else}
-					<div class="res_max" id="max_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.max|number}</div>
+					<div class="res_max" id="max_{$resourceData.name}" data-real="{$resourceData.max}">{$resourceData.max|number}</div>
 				{/if}
 			</div>
 			
 			<div class="mobile">
 				{if !isset($resourceData.current)}
 					{$resourceData.currentt = $resourceData.max + $resourceData.used}
-						<td class="res_current tooltip" data-tooltip-content="{$resourceData.currentt|number_plain}">
-							<span{if $resourceData.currentt < 0} style="color:red"{/if}>{$resourceData.currentt|shortly_number}</span>
-						</td>
-{/if}
-{if !isset($resourceData.max)}
-
-						<td class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|shortly_number}</td>
-				{/if}
-				{if !isset($resourceData.current) || !isset($resourceData.max)}
-					
+					<span class="res_current{if $resourceData.currentt < 0} is-energy-deficit{/if}" data-tooltip-content="{$resourceData.currentt|number_plain}">{$resourceData.currentt|shortly_number}</span>
+				{elseif !isset($resourceData.max)}
+					<span class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|shortly_number}</span>
 				{else}
-					<td class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}"><span{if $resourceData.current >= {$resourceData.max}} style="color:red"{/if}>{$resourceData.current|shortly_number}</span></td>
+					<span class="res_current{if $resourceData.current >= $resourceData.max} is-over-capacity res_current_max{/if}" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|shortly_number}</span>
 				{/if}
 			</div>
 		
