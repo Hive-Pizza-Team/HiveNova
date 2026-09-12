@@ -3128,3 +3128,36 @@ table.tablesorter thead tr .headerSortDown {
 		animation: none;
 	}
 }
+
+/* Empire / Imperium overview */
+.empire-overview td,
+.empire-section table td {
+	background-color: var(--color-bg-surface-dark);
+	background-image: none;
+}
+
+.empire-resource-row td {
+	background-color: var(--color-bg-surface-dark);
+	background-image: none;
+}
+
+.empire-overview .empire-total-col {
+	font-size: inherit;
+	font-weight: 700;
+}
+
+.empire-overview .empire-planet-thumb img {
+	width: 48px;
+	height: 48px;
+	object-fit: cover;
+	vertical-align: middle;
+}
+
+.empire-section {
+	margin: 8px 0;
+}
+
+.empire-section summary {
+	cursor: pointer;
+	padding: 4px 6px;
+}
