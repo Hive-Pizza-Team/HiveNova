@@ -38,6 +38,26 @@ for f in $THEME_FILES; do
     check_named_colors "$f"
 done
 
+# Mobile Fancybox close must keep the 30px sprite clipped inside a 44px
+# tap target. A bare min-width/min-height enlarges the sprite viewport.
+if ! awk '
+    BEGIN { in_mq = 0; in_rule = 0; seen = 0; ok_repeat = 0; ok_clip = 0; ok_inset = 0; brace = 0 }
+    /@media screen and \(max-width: 699px\)/ { in_mq = 1 }
+    in_mq && /#fancybox-wrap #fancybox-close[[:space:]]*\{/ { in_rule = 1; seen = 1 }
+    in_rule {
+        if ($0 ~ /background-repeat:[[:space:]]*no-repeat/) ok_repeat = 1
+        if ($0 ~ /background-clip:[[:space:]]*content-box/) ok_clip = 1
+        if ($0 ~ /top:[[:space:]]*[0-9]+px/) ok_inset = 1
+        brace += gsub(/\{/, "{")
+        brace -= gsub(/\}/, "}")
+        if (brace <= 0 && in_rule) in_rule = 0
+    }
+    END { exit (seen && ok_repeat && ok_clip && ok_inset) ? 0 : 1 }
+' "$INGAME"; then
+    echo "FAIL: mobile #fancybox-wrap #fancybox-close must inset the control and clip the 30px sprite (background-repeat: no-repeat; background-clip: content-box; top: Npx)."
+    ERRORS=$((ERRORS + 1))
+fi
+
 if [[ $ERRORS -eq 0 ]]; then
     echo "CSS check passed."
     exit 0

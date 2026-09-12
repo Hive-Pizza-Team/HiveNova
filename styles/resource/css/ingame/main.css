@@ -1756,9 +1756,23 @@ table.tablesorter thead tr .headerSortDown {
         max-width: 95vw !important;
     }
 
-    #fancybox-close {
+    /* Fancybox close is a 30×30 sprite at top/right -15px. Dialog.open uses
+       padding:0, so that offset hangs off the wrap; the 44px tap-target then
+       revealed neighboring sprite frames (broken X + spinner). Keep the 44px
+       hit area, paint only the 30px icon, and sit inside the wrap.
+       Two IDs so this wins over jquery.fancybox.css loaded after main.css. */
+    #fancybox-wrap #fancybox-close {
+        top: 6px;
+        right: 6px;
+        width: 44px;
+        height: 44px;
         min-width: 44px;
         min-height: 44px;
+        box-sizing: border-box;
+        padding: 7px;
+        background-repeat: no-repeat;
+        background-origin: content-box;
+        background-clip: content-box;
     }
 
     #tooltip.tooltip-mobile-active {
