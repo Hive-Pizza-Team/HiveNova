@@ -31,9 +31,8 @@ use HiveNova\Core\Language;
 use HiveNova\Core\SeasonService;
 
 
-$page 		= \HiveNova\Core\HTTP::_GP('page', 'overview');
+$page 		= \HiveNova\Core\GamePageRouter::resolve(\HiveNova\Core\HTTP::_GP('page', 'overview'));
 $mode 		= \HiveNova\Core\HTTP::_GP('mode', 'show');
-$page		= str_replace(array('_', '\\', '/', '.', "\0"), '', $page);
 $pageClass	= 'Show'.ucwords($page).'Page';
 
 $fqcn		= 'HiveNova\\Page\\Game\\' . $pageClass;

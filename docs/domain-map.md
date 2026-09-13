@@ -17,6 +17,7 @@ Quick index for agents. Prefer the service/class column for logic; pages are HTT
 | Alliance (huge page) | `ShowAlliancePage` + `AllianceService`, `AllianceDiplomacyService`, `AllianceRankService` | Keep extracting |
 | Messages / buddy | `ShowMessagesPage`, `MessageRepository`, `BuddyRepository` | |
 | Overview | `ShowOverviewPage`, `scripts/game/overview*.js` | Planet viz is JS-heavy |
+| Empire / Imperium | `ShowImperiumPage`, `ImperiumView`, `GamePageRouter` | `page=empire` aliases to `imperium`; matrix in `imperium.js` |
 | Settings / Hive link / PIZZA deposit | `ShowSettingsPage`, `scripts/game/base.js` (`DepositPizzaTokens`) | Info modal also uses deposit for resource 921 |
 | Pizzabits (DM) resource id | `RESOURCE_DARKMATTER` (921) | Column still `darkmatter` |
 | Achievements / feats / directives | `AchievementService`, `FeatService`, `DirectiveService` (+ Hooks/Catalog) | |

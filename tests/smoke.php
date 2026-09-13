@@ -45,6 +45,7 @@ $pages = [
     'notes',
     'settings',
     'imperium',
+    'empire',
     'information',
     'marketplace',
     'trader',
