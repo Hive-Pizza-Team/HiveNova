@@ -10,14 +10,14 @@
     {if $smarty.const.MODULE_IMPERIUM|isModuleAvailable}<li><a href="game.php?page=imperium"{if $navPage == 'imperium'} class="active"{/if}>{$LNG.lm_empire}</a></li>{/if}
     {if $smarty.const.MODULE_MESSAGES|isModuleAvailable}<li><a href="game.php?page=messages"{if $navPage == 'messages'} class="active"{/if}>{$LNG.lm_messages}{nocache}{if $new_message > 0}<span id="newmes"> (<span id="newmesnum">{$new_message}</span>)</span>{/if}{/nocache}</a></li>{/if}
     {if $smarty.const.MODULE_TECHTREE|isModuleAvailable}<li><a href="game.php?page=techtree"{if $navPage == 'techtree'} class="active"{/if}>{$LNG.lm_technology}</a></li>{/if}
-    {if $smarty.const.MODULE_RESSOURCE_LIST|isModuleAvailable}<li><a href="game.php?page=resources"{if $navPage == 'resources'} class="active"{/if}>{$LNG.lm_resources}</a></li>{/if}
     {if $smarty.const.MODULE_OFFICIER|isModuleAvailable || $smarty.const.MODULE_DMEXTRAS|isModuleAvailable}<li><a href="game.php?page=officier"{if $navPage == 'officier'} class="active"{/if}>{$LNG.lm_officiers}</a></li>{/if}
-    {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=trader"{if $navPage == 'trader'} class="active"{/if}>{$LNG.lm_trader}</a></li>{/if}
-    {if $smarty.const.MODULE_FLEET_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetDealer"{if $navPage == 'fleetDealer'} class="active"{/if}>{$LNG.lm_fleettrader}</a></li>{/if}
 
     <li class="menu-separator menu-section">{$LNG.lm_menu_section_empire}</li>
     <li><a href="game.php?page=viz"{if $navPage == 'viz'} class="active"{/if}>{$LNG.lm_viz}</a></li>
     <li><a href="game.php?page=eventFirehose"{if $navPage == 'eventFirehose'} class="active"{/if}>{$LNG.ef_title}</a></li>
+    {if $smarty.const.MODULE_RESSOURCE_LIST|isModuleAvailable}<li><a href="game.php?page=resources"{if $navPage == 'resources'} class="active"{/if}>{$LNG.lm_resources}</a></li>{/if}
+    {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=trader"{if $navPage == 'trader'} class="active"{/if}>{$LNG.lm_trader}</a></li>{/if}
+    {if $smarty.const.MODULE_FLEET_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetDealer"{if $navPage == 'fleetDealer'} class="active"{/if}>{$LNG.lm_fleettrader}</a></li>{/if}
     {if $smarty.const.MODULE_ALLIANCE|isModuleAvailable}<li><a href="game.php?page=alliance"{if $navPage == 'alliance'} class="active"{/if}>{$LNG.lm_alliance}</a></li>{/if}
     {if !empty($hasBoard)}<li><a href="game.php?page=board" target="forum">{$LNG.lm_forums}</a></li>{/if}
     {if $smarty.const.MODULE_STATISTICS|isModuleAvailable}<li><a href="game.php?page=statistics"{if $navPage == 'statistics'} class="active"{/if}>{$LNG.lm_statistics}</a></li>{/if}

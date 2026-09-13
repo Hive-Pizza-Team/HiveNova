@@ -110,6 +110,19 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.ok(viz > advanced && viz < admin);
 		assert.ok(feed > advanced && feed < admin);
 	});
+
+	it('keeps Resources, Market, and Ship Merchant under Advanced', () => {
+		const advanced = nav.indexOf('lm_menu_section_empire');
+		const admin = nav.indexOf('lm_menu_section_account');
+		const resources = nav.indexOf('page=resources');
+		const market = nav.indexOf('page=trader');
+		const shipMerchant = nav.indexOf('page=fleetDealer');
+		assert.ok(advanced !== -1 && admin !== -1);
+		assert.ok(resources > advanced && resources < admin);
+		assert.ok(market > advanced && market < admin);
+		assert.ok(shipMerchant > advanced && shipMerchant < admin);
+		assert.ok(resources < market && market < shipMerchant);
+	});
 });
 
 describe('chrome-v1.2 mobile', () => {
