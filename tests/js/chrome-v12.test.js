@@ -140,8 +140,33 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.ok(discord < support && support < search && search < banned);
 		assert.equal(nav.includes('page=board'), false);
 		assert.equal(nav.includes('lm_forums'), false);
-		assert.match(nav, /TODO\(nav-ia\): reorder Advanced siblings by Outreach usage ranks/);
+		assert.equal(nav.includes('TODO(nav-ia)'), false);
 		assert.match(faqTpl, /faq_intro/);
+	});
+
+	it('orders Advanced by the explicit product ranking', () => {
+		const advanced = nav.indexOf('lm_menu_section_empire');
+		const admin = nav.indexOf('lm_menu_section_account');
+		const order = [
+			'page=resources',
+			'page=battleSimulator',
+			'page=statistics',
+			'page=records',
+			'page=battleHall',
+			'page=achievements',
+			'page=viz',
+			'page=eventFirehose',
+			'page=trader',
+			'page=fleetDealer',
+			'page=alliance',
+		].map((needle) => nav.indexOf(needle));
+		assert.ok(advanced !== -1 && admin !== -1);
+		assert.match(nav, /Advanced product order applied/);
+		let previous = advanced;
+		for (const pos of order) {
+			assert.ok(pos > previous && pos < admin);
+			previous = pos;
+		}
 	});
 });
 
