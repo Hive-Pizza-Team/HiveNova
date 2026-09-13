@@ -157,8 +157,9 @@
 				$nhour		= self::findValue($rtime[IDX_HOUR], $cron[IDX_HOUR], $next);
 
 				// Meh. Such a cruel world. Something has gone awry. Lets see HOW awry it went.
+				// === false: hour 0 is valid; !$nhour used to skip a full day under UTC.
 
-				if (!$nhour) {
+				if ($nhour === false) {
 
 					// Ah, the hour-part went wrong. Thats easy. Wrong hour means that no
 					// matter what we do we'll end up at a different date. Thus we can use
