@@ -72,22 +72,41 @@
 		return wrap;
 	}
 
+	function hasItem(items, id) {
+		return Object.prototype.hasOwnProperty.call(items, String(id))
+			|| Object.prototype.hasOwnProperty.call(items, id);
+	}
+
+	function categoryIds(cfg, catId) {
+		var items = cfg.items || {};
+		var raw = cfg.order && (cfg.order[String(catId)] || cfg.order[catId]);
+		if (Array.isArray(raw) && raw.length) {
+			return raw.filter(function (id) {
+				return hasItem(items, id);
+			});
+		}
+		var range = RANGES[catId];
+		if (!range) return [];
+		var ids = [];
+		for (var id = range[0]; id <= range[1]; id++) {
+			if (hasItem(items, id)) {
+				ids.push(id);
+			}
+		}
+		return ids;
+	}
+
 	function ensureCategory(cfg, catId) {
 		var body = document.getElementById('body' + catId);
 		if (!body || body.dataset.filled === '1') return;
 		body.dataset.filled = '1';
-		var range = RANGES[catId];
-		if (!range) return;
 		var frag = document.createDocumentFragment();
 		var items = cfg.items || {};
-		for (var id = range[0]; id <= range[1]; id++) {
-			if (!Object.prototype.hasOwnProperty.call(items, String(id))
-				&& !Object.prototype.hasOwnProperty.call(items, id)) {
-				continue;
-			}
+		var ids = categoryIds(cfg, catId);
+		ids.forEach(function (id) {
 			var reqList = items[String(id)] || items[id];
 			frag.appendChild(buildItem(cfg, id, reqList));
-		}
+		});
 		body.appendChild(frag);
 	}
 
