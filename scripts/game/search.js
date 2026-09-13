@@ -1,44 +1,8 @@
-function searchQuery() {
-	return $.trim($('#searchtext').val());
-}
-
-function fetchResults() {
-	var term = searchQuery();
-	if (!term) {
-		return;
+function isIgnoredSearchKey(event) {
+	if (!event) {
+		return false;
 	}
-
-	$('#searchEmpty').prop('hidden', true);
-	$('#loading').show();
-	$.get('game.php?page=search&mode=result&type='+$('#type').val()+'&search='+encodeURIComponent(term)+'&ajax=1', function(data) {
-		$('#resulttable').remove();
-		$('content > table:not(.hack)').after(data);
-		$('#loading').hide();
-	});
-}
-
-function submitSearch(event) {
-	if (event) {
-		event.preventDefault();
-	}
-
-	if (!searchQuery()) {
-		$('#resulttable').remove();
-		$('#searchEmpty').prop('hidden', false);
-		return;
-	}
-
-	fetchResults();
-}
-
-function instant(event) {
-	if (event.keyCode == 13) {
-		event.preventDefault();
-		submitSearch();
-		return;
-	}
-
-	if ($.inArray(event.keyCode, [
+	return $.inArray(event.keyCode, [
 		91, // WINDOWS
 		18, // ALT
 		20, // CAPS_LOCK
@@ -49,6 +13,7 @@ function instant(event) {
 		17, // CONTROL
 		40, // DOWN
 		35, // END
+		13, // ENTER
 		27, // ESCAPE
 		36, // HOME
 		45, // INSERT
@@ -69,25 +34,45 @@ function instant(event) {
 		9, // TAB
 		38, // UP
 		91 // WINDOWS
-	]) !== -1) {
-		return;
-	}
-
-	$('#searchEmpty').prop('hidden', true);
-	if (!searchQuery()) {
-		$('#resulttable').remove();
-		return;
-	}
-
-	fetchResults();
+	]) !== -1;
 }
 
-$(document).ready(function() {
-	$('#searchtext').on('keyup', instant);
-	$('#searchbutton').on('click', submitSearch);
-	$('#type').on('change', function() {
-		if (searchQuery()) {
-			fetchResults();
+function runSearch() {
+	var query = $('#searchtext').val() || '';
+	if (query.length > 0 && query.length < 2) {
+		return;
+	}
+
+	if (query.length === 0) {
+		$('#resulttable').remove();
+		$('#loading').hide();
+		return;
+	}
+
+	$('#loading').show();
+	$.get('game.php?page=search&mode=result&type=' + $('#type').val() + '&search=' + encodeURIComponent(query) + '&ajax=1', function (data) {
+		$('#resulttable').remove();
+		$('content > table:not(.hack)').after(data);
+		$('#loading').hide();
+	});
+}
+
+$(document).ready(function () {
+	var debounceTimer = null;
+	var DEBOUNCE_MS = 300;
+
+	$('#searchtext').on('keyup', function (event) {
+		if (event.keyCode == 13) {
+			event.preventDefault();
 		}
+		if (isIgnoredSearchKey(event)) {
+			return;
+		}
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(runSearch, DEBOUNCE_MS);
+	});
+	$('#type').on('change', function () {
+		clearTimeout(debounceTimer);
+		runSearch();
 	});
 });

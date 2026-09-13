@@ -72,7 +72,7 @@
 	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}" defer></script>
 	{foreach item=scriptname from=$scripts}
-	<script type="text/javascript" src="./scripts/game/{$scriptname}.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/game/{$scriptname}.js?v={$REV}" defer></script>
 	{/foreach}
 	{block name="script"}{/block}
 	<script type="text/javascript">

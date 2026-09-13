@@ -1,16 +1,87 @@
 /**
  * Battle simulator — ACS slot tabs + column reset.
  * Tabs: #tabs (via HiveNovaSimpleTabs). Requires simple-tabs.js first.
+ * Extra ACS slots are cloned client-side (no full page POST).
  */
 (function (root) {
 	'use strict';
 
+	var tabsApi = null;
+
+	function panelCount(tabs) {
+		return tabs.querySelectorAll(':scope > div[id^="tabs-"]').length;
+	}
+
+	function stripDefenseColumn(panel) {
+		var defenseCell = panel.querySelector('td.transparent[style*="width"]');
+		if (defenseCell && defenseCell.parentElement) {
+			defenseCell.parentElement.removeChild(defenseCell);
+		}
+	}
+
+	function renumberSlot(panel, index) {
+		panel.id = 'tabs-' + index;
+		var inputs = panel.querySelectorAll('input[name^="battleinput["]');
+		for (var i = 0; i < inputs.length; i++) {
+			inputs[i].name = inputs[i].name.replace(/^battleinput\[\d+]/, 'battleinput[' + index + ']');
+			inputs[i].value = '0';
+		}
+		if (index > 0) {
+			stripDefenseColumn(panel);
+		}
+	}
+
 	function add() {
+		var tabs = document.getElementById('tabs');
 		var form = document.getElementById('form');
-		if (!form) return false;
-		form.setAttribute('action', 'game.php?page=battleSimulator&action=moreslots');
-		form.setAttribute('method', 'POST');
-		form.submit();
+		if (!tabs || !form) {
+			return false;
+		}
+
+		var source = document.getElementById('tabs-0');
+		var nav = tabs.querySelector(':scope > ul');
+		if (!source || !nav) {
+			return false;
+		}
+
+		var nextIndex = panelCount(tabs);
+		if (nextIndex >= 10) {
+			return false;
+		}
+
+		var firstLink = nav.querySelector('a');
+		var baseLabel = firstLink ? (firstLink.textContent || '').replace(/\s*\d+\s*$/, '') : 'ACS';
+		baseLabel = baseLabel.replace(/\s+$/, '');
+
+		var clone = source.cloneNode(true);
+		renumberSlot(clone, nextIndex);
+		clone.classList.add('simple-tabs__panel');
+		clone.setAttribute('role', 'tabpanel');
+		clone.hidden = true;
+		clone.style.display = 'none';
+		clone.classList.remove('is-active');
+
+		var li = document.createElement('li');
+		li.setAttribute('role', 'presentation');
+		var a = document.createElement('a');
+		a.href = '#tabs-' + nextIndex;
+		a.textContent = baseLabel + ' ' + (nextIndex + 1);
+		a.setAttribute('role', 'tab');
+		a.setAttribute('aria-selected', 'false');
+		li.appendChild(a);
+		nav.appendChild(li);
+		tabs.appendChild(clone);
+
+		var slotsInput = document.getElementById('slots');
+		if (slotsInput) {
+			slotsInput.value = String(nextIndex + 2);
+		}
+
+		if (tabsApi && typeof tabsApi.activate === 'function') {
+			tabsApi.activate(nextIndex);
+		} else if (root.HiveNovaSimpleTabs) {
+			tabsApi = root.HiveNovaSimpleTabs.init(tabs, { active: nextIndex });
+		}
 		return true;
 	}
 
@@ -74,7 +145,8 @@
 	var api = {
 		resetColumn: resetColumn,
 		initTabs: initTabs,
-		bindReset: bindReset
+		bindReset: bindReset,
+		addSlot: add
 	};
 	root.HiveNovaBattleSim = api;
 	if (typeof module !== 'undefined' && module.exports) {
@@ -83,9 +155,9 @@
 
 	if (typeof document !== 'undefined') {
 		function boot() {
-			var tabs = initTabs(document);
+			tabsApi = initTabs(document);
 			bindReset(document.getElementById('tabs') || document);
-			return tabs;
+			return tabsApi;
 		}
 		if (document.readyState === 'loading') {
 			document.addEventListener('DOMContentLoaded', boot);
