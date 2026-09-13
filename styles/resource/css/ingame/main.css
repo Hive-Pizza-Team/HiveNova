@@ -77,7 +77,15 @@ menu .fixed {
     list-style: none;
     position: fixed;
     top: 100px;
+    bottom: 0;
     width: 180px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+    box-sizing: border-box;
+    scrollbar-width: thin;
 }
 
 menu li {
@@ -1851,9 +1859,14 @@ table.tablesorter thead tr .headerSortDown {
 
     menu .fixed {
         position: static;
+        top: auto;
+        bottom: auto;
         width: 100%;
         max-width: 480px;
         margin: 0 auto;
+        overflow: visible;
+        max-height: none;
+        padding-bottom: 0;
     }
 
     menu li {
