@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\ShipyardPageModeService;
 
 /**
  *  2Moons 
@@ -235,9 +236,13 @@ class ShowShipyardPage extends AbstractGamePage
 		}
 		
 		
-		$mode		= HTTP::_GP('mode', 'fleet');
-		
-		if($mode == 'defense') {
+		$mode = ShipyardPageModeService::resolveMode(
+			HTTP::_GP('mode', ShipyardPageModeService::MODE_FLEET),
+			isModuleAvailable(MODULE_SHIPYARD_FLEET),
+			isModuleAvailable(MODULE_SHIPYARD_DEFENSIVE)
+		);
+
+		if (ShipyardPageModeService::isDefenseMode($mode)) {
 			$elementIDs	= array_merge($reslist['defense'], $reslist['missile']);
 		} else {
 			$elementIDs	= $reslist['fleet'];
@@ -288,6 +293,11 @@ class ShowShipyardPage extends AbstractGamePage
 			'BuildList'		=> $buildList,
 			'maxlength'		=> strlen((string) Config::get()->max_fleet_per_build),
 			'mode'			=> $mode,
+			'shipyardTabs'	=> ShipyardPageModeService::tabs(
+				$mode,
+				isModuleAvailable(MODULE_SHIPYARD_FLEET),
+				isModuleAvailable(MODULE_SHIPYARD_DEFENSIVE)
+			),
 			'messages'		=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)): false,
 			'SolarEnergy'		=> $SolarEnergy,
 		));
