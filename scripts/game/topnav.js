@@ -56,6 +56,7 @@
 			var element = $(this);
 			if (atMax) {
 				element.addClass('res_current_max');
+				element.addClass('is-over-capacity');
 			} else if (!element.hasClass('res_current_warn') && isFinite(limit) && nrResource >= limit * 0.9) {
 				element.addClass('res_current_warn');
 			}

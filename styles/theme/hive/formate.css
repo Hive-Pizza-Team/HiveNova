@@ -21,6 +21,19 @@ $ui-background: #E31337;
     --color-warning:         #FF8040;
     --color-notice:          #FFFF00;
     --color-res-name:        #E31337;
+    --color-chrome-res-label:       #8aa4b8;
+    --color-chrome-res-amount:      #e8eef5;
+    --color-chrome-res-over:        #e85d5d;
+    --color-chrome-res-max:         #50c878;
+    --color-chrome-res-divider:     #2a3340;
+    --color-chrome-menu-item:       #dce3ec;
+    --color-chrome-menu-hover-bg:   #252a33;
+    --color-chrome-menu-hover-text: #ffffff;
+    --color-chrome-menu-active-bar: #5eb0d4;
+    --color-chrome-menu-active-bg:  #1e2430;
+    --color-chrome-menu-section:    #78b0c8;
+    --color-chrome-menu-section-bg: #1c2129;
+    --color-chrome-menu-footer:     #6a7380;
     --color-ally-member:     #99FF66;
     --color-ally-friend:     #99FFFF;
     --color-ally-nap:        #aa99ff;
@@ -404,25 +417,31 @@ header .fixed {
 
 /** MENU **/
 
-.menu-separator {
-  background-image: url('img/bkd_title.png');
-  /* color: #FFF; */
-  /* border: 1px solid black; */
+.menu-separator,
+#menu .menu-section {
+  background-image: none;
+  background: var(--color-chrome-menu-section-bg);
 }
 
-menu a {
-  text-align: center;
+menu a,
+#menu a {
+  text-align: left;
+  color: var(--color-chrome-menu-item);
   background: var(--color-menu-bg);
 }
 
-menu a:hover {
-  color: var(--color-bg-surface);
-  font-weight: bold;
+menu a:hover,
+#menu a:hover {
+  color: var(--color-chrome-menu-hover-text);
+  background: var(--color-chrome-menu-hover-bg);
+  font-weight: 400;
 }
 
+div#disclamer,
 div#disclamer a {
   background: unset;
   border-top: unset;
+  color: var(--color-chrome-menu-footer);
 }
 
 /* PLANETMENU */
@@ -587,6 +606,31 @@ a.faq-index-link:hover {
 th a,
 .res_current {
   color: #FFF
+}
+
+#resources_mobile .resource_name {
+  color: var(--color-chrome-res-label);
+}
+
+#resources_mobile .res_current,
+#resources_mobile .res_current_value {
+  color: var(--color-chrome-res-amount);
+}
+
+#resources_mobile .res_max {
+  color: var(--color-chrome-res-max);
+}
+
+#resources_mobile .is-over-capacity,
+#resources_mobile .res_current_max,
+#resources_mobile .is-energy-deficit {
+  color: var(--color-chrome-res-over);
+}
+
+#resources_mobile a:hover,
+#resources_mobile a:hover .resource_name {
+  color: var(--color-chrome-res-label);
+  font-weight: 700;
 }
 
 .res_current_max,

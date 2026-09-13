@@ -1551,3 +1551,7 @@ $LNG['push_research_body_many'] = '%s (level %d) and %d more finished';
 $LNG['push_building_body_many'] = '%s (level %d) on %s and %d more finished';
 $LNG['push_test_title'] = 'HiveNova push test';
 $LNG['push_test_body'] = 'If you see this, Web Push delivery works.';
+$LNG['lm_menu_section_overview'] = 'Overview';
+$LNG['lm_menu_section_empire'] = 'Empire';
+$LNG['lm_menu_section_account'] = 'Account';
+$LNG['rs_prod_factor'] = 'Production';
