@@ -66,6 +66,15 @@ describe('chrome-v1.2 top resource bar', () => {
 });
 
 describe('chrome-v1.2 sidebar', () => {
+	it('scrolls inside the fixed sidebar so short viewports reach Logout', () => {
+		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?position:\s*fixed/);
+		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?bottom:\s*0/);
+		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?overflow-y:\s*auto/);
+		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?overscroll-behavior:\s*contain/);
+		assert.match(mobileCss, /menu \{[\s\S]*?overflow-y:\s*auto/);
+		assert.match(mobileCss, /menu \.fixed \{[\s\S]*?overflow:\s*visible/);
+	});
+
 	it('left-aligns items with 8–10px pad, section headers, and active bar', () => {
 		assert.match(desktopCss, /#menu a \{[\s\S]*?padding:\s*8px 10px/);
 		assert.match(desktopCss, /#menu a \{[\s\S]*?text-align:\s*left/);
