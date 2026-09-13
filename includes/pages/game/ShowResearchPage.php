@@ -38,18 +38,20 @@ class ShowResearchPage extends AbstractGamePage
 	{
 		global $USER;
 		$db = Database::get();
-		$sql	= "SELECT * FROM %%PLANETS%% WHERE id_owner = :owner;";
+		// Only queue columns — full planet rows are unnecessary for lab-busy checks.
+		$sql	= "SELECT id, b_building, b_building_id FROM %%PLANETS%% WHERE id_owner = :owner AND b_building > 0;";
 		$planets	= $db->select($sql, array(
 			':owner'	=> $USER['id'],
 		));
 
 		foreach ($planets as $planet)
 		{
-			if ($planet['b_building'] == 0)
-				continue;
-
 			$CurrentQueue		= safe_unserialize($planet['b_building_id']);
+			if (!is_array($CurrentQueue)) {
+				continue;
+			}
 			foreach($CurrentQueue as $ListIDArray) {
+				// 6 = Research Lab, 31 = University
 				if($ListIDArray[0] == 6 || $ListIDArray[0] == 31)
 					return false;
 			}

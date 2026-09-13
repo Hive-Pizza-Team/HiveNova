@@ -2,6 +2,7 @@
 {block name="content"}
 <div class="fleet-page-layout">
 <div class="fleet-active-section">
+{if !$compactViewport}
 <table class="fleet-table-desktop">
 	<tr>
 		<th colspan="9">
@@ -77,13 +78,14 @@
 	<tr><td colspan="9">{$LNG.fl_no_more_slots}</td></tr>
 	{/if}
 </table>
-{if $activeFleetSlots > 0 && $activeFleetSlots < $maxFleetSlots}
-<button type="button" class="fleet-mobile-active-toggle" id="fleetMobileToggle" aria-controls="fleetMobileList" aria-expanded="false">
-	{$activeFleetSlots} / {$maxFleetSlots} {$LNG.fl_fleets}
-</button>
 {/if}
-{if $activeFleetSlots > 0}
-<div class="fleet-mobile-list{if $activeFleetSlots < $maxFleetSlots} fleet-mobile-list--collapsed{/if}" id="fleetMobileList">
+{if $compactViewport}
+<div class="fleet-active-section-mobile-head">
+	{$LNG.fl_fleets} {$activeFleetSlots} / {$maxFleetSlots} · {$activeExpedition} / {$maxExpedition} {$LNG.fl_expeditions}
+</div>
+{/if}
+{if $compactViewport && $activeFleetSlots > 0}
+<div class="fleet-mobile-list" id="fleetMobileList">
 	{foreach name=FlyingFleetsMobile item=FlyingFleetRow from=$FlyingFleetList}
 	<div class="fleet-mobile-card">
 		<div class="fleet-mobile-row"><strong>#{$smarty.foreach.FlyingFleetsMobile.iteration}</strong> {$LNG["type_mission_{$FlyingFleetRow.mission}"]}{if $FlyingFleetRow.state == 1} ({$LNG.fl_r}){else} ({$LNG.fl_a}){/if}{if $FlyingFleetRow.mission == 15 && $FlyingFleetRow.stance} · {$LNG["cm_stance_{$FlyingFleetRow.stance}"]}{/if}</div>

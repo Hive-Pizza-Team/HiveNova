@@ -64,7 +64,7 @@
 		</td>
 	</tr>
 	<tr class="message_{$Message.id} messages_body{if $MessID != 999 && $Message.unread == 1} mes_unread{/if}">
-		<td colspan="3" class="left msg-body-cell">
+		<td colspan="3" class="left msg-body-cell" data-message-body="{$Message.id}">
 		{$Message.text}
 		</td>
 	</tr>
@@ -76,4 +76,8 @@
 	{include file="shared.messages.pagination.tpl"}
 </table>
 </form>
+{if !empty($messageBodyIds)}
+<script type="application/json" id="message-body-ids">{$messageBodyIds|json}</script>
+<script type="application/json" id="message-body-outbox">{if $MessID == 999}1{else}0{/if}</script>
+{/if}
 {/block}

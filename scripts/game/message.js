@@ -85,5 +85,40 @@ Message	= {
 				NotifyBox(data.mess);
 		});
 		
+	},
+
+	loadBodies: function() {
+		var idsTag = document.getElementById('message-body-ids');
+		if (!idsTag) {
+			return;
+		}
+		var ids;
+		try {
+			ids = JSON.parse(idsTag.textContent || '[]');
+		} catch (e) {
+			return;
+		}
+		if (!ids || !ids.length) {
+			return;
+		}
+		var outboxTag = document.getElementById('message-body-outbox');
+		var outbox = outboxTag && outboxTag.textContent.trim() === '1' ? 1 : 0;
+		$.getJSON('game.php?page=messages&mode=bodies&ajax=1&outbox=' + outbox + '&ids=' + ids.join(','), function (data) {
+			if (!data || !data.bodies) {
+				return;
+			}
+			Object.keys(data.bodies).forEach(function (id) {
+				var cell = document.querySelector('[data-message-body="' + id + '"]');
+				if (cell) {
+					cell.innerHTML = data.bodies[id];
+				}
+			});
+		});
 	}
-}
+};
+
+$(function () {
+	if (window.Message && typeof Message.loadBodies === 'function') {
+		Message.loadBodies();
+	}
+});
