@@ -66,6 +66,39 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertGreaterThan($market, $shipMerchant);
 	}
 
+	public function test_advanced_section_follows_product_order(): void
+	{
+		$advanced = strpos($this->nav, 'lm_menu_section_empire');
+		$admin = strpos($this->nav, 'lm_menu_section_account');
+		$order = [
+			'page=resources',
+			'page=battleSimulator',
+			'page=statistics',
+			'page=records',
+			'page=battleHall',
+			'page=achievements',
+			'page=viz',
+			'page=eventFirehose',
+			'page=trader',
+			'page=fleetDealer',
+			'page=alliance',
+		];
+
+		$this->assertNotFalse($advanced);
+		$this->assertNotFalse($admin);
+		$this->assertStringContainsString('Advanced product order applied', $this->nav);
+		$this->assertStringNotContainsString('TODO(nav-ia)', $this->nav);
+
+		$previous = $advanced;
+		foreach ($order as $needle) {
+			$pos = strpos($this->nav, $needle);
+			$this->assertNotFalse($pos, $needle . ' missing from nav');
+			$this->assertGreaterThan($previous, $pos, $needle . ' is out of product order');
+			$this->assertLessThan($admin, $pos, $needle . ' left Advanced');
+			$previous = $pos;
+		}
+	}
+
 	public function test_shipyard_page_exposes_mode_tabs(): void
 	{
 		$tpl = file_get_contents(__DIR__ . '/../../styles/templates/game/page.shipyard.default.tpl');

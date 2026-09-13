@@ -13,21 +13,21 @@
     <li><a href="game.php?page=questions"{if $navPage == 'questions'} class="active"{/if}>{$LNG.lm_faq}</a></li>
     {if $smarty.const.MODULE_OFFICIER|isModuleAvailable || $smarty.const.MODULE_DMEXTRAS|isModuleAvailable}<li><a href="game.php?page=officier"{if $navPage == 'officier'} class="active"{/if}>{$LNG.lm_officiers}</a></li>{/if}
 
-    {* TODO(nav-ia): reorder Advanced siblings by Outreach usage ranks before merge. Do not finalize this order until ranks land. *}
+    {* Advanced product order applied: Resources, Simulator, Statistics, Records, Hall of Fame, Achievements, then remaining Advanced items. *}
     <li class="menu-separator menu-section">{$LNG.lm_menu_section_empire}</li>
+    {if $smarty.const.MODULE_RESSOURCE_LIST|isModuleAvailable}<li><a href="game.php?page=resources"{if $navPage == 'resources'} class="active"{/if}>{$LNG.lm_resources}</a></li>{/if}
+    {if $smarty.const.MODULE_SIMULATOR|isModuleAvailable}<li><a href="game.php?page=battleSimulator"{if $navPage == 'battleSimulator'} class="active"{/if}>{$LNG.lm_battlesim}</a></li>{/if}
+    {if $smarty.const.MODULE_STATISTICS|isModuleAvailable}<li><a href="game.php?page=statistics"{if $navPage == 'statistics'} class="active"{/if}>{$LNG.lm_statistics}</a></li>{/if}
+    {if $smarty.const.MODULE_RECORDS|isModuleAvailable}<li><a href="game.php?page=records"{if $navPage == 'records'} class="active"{/if}>{$LNG.lm_records}</a></li>{/if}
+    {if $smarty.const.MODULE_BATTLEHALL|isModuleAvailable}<li><a href="game.php?page=battleHall"{if $navPage == 'battleHall'} class="active"{/if}>{$LNG.lm_topkb}</a></li>{/if}
+    {if $smarty.const.MODULE_ACHIEVEMENTS|isModuleAvailable}<li><a href="game.php?page=achievements"{if $navPage == 'achievements'} class="active"{/if}>{$LNG.lm_achievements}</a></li>{/if}
     <li><a href="game.php?page=viz"{if $navPage == 'viz'} class="active"{/if}>{$LNG.lm_viz}</a></li>
     <li><a href="game.php?page=eventFirehose"{if $navPage == 'eventFirehose'} class="active"{/if}>{$LNG.ef_title}</a></li>
-    {if $smarty.const.MODULE_RESSOURCE_LIST|isModuleAvailable}<li><a href="game.php?page=resources"{if $navPage == 'resources'} class="active"{/if}>{$LNG.lm_resources}</a></li>{/if}
     {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=trader"{if $navPage == 'trader'} class="active"{/if}>{$LNG.lm_trader}</a></li>{/if}
     {if $smarty.const.MODULE_FLEET_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetDealer"{if $navPage == 'fleetDealer'} class="active"{/if}>{$LNG.lm_fleettrader}</a></li>{/if}
     {if $smarty.const.MODULE_ALLIANCE|isModuleAvailable}<li><a href="game.php?page=alliance"{if $navPage == 'alliance'} class="active"{/if}>{$LNG.lm_alliance}</a></li>{/if}
-    {if $smarty.const.MODULE_STATISTICS|isModuleAvailable}<li><a href="game.php?page=statistics"{if $navPage == 'statistics'} class="active"{/if}>{$LNG.lm_statistics}</a></li>{/if}
-    {if $smarty.const.MODULE_RECORDS|isModuleAvailable}<li><a href="game.php?page=records"{if $navPage == 'records'} class="active"{/if}>{$LNG.lm_records}</a></li>{/if}
-    {if $smarty.const.MODULE_ACHIEVEMENTS|isModuleAvailable}<li><a href="game.php?page=achievements"{if $navPage == 'achievements'} class="active"{/if}>{$LNG.lm_achievements}</a></li>{/if}
-    {if $smarty.const.MODULE_BATTLEHALL|isModuleAvailable}<li><a href="game.php?page=battleHall"{if $navPage == 'battleHall'} class="active"{/if}>{$LNG.lm_topkb}</a></li>{/if}
     {if false}
     <li><a href="index.php?page=rules" target="rules">{$LNG.lm_rules}</a></li>{/if}
-    {if $smarty.const.MODULE_SIMULATOR|isModuleAvailable}<li><a href="game.php?page=battleSimulator"{if $navPage == 'battleSimulator'} class="active"{/if}>{$LNG.lm_battlesim}</a></li>{/if}
 
     <li class="menu-separator menu-section">{$LNG.lm_menu_section_account}</li>
     {if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="javascript:OpenPopup('?page=notes', 'notes', 720, 300);"{if $navPage == 'notes'} class="active"{/if}>{$LNG.lm_notes}</a></li>{/if}
