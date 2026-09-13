@@ -2,6 +2,8 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\TechTreeOrderService;
+
 /**
  *  2Moons 
  *   by Jan-Otto Kröpke 2009-2016
@@ -71,6 +73,9 @@ class ShowTechtreePage extends AbstractGamePage
             $ext[(string) $elementId] = ($elementId >= 600 && $elementId <= 699) ? 'jpg' : 'gif';
         }
 
+        $orderService = new TechTreeOrderService(is_array($requirements) ? $requirements : array());
+        $order = $orderService->orderByCategory(array_map('intval', array_keys($items)));
+
         $dpath = $THEME->getTheme();
         $techTreeJson = json_encode(array(
             'dpath' => $dpath,
@@ -79,6 +84,7 @@ class ShowTechtreePage extends AbstractGamePage
             'names' => $names,
             'ext' => $ext,
             'items' => $items,
+            'order' => $order,
         ), JSON_UNESCAPED_UNICODE);
 
         $this->assign(array(
