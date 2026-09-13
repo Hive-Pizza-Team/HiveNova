@@ -140,7 +140,7 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.ok(discord < support && support < search && search < banned);
 		assert.equal(nav.includes('page=board'), false);
 		assert.equal(nav.includes('lm_forums'), false);
-		assert.match(nav, /TODO\(nav-ia\): reorder Advanced siblings by Outreach usage ranks/);
+		assert.match(nav, /TODO\(nav-ia\): reorder Advanced siblings by real page=/);
 		assert.match(faqTpl, /faq_intro/);
 	});
 });
