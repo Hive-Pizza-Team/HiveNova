@@ -11,6 +11,7 @@ const mainCss = fs.readFileSync(path.join(root, 'styles/resource/css/ingame/main
 const hiveCss = fs.readFileSync(path.join(root, 'styles/theme/hive/formate.css'), 'utf8');
 const topnav = fs.readFileSync(path.join(root, 'styles/templates/game/main.topnav.tpl'), 'utf8');
 const nav = fs.readFileSync(path.join(root, 'styles/templates/game/main.navigation.tpl'), 'utf8');
+const faqTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.questions.default.tpl'), 'utf8');
 const resourcesTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.resources.default.tpl'), 'utf8');
 const varsPhp = fs.readFileSync(path.join(root, 'includes/vars.php'), 'utf8');
 const bottomnav = fs.readFileSync(path.join(root, 'styles/templates/game/main.bottomnav.tpl'), 'utf8');
@@ -122,6 +123,25 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.ok(market > advanced && market < admin);
 		assert.ok(shipMerchant > advanced && shipMerchant < admin);
 		assert.ok(resources < market && market < shipMerchant);
+	});
+
+	it('puts FAQ in Basics, drops Forum, and moves community/admin tools to Administration', () => {
+		const basics = nav.indexOf('lm_menu_section_overview');
+		const advanced = nav.indexOf('lm_menu_section_empire');
+		const admin = nav.indexOf('lm_menu_section_account');
+		const faq = nav.indexOf('page=questions');
+		const discord = nav.indexOf('{$discordUrl}');
+		const support = nav.indexOf('page=ticket');
+		const search = nav.indexOf('page=search');
+		const banned = nav.indexOf('page=banList');
+		assert.ok(basics !== -1 && advanced !== -1 && admin !== -1);
+		assert.ok(faq > basics && faq < advanced);
+		assert.ok(discord > admin && support > admin && search > admin && banned > admin);
+		assert.ok(discord < support && support < search && search < banned);
+		assert.equal(nav.includes('page=board'), false);
+		assert.equal(nav.includes('lm_forums'), false);
+		assert.match(nav, /TODO\(nav-ia\): reorder Advanced siblings by Outreach usage ranks/);
+		assert.match(faqTpl, /faq_intro/);
 	});
 });
 

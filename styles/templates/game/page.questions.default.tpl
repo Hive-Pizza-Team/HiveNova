@@ -6,6 +6,7 @@
 	</tr>
 	<tr>
 		<td class="left">
+		{if $LNG.faq_intro}<p class="faq-intro">{$LNG.faq_intro}</p>{/if}
 		{foreach $faqIndex as $categoryRow}
 			<h2>{$categoryRow.category}</h2>
 			<ul>

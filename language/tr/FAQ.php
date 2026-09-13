@@ -140,4 +140,5 @@ $LNG['questions'][2][4]['body']		= <<<BODY
 <p>Bu menüden ittifakla ilgili bilgileri düzenleyebilirsiniz. Ittifağın tanımı,  metinler ve sayfası gibi. Aynı zamanda üyeleri yönet menüsüyle rütbeler belirleyip, üyelerin yetkilerini atayabilirsiniz. Eğer ileride ittifağı devretmek isterseniz üyelerden birine Sağ Kol özelliği vermeniz gerekmektedir.
 <br> Aynı zamanda ittifağı dağıt menüsüyle de ittifağı dağıtabilirsiniz Ama ittifaktan ayrıl dediğinizde Ittifak belirlediğiniz Sağ Kol’a devredilir. Aynı zamanda kurucu ya da kurucunun yetki verdiği üyeler bu sayfadan üye başvurularını değerlendirebilir. </p>
 BODY;
+$LNG['faq_intro'] = 'Start with energy and mines, then unlock the Shipyard from Technologies (Gigafactory level 2). Open a topic below, or go to Technologies any time you need building or ship requirements.';
 

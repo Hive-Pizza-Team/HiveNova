@@ -172,3 +172,4 @@ Unter "Textverwaltung" kannst du die Allianztexte ändern. Den externen Text sie
 Bei den Einstellungen kannst du ein Bild verlinken, dass auf der Allianzseite dargestellt wird, sowie einen Link zu einem Allianzforum eingeben, falls du eines hast. Außerdem kannst du festlegen, ob Bewerbungen möglich sind oder nicht, und welchen Rangnamen du als Gründer verwenden willst. Wenn du dort nichts eingibst, ist dein Rangname "Gründer".<br>
 Mit "Allianz auflösen" kannst du logischerweise die Allianz auflösen, und mit "Allianz abtreten/übernehmen" kannst du die Allianz an ein anderes Allianzmitglied übergeben, dieses bekommt dann den Gründerstatus.</p>
 BODY;
+$LNG['faq_intro'] = 'Start with energy and mines, then unlock the Shipyard from Technologies (Gigafactory level 2). Open a topic below, or go to Technologies any time you need building or ship requirements.';

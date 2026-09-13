@@ -150,3 +150,4 @@ Pamiętaj, że w nazwach nie możesz używać znaków specjalnych.<br>
 BODY;
 
 // Translated into Polish by Sirgomo . All rights reversed (C) 2012
+$LNG['faq_intro'] = 'Start with energy and mines, then unlock the Shipyard from Technologies (Gigafactory level 2). Open a topic below, or go to Technologies any time you need building or ship requirements.';

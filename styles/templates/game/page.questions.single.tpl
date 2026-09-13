@@ -8,7 +8,7 @@
 		<th>{$questionRow.title}</th>
 	</tr>
 	<tr>
-		<td class="left">
+		<td class="left faq-body">
 		{$questionRow.body}
 		</td>
 	</tr>
