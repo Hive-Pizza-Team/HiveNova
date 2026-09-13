@@ -2737,7 +2737,17 @@ table.tablesorter thead tr .headerSortDown {
         white-space: normal;
     }
 
+    body#messages .msg-pagination-row {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 6px 0;
+    }
+
     body#messages .msg-pagination-row td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
         white-space: normal;
         text-align: left !important;
         word-break: break-word;
