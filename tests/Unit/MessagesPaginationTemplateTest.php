@@ -113,4 +113,17 @@ class MessagesPaginationTemplateTest extends TestCase
 		$this->assertSame($rows[0][0], $rows[0][1]);
 		$this->assertStringContainsString('game.php?page=messages&category=1&filter=lost&side=3', $rows[0][0]);
 	}
+
+	public function testMessageBodyIdsRenderHydrationFallbackWhenLoadBodiesIsMissing(): void
+	{
+		$html = $this->renderMessagesPage([
+			'messageBodyIds' => [10, 11],
+		]);
+
+		$this->assertStringContainsString('id="message-body-ids"', $html);
+		$this->assertStringContainsString('id="message-body-outbox"', $html);
+		$this->assertStringContainsString('typeof Message.loadBodies === \'function\'', $html);
+		$this->assertStringContainsString('mode=bodies', $html);
+		$this->assertStringContainsString('data-message-body', $html);
+	}
 }
