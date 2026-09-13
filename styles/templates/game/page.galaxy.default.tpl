@@ -100,6 +100,7 @@
 		</td>
         {$currentPlanet = $GalaxyRows[$planet]}
 		<td>
+			{if !$galaxyCompact}
 			{capture name="planetTooltip"}
 			<table style='width:220px'>
 				<tr>
@@ -149,10 +150,16 @@
 			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.planetTooltip|escape:'html'}">
 				{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=30 height=30 alt='' preferLite=true loading="lazy"}
 			</a>
+			{else}
+			<span{if $dpath|strstr:'/hive/'} class="galaxy-planet-preview" data-planet-viz-ref="{$currentPlanet.planet.vizRef|escape:'html'}"{/if}>
+				{include file="shared.planet-thumb.tpl" texture=$currentPlanet.planet.image dpath=$dpath width=30 height=30 alt='' preferLite=true loading="lazy"}
+			</span>
+			{/if}
 		</td>
 		<td style="white-space: nowrap;">{$currentPlanet.planet.name} {$currentPlanet.lastActivity}</td>
 		<td style="white-space: nowrap;">
 			{if $currentPlanet.moon}
+			{if !$galaxyCompact}
 			{capture name="moonTooltip"}
 			<table style='width:240px'>
 				<tr>
@@ -208,10 +215,16 @@
 			<a class="tooltip_sticky{if $dpath|strstr:'/hive/'} galaxy-planet-preview{/if}"{if $dpath|strstr:'/hive/'} data-planet-viz-ref="{$currentPlanet.moon.vizRef|escape:'html'}"{/if} data-tooltip-content="{$smarty.capture.moonTooltip|escape:'html'}">
 				{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=22 height=22 alt=$currentPlanet.moon.name preferLite=true loading="lazy"}
 			</a>
+			{else}
+			<span{if $dpath|strstr:'/hive/'} class="galaxy-planet-preview" data-planet-viz-ref="{$currentPlanet.moon.vizRef|escape:'html'}"{/if}>
+				{include file="shared.planet-thumb.tpl" texture='mond' dpath=$dpath width=22 height=22 alt=$currentPlanet.moon.name preferLite=true loading="lazy"}
+			</span>
+			{/if}
 			{/if}
 		</td>
 		<td style="white-space: nowrap;">
         {if $currentPlanet.debris}
+			{if !$galaxyCompact}
 			{capture name="debrisTooltip"}
 			<table style='width:240px'>
 				<tr>
@@ -247,6 +260,9 @@
 			<a class="tooltip_sticky" data-tooltip-content="{$smarty.capture.debrisTooltip|escape:'html'}">
 			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt='' preferLite=true loading="lazy"}
 			</a>
+			{else}
+			{include file="shared.planet-thumb.tpl" texture='debris' dpath=$dpath width=22 height=22 alt='' preferLite=true loading="lazy"}
+			{/if}
         {/if}
 		</td>
 		<td>

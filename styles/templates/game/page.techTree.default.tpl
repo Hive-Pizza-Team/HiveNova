@@ -37,5 +37,5 @@
 </div>
 </div>
 <script type="application/json" id="techtree-data">{$techTreeJson nofilter}</script>
-<script src="./scripts/game/techtree.js?v={$REV}"></script>
+<script defer src="./scripts/game/techtree.js?v={$REV}"></script>
 {/block}

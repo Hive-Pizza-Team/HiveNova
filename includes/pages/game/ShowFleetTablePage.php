@@ -219,7 +219,12 @@ class ShowFleetTablePage extends AbstractGamePage
 		$targetType		= HTTP::_GP('planettype', (int) $PLANET['planet_type']);
 		$targetMission	= HTTP::_GP('target_mission', 0);
 
-        $sql = "SELECT * FROM %%FLEETS%% WHERE fleet_owner = :userID AND fleet_mission <> 10 ORDER BY fleet_end_time ASC;";
+        $sql = "SELECT fleet_id, fleet_mission, fleet_mess, fleet_no_m_return,
+			fleet_start_galaxy, fleet_start_system, fleet_start_planet, fleet_start_time,
+			fleet_end_galaxy, fleet_end_system, fleet_end_planet, fleet_end_time,
+			fleet_resource_metal, fleet_resource_crystal, fleet_resource_deuterium, fleet_resource_darkmatter,
+			fleet_amount, fleet_array, fleet_meta
+			FROM %%FLEETS%% WHERE fleet_owner = :userID AND fleet_mission <> 10 ORDER BY fleet_end_time ASC;";
         $fleetResult = $db->select($sql, array(
             ':userID'   => $USER['id']
         ));
@@ -299,6 +304,7 @@ class ShowFleetTablePage extends AbstractGamePage
 			'targetMission'			=> $targetMission,
 			'acsData'				=> $acsData,
 			'isVacation'			=> IsVacationMode($USER),
+			'compactViewport'		=> (($_COOKIE['hn_compact'] ?? '') === '1'),
 			'bonusAttack'			=> $USER[$resource[109]] * 10 + $USER['factor']['Attack'] * 100,
 			'bonusDefensive'		=> $USER[$resource[110]] * 10 + $USER['factor']['Defensive'] * 100,
 			'bonusShield'			=> $USER[$resource[111]] * 10 + $USER['factor']['Shield'] * 100,

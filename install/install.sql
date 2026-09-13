@@ -909,7 +909,8 @@ CREATE TABLE `%PREFIX%topkb` (
   `result` varchar(1) NOT NULL,
   `time` int(11) NOT NULL,
   `universe` tinyint(3) unsigned NOT NULL,
-  KEY `time` (`universe`,`rid`,`time`)
+  KEY `time` (`universe`,`rid`,`time`),
+  KEY `universe_units` (`universe`,`units`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%universe_events` (

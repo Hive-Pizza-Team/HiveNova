@@ -93,31 +93,34 @@ class MessageRepository
 
     /**
      * Fetch a paged list of messages. Category 999 = sent, 100 = all.
+     *
+     * @param bool $includeBody When false, omit message_text (lazy-load via getMessageBodies).
      */
-    public static function getMessagesPaged(int $userId, int $category, int $offset, int $limit, string $filter = '', int $universe = 0): array
+    public static function getMessagesPaged(int $userId, int $category, int $offset, int $limit, string $filter = '', int $universe = 0, bool $includeBody = true): array
     {
         $db = Database::get();
         $lost = self::lostFilterClause($category, $filter);
         $uni = self::universeClause($universe);
+        $bodyCol = $includeBody ? ', message_text' : '';
 
         if ($category === 999) {
             $sql = 'SELECT message_id, message_time,
                         CONCAT(username, \' [\', galaxy, \':\', `system`, \':\', planet, \']\') as message_from,
-                        message_subject, message_sender, message_type, message_unread, message_text
+                        message_subject, message_sender, message_type, message_unread' . $bodyCol . '
                     FROM %%MESSAGES%% INNER JOIN %%USERS%% ON id = message_owner
                     WHERE message_sender = :userId AND message_type != 50 AND message_deleted IS NULL' . $uni['sql'] . '
                     ORDER BY message_time DESC
                     LIMIT :offset, :limit;';
             $params = [':userId' => $userId, ':offset' => $offset, ':limit' => $limit] + $uni['params'];
         } elseif ($category === 100) {
-            $sql = 'SELECT message_id, message_time, message_from, message_subject, message_sender, message_type, message_unread, message_text
+            $sql = 'SELECT message_id, message_time, message_from, message_subject, message_sender, message_type, message_unread' . $bodyCol . '
                     FROM %%MESSAGES%%
                     WHERE message_owner = :userId AND message_deleted IS NULL' . $uni['sql'] . $lost['sql'] . '
                     ORDER BY message_time DESC
                     LIMIT :offset, :limit;';
             $params = [':userId' => $userId, ':offset' => $offset, ':limit' => $limit] + $uni['params'] + $lost['params'];
         } else {
-            $sql = 'SELECT message_id, message_time, message_from, message_subject, message_sender, message_type, message_unread, message_text
+            $sql = 'SELECT message_id, message_time, message_from, message_subject, message_sender, message_type, message_unread' . $bodyCol . '
                     FROM %%MESSAGES%%
                     WHERE message_owner = :userId AND message_type = :category AND message_deleted IS NULL' . $uni['sql'] . $lost['sql'] . '
                     ORDER BY message_time DESC
@@ -126,6 +129,36 @@ class MessageRepository
         }
 
         return $db->select($sql, $params);
+    }
+
+    /**
+     * Load message bodies for the given IDs owned by (or sent by) the user.
+     *
+     * @param list<int> $ids
+     * @return list<array{message_id: int, message_type: int, message_text: string}>
+     */
+    public static function getMessageBodies(int $userId, array $ids, bool $outbox = false, int $universe = 0): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static fn(int $id): bool => $id > 0)));
+        if ($ids === []) {
+            return [];
+        }
+
+        $db = Database::get();
+        $uni = self::universeClause($universe);
+        $inList = implode(',', $ids);
+
+        if ($outbox) {
+            $sql = 'SELECT message_id, message_type, message_text
+                    FROM %%MESSAGES%%
+                    WHERE message_sender = :userId AND message_type != 50 AND message_id IN (' . $inList . ')' . $uni['sql'];
+        } else {
+            $sql = 'SELECT message_id, message_type, message_text
+                    FROM %%MESSAGES%%
+                    WHERE message_owner = :userId AND message_deleted IS NULL AND message_id IN (' . $inList . ')' . $uni['sql'];
+        }
+
+        return $db->select($sql, [':userId' => $userId] + $uni['params']);
     }
 
     public static function markAsRead(int $userId, ?int $category = null, int $universe = 0): void

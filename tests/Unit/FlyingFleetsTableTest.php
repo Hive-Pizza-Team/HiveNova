@@ -74,6 +74,30 @@ class FlyingFleetsTableTest extends TestCase
         $this->assertSame(3600, $events[$outwardKey]['resttime']);
     }
 
+    public function test_compact_mode_omits_sticky_tooltip_markup(): void
+    {
+        $this->seedUsersAndPlanets();
+        $this->fake->fleetRowsById[1] = $this->fleetRow([
+            'fleet_id' => 1,
+            'fleet_owner' => 1,
+            'fleet_target_owner' => 2,
+            'fleet_mission' => 1,
+            'fleet_mess' => FLEET_OUTWARD,
+            'fleet_start_time' => TIMESTAMP + 3600,
+            'fleet_end_time' => TIMESTAMP + 7200,
+            'fleet_resource_metal' => 100,
+            'fleet_array' => '202,5;',
+        ]);
+
+        $table = new FlyingFleetsTable();
+        $table->setUser(1);
+        $table->setCompactOmitTooltips(true);
+        $events = $table->renderTable();
+        $outwardKey = (TIMESTAMP + 3600) . '1';
+        $this->assertArrayHasKey($outwardKey, $events);
+        $this->assertStringNotContainsString('data-tooltip-content', $events[$outwardKey]['text']);
+    }
+
     public function test_render_table_filters_by_mission_list(): void
     {
         $this->seedUsersAndPlanets();

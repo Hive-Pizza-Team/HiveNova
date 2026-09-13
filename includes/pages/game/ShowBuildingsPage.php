@@ -371,9 +371,15 @@ $Messages		= $USER['messages'];
 			$costResources		= BuildFunctions::getElementPrice($USER, $PLANET, $Element, false, $levelToBuild+1);
 			$costOverflow		= BuildFunctions::getRestPrice($USER, $PLANET, $Element, $costResources);
 			$elementTime    	= BuildFunctions::getBuildingTime($USER, $PLANET, $Element, $costResources);
-			$destroyResources	= BuildFunctions::getElementPrice($USER, $PLANET, $Element, true);
-			$destroyTime		= BuildFunctions::getBuildingTime($USER, $PLANET, $Element, $destroyResources);
-			$destroyOverflow	= BuildFunctions::getRestPrice($USER, $PLANET, $Element, $destroyResources);
+			$destroyResources	= array();
+			$destroyTime		= 0;
+			$destroyOverflow	= array();
+			// Destroy pricing only when the building exists (details UI).
+			if ((int) $PLANET[$resource[$Element]] > 0) {
+				$destroyResources	= BuildFunctions::getElementPrice($USER, $PLANET, $Element, true);
+				$destroyTime		= BuildFunctions::getBuildingTime($USER, $PLANET, $Element, $destroyResources);
+				$destroyOverflow	= BuildFunctions::getRestPrice($USER, $PLANET, $Element, $destroyResources);
+			}
 			$buyable			= $QueueCount != 0 || BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources);
 
 			$BuildInfoList[$Element]	= array(
@@ -393,8 +399,8 @@ $Messages		= $USER['messages'];
 		}
 
 		
+		$this->tplObj->loadscript('page-filters.js');
 		if ($QueueCount != 0) {
-			$this->tplObj->loadscript('page-filters.js');
 			$this->tplObj->loadscript('buildlist.js');
 		}
 		
