@@ -134,3 +134,4 @@ $LNG['questions'][2][5]['body']		= <<<BODY
 <p>As compras de Pizzabits duram apenas um universo ou temporada. Não serão transferidas para uma nova temporada.</p>
 <p>É necessária uma conta Hive vinculada para depositar PIZZA e ganhar recompensas. Contacta-nos no Discord para saber como criar uma conta Hive.</p>
 BODY;
+$LNG['faq_intro'] = 'Start with energy and mines, then unlock the Shipyard from Technologies (Gigafactory level 2). Open a topic below, or go to Technologies any time you need building or ship requirements.';

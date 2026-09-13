@@ -593,12 +593,18 @@ a {
   text-decoration: none
 }
 
-a.faq-index-link {
+.faq-intro {
+  margin: 0 0 1em;
+}
+
+a.faq-index-link,
+.faq-body a {
   color: var(--color-accent);
   text-decoration: underline;
 }
 
-a.faq-index-link:hover {
+a.faq-index-link:hover,
+.faq-body a:hover {
   color: var(--color-accent-hover);
   text-decoration: underline;
 }
