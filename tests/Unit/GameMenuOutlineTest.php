@@ -62,8 +62,8 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertLessThan($admin, $resources);
 		$this->assertLessThan($admin, $market);
 		$this->assertLessThan($admin, $shipMerchant);
-		$this->assertLessThan($resources, $market);
-		$this->assertLessThan($market, $shipMerchant);
+		$this->assertGreaterThan($resources, $market);
+		$this->assertGreaterThan($market, $shipMerchant);
 	}
 
 	public function test_shipyard_page_exposes_mode_tabs(): void
