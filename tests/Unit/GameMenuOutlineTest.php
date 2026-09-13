@@ -41,6 +41,31 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertLessThan($admin, $feed);
 	}
 
+	public function test_resources_market_and_ship_merchant_sit_in_advanced_section(): void
+	{
+		$basics = strpos($this->nav, 'lm_menu_section_overview');
+		$advanced = strpos($this->nav, 'lm_menu_section_empire');
+		$admin = strpos($this->nav, 'lm_menu_section_account');
+		$resources = strpos($this->nav, 'page=resources');
+		$market = strpos($this->nav, 'page=trader');
+		$shipMerchant = strpos($this->nav, 'page=fleetDealer');
+
+		$this->assertNotFalse($basics);
+		$this->assertNotFalse($advanced);
+		$this->assertNotFalse($admin);
+		$this->assertNotFalse($resources);
+		$this->assertNotFalse($market);
+		$this->assertNotFalse($shipMerchant);
+		$this->assertGreaterThan($advanced, $resources);
+		$this->assertGreaterThan($advanced, $market);
+		$this->assertGreaterThan($advanced, $shipMerchant);
+		$this->assertLessThan($admin, $resources);
+		$this->assertLessThan($admin, $market);
+		$this->assertLessThan($admin, $shipMerchant);
+		$this->assertGreaterThan($resources, $market);
+		$this->assertGreaterThan($market, $shipMerchant);
+	}
+
 	public function test_shipyard_page_exposes_mode_tabs(): void
 	{
 		$tpl = file_get_contents(__DIR__ . '/../../styles/templates/game/page.shipyard.default.tpl');
