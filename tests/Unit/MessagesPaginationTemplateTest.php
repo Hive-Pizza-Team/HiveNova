@@ -69,15 +69,17 @@ class MessagesPaginationTemplateTest extends TestCase
 	{
 		$html = $this->renderMessagesPage();
 
-		$this->assertSame(2, substr_count($html, 'class="msg-pagination-row"'));
-		$this->assertSame(2, substr_count($html, 'Page:'));
-		$this->assertSame(2, substr_count($html, 'game.php?page=messages&category=1&side=1'));
-		$this->assertSame(2, substr_count($html, 'game.php?page=messages&category=1&side=3'));
-		$this->assertSame(2, substr_count($html, '<b>[2]&nbsp;</b>'));
+		preg_match_all('/<tr class="msg-pagination-row">.*?<\/tr>/s', $html, $rows);
+		$this->assertCount(2, $rows[0], $html);
+		$this->assertSame($rows[0][0], $rows[0][1]);
+		$this->assertStringContainsString('Page:', $rows[0][0]);
+		$this->assertStringContainsString('game.php?page=messages&category=1&side=1', $rows[0][0]);
+		$this->assertStringContainsString('game.php?page=messages&category=1&side=3', $rows[0][0]);
+		$this->assertStringContainsString('<b>[2]&nbsp;</b>', $rows[0][0]);
 
-		$top = strpos($html, 'class="msg-pagination-row"');
+		$top = strpos($html, $rows[0][0]);
 		$message = strpos($html, 'id="message_10"');
-		$bottom = strrpos($html, 'class="msg-pagination-row"');
+		$bottom = strrpos($html, $rows[0][1]);
 
 		$this->assertNotFalse($top);
 		$this->assertNotFalse($message);
@@ -106,6 +108,9 @@ class MessagesPaginationTemplateTest extends TestCase
 			'filterQuery' => '&filter=lost',
 		]);
 
-		$this->assertSame(2, substr_count($html, 'game.php?page=messages&category=1&filter=lost&side=3'));
+		preg_match_all('/<tr class="msg-pagination-row">.*?<\/tr>/s', $html, $rows);
+		$this->assertCount(2, $rows[0], $html);
+		$this->assertSame($rows[0][0], $rows[0][1]);
+		$this->assertStringContainsString('game.php?page=messages&category=1&filter=lost&side=3', $rows[0][0]);
 	}
 }
