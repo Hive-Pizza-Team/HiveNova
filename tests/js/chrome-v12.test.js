@@ -86,12 +86,29 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.equal(nav.includes('details') && nav.includes('accordion'), false);
 	});
 
-	it('labels existing OVERVIEW / EMPIRE / ACCOUNT splits and marks the active page', () => {
+	it('labels Basics / Advanced / Administration splits and marks the active page', () => {
 		assert.match(nav, /lm_menu_section_overview/);
 		assert.match(nav, /lm_menu_section_empire/);
 		assert.match(nav, /lm_menu_section_account/);
 		assert.match(nav, /class="active"/);
 		assert.equal((nav.match(/menu-section/g) || []).length >= 3, true);
+		const ingameEn = fs.readFileSync(path.join(root, 'language/en/INGAME.php'), 'utf8');
+		assert.match(ingameEn, /lm_menu_section_overview'\]\s*=\s*'Basics'/);
+		assert.match(ingameEn, /lm_menu_section_empire'\]\s*=\s*'Advanced'/);
+		assert.match(ingameEn, /lm_menu_section_account'\]\s*=\s*'Administration'/);
+	});
+
+	it('uses one Shipyard item and keeps Map plus Universe Feed under Advanced', () => {
+		assert.equal((nav.match(/page=shipyard/g) || []).length, 1);
+		assert.match(nav, /lm_shipshard/);
+		assert.equal(nav.includes('lm_defenses'), false);
+		const advanced = nav.indexOf('lm_menu_section_empire');
+		const admin = nav.indexOf('lm_menu_section_account');
+		const viz = nav.indexOf('page=viz');
+		const feed = nav.indexOf('page=eventFirehose');
+		assert.ok(advanced !== -1 && admin !== -1 && viz !== -1 && feed !== -1);
+		assert.ok(viz > advanced && viz < admin);
+		assert.ok(feed > advanced && feed < admin);
 	});
 });
 
