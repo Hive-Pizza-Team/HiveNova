@@ -84,17 +84,18 @@ class AssetRevisionTest extends TestCase
 
 	public function testFingerprintPathsIncludeDeferredPageScripts(): void
 	{
-		$this->assertContains('scripts/game/message.js', AssetRevision::FINGERPRINT_PATHS);
-		$this->assertContains('scripts/game/battlesim.js', AssetRevision::FINGERPRINT_PATHS);
-		$this->assertContains('scripts/game/search.js', AssetRevision::FINGERPRINT_PATHS);
-		$this->assertContains('scripts/game/flotten.js', AssetRevision::FINGERPRINT_PATHS);
-		$this->assertContains('scripts/game/galaxy.js', AssetRevision::FINGERPRINT_PATHS);
-		$this->assertContains('scripts/game/overview.js', AssetRevision::FINGERPRINT_PATHS);
+		$paths = AssetRevision::fingerprintPaths();
+		$this->assertContains('scripts/game/message.js', $paths);
+		$this->assertContains('scripts/game/battlesim.js', $paths);
+		$this->assertContains('scripts/game/search.js', $paths);
+		$this->assertContains('scripts/game/flotten.js', $paths);
+		$this->assertContains('scripts/game/galaxy.js', $paths);
+		$this->assertContains('scripts/game/overview.js', $paths);
 	}
 
 	public function testFingerprintPathsExistOnDisk(): void
 	{
-		foreach (AssetRevision::FINGERPRINT_PATHS as $relative) {
+		foreach (AssetRevision::fingerprintPaths() as $relative) {
 			$this->assertFileExists(ROOT_PATH . $relative, $relative . ' is fingerprinted but missing');
 		}
 	}
