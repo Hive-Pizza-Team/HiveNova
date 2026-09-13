@@ -1,4 +1,4 @@
-{block name="title" prepend}{if $mode == "defense"}{$LNG.lm_defenses}{else}{$LNG.lm_shipshard}{/if}{/block}
+{block name="title" prepend}{$LNG.lm_shipshard}{/block}
 {block name="content"}
 
 	{if $messages}
@@ -27,8 +27,15 @@
 {/if}
 
 <div>
-{if $mode == "defense"}{else}<div class="planeto"> <button type="button" id="ship1" class="btn btn--secondary btn--compact">Civil</button> | <button type="button" id="ship2" class="btn btn--secondary btn--compact">Military</button> | <button type="button" id="ship3" class="btn btn--secondary btn--compact selected">All</button>{/if}
-</div>	
+{if $shipyardTabs|@count > 1}
+<div class="planeto shipyard-mode-tabs">
+{foreach $shipyardTabs as $tab}
+	<a href="game.php?page=shipyard&amp;mode={$tab.mode}" class="btn btn--secondary btn--compact{if $tab.active} selected{/if}">{if $tab.mode == 'defense'}{$LNG.lm_defenses}{else}{$LNG.bd_shipyard_tab_ships}{/if}</a>{if !$tab@last} | {/if}
+{/foreach}
+</div>
+{/if}
+{if $mode != "defense"}<div class="planeto"> <button type="button" id="ship1" class="btn btn--secondary btn--compact">Civil</button> | <button type="button" id="ship2" class="btn btn--secondary btn--compact">Military</button> | <button type="button" id="ship3" class="btn btn--secondary btn--compact selected">All</button></div>{/if}
+</div>
 	{foreach $elementList as $ID => $Element}
 	
 		<div class="infos" id="s{$ID}"><form action="game.php?page=shipyard&amp;mode={$mode}" method="post" id="s{$ID}">
