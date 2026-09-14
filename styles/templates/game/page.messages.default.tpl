@@ -79,5 +79,38 @@
 {if !empty($messageBodyIds)}
 <script type="application/json" id="message-body-ids">{$messageBodyIds|json}</script>
 <script type="application/json" id="message-body-outbox">{if $MessID == 999}1{else}0{/if}</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	if (window.Message && typeof Message.loadBodies === 'function') {
+		return;
+	}
+	var idsTag = document.getElementById('message-body-ids');
+	if (!idsTag || typeof window.jQuery === 'undefined') {
+		return;
+	}
+	var ids;
+	try {
+		ids = JSON.parse(idsTag.textContent || '[]');
+	} catch (e) {
+		return;
+	}
+	if (!ids || !ids.length) {
+		return;
+	}
+	var outboxTag = document.getElementById('message-body-outbox');
+	var outbox = outboxTag && outboxTag.textContent.trim() === '1' ? 1 : 0;
+	jQuery.getJSON('game.php?page=messages&mode=bodies&ajax=1&outbox=' + outbox + '&ids=' + ids.join(','), function (data) {
+		if (!data || !data.bodies) {
+			return;
+		}
+		Object.keys(data.bodies).forEach(function (id) {
+			var cell = document.querySelector('[data-message-body="' + id + '"]');
+			if (cell) {
+				cell.innerHTML = data.bodies[id];
+			}
+		});
+	});
+});
+</script>
 {/if}
 {/block}

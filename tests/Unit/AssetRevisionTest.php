@@ -82,6 +82,47 @@ class AssetRevisionTest extends TestCase
 		$this->assertNull(AssetRevision::maxAssetMtime($root));
 	}
 
+	public function testFingerprintPathsIncludeDeferredPageScripts(): void
+	{
+		$paths = AssetRevision::fingerprintPaths();
+		$this->assertContains('scripts/game/message.js', $paths);
+		$this->assertContains('scripts/game/battlesim.js', $paths);
+		$this->assertContains('scripts/game/search.js', $paths);
+		$this->assertContains('scripts/game/flotten.js', $paths);
+		$this->assertContains('scripts/game/galaxy.js', $paths);
+		$this->assertContains('scripts/game/overview.js', $paths);
+	}
+
+	public function testFingerprintPathsExistOnDisk(): void
+	{
+		foreach (AssetRevision::fingerprintPaths() as $relative) {
+			$this->assertFileExists(ROOT_PATH . $relative, $relative . ' is fingerprinted but missing');
+		}
+	}
+
+	public function testFilesystemRevChangesWhenMessageJsChangesAndCssDoesNot(): void
+	{
+		$cssMtime = 1_700_000_000;
+		$jsMtime = 1_700_000_100;
+		$messageMtime = 1_700_000_400;
+		$root = $this->makeAssetTree($cssMtime, $jsMtime);
+		file_put_contents($root . 'scripts/game/message.js', 'void 0;');
+		touch($root . 'scripts/game/message.js', $messageMtime);
+		clearstatcache(true, $root . 'scripts/game/message.js');
+
+		$before = AssetRevision::fromFilesystem('2.0', $root);
+		$this->assertSame('2.0.' . $messageMtime, $before);
+
+		$newerMessage = 1_700_000_500;
+		$this->assertTrue(touch($root . 'scripts/game/message.js', $newerMessage));
+		clearstatcache(true, $root . 'scripts/game/message.js');
+
+		$after = AssetRevision::fromFilesystem('2.0', $root);
+		$this->assertSame('2.0.' . $newerMessage, $after);
+		$this->assertNotSame($before, $after);
+		$this->assertSame($cssMtime, (int) filemtime($root . 'styles/resource/css/ingame/main.css'));
+	}
+
 	private function makeAssetTree(int $cssMtime, int $jsMtime): string
 	{
 		$root = $this->makeEmptyRoot();
