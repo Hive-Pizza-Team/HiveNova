@@ -14,10 +14,11 @@
  */
 
 var MOBILE_TOOLTIP_INERT_HREF = 'javascript:void(0)';
-var MOBILE_TOOLTIP_GUARD_MS = 400;
+var MOBILE_TOOLTIP_GUARD_MS = 500;
 var MOBILE_TOOLTIP_TAP_SLOP = 16;
 var mobileTooltipGuardUntil = 0;
 var mobileTooltipTouch = null;
+var suppressNextMobileTooltipClick = false;
 
 function mobileTooltipMediaQuery() {
 	return '(max-width: 699px), (hover: none), (pointer: coarse)';
@@ -102,6 +103,9 @@ function openMobileTooltip(el, e) {
 		e.preventDefault();
 		e.stopPropagation();
 	}
+	if (e && e.type === 'touchend') {
+		suppressNextMobileTooltipClick = true;
+	}
 	if (tip.is(':visible') && tip.data('mobile-source') === el) {
 		resetTooltipOverlay(tip);
 		tip.hide().removeData('mobile-source');
@@ -161,7 +165,8 @@ $(document).ready(function () {
 		if (!isMobileTooltip()) {
 			return;
 		}
-		if (isMobileTooltipGuardActive()) {
+		if (suppressNextMobileTooltipClick || isMobileTooltipGuardActive()) {
+			suppressNextMobileTooltipClick = false;
 			e.preventDefault();
 			e.stopPropagation();
 			return;

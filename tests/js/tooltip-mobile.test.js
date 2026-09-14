@@ -27,10 +27,10 @@ describe('mobile tooltip helpers', () => {
 
 	it('ignores dismiss during the opening-gesture guard', () => {
 		const openedAt = 1_000;
-		const guardUntil = tooltip.armMobileTooltipGuard(openedAt, 400);
+		const guardUntil = tooltip.armMobileTooltipGuard(openedAt, tooltip.MOBILE_TOOLTIP_GUARD_MS);
 		assert.equal(tooltip.isMobileTooltipGuardActive(1_100, guardUntil), true);
 		assert.equal(tooltip.shouldDismissMobileTooltip(false, 1_100, guardUntil), false);
-		assert.equal(tooltip.shouldDismissMobileTooltip(false, 1_500, guardUntil), true);
+		assert.equal(tooltip.shouldDismissMobileTooltip(false, openedAt + tooltip.MOBILE_TOOLTIP_GUARD_MS + 1, guardUntil), true);
 		assert.equal(tooltip.shouldDismissMobileTooltip(true, 1_500, guardUntil), false);
 	});
 
