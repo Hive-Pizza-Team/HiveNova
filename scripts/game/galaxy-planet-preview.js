@@ -109,7 +109,7 @@
 
 	function startPreview(trigger) {
 		var vizRef = $(trigger).attr('data-planet-viz-ref');
-		if (!vizRef || isMobileTooltip()) {
+		if (!vizRef || (typeof window.isMobileTooltip === 'function' && window.isMobileTooltip())) {
 			return;
 		}
 
@@ -159,12 +159,8 @@
 		});
 	}
 
-	function isMobileTooltip() {
-		return window.matchMedia('(max-width: 699px)').matches;
-	}
-
 	$(function () {
-		if (isMobileTooltip()) {
+		if (typeof window.isMobileTooltip === 'function' && window.isMobileTooltip()) {
 			return;
 		}
 
