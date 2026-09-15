@@ -124,6 +124,30 @@ class LoginUniverseDefaultsTest extends TestCase
 		$this->assertSame(1, LoginUniverseDefaults::forHive(true));
 	}
 
+	public function test_is_open_for_registration_matches_send_gate(): void
+	{
+		$this->resetUniverseList([1, 2, 3, 4]);
+		Config::setInstance($this->uniConfig(1, 'Open', open: true, seasonal: false, players: 10), 1);
+		Config::setInstance($this->uniConfig(2, 'Reg closed', open: true, seasonal: false, players: 10, regClosed: true), 2);
+		Config::setInstance($this->uniConfig(3, 'Disabled', open: false, seasonal: false, players: 0), 3);
+		Config::setInstance($this->uniConfig(4, 'Seasonal open', open: true, seasonal: true, players: 17), 4);
+
+		$this->assertTrue(LoginUniverseDefaults::isOpenForRegistration(1));
+		$this->assertTrue(LoginUniverseDefaults::isOpenForRegistration(4));
+		$this->assertFalse(LoginUniverseDefaults::isOpenForRegistration(2));
+		$this->assertFalse(LoginUniverseDefaults::isOpenForRegistration(3));
+		$this->assertFalse(LoginUniverseDefaults::isOpenForRegistration(99));
+		$this->assertFalse(LoginUniverseDefaults::isOpenForRegistration(0));
+	}
+
+	public function test_is_open_for_registration_fails_closed_without_config(): void
+	{
+		$this->resetUniverseList([7]);
+		Config::setInstance($this->uniConfig(1, 'Other', open: true, seasonal: false, players: 1), 1);
+
+		$this->assertFalse(LoginUniverseDefaults::isOpenForRegistration(7));
+	}
+
 	/**
 	 * @param list<int> $ids
 	 */
