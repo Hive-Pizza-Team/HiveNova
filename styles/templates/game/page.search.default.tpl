@@ -13,4 +13,5 @@
 		</td>
 	</tr>
 </table>
+<div id="searchResults"></div>
 {/block}
