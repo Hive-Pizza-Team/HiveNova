@@ -21,7 +21,7 @@ class RegisterUsernameAvailabilityTest extends TestCase
 	{
 		$this->assertSame(
 			RegisterUsernameAvailability::REASON_INVALID,
-			RegisterUsernameAvailability::formatReason('Nova', true)
+			RegisterUsernameAvailability::formatReason('Nova Player', true)
 		);
 		$this->assertNull(RegisterUsernameAvailability::formatReason('novaplayer', true));
 	}
@@ -182,6 +182,35 @@ class RegisterUsernameAvailabilityTest extends TestCase
 
 		$this->assertSame([], RegisterUsernameAvailability::lookupGameTaken($db, 0, ['Name']));
 		$this->assertSame([], RegisterUsernameAvailability::lookupGameTaken($db, 1, ['', '  ']));
+	}
+
+	public function test_lookup_game_taken_returns_empty_when_select_fails(): void
+	{
+		$db = $this->createStub(DatabaseInterface::class);
+		$db->method('select')->willReturn(false);
+
+		$this->assertSame([], RegisterUsernameAvailability::lookupGameTaken($db, 1, ['Name']));
+	}
+
+	public function test_hive_lookup_non_array_is_treated_as_empty(): void
+	{
+		$service = new RegisterUsernameAvailability(
+			static fn (): array => [],
+			static fn (): mixed => null
+		);
+
+		$result = $service->check('FreshName', 1, false);
+		$this->assertTrue($result['available']);
+	}
+
+	public function test_similar_hive_candidates_are_lowercase_and_hive_valid(): void
+	{
+		$names = RegisterUsernameAvailability::similarNameCandidates('Alice', true);
+		$this->assertContains('alice2', $names);
+		$this->assertContains('xalice', $names);
+		foreach ($names as $name) {
+			$this->assertTrue(\HiveNova\Core\HiveUtil::isAccountValid($name), $name);
+		}
 	}
 
 	public function test_from_defaults_uses_injected_hive_lookup(): void

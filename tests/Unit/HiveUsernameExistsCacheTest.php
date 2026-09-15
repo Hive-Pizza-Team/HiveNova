@@ -85,6 +85,24 @@ class HiveUsernameExistsCacheTest extends TestCase
 		$this->assertSame(2, $calls);
 	}
 
+	public function test_lookup_ignores_blank_names_and_non_array_fetch(): void
+	{
+		$calls = 0;
+		$result = HiveUsernameExistsCache::lookup(
+			['', '  ', 'erin'],
+			function (array $names) use (&$calls) {
+				$calls++;
+				$this->assertSame(['erin'], $names);
+				return 'nope';
+			},
+			$this->dir,
+			2000
+		);
+
+		$this->assertSame(['erin' => false], $result);
+		$this->assertSame(1, $calls);
+	}
+
 	public function test_default_cache_dir_uses_cache_path(): void
 	{
 		$this->assertStringContainsString('reg-hive-user', HiveUsernameExistsCache::defaultCacheDir());
