@@ -45,8 +45,13 @@
 			{/if}
 			<div class="rowForm">
 				<label for="reg-email-username">{$LNG.registerUsername}</label>
-				<input type="text" class="input" name="username" id="reg-email-username" maxlength="32">
+				<div class="reg-username-wrap">
+					<input type="text" class="input" name="username" id="reg-email-username" maxlength="25" spellcheck="false" autocomplete="username" data-username-check="email" aria-describedby="reg-email-username-msg">
+					<span class="reg-username-mark" aria-hidden="true"></span>
+				</div>
 				{if !empty($error.username)}<span class="error errorUsername"></span>{/if}
+				<p class="reg-username-message" id="reg-email-username-msg" aria-live="polite"></p>
+				<ul class="reg-username-suggestions" id="reg-email-username-suggestions" hidden></ul>
 				<span class="inputDesc">{$LNG.registerUsernameDesc}</span>
 			</div>
 			<div class="rowForm">
@@ -124,7 +129,11 @@
 			</div>
 			<div class="rowForm">
 				<label for="reg-hive-username">{$LNG.hiveAccount}</label>
-				<input type="text" id="reg-hive-username" name="username" maxlength="16">
+				<div class="reg-username-wrap">
+					<input type="text" id="reg-hive-username" name="username" maxlength="16" spellcheck="false" autocomplete="username" data-username-check="hive" aria-describedby="reg-hive-username-msg">
+					<span class="reg-username-mark" aria-hidden="true"></span>
+				</div>
+				<p class="reg-username-message" id="reg-hive-username-msg" aria-live="polite"></p>
 			</div>
 			<input type="hidden" name="password" id="password">
 			<input type="hidden" name="passwordReplay" id="passwordReplay">
@@ -157,5 +166,7 @@
 {if $recaptchaEnable}
 <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl={$lang}"></script>
 {/if}
+<script type="application/json" id="reg-username-check-config">{$registerUsernameCheckConfig|json}</script>
+<script type="text/javascript" src="scripts/login/register-username.js?v={$REV}"></script>
 <script type="text/javascript" src="scripts/login/register.js"></script>
 {/block}

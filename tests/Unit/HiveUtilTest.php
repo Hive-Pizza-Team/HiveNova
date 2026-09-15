@@ -105,6 +105,29 @@ class HiveUtilTest extends TestCase
         ];
     }
 
+    public function testAccountsExistMarksInvalidNamesFalseWithoutRpc(): void
+    {
+        $this->assertSame(
+            ['1player' => false, 'hive nova' => false],
+            HiveUtil::accountsExist(['1player', 'Hive Nova', '1player'])
+        );
+        $this->assertSame([], HiveUtil::accountsExist(['', '  ']));
+    }
+
+    public function testExistingNamesFromAccountListReadsAccountNames(): void
+    {
+        $this->assertSame(
+            ['alice', 'bob'],
+            HiveUtil::existingNamesFromAccountList([
+                ['name' => 'Alice'],
+                'skip',
+                ['name' => ' bob '],
+            ])
+        );
+        $this->assertSame([], HiveUtil::existingNamesFromAccountList(['code' => 1, 'message' => 'err']));
+        $this->assertSame([], HiveUtil::existingNamesFromAccountList(null));
+    }
+
     public function testExtractProfileAboutPrefersPostingJsonMetadata(): void
     {
         $account = [

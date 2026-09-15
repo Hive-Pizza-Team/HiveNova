@@ -12,6 +12,7 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\PasswordPolicy;
 use HiveNova\Core\RegisterValidation;
+use HiveNova\Core\RegisterUsernameAvailability;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\Mail;
 
@@ -124,9 +125,78 @@ class ShowRegisterPage extends AbstractLoginPage
 			'registerTabEmail'			=> $LNG['registerTabEmail'],
 			'registerTabHive'			=> $LNG['registerTabHive'],
 			'registerHiveKeychainInfo'	=> $LNG['registerHiveKeychainInfo'],
+			'registerUsernameCheckConfig'	=> array(
+				'url'         => 'index.php?page=register&mode=checkUsername&ajax=1',
+				'debounceMs'  => 300,
+				'i18n'        => array(
+					'available'   => $LNG['registerUsernameCheckAvailable'],
+					'suggestions' => $LNG['registerUsernameCheckSuggestions'],
+				),
+			),
 		));
 		
 		$this->display('page.register.default.tpl');
+	}
+
+	/**
+	 * Live username availability for the register form.
+	 * index.php?page=register&mode=checkUsername&ajax=1
+	 */
+	function checkUsername()
+	{
+		global $LNG;
+
+		$userName = HTTP::_GP('username', '', UTF8_SUPPORT);
+		$hiveSignup = HTTP::_GP('hiveSignup', 0) === 1;
+		$universe = HTTP::_GP('uni', 0);
+		if ($universe <= 0) {
+			$universe = (int) Universe::current();
+		}
+
+		$result = RegisterUsernameAvailability::fromDefaults(Database::get())->check(
+			$userName,
+			$universe,
+			$hiveSignup
+		);
+
+		$message = '';
+		if ($result['available']) {
+			$message = !empty($result['hiveOwn'])
+				? $LNG['registerUsernameCheckHiveOwn']
+				: $LNG['registerUsernameCheckAvailable'];
+		} else {
+			$message = match ($result['reason']) {
+				RegisterUsernameAvailability::REASON_TAKEN_GAME => $LNG['registerUsernameCheckTakenGame'],
+				RegisterUsernameAvailability::REASON_TAKEN_HIVE => $LNG['registerUsernameCheckTakenHive'],
+				RegisterUsernameAvailability::REASON_MISSING_HIVE => $LNG['registerUsernameCheckMissingHive'],
+				default => $this->invalidUsernameMessage($userName, $hiveSignup),
+			};
+		}
+
+		$this->sendJSON(array(
+			'ok'          => true,
+			'available'   => $result['available'],
+			'reason'      => $result['reason'],
+			'suggestions' => $result['suggestions'],
+			'message'     => $message,
+			'hiveOwn'     => !empty($result['hiveOwn']),
+		));
+	}
+
+	private function invalidUsernameMessage(string $userName, bool $hiveSignup): string
+	{
+		global $LNG;
+
+		if ($hiveSignup) {
+			return $LNG['registerErrorHiveAccountInvalid'] ?? $LNG['registerErrorUsernameChar'];
+		}
+
+		$key = RegisterValidation::usernameErrorKey($userName);
+		if ($key !== null && isset($LNG[$key])) {
+			return $LNG[$key];
+		}
+
+		return $LNG['registerErrorUsernameChar'];
 	}
 	
 	function send() 
@@ -179,12 +249,9 @@ class ShowRegisterPage extends AbstractLoginPage
 			}
 		}
 		
-		if(empty($userName)) {
-			$errors[]	= $LNG['registerErrorUsernameEmpty'];
-		}
-		
-		if(!PlayerUtil::isNameValid($userName)) {
-			$errors[]	= $LNG['registerErrorUsernameChar'];
+		$usernameFormatKey = RegisterValidation::usernameErrorKey($userName);
+		if($usernameFormatKey !== null) {
+			$errors[]	= $LNG[$usernameFormatKey];
 		}
 
 		if(!PasswordPolicy::isLongEnough((string) $password)) {
