@@ -273,22 +273,13 @@ class ShowRegisterPage extends AbstractLoginPage
 			':hiveAccount'	=> $hiveAccount,
 		), 'count');
 		
-		if($countUsername != 0) {
-			$errors[]	= $LNG['registerErrorUsernameExist'];
-		}
-
-		if(HiveUtil::accountExists($userName) && empty($hiveAccount)) {
-			// disallow registering a non-hive account with same name as an existing hive account
-			// to avoid collisions
-			$errors[]	= $LNG['registerErrorUsernameExist'];
-		}
-			
-		if($countMail != 0) {
-			$errors[]	= $LNG['registerErrorMailExist'];
-		}
-
-		if(!empty($hiveAccount) && $countHiveAccount != 0) {
-			$errors[]	= $LNG['registerErrorHiveAccountExist'];
+		foreach (RegisterValidation::uniquenessErrorKeys(
+			(int) $countUsername,
+			(int) $countMail,
+			(int) $countHiveAccount,
+			(string) $hiveAccount
+		) as $errorKey) {
+			$errors[] = $LNG[$errorKey];
 		}
 		
 		if ($config->capaktiv === '1')
