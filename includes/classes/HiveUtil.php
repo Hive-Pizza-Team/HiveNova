@@ -164,6 +164,67 @@ class HiveUtil
 		return is_array($result) && count($result) > 0;
 	}
 
+	/**
+	 * Batch Hive account existence. Invalid Hive usernames are false without an RPC.
+	 *
+	 * @param list<string> $accounts
+	 * @return array<string, bool> lowercase name => exists on chain
+	 */
+	static public function accountsExist(array $accounts): array
+	{
+		$result = [];
+		$valid = [];
+
+		foreach ($accounts as $account) {
+			$key = strtolower(trim((string) $account));
+			if ($key === '' || array_key_exists($key, $result)) {
+				continue;
+			}
+			if (!self::isAccountValid($key)) {
+				$result[$key] = false;
+				continue;
+			}
+			$result[$key] = false;
+			$valid[] = $key;
+		}
+
+		if ($valid === []) {
+			return $result;
+		}
+
+		$rpcResult = self::rpcCall('condenser_api.get_accounts', json_encode([$valid]));
+		foreach (self::existingNamesFromAccountList($rpcResult) as $name) {
+			if (array_key_exists($name, $result)) {
+				$result[$name] = true;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @return list<string> lowercase account names present in a get_accounts result
+	 */
+	static public function existingNamesFromAccountList(mixed $result): array
+	{
+		if (!is_array($result) || self::isRpcError($result)) {
+			return [];
+		}
+
+		$names = [];
+		foreach ($result as $account) {
+			if (!is_array($account)) {
+				continue;
+			}
+			$name = strtolower(trim((string) ($account['name'] ?? '')));
+			if ($name !== '') {
+				$names[$name] = $name;
+			}
+		}
+
+		return array_values($names);
+	}
+
 	static public function extractProfileAbout(mixed $account): string
 	{
 		if (!is_array($account)) {
