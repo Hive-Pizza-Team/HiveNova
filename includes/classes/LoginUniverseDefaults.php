@@ -97,4 +97,25 @@ class LoginUniverseDefaults
 
 		return $bestId ?? self::newestOpen($forRegistration);
 	}
+
+	/**
+	 * Whether $universeId may be used for registration lookups/sign-up.
+	 *
+	 * Same gate as ShowRegisterPage::send(): universe must exist, the game
+	 * must be enabled, and registration must not be closed.
+	 */
+	public static function isOpenForRegistration(int $universeId): bool
+	{
+		if ($universeId <= 0 || !Universe::exists($universeId)) {
+			return false;
+		}
+
+		try {
+			$config = Config::get($universeId);
+		} catch (\Throwable $e) {
+			return false;
+		}
+
+		return (int) $config->game_disable !== 0 && (int) $config->reg_closed !== 1;
+	}
 }
