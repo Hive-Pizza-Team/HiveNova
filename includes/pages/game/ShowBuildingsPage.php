@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\ElementRequirementService;
 use HiveNova\Core\ResourceUpdate;
 
 /**
@@ -279,7 +280,7 @@ class ShowBuildingsPage extends AbstractGamePage
 
 	public function show()
 	{
-		global $ProdGrid, $LNG, $resource, $reslist, $PLANET, $USER, $pricelist;
+		global $ProdGrid, $LNG, $resource, $reslist, $PLANET, $USER, $pricelist, $requirements;
 		
 		$TheCommand		= HTTP::_GP('cmd', '');
 
@@ -333,11 +334,13 @@ class ShowBuildingsPage extends AbstractGamePage
         $BuildInfoList      = array();
 $Messages		= $USER['messages'];
 		$Elements			= $reslist['allow'][$PLANET['planet_type']];
+		$requirementService = new ElementRequirementService();
+		$techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+		$requirementMap = is_array($requirements) ? $requirements : array();
 		
 		foreach($Elements as $Element)
 		{
-			if (!BuildFunctions::isTechnologieAccessible($USER, $PLANET, $Element))
-				continue;
+			$techAccessible	= BuildFunctions::isTechnologieAccessible($USER, $PLANET, $Element);
 
 			$infoEnergy	= "";
 			
@@ -380,7 +383,7 @@ $Messages		= $USER['messages'];
 				$destroyTime		= BuildFunctions::getBuildingTime($USER, $PLANET, $Element, $destroyResources);
 				$destroyOverflow	= BuildFunctions::getRestPrice($USER, $PLANET, $Element, $destroyResources);
 			}
-			$buyable			= $QueueCount != 0 || BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources);
+			$buyable			= $techAccessible && ($QueueCount != 0 || BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources));
 
 			$BuildInfoList[$Element]	= array(
 				'level'				=> $PLANET[$resource[$Element]],
@@ -394,12 +397,22 @@ $Messages		= $USER['messages'];
 				'destroyOverflow'	=> $destroyOverflow,
 				'buyable'			=> $buyable,
 				'levelToBuild'		=> $levelToBuild,
+				'techAccessible'	=> $techAccessible,
+				'requirements'		=> $requirementService->listForElement(
+					(int) $Element,
+					$USER,
+					$PLANET,
+					$requirementMap,
+					$resource,
+					$techNames
+				),
 				
 			);
 		}
 
 		
 		$this->tplObj->loadscript('page-filters.js');
+		$this->tplObj->loadscript('element-focus.js');
 		if ($QueueCount != 0) {
 			$this->tplObj->loadscript('buildlist.js');
 		}

@@ -59,7 +59,7 @@
 <div class="planeto"> <button type="button" id="lab1" class="btn btn--secondary btn--compact">Imperial</button> | <button type="button" id="lab2" class="btn btn--secondary btn--compact">Military</button> | <button type="button" id="lab3" class="btn btn--secondary btn--compact">Engines</button> | <button type="button" id="lab4" class="btn btn--secondary btn--compact">Mining</button> | <button type="button" id="lab5" class="btn btn--secondary btn--compact selected">All</button></div>		
 
 	{foreach $ResearchList as $ID => $Element}
-	<div class="infos" id="t{$ID}">
+	<div class="infos{if !$Element.techAccessible} element-locked{/if}" id="t{$ID}">
 <div class="buildn"><a href="#" onclick="return Dialog.info({$ID})">{$LNG.tech.{$ID}}</a>{if $Element.level != 0} ({$LNG.bd_lvl} {$Element.level}{if $Element.maxLevel != 255}/{$Element.maxLevel}{/if}){/if}
 	</div>
 <div class="buildl">
@@ -70,6 +70,7 @@
 						{foreach $Element.costOverflow as $ResType => $ResCount}
                         <a href='#' onclick='return Dialog.info({$ResType})'>{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
+						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 			
 					
 				
@@ -80,7 +81,9 @@
                         <a href='#' onclick='return Dialog.info({$RessID})'>{$LNG.tech.{$RessID}}</a>: <b><span style="color:{if $Element.costOverflow[$RessID] == 0}lime{else}red{/if}">{$RessAmount|number}</span></b>
 					{/foreach}</span>
 <br>
-	{if $Element.maxLevel == $Element.levelToBuild}
+	{if !$Element.techAccessible}
+						&nbsp;
+	{elseif $Element.maxLevel == $Element.levelToBuild}
 						<span style="color:#ffd600">{$LNG.bd_maxlevel}</span>
 					{elseif $IsLabinBuild || $IsFullQueue || !$Element.buyable}
 						<span style="color:#ffd600">{if $Element.level == 0 && $Element.levelToBuild == 0}{$LNG.bd_tech}{else}{$LNG.bd_tech_next_level}{$Element.levelToBuild + 1}{/if}</span>

@@ -5,6 +5,7 @@ namespace HiveNova\Page\Game;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\ElementRequirementService;
 
 /**
  *  2Moons 
@@ -115,7 +116,7 @@ class ShowOfficierPage extends AbstractGamePage
 
 	public function show()
 	{
-		global $USER, $PLANET, $resource, $reslist, $LNG, $pricelist;
+		global $USER, $PLANET, $resource, $reslist, $LNG, $pricelist, $requirements;
 		
 		$updateID	  = HTTP::_GP('id', 0);
 				
@@ -130,6 +131,9 @@ class ShowOfficierPage extends AbstractGamePage
 		
 		$darkmatterList	= array();
 		$officierList	= array();
+		$requirementService = new ElementRequirementService();
+		$techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+		$requirementMap = is_array($requirements) ? $requirements : array();
 		
 		if(isModuleAvailable(MODULE_DMEXTRAS))
 		{
@@ -159,11 +163,10 @@ class ShowOfficierPage extends AbstractGamePage
 		{
 			foreach($reslist['officier'] as $Element)
 			{
-				if (!BuildFunctions::isTechnologieAccessible($USER, $PLANET, $Element))
-					continue;
+				$techAccessible		= BuildFunctions::isTechnologieAccessible($USER, $PLANET, $Element);
 					
 				$costResources		= BuildFunctions::getElementPrice($USER, $PLANET, $Element);
-				$buyable			= BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources);
+				$buyable			= $techAccessible && BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources);
 				$costOverflow		= BuildFunctions::getRestPrice($USER, $PLANET, $Element, $costResources);
 				$elementBonus		= BuildFunctions::getAvalibleBonus($Element);
 				
@@ -174,10 +177,20 @@ class ShowOfficierPage extends AbstractGamePage
 					'buyable'			=> $buyable,
 					'costOverflow'		=> $costOverflow,
 					'elementBonus'		=> $elementBonus,
+					'techAccessible'	=> $techAccessible,
+					'requirements'		=> $requirementService->listForElement(
+						(int) $Element,
+						$USER,
+						$PLANET,
+						$requirementMap,
+						$resource,
+						$techNames
+					),
 				);
 			}
 		}
 		
+		$this->tplObj->loadscript('element-focus.js');
 		$this->assign(array(
 			'officierList'		=> $officierList,
 			'darkmatterList'	=> $darkmatterList,

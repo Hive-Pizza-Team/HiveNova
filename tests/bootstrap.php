@@ -110,6 +110,7 @@ if (!defined('RESOURCE_CRYSTAL'))           define('RESOURCE_CRYSTAL',          
 if (!defined('RESOURCE_DEUTERIUM'))         define('RESOURCE_DEUTERIUM',         903);
 if (!defined('RESOURCE_ENERGY'))            define('RESOURCE_ENERGY',            911);
 if (!defined('RESOURCE_DARKMATTER'))        define('RESOURCE_DARKMATTER',        921);
+if (!defined('SHIP_SMALL_CARGO'))           define('SHIP_SMALL_CARGO',           202);
 if (!defined('SHIP_COLONY_SHIP'))           define('SHIP_COLONY_SHIP',           208);
 if (!defined('SHIP_RECYCLER'))              define('SHIP_RECYCLER',              209);
 if (!defined('SHIP_ESPIONAGE_PROBE'))       define('SHIP_ESPIONAGE_PROBE',       210);

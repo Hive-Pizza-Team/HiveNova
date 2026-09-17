@@ -29,6 +29,8 @@ class AssetRevision
 			'scripts/game/flotten.js',
 			'scripts/game/galaxy.js',
 			'scripts/game/overview.js',
+			'scripts/game/element-focus.js',
+			'scripts/game/techtree.js',
 		];
 	}
 

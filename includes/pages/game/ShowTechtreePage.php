@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\ElementRequirementService;
 use HiveNova\Core\TechTreeOrderService;
 
 /**
@@ -46,30 +47,35 @@ class ShowTechtreePage extends AbstractGamePage
         $names = array();
         $ext = array();
         $Messages = $USER['messages'];
+        $requirementService = new ElementRequirementService();
+        $techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+        $requirementMap = is_array($requirements) ? $requirements : array();
 
         foreach ($elementIDs as $elementId) {
             if (!isset($resource[$elementId])) {
                 continue;
             }
 
-            $requirementsList = array();
-            if (isset($requirements[$elementId])) {
-                foreach ($requirements[$elementId] as $requireID => $RedCount) {
-                    $requirementsList[(string) $requireID] = array(
-                        'count' => $RedCount,
-                        'own'   => isset($PLANET[$resource[$requireID]]) ? $PLANET[$resource[$requireID]] : $USER[$resource[$requireID]],
-                    );
-                    $names[(string) $requireID] = $LNG['tech'][$requireID] ?? (string) $requireID;
-                }
-            }
+            $requirementsList = $requirementService->listForElement(
+                (int) $elementId,
+                $USER,
+                $PLANET,
+                $requirementMap,
+                $resource,
+                $techNames
+            );
 
             // Keep empty-req techs out of the payload — expand only shows requirement rows historically when requireList truthy.
             if ($requirementsList === array()) {
                 continue;
             }
 
+            foreach ($requirementsList as $row) {
+                $names[(string) $row['id']] = $row['name'];
+            }
+
             $items[(string) $elementId] = $requirementsList;
-            $names[(string) $elementId] = $LNG['tech'][$elementId] ?? (string) $elementId;
+            $names[(string) $elementId] = $techNames[$elementId] ?? (string) $elementId;
             $ext[(string) $elementId] = ($elementId >= 600 && $elementId <= 699) ? 'jpg' : 'gif';
         }
 
