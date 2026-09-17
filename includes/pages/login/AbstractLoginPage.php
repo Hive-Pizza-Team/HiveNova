@@ -207,22 +207,7 @@ abstract class AbstractLoginPage
 		$ogImageUrl			= $basePath.'styles/resource/images/login/HiveNova.png';
 		$jsonLd				= '';
 		if ($seoPage === 'index') {
-			$jsonLd = json_encode([
-				'@context'    => 'https://schema.org',
-				'@type'       => 'VideoGame',
-				'name'        => $gameName,
-				'url'         => $canonicalUrl,
-				'description' => $metaDescription,
-				'image'       => $ogImageUrl,
-				'genre'       => 'Strategy',
-				'applicationCategory' => 'Game',
-				'operatingSystem' => 'Any',
-				'offers'      => [
-					'@type'         => 'Offer',
-					'price'         => '0',
-					'priceCurrency' => 'USD',
-				],
-			], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
 		}
 		
 		$this->assign(array(

@@ -155,4 +155,41 @@ class PublicSeoTest extends TestCase
 		$this->assertNull(PublicSeo::loginAliasRedirectTarget('disclamer'));
 		$this->assertNull(PublicSeo::loginAliasRedirectTarget('rules'));
 	}
+
+	public function testEntitySameAsListsGenuinePublicUrls(): void
+	{
+		$sameAs = PublicSeo::entitySameAs();
+		$this->assertSame([
+			'https://discord.gg/bP6ksCeEUk',
+			'https://github.com/Hive-Pizza-Team/HiveNova',
+			'https://peakd.com/@hive.pizza',
+			'https://hive.pizza/',
+		], $sameAs);
+		$this->assertNotContains('https://twitter.com/PizzaOnHive', $sameAs);
+		$this->assertNotContains('https://x.com/PizzaOnHive', $sameAs);
+	}
+
+	public function testIndexJsonLdVideoGameIncludesSameAsAndPublisher(): void
+	{
+		$json = PublicSeo::indexJsonLd(
+			'Moon',
+			'https://moon.hive.pizza/',
+			'A free browser space strategy game.',
+			'https://moon.hive.pizza/styles/resource/images/login/HiveNova.png'
+		);
+		$data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+		$this->assertSame('https://schema.org', $data['@context']);
+		$this->assertSame('VideoGame', $data['@type']);
+		$this->assertSame('Moon', $data['name']);
+		$this->assertSame('https://moon.hive.pizza/', $data['url']);
+		$this->assertSame(PublicSeo::entitySameAs(), $data['sameAs']);
+		$this->assertSame('Organization', $data['publisher']['@type']);
+		$this->assertSame('Hive Pizza Team', $data['publisher']['name']);
+		$this->assertSame('https://hive.pizza/', $data['publisher']['url']);
+		$this->assertSame(PublicSeo::entitySameAs(), $data['publisher']['sameAs']);
+		$this->assertArrayNotHasKey('aggregateRating', $data);
+		$this->assertArrayNotHasKey('reviewCount', $data);
+		$this->assertStringNotContainsString('\\/', $json);
+	}
 }
