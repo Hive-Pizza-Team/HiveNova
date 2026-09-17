@@ -3480,7 +3480,7 @@ table.tablesorter thead tr .headerSortDown {
 }
 
 .requirement-link--met {
-	color: lime;
+	color: var(--color-success);
 }
 
 .requirement-level {
