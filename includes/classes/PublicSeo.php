@@ -235,4 +235,55 @@ class PublicSeo
 
 		return 'index, follow';
 	}
+
+	/**
+	 * Genuine public entity URLs for Google sameAs (lobby VideoGame / publisher).
+	 *
+	 * @return list<string>
+	 */
+	public static function entitySameAs(): array
+	{
+		$discord = defined('DISCORD_URL') && DISCORD_URL !== ''
+			? (string) DISCORD_URL
+			: 'https://discord.gg/bP6ksCeEUk';
+
+		return [
+			$discord,
+			'https://github.com/Hive-Pizza-Team/HiveNova',
+			'https://peakd.com/@hive.pizza',
+			'https://hive.pizza/',
+		];
+	}
+
+	/**
+	 * JSON-LD for the public lobby homepage (VideoGame + nested publisher).
+	 */
+	public static function indexJsonLd(string $gameName, string $canonicalUrl, string $description, string $imageUrl): string
+	{
+		$sameAs = self::entitySameAs();
+
+		return json_encode([
+			'@context'    => 'https://schema.org',
+			'@type'       => 'VideoGame',
+			'name'        => $gameName,
+			'url'         => $canonicalUrl,
+			'description' => $description,
+			'image'       => $imageUrl,
+			'genre'       => 'Strategy',
+			'applicationCategory' => 'Game',
+			'operatingSystem' => 'Any',
+			'sameAs'      => $sameAs,
+			'offers'      => [
+				'@type'         => 'Offer',
+				'price'         => '0',
+				'priceCurrency' => 'USD',
+			],
+			'publisher'   => [
+				'@type'  => 'Organization',
+				'name'   => 'Hive Pizza Team',
+				'url'    => 'https://hive.pizza/',
+				'sameAs' => $sameAs,
+			],
+		], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+	}
 }
