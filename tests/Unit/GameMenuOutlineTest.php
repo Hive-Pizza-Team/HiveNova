@@ -99,6 +99,29 @@ class GameMenuOutlineTest extends TestCase
 		}
 	}
 
+	public function test_tech_tree_sits_with_research_and_shipyard_in_basics(): void
+	{
+		$basics = strpos($this->nav, 'lm_menu_section_overview');
+		$advanced = strpos($this->nav, 'lm_menu_section_empire');
+		$shipyard = strpos($this->nav, 'page=shipyard');
+		$research = strpos($this->nav, 'page=research');
+		$techtree = strpos($this->nav, 'page=techtree');
+		$fleet = strpos($this->nav, 'page=fleetTable');
+
+		$this->assertNotFalse($basics);
+		$this->assertNotFalse($advanced);
+		$this->assertNotFalse($shipyard);
+		$this->assertNotFalse($research);
+		$this->assertNotFalse($techtree);
+		$this->assertNotFalse($fleet);
+		$this->assertGreaterThan($basics, $shipyard);
+		$this->assertGreaterThan($shipyard, $research);
+		$this->assertGreaterThan($research, $techtree);
+		$this->assertGreaterThan($techtree, $fleet);
+		$this->assertLessThan($advanced, $techtree);
+		$this->assertSame(1, preg_match_all('/page=techtree/', $this->nav));
+	}
+
 	public function test_shipyard_page_exposes_mode_tabs(): void
 	{
 		$tpl = file_get_contents(__DIR__ . '/../../styles/templates/game/page.shipyard.default.tpl');
@@ -107,5 +130,18 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertStringContainsString('page=shipyard&amp;mode={$tab.mode}', $tpl);
 		$this->assertStringContainsString('bd_shipyard_tab_ships', $tpl);
 		$this->assertStringContainsString('lm_defenses', $tpl);
+	}
+
+	public function test_full_layout_includes_techtree_nudge(): void
+	{
+		$layout = file_get_contents(__DIR__ . '/../../styles/templates/game/layout.full.tpl');
+		$nudge = file_get_contents(__DIR__ . '/../../styles/templates/game/shared.techtree.nudge.tpl');
+		$this->assertNotFalse($layout);
+		$this->assertNotFalse($nudge);
+		$this->assertStringContainsString('shared.techtree.nudge.tpl', $layout);
+		$this->assertStringContainsString('data-techtree-nudge', $nudge);
+		$this->assertStringContainsString('data-techtree-nudge-dismiss', $nudge);
+		$this->assertStringContainsString('role="status"', $nudge);
+		$this->assertStringContainsString('page=techtree', $nudge);
 	}
 }

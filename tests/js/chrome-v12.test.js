@@ -125,6 +125,21 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.ok(resources < market && market < shipMerchant);
 	});
 
+	it('pins Tech Tree next to Research and Shipyard in Basics', () => {
+		const basics = nav.indexOf('lm_menu_section_overview');
+		const advanced = nav.indexOf('lm_menu_section_empire');
+		const shipyard = nav.indexOf('page=shipyard');
+		const research = nav.indexOf('page=research');
+		const techtree = nav.indexOf('page=techtree');
+		const fleet = nav.indexOf('page=fleetTable');
+		assert.ok(basics !== -1 && advanced !== -1);
+		assert.ok(shipyard > basics && research > shipyard && techtree > research);
+		assert.ok(techtree < fleet && techtree < advanced);
+		assert.equal((nav.match(/page=techtree/g) || []).length, 1);
+		const ingameEn = fs.readFileSync(path.join(root, 'language/en/INGAME.php'), 'utf8');
+		assert.match(ingameEn, /lm_technology'\]\s*=\s*'Tech Tree'/);
+	});
+
 	it('puts FAQ in Basics, drops Forum, and moves community/admin tools to Administration', () => {
 		const basics = nav.indexOf('lm_menu_section_overview');
 		const advanced = nav.indexOf('lm_menu_section_empire');
@@ -197,6 +212,8 @@ describe('chrome-v1.2 mobile', () => {
 		assert.match(bottomnav, /id="bottom-nav"/);
 		assert.match(bottomnav, /page=overview/);
 		assert.match(bottomnav, /page=buildings/);
+		assert.match(bottomnav, /page=techtree/);
+		assert.match(bottomnav, /lm_technology/);
 		assert.match(bottomnav, /page=fleetTable/);
 		assert.match(bottomnav, /page=galaxy/);
 		assert.match(mobileCss, /#bottom-nav a,[\s\S]*?min-height:\s*44px/);

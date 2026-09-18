@@ -91,6 +91,8 @@ class AssetRevisionTest extends TestCase
 		$this->assertContains('scripts/game/flotten.js', $paths);
 		$this->assertContains('scripts/game/galaxy.js', $paths);
 		$this->assertContains('scripts/game/overview.js', $paths);
+		$this->assertContains('scripts/game/techtree.js', $paths);
+		$this->assertContains('scripts/game/techtree-nudge.js', $paths);
 	}
 
 	public function testFingerprintPathsExistOnDisk(): void

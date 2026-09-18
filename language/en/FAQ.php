@@ -16,7 +16,7 @@
 // Translated into English by QwataKayean . All rights reversed (C) 2012
 // 2Moons - Copyright (C) 2010-2012 Slaver
 $LNG['faq_overview']	= "FAQ";
-$LNG['faq_intro']		= 'Start with energy and mines, then unlock the Shipyard from Technologies (Gigafactory level 2). Open a topic below, or go to Technologies any time you need building or ship requirements.';
+$LNG['faq_intro']		= 'Start with energy and mines, then unlock the Shipyard from the Tech Tree (Gigafactory level 2). Open a topic below, or go to Tech Tree any time you need building or ship requirements.';
 
 $LNG['questions']					= array();
 $LNG['questions'][1]['category']	= 'Getting started';
@@ -31,7 +31,7 @@ $LNG['questions'][1][1]['body']		= <<<BODY
 <p>Produces Silicon. Silicon is used heavily for research, electronics, and many ships, and it usually comes in slower than Metal.</p>
 <h3>Uranium Centrifuge</h3>
 <p>Produces Uranium. Uranium fuels ships, some research, and later energy options such as the Uranium Power Plant.</p>
-<p>Exact costs and prerequisites for every building are on <a href="game.php?page=techtree">Technologies</a>. Do not guess from memory — open the tech tree when a building is locked.</p>
+<p>Exact costs and prerequisites for every building are on <a href="game.php?page=techtree">Tech Tree</a>. Do not guess from memory — open the tech tree when a building is locked.</p>
 BODY;
 $LNG['questions'][1][2]['title']	= 'How to unlock the Shipyard';
 $LNG['questions'][1][2]['body']		= <<<BODY
@@ -43,14 +43,14 @@ $LNG['questions'][1][2]['body']		= <<<BODY
 <li>When that finishes, build the <strong>Shipyard</strong>.</li>
 <li>Then open <a href="game.php?page=shipyard&amp;mode=fleet">Shipyard</a> to queue ships and defenses.</li>
 </ol>
-<p>Individual ships and defenses have extra research and Shipyard-level requirements. Those are listed on <a href="game.php?page=techtree">Technologies</a>, not on this page. Gigafactory also speeds up other building construction as you upgrade it.</p>
+<p>Individual ships and defenses have extra research and Shipyard-level requirements. Those are listed on <a href="game.php?page=techtree">Tech Tree</a>, not on this page. Gigafactory also speeds up other building construction as you upgrade it.</p>
 BODY;
-$LNG['questions'][1][3]['title']	= 'Research and the Technologies page';
+$LNG['questions'][1][3]['title']	= 'Research and the Tech Tree';
 $LNG['questions'][1][3]['body']		= <<<BODY
 <p><a href="game.php?page=research">Research</a> unlocks buildings, ships, defenses, and fleet options. Start a <strong>Research Lab</strong> from Buildings as soon as you can — the lab has no earlier building prerequisite.</p>
-<p>Each research level takes time. A higher Research Lab shortens that queue. Later buildings such as University sit much deeper in the tree; use Technologies to see the path instead of trying to memorize it.</p>
-<h3>Technologies (tech tree)</h3>
-<p><a href="game.php?page=techtree">Technologies</a> is the live requirement list for buildings, research, ships, and defenses. If something is greyed out on Buildings, Research, or Shipyard, open Technologies and follow the missing levels. That page is sorted so early unlocks (Shipyard) appear before late ones (University).</p>
+<p>Each research level takes time. A higher Research Lab shortens that queue. Later buildings such as University sit much deeper in the tree; use the Tech Tree to see the path instead of trying to memorize it.</p>
+<h3>Tech Tree</h3>
+<p><a href="game.php?page=techtree">Tech Tree</a> is the live requirement list for buildings, research, ships, and defenses. If something is greyed out on Buildings, Research, or Shipyard, open Tech Tree and follow the missing levels. That page is sorted so early unlocks (Shipyard) appear before late ones (University).</p>
 BODY;
 $LNG['questions'][1][4]['title']	= 'Resources and production';
 $LNG['questions'][1][4]['body']		= <<<BODY
@@ -70,7 +70,7 @@ $LNG['questions'][1][5]['body']		= <<<BODY
 <p><a href="game.php?page=galaxy">Galaxy</a> shows nearby systems. From a row you can spy, message a player, or send a fleet to those coordinates. <a href="game.php?page=fleetTable">Fleet</a> is the full send screen: pick ships, set coordinates and speed, then choose a mission.</p>
 <p>Slower flights use less Uranium. Always leave enough fuel on the planet for the return trip.</p>
 <p>Common missions include Attack, ACS, Transport, Deploy, Spying, Colonize, Recycle, Expedition, Transfer, Trade, and Salvage. Colony ships colonize empty slots. Recyclers collect debris. Expeditions fly to deep space. Transfer delivers ships and cargo to another player's planet.</p>
-<p>What you can build, and which missions you can fly, still depends on research and Shipyard level. Check <a href="game.php?page=techtree">Technologies</a> before you plan a fleet.</p>
+<p>What you can build, and which missions you can fly, still depends on research and Shipyard level. Check <a href="game.php?page=techtree">Tech Tree</a> before you plan a fleet.</p>
 BODY;
 $LNG['questions'][2]['category']	= 'Empire';
 $LNG['questions'][2][1]['title']	= 'Alliances';

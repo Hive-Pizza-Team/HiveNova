@@ -2,6 +2,8 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\TechTreeGuideService;
+use HiveNova\Core\TechTreeNudgeService;
 use HiveNova\Core\TechTreeOrderService;
 
 /**
@@ -73,8 +75,30 @@ class ShowTechtreePage extends AbstractGamePage
             $ext[(string) $elementId] = ($elementId >= 600 && $elementId <= 699) ? 'jpg' : 'gif';
         }
 
-        $orderService = new TechTreeOrderService(is_array($requirements) ? $requirements : array());
+        $requirementMap = is_array($requirements) ? $requirements : array();
+        $orderService = new TechTreeOrderService($requirementMap);
         $order = $orderService->orderByCategory(array_map('intval', array_keys($items)));
+        $guide = new TechTreeGuideService($requirementMap);
+        $nextUnlocks = $guide->nextUnlocks(
+            is_array($USER) ? $USER : array(),
+            is_array($PLANET) ? $PLANET : array(),
+            is_array($resource) ? $resource : array(),
+            is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array(),
+            array(
+                'need'  => $LNG['tt_need_level'] ?? 'Need %s %d (%d/%d)',
+                'ready' => $LNG['tt_ready'] ?? 'Requirements met — go start it.',
+                'sep'   => $LNG['tt_need_join'] ?? '; ',
+            ),
+            3
+        );
+
+        if (!TechTreeNudgeService::isSeen($_COOKIE)) {
+            setcookie(
+                TechTreeNudgeService::COOKIE,
+                TechTreeNudgeService::COOKIE_VALUE,
+                TechTreeNudgeService::cookieOptions(TIMESTAMP, TechTreeNudgeService::isSecureRequest())
+            );
+        }
 
         $dpath = $THEME->getTheme();
         $techTreeJson = json_encode(array(
@@ -85,11 +109,15 @@ class ShowTechtreePage extends AbstractGamePage
             'ext' => $ext,
             'items' => $items,
             'order' => $order,
+            'starterIds' => $guide->startHereIds(),
+            'defaultFilter' => 'start',
+            'seenCookie' => TechTreeNudgeService::COOKIE,
         ), JSON_UNESCAPED_UNICODE);
 
         $this->assign(array(
             'TechCategories' => array(0, 100, 200, 400, 500, 600),
             'techTreeJson'   => $techTreeJson,
+            'nextUnlocks'    => $nextUnlocks,
             'messages'       => ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)) : false,
         ));
 
