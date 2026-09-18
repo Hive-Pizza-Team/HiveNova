@@ -130,4 +130,67 @@ class RegisterUsernameCheckAccess
 			'hiveOwn' => false,
 		];
 	}
+
+	/**
+	 * Live register username Ajax: index.php?page=register&mode=checkUsername&ajax=1
+	 *
+	 * @param array<string, mixed>|null $request
+	 */
+	public static function isCheckUsernameAjax(?array $request = null): bool
+	{
+		$request ??= $_REQUEST;
+		$page = strtolower(str_replace(['_', '\\', '/', '.', "\0"], '', (string) ($request['page'] ?? '')));
+		$mode = (string) ($request['mode'] ?? '');
+		$ajax = (int) ($request['ajax'] ?? 0);
+
+		return $page === 'register' && $mode === 'checkUsername' && $ajax === 1;
+	}
+
+	/**
+	 * Bootstrap / uncaught Config miss on this Ajax path must not become HTML 503.
+	 *
+	 * @param array<string, mixed>|null $request
+	 */
+	public static function shouldFailClosedForConfigFault(\Throwable $e, ?array $request = null): bool
+	{
+		return self::isCheckUsernameAjax($request) && Config::isUnknownUniverseException($e);
+	}
+
+	/**
+	 * Emit fail-closed JSON (reason=closed) and stop. Same shape as checkUsername().
+	 *
+	 * @param callable():void|null $exit
+	 */
+	public static function emitClosedJson(string $message = '', ?callable $exit = null): void
+	{
+		if (!headers_sent()) {
+			HTTP::sendHeader('Content-Type', 'application/json; charset=UTF-8');
+			HTTP::sendHeader('HTTP/1.1 200 OK');
+		}
+		echo json_encode(self::denyPayload(self::REASON_CLOSED, $message));
+		$exit ??= static function (): void {
+			exit;
+		};
+		$exit();
+	}
+
+	/**
+	 * Handle a Config universe miss on this Ajax path. Returns false when the
+	 * caller should keep the original exception (other pages / other faults).
+	 *
+	 * @param array<string, mixed>|null $request
+	 * @param callable():void|null $exit
+	 */
+	public static function abortClosedIfAjaxConfigFault(
+		\Throwable $e,
+		?array $request = null,
+		?callable $exit = null
+	): bool {
+		if (!self::shouldFailClosedForConfigFault($e, $request)) {
+			return false;
+		}
+
+		self::emitClosedJson('', $exit);
+		return true;
+	}
 }
