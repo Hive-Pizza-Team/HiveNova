@@ -158,15 +158,20 @@ class RegisterUsernameCheckAccess
 
 	/**
 	 * Emit fail-closed JSON (reason=closed) and stop. Same shape as checkUsername().
+	 *
+	 * @param callable():void|null $exit
 	 */
-	public static function emitClosedJson(string $message = ''): never
+	public static function emitClosedJson(string $message = '', ?callable $exit = null): void
 	{
 		if (!headers_sent()) {
 			HTTP::sendHeader('Content-Type', 'application/json; charset=UTF-8');
 			HTTP::sendHeader('HTTP/1.1 200 OK');
 		}
 		echo json_encode(self::denyPayload(self::REASON_CLOSED, $message));
-		exit;
+		$exit ??= static function (): void {
+			exit;
+		};
+		$exit();
 	}
 
 	/**
@@ -174,13 +179,18 @@ class RegisterUsernameCheckAccess
 	 * caller should keep the original exception (other pages / other faults).
 	 *
 	 * @param array<string, mixed>|null $request
+	 * @param callable():void|null $exit
 	 */
-	public static function abortClosedIfAjaxConfigFault(\Throwable $e, ?array $request = null): bool
-	{
+	public static function abortClosedIfAjaxConfigFault(
+		\Throwable $e,
+		?array $request = null,
+		?callable $exit = null
+	): bool {
 		if (!self::shouldFailClosedForConfigFault($e, $request)) {
 			return false;
 		}
 
-		self::emitClosedJson();
+		self::emitClosedJson('', $exit);
+		return true;
 	}
 }

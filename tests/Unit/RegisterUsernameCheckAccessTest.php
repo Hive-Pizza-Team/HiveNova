@@ -253,6 +253,70 @@ class RegisterUsernameCheckAccessTest extends TestCase
 		));
 	}
 
+	public function test_is_check_username_ajax_reads_request_superglobal(): void
+	{
+		$saved = $_REQUEST;
+		$_REQUEST = ['page' => 'register', 'mode' => 'checkUsername', 'ajax' => 1];
+		try {
+			$this->assertTrue(RegisterUsernameCheckAccess::isCheckUsernameAjax());
+		} finally {
+			$_REQUEST = $saved;
+		}
+	}
+
+	public function test_abort_closed_emits_json_for_unknown_universe_ajax(): void
+	{
+		$exited = false;
+		ob_start();
+		$aborted = RegisterUsernameCheckAccess::abortClosedIfAjaxConfigFault(
+			new Exception('Unknown universe id: 99999'),
+			[
+				'page' => 'register',
+				'mode' => 'checkUsername',
+				'ajax' => 1,
+				'uni' => 99999,
+			],
+			static function () use (&$exited): void {
+				$exited = true;
+			}
+		);
+		$stdout = (string) ob_get_clean();
+
+		$this->assertTrue($aborted);
+		$this->assertTrue($exited);
+		$payload = json_decode($stdout, true);
+		$this->assertIsArray($payload);
+		$this->assertFalse($payload['ok']);
+		$this->assertFalse($payload['available']);
+		$this->assertSame(RegisterUsernameCheckAccess::REASON_CLOSED, $payload['reason']);
+		$this->assertSame([], $payload['suggestions']);
+		$this->assertSame('', $payload['message']);
+		$this->assertFalse($payload['hiveOwn']);
+		$this->assertStringNotContainsString('503', $stdout);
+		$this->assertStringNotContainsString('Unknown universe', $stdout);
+		$this->assertStringNotContainsString('/includes/', $stdout);
+	}
+
+	public function test_emit_closed_json_includes_message_without_internals(): void
+	{
+		$exited = false;
+		ob_start();
+		RegisterUsernameCheckAccess::emitClosedJson(
+			'The registration is closed in this universe.!',
+			static function () use (&$exited): void {
+				$exited = true;
+			}
+		);
+		$stdout = (string) ob_get_clean();
+
+		$this->assertTrue($exited);
+		$payload = json_decode($stdout, true);
+		$this->assertIsArray($payload);
+		$this->assertSame('closed', $payload['reason']);
+		$this->assertSame('The registration is closed in this universe.!', $payload['message']);
+		$this->assertStringNotContainsString('Config.php', $stdout);
+	}
+
 	public function test_unknown_universe_uses_real_registration_gate(): void
 	{
 		$lookups = 0;
