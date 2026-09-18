@@ -13,6 +13,7 @@ use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\PasswordPolicy;
 use HiveNova\Core\RegisterValidation;
 use HiveNova\Core\RegisterUsernameAvailability;
+use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\Mail;
 
@@ -146,18 +147,42 @@ class ShowRegisterPage extends AbstractLoginPage
 	{
 		global $LNG;
 
-		$userName = HTTP::_GP('username', '', UTF8_SUPPORT);
-		$hiveSignup = HTTP::_GP('hiveSignup', 0) === 1;
-		$universe = HTTP::_GP('uni', 0);
-		if ($universe <= 0) {
-			$universe = (int) Universe::current();
+		$sessionId = session_id();
+		if ($sessionId === '' && isset($_COOKIE[session_name()])) {
+			$sessionId = (string) $_COOKIE[session_name()];
 		}
 
-		$result = RegisterUsernameAvailability::fromDefaults(Database::get())->check(
-			$userName,
-			$universe,
-			$hiveSignup
+		$userName = HTTP::_GP('username', '', UTF8_SUPPORT);
+		$hiveSignup = HTTP::_GP('hiveSignup', 0) === 1;
+
+		$gate = RegisterUsernameCheckAccess::runLookup(
+			static function (int $universeId) use ($userName, $hiveSignup) {
+				return RegisterUsernameAvailability::fromDefaults(Database::get())->check(
+					$userName,
+					$universeId,
+					$hiveSignup
+				);
+			},
+			Session::getClientIp(),
+			HTTP::_GP('uni', 0),
+			(int) Universe::current(),
+			$sessionId !== '' ? $sessionId : null
 		);
+		if (!$gate['allow']) {
+			if ($gate['httpStatus'] === RegisterUsernameCheckAccess::HTTP_TOO_MANY_REQUESTS) {
+				HTTP::sendHeader('HTTP/1.1 429 Too Many Requests');
+				HTTP::sendHeader('Retry-After', (string) $gate['retryAfter']);
+			}
+			$message = $gate['reason'] === RegisterUsernameCheckAccess::REASON_CLOSED
+				? ($LNG['registerErrorUniClosed'] ?? '')
+				: '';
+			$this->sendJSON(RegisterUsernameCheckAccess::denyPayload(
+				(string) $gate['reason'],
+				$message
+			));
+		}
+
+		$result = $gate['result'];
 
 		$message = '';
 		if ($result['available']) {

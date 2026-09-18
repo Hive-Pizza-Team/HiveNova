@@ -154,6 +154,34 @@ describe('register username live check', () => {
 		assert.deepEqual(picked, ['Name2']);
 	});
 
+	it('does not render a rate-limited ok:false payload', async () => {
+		const row = createEl('div');
+		const wrap = createEl('div', { class: 'reg-username-wrap' });
+		const input = createEl('input', { 'data-username-check': 'email' });
+		input.value = 'Alice';
+		const mark = createEl('span', { class: 'reg-username-mark' });
+		const message = createEl('p', { class: 'reg-username-message' });
+		wrap.appendChild(input);
+		wrap.appendChild(mark);
+		row.appendChild(wrap);
+		row.appendChild(message);
+		input.parentElement = wrap;
+		wrap.parentElement = row;
+
+		const bound = check.bindField(input, { url: '/check', debounceMs: 1 }, {
+			documentObj: { querySelectorAll() { const empty = []; empty.forEach = Array.prototype.forEach; return empty; } },
+			fetchFn() {
+				return Promise.resolve({
+					json: () => Promise.resolve({ ok: false, available: false, reason: 'rate_limited', message: '' })
+				});
+			}
+		});
+
+		await bound.runCheck();
+		assert.equal(mark.textContent, '');
+		assert.equal(message.textContent, '');
+	});
+
 	it('empty input clears the view and does not fetch', async () => {
 		const row = createEl('div');
 		const wrap = createEl('div', { class: 'reg-username-wrap' });
