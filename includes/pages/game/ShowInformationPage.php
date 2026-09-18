@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\ElementRequirementService;
 use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\PlanetProductionBonus;
 use HiveNova\Core\ResourceUpdate;
@@ -212,7 +213,7 @@ class ShowInformationPage extends AbstractGamePage
 
 	public function show()
 	{
-		global $USER, $PLANET, $LNG, $resource, $pricelist, $reslist, $CombatCaps, $ProdGrid;
+		global $USER, $PLANET, $LNG, $resource, $pricelist, $reslist, $CombatCaps, $ProdGrid, $requirements;
 
 		$elementID 	= HTTP::_GP('id', 0);
 
@@ -376,6 +377,14 @@ class ShowInformationPage extends AbstractGamePage
 			'MissileList'		=> $MissileList,
 			'FleetInfo'			=> $FleetInfo,
 			'gateData'			=> $gateData,
+			'requirementRows'	=> (new ElementRequirementService())->listForElement(
+				(int) $elementID,
+				$USER,
+				$PLANET,
+				is_array($requirements) ? $requirements : array(),
+				$resource,
+				is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array()
+			),
 		));
 
 		if ((int) $elementID === 921) {

@@ -55,19 +55,33 @@
 		wrap.appendChild(document.createTextNode(cfg.ttRequirements + ' '));
 		wrap.appendChild(document.createElement('br'));
 
-		var keys = Object.keys(reqList || {});
-		keys.forEach(function (requireId, idx) {
+		var rows = Array.isArray(reqList) ? reqList : Object.keys(reqList || {}).map(function (requireId) {
 			var need = reqList[requireId];
+			return {
+				id: parseInt(requireId, 10),
+				name: cfg.names[requireId],
+				count: need.count,
+				own: need.own,
+				href: need.href || null
+			};
+		});
+		rows.forEach(function (need, idx) {
+			var requireId = need.id;
 			var a = document.createElement('a');
-			a.href = '#';
-			a.onclick = function () { return Dialog.info(parseInt(requireId, 10)); };
+			if (need.href) {
+				a.href = need.href;
+				a.className = 'requirement-link ' + ((need.own < need.count) ? 'requirement-link--unmet' : 'requirement-link--met');
+			} else {
+				a.href = '#';
+				a.onclick = function () { return Dialog.info(parseInt(requireId, 10)); };
+			}
 			var span = document.createElement('span');
 			span.style.color = (need.own < need.count) ? '#ffd600' : 'lime';
-			span.textContent = (cfg.names[requireId] || ('#' + requireId))
+			span.textContent = (need.name || cfg.names[requireId] || ('#' + requireId))
 				+ ' (' + cfg.ttLvl + ' ' + need.own + '/' + need.count + ')';
 			a.appendChild(span);
 			wrap.appendChild(a);
-			if (idx < keys.length - 1) {
+			if (idx < rows.length - 1) {
 				wrap.appendChild(document.createElement('br'));
 			}
 		});

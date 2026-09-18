@@ -183,6 +183,9 @@
 					String(input.value || '').trim().toLowerCase() !== username) {
 					return payload;
 				}
+				if (payload && payload.ok === false && payload.reason === 'rate_limited') {
+					return payload;
+				}
 				render(view, payload, config.i18n || {}, applyValue, doc);
 				return payload;
 			}).catch(function () {

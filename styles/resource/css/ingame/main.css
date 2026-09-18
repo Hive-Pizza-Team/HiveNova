@@ -3535,3 +3535,39 @@ table.tablesorter thead tr .headerSortDown {
 .techtree-nudge .btn {
 	min-height: 44px;
 }
+
+/* Requirement deep-links (research / buildings / shipyard) */
+.element-requirements {
+	margin: 0.4em 0;
+	text-align: left;
+}
+
+.requirement-link {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.requirement-link--unmet {
+	color: #ffd600;
+}
+
+.requirement-link--met {
+	color: var(--color-success);
+}
+
+.requirement-level {
+	margin-left: 0.25em;
+}
+
+.element-locked {
+	opacity: 0.78;
+}
+
+.infos.element-focus,
+.infoso.element-focus,
+.element-focus,
+.infos:target,
+.infoso:target {
+	outline: 2px solid var(--color-accent, #9b6dff);
+	box-shadow: 0 0 0 2px rgba(155, 109, 255, 0.35);
+}
