@@ -97,13 +97,14 @@ class FaqIndexServiceTest extends TestCase
 
 		$this->assertArrayHasKey('faq_intro', $LNG);
 		$this->assertStringContainsString('Gigafactory level 2', $LNG['faq_intro']);
-		$this->assertStringContainsString('Technologies', $LNG['faq_intro']);
+		$this->assertStringContainsString('Tech Tree', $LNG['faq_intro']);
+		$this->assertStringNotContainsString('empty universe', strtolower($LNG['faq_intro']));
 
 		$index = FaqIndexService::fromQuestions($LNG['questions']);
 		$this->assertSame('Getting started', $index[0]['category']);
 		$titles = array_column($index[0]['questions'], 'title');
 		$this->assertContains('How to unlock the Shipyard', $titles);
-		$this->assertContains('Research and the Technologies page', $titles);
+		$this->assertContains('Research and the Tech Tree', $titles);
 		$this->assertContains('Resources and production', $titles);
 		$this->assertContains('Fleet and Galaxy', $titles);
 

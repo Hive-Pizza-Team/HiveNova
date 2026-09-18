@@ -1,8 +1,11 @@
 /**
  * Techtree expand/collapse — injects category bodies on first open.
  * Config: #techtree-data JSON
+ *
+ * Filter tabs (Start here / All / category) stay in this file so #611
+ * requirement-link edits to buildItem can merge independently.
  */
-(function () {
+(function (root) {
 	'use strict';
 
 	var RANGES = {
@@ -110,6 +113,23 @@
 		return ids;
 	}
 
+	function starterSet(cfg) {
+		var ids = cfg && Array.isArray(cfg.starterIds) ? cfg.starterIds : [];
+		var set = {};
+		ids.forEach(function (id) {
+			set[String(id)] = true;
+		});
+		return set;
+	}
+
+	function isStarter(cfg, id) {
+		var set = starterSet(cfg);
+		if (Object.keys(set).length === 0) {
+			return true;
+		}
+		return !!set[String(id)];
+	}
+
 	function ensureCategory(cfg, catId) {
 		var body = document.getElementById('body' + catId);
 		if (!body || body.dataset.filled === '1') return;
@@ -119,7 +139,9 @@
 		var ids = categoryIds(cfg, catId);
 		ids.forEach(function (id) {
 			var reqList = items[String(id)] || items[id];
-			frag.appendChild(buildItem(cfg, id, reqList));
+			var node = buildItem(cfg, id, reqList);
+			node.setAttribute('data-element-id', String(id));
+			frag.appendChild(node);
 		});
 		body.appendChild(frag);
 	}
@@ -174,6 +196,76 @@
 		});
 	}
 
+	function applyItemFilter(cfg, filter) {
+		var bodies = document.querySelectorAll('.techtree-body .techi');
+		for (var i = 0; i < bodies.length; i++) {
+			var el = bodies[i];
+			var id = el.getAttribute('data-element-id');
+			var hide = filter === 'start' && !isStarter(cfg, id);
+			if (hide) {
+				el.classList.add('is-filtered-out');
+			} else {
+				el.classList.remove('is-filtered-out');
+			}
+		}
+	}
+
+	function applyFilter(cfg, filter) {
+		var catIds = Object.keys(RANGES);
+		var startOnly = filter === 'start';
+		var all = filter === 'all';
+
+		catIds.forEach(function (catId) {
+			var ids = categoryIds(cfg, catId);
+			var visible = ids.filter(function (id) {
+				return !startOnly || isStarter(cfg, id);
+			});
+			var openThis = all || startOnly ? visible.length > 0 : String(filter) === String(catId);
+			if (openThis) {
+				ensureCategory(cfg, catId);
+			}
+			setOpen(catId, openThis);
+		});
+		applyItemFilter(cfg, startOnly ? 'start' : 'all');
+	}
+
+	function setSelectedTab(filter) {
+		var tabs = document.querySelectorAll('[data-techtree-filter]');
+		for (var i = 0; i < tabs.length; i++) {
+			var tab = tabs[i];
+			var on = String(tab.getAttribute('data-techtree-filter')) === String(filter);
+			if (on) {
+				tab.classList.add('selected');
+			} else {
+				tab.classList.remove('selected');
+			}
+			tab.setAttribute('aria-selected', on ? 'true' : 'false');
+		}
+	}
+
+	function bindFilters(cfg) {
+		var tabs = document.querySelectorAll('[data-techtree-filter]');
+		for (var i = 0; i < tabs.length; i++) {
+			tabs[i].addEventListener('click', function (e) {
+				if (e) {
+					e.preventDefault();
+				}
+				var filter = this.getAttribute('data-techtree-filter') || 'start';
+				setSelectedTab(filter);
+				applyFilter(cfg, filter);
+			});
+		}
+	}
+
+	function markTechTreeSeen(cfg) {
+		var name = (cfg && cfg.seenCookie) || 'hn_techtree_seen';
+		if (root.HiveNovaTechTreeNudge && typeof root.HiveNovaTechTreeNudge.markSeen === 'function') {
+			root.HiveNovaTechTreeNudge.markSeen(name);
+			return;
+		}
+		document.cookie = name + '=1; path=/; max-age=31536000; SameSite=Lax';
+	}
+
 	function boot() {
 		var cfg = readConfig();
 		if (!cfg) return;
@@ -181,11 +273,32 @@
 		Object.keys(RANGES).forEach(function (catId) {
 			bindCategory(cfg, catId);
 		});
+		bindFilters(cfg);
+		var filter = cfg.defaultFilter || 'start';
+		setSelectedTab(filter);
+		applyFilter(cfg, filter);
+		markTechTreeSeen(cfg);
 	}
 
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', boot);
-	} else {
-		boot();
+	var api = {
+		readConfig: readConfig,
+		isStarter: isStarter,
+		applyFilter: applyFilter,
+		setSelectedTab: setSelectedTab,
+		markTechTreeSeen: markTechTreeSeen,
+		boot: boot
+	};
+
+	root.HiveNovaTechTree = api;
+	if (typeof module !== 'undefined' && module.exports) {
+		module.exports = api;
 	}
-})();
+
+	if (typeof document !== 'undefined') {
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', boot);
+		} else {
+			boot();
+		}
+	}
+})(typeof window !== 'undefined' ? window : globalThis);

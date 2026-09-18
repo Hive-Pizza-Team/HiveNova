@@ -5,11 +5,11 @@
     {if $smarty.const.MODULE_BUILDING|isModuleAvailable}<li><a href="game.php?page=buildings"{if $navPage == 'buildings'} class="active"{/if}>{$LNG.lm_buildings}</a></li>{/if}
     {if $smarty.const.MODULE_SHIPYARD_FLEET|isModuleAvailable || $smarty.const.MODULE_SHIPYARD_DEFENSIVE|isModuleAvailable}<li><a href="game.php?page=shipyard&amp;mode=fleet"{if $navPage == 'shipyard'} class="active"{/if}>{$LNG.lm_shipshard}</a></li>{/if}
     {if $smarty.const.MODULE_RESEARCH|isModuleAvailable}<li><a href="game.php?page=research"{if $navPage == 'research'} class="active"{/if}>{$LNG.lm_research}</a></li>{/if}
+    {if $smarty.const.MODULE_TECHTREE|isModuleAvailable}<li><a href="game.php?page=techtree"{if $navPage == 'techtree'} class="active"{/if}>{$LNG.lm_technology}</a></li>{/if}
     {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetTable"{if $navPage == 'fleetTable' || $navPage == 'fleetStep1' || $navPage == 'fleetStep2' || $navPage == 'fleetStep3'} class="active"{/if}>{$LNG.lm_fleet}</a></li>{/if}
     {if $smarty.const.MODULE_GALAXY|isModuleAvailable}<li><a href="game.php?page=galaxy"{if $navPage == 'galaxy'} class="active"{/if}>{$LNG.lm_galaxy}</a></li>{/if}
     {if $smarty.const.MODULE_IMPERIUM|isModuleAvailable}<li><a href="game.php?page=imperium"{if $navPage == 'imperium'} class="active"{/if}>{$LNG.lm_empire}</a></li>{/if}
     {if $smarty.const.MODULE_MESSAGES|isModuleAvailable}<li><a href="game.php?page=messages"{if $navPage == 'messages'} class="active"{/if}>{$LNG.lm_messages}{nocache}{if $new_message > 0}<span id="newmes"> (<span id="newmesnum">{$new_message}</span>)</span>{/if}{/nocache}</a></li>{/if}
-    {if $smarty.const.MODULE_TECHTREE|isModuleAvailable}<li><a href="game.php?page=techtree"{if $navPage == 'techtree'} class="active"{/if}>{$LNG.lm_technology}</a></li>{/if}
     <li><a href="game.php?page=questions"{if $navPage == 'questions'} class="active"{/if}>{$LNG.lm_faq}</a></li>
     {if $smarty.const.MODULE_OFFICIER|isModuleAvailable || $smarty.const.MODULE_DMEXTRAS|isModuleAvailable}<li><a href="game.php?page=officier"{if $navPage == 'officier'} class="active"{/if}>{$LNG.lm_officiers}</a></li>{/if}
 

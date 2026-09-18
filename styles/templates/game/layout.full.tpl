@@ -44,7 +44,7 @@
 		<div id="attack-alert" class="infobox attack-notification"{if $attackAlertCount <= 0} hidden{/if} data-count="{$attackAlertCount}">
 			<a href="game.php?page=overview">{$LNG.ov_attack_alert}</a><span data-attack-alert-count>{if $attackAlertCount > 0} ({$attackAlertCount}){/if}</span>
 		</div>
-		
+		{include file="shared.techtree.nudge.tpl"}
 		{block name="content"}{/block}
 		<table class="hack"></table>
 	</content>

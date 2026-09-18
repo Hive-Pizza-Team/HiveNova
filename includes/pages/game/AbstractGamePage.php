@@ -11,6 +11,7 @@ use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\TechTreeNudgeService;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
 use HiveNova\Core\Session;
@@ -224,6 +225,7 @@ abstract class AbstractGamePage
 			'loadAchievementsCss'=> $loadAchievementsCss,
 			// Set by base.js at ≤699px; skip assets CSS hides on mobile (nav logo, etc.).
 			'compactViewport'	=> (($_COOKIE['hn_compact'] ?? '') === '1'),
+			'showTechTreeNudge'	=> TechTreeNudgeService::shouldShow($_COOKIE, HTTP::_GP('page', '')),
 		));
 
 		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {

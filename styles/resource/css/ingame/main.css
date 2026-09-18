@@ -3464,6 +3464,78 @@ table.tablesorter thead tr .headerSortDown {
 	padding: 4px 6px;
 }
 
+/* Tech Tree discoverability — next unlock + first-session nudge */
+.techtree-next {
+	margin: 0 0 12px;
+}
+
+.techtree-next__title {
+	margin: 0 0 8px;
+	font-size: 1.05em;
+}
+
+.techtree-next__cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.techtree-next__card {
+	flex: 1 1 180px;
+	background: var(--color-bg-surface);
+	border: 1px solid var(--color-border);
+	border-radius: 8px;
+	padding: 10px 12px;
+	box-sizing: border-box;
+}
+
+.techtree-next__name {
+	margin: 0 0 6px;
+	font-size: 1em;
+}
+
+.techtree-next__missing,
+.techtree-next__progress {
+	margin: 0 0 8px;
+	font-size: 13px;
+	line-height: 1.35;
+}
+
+.techtree-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	margin: 0 0 10px;
+}
+
+.techtree-nudge {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 10px;
+	padding: 10px 12px;
+	background: var(--color-bg-surface);
+	border: 1px solid var(--color-chrome-menu-active-bar, #5eb0d4);
+	border-radius: 8px;
+	box-sizing: border-box;
+}
+
+.techtree-nudge[hidden] {
+	display: none;
+}
+
+.techtree-nudge__text {
+	margin: 0;
+	flex: 1 1 180px;
+	line-height: 1.4;
+}
+
+.techtree-nudge .btn {
+	min-height: 44px;
+}
+
 /* Requirement deep-links (research / buildings / shipyard) */
 .element-requirements {
 	margin: 0.4em 0;
