@@ -35,6 +35,7 @@
 					{/foreach}
 					</p>{/if}
 					{/if}				
+					{include file="shared.element.requirements.tpl" requirementRows=$requirementRows requirementLinkTarget="_top"}
 					</td>
 				</tr>
 			</table>

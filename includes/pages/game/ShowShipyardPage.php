@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\ElementRequirementService;
 use HiveNova\Core\ShipyardPageModeService;
 
 /**
@@ -157,7 +158,7 @@ class ShowShipyardPage extends AbstractGamePage
 	
 	public function show()
 	{
-		global $USER, $PLANET, $LNG, $resource, $reslist;
+		global $USER, $PLANET, $LNG, $resource, $reslist, $requirements;
 		
 		if ($PLANET[$resource[21]] == 0)
 		{
@@ -256,16 +257,17 @@ class ShowShipyardPage extends AbstractGamePage
 		}
 		
 		$MaxMissiles	= BuildFunctions::getMaxConstructibleRockets($USER, $PLANET, $Missiles);
+		$requirementService = new ElementRequirementService();
+		$techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+		$requirementMap = is_array($requirements) ? $requirements : array();
 
 		foreach($elementIDs as $Element)
 		{
-			if(!BuildFunctions::isTechnologieAccessible($USER, $PLANET, $Element))
-				continue;
-			
+			$techAccessible		= BuildFunctions::isTechnologieAccessible($USER, $PLANET, $Element);
 			$costResources		= BuildFunctions::getElementPrice($USER, $PLANET, $Element);
 			$costOverflow		= BuildFunctions::getRestPrice($USER, $PLANET, $Element, $costResources);
 			$elementTime    	= BuildFunctions::getBuildingTime($USER, $PLANET, $Element, $costResources);
-			$buyable			= BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources);
+			$buyable			= $techAccessible && BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources);
 			$maxBuildable		= BuildFunctions::getMaxConstructibleElements($USER, $PLANET, $Element, $costResources);
 			$SolarEnergy		= round((($PLANET['temp_max']+160)/6)*Config::get()->energySpeed, 1);
 
@@ -284,6 +286,15 @@ class ShowShipyardPage extends AbstractGamePage
 				'buyable'			=> $buyable,
 				'maxBuildable'		=> floatToString($maxBuildable),
 				'AlreadyBuild'		=> $AlreadyBuild,
+				'techAccessible'	=> $techAccessible,
+				'requirements'		=> $requirementService->listForElement(
+					(int) $Element,
+					$USER,
+					$PLANET,
+					$requirementMap,
+					$resource,
+					$techNames
+				),
 			);
 		}
 		
@@ -303,6 +314,7 @@ class ShowShipyardPage extends AbstractGamePage
 		));
 
 		$this->tplObj->loadscript('page-filters.js');
+		$this->tplObj->loadscript('element-focus.js');
 		$this->display('page.shipyard.default.tpl');
 	}
 }

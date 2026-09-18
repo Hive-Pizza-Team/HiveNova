@@ -61,6 +61,7 @@
 		<th colspan="2">{$LNG.of_offi}</th>
 	</tr>
 	{foreach $officierList as $ID => $Element}
+	<tbody id="o{$ID}"{if !$Element.techAccessible} class="element-locked"{/if}>
 	<tr>
 		<td rowspan="2" style="width:120px;">
 			<a href="#" onclick="return Dialog.info({$ID})">
@@ -80,9 +81,12 @@
 							<p>{$LNG.shortDescription.{$ID}}</p>
 							<p>{foreach $Element.elementBonus as $BonusName => $Bonus}{if $Bonus[0] < 0}-{else}+{/if}{if $Bonus[1] == 0}{$_v=$Bonus[0]*100}{$_v|abs}%{else}{$Bonus[0]|floatval}{/if} {$LNG.bonus.$BonusName}<br>{/foreach}</p>
                             <p>{foreach $Element.costResources as $RessID => $RessAmount}<a href='#' onclick='return Dialog.info({$RessID})'>{$LNG.tech.{$RessID}}</a>: <b><span style="color:{if $Element.costOverflow[$RessID] == 0}lime{else}red{/if}">{$RessAmount|number}</span></b>{/foreach}</p>
+							{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 						</td>
 						<td class="transparent" style="vertical-align:middle;width:100px">
-						{if $Element.maxLevel <= $Element.level}
+						{if !$Element.techAccessible}
+							&nbsp;
+						{elseif $Element.maxLevel <= $Element.level}
 							<span style="color:red">{$LNG.bd_maxlevel}</span>
 						{elseif $Element.buyable}
 							<form action="game.php?page=officier" method="post" class="build_form">
@@ -98,6 +102,7 @@
 			</table>
 		</td>
 	</tr>
+	</tbody>
 	{/foreach}
 </table>
 {/if}
