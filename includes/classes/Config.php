@@ -72,10 +72,18 @@ class Config
 
 		if(!isset(self::$instances[$universe]))
 		{
-			throw new Exception("Unknown universe id: ".$universe);
+			throw new Exception('Unknown universe id: '.$universe);
 		}
 
 		return self::$instances[$universe];
+	}
+
+	/**
+	 * True when $e is the fail-closed "universe does not exist" miss from get().
+	 */
+	public static function isUnknownUniverseException(\Throwable $e): bool
+	{
+		return str_starts_with($e->getMessage(), 'Unknown universe id:');
 	}
 
 	public static function setInstance(Config $config, int|string|null $universe = null): void

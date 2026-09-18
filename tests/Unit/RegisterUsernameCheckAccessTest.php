@@ -181,6 +181,101 @@ class RegisterUsernameCheckAccessTest extends TestCase
 		$this->assertArrayNotHasKey('taken_game', $payload);
 	}
 
+	public function test_closed_deny_payload_is_not_a_universe_oracle(): void
+	{
+		$payload = RegisterUsernameCheckAccess::denyPayload(
+			RegisterUsernameCheckAccess::REASON_CLOSED,
+			'The registration is closed in this universe.!'
+		);
+
+		$this->assertFalse($payload['ok']);
+		$this->assertFalse($payload['available']);
+		$this->assertSame('closed', $payload['reason']);
+		$this->assertSame([], $payload['suggestions']);
+		$this->assertSame('The registration is closed in this universe.!', $payload['message']);
+		$this->assertArrayNotHasKey('exists', $payload);
+		$this->assertArrayNotHasKey('unknown', $payload);
+		$encoded = json_encode($payload);
+		$this->assertIsString($encoded);
+		$this->assertStringNotContainsString('Unknown universe', $encoded);
+		$this->assertStringNotContainsString('99999', $encoded);
+	}
+
+	/**
+	 * @dataProvider checkUsernameAjaxProvider
+	 * @param array<string, mixed> $request
+	 */
+	public function test_is_check_username_ajax(array $request, bool $expected): void
+	{
+		$this->assertSame($expected, RegisterUsernameCheckAccess::isCheckUsernameAjax($request));
+	}
+
+	/**
+	 * @return list<array{0: array<string, mixed>, 1: bool}>
+	 */
+	public static function checkUsernameAjaxProvider(): array
+	{
+		return [
+			[['page' => 'register', 'mode' => 'checkUsername', 'ajax' => '1'], true],
+			[['page' => 'Register', 'mode' => 'checkUsername', 'ajax' => 1], true],
+			[['page' => 'register', 'mode' => 'checkUsername', 'ajax' => 1, 'uni' => 99999], true],
+			[['page' => 'register', 'mode' => 'show', 'ajax' => 1], false],
+			[['page' => 'register', 'mode' => 'checkUsername', 'ajax' => 0], false],
+			[['page' => 'login', 'mode' => 'checkUsername', 'ajax' => 1], false],
+			[['page' => 'register', 'mode' => 'send'], false],
+			[[], false],
+		];
+	}
+
+	public function test_unknown_universe_config_fault_on_ajax_path_is_fail_closed(): void
+	{
+		$fault = new Exception('Unknown universe id: 99999');
+		$query = [
+			'page' => 'register',
+			'mode' => 'checkUsername',
+			'ajax' => 1,
+			'uni' => 99999,
+			'username' => 'OrbitFoxClosedTest',
+		];
+
+		$this->assertTrue(RegisterUsernameCheckAccess::shouldFailClosedForConfigFault($fault, $query));
+		$this->assertFalse(RegisterUsernameCheckAccess::abortClosedIfAjaxConfigFault(
+			new RuntimeException('connection refused'),
+			$query
+		));
+		$this->assertFalse(RegisterUsernameCheckAccess::shouldFailClosedForConfigFault(
+			$fault,
+			['page' => 'register', 'mode' => 'show', 'uni' => 99999]
+		));
+		$this->assertFalse(RegisterUsernameCheckAccess::shouldFailClosedForConfigFault(
+			new Exception('Unknown configuration key timezone!'),
+			$query
+		));
+	}
+
+	public function test_unknown_universe_uses_real_registration_gate(): void
+	{
+		$lookups = 0;
+		$gate = RegisterUsernameCheckAccess::runLookup(
+			function () use (&$lookups) {
+				$lookups++;
+				return ['available' => true];
+			},
+			'10.0.0.1',
+			99999,
+			1,
+			null,
+			$this->limiter(),
+			[\HiveNova\Core\LoginUniverseDefaults::class, 'isOpenForRegistration'],
+			1000
+		);
+
+		$this->assertFalse($gate['allow']);
+		$this->assertSame(RegisterUsernameCheckAccess::REASON_CLOSED, $gate['reason']);
+		$this->assertSame(200, $gate['httpStatus']);
+		$this->assertSame(0, $lookups);
+	}
+
 	private function limiter(int $max = 45): RegisterUsernameCheckLimiter
 	{
 		return new RegisterUsernameCheckLimiter($this->dir, $max, 60);

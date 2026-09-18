@@ -658,6 +658,10 @@ function exceptionHandler($exception)
 {
 	/** @var $exception ErrorException|Exception */
 
+	if (\HiveNova\Core\RegisterUsernameCheckAccess::abortClosedIfAjaxConfigFault($exception)) {
+		return;
+	}
+
 	if (!headers_sent()) {
 		if (!class_exists('\HiveNova\Core\HTTP', false)) {
 			

@@ -136,7 +136,28 @@ class ConfigTest extends TestCase
         Config::setInstance($config, 1);
 
         $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Unknown universe id: 999');
         Config::get(999);
+    }
+
+    public function testIsUnknownUniverseExceptionMatchesGetMiss(): void
+    {
+        $config = new Config(['uni' => 1]);
+        Config::setInstance($config, 1);
+
+        try {
+            Config::get(99999);
+            $this->fail('expected unknown universe exception');
+        } catch (Throwable $e) {
+            $this->assertTrue(Config::isUnknownUniverseException($e));
+        }
+
+        $this->assertFalse(Config::isUnknownUniverseException(
+            new Exception('Unknown configuration key timezone!')
+        ));
+        $this->assertFalse(Config::isUnknownUniverseException(
+            new RuntimeException('connection refused')
+        ));
     }
 
     public function testMultipleInstancesAreIndependent(): void
