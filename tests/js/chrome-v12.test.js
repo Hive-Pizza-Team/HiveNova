@@ -13,6 +13,8 @@ const topnav = fs.readFileSync(path.join(root, 'styles/templates/game/main.topna
 const nav = fs.readFileSync(path.join(root, 'styles/templates/game/main.navigation.tpl'), 'utf8');
 const faqTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.questions.default.tpl'), 'utf8');
 const resourcesTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.resources.default.tpl'), 'utf8');
+const buildingsTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.buildings.default.tpl'), 'utf8');
+const ingameEn = fs.readFileSync(path.join(root, 'language/en/INGAME.php'), 'utf8');
 const varsPhp = fs.readFileSync(path.join(root, 'includes/vars.php'), 'utf8');
 const bottomnav = fs.readFileSync(path.join(root, 'styles/templates/game/main.bottomnav.tpl'), 'utf8');
 
@@ -206,6 +208,21 @@ describe('chrome-v1.2 mobile', () => {
 		assert.match(resourcesTpl, /class="resources-table"/);
 		assert.match(resourcesTpl, /resources-apply-bar/);
 		assert.match(resourcesTpl, /data-label="\{\$LNG\.tech\.901\}"/);
+	});
+
+	it('collapses extra Buildings queue rows on mobile so the list can scroll', () => {
+		assert.match(buildingsTpl, /id="buildlist"/);
+		assert.match(buildingsTpl, /buildlist--collapsible/);
+		assert.match(buildingsTpl, /buildlist-item--queued/);
+		assert.match(buildingsTpl, /id="buildlistMoreToggle"/);
+		assert.match(buildingsTpl, /bd_queue_more/);
+		assert.match(ingameEn, /bd_queue_more'\]\s*=\s*'Show remaining queue'/);
+		assert.match(ingameEn, /bd_queue_less'\]\s*=\s*'Hide remaining queue'/);
+		assert.match(mobileCss, /#buildlist\.infos1 \{[\s\S]*?overflow:\s*visible/);
+		assert.match(mobileCss, /#buildlist\.infos1 \{[\s\S]*?max-height:\s*none/);
+		assert.match(mobileCss, /#buildlist\.buildlist--collapsible:not\(\.is-expanded\) \.buildlist-item--queued/);
+		assert.match(mobileCss, /#buildlist \.buildlist-more-toggle \{[\s\S]*?min-height:\s*44px/);
+		assert.match(desktopCss, /\.buildlist-more-toggle \{[\s\S]*?display:\s*none/);
 	});
 
 	it('keeps bottom-nav IA and 44px tap targets', () => {
