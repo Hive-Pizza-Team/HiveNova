@@ -46,7 +46,7 @@
 			<div class="rowForm">
 				<label for="reg-email-username">{$LNG.registerUsername}</label>
 				<div class="reg-username-wrap">
-					<input type="text" class="input" name="username" id="reg-email-username" maxlength="25" spellcheck="false" autocomplete="username" data-username-check="email" aria-describedby="reg-email-username-msg">
+					<input type="text" class="input" name="username" id="reg-email-username" maxlength="25" spellcheck="false" autocomplete="username" data-username-check="email" data-remember-username="email" aria-describedby="reg-email-username-msg">
 					<span class="reg-username-mark" aria-hidden="true"></span>
 				</div>
 				{if !empty($error.username)}<span class="error errorUsername"></span>{/if}
@@ -130,7 +130,7 @@
 			<div class="rowForm">
 				<label for="reg-hive-username">{$LNG.hiveAccount}</label>
 				<div class="reg-username-wrap">
-					<input type="text" id="reg-hive-username" name="username" maxlength="16" spellcheck="false" autocomplete="username" data-username-check="hive" aria-describedby="reg-hive-username-msg">
+					<input type="text" id="reg-hive-username" name="username" maxlength="16" spellcheck="false" autocomplete="username" data-username-check="hive" data-remember-username="hive" aria-describedby="reg-hive-username-msg">
 					<span class="reg-username-mark" aria-hidden="true"></span>
 				</div>
 				<p class="reg-username-message" id="reg-hive-username-msg" aria-live="polite"></p>
