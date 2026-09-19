@@ -6,11 +6,11 @@
 	
 	{/if}
 {if !empty($Queue)}
-<div id="buildlist" class="infos1">
+<div id="buildlist" class="infos1{if $Queue|count > 1} buildlist--collapsible{/if}">
 	
 		{foreach $Queue as $List}
 		{$ID = $List.element}
-		<div class="buildlist-item">
+		<div class="buildlist-item{if !$List@first} buildlist-item--queued{/if}">
 		<div class="buildb">
 				{$List@iteration}.:
 				{if !($isBusy.research && ($ID == 6 || $ID == 31)) && !($isBusy.shipyard && ($ID == 15 || $ID == 21)) && $RoomIsOk && $CanBuildElement && $BuildInfoList[$ID].buyable}
@@ -41,6 +41,9 @@
 				<span style="color:lime" data-time="{$List.endtime}" class="timer">{$List.display}</span>
 		</div>
 		</div>
+		{if $List@first && $Queue|count > 1}
+		<button type="button" class="buildlist-more-toggle" id="buildlistMoreToggle" aria-expanded="false" aria-controls="buildlist" data-label-more="{$LNG.bd_queue_more}" data-label-less="{$LNG.bd_queue_less}">{$LNG.bd_queue_more}</button>
+		{/if}
 	{/foreach}
 
 	{if $Queue|count > 1}
