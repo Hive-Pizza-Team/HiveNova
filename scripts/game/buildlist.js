@@ -4,6 +4,36 @@ var endtime		= 0;
 var interval	= 0;
 var buildname	= "";
 
+function toggleBuildlistExpanded(root, button) {
+	if (!root || !root.classList) {
+		return false;
+	}
+	var expanded = root.classList.contains('is-expanded');
+	var next = !expanded;
+	root.classList.toggle('is-expanded', next);
+	if (button) {
+		if (button.setAttribute) {
+			button.setAttribute('aria-expanded', next ? 'true' : 'false');
+		}
+		var more = button.getAttribute ? button.getAttribute('data-label-more') : null;
+		var less = button.getAttribute ? button.getAttribute('data-label-less') : null;
+		if (more && less) {
+			button.textContent = next ? less : more;
+		}
+	}
+	return next;
+}
+
+function bindBuildlistMoreToggle(root, button) {
+	if (!root || !button || typeof button.addEventListener !== 'function') {
+		return false;
+	}
+	button.addEventListener('click', function () {
+		toggleBuildlistExpanded(root, button);
+	});
+	return true;
+}
+
 function Buildlist() {
 	var rest	= resttime - (serverTime.getTime() - startTime) / 1000;
 	if (rest <= 0) {
@@ -41,6 +71,7 @@ function Buildlist() {
 	}
 }
 
+if (typeof $ === 'function') {
 $(document).ready(function() {
 	time		= $('#time').data('time');
 	resttime	= $('#progressbar').data('time');
@@ -54,4 +85,16 @@ $(document).ready(function() {
 
 
 	Buildlist();
+
+	bindBuildlistMoreToggle(document.getElementById('buildlist'), document.getElementById('buildlistMoreToggle'));
 });
+}
+
+var HiveNovaBuildlist = {
+	toggleExpanded: toggleBuildlistExpanded,
+	bindMoreToggle: bindBuildlistMoreToggle
+};
+
+if (typeof module !== 'undefined' && module.exports) {
+	module.exports = HiveNovaBuildlist;
+}

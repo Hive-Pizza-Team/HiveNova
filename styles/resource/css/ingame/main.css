@@ -1693,6 +1693,10 @@ table.tablesorter thead tr .headerSortDown {
     min-height: 44px;
 }
 
+.buildlist-more-toggle {
+    display: none;
+}
+
 @media screen and (max-width: 699px) {
     body.full {
         padding-top: max(12px, env(safe-area-inset-top, 0px));
@@ -2823,6 +2827,48 @@ table.tablesorter thead tr .headerSortDown {
         border-radius: 8px;
         color: var(--color-text);
         padding: 8px 14px;
+    }
+
+    /* #615: compact Buildings queue so a multi-item card does not eat the viewport */
+    #buildlist.infos1 {
+        overflow: visible;
+        max-height: none;
+        touch-action: pan-y;
+    }
+
+    #buildlist .buildb,
+    #buildlist .bulida {
+        min-height: 0;
+        padding: 6px 8px;
+    }
+
+    #buildlist #progressbar {
+        margin-top: 4px;
+    }
+
+    #buildlist.buildlist--collapsible:not(.is-expanded) .buildlist-item--queued {
+        display: none;
+    }
+
+    #buildlist .buildlist-more-toggle {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 10px 12px;
+        min-height: 44px;
+        border: 0;
+        border-bottom: 1px solid var(--color-border);
+        border-radius: 0;
+        background: var(--color-card-header-bg);
+        color: var(--color-text);
+        font-size: 13px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #buildlist .buildlist-more-toggle[aria-expanded="true"] {
+        border-bottom-color: rgba(0, 210, 190, 0.45);
     }
 }
 
