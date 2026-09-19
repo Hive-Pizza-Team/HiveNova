@@ -20,6 +20,12 @@ class DirectiveCatalog
 	/** Floor so a day-one empire (0–500 points) is not given the full stockpile. */
 	public const REWARD_MIN_FACTOR = 0.05;
 
+	/** Astrophysics — expedition slots scale from this research. */
+	public const RESEARCH_ASTROPHYSICS = 124;
+
+	/** Rocket launcher — first defense unit. */
+	public const DEFENSE_MISSILE_LAUNCHER = 401;
+
 	/**
 	 * @return array<string, array<string, mixed>>
 	 */
@@ -88,6 +94,133 @@ class DirectiveCatalog
 				],
 			],
 		];
+	}
+
+	/**
+	 * Unlock gates for the directive picker. Industrial Surge has none.
+	 *
+	 * - any_accessible: player can build at least one listed element
+	 * - min_research: player has researched each listed tech to the min level
+	 *
+	 * @return array<string, array{any_accessible?: list<int>, min_research?: array<int, int>}>
+	 */
+	public static function unlockRules(): array
+	{
+		return [
+			self::INDUSTRIAL => [],
+			self::DEFENSIVE => [
+				'any_accessible' => [self::DEFENSE_MISSILE_LAUNCHER],
+			],
+			self::EXPLORATION => [
+				'min_research' => [self::RESEARCH_ASTROPHYSICS => 1],
+			],
+			self::TRADE => [
+				'any_accessible' => [SHIP_SMALL_CARGO, SHIP_RECYCLER],
+			],
+		];
+	}
+
+	/**
+	 * Whether the player has unlocked the ships / research needed for a directive.
+	 *
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
+	 * @param array<int|string, array<int|string, int|string>>|null $requirements
+	 * @param array<int|string, string>|null $resource
+	 */
+	public static function isUnlocked(
+		string $key,
+		array $user,
+		array $planet,
+		?array $requirements = null,
+		?array $resource = null
+	): bool {
+		if (!self::exists($key)) {
+			return false;
+		}
+		$rules = self::unlockRules()[$key] ?? [];
+		if ($rules === []) {
+			return true;
+		}
+
+		$requirements ??= is_array($GLOBALS['requirements'] ?? null) ? $GLOBALS['requirements'] : [];
+		$resource ??= is_array($GLOBALS['resource'] ?? null) ? $GLOBALS['resource'] : [];
+
+		$accessible = $rules['any_accessible'] ?? null;
+		if (is_array($accessible) && $accessible !== []) {
+			$ok = false;
+			foreach ($accessible as $elementId) {
+				if (self::isElementAccessible((int) $elementId, $user, $planet, $requirements, $resource)) {
+					$ok = true;
+					break;
+				}
+			}
+			if (!$ok) {
+				return false;
+			}
+		}
+
+		$minResearch = $rules['min_research'] ?? null;
+		if (is_array($minResearch) && $minResearch !== []) {
+			foreach ($minResearch as $elementId => $minLevel) {
+				if (!self::hasResearchLevel((int) $elementId, (int) $minLevel, $user, $resource)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
+	 * @param array<int|string, array<int|string, int|string>> $requirements
+	 * @param array<int|string, string> $resource
+	 */
+	public static function isElementAccessible(
+		int $elementId,
+		array $user,
+		array $planet,
+		array $requirements,
+		array $resource
+	): bool {
+		if (!isset($requirements[$elementId]) || !is_array($requirements[$elementId])) {
+			return true;
+		}
+
+		foreach ($requirements[$elementId] as $reqElement => $eleLevel) {
+			$reqId = (int) $reqElement;
+			$need = (int) $eleLevel;
+			$column = $resource[$reqId] ?? null;
+			if ($column === null) {
+				return false;
+			}
+			$haveUser = isset($user[$column]) ? (int) $user[$column] : 0;
+			$havePlanet = isset($planet[$column]) ? (int) $planet[$column] : 0;
+			if ($haveUser < $need && $havePlanet < $need) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 * @param array<int|string, string> $resource
+	 */
+	public static function hasResearchLevel(int $elementId, int $minLevel, array $user, array $resource): bool
+	{
+		if ($minLevel <= 0) {
+			return true;
+		}
+		$column = $resource[$elementId] ?? null;
+		if ($column === null) {
+			return false;
+		}
+
+		return (int) ($user[$column] ?? 0) >= $minLevel;
 	}
 
 	public static function exists(string $key): bool

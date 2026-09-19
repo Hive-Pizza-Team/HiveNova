@@ -86,19 +86,18 @@ class BuildFunctionsTest extends TestCase
 
 	public function testElementAccessibleWhenTechLevelMet(): void
 	{
-		// Light Fighter (202) requires combustion_tech >= 1
-		// $requirements[202] = [115 => 1], $resource[115] = 'combustion_tech'
-		$user   = $this->makeUser(['combustion_tech' => 1]);
-		$planet = $this->makePlanet();
+		// Small Cargo (202) requires hangar >= 2 and combustion_tech >= 2
+		$user   = $this->makeUser(['combustion_tech' => 2, 'hangar' => 2]);
+		$planet = $this->makePlanet(['hangar' => 2]);
 
 		$this->assertTrue(BuildFunctions::isTechnologieAccessible($user, $planet, 202));
 	}
 
 	public function testElementBlockedWhenUserTechTooLow(): void
 	{
-		// Combustion Drive level 0 < required 1 → false
+		// Combustion Drive level 0 < required 2 → false
 		$user   = $this->makeUser(['combustion_tech' => 0]);
-		$planet = $this->makePlanet();
+		$planet = $this->makePlanet(['hangar' => 2]);
 
 		$this->assertFalse(BuildFunctions::isTechnologieAccessible($user, $planet, 202));
 	}

@@ -11,11 +11,13 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../Support/CommanderDatabaseStub.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 require_once __DIR__ . '/../Support/RestoreGameGlobals.php';
+require_once __DIR__ . '/../Support/DirectiveUnlockFixtures.php';
 
 class DirectiveServiceTest extends TestCase
 {
 	use SwapDatabaseInstance;
 	use RestoreGameGlobals;
+	use DirectiveUnlockFixtures;
 
 	private CommanderDatabaseStub $db;
 
@@ -53,18 +55,68 @@ class DirectiveServiceTest extends TestCase
 
 	public function testSelectDirectiveLocksChoice(): void
 	{
-		$row = DirectiveService::selectDirective(10, 1, DirectiveCatalog::INDUSTRIAL);
+		$user = $this->directiveUnlockedUser();
+		$planet = $this->directiveUnlockedPlanet();
+		$row = DirectiveService::selectDirective(10, 1, DirectiveCatalog::INDUSTRIAL, $user, $planet);
 		$this->assertSame(DirectiveCatalog::INDUSTRIAL, $row['directive_key']);
 		$this->expectException(RuntimeException::class);
 		$this->expectExceptionMessage(DirectiveService::ERROR_LOCKED);
-		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE);
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE, $user, $planet);
 	}
 
 	public function testUnknownDirectiveRejected(): void
 	{
 		$this->expectException(RuntimeException::class);
 		$this->expectExceptionMessage(DirectiveService::ERROR_UNKNOWN);
-		DirectiveService::selectDirective(10, 1, 'not_a_real_directive');
+		DirectiveService::selectDirective(10, 1, 'not_a_real_directive', $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
+	}
+
+	public function testLockedDirectiveRejectedUntilTechsUnlocked(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage(DirectiveService::ERROR_REQUIREMENTS);
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE, [], []);
+	}
+
+	public function testBriefingHidesLockedDirectivesForDayOnePlayers(): void
+	{
+		$data = DirectiveService::getBriefingData(10, 1, [], []);
+		$keys = array_column($data['options'], 'key');
+		$this->assertSame([DirectiveCatalog::INDUSTRIAL], $keys);
+	}
+
+	public function testBriefingShowsUnlockedDirectives(): void
+	{
+		$data = DirectiveService::getBriefingData(
+			10,
+			1,
+			$this->directiveUnlockedUser(),
+			$this->directiveUnlockedPlanet()
+		);
+		$keys = array_column($data['options'], 'key');
+		$this->assertSame(
+			[
+				DirectiveCatalog::INDUSTRIAL,
+				DirectiveCatalog::DEFENSIVE,
+				DirectiveCatalog::EXPLORATION,
+				DirectiveCatalog::TRADE,
+			],
+			$keys
+		);
+	}
+
+	public function testIndustrialIsAlwaysUnlocked(): void
+	{
+		$this->assertTrue(DirectiveCatalog::isUnlocked(DirectiveCatalog::INDUSTRIAL, [], []));
+		$this->assertFalse(DirectiveCatalog::isUnlocked(DirectiveCatalog::DEFENSIVE, [], []));
+		$this->assertFalse(DirectiveCatalog::isUnlocked(DirectiveCatalog::EXPLORATION, [], []));
+		$this->assertFalse(DirectiveCatalog::isUnlocked(DirectiveCatalog::TRADE, [], []));
+
+		$user = $this->directiveUnlockedUser();
+		$planet = $this->directiveUnlockedPlanet();
+		$this->assertTrue(DirectiveCatalog::isUnlocked(DirectiveCatalog::DEFENSIVE, $user, $planet));
+		$this->assertTrue(DirectiveCatalog::isUnlocked(DirectiveCatalog::EXPLORATION, $user, $planet));
+		$this->assertTrue(DirectiveCatalog::isUnlocked(DirectiveCatalog::TRADE, $user, $planet));
 	}
 
 	public function testClaimRewardIsIdempotent(): void
@@ -250,7 +302,7 @@ class DirectiveServiceTest extends TestCase
 
 	public function testGetBriefingDataIncludesSelectedDirectiveAndFleets(): void
 	{
-		DirectiveService::selectDirective(10, 1, DirectiveCatalog::EXPLORATION);
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::EXPLORATION, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		$this->db->fleets[] = [
 			'fleet_id' => 44,
 			'fleet_owner' => 10,
@@ -266,7 +318,7 @@ class DirectiveServiceTest extends TestCase
 			'deuterium' => 0,
 		], []);
 
-		$data = DirectiveService::getBriefingData(10, 1);
+		$data = DirectiveService::getBriefingData(10, 1, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		$this->assertTrue($data['enabled']);
 		$this->assertSame(DirectiveCatalog::EXPLORATION, $data['directive']['key']);
 		$this->assertSame(1500, $data['directive']['reward']['metal']);
@@ -281,7 +333,7 @@ class DirectiveServiceTest extends TestCase
 
 	public function testNotifyPeriodEndingMarksProgressOnce(): void
 	{
-		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE);
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		$this->db->periods[0]['period_end'] = TIMESTAMP + 60;
 		DirectiveService::notifyPeriodEndingIfNeeded(1);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
@@ -294,7 +346,7 @@ class DirectiveServiceTest extends TestCase
 
 	public function testNotifyPeriodEndingSkipsWhenFarFromEnd(): void
 	{
-		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE);
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		$this->db->periods[0]['period_end'] = TIMESTAMP + DirectiveService::PERIOD_ENDING_SECONDS + 1;
 		DirectiveService::notifyPeriodEndingIfNeeded(1);
 		$this->assertSame([], $this->db->updates);
@@ -334,8 +386,8 @@ class DirectiveServiceTest extends TestCase
 
 	public function testGetBriefingDataTradeBarsAreEmptyAtZero(): void
 	{
-		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE);
-		$data = DirectiveService::getBriefingData(10, 1);
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::TRADE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
+		$data = DirectiveService::getBriefingData(10, 1, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		$this->assertSame([
 			[
 				'counter' => 'trade_run',
@@ -346,7 +398,7 @@ class DirectiveServiceTest extends TestCase
 		], $data['directive']['bars']);
 
 		$this->db->userDirectives[0]['progress_json'] = json_encode(['trade_run' => 2, 'ending_push_sent' => 1]);
-		$partial = DirectiveService::getBriefingData(10, 1);
+		$partial = DirectiveService::getBriefingData(10, 1, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		$this->assertSame(2, $partial['directive']['bars'][0]['have']);
 		$this->assertSame(67, $partial['directive']['bars'][0]['pct']);
 		$this->assertCount(1, $partial['directive']['bars']);

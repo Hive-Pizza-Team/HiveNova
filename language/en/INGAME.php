@@ -1569,3 +1569,4 @@ $LNG['tt_need_join'] = '; ';
 $LNG['tt_nudge'] = 'See what unlocks what → Tech Tree.';
 $LNG['tt_nudge_open'] = 'Tech Tree';
 $LNG['tt_nudge_dismiss'] = 'Dismiss';
+$LNG['cm_directive_requirements'] = 'You have not unlocked the ships or research needed for that directive';
