@@ -41,6 +41,7 @@ $GLOBALS['resource'] = array_replace($GLOBALS['resource'] ?? [], [
 	124 => 'astrophysics_tech',
 
 	202 => 'light_fighter',
+	209 => 'recycler',
 	210 => 'bomber',
 	401 => 'rocket_launcher',
 	402 => 'light_laser',
@@ -170,13 +171,15 @@ $GLOBALS['CombatCaps'] = array_replace($GLOBALS['CombatCaps'] ?? [], [
 // ---------------------------------------------------------------------------
 
 $GLOBALS['requirements'] = array_replace($GLOBALS['requirements'] ?? [], [
-	202 => [115 => 1],               // Light Fighter: Combustion Drive lv 1
+	202 => [21 => 2, 115 => 2],       // Small Cargo: Shipyard 2 + Combustion 2
+	209 => [21 => 4, 115 => 6, 110 => 2], // Recycler
 	210 => [117 => 6, 118 => 3],     // Bomber: Impulse lv6 + Hyperspace lv3
 	206 => [121 => 2],
 	211 => [122 => 5],
 	213 => [114 => 5],
 	215 => [114 => 5, 120 => 12],
 	217 => [114 => 10],
+	401 => [21 => 1],               // Missile launcher: Shipyard 1
 	402 => [120 => 3],
 	404 => [109 => 3],
 ]);

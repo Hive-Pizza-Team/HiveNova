@@ -16,6 +16,7 @@ class DirectiveService
 	public const ERROR_CLAIMED = 'already_claimed';
 	public const ERROR_NO_DIRECTIVE = 'no_directive';
 	public const ERROR_NO_PERIOD = 'no_period';
+	public const ERROR_REQUIREMENTS = 'requirements';
 
 	/** Directive periods reset each UTC calendar day. */
 	public const PERIOD_SECONDS = 86400;
@@ -118,15 +119,20 @@ class DirectiveService
 	}
 
 	/**
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
 	 * @return array<string, mixed>
 	 */
-	public static function selectDirective(int $userId, int $universe, string $directiveKey): array
+	public static function selectDirective(int $userId, int $universe, string $directiveKey, array $user = [], array $planet = []): array
 	{
 		if (!isModuleAvailable(MODULE_COMMANDER)) {
 			throw new RuntimeException(self::ERROR_DISABLED);
 		}
 		if (!DirectiveCatalog::exists($directiveKey)) {
 			throw new RuntimeException(self::ERROR_UNKNOWN);
+		}
+		if (!DirectiveCatalog::isUnlocked($directiveKey, $user, $planet)) {
+			throw new RuntimeException(self::ERROR_REQUIREMENTS);
 		}
 
 		$period = self::ensureCurrentPeriod($universe);
@@ -325,9 +331,11 @@ class DirectiveService
 	}
 
 	/**
+	 * @param array<string, mixed> $user
+	 * @param array<string, mixed> $planet
 	 * @return array<string, mixed>
 	 */
-	public static function getBriefingData(int $userId, int $universe): array
+	public static function getBriefingData(int $userId, int $universe, array $user = [], array $planet = []): array
 	{
 		$period = self::ensureCurrentPeriod($universe);
 		$userDirective = self::getUserDirective($userId, (int) $period['id']);
@@ -335,6 +343,9 @@ class DirectiveService
 		$points = self::playerPoints($userId);
 		$catalog = [];
 		foreach (DirectiveCatalog::all() as $key => $def) {
+			if (!DirectiveCatalog::isUnlocked($key, $user, $planet)) {
+				continue;
+			}
 			$def['reward'] = DirectiveCatalog::scaledReward($def['reward'] ?? [], $points);
 			$catalog[$key] = $def;
 		}

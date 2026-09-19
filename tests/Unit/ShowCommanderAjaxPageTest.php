@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../Support/CommanderDatabaseStub.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 require_once __DIR__ . '/../Support/RestoreGameGlobals.php';
+require_once __DIR__ . '/../Support/DirectiveUnlockFixtures.php';
 
 final class TestableShowCommanderAjaxPage extends ShowCommanderAjaxPage
 {
@@ -32,6 +33,7 @@ class ShowCommanderAjaxPageTest extends TestCase
 {
 	use SwapDatabaseInstance;
 	use RestoreGameGlobals;
+	use DirectiveUnlockFixtures;
 
 	private CommanderDatabaseStub $db;
 
@@ -40,8 +42,8 @@ class ShowCommanderAjaxPageTest extends TestCase
 		parent::setUp();
 		$this->snapshotGameGlobals();
 		global $USER, $PLANET, $LNG;
-		$USER = ['id' => 4, 'universe' => 1];
-		$PLANET = ['id' => 9];
+		$USER = array_replace(['id' => 4, 'universe' => 1], $this->directiveUnlockedUser());
+		$PLANET = array_replace(['id' => 9], $this->directiveUnlockedPlanet());
 		$LNG = [];
 		$_SESSION = [];
 		$_REQUEST = [];
@@ -104,7 +106,7 @@ class ShowCommanderAjaxPageTest extends TestCase
 
 	public function testSelectDirectiveRejectsReselect(): void
 	{
-		DirectiveService::selectDirective(4, 1, DirectiveCatalog::TRADE);
+		DirectiveService::selectDirective(4, 1, DirectiveCatalog::TRADE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
 		$_REQUEST['directive_key'] = DirectiveCatalog::INDUSTRIAL;
 		$page = $this->page();

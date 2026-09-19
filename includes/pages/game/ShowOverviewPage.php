@@ -340,7 +340,12 @@ class ShowOverviewPage extends AbstractGamePage
 		$commanderEnabled = defined('MODULE_COMMANDER') && isModuleAvailable(MODULE_COMMANDER);
 		if ($commanderEnabled) {
 			$this->tplObj->loadscript('commander-briefing.js');
-			$commanderBriefing = DirectiveService::getBriefingData((int) $USER['id'], (int) Universe::current());
+			$commanderBriefing = DirectiveService::getBriefingData(
+				(int) $USER['id'],
+				(int) Universe::current(),
+				$USER,
+				$PLANET
+			);
 		}
 
 		$this->tplObj->loadscript('overview.js');
