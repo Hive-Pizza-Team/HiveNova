@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 50);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 51);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -90,5 +90,8 @@ $dbTableNames	= array(
 	'SEASON_ENTRIES'		=> DB_PREFIX.'season_entries',
 	'SEASON_SNAPSHOTS'		=> DB_PREFIX.'season_snapshots',
 	'SEASON_PAYOUTS'		=> DB_PREFIX.'season_payouts',
+	'SEASON_HIVE_LINKS'		=> DB_PREFIX.'season_hive_links',
+	'SEASON_MEDALS'			=> DB_PREFIX.'season_medals',
+	'UNI3_PILOT_EVENTS'		=> DB_PREFIX.'uni3_pilot_events',
 );
 // MOD-TABLES

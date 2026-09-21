@@ -2,7 +2,6 @@
 
 namespace HiveNova\Cronjob;
 
-use HiveNova\Core\DatabaseSeasonStore;
 use HiveNova\Core\Language;
 use HiveNova\Core\SeasonService;
 use HiveNova\Cronjob\CronjobTask;
@@ -18,7 +17,7 @@ class SeasonCronjob implements CronjobTask
 	public function run()
 	{
 		try {
-			$service = $this->service ?? new SeasonService(new DatabaseSeasonStore());
+			$service = $this->service ?? SeasonService::createDefault();
 			$service->tick($this->englishIngameStrings());
 		} catch (Throwable $e) {
 			error_log('SeasonCronjob: ' . $e->getMessage());

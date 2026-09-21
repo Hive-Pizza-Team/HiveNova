@@ -2,6 +2,9 @@
 <ul id="menu">
     <li class="menu-separator menu-section">{$LNG.lm_menu_section_overview}</li>
     <li><a href="game.php?page=overview"{if $navPage == 'overview'} class="active"{/if}>{$LNG.lm_overview}</a></li>
+    {if !empty($uni3Seasonal)}
+    <li><a href="game.php?page=season"{if $navPage == 'season'} class="active"{/if}>{$LNG.lm_season}</a></li>
+    {/if}
     {if $smarty.const.MODULE_BUILDING|isModuleAvailable}<li><a href="game.php?page=buildings"{if $navPage == 'buildings'} class="active"{/if}>{$LNG.lm_buildings}</a></li>{/if}
     {if $smarty.const.MODULE_SHIPYARD_FLEET|isModuleAvailable || $smarty.const.MODULE_SHIPYARD_DEFENSIVE|isModuleAvailable}<li><a href="game.php?page=shipyard&amp;mode=fleet"{if $navPage == 'shipyard'} class="active"{/if}>{$LNG.lm_shipshard}</a></li>{/if}
     {if $smarty.const.MODULE_RESEARCH|isModuleAvailable}<li><a href="game.php?page=research"{if $navPage == 'research'} class="active"{/if}>{$LNG.lm_research}</a></li>{/if}

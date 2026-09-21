@@ -14,7 +14,10 @@ use HiveNova\Core\PasswordPolicy;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\Theme;
 use HiveNova\Core\PushNotificationService;
+use HiveNova\Core\DatabaseUni3ClaimStore;
 use HiveNova\Core\SeasonService;
+use HiveNova\Core\Uni3ClaimGate;
+use HiveNova\Core\Uni3HiveLinkService;
 
 /**
  *  2Moons 
@@ -457,7 +460,35 @@ class ShowSettingsPage extends AbstractGamePage
 					':universe'     => $universe
 				), 'state');
 		
-				if($linkedAccounts != 0) {
+				$seasonConfig = Config::get();
+				$seasonalSeat = isset($seasonConfig->season_mode)
+					&& (int) $seasonConfig->season_mode === 1
+					&& (int) ($seasonConfig->season_id ?? 0) >= 1;
+				if ($seasonalSeat) {
+					$linked = (new Uni3HiveLinkService(new DatabaseUni3ClaimStore()))->bind(
+						(int) $seasonConfig->uni,
+						(int) $seasonConfig->season_id,
+						(int) $USER['id'],
+						strtolower(trim((string) $hiveAccount)),
+						Uni3ClaimGate::ORIGIN_EMAIL,
+						TIMESTAMP
+					);
+					if (!$linked['ok']) {
+						$taken = $LNG['page_season_hive_taken'] ?? $LNG['op_user_name_no_alphanumeric'];
+						$this->printMessage($taken, array(array(
+							'label'	=> $LNG['sys_back'],
+							'url'	=> 'game.php?page=settings'
+						)));
+					}
+					if (isModuleAvailable(MODULE_ACHIEVEMENTS)) {
+						\HiveNova\Core\AchievementService::record(
+							(int) $USER['id'],
+							'hive_account_valid',
+							['valid' => 1],
+							true
+						);
+					}
+				} elseif ($linkedAccounts != 0) {
 					$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
 						'label'	=> $LNG['sys_back'],
 						'url'	=> 'game.php?page=settings'

@@ -175,4 +175,35 @@ class DatabaseSeasonStoreTest extends TestCase
 		$this->db->selectSingleResult = ['c' => 4];
 		$this->assertSame(4, $store->countEntries(2, 1));
 	}
+
+	public function testClaimLockAndUnclaimedPrizeState(): void
+	{
+		$store = new DatabaseSeasonStore();
+		$store->compareAndSetPayout(4, 'pending_claim', 'claiming', 'claim:abc');
+		$this->assertStringContainsString('`status` = :from', $this->db->updates[0][0]);
+		$this->assertSame('pending_claim', $this->db->updates[0][1][':from']);
+
+		$this->db->selectSingleResult = [
+			'id' => 4, 'user_id' => 11, 'hive_account' => 'bobbbbbb', 'pizza_amount' => '1.500',
+			'status' => 'pending_claim', 'trx_id' => '', 'points' => 80, 'rank' => 2,
+		];
+		$payout = $store->findPayout(2, 1, 11);
+		$this->assertSame('pending_claim', $payout['status']);
+		$this->assertSame(80, $payout['points']);
+
+		$this->db->selectResult = [[
+			'id' => 4, 'user_id' => 11, 'hive_account' => 'bobbbbbb', 'pizza_amount' => '1.500',
+			'status' => 'pending_claim', 'trx_id' => '', 'points' => 80, 'rank' => 2,
+		]];
+		$held = $store->payoutsWithStatus(2, 1, 'pending_claim');
+		$this->assertCount(1, $held);
+
+		$this->db->selectResult = [[
+			'rank' => 2, 'hive_account' => 'bobbbbbb', 'points' => 80, 'username' => 'Bob',
+			'pizza_amount' => '1.500', 'payout_status' => 'pending_claim',
+		]];
+		$rows = $store->reportRanking(2, 1, 20);
+		$this->assertNull($rows[0]['pizza_amount']);
+		$this->assertSame('unclaimed', $rows[0]['prize_state']);
+	}
 }

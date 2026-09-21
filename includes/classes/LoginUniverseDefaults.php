@@ -64,6 +64,7 @@ class LoginUniverseDefaults
 	 * Prefer a non-seasonal open universe so cold traffic lands on Uni 1.
 	 * Registration also skips universes with registration closed.
 	 * Falls back to the newest open universe when every candidate is seasonal.
+	 * Seasonal universes stay selectable: email accounts may play, prizes stay Hive-gated.
 	 */
 	public static function forEmail(bool $forRegistration = false): int
 	{

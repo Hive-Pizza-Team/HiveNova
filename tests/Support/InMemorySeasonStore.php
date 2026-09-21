@@ -147,6 +147,61 @@ class InMemorySeasonStore implements SeasonStore
 		}
 	}
 
+	public function compareAndSetPayout(int $id, string $fromStatus, string $toStatus, string $trxId): void
+	{
+		foreach ($this->payouts as $i => $row) {
+			if ((int) $row['id'] === $id && (string) $row['status'] === $fromStatus) {
+				$this->payouts[$i]['status'] = $toStatus;
+				$this->payouts[$i]['trx_id'] = $trxId;
+			}
+		}
+	}
+
+	public function findPayout(int $universe, int $seasonId, int $userId): ?array
+	{
+		foreach ($this->payouts as $row) {
+			if ((int) $row['universe'] === $universe && (int) $row['season_id'] === $seasonId && (int) $row['user_id'] === $userId) {
+				return $this->mapPayout($row);
+			}
+		}
+
+		return null;
+	}
+
+	public function payoutsWithStatus(int $universe, int $seasonId, string $status): array
+	{
+		$out = [];
+		foreach ($this->payouts as $row) {
+			if ((int) $row['universe'] !== $universe || (int) $row['season_id'] !== $seasonId) {
+				continue;
+			}
+			if ((string) $row['status'] !== $status) {
+				continue;
+			}
+			$out[] = $this->mapPayout($row);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * @param array<string, mixed> $row
+	 * @return array{id: int, user_id: int, hive_account: string, pizza_amount: float, status: string, trx_id: string, points: int, rank: int}
+	 */
+	private function mapPayout(array $row): array
+	{
+		return [
+			'id'           => (int) $row['id'],
+			'user_id'      => (int) $row['user_id'],
+			'hive_account' => (string) $row['hive_account'],
+			'pizza_amount' => (float) $row['pizza_amount'],
+			'status'       => (string) $row['status'],
+			'trx_id'       => (string) ($row['trx_id'] ?? ''),
+			'points'       => (int) ($row['points'] ?? 0),
+			'rank'         => (int) ($row['rank'] ?? 0),
+		];
+	}
+
 	public function playersInUniverse(int $universe): array
 	{
 		return $this->players;
@@ -179,15 +234,22 @@ class InMemorySeasonStore implements SeasonStore
 			$userId = (int) ($row['user_id'] ?? 0);
 			$username = (string) ($this->users[$userId]['username'] ?? '');
 			$pizza = null;
+			$prizeState = '';
 			foreach ($this->payouts as $payout) {
-				if ((int) $payout['universe'] === $universe
-					&& (int) $payout['season_id'] === $seasonId
-					&& (int) $payout['user_id'] === $userId
-					&& ($payout['status'] ?? '') === 'sent'
+				if ((int) $payout['universe'] !== $universe
+					|| (int) $payout['season_id'] !== $seasonId
+					|| (int) $payout['user_id'] !== $userId
 				) {
-					$pizza = (float) $payout['pizza_amount'];
-					break;
+					continue;
 				}
+				$status = (string) ($payout['status'] ?? '');
+				if ($status === 'sent') {
+					$pizza = (float) $payout['pizza_amount'];
+					$prizeState = 'sent';
+				} elseif (in_array($status, ['pending_claim', 'forfeited', 'claiming'], true)) {
+					$prizeState = 'unclaimed';
+				}
+				break;
 			}
 			$out[] = [
 				'rank'         => (int) $row['rank'],
@@ -195,6 +257,7 @@ class InMemorySeasonStore implements SeasonStore
 				'hive_account' => (string) $row['hive_account'],
 				'points'       => (int) $row['points'],
 				'pizza_amount' => $pizza,
+				'prize_state'  => $prizeState,
 			];
 		}
 		usort($out, static fn ($a, $b) => $a['rank'] <=> $b['rank']);
