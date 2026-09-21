@@ -93,6 +93,15 @@
 	margin: 4px 0 0;
 }
 
+.lobby-cta-note {
+	margin: 2px 0 0;
+	max-width: 32rem;
+	font-size: 13px;
+	line-height: 1.45;
+	font-style: italic;
+	color: #8eabc0;
+}
+
 .lobby-cta {
 	display: inline-flex;
 	align-items: center;

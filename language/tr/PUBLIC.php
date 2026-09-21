@@ -32,8 +32,8 @@ $LNG['siteTitleDisclamer']			= 'Iletişim';
 $LNG['siteTitleLostPassword']		= 'Şifremi Unuttum?';
 
 // Public SEO
-$LNG['metaTitleHome']				= '%s — Free Hive browser space strategy game';
-$LNG['metaDescriptionIndex']		= 'Multiplayer Orbiting Optimization Network (MOON). Free-to-play space empire browser game on Hive. Build fleets, ally up, and come get mooned!';
+$LNG['metaTitleHome']				= '%s — Free browser space strategy — Uni 1 frontier';
+$LNG['metaDescriptionIndex']		= 'Free browser space strategy — Uni 1 frontier. No download. Build fleets in the browser. Uni 1 does not wipe — room to explore, neighbors welcome.';
 $LNG['metaDescriptionRegister']		= 'Create your free %s account. Play in any browser — no download. Register with email or Hive Keychain.';
 $LNG['metaDescriptionRules']		= 'Official %s game rules: accounts, multi-accounting, bashing, bugs, and fair play.';
 $LNG['metaDescriptionScreens']		= 'Screenshots from %s — the free Hive space strategy browser game.';
@@ -218,7 +218,7 @@ $LNG['loginHiveAccount'] = 'Hive Hesabı';
 $LNG['loginKeychainButton'] = 'Keychain ile giriş yap';
 
 $LNG['registerErrorHiveRequiredSeason'] = 'Bu evren bağlı bir Hive hesabı gerektirir.';
-$LNG['lobby_kicker'] = 'Free to play on Hive';
+$LNG['lobby_kicker'] = 'Free browser space strategy';
 $LNG['lobby_hero_alt'] = 'In-game view of Moon — build, fight, and expand across the galaxy';
 $LNG['lobby_hero_caption'] = 'Built on Hive';
 $LNG['lobby_feed_title_one'] = '%s universe is live';
@@ -250,3 +250,7 @@ $LNG['registerUsernameCheckSuggestions'] = 'Available similar names:';
 $LNG['registerUsernameCheckHiveOwn'] = 'This Hive account exists. Continue with Keychain to register as this identity.';
 $LNG['registerUsernameCheckMissingHive'] = 'No Hive account exists with this name.';
 $LNG['registerUsernameCheckAvailable'] = 'Username is available.';
+$LNG['lobby_tagline'] = 'Build fleets in your browser. No download. Uni 1 does not wipe.';
+$LNG['lobby_cta_primary'] = 'Play free — Uni 1';
+$LNG['lobby_cta_season'] = 'Want a one-week season with Hive ranks? That\'s Uni 3 — needs Hive Keychain.';
+$LNG['uni_option_keychain_pizza'] = 'Needs Hive Keychain + PIZZA entry';

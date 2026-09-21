@@ -27,13 +27,13 @@ class LoginUniverseDefaultsTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function test_for_email_login_prefers_newest_seasonal(): void
+	public function test_for_email_login_prefers_non_seasonal(): void
 	{
 		Config::setInstance($this->uniConfig(1, 'Classic', open: true, seasonal: false, players: 200), 1);
 		Config::setInstance($this->uniConfig(2, 'Old Season', open: true, seasonal: true, players: 10), 2);
 		Config::setInstance($this->uniConfig(3, 'New Season', open: true, seasonal: true, players: 17), 3);
 
-		$this->assertSame(3, LoginUniverseDefaults::forEmail(false));
+		$this->assertSame(1, LoginUniverseDefaults::forEmail(false));
 	}
 
 	public function test_for_email_registration_skips_seasonal(): void
@@ -93,6 +93,38 @@ class LoginUniverseDefaultsTest extends TestCase
 		Config::setInstance($this->uniConfig(3, 'Season', open: true, seasonal: true, players: 17), 3);
 
 		$this->assertSame(3, LoginUniverseDefaults::forEmail(true));
+	}
+
+	public function test_for_email_login_falls_back_to_only_open_seasonal(): void
+	{
+		$this->resetUniverseList([3]);
+		Config::setInstance($this->uniConfig(3, 'Season', open: true, seasonal: true, players: 17), 3);
+
+		$this->assertSame(3, LoginUniverseDefaults::forEmail(false));
+	}
+
+	public function test_select_option_label_names_keychain_and_pizza_for_seasonal(): void
+	{
+		$suffix = 'Needs Hive Keychain + PIZZA entry';
+
+		$this->assertSame(
+			'Universe 3 — '.$suffix,
+			LoginUniverseDefaults::selectOptionLabel('Universe 3', true, '', $suffix)
+		);
+		$this->assertSame(
+			'Universe 3 — '.$suffix.' (closed)',
+			LoginUniverseDefaults::selectOptionLabel('Universe 3', true, ' (closed)', $suffix)
+		);
+		$this->assertSame(
+			'Universe 1',
+			LoginUniverseDefaults::selectOptionLabel('Universe 1', false, '', $suffix)
+		);
+		$this->assertSame(
+			'Universe 2 (closed)',
+			LoginUniverseDefaults::selectOptionLabel('Universe 2', false, ' (closed)', $suffix)
+		);
+		$this->assertFalse(LoginUniverseDefaults::isSeasonal($this->uniConfig(1, 'Classic', open: true, seasonal: false, players: 1)));
+		$this->assertTrue(LoginUniverseDefaults::isSeasonal($this->uniConfig(3, 'Season', open: true, seasonal: true, players: 1)));
 	}
 
 	public function test_for_email_login_falls_back_when_no_seasonal(): void

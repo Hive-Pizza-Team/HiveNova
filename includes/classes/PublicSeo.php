@@ -162,7 +162,7 @@ class PublicSeo
 		$key = self::PAGE_TITLE_KEYS[$page] ?? null;
 
 		if ($page === 'index' || $key === 'metaTitleHome') {
-			$template = isset($LNG['metaTitleHome']) ? (string) $LNG['metaTitleHome'] : '%s — Free browser space strategy game';
+			$template = isset($LNG['metaTitleHome']) ? (string) $LNG['metaTitleHome'] : '%s — Free browser space strategy — Uni 1 frontier';
 			return sprintf($template, $gameName);
 		}
 

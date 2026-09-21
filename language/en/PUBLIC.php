@@ -29,8 +29,8 @@ $LNG['siteTitleDisclamer']			= 'Contact Admin';
 $LNG['siteTitleLostPassword']		= 'Lost Password?';
 
 // Public SEO (EN is fallback for other languages)
-$LNG['metaTitleHome']				= '%s — Free Hive browser space strategy game';
-$LNG['metaDescriptionIndex']		= 'Free-to-play Hive space strategy browser game. Build fleets, ally up, fight for the galaxy — come get mooned!';
+$LNG['metaTitleHome']				= '%s — Free browser space strategy — Uni 1 frontier';
+$LNG['metaDescriptionIndex']		= 'Free browser space strategy — Uni 1 frontier. No download. Build fleets in the browser. Uni 1 does not wipe — room to explore, neighbors welcome.';
 $LNG['metaDescriptionRegister']		= 'Create your free %s account. Play in any browser — no download. Register with email or Hive Keychain.';
 $LNG['metaDescriptionRules']		= 'Official %s game rules: accounts, multi-accounting, bashing, bugs, and fair play.';
 $LNG['metaDescriptionScreens']		= 'Screenshots from %s — the free Hive space strategy browser game.';
@@ -103,7 +103,7 @@ $LNG['loginPassword']				= 'Password';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'With the login I accept the %s.';
 $LNG['loginWelcome']				= 'Welcome to %s';
-$LNG['loginServerDesc']				= '%s is a real-time space empire game on Hive — free to play in any browser.';
+$LNG['loginServerDesc']				= 'Build fleets in your browser. No download. Uni 1 does not wipe.';
 $LNG['loginHiveAccount']			= 'Hive Account';
 $LNG['loginKeychainButton']			= 'Sign in with Keychain';
 
@@ -212,7 +212,7 @@ $LNG['disclamerLabelMail']			= 'Support Email:';
 $LNG['disclamerLabelNotice']		= 'More information';
 
 $LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';
-$LNG['lobby_kicker'] = 'Free to play on Hive';
+$LNG['lobby_kicker'] = 'Free browser space strategy';
 $LNG['lobby_hero_alt'] = 'In-game view of Moon — build, fight, and expand across the galaxy';
 $LNG['lobby_hero_caption'] = 'Built on Hive';
 $LNG['lobby_feed_title_one'] = '%s universe is live';
@@ -244,3 +244,7 @@ $LNG['registerUsernameCheckSuggestions'] = 'Available similar names:';
 $LNG['registerUsernameCheckHiveOwn'] = 'This Hive account exists. Continue with Keychain to register as this identity.';
 $LNG['registerUsernameCheckMissingHive'] = 'No Hive account exists with this name.';
 $LNG['registerUsernameCheckAvailable'] = 'Username is available.';
+$LNG['lobby_tagline'] = 'Build fleets in your browser. No download. Uni 1 does not wipe.';
+$LNG['lobby_cta_primary'] = 'Play free — Uni 1';
+$LNG['lobby_cta_season'] = 'Want a one-week season with Hive ranks? That\'s Uni 3 — needs Hive Keychain.';
+$LNG['uni_option_keychain_pizza'] = 'Needs Hive Keychain + PIZZA entry';
