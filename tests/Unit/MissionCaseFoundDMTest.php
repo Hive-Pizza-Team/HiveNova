@@ -105,6 +105,9 @@ class MissionCaseFoundDMTest extends TestCase
 		$this->assertSame(777, $mission->_fleet['fleet_resource_darkmatter']);
 		$this->assertSame(2, (int) $mission->_fleet['fleet_amount']);
 		$this->assertNotEmpty($this->fake->achievement->messages);
+		$this->assertTrue($this->hasMessageContaining('[1:1:16]'));
+		$this->assertTrue($this->hasMessageContaining('Destination:'));
+		$this->assertTrue($this->hasSubjectContaining('[1:1:16]'));
 	}
 
 	public function test_end_stay_nothing_keeps_ships_and_no_dm(): void
@@ -144,6 +147,7 @@ class MissionCaseFoundDMTest extends TestCase
 		$this->assertSame(0, (int) $mission->_fleet['fleet_amount']);
 		$this->assertSame(1, $mission->kill);
 		$this->assertTrue($this->hasMessageContaining('scrapped'));
+		$this->assertTrue($this->hasMessageContaining('[1:1:16]'));
 	}
 
 	public function test_return_nothing_keeps_ships(): void
@@ -180,6 +184,18 @@ class MissionCaseFoundDMTest extends TestCase
 		foreach ($this->fake->achievement->messages as $message) {
 			$text = (string) ($message[':text'] ?? $message[':message'] ?? json_encode($message));
 			if (str_contains($text, $needle)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private function hasSubjectContaining(string $needle): bool
+	{
+		foreach ($this->fake->achievement->messages as $message) {
+			$subject = (string) ($message[':subject'] ?? '');
+			if (str_contains($subject, $needle)) {
 				return true;
 			}
 		}
