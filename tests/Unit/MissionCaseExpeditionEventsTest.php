@@ -198,6 +198,7 @@ class MissionCaseExpeditionEventsTest extends TestCase
 
         $this->assertSame(1, $mission->kill);
         $this->assertTrue($this->hasMessageType(4), 'Return should send fleet-back message (type 4)');
+        $this->assertExpeditionCoordinatesInMessages(4);
         $this->assertTrue($this->fleetWasDeleted());
     }
 
@@ -254,6 +255,27 @@ class MissionCaseExpeditionEventsTest extends TestCase
             $this->hasMessageType(15),
             'Expedition should send sys_expe_report message (type 15)'
         );
+        $this->assertExpeditionCoordinatesInMessages(15);
+    }
+
+    private function assertExpeditionCoordinatesInMessages(int $type): void
+    {
+        $matched = false;
+        foreach ($this->fake->achievement->messages as $message) {
+            if ((int) ($message[':type'] ?? 0) !== $type) {
+                continue;
+            }
+            $matched = true;
+            $subject = (string) ($message[':subject'] ?? '');
+            $text = (string) ($message[':text'] ?? '');
+            $this->assertStringContainsString('[1:1:16]', $text, 'Expedition message body should include destination coordinates');
+            $this->assertStringContainsString('Destination:', $text);
+            $this->assertStringContainsString('galaxy=1', $text);
+            if ($type === 15) {
+                $this->assertStringContainsString('[1:1:16]', $subject, 'Expedition report subject should include destination coordinates');
+            }
+        }
+        $this->assertTrue($matched, "Expected a message of type {$type} with destination coordinates");
     }
 
 }
