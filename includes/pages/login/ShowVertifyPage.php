@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\ReferralActivationService;
 use HiveNova\Core\Session;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Mail;
@@ -82,19 +83,9 @@ class ShowVertifyPage extends AbstractLoginPage
 			}
 		}
 
-		if(!empty($userData['referralID']))
-		{
-			$sql = "UPDATE %%USERS%% SET
-			`ref_id`	= :referralId,
-			`ref_bonus`	= 1
-			WHERE
-			`id`		= :userID;";
-
-			$db->update($sql, array(
-				':referralId'	=> $userData['referralID'],
-				':userID'		=> $userID
-			));
-		}
+		// Skip-verify (user_valid = 0) redirects here, so this is the only
+		// activation write. ReferralCronjob ignores recruits without these columns.
+		(new ReferralActivationService())->attachFromPending($db, (int) $userID, $userData);
 
 		if(!empty($userData['externalAuthUID']))
 		{
