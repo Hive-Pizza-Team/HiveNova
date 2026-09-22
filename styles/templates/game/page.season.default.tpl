@@ -53,6 +53,45 @@
 			{if $canPlay}
 			<p><a href="game.php?page=overview">{$LNG.sys_forward}</a></p>
 			{/if}
+			{if !empty($claimDesk.show)}
+			<hr>
+			<h3>{$LNG.page_season_claim_title}</h3>
+			<p>{$LNG.page_season_medal_blurb}</p>
+			{if $claimSeconds != ''}
+			<p>{$LNG.page_season_claim_window|sprintf:$claimSeconds}</p>
+			{/if}
+			{if $claimDesk.reason == 'unpaid'}
+			<p>{$LNG.page_season_claim_unpaid}</p>
+			<p>{$LNG.page_season_entry_before_wipe}</p>
+			{elseif $claimDesk.reason == 'unlinked'}
+			<p>{$LNG.page_season_claim_unlinked}</p>
+			{elseif $claimDesk.reason == 'forfeited' || $claimDesk.reason == 'window_closed'}
+			<p>{$LNG.page_season_claim_forfeit}</p>
+			{elseif $claimDesk.reason == 'already'}
+			<p>{$LNG.page_season_claim_ok}</p>
+			{elseif $claimDesk.reason == 'auto'}
+			<p>{$LNG.page_season_claim_auto}</p>
+			{elseif $claimDesk.reason == 'not_eligible'}
+			<p>{$LNG.page_season_claim_fail}</p>
+			{/if}
+			{if $claimDesk.can_claim}
+			<p>{$LNG.page_season_claim_ready|sprintf:$claimAmount}</p>
+			<form action="game.php?page=season" method="post">
+				<input type="hidden" name="mode" value="claim">
+				<input type="submit" value="{$LNG.page_season_claim_button}">
+			</form>
+			{/if}
+			{if $claimDesk.medal_status == 'claimed'}
+			<p>{$LNG.page_season_medal_claimed}</p>
+			{elseif $claimDesk.medal_status == 'pending_claim'}
+			<p>{$LNG.page_season_medal_pending}</p>
+			{elseif $claimDesk.medal_status == 'forfeited'}
+			<p>{$LNG.page_season_medal_forfeited}</p>
+			{/if}
+			{if $claimMeta != ''}
+			<p><small>{$claimMeta|escape:'html'}</small></p>
+			{/if}
+			{/if}
 		</td>
 	</tr>
 </table>

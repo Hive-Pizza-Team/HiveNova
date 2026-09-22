@@ -183,6 +183,63 @@ class DatabaseSeasonStore implements SeasonStore
 		);
 	}
 
+	public function compareAndSetPayout(int $id, string $fromStatus, string $toStatus, string $trxId): void
+	{
+		Database::get()->update(
+			'UPDATE %%SEASON_PAYOUTS%% SET `status` = :to, `trx_id` = :trx WHERE `id` = :id AND `status` = :from',
+			[':to' => $toStatus, ':trx' => $trxId, ':id' => $id, ':from' => $fromStatus]
+		);
+	}
+
+	public function findPayout(int $universe, int $seasonId, int $userId): ?array
+	{
+		$row = Database::get()->selectSingle(
+			'SELECT `id`, `user_id`, `hive_account`, `pizza_amount`, `status`, `trx_id`, `points`, `rank`
+			FROM %%SEASON_PAYOUTS%%
+			WHERE `universe` = :uni AND `season_id` = :sid AND `user_id` = :uid LIMIT 1',
+			[':uni' => $universe, ':sid' => $seasonId, ':uid' => $userId]
+		);
+		if (!is_array($row)) {
+			return null;
+		}
+
+		return $this->mapPayout($row);
+	}
+
+	public function payoutsWithStatus(int $universe, int $seasonId, string $status): array
+	{
+		$rows = Database::get()->select(
+			'SELECT `id`, `user_id`, `hive_account`, `pizza_amount`, `status`, `trx_id`, `points`, `rank`
+			FROM %%SEASON_PAYOUTS%%
+			WHERE `universe` = :uni AND `season_id` = :sid AND `status` = :status',
+			[':uni' => $universe, ':sid' => $seasonId, ':status' => $status]
+		);
+		$out = [];
+		foreach ($rows as $row) {
+			$out[] = $this->mapPayout($row);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * @param array<string, mixed> $row
+	 * @return array{id: int, user_id: int, hive_account: string, pizza_amount: float, status: string, trx_id: string, points: int, rank: int}
+	 */
+	private function mapPayout(array $row): array
+	{
+		return [
+			'id'           => (int) $row['id'],
+			'user_id'      => (int) $row['user_id'],
+			'hive_account' => (string) $row['hive_account'],
+			'pizza_amount' => (float) $row['pizza_amount'],
+			'status'       => (string) $row['status'],
+			'trx_id'       => (string) ($row['trx_id'] ?? ''),
+			'points'       => (int) ($row['points'] ?? 0),
+			'rank'         => (int) ($row['rank'] ?? 0),
+		];
+	}
+
 	public function playersInUniverse(int $universe): array
 	{
 		$rows = Database::get()->select(
@@ -270,11 +327,11 @@ class DatabaseSeasonStore implements SeasonStore
 		$limit = max(1, min(100, $limit));
 		$rows = Database::get()->select(
 			'SELECT s.`rank`, s.`hive_account`, s.`points`, COALESCE(u.`username`, \'\') AS `username`,
-				p.`pizza_amount` AS `pizza_amount`
+				p.`pizza_amount` AS `pizza_amount`, p.`status` AS `payout_status`
 			FROM %%SEASON_SNAPSHOTS%% s
 			LEFT JOIN %%USERS%% u ON u.`id` = s.`user_id`
 			LEFT JOIN %%SEASON_PAYOUTS%% p ON p.`universe` = s.`universe` AND p.`season_id` = s.`season_id`
-				AND p.`user_id` = s.`user_id` AND p.`status` = \'sent\'
+				AND p.`user_id` = s.`user_id`
 			WHERE s.`universe` = :uni AND s.`season_id` = :sid
 			ORDER BY s.`rank` ASC
 			LIMIT ' . $limit,
@@ -282,14 +339,17 @@ class DatabaseSeasonStore implements SeasonStore
 		);
 		$out = [];
 		foreach ($rows as $row) {
+			$status = (string) ($row['payout_status'] ?? '');
+			$sent = $status === 'sent';
 			$out[] = [
 				'rank'         => (int) $row['rank'],
 				'username'     => (string) $row['username'],
 				'hive_account' => (string) $row['hive_account'],
 				'points'       => (int) $row['points'],
-				'pizza_amount' => isset($row['pizza_amount']) && $row['pizza_amount'] !== null
+				'pizza_amount' => $sent && isset($row['pizza_amount']) && $row['pizza_amount'] !== null
 					? (float) $row['pizza_amount']
 					: null,
+				'prize_state'  => $this->prizeState($status),
 			];
 		}
 
@@ -356,6 +416,18 @@ class DatabaseSeasonStore implements SeasonStore
 		}
 
 		return $out;
+	}
+
+	private function prizeState(string $status): string
+	{
+		if ($status === 'sent') {
+			return 'sent';
+		}
+		if ($status === 'pending_claim' || $status === 'forfeited' || $status === 'claiming') {
+			return 'unclaimed';
+		}
+
+		return '';
 	}
 
 	public function countEntries(int $universe, int $seasonId): int

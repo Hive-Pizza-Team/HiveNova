@@ -46,6 +46,21 @@ interface SeasonStore
 	public function markPayout(int $id, string $status, string $trxId): void;
 
 	/**
+	 * Flip a payout only when it is still in $fromStatus. Used as a claim lock.
+	 */
+	public function compareAndSetPayout(int $id, string $fromStatus, string $toStatus, string $trxId): void;
+
+	/**
+	 * @return array{id: int, user_id: int, hive_account: string, pizza_amount: float, status: string, trx_id: string, points: int, rank: int}|null
+	 */
+	public function findPayout(int $universe, int $seasonId, int $userId): ?array;
+
+	/**
+	 * @return list<array{id: int, user_id: int, hive_account: string, pizza_amount: float, status: string, trx_id: string, points: int, rank: int}>
+	 */
+	public function payoutsWithStatus(int $universe, int $seasonId, string $status): array;
+
+	/**
 	 * @return list<array{id: int, hive_account: string, lang: string}>
 	 */
 	public function playersInUniverse(int $universe): array;
@@ -65,7 +80,7 @@ interface SeasonStore
 	/**
 	 * Top ranking rows for the season blog (username + prize when sent).
 	 *
-	 * @return list<array{rank: int, username: string, hive_account: string, points: int, pizza_amount: float|null}>
+	 * @return list<array{rank: int, username: string, hive_account: string, points: int, pizza_amount: float|null, prize_state: string}>
 	 */
 	public function reportRanking(int $universe, int $seasonId, int $limit = 20): array;
 

@@ -26,7 +26,13 @@ class SeasonService
 		private readonly ?int $now = null,
 		private readonly HiveCommentPoster $poster = new HiveCommentPoster(),
 		private readonly SeasonReportComposer $composer = new SeasonReportComposer(),
+		private readonly ?Uni3ClaimStore $claims = null,
 	) {
+	}
+
+	public static function createDefault(): self
+	{
+		return new self(new DatabaseSeasonStore(), claims: new DatabaseUni3ClaimStore());
 	}
 
 	public function setMessageSender(?callable $sender): void
@@ -60,14 +66,8 @@ class SeasonService
 
 	public function canPlay(array $user, Config $config): bool
 	{
-		if (!$this->isSeasonal($config)) {
-			return true;
-		}
-		if (AuthLevel::isStaff((int) ($user['authlevel'] ?? 0))) {
-			return true;
-		}
-
-		return $this->hasHive($user) && $this->hasEntry($user, $config);
+		// Seasonal universes allow email/password play. Prizes stay Hive-gated.
+		return true;
 	}
 
 	public function isAllowedPage(string $page): bool
@@ -255,6 +255,8 @@ class SeasonService
 			return 'skip';
 		}
 
+		$this->expireUnclaimed($config);
+
 		$status = (string) ($config->season_status ?? self::STATUS_IDLE);
 		if ($status === self::STATUS_IDLE || (int) ($config->season_id ?? 0) < 1) {
 			$this->startWeek($config, $lng);
@@ -427,6 +429,9 @@ class SeasonService
 			'trx_id'        => $transfer['trx_id'],
 			'created_at'    => $this->now(),
 		]);
+		if ($ok) {
+			Uni3PilotLog::record(Uni3PilotLog::ENTRY_PAID, $uni, $seasonId, $userId, $transfer['trx_id']);
+		}
 
 		return $ok ? ['ok' => true, 'reason' => ''] : ['ok' => false, 'reason' => 'insert_failed'];
 	}
@@ -478,8 +483,11 @@ class SeasonService
 			'payout_budget'    => $budget,
 		]);
 
+		$gate = new Uni3ClaimGate();
 		$pending = [];
 		foreach ($payouts as $payout) {
+			$origin = $this->linkOrigin($uni, $seasonId, (int) $payout['user_id']);
+			$status = $gate->payoutStatusForOrigin($origin);
 			$pending[] = [
 				'universe'      => $uni,
 				'season_id'     => $seasonId,
@@ -489,8 +497,18 @@ class SeasonService
 				'points'        => $payout['points'],
 				'pizza_amount'  => $payout['pizza_amount'],
 				'trx_id'        => '',
-				'status'        => 'pending',
+				'status'        => $status,
 			];
+			$this->claims?->upsertMedal([
+				'universe'     => $uni,
+				'season_id'    => $seasonId,
+				'user_id'      => (int) $payout['user_id'],
+				'hive_account' => (string) $payout['hive_account'],
+				'tier'         => Uni3ClaimGate::MEDAL_TIER,
+				'status'       => Uni3ClaimGate::MEDAL_PENDING,
+				'points'       => (int) $payout['points'],
+				'claimed_at'   => 0,
+			]);
 		}
 		$this->store->insertPayouts($pending);
 
@@ -528,6 +546,7 @@ class SeasonService
 			);
 			if ($result['ok']) {
 				$this->store->markPayout($payout['id'], 'sent', $result['trx_id']);
+				$this->markMedalClaimed($uni, $seasonId, (int) $payout['user_id'], (string) $payout['hive_account']);
 			} else {
 				$this->store->markPayout($payout['id'], 'failed', '');
 				$failed = true;
@@ -714,7 +733,7 @@ class SeasonService
 		$hoursLeft = max(0, (int) ceil(($closes - $this->now()) / 3600));
 
 		$defaults = [
-			'start'    => 'Season %d has started. Hive signup and a Pizza entry are required to play.',
+			'start'    => 'Season %d has started. You can play now. Link Hive and pay the Pizza entry before the wipe to be prize-eligible.',
 			'daily'    => 'Season %d countdown: %d day(s) until close.',
 			'preclose' => 'Season %d closes in about %d hour(s).',
 			'close'    => 'Season %d is closing. Rankings are locked for Pizza payouts.',
@@ -762,5 +781,294 @@ class SeasonService
 		}
 
 		DiscordWebhookService::notifySeasonReminder($uni, $text);
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 * @return array{show: bool, dismissible: bool, hard: bool, mode: string, season_id: int}
+	 */
+	public function prizeLockState(array $user, Config $config, bool $dismissed): array
+	{
+		$seasonId = (int) ($config->season_id ?? 0);
+		$gate = new Uni3ClaimGate();
+		$pending = $this->hasPendingClaim($user, $config);
+		$banner = $gate->banner(
+			$this->isSeasonal($config),
+			$gate->prizeLocked($this->hasHive($user), $this->hasEntry($user, $config)),
+			$pending,
+			$dismissed
+		);
+
+		return $banner + ['season_id' => $seasonId];
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 * @return array{
+	 *   show: bool,
+	 *   can_claim: bool,
+	 *   reason: string,
+	 *   season_id: int,
+	 *   seconds_left: int,
+	 *   pizza_amount: float,
+	 *   medal_status: string,
+	 *   metadata: array<string, int|string|bool>,
+	 *   window_open: bool
+	 * }
+	 */
+	public function claimDesk(Config $config, array $user): array
+	{
+		$empty = [
+			'show'          => false,
+			'can_claim'     => false,
+			'reason'        => '',
+			'season_id'     => 0,
+			'seconds_left'  => 0,
+			'pizza_amount'  => 0.0,
+			'medal_status'  => '',
+			'metadata'      => [],
+			'window_open'   => false,
+		];
+		if (!$this->isSeasonal($config)) {
+			return $empty;
+		}
+		$target = $this->claimTargetSeasonId($config);
+		if ($target < 1) {
+			return $empty;
+		}
+
+		$gate = new Uni3ClaimGate();
+		$uni = (int) $config->uni;
+		$userId = (int) ($user['id'] ?? 0);
+		$week = $this->store->getWeek($uni, $target) ?? [];
+		$closes = (int) ($week['closes_at'] ?? 0);
+		$open = $gate->claimWindowOpen($closes, $this->now());
+		$expired = $gate->claimWindowExpired($closes, $this->now());
+		$linked = $this->hasHive($user);
+		$entry = $this->store->findEntry($uni, $target, $userId);
+		$paid = $entry !== null;
+		$payout = $this->store->findPayout($uni, $target, $userId);
+		$medal = $this->claims?->findMedal($uni, $target, $userId);
+		$status = (string) ($payout['status'] ?? '');
+		$points = (int) ($payout['points'] ?? ($medal['points'] ?? 0));
+		$decision = $this->claimDecision($linked, $paid, $status, $open, $expired, $payout !== null);
+		$relevant = $paid || $payout !== null || $medal !== null || ($linked && ($open || $expired));
+
+		$metadata = [];
+		if ($linked && $paid) {
+			$metadata = $gate->medalMetadata(
+				$uni,
+				$target,
+				(string) ($user['hive_account'] ?? ''),
+				(string) ($user['username'] ?? ''),
+				$points,
+				(string) ($medal['status'] ?? Uni3ClaimGate::MEDAL_PENDING)
+			);
+		}
+
+		return [
+			'show'         => $relevant && ($open || $expired || $status !== ''),
+			'can_claim'    => $decision['can_claim'],
+			'reason'       => $decision['reason'],
+			'season_id'    => $target,
+			'seconds_left' => $open ? max(0, $closes + Uni3ClaimGate::CLAIM_WINDOW_SECONDS - $this->now()) : 0,
+			'pizza_amount' => (float) ($payout['pizza_amount'] ?? 0),
+			'medal_status' => (string) ($medal['status'] ?? ''),
+			'metadata'     => $metadata,
+			'window_open'  => $open,
+		];
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 * @return array{ok: bool, reason: string}
+	 */
+	public function claim(Config $config, array $user): array
+	{
+		$desk = $this->claimDesk($config, $user);
+		if ($desk['reason'] === 'already') {
+			return ['ok' => true, 'reason' => 'already'];
+		}
+		if (!$desk['can_claim']) {
+			return ['ok' => false, 'reason' => $desk['reason'] !== '' ? $desk['reason'] : 'not_eligible'];
+		}
+
+		$uni = (int) $config->uni;
+		$seasonId = (int) $desk['season_id'];
+		$userId = (int) ($user['id'] ?? 0);
+		$payout = $this->store->findPayout($uni, $seasonId, $userId);
+		if ($payout === null) {
+			return ['ok' => false, 'reason' => 'not_eligible'];
+		}
+
+		Uni3PilotLog::record(Uni3PilotLog::CLAIM_STARTED, $uni, $seasonId, $userId, (string) $payout['hive_account']);
+		$token = 'claim:' . bin2hex(random_bytes(8));
+		$this->store->compareAndSetPayout((int) $payout['id'], Uni3ClaimGate::PAYOUT_PENDING_CLAIM, Uni3ClaimGate::PAYOUT_CLAIMING, $token);
+		$locked = $this->store->findPayout($uni, $seasonId, $userId);
+		if ($locked === null || (string) ($locked['trx_id'] ?? '') !== $token) {
+			return ['ok' => false, 'reason' => 'in_progress'];
+		}
+
+		$from = (string) ($config->season_wallet_account ?? '');
+		$wif = ConfigSecret::resolve(ConfigSecret::ENV_SEASON_WALLET_KEY, $config->season_wallet_active_key ?? '');
+		$gameName = trim((string) ($config->game_name ?? ''));
+		if ($gameName === '') {
+			$gameName = 'HiveNova';
+		}
+		$memo = sprintf('%s season %d prize', $gameName, $seasonId);
+		$result = $this->transfer->send(
+			$from,
+			(string) $payout['hive_account'],
+			(float) $payout['pizza_amount'],
+			self::TOKEN,
+			$memo,
+			$wif
+		);
+		if (!$result['ok']) {
+			$this->store->compareAndSetPayout((int) $payout['id'], Uni3ClaimGate::PAYOUT_CLAIMING, Uni3ClaimGate::PAYOUT_PENDING_CLAIM, '');
+			return ['ok' => false, 'reason' => 'send_failed'];
+		}
+
+		$this->store->markPayout((int) $payout['id'], Uni3ClaimGate::PAYOUT_SENT, $result['trx_id']);
+		$this->markMedalClaimed($uni, $seasonId, $userId, (string) $payout['hive_account']);
+		Uni3PilotLog::record(Uni3PilotLog::CLAIM_COMPLETED, $uni, $seasonId, $userId, $result['trx_id']);
+
+		return ['ok' => true, 'reason' => ''];
+	}
+
+	public function expireUnclaimed(Config $config): int
+	{
+		if (!$this->isSeasonal($config) || $this->claims === null) {
+			return 0;
+		}
+		$gate = new Uni3ClaimGate();
+		$uni = (int) $config->uni;
+		$current = (int) ($config->season_id ?? 0);
+		$seasons = [];
+		if ($current > 1) {
+			$seasons[] = $current - 1;
+		}
+		if ($current > 0) {
+			$seasons[] = $current;
+		}
+		$forfeited = 0;
+		foreach (array_unique($seasons) as $seasonId) {
+			$week = $this->store->getWeek($uni, $seasonId);
+			if ($week === null) {
+				continue;
+			}
+			if (!$gate->claimWindowExpired((int) ($week['closes_at'] ?? 0), $this->now())) {
+				continue;
+			}
+			foreach ($this->store->payoutsWithStatus($uni, $seasonId, Uni3ClaimGate::PAYOUT_PENDING_CLAIM) as $payout) {
+				$this->store->markPayout((int) $payout['id'], Uni3ClaimGate::PAYOUT_FORFEITED, '');
+				$this->claims->markMedal(
+					$uni,
+					$seasonId,
+					(int) $payout['user_id'],
+					Uni3ClaimGate::MEDAL_FORFEITED,
+					$this->now(),
+					(string) $payout['hive_account']
+				);
+				Uni3PilotLog::record(
+					Uni3PilotLog::CLAIM_FORFEITED,
+					$uni,
+					$seasonId,
+					(int) $payout['user_id'],
+					(string) $payout['hive_account']
+				);
+				$forfeited++;
+			}
+		}
+
+		return $forfeited;
+	}
+
+	private function linkOrigin(int $universe, int $seasonId, int $userId): string
+	{
+		if ($this->claims === null) {
+			return Uni3ClaimGate::ORIGIN_KEYCHAIN;
+		}
+		$link = $this->claims->findHiveLinkByUser($universe, $seasonId, $userId);
+		$origin = (string) ($link['origin'] ?? '');
+		if ($origin === Uni3ClaimGate::ORIGIN_EMAIL) {
+			return Uni3ClaimGate::ORIGIN_EMAIL;
+		}
+
+		return Uni3ClaimGate::ORIGIN_KEYCHAIN;
+	}
+
+	private function claimTargetSeasonId(Config $config): int
+	{
+		$status = (string) ($config->season_status ?? '');
+		$id = (int) ($config->season_id ?? 0);
+		if (in_array($status, [self::STATUS_PAYING, self::STATUS_PAYOUT_HOLD, self::STATUS_BLOG_HOLD], true) && $id > 0) {
+			return $id;
+		}
+		if ($status === self::STATUS_RUNNING && $id > 1) {
+			return $id - 1;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * @param array<string, mixed> $user
+	 */
+	private function hasPendingClaim(array $user, Config $config): bool
+	{
+		$target = $this->claimTargetSeasonId($config);
+		if ($target < 1) {
+			return false;
+		}
+		$week = $this->store->getWeek((int) $config->uni, $target);
+		$closes = (int) ($week['closes_at'] ?? 0);
+		if (!(new Uni3ClaimGate())->claimWindowOpen($closes, $this->now())) {
+			return false;
+		}
+		$payout = $this->store->findPayout((int) $config->uni, $target, (int) ($user['id'] ?? 0));
+
+		return $payout !== null && (string) ($payout['status'] ?? '') === Uni3ClaimGate::PAYOUT_PENDING_CLAIM;
+	}
+
+	/**
+	 * @return array{can_claim: bool, reason: string}
+	 */
+	private function claimDecision(bool $linked, bool $paid, string $status, bool $windowOpen, bool $windowExpired, bool $hasPayout): array
+	{
+		if (!$linked) {
+			return ['can_claim' => false, 'reason' => 'unlinked'];
+		}
+		if (!$paid) {
+			return ['can_claim' => false, 'reason' => 'unpaid'];
+		}
+		if ($status === Uni3ClaimGate::PAYOUT_FORFEITED || ($windowExpired && $status === Uni3ClaimGate::PAYOUT_PENDING_CLAIM)) {
+			return ['can_claim' => false, 'reason' => 'forfeited'];
+		}
+		if ($status === Uni3ClaimGate::PAYOUT_SENT) {
+			return ['can_claim' => false, 'reason' => 'already'];
+		}
+		if ($status === Uni3ClaimGate::PAYOUT_PENDING || $status === Uni3ClaimGate::PAYOUT_FAILED) {
+			return ['can_claim' => false, 'reason' => 'auto'];
+		}
+		if ($status === Uni3ClaimGate::PAYOUT_CLAIMING) {
+			return ['can_claim' => false, 'reason' => 'in_progress'];
+		}
+		if ($status === Uni3ClaimGate::PAYOUT_PENDING_CLAIM && $windowOpen) {
+			return ['can_claim' => true, 'reason' => ''];
+		}
+		if (!$hasPayout) {
+			return ['can_claim' => false, 'reason' => 'not_eligible'];
+		}
+		if (!$windowOpen) {
+			return ['can_claim' => false, 'reason' => 'window_closed'];
+		}
+
+		return ['can_claim' => false, 'reason' => 'not_eligible'];
+	}
+
+	private function markMedalClaimed(int $universe, int $seasonId, int $userId, string $hive): void
+	{
+		$this->claims?->markMedal($universe, $seasonId, $userId, Uni3ClaimGate::MEDAL_CLAIMED, $this->now(), $hive);
 	}
 }

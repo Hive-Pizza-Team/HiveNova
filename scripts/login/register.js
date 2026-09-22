@@ -51,21 +51,18 @@ document.addEventListener('DOMContentLoaded', function() {
 		var emailBtn = document.querySelector('.reg-tab-btn[data-tab="reg-email"]');
 		var emailSubmit = document.querySelector('#registerForm .submitButton');
 		if (emailBtn) {
-			emailBtn.disabled = seasonal;
-			emailBtn.classList.toggle('disabled', seasonal);
-			emailBtn.setAttribute('aria-disabled', seasonal ? 'true' : 'false');
+			emailBtn.disabled = false;
+			emailBtn.classList.remove('disabled');
+			emailBtn.setAttribute('aria-disabled', 'false');
 		}
 		if (emailSubmit) {
-			emailSubmit.disabled = seasonal;
-		}
-		if (seasonal) {
-			activateTab('reg-hive');
+			emailSubmit.disabled = false;
 		}
 	}
 
 	btns.forEach(function(btn) {
 		btn.addEventListener('click', function() {
-			if (btn.disabled || (btn.getAttribute('data-tab') === 'reg-email' && isSeasonalUni(currentUniId()))) {
+			if (btn.disabled) {
 				return;
 			}
 			activateTab(btn.getAttribute('data-tab'));
@@ -117,8 +114,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	// If Hive Keychain is available, select that tab by default
 	// Extensions inject after DOMContentLoaded, so we wait briefly
 	setTimeout(function() {
+		applySeasonalRegister(currentUniId());
 		if (isSeasonalUni(currentUniId())) {
-			applySeasonalRegister(currentUniId());
 			return;
 		}
 		if (typeof hive_keychain !== 'undefined') {

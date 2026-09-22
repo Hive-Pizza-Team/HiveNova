@@ -225,4 +225,36 @@ class SeasonReportComposerTest extends TestCase
 		$this->assertStringNotContainsString('| w |', $body);
 		$this->assertStringNotContainsString('| r |', $body);
 	}
+
+	public function testUnlinkedRowsAreOmittedAndUnclaimedPrizesAreMarked(): void
+	{
+		$body = (new SeasonReportComposer())->compose(
+			[
+				'universe' => 3,
+				'season_id' => 2,
+				'starts_at' => 100,
+				'closes_at' => 200,
+				'pool_pizza' => 0.2,
+				'house_cut_pizza' => 0.02,
+				'payout_budget' => 0.18,
+			],
+			[
+				['rank' => 1, 'username' => 'Linked', 'hive_account' => 'linkedaa', 'points' => 50, 'pizza_amount' => null, 'prize_state' => 'unclaimed'],
+				['rank' => 2, 'username' => 'EmailOnly', 'hive_account' => '', 'points' => 40, 'pizza_amount' => null],
+			],
+			[
+				['feat_key' => FeatCatalog::FIRST_SHIP, 'username' => 'EmailOnly', 'hive_account' => '', 'claimed_at' => 150],
+				['feat_key' => FeatCatalog::FIRST_COLONY, 'username' => 'Linked', 'hive_account' => 'linkedaa', 'claimed_at' => 160],
+			],
+			[]
+		)['body'];
+
+		$this->assertStringContainsString('| unclaimed |', $body);
+		$this->assertStringContainsString('@linkedaa', $body);
+		$this->assertStringNotContainsString('EmailOnly', $body);
+		$this->assertStringContainsString('never linked a Hive account are omitted', $body);
+		$this->assertStringContainsString('not amended', $body);
+		$this->assertStringContainsString('do not change combat', $body);
+		$this->assertStringNotContainsString('NFT', $body);
+	}
 }

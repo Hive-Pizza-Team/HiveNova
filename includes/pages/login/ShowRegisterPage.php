@@ -311,11 +311,6 @@ class ShowRegisterPage extends AbstractLoginPage
 			$errors[]	= $LNG['registerErrorHiveAccountInvalid'];
 		}
 
-		$seasonConfig = Config::get(Universe::current());
-		if (isset($seasonConfig->season_mode) && (int) $seasonConfig->season_mode === 1 && $hiveAccount === '') {
-			$errors[]	= $LNG['registerErrorHiveRequiredSeason'] ?? $LNG['registerErrorHiveAccountInvalid'];
-		}
-		
 		$db = Database::get();
 
 		$sql = "SELECT (

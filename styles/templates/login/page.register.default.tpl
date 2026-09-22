@@ -18,7 +18,7 @@
 		<form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register">
 		<input type="hidden" value="send" name="mode">
 		<div class="rowForm reg-season-hive-notice" hidden>
-			<p>{$LNG.registerErrorHiveRequiredSeason}</p>
+			<p>{$LNG.registerSeasonEmailNotice}</p>
 		</div>
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">

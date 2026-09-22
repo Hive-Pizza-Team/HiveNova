@@ -109,24 +109,31 @@ class SeasonReportComposer
 		$lines[] = '';
 		$lines[] = '## Top 20 Ranking';
 		$lines[] = '';
-		if ($ranking === []) {
+		$ranked = [];
+		foreach ($ranking as $row) {
+			$hive = strtolower(trim((string) ($row['hive_account'] ?? '')));
+			if (!HiveUtil::isAccountValid($hive)) {
+				continue;
+			}
+			$ranked[] = $row;
+		}
+		if ($ranked === []) {
 			$lines[] = '_No ranked entrants this season._';
 		} else {
 			$lines[] = '| Rank | Player | Hive | Points | Prize (PIZZA) |';
 			$lines[] = '|-----:|--------|------|-------:|--------------:|';
-			foreach ($ranking as $row) {
+			foreach ($ranked as $row) {
+				$hive = strtolower(trim((string) ($row['hive_account'] ?? '')));
 				$lines[] = sprintf(
 					'| %d | %s | @%s | %s | %s |',
 					(int) ($row['rank'] ?? 0),
 					$this->escapeCell((string) ($row['username'] ?? '')),
-					$this->escapeCell(strtolower(trim((string) ($row['hive_account'] ?? '')))),
+					$this->escapeCell($hive),
 					number_format((float) ($row['points'] ?? 0), 0, '.', ','),
-					isset($row['pizza_amount']) && $row['pizza_amount'] !== null && $row['pizza_amount'] !== ''
-						? $this->formatPizza((float) $row['pizza_amount'])
-						: '—'
+					$this->prizeCell($row)
 				);
 			}
-			if (count($ranking) < self::RANKING_LIMIT) {
+			if (count($ranked) < self::RANKING_LIMIT) {
 				$lines[] = '';
 				$lines[] = '*(Fewer than 20 rows if the season had fewer ranked entrants.)*';
 			}
@@ -137,15 +144,22 @@ class SeasonReportComposer
 		$lines[] = '';
 		$lines[] = sprintf('Claimed during Season %d:', $seasonId);
 		$lines[] = '';
-		if ($feats === []) {
+		$linkedFeats = [];
+		foreach ($feats as $feat) {
+			$hive = strtolower(trim((string) ($feat['hive_account'] ?? '')));
+			if (HiveUtil::isAccountValid($hive)) {
+				$linkedFeats[] = $feat;
+			}
+		}
+		if ($linkedFeats === []) {
 			$lines[] = '_No feats claimed during this season window._';
 		} else {
-			foreach ($feats as $feat) {
+			foreach ($linkedFeats as $feat) {
 				$key = (string) ($feat['feat_key'] ?? '');
 				$name = self::FEAT_NAMES[$key] ?? $key;
 				$username = trim((string) ($feat['username'] ?? ''));
 				$hive = strtolower(trim((string) ($feat['hive_account'] ?? '')));
-				$who = $username !== '' ? $username : ($hive !== '' ? '@' . $hive : 'Unknown');
+				$who = $username !== '' ? $username : ('@' . $hive);
 				if ($username !== '' && $hive !== '') {
 					$who = $username . ' (@' . $hive . ')';
 				}
@@ -187,8 +201,11 @@ class SeasonReportComposer
 		$lines[] = '';
 		$lines[] = '## Season notes';
 		$lines[] = '';
-		$lines[] = '- Entry fee was paid in Hive Engine **PIZZA** to the season wallet.';
-		$lines[] = '- Only entrants meeting the minimum points threshold were eligible for prizes.';
+		$lines[] = '- Entry fee was paid in Hive Engine **PIZZA** to the season wallet before the wipe.';
+		$lines[] = '- Only linked entrants meeting the minimum points threshold were eligible for prizes.';
+		$lines[] = '- Seats that never linked a Hive account are omitted from this prize table.';
+		$lines[] = '- Prizes marked unclaimed were not collected when this post was written. They forfeit 7 days after close. This post is not amended.';
+		$lines[] = '- Season medals are in-game records of who played a paid seat. They are not tradable and do not change combat.';
 		$lines[] = '- Play the next season at [moon.hive.pizza](https://moon.hive.pizza)';
 		$lines[] = '';
 		$lines[] = sprintf('*— %s automated season log. Immutable on Hive.*', $gameName);
@@ -199,6 +216,21 @@ class SeasonReportComposer
 			'body'     => implode("\n", $lines),
 			'tags'     => $tags,
 		];
+	}
+
+	/**
+	 * @param array{pizza_amount?: float|string|null, prize_state?: string} $row
+	 */
+	private function prizeCell(array $row): string
+	{
+		if ((string) ($row['prize_state'] ?? '') === 'unclaimed') {
+			return 'unclaimed';
+		}
+		if (isset($row['pizza_amount']) && $row['pizza_amount'] !== null && $row['pizza_amount'] !== '') {
+			return $this->formatPizza((float) $row['pizza_amount']);
+		}
+
+		return '—';
 	}
 
 	/**

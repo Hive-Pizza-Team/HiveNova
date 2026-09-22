@@ -41,6 +41,18 @@
 		{elseif $vacation}
 		<div class="infobox">{$LNG.tn_vacation_mode} {$vacation}</div>
 		{/if}
+		{if !empty($uni3PrizeLock.show)}
+		<div class="infobox" id="uni3-prize-lock">
+			{$uni3PrizeLock.text|escape:'html'}
+			<a href="game.php?page=season">{$LNG.page_season_title}</a>
+			{if $uni3PrizeLock.mode == 'locked'}
+			<a href="game.php?page=settings">{$LNG.page_season_link_settings}</a>
+			{/if}
+			{if !empty($uni3PrizeLock.dismissible)}
+			<button type="button" onclick="document.cookie='hn_prize_lock={$uni3PrizeLock.dismiss_key|escape:'javascript'};path=/;max-age=604800;SameSite=Lax';this.parentNode.hidden=true;">{$LNG.uni3_prize_locked_dismiss}</button>
+			{/if}
+		</div>
+		{/if}
 		<div id="attack-alert" class="infobox attack-notification"{if $attackAlertCount <= 0} hidden{/if} data-count="{$attackAlertCount}">
 			<a href="game.php?page=overview">{$LNG.ov_attack_alert}</a><span data-attack-alert-count>{if $attackAlertCount > 0} ({$attackAlertCount}){/if}</span>
 		</div>

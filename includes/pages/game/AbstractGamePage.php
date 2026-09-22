@@ -14,6 +14,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\TechTreeNudgeService;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
+use HiveNova\Core\SeasonService;
 use HiveNova\Core\Session;
 use HiveNova\Core\Template as template;
 use DateTime;
@@ -226,7 +227,10 @@ abstract class AbstractGamePage
 			// Set by base.js at ≤699px; skip assets CSS hides on mobile (nav logo, etc.).
 			'compactViewport'	=> (($_COOKIE['hn_compact'] ?? '') === '1'),
 			'showTechTreeNudge'	=> TechTreeNudgeService::shouldShow($_COOKIE, HTTP::_GP('page', '')),
+			'uni3Seasonal'		=> false,
+			'uni3PrizeLock'		=> ['show' => false, 'dismissible' => true, 'hard' => false, 'mode' => '', 'season_id' => 0, 'text' => '', 'dismiss_key' => ''],
 		));
+		$this->assignUni3PrizeLock($config, $USER, $LNG);
 
 		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {
 			global $LNG;
@@ -263,6 +267,38 @@ abstract class AbstractGamePage
 					. ');}});'
 				);
 			}
+		}
+	}
+
+	/**
+	 * One sticky prize banner per page. Dismiss hides it for the season; a pending claim does not.
+	 *
+	 * @param array<string, mixed> $user
+	 * @param array<string, string>|\Language $lang
+	 */
+	protected function assignUni3PrizeLock(Config $config, array $user, $lang): void
+	{
+		if (!isset($config->season_mode) || (int) $config->season_mode !== 1) {
+			return;
+		}
+		try {
+			$service = SeasonService::createDefault();
+			$dismissKey = (int) $config->uni . '-' . (int) ($config->season_id ?? 0);
+			$dismissed = (string) ($_COOKIE['hn_prize_lock'] ?? '') === $dismissKey;
+			$state = $service->prizeLockState($user, $config, $dismissed);
+			$amount = number_format((float) ($config->season_entry_pizza ?? 0.1), 2, '.', '');
+			$lockedTpl = (string) ($lang['uni3_prize_locked_banner'] ?? 'Prize: locked — link Hive + pay %s $PIZZA');
+			$claimTpl = (string) ($lang['uni3_prize_claim_banner'] ?? 'Season medal ready — claim your PeakD prize before the window closes.');
+			$state['dismiss_key'] = $dismissKey;
+			$state['text'] = ($state['mode'] ?? '') === 'claim'
+				? $claimTpl
+				: sprintf($lockedTpl, $amount);
+			$this->assign([
+				'uni3Seasonal'  => true,
+				'uni3PrizeLock' => $state,
+			]);
+		} catch (\Throwable $e) {
+			return;
 		}
 	}
 

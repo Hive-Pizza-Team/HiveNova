@@ -8,6 +8,7 @@ use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\Uni3AccountHooks;
 use HiveNova\Core\Mail;
 
 /**
@@ -57,6 +58,7 @@ class ShowVertifyPage extends AbstractLoginPage
 		));
 
 		list($userID, $planetID) = PlayerUtil::createPlayer($userData['universe'], $userData['userName'], $userData['password'], $userData['email'], $userData['hive_account'], $userData['language']);
+		Uni3AccountHooks::onPlayerCreated((int) $userData['universe'], (int) $userID, (string) ($userData['hive_account'] ?? ''));
 
 		if($config->mail_active == 1)
 		{

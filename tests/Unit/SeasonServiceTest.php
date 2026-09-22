@@ -12,6 +12,7 @@ use HiveNova\Core\Universe;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/InMemorySeasonStore.php';
+require_once __DIR__ . '/../Support/InMemoryUni3ClaimStore.php';
 require_once __DIR__ . '/../Support/RecordingDatabase.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 
@@ -138,9 +139,15 @@ class SeasonServiceTest extends TestCase
 		], $override));
 	}
 
-	private function service(?int $now = null): SeasonService
+	private function service(?int $now = null, ?InMemoryUni3ClaimStore $claims = null): SeasonService
 	{
-		$svc = new SeasonService($this->store, new HiveEngineTransfer(), new HiveEngineClient(), $now ?? $this->now);
+		$svc = new SeasonService(
+			$this->store,
+			new HiveEngineTransfer(),
+			new HiveEngineClient(),
+			$now ?? $this->now,
+			claims: $claims
+		);
 		$svc->setMessageSender(function (int $userId, string $subject, string $text, int $uni): void {
 			$this->messages[] = [$userId, $subject, $text, $uni];
 		});
@@ -194,23 +201,30 @@ class SeasonServiceTest extends TestCase
 		$this->assertSame('moon.deposit', $svc->depositWallet($config));
 	}
 
-	public function testPlayerNeedsHiveAndEntry(): void
+	public function testEmailSeatCanPlayWhilePrizeStaysLocked(): void
 	{
 		$config = $this->makeConfig();
 		$svc = $this->service();
-		$noHive = ['id' => 10, 'hive_account' => '', 'authlevel' => 0];
-		$this->assertFalse($svc->canPlay($noHive, $config));
-		$this->assertTrue($svc->mustRedirect($noHive, $config, 'overview'));
+		$noHive = ['id' => 10, 'hive_account' => '', 'authlevel' => 0, 'username' => 'mailer'];
+		$this->assertTrue($svc->canPlay($noHive, $config));
+		$this->assertFalse($svc->mustRedirect($noHive, $config, 'overview'));
 		$this->assertFalse($svc->mustRedirect($noHive, $config, 'season'));
 
-		$linked = ['id' => 10, 'hive_account' => 'playerone', 'authlevel' => 0];
-		$this->assertFalse($svc->canPlay($linked, $config));
+		$locked = $svc->prizeLockState($noHive, $config, false);
+		$this->assertTrue($locked['show']);
+		$this->assertTrue($locked['dismissible']);
+		$this->assertSame('locked', $locked['mode']);
+		$this->assertFalse($svc->prizeLockState($noHive, $config, true)['show']);
+
+		$linked = ['id' => 10, 'hive_account' => 'playerone', 'authlevel' => 0, 'username' => 'playerone'];
+		$this->assertTrue($svc->canPlay($linked, $config));
+		$this->assertSame('locked', $svc->prizeLockState($linked, $config, false)['mode']);
 
 		$this->store->insertEntry([
 			'universe' => 2, 'season_id' => 1, 'user_id' => 10, 'hive_account' => 'playerone',
 			'pizza_amount' => 1, 'trx_id' => 'a', 'created_at' => $this->now,
 		]);
-		$this->assertTrue($svc->canPlay($linked, $config));
+		$this->assertFalse($svc->prizeLockState($linked, $config, false)['show']);
 	}
 
 	public function testAdminBypassesGate(): void
@@ -219,11 +233,13 @@ class SeasonServiceTest extends TestCase
 		$this->assertTrue($this->service()->canPlay(['id' => 1, 'hive_account' => '', 'authlevel' => AUTH_ADM], $config));
 	}
 
-	public function testPromoterDoesNotBypassSeasonGate(): void
+	public function testPromoterCanPlayButIsNotPrizeEligibleWithoutEntry(): void
 	{
 		$config = $this->makeConfig();
 		$promo = ['id' => 2, 'hive_account' => '', 'authlevel' => AUTH_PROMO];
-		$this->assertFalse($this->service()->canPlay($promo, $config));
+		$svc = $this->service();
+		$this->assertTrue($svc->canPlay($promo, $config));
+		$this->assertSame('locked', $svc->prizeLockState($promo, $config, false)['mode']);
 	}
 
 	public function testAcceptsEntryDepositOncePerWeek(): void
@@ -766,5 +782,148 @@ class SeasonServiceTest extends TestCase
 			(bool) array_filter($contents, static fn (string $c): bool => str_contains($c, 'wipe complete')),
 			'expected wipe-done Discord: ' . implode(' | ', $contents)
 		);
+	}
+
+	public function testTransferTimestampAfterCloseIsRejected(): void
+	{
+		$config = $this->makeConfig();
+		$tx = $this->transferFor(10, 'playerone');
+		$tx['timestamp'] = $this->now + 604800;
+		$result = $this->service()->acceptTransfer($config, ['id' => 10, 'hive_account' => 'playerone'], $tx);
+		$this->assertSame('after_close', $result['reason']);
+		$this->assertFalse((new \HiveNova\Core\Uni3ClaimGate())->acceptsEntryAfterClose());
+	}
+
+	public function testEmailSeatIsHeldForClaimAndKeychainStillAutoPays(): void
+	{
+		$claims = new InMemoryUni3ClaimStore();
+		$claims->insertHiveLink([
+			'universe' => 2, 'season_id' => 1, 'user_id' => 11,
+			'hive_account' => 'bobbbbbb', 'origin' => 'email', 'linked_at' => $this->now,
+		]);
+		$config = $this->makeConfig();
+		$svc = $this->service(null, $claims);
+		$svc->acceptTransfer($config, ['id' => 10, 'hive_account' => 'aliceaaa'], $this->transferFor(10, 'aliceaaa', 10));
+		$svc->acceptTransfer($config, ['id' => 11, 'hive_account' => 'bobbbbbb'], $this->transferFor(11, 'bobbbbbb', 10));
+		$this->store->ranking = [
+			['user_id' => 10, 'hive_account' => 'aliceaaa', 'authlevel' => 0, 'points' => 100, 'rank' => 1],
+			['user_id' => 11, 'hive_account' => 'bobbbbbb', 'authlevel' => 0, 'points' => 100, 'rank' => 2],
+		];
+
+		$this->assertSame('wiped', $svc->closeWeek($config));
+		$sent = array_values(array_filter($this->store->payouts, static fn ($row) => $row['status'] === 'sent'));
+		$held = array_values(array_filter($this->store->payouts, static fn ($row) => $row['status'] === 'pending_claim'));
+		$this->assertCount(1, $sent);
+		$this->assertSame(10, $sent[0]['user_id']);
+		$this->assertCount(1, $held);
+		$this->assertSame(11, $held[0]['user_id']);
+		$this->assertSame(1, count($this->sends));
+		$medal = $claims->findMedal(2, 1, 11);
+		$this->assertSame('pending_claim', $medal['status'] ?? null);
+		$this->assertSame('claimed', $claims->findMedal(2, 1, 10)['status'] ?? null);
+
+		$user = ['id' => 11, 'hive_account' => 'bobbbbbb', 'username' => 'Bobby'];
+		$unpaid = $this->service($this->now + 604800 + 3600, $claims)->claim($config, [
+			'id' => 12, 'hive_account' => '', 'username' => 'Guest',
+		]);
+		$this->assertSame('unlinked', $unpaid['reason']);
+
+		$claimSvc = $this->service($this->now + 604800 + 3600, $claims);
+		$first = $claimSvc->claim($config, $user);
+		$this->assertTrue($first['ok']);
+		$this->assertSame('', $first['reason']);
+		$this->assertSame(2, count($this->sends));
+		$this->assertSame('claimed', $claims->findMedal(2, 1, 11)['status'] ?? null);
+
+		$second = $claimSvc->claim($config, $user);
+		$this->assertTrue($second['ok']);
+		$this->assertSame('already', $second['reason']);
+		$this->assertSame(2, count($this->sends));
+
+		$report = $this->store->reportRanking(2, 1, 20);
+		$byUser = [];
+		foreach ($report as $row) {
+			$byUser[$row['hive_account']] = $row['prize_state'];
+		}
+		$this->assertSame('sent', $byUser['bobbbbbb']);
+	}
+
+	public function testUnclaimedEmailPrizeIsForfeitedAfterSevenDays(): void
+	{
+		$claims = new InMemoryUni3ClaimStore();
+		$claims->insertHiveLink([
+			'universe' => 2, 'season_id' => 1, 'user_id' => 11,
+			'hive_account' => 'bobbbbbb', 'origin' => 'email', 'linked_at' => $this->now,
+		]);
+		$config = $this->makeConfig();
+		$svc = $this->service(null, $claims);
+		$svc->acceptTransfer($config, ['id' => 11, 'hive_account' => 'bobbbbbb'], $this->transferFor(11, 'bobbbbbb', 10));
+		$this->store->ranking = [
+			['user_id' => 11, 'hive_account' => 'bobbbbbb', 'authlevel' => 0, 'points' => 100, 'rank' => 1],
+		];
+		$this->assertSame('wiped', $svc->closeWeek($config));
+		$this->assertSame([], $this->sends);
+
+		$late = $this->service($this->now + 604800 + 604800, $claims);
+		$this->assertSame(1, $late->expireUnclaimed($config));
+		$user = ['id' => 11, 'hive_account' => 'bobbbbbb', 'username' => 'Bobby'];
+		$claim = $late->claim($config, $user);
+		$this->assertFalse($claim['ok']);
+		$this->assertSame('forfeited', $claim['reason']);
+		$this->assertSame([], $this->sends);
+		$this->assertSame('forfeited', $claims->findMedal(2, 1, 11)['status'] ?? null);
+	}
+
+	public function testFailedClaimStaysPendingAndCanBeRetried(): void
+	{
+		$claims = new InMemoryUni3ClaimStore();
+		$claims->insertHiveLink([
+			'universe' => 2, 'season_id' => 1, 'user_id' => 11,
+			'hive_account' => 'bobbbbbb', 'origin' => 'email', 'linked_at' => $this->now,
+		]);
+		$config = $this->makeConfig();
+		$this->service(null, $claims)->acceptTransfer(
+			$config,
+			['id' => 11, 'hive_account' => 'bobbbbbb'],
+			$this->transferFor(11, 'bobbbbbb', 10)
+		);
+		$this->store->ranking = [
+			['user_id' => 11, 'hive_account' => 'bobbbbbb', 'authlevel' => 0, 'points' => 80, 'rank' => 1],
+		];
+		$this->service(null, $claims)->closeWeek($config);
+		$user = ['id' => 11, 'hive_account' => 'bobbbbbb', 'username' => 'Bobby'];
+		$this->sendFail = true;
+		$failed = $this->service($this->now + 604800 + 60, $claims)->claim($config, $user);
+		$this->assertFalse($failed['ok']);
+		$this->assertSame('send_failed', $failed['reason']);
+		$this->assertSame('pending_claim', $this->store->findPayout(2, 1, 11)['status']);
+		$this->sendFail = false;
+		$ok = $this->service($this->now + 604800 + 60, $claims)->claim($config, $user);
+		$this->assertTrue($ok['ok']);
+		$this->assertSame('sent', $this->store->findPayout(2, 1, 11)['status']);
+	}
+
+	public function testPendingClaimBannerIsNotDismissible(): void
+	{
+		$claims = new InMemoryUni3ClaimStore();
+		$claims->insertHiveLink([
+			'universe' => 2, 'season_id' => 1, 'user_id' => 11,
+			'hive_account' => 'bobbbbbb', 'origin' => 'email', 'linked_at' => $this->now,
+		]);
+		$config = $this->makeConfig();
+		$this->service(null, $claims)->acceptTransfer(
+			$config,
+			['id' => 11, 'hive_account' => 'bobbbbbb'],
+			$this->transferFor(11, 'bobbbbbb', 10)
+		);
+		$this->store->ranking = [
+			['user_id' => 11, 'hive_account' => 'bobbbbbb', 'authlevel' => 0, 'points' => 80, 'rank' => 1],
+		];
+		$this->service(null, $claims)->closeWeek($config);
+		$user = ['id' => 11, 'hive_account' => 'bobbbbbb', 'username' => 'Bobby'];
+		$state = $this->service($this->now + 604800 + 60, $claims)->prizeLockState($user, $config, true);
+		$this->assertTrue($state['show']);
+		$this->assertFalse($state['dismissible']);
+		$this->assertSame('claim', $state['mode']);
 	}
 }
