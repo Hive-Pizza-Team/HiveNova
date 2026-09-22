@@ -3583,6 +3583,12 @@ table.tablesorter thead tr .headerSortDown {
 }
 
 /* Requirement deep-links (research / buildings / shipyard) */
+.element-short-desc {
+	margin: 0.25em 0.6em 0.5em;
+	text-align: left;
+	clear: both;
+}
+
 .element-requirements {
 	margin: 0.4em 0;
 	text-align: left;

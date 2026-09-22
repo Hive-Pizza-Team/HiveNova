@@ -130,6 +130,145 @@ class ElementRequirementServiceTest extends TestCase
 		$this->assertSame([], $this->service->listForElement(1, [], [], [], [], []));
 	}
 
+	public function test_locked_shipyard_lists_missing_energy_technology(): void
+	{
+		$rows = $this->service->listForElement(
+			ElementRequirementService::SHIPYARD,
+			['energy_tech' => 0],
+			['robotic_factory' => 0],
+			[ElementRequirementService::SHIPYARD => [14 => 2]],
+			[
+				14 => 'robotic_factory',
+				ElementRequirementService::ENERGY_TECH => 'energy_tech',
+			],
+			[
+				14 => 'Gigafactory',
+				ElementRequirementService::ENERGY_TECH => 'Energy Technology',
+			]
+		);
+
+		$byId = [];
+		foreach ($rows as $row) {
+			$byId[$row['id']] = $row;
+		}
+
+		$this->assertArrayHasKey(14, $byId);
+		$this->assertFalse($byId[14]['met']);
+		$this->assertArrayHasKey(ElementRequirementService::ENERGY_TECH, $byId);
+		$energy = $byId[ElementRequirementService::ENERGY_TECH];
+		$this->assertSame('Energy Technology', $energy['name']);
+		$this->assertSame(1, $energy['count']);
+		$this->assertSame(0, $energy['own']);
+		$this->assertFalse($energy['met']);
+		$this->assertSame('game.php?page=research#t113', $energy['href']);
+	}
+
+	public function test_shipyard_does_not_duplicate_an_existing_energy_requirement(): void
+	{
+		$rows = $this->service->listForElement(
+			ElementRequirementService::SHIPYARD,
+			['energy_tech' => 0],
+			['robotic_factory' => 0],
+			[ElementRequirementService::SHIPYARD => [14 => 2, ElementRequirementService::ENERGY_TECH => 1]],
+			[
+				14 => 'robotic_factory',
+				ElementRequirementService::ENERGY_TECH => 'energy_tech',
+			],
+			[
+				14 => 'Gigafactory',
+				ElementRequirementService::ENERGY_TECH => 'Energy Technology',
+			]
+		);
+
+		$energyRows = array_values(array_filter(
+			$rows,
+			static fn (array $row): bool => $row['id'] === ElementRequirementService::ENERGY_TECH
+		));
+		$this->assertCount(1, $energyRows);
+		$this->assertFalse($energyRows[0]['met']);
+		$this->assertSame('game.php?page=research#t113', $energyRows[0]['href']);
+	}
+
+	public function test_open_shipyard_does_not_invent_an_energy_requirement(): void
+	{
+		$rows = $this->service->listForElement(
+			ElementRequirementService::SHIPYARD,
+			['energy_tech' => 0],
+			['robotic_factory' => 2],
+			[ElementRequirementService::SHIPYARD => [14 => 2]],
+			[
+				14 => 'robotic_factory',
+				ElementRequirementService::ENERGY_TECH => 'energy_tech',
+			],
+			[14 => 'Gigafactory', ElementRequirementService::ENERGY_TECH => 'Energy Technology']
+		);
+
+		$this->assertCount(1, $rows);
+		$this->assertSame(14, $rows[0]['id']);
+		$this->assertTrue($rows[0]['met']);
+	}
+
+	public function test_locked_shipyard_hides_energy_once_it_is_researched(): void
+	{
+		$rows = $this->service->listForElement(
+			ElementRequirementService::SHIPYARD,
+			['energy_tech' => 1],
+			['robotic_factory' => 1],
+			[ElementRequirementService::SHIPYARD => [14 => 2]],
+			[
+				14 => 'robotic_factory',
+				ElementRequirementService::ENERGY_TECH => 'energy_tech',
+			],
+			[14 => 'Gigafactory', ElementRequirementService::ENERGY_TECH => 'Energy Technology']
+		);
+
+		$ids = array_column($rows, 'id');
+		$this->assertSame([14], $ids);
+		$this->assertFalse($rows[0]['met']);
+	}
+
+	public function test_unmet_requirement_links_keep_clickable_research_href(): void
+	{
+		$html = $this->service->unmetRequirementLinksHtml([
+			[
+				'id' => ElementRequirementService::ENERGY_TECH,
+				'name' => 'Energy "Technology"',
+				'count' => 1,
+				'own' => 0,
+				'met' => false,
+				'href' => 'game.php?page=research#t113',
+			],
+			[
+				'id' => 14,
+				'name' => 'Gigafactory',
+				'count' => 2,
+				'own' => 2,
+				'met' => true,
+				'href' => 'game.php?page=buildings#g14',
+			],
+		], 'Level ');
+
+		$this->assertStringContainsString('class="requirement-link requirement-link--unmet"', $html);
+		$this->assertStringContainsString('href="game.php?page=research#t113"', $html);
+		$this->assertStringContainsString('Energy &quot;Technology&quot;', $html);
+		$this->assertStringContainsString('Level 0/1', $html);
+		$this->assertStringNotContainsString('Gigafactory', $html);
+	}
+
+	public function test_unmet_requirement_links_are_empty_when_every_requirement_is_met(): void
+	{
+		$this->assertSame('', $this->service->unmetRequirementLinksHtml([
+			[
+				'id' => 14,
+				'name' => 'Gigafactory',
+				'count' => 2,
+				'own' => 2,
+				'met' => true,
+				'href' => 'game.php?page=buildings#g14',
+			],
+		]));
+	}
+
 	public function test_owned_level_prefers_planet_column_when_present(): void
 	{
 		$own = $this->service->ownedLevel(
