@@ -214,7 +214,7 @@ $LNG['shortDescription'] = array(
 109 => "La tecnología de armamento hace que los sistemas de armas sean más eficientes. Cada nivel de tecnología de armamento aumenta la fuerza del arma de las unidades en un 10% del valor base.",
 110 => "La tecnología de escudos hace que los escudos en naves e instalaciones defensivas sean más eficientes. Cada nivel de tecnología de escudos aumenta la fuerza de los escudos en un 10% del valor base.",
 111 => "Las aleaciones especiales mejoran el blindaje en naves y estructuras defensivas. La efectividad del blindaje se puede aumentar en un 10% por nivel.",
-113 => "El dominio de diferentes tipos de energía es necesario para muchas tecnologías nuevas.",
+113 => "El dominio de diferentes tipos de energía es necesario para muchas tecnologías nuevas. Completing Energy Technology is needed for the Shipyard path, together with the other requirements for the Shipyard.",
 114 => "Al integrar la 4ta y 5ta dimensión ahora es posible investigar un nuevo tipo de propulsión que es más económica y eficiente. Además, cada nivel de Tecnología de hiperespacio aumenta un 1% la capacidad de carga de las naves que requieren esta tecnología.",
 115 => "El desarrollo de esta propulsión hace que algunas naves sean más rápidas, aunque cada nivel aumenta la velocidad solo en un 10% del valor base.",
 117 => "La propulsión de impulso se basa en el principio de reacción. El desarrollo adicional de esta propulsión hace que algunas naves sean más rápidas, aunque cada nivel aumenta la velocidad solo en un 20% del valor base.",
@@ -310,4 +310,5 @@ $LNG['longDescription'] = array(
 24 => "Proporciona almacenamiento para el exceso de uranio.",
 31 => "Se requiere un laboratorio de investigación para poder investigar nuevas tecnologías.",
 33 => 'El terraformador aumenta el área utilizable en el planeta. Por cada nivel del terraformador obtienes 5 campos adicionales para usar y un campo extra cada nivel par, un campo es ocupado por el terraformador mismo.<br>Para comenzar a construir el terraformador no necesitas la energía disponible, solo necesitas ser capaz de',
+113 => "El dominio de diferentes tipos de energía es necesario para muchas tecnologías nuevas. Completing Energy Technology is needed for the Shipyard path, together with the other requirements for the Shipyard.",
 );

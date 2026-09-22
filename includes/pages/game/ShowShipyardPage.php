@@ -162,7 +162,22 @@ class ShowShipyardPage extends AbstractGamePage
 		
 		if ($PLANET[$resource[21]] == 0)
 		{
-			$this->printMessage($LNG['bd_shipyard_required']);
+			$requirementService = new ElementRequirementService();
+			$techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+			$rows = $requirementService->listForElement(
+				ElementRequirementService::SHIPYARD,
+				$USER,
+				$PLANET,
+				is_array($requirements) ? $requirements : array(),
+				$resource,
+				$techNames
+			);
+			$this->printMessage(
+				$LNG['bd_shipyard_required'] . $requirementService->unmetRequirementLinksHtml(
+					$rows,
+					(string) ($LNG['tt_lvl'] ?? 'Level ')
+				)
+			);
 		}
 		$Messages		= $USER['messages'];
 
