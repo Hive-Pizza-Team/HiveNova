@@ -5,7 +5,9 @@ namespace HiveNova\Core;
 /**
  * Defaults for login/register universe selects.
  *
- * Email/password flows prefer the newest open seasonal universe (Uni3 today).
+ * Email/password flows prefer a non-seasonal open universe (Uni 1 today).
+ * Seasonal universes need Hive Keychain and a PIZZA entry, so they are not
+ * the cold-traffic default.
  * Hive Keychain flows prefer the most populated open universe.
  */
 class LoginUniverseDefaults
@@ -33,43 +35,54 @@ class LoginUniverseDefaults
 	}
 
 	/**
-	 * Default for email/password flows.
+	 * Whether this universe is a short seasonal wipe (Hive + PIZZA entry).
+	 */
+	public static function isSeasonal(object $config): bool
+	{
+		return isset($config->season_mode) && (int) $config->season_mode === 1;
+	}
+
+	/**
+	 * Dropdown label. Seasonal options name the Keychain + PIZZA requirement.
+	 */
+	public static function selectOptionLabel(string $uniName, bool $seasonal, string $closedSuffix, string $seasonSuffix): string
+	{
+		$label = $uniName;
+		if ($seasonal && $seasonSuffix !== '') {
+			$label .= ' — '.$seasonSuffix;
+		}
+		if ($closedSuffix !== '') {
+			$label .= $closedSuffix;
+		}
+
+		return $label;
+	}
+
+	/**
+	 * Default for email/password login and registration.
 	 *
-	 * Login prefers the newest open seasonal universe (Uni3).
-	 * Registration prefers a non-seasonal open universe — seasonal unis require Hive.
+	 * Prefer a non-seasonal open universe so cold traffic lands on Uni 1.
+	 * Registration also skips universes with registration closed.
+	 * Falls back to the newest open universe when every candidate is seasonal.
 	 */
 	public static function forEmail(bool $forRegistration = false): int
 	{
-		if ($forRegistration) {
-			foreach (array_reverse(Universe::availableUniverses()) as $uniId) {
-				$config = Config::get($uniId);
-				if ((int) $config->game_disable === 0) {
-					continue;
-				}
-				if ((int) $config->reg_closed === 1) {
-					continue;
-				}
-				if (isset($config->season_mode) && (int) $config->season_mode === 1) {
-					continue;
-				}
-
-				return (int) $uniId;
-			}
-
-			return self::newestOpen(true);
-		}
-
 		foreach (array_reverse(Universe::availableUniverses()) as $uniId) {
 			$config = Config::get($uniId);
 			if ((int) $config->game_disable === 0) {
 				continue;
 			}
-			if (isset($config->season_mode) && (int) $config->season_mode === 1) {
-				return (int) $uniId;
+			if ($forRegistration && (int) $config->reg_closed === 1) {
+				continue;
 			}
+			if (self::isSeasonal($config)) {
+				continue;
+			}
+
+			return (int) $uniId;
 		}
 
-		return self::newestOpen(false);
+		return self::newestOpen($forRegistration);
 	}
 
 	/**

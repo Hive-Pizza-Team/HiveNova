@@ -57,7 +57,7 @@ class PublicSeoTest extends TestCase
 	public function testDocumentTitleHomeDefaultTemplateWhenKeyMissing(): void
 	{
 		$title = PublicSeo::documentTitle('index', 'Moon', []);
-		$this->assertSame('Moon — Free browser space strategy game', $title);
+		$this->assertSame('Moon — Free browser space strategy — Uni 1 frontier', $title);
 	}
 
 	public function testDocumentTitleInnerPageUsesSiteTitle(): void

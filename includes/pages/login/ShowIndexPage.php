@@ -9,6 +9,7 @@ use HiveNova\Core\FleetVizSnapshotService;
 use HiveNova\Core\GameAssetPrefetchService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\LobbyActivityFeed;
+use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
@@ -76,7 +77,12 @@ class ShowIndexPage extends AbstractLoginPage
 		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
 			$uniConfig = Config::get($uniId);
-			$universeSelect[$uniId]	= $uniConfig->uni_name.($uniConfig->game_disable == 0 ? $LNG['uni_closed'] : '');
+			$universeSelect[$uniId]	= LoginUniverseDefaults::selectOptionLabel(
+				(string) $uniConfig->uni_name,
+				LoginUniverseDefaults::isSeasonal($uniConfig),
+				(int) $uniConfig->game_disable === 0 ? (string) $LNG['uni_closed'] : '',
+				(string) ($LNG['uni_option_keychain_pizza'] ?? 'Needs Hive Keychain + PIZZA entry')
+			);
 			$universeNames[$uniId]	= (string) $uniConfig->uni_name;
 			if ((int) $uniConfig->game_disable === 1) {
 				$liveUniverseCount++;

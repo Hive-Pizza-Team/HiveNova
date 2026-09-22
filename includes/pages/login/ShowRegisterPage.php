@@ -15,6 +15,7 @@ use HiveNova\Core\RegisterValidation;
 use HiveNova\Core\RegisterUsernameAvailability;
 use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\HiveUtil;
+use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\Mail;
 
 /**
@@ -66,8 +67,14 @@ class ShowRegisterPage extends AbstractLoginPage
 		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
 			$config = Config::get($uniId);
-			$universeSelect[$uniId]	= $config->uni_name.($config->game_disable == 0 || $config->reg_closed == 1 ? $LNG['uni_closed'] : '');
-			$universeSeasonal[$uniId]	= isset($config->season_mode) && (int) $config->season_mode === 1 ? 1 : 0;
+			$closed = (int) $config->game_disable === 0 || (int) $config->reg_closed === 1;
+			$universeSelect[$uniId]	= LoginUniverseDefaults::selectOptionLabel(
+				(string) $config->uni_name,
+				LoginUniverseDefaults::isSeasonal($config),
+				$closed ? (string) $LNG['uni_closed'] : '',
+				(string) ($LNG['uni_option_keychain_pizza'] ?? 'Needs Hive Keychain + PIZZA entry')
+			);
+			$universeSeasonal[$uniId]	= LoginUniverseDefaults::isSeasonal($config) ? 1 : 0;
 		}
 		
 		if(!isset($externalAuth['account'], $externalAuth['method']))
