@@ -93,7 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	function syncReferralWithUniverse(uniId) {
 		var entry = referralByUniverse[uniId] || referralByUniverse[String(uniId)] || null;
-		var id = entry && entry.id ? String(entry.id) : '0';
+		var status = entry && entry.status ? String(entry.status) : '';
+		var inactive = status === 'inactive';
+		var id = (!inactive && entry && entry.id) ? String(entry.id) : '0';
 		var name = entry && entry.name ? String(entry.name) : '';
 		document.querySelectorAll('.reg-referral-id').forEach(function(input) {
 			input.value = id;
@@ -103,7 +105,14 @@ document.addEventListener('DOMContentLoaded', function() {
 			if (nameEl) {
 				nameEl.textContent = name;
 			}
-			if (id !== '0' && name) {
+			if (name && (id !== '0' || inactive)) {
+				row.removeAttribute('hidden');
+			} else {
+				row.setAttribute('hidden', 'hidden');
+			}
+		});
+		document.querySelectorAll('.reg-referral-inactive').forEach(function(row) {
+			if (inactive) {
 				row.removeAttribute('hidden');
 			} else {
 				row.setAttribute('hidden', 'hidden');

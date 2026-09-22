@@ -487,3 +487,9 @@
     color: #fff;
     outline: none;
 }
+
+.reg-referral-inactive p {
+    margin: 0;
+    color: #e6c36a;
+    font-size: 11px;
+}

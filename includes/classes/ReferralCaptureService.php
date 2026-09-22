@@ -20,6 +20,9 @@ class ReferralCaptureService
 	public const COOKIE_REF_UNI = 'ref_uni';
 	public const COOKIE_TTL_SECONDS = 2592000; // 30 days
 
+	public const STATUS_OK = 'ok';
+	public const STATUS_INACTIVE = 'inactive';
+
 	/**
 	 * Public referral codes that map to different user ids per universe.
 	 *
@@ -157,6 +160,77 @@ class ReferralCaptureService
 	{
 		return (int) ($config->game_disable ?? 0) === 1
 			&& (int) ($config->reg_closed ?? 0) === 0;
+	}
+
+	/**
+	 * Copyable Settings invite. Empty when referrals are off for this universe.
+	 *
+	 * $httpPath is PROTOCOL.HTTP_HOST.HTTP_ROOT (trailing slash included).
+	 */
+	public static function settingsShareUrl(int $refActive, int $userId, string $httpPath): string
+	{
+		if ($refActive !== 1 || $userId <= 0 || $httpPath === '') {
+			return '';
+		}
+
+		return $httpPath.'index.php?ref='.$userId;
+	}
+
+	/**
+	 * Per-universe register-form state for a public code.
+	 *
+	 * Active universes keep the resolved user id. Inactive universes keep the
+	 * referrer name with id 0 so the form can explain the dropped invite
+	 * instead of looking like the link never arrived.
+	 *
+	 * @return array<int, array{id: int, name: string, status: string}>
+	 */
+	public function registerStates(DatabaseInterface $db, int $publicCode): array
+	{
+		if ($publicCode <= 0) {
+			return [];
+		}
+
+		$universeIds = self::isAlias($publicCode)
+			? array_keys(self::ALIASES[$publicCode])
+			: Universe::availableUniverses();
+
+		$map = [];
+		foreach ($universeIds as $uniId) {
+			$uniId = (int) $uniId;
+			if ($uniId <= 0) {
+				continue;
+			}
+
+			$userId = self::isAlias($publicCode)
+				? self::aliasUserId($publicCode, $uniId)
+				: $publicCode;
+			if ($userId <= 0) {
+				continue;
+			}
+
+			$referrer = $this->lookupReferrerInUniverse($db, $userId, $uniId);
+			if ($referrer === null) {
+				continue;
+			}
+
+			if ($this->isRefActive($uniId)) {
+				$map[$uniId] = [
+					'id'     => $referrer['id'],
+					'name'   => $referrer['name'],
+					'status' => self::STATUS_OK,
+				];
+				continue;
+			}
+
+			$map[$uniId] = [
+				'id'     => 0,
+				'name'   => $referrer['name'],
+				'status' => self::STATUS_INACTIVE,
+			];
+		}
+
+		return $map;
 	}
 
 	/**

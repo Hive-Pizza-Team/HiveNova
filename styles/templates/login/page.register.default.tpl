@@ -91,6 +91,9 @@
 				<span class="text reg-referral-name">{$referralData.name|escape}</span>
 				<div class="clear"></div>
 			</div>
+			<div class="rowForm reg-referral-inactive"{if !$referralInactive} hidden{/if}>
+				<p>{$LNG.registerReferralInactive}</p>
+			</div>
 			{if $recaptchaEnable}
 			<div class="rowForm" id="captchaRow">
 				<div>
@@ -148,6 +151,14 @@
 				<div class="clear"></div>
 			</div>
 			{/if}
+			<div class="rowForm reg-referral-row"{if empty($referralData.name)} hidden{/if}>
+				<label>{$LNG.registerReferral}</label>
+				<span class="text reg-referral-name">{$referralData.name|escape}</span>
+				<div class="clear"></div>
+			</div>
+			<div class="rowForm reg-referral-inactive"{if !$referralInactive} hidden{/if}>
+				<p>{$LNG.registerReferralInactive}</p>
+			</div>
 			<div class="rowForm">
 				<label for="reg-hive-rules">{$LNG.registerRules}</label>
 				<input type="checkbox" name="rules" id="reg-hive-rules" value="1">

@@ -53,7 +53,8 @@ class ShowRegisterPage extends AbstractLoginPage
 		$referralCapture	= new ReferralCaptureService();
 		$referralRequest	= ReferralCaptureService::requestBag();
 		$referralPublicCode	= ReferralCaptureService::publicCodeFrom($referralRequest, $_COOKIE);
-		$referralByUniverse	= $referralCapture->resolveByUniverse(
+		// Includes inactive universes so the form can explain a dropped invite.
+		$referralByUniverse	= $referralCapture->registerStates(
 			Database::get(),
 			$referralPublicCode
 		);
@@ -109,18 +110,30 @@ class ShowRegisterPage extends AbstractLoginPage
 
 		$defaultEmailUniverse = $this->getDefaultEmailUniverseId(true);
 		$defaultHiveUniverse = $this->getDefaultHiveUniverseId(true);
-		$referralSeed = $referralByUniverse[$defaultEmailUniverse] ?? array('id' => 0, 'name' => '');
-		if ((int) ($referralSeed['id'] ?? 0) > 0 && ($referralSeed['name'] ?? '') !== '')
+		$referralSeed = $referralByUniverse[$defaultEmailUniverse] ?? array('id' => 0, 'name' => '', 'status' => '');
+		$referralInactive = ($referralSeed['status'] ?? '') === ReferralCaptureService::STATUS_INACTIVE;
+		$seedName = (string) ($referralSeed['name'] ?? '');
+		$seedId = (int) ($referralSeed['id'] ?? 0);
+		if (!$referralInactive && $seedId > 0 && $seedName !== '')
 		{
 			$referralData = array(
-				'id'   => (int) $referralSeed['id'],
-				'name' => (string) $referralSeed['name'],
+				'id'   => $seedId,
+				'name' => $seedName,
+			);
+		}
+		elseif ($referralInactive && $seedName !== '')
+		{
+			// Keep the name visible, but do not submit a referralID the server will drop.
+			$referralData = array(
+				'id'   => 0,
+				'name' => $seedName,
 			);
 		}
 		
 		$this->assign(array(
 			'referralData'		=> $referralData,
 			'referralByUniverse'	=> $referralByUniverse,
+			'referralInactive'	=> $referralInactive,
 			'accountName'		=> $accountName,
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,
@@ -463,6 +476,8 @@ class ShowRegisterPage extends AbstractLoginPage
 		$verifyPath	= 'index.php?page=vertify&i='.$validationID.'&k='.$validationKey.'&uni='.$universeId;
 		$verifyURL	= EmailRegistrationService::buildVerifyUrl($universeId, (int) $validationID, $validationKey);
 		
+		// user_valid = 0 skips the email click and still activates through vertify,
+		// which writes ref_id / ref_bonus when referralID was captured.
 		if($config->user_valid == 0 || !empty($externalAuthUID))
 		{
 			$this->redirectTo($verifyPath);
