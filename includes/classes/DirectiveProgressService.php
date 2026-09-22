@@ -79,6 +79,40 @@ class DirectiveProgressService
 	}
 
 	/**
+	 * Persist completion when stored progress already meets the current catalog.
+	 * Used when a directive's targets change under an in-progress row.
+	 *
+	 * @param array<string, mixed> $row
+	 * @return array<string, mixed>
+	 */
+	public static function markCompleteIfTargetsMet(array $row): array
+	{
+		if (!empty($row['completed_at']) || empty($row['id'])) {
+			return $row;
+		}
+
+		$key = (string) ($row['directive_key'] ?? '');
+		$catalog = DirectiveCatalog::get($key);
+		$targets = is_array($catalog) ? ($catalog['targets'] ?? []) : [];
+		$progress = json_decode((string) ($row['progress_json'] ?? '{}'), true);
+		if (!is_array($progress) || !self::targetsMet($progress, $targets)) {
+			return $row;
+		}
+
+		$completed = TIMESTAMP;
+		Database::get()->update(
+			'UPDATE %%USER_DIRECTIVES%% SET completed_at = :completed WHERE id = :id AND completed_at IS NULL',
+			[
+				':completed' => $completed,
+				':id' => (int) $row['id'],
+			]
+		);
+		$row['completed_at'] = $completed;
+
+		return $row;
+	}
+
+	/**
 	 * @param array<string, int> $progress
 	 * @param array<string, int> $targets
 	 */

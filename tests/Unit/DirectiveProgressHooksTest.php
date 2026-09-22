@@ -69,7 +69,18 @@ class DirectiveProgressHooksTest extends TestCase
 		DirectiveHooks::afterHoldSuccess(8, 1);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
 		$this->assertSame(3, $progress['defense_complete']);
-		$this->assertSame(1, $progress['hold_success']);
+		$this->assertArrayNotHasKey('hold_success', $progress);
+		$this->assertNull($this->db->userDirectives[0]['completed_at']);
+	}
+
+	public function testSixDefensesCompleteDefensiveWithoutHold(): void
+	{
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::DEFENSIVE, [], ['hangar' => 1]);
+		DirectiveHooks::afterBuildCompleted([401 => 6], ['id' => 8, 'universe' => 1]);
+		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
+		$this->assertSame(6, $progress['defense_complete']);
+		$this->assertArrayNotHasKey('hold_success', $progress);
+		$this->assertNotEmpty($this->db->userDirectives[0]['completed_at']);
 	}
 
 	public function testExpeditionCompletionHookIncrementsExploration(): void

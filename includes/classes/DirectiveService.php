@@ -351,6 +351,7 @@ class DirectiveService
 		}
 		$selected = null;
 		if (is_array($userDirective)) {
+			$userDirective = DirectiveProgressService::markCompleteIfTargetsMet($userDirective);
 			$def = DirectiveCatalog::get((string) $userDirective['directive_key']);
 			$progress = json_decode((string) ($userDirective['progress_json'] ?? '{}'), true);
 			if (!is_array($progress)) {

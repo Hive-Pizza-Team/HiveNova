@@ -85,6 +85,41 @@ class DirectiveServiceTest extends TestCase
 		$this->assertSame([DirectiveCatalog::INDUSTRIAL], $keys);
 	}
 
+	public function testBriefingOffersDefensesOnceShipyardExistsWithoutShips(): void
+	{
+		$data = DirectiveService::getBriefingData(10, 1, [], ['hangar' => 1]);
+		$keys = array_column($data['options'], 'key');
+		$this->assertSame([DirectiveCatalog::INDUSTRIAL, DirectiveCatalog::DEFENSIVE], $keys);
+
+		$defensive = null;
+		foreach ($data['options'] as $option) {
+			if ($option['key'] === DirectiveCatalog::DEFENSIVE) {
+				$defensive = $option;
+			}
+		}
+		$this->assertIsArray($defensive);
+		$this->assertSame(['defense_complete' => 6], $defensive['targets']);
+		$this->assertArrayNotHasKey('hold_success', $defensive['targets']);
+	}
+
+	public function testBriefingClaimsDefensiveWhenDefensesAlreadyMetWithoutHold(): void
+	{
+		DirectiveService::selectDirective(10, 1, DirectiveCatalog::DEFENSIVE, [], ['hangar' => 1]);
+		$this->db->userDirectives[0]['progress_json'] = json_encode([
+			'defense_complete' => 6,
+			'hold_success' => 0,
+		]);
+
+		$data = DirectiveService::getBriefingData(10, 1, [], ['hangar' => 1]);
+
+		$this->assertTrue($data['directive']['completed']);
+		$this->assertNotEmpty($this->db->userDirectives[0]['completed_at']);
+		$this->assertSame(
+			[['counter' => 'defense_complete', 'have' => 6, 'need' => 6, 'pct' => 100]],
+			$data['directive']['bars']
+		);
+	}
+
 	public function testBriefingShowsUnlockedDirectives(): void
 	{
 		$data = DirectiveService::getBriefingData(
