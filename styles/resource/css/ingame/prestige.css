@@ -1,0 +1,48 @@
+.prestige-badges {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	margin-left: 4px;
+	vertical-align: middle;
+}
+
+.prestige-badge {
+	display: inline-flex;
+	width: 16px;
+	height: 16px;
+	line-height: 0;
+	color: #e6b325;
+}
+
+.prestige-badge svg {
+	display: block;
+	width: 16px;
+	height: 16px;
+}
+
+.prestige-hive {
+	margin-left: 0.6em;
+	opacity: 0.85;
+}
+
+.prestige-badge--worker_bee { color: #e6b325; }
+.prestige-badge--honey_bee { color: #f4a261; }
+.prestige-badge--bumblebee { color: #e9c46a; }
+.prestige-badge--yellowjacket { color: #eeef20; }
+.prestige-badge--giant_hornet { color: #e76f51; }
+.prestige-badge--killer_bee { color: #9b2226; }
+.prestige-badge--queen_bee { color: #c77dff; }
+
+.prestige-badge--pizza_driver_l1 { color: #f4a261; }
+.prestige-badge--pizza_driver_l2 { color: #e76f51; }
+.prestige-badge--pizza_senior { color: #e9c46a; }
+.prestige-badge--pizza_zupervisor { color: #2a9d8f; }
+.prestige-badge--pizza_shift_manager { color: #457b9d; }
+.prestige-badge--pizza_champions { color: #e63946; }
+.prestige-badge--pizza_baron { color: #9b5de5; }
+.prestige-badge--pizza_big_cheese { color: #ffd60a; }
+.prestige-badge--pizza_50k { color: #c1121f; }
+.prestige-badge--pizza_grand_barony { color: #ffb703; }
+
+.prestige-badge--season,
+.prestige-badge--season_winner { color: #ffd166; }

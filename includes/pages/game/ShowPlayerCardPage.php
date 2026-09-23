@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\PrestigeBadgeService;
 
 /**
  *  2Moons 
@@ -46,7 +47,7 @@ class ShowPlayerCardPage extends AbstractGamePage
 		$PlayerID 	= HTTP::_GP('id', 0);
 
 		$sql = "SELECT 
-				u.username, u.hive_account, u.public_message, u.galaxy, u.system, u.planet, u.wons, u.loos, u.draws, u.kbmetal, u.kbcrystal, u.lostunits, u.desunits, u.ally_id,
+				u.id, u.username, u.hive_account, u.register_time, u.public_message, u.galaxy, u.system, u.planet, u.wons, u.loos, u.draws, u.kbmetal, u.kbcrystal, u.lostunits, u.desunits, u.ally_id,
 				p.name,
 				s.tech_rank, s.tech_points, s.build_rank, s.build_points, s.defs_rank, s.defs_points, s.fleet_rank, s.fleet_points, s.total_rank, s.total_points,
 				a.ally_name
@@ -76,8 +77,19 @@ class ShowPlayerCardPage extends AbstractGamePage
 			$drawsprozent               = 100 / $totalfights * $query['draws'];
 		}
 
+		$months = $LNG['months'] ?? [];
+		$prestige = (new PrestigeBadgeService())->forProfile($query, array(
+			'member_since' => (string) ($LNG['pl_member_since'] ?? 'Member since %s'),
+			'hive_linked'  => (string) ($LNG['pl_hive_linked'] ?? 'Hive: @%s'),
+			'hp_range'     => (string) ($LNG['pl_prestige_hp_range'] ?? '%1$s — %2$s–%3$s HP'),
+			'hp_open'      => (string) ($LNG['pl_prestige_hp_open'] ?? '%1$s — %2$s+ HP'),
+			'pizza_open'   => (string) ($LNG['pl_prestige_pizza_open'] ?? '%1$s — %2$s+ PIZZA staked'),
+			'months'       => is_array($months) ? $months : array(),
+		));
+
 		$this->assign(array(
 			'id'			=> $PlayerID,
+			'prestige'		=> $prestige,
 			'yourid'		=> $USER['id'],
 			'name'			=> $query['username'],
 			'avatar'		=> PlayerUtil::getPlayerAvatarURL($query),

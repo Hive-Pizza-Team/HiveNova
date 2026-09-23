@@ -10,6 +10,7 @@ use Throwable;
 class HiveEngineClient
 {
 	public const RPC_URL = 'https://api.hive-engine.com/rpc/blockchain';
+	public const CONTRACTS_URL = 'https://api.hive-engine.com/rpc/contracts';
 	public const HISTORY_URL = 'https://history.hive-engine.com/accountHistory?account=';
 	public const HISTORY_MAX_PAGES = 20;
 
@@ -138,6 +139,64 @@ class HiveEngineClient
 			'trx_id'    => $trxId,
 			'timestamp' => $timestamp,
 		];
+	}
+
+	/**
+	 * Staked Hive-Engine balance. Null when the request failed; 0.0 when the
+	 * account has no balance row. Liquid `balance` is not used.
+	 */
+	public function tokenStake(string $account, string $symbol = 'PIZZA'): ?float
+	{
+		$account = strtolower(trim($account));
+		$symbol = strtoupper(trim($symbol));
+		if (!HiveUtil::isAccountValid($account) || $symbol === '') {
+			return null;
+		}
+
+		$body = json_encode([
+			'jsonrpc' => '2.0',
+			'id'      => 1,
+			'method'  => 'find',
+			'params'  => [
+				'contract' => 'tokens',
+				'table'    => 'balances',
+				'query'    => [
+					'account' => $account,
+					'symbol'  => $symbol,
+				],
+				'limit'    => 1,
+				'offset'   => 0,
+				'indexes'  => [],
+			],
+		], JSON_UNESCAPED_SLASHES);
+		$raw = $this->fetch(self::CONTRACTS_URL, is_string($body) ? $body : null);
+		if ($raw === null) {
+			return null;
+		}
+
+		$decoded = json_decode($raw, true);
+		if (!is_array($decoded) || isset($decoded['error']) || !isset($decoded['result']) || !is_array($decoded['result'])) {
+			return null;
+		}
+		if ($decoded['result'] === []) {
+			return 0.0;
+		}
+		if (!array_is_list($decoded['result'])) {
+			return null;
+		}
+
+		$row = $decoded['result'][0] ?? null;
+		if (!is_array($row)) {
+			return null;
+		}
+		if (!array_key_exists('stake', $row)) {
+			return 0.0;
+		}
+		if (!is_numeric($row['stake'])) {
+			return null;
+		}
+
+		return (float) $row['stake'];
 	}
 
 	private static function parseTimestamp(mixed $value): int
