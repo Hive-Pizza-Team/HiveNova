@@ -5,7 +5,9 @@ namespace HiveNova\Core;
 /**
  * Defaults for login/register universe selects.
  *
- * Email/password flows prefer a non-seasonal open universe (Uni 1 today).
+ * Email/password flows prefer Universe 1 when it is open and not seasonal,
+ * then the newest other non-seasonal open universe. A newer universe that
+ * was not flagged seasonal must not steal the password default.
  * Seasonal universes need Hive Keychain and a PIZZA entry, so they are not
  * the cold-traffic default.
  * Hive Keychain flows prefer the most populated open universe.
@@ -61,13 +63,15 @@ class LoginUniverseDefaults
 	/**
 	 * Default for email/password login and registration.
 	 *
-	 * Prefer a non-seasonal open universe so cold traffic lands on Uni 1.
-	 * Registration also skips universes with registration closed.
-	 * Falls back to the newest open universe when every candidate is seasonal.
+	 * Prefer Universe 1 whenever it is an open non-seasonal universe so cold
+	 * traffic lands on the free frontier even when a newer universe is not
+	 * marked seasonal. Registration also skips universes with registration
+	 * closed. Falls back to the newest open universe when every candidate
+	 * is seasonal or closed.
 	 */
 	public static function forEmail(bool $forRegistration = false): int
 	{
-		foreach (array_reverse(Universe::availableUniverses()) as $uniId) {
+		foreach (self::emailCandidateOrder() as $uniId) {
 			$config = Config::get($uniId);
 			if ((int) $config->game_disable === 0) {
 				continue;
@@ -83,6 +87,32 @@ class LoginUniverseDefaults
 		}
 
 		return self::newestOpen($forRegistration);
+	}
+
+	/**
+	 * Universe 1 first, then every other universe newest-first.
+	 *
+	 * Walking newest-first alone lets the highest id win whenever season_mode
+	 * is off, which is how password forms defaulted to Universe 3 on hosts
+	 * that had not flagged it seasonal.
+	 *
+	 * @return list<int>
+	 */
+	private static function emailCandidateOrder(): array
+	{
+		$ordered = [];
+		if (Universe::exists(ROOT_UNI)) {
+			$ordered[] = (int) ROOT_UNI;
+		}
+		foreach (array_reverse(Universe::availableUniverses()) as $uniId) {
+			$uniId = (int) $uniId;
+			if ($uniId === (int) ROOT_UNI) {
+				continue;
+			}
+			$ordered[] = $uniId;
+		}
+
+		return $ordered;
 	}
 
 	/**
