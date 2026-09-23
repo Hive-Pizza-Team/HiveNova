@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Login;
 
 use HiveNova\Core\Config;
+use HiveNova\Core\PublicContactService;
 
 /**
  *  2Moons 
@@ -31,12 +32,26 @@ class ShowDisclamerPage extends AbstractLoginPage
 	
 	function show() 
 	{
+		global $LNG;
+
 		$config	= Config::get();
+		$contact = PublicContactService::resolve([
+			'address'        => (string) $config->disclamerAddress,
+			'phone'          => (string) $config->disclamerPhone,
+			'mail'           => (string) $config->disclamerMail,
+			'notice'         => (string) $config->disclamerNotice,
+			'noticeFallback' => isset($LNG['disclamerNoticeFallback'])
+				? (string) $LNG['disclamerNoticeFallback']
+				: PublicContactService::DEFAULT_NOTICE_FALLBACK,
+		]);
+		$this->seoAllowIndex = $contact['hasContent'];
 		$this->assign(array(
-			'disclamerAddress'	=> makebr($config->disclamerAddress),
-			'disclamerPhone'	=> $config->disclamerPhone,
-			'disclamerMail'		=> $config->disclamerMail,
-			'disclamerNotice'	=> $config->disclamerNotice,
+			'disclamerAddress'		=> makebr($contact['address']),
+			'disclamerPhone'		=> $contact['phone'],
+			'disclamerMail'			=> $contact['mail'],
+			'disclamerMailHref'		=> $contact['mailHref'],
+			'disclamerNotice'		=> makebr($contact['notice']),
+			'disclamerDiscordUrl'	=> $contact['discordUrl'],
 		));
 		
 		$this->display('page.disclamer.default.tpl');

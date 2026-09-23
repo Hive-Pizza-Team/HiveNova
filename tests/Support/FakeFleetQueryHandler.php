@@ -31,6 +31,13 @@ trait FakeFleetQueryHandler
 
     public int $acsGroupMemberCount = 0;
 
+    /**
+     * Joinable ACS memberships for AcsJoinService queries (marker: member.userID).
+     *
+     * @var list<array<string, mixed>>
+     */
+    public array $acsInvites = [];
+
     /** @var list<array{sql: string, params: array}> */
     public array $fleetUpdates = [];
 
@@ -48,6 +55,10 @@ trait FakeFleetQueryHandler
 
     private function fleetSelect(string $qry, array $params): array
     {
+        if (str_contains($qry, 'member.userID')) {
+            return $this->acsInviteRows($params);
+        }
+
         if (str_contains($qry, '%%FLEETS%%')
             && str_contains($qry, 'DISTINCT fleet_owner')
             && str_contains($qry, 'fleet_mission')) {
@@ -107,6 +118,16 @@ trait FakeFleetQueryHandler
 
     private function fleetSelectSingle(string $qry, array $params, $field = false)
     {
+        if (str_contains($qry, 'member.userID')) {
+            $rows = $this->acsInviteRows($params);
+            $row = $rows[0] ?? null;
+            if ($row === null) {
+                return $field === false ? null : false;
+            }
+
+            return $field === false ? $row : ($row[$field] ?? false);
+        }
+
         if (str_contains($qry, '%%AKS%%') && str_contains($qry, 'ankunft')) {
             $id = (int) ($params[':acsId'] ?? 0);
             $row = $this->aksRows[$id] ?? null;
@@ -216,6 +237,57 @@ trait FakeFleetQueryHandler
         }
 
         return $field === false ? null : false;
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     * @return list<array<string, mixed>>
+     */
+    private function acsInviteRows(array $params): array
+    {
+        $userId = (int) ($params[':userID'] ?? 0);
+        $acsId = (int) ($params[':acsId'] ?? 0);
+        $targetId = (int) ($params[':targetId'] ?? 0);
+        $maxFleets = (int) ($params[':maxFleets'] ?? PHP_INT_MAX);
+        $out = [];
+
+        foreach ($this->acsInvites as $invite) {
+            if ((int) ($invite['userId'] ?? 0) !== $userId) {
+                continue;
+            }
+            $group = (int) ($invite['acsId'] ?? 0);
+            if ($acsId > 0 && $group !== $acsId) {
+                continue;
+            }
+            if ($targetId > 0 && (int) ($invite['target'] ?? 0) !== $targetId) {
+                continue;
+            }
+
+            $fleetCount = 0;
+            foreach ($this->fleetRowsById as $fleet) {
+                if ((int) ($fleet['fleet_group'] ?? 0) === $group) {
+                    $fleetCount++;
+                }
+            }
+            if ($maxFleets <= $fleetCount) {
+                continue;
+            }
+
+            $out[] = [
+                'id' => $group,
+                'name' => (string) ($invite['name'] ?? ''),
+                'galaxy' => (int) ($invite['galaxy'] ?? 0),
+                'system' => (int) ($invite['system'] ?? 0),
+                'planet' => (int) ($invite['planet'] ?? 0),
+                'planet_type' => (int) ($invite['planet_type'] ?? 1),
+                'ankunft' => (int) ($invite['ankunft'] ?? 0),
+                'target' => (int) ($invite['target'] ?? 0),
+            ];
+        }
+
+        usort($out, static fn (array $a, array $b): int => $b['id'] <=> $a['id']);
+
+        return $out;
     }
 
     /**

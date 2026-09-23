@@ -6,7 +6,7 @@
 		<span class="footer-sep">&bull;</span>
 		<a href="https://thecrazygm.com/hivetools/utility/tipjar/mithril.pizza/1/hbd/support%20moon" target="_blank">Team Mithril</a> &amp; <a href="https://peakd.com/@hive.pizza" target="_blank">Hive Pizza Team</a>
 		<span class="footer-sep">&bull;</span>
-		<a href="https://discord.gg/BWqmGbtuDn" title="Discord" target="_blank">Discord</a>
+		<a href="https://discord.gg/bP6ksCeEUk" title="Discord" target="_blank">Discord</a>
 	</div>
 </footer>
 </div>
@@ -19,6 +19,7 @@ var LoginConfig = {
 	'basePath' : {$basepath|json}
 };
 </script>
+<script src="scripts/login/pwa-register.js?v={$REV}"></script>
 {if $analyticsEnable}
 <script type="text/javascript" src="https://www.google-analytics.com/ga.js"></script>
 <script type="text/javascript">

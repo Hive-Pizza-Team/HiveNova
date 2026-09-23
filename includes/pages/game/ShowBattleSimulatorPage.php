@@ -8,6 +8,7 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\BattleSimulatorCoords;
+use HiveNova\Core\BattleSimulatorView;
 
 /**
  *  2Moons 
@@ -236,9 +237,6 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 	{
 		global $USER, $PLANET, $reslist, $resource;
 
-		$Slots			= HTTP::_GP('slots', 1);
-
-
 		$BattleArray[0][0][109]	= $USER[$resource[109]];
 		$BattleArray[0][0][110]	= $USER[$resource[110]];
 		$BattleArray[0][0][111]	= $USER[$resource[111]];
@@ -246,47 +244,53 @@ class ShowBattleSimulatorPage extends AbstractGamePage
 		$BattleArray[0][0][120]	= $USER[$resource[120]];
 		$BattleArray[0][0][121]	= $USER[$resource[121]];
 		$BattleArray[0][0][122]	= $USER[$resource[122]];
-		
-		if(empty($_REQUEST['battleinput']))
-		{
-			foreach($reslist['fleet'] as $ID)
-			{
-				if(FleetFunctions::GetFleetMaxSpeed($ID, $USER) > 0)
-				{
-					// Add just flyable elements
-					$BattleArray[0][0][$ID]	= $PLANET[$resource[$ID]];
+
+		if (empty($_REQUEST['battleinput'])) {
+			foreach ($reslist['fleet'] as $ID) {
+				if (FleetFunctions::GetFleetMaxSpeed($ID, $USER) > 0) {
+					$BattleArray[0][0][$ID] = $PLANET[$resource[$ID]];
 				}
 			}
+		} else {
+			$BattleArray = HTTP::_GP('battleinput', array());
 		}
-		else
-		{
-			$BattleArray	= HTTP::_GP('battleinput', array());
-		}
-		
-		if(isset($_REQUEST['im']))
-		{
-			foreach($_REQUEST['im'] as $ID => $Count)
-			{
-				$BattleArray[0][1][$ID]	= floatToString($Count);
+
+		if (isset($_REQUEST['im'])) {
+			foreach ($_REQUEST['im'] as $ID => $Count) {
+				$BattleArray[0][1][$ID] = floatToString($Count);
 			}
 		}
-		
+
+		// Prefer a single SSR slot; extra ACS slots are cloned in battlesim.js.
+		// Honor legacy moreslots POST when slots > 1 is explicitly requested.
+		$Slots = BattleSimulatorView::slotsToRender(
+			$BattleArray,
+			isset($_REQUEST['slots']) ? (int) HTTP::_GP('slots', 1) : 1
+		);
+
+		$compact = (($_COOKIE['hn_compact'] ?? '') === '1');
+		$isFlyable = static function (int $id) use ($USER): bool {
+			return FleetFunctions::GetFleetMaxSpeed($id, $USER) > 0;
+		};
+		$fleetList = BattleSimulatorView::fleetIdsForForm($reslist['fleet'], $isFlyable, $BattleArray);
+		$defensiveList = BattleSimulatorView::defenseIdsForForm($reslist['defense'], $BattleArray, $compact);
+
 		$this->tplObj->loadscript('simple-tabs.js');
 		$this->tplObj->loadscript('battlesim.js');
 
 		$simCoords = $this->simulationCoords();
-		
+
 		$this->assign(array(
 			'Slots'			=> $Slots,
 			'battleinput'	=> $BattleArray,
-			'fleetList'		=> $reslist['fleet'],
-			'defensiveList'	=> $reslist['defense'],
+			'fleetList'		=> $fleetList,
+			'defensiveList'	=> $defensiveList,
 			'simGalaxy'		=> $simCoords['defender']['galaxy'],
 			'simSystem'		=> $simCoords['defender']['system'],
 			'simPlanet'		=> $simCoords['defender']['planet'],
 			'simType'		=> $simCoords['defender']['type'],
 		));
-		
-		$this->display('page.battleSimulator.default.tpl');   
+
+		$this->display('page.battleSimulator.default.tpl');
 	}
 }

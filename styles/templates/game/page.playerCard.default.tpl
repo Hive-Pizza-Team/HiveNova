@@ -10,16 +10,22 @@
 	</tr>
 	<tr>
 		<td style="width:40%">{$LNG.pl_name}</td>
-		<td colspan="2">{$name} {$badges}</td>
+		<td colspan="2">{$name} {$badges} {include file="shared.prestige.badges.tpl" badges=$prestige.badges}</td>
 	</tr>
+	{if $prestige.memberSinceDate || $prestige.hiveLine}
+	<tr>
+		<td>{$LNG.pl_member_since_label}</td>
+		<td colspan="2">{if $prestige.memberSinceDate}{$prestige.memberSinceDate|escape:'html'}{/if}{if $prestige.hiveLine} <span class="prestige-hive">{$prestige.hiveLine|escape:'html'}</span>{/if}</td>
+	</tr>
+	{/if}
 
 	<tr>
 		<td>{$LNG.pl_homeplanet}</td>
-		<td colspan="2">{$homeplanet} <a href="#" onclick="parent.location = 'game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}';return false;">[{$galaxy}:{$system}:{$planet}]</a></td>
+		<td colspan="2">{$homeplanet} <a href="game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}" target="_top">[{$galaxy}:{$system}:{$planet}]</a></td>
 	</tr>
 	<tr>
 		<td>{$LNG.pl_ally}</td>
-		<td colspan="2">{if $allyname}<a href="#" onclick="parent.location = 'game.php?page=alliance&amp;mode=info&amp;id={$allyid}';return false;">{$allyname}</a>{else}-{/if}</td>
+		<td colspan="2">{if $allyname}<a href="game.php?page=alliance&amp;mode=info&amp;id={$allyid}" target="_top">{$allyname}</a>{else}-{/if}</td>
 	</tr>
 	{if $publicMessage}
 	<tr>

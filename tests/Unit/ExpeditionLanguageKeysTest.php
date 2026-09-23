@@ -12,6 +12,7 @@ class ExpeditionLanguageKeysTest extends TestCase
 	{
 		$keys = [
 			'sys_expe_report',
+			'sys_expe_destination',
 			'sys_expe_choice_pending',
 			'cm_pending_choice',
 			'sys_expe_found_ships_nothing',
@@ -86,5 +87,6 @@ class ExpeditionLanguageKeysTest extends TestCase
 
 		$this->assertSame(8, substr_count((string) $lng['sys_expe_back_home'], '%s'));
 		$this->assertSame(3, substr_count((string) $lng['sys_expe_back_home_with_dm'], '%s'));
+		$this->assertSame(1, substr_count((string) $lng['sys_expe_destination'], '%s'));
 	}
 }

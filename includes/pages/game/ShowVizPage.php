@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Config;
 use HiveNova\Core\FleetVizSnapshotService;
+use HiveNova\Core\HTTP;
 
 /**
  *  2Moons
@@ -26,20 +27,35 @@ class ShowVizPage extends AbstractGamePage
 		parent::__construct();
 	}
 
-	public function show()
+	/**
+	 * AJAX: fleet arcs for the map (loaded after first paint).
+	 */
+	public function fleets()
 	{
 		global $USER;
 
 		$snap = (new FleetVizSnapshotService())->forUniverse((int) $USER['universe']);
+		HTTP::sendHeader('Content-Type', 'application/json; charset=UTF-8');
+		$this->sendJSON([
+			'fleets' => $snap['fleets'],
+		]);
+	}
+
+	public function show()
+	{
+		global $USER;
+
 		$config = Config::get($USER['universe']);
 		$version = (string) ($config->VERSION ?? '');
 
+		// Dimensions only on first paint — fleets arrive via mode=fleets.
 		$vizConfigJson = json_encode([
 			'threeSrc'   => './scripts/threejs/three.min.js?v=' . substr($version, -4),
-			'maxGalaxy'  => $snap['maxGalaxy'],
-			'maxSystem'  => $snap['maxSystem'],
-			'maxPlanets' => $snap['maxPlanets'],
-			'fleets'     => $snap['fleets'],
+			'maxGalaxy'  => (int) $config->max_galaxy,
+			'maxSystem'  => (int) $config->max_system,
+			'maxPlanets' => (int) $config->max_planets,
+			'fleetsUrl'  => 'game.php?page=viz&mode=fleets&ajax=1',
+			'fleets'     => [],
 		]);
 
 		$this->assign([

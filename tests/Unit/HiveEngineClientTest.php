@@ -157,6 +157,88 @@ class HiveEngineClientTest extends TestCase
 		$this->assertStringContainsString('offset=2', $calls[1]);
 	}
 
+	public function testTokenStakeReadsStakeNotLiquidBalance(): void
+	{
+		HiveEngineClient::setFetcher(function (string $url, ?string $body = null) {
+			$this->assertSame(HiveEngineClient::CONTRACTS_URL, $url);
+			$this->assertIsString($body);
+			$this->assertStringContainsString('"find"', $body);
+			$this->assertStringContainsString('"account":"alice"', $body);
+			$this->assertStringContainsString('"symbol":"PIZZA"', $body);
+			return json_encode([
+				'jsonrpc' => '2.0',
+				'id' => 1,
+				'result' => [[
+					'account' => 'alice',
+					'symbol' => 'PIZZA',
+					'balance' => '999.000',
+					'stake' => '20.500',
+				]],
+			]);
+		});
+		$this->assertSame(20.5, (new HiveEngineClient())->tokenStake('Alice', 'pizza'));
+	}
+
+	public function testTokenStakeEmptyBalanceIsZero(): void
+	{
+		HiveEngineClient::setFetcher(static fn () => json_encode([
+			'jsonrpc' => '2.0',
+			'result' => [],
+		]));
+		$this->assertSame(0.0, (new HiveEngineClient())->tokenStake('alice'));
+	}
+
+	public function testTokenStakeMissingStakeFieldIsZero(): void
+	{
+		HiveEngineClient::setFetcher(static fn () => json_encode([
+			'jsonrpc' => '2.0',
+			'result' => [['account' => 'alice', 'symbol' => 'PIZZA', 'balance' => '1']],
+		]));
+		$this->assertSame(0.0, (new HiveEngineClient())->tokenStake('alice'));
+	}
+
+	public function testTokenStakeSoftFailsOnTransportAndError(): void
+	{
+		HiveEngineClient::setFetcher(static fn () => false);
+		$this->assertNull((new HiveEngineClient())->tokenStake('alice'));
+
+		HiveEngineClient::setFetcher(static fn () => json_encode([
+			'jsonrpc' => '2.0',
+			'error' => ['message' => 'down'],
+		]));
+		$this->assertNull((new HiveEngineClient())->tokenStake('alice'));
+
+		HiveEngineClient::setFetcher(static fn () => '{');
+		$this->assertNull((new HiveEngineClient())->tokenStake('alice'));
+
+		HiveEngineClient::setFetcher(static fn () => json_encode([
+			'jsonrpc' => '2.0',
+			'result' => ['stake' => '5'],
+		]));
+		$this->assertNull((new HiveEngineClient())->tokenStake('alice'));
+
+		HiveEngineClient::setFetcher(static fn () => json_encode([
+			'jsonrpc' => '2.0',
+			'result' => ['nope'],
+		]));
+		$this->assertNull((new HiveEngineClient())->tokenStake('alice'));
+
+		HiveEngineClient::setFetcher(static fn () => json_encode([
+			'jsonrpc' => '2.0',
+			'result' => [['stake' => 'lots']],
+		]));
+		$this->assertNull((new HiveEngineClient())->tokenStake('alice'));
+	}
+
+	public function testTokenStakeSkipsInvalidAccountWithoutRequest(): void
+	{
+		HiveEngineClient::setFetcher(function () {
+			$this->fail('invalid Hive names must not hit Hive-Engine');
+		});
+		$this->assertNull((new HiveEngineClient())->tokenStake('Not Valid!'));
+		$this->assertNull((new HiveEngineClient())->tokenStake('ab'));
+	}
+
 	public function testMillisTimestampIsConverted(): void
 	{
 		$parsed = HiveEngineClient::parseTransfer([

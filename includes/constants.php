@@ -63,7 +63,7 @@ if(!defined('CACHE_PATH')) {
 // EXTERNAL LINKS
 // =============================================================================
 
-define('DISCORD_URL'				, 'https://discord.gg/BWqmGbtuDn');
+define('DISCORD_URL'				, 'https://discord.gg/bP6ksCeEUk');
 
 // Hive RPC — tried in order; each node gets HIVE_RPC_TIMEOUT seconds before the next.
 // Broadcasts (HiveBroadcast) also fail over on RPC errors, not only connection failures.
@@ -131,6 +131,9 @@ define('AUTH_USR'					, 0);
 
 // Max. User Session in Seconds
 define('SESSION_LIFETIME'			, 604800);
+
+// Minimum length for account passwords (register + settings)
+define('PASSWORD_MIN_LENGTH'			, 8);
 
 // Prevent the use of one account on multiple devices simultaneously
 define('PREVENT_MULTISESSIONS'		, false);

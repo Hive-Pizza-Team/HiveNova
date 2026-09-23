@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PushNotificationService;
+use HiveNova\Core\Session;
 
 class ShowPushPage extends AbstractGamePage
 {
@@ -27,7 +28,85 @@ class ShowPushPage extends AbstractGamePage
 			'configured' => PushNotificationService::isConfigured(),
 			'publicKey'  => PushNotificationService::getPublicKey(),
 			'enabled'    => PushNotificationService::isEnabledForUser((int) $USER['id']),
+			'subscribed' => PushNotificationService::hasSubscription((int) $USER['id']),
+			'vapidOk'    => PushNotificationService::isVapidOk(),
 		]);
+	}
+
+	public function test()
+	{
+		global $USER;
+
+		if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+			HTTP::sendHeader('HTTP/1.1 405 Method Not Allowed');
+			$this->sendJSON(['error' => 'method_not_allowed']);
+			return;
+		}
+
+		$now = defined('TIMESTAMP') ? TIMESTAMP : time();
+		$wait = PushNotificationService::testCooldownRemaining($this->lastTestAt(), $now);
+		if ($wait > 0) {
+			HTTP::sendHeader('HTTP/1.1 429 Too Many Requests');
+			$prior = $this->lastTestResult();
+			$this->sendJSON(array_merge(
+				is_array($prior) ? $prior : [],
+				['error' => 'rate_limited', 'retryAfter' => $wait]
+			));
+			return;
+		}
+
+		$subscribed = PushNotificationService::hasSubscription((int) $USER['id']);
+		if (PushNotificationService::isConfigured() && !PushNotificationService::isVapidOk()) {
+			$this->sendJSON(PushNotificationService::testClientPayload(
+				PushNotificationService::skipResult(PushNotificationService::SKIP_VAPID_MISMATCH),
+				$subscribed
+			));
+			return;
+		}
+
+		$result = PushNotificationService::sendTestNotification((int) $USER['id']);
+		$payload = PushNotificationService::testClientPayload($result, $subscribed);
+		// Only start the 60s cooldown after a real gateway flush so a skip/fail
+		// is not hidden by a subsequent 429 with no diagnostics.
+		if ($payload['attempted'] > 0) {
+			$this->rememberTestAt($now);
+			$this->rememberTestResult($payload);
+		}
+
+		$this->sendJSON($payload);
+	}
+
+	protected function lastTestAt(): int
+	{
+		$session = Session::load();
+
+		return isset($session->pushTestAt) ? (int) $session->pushTestAt : 0;
+	}
+
+	protected function rememberTestAt(int $now): void
+	{
+		$session = Session::load();
+		$session->pushTestAt = $now;
+	}
+
+	/**
+	 * @return array<string, mixed>|null
+	 */
+	protected function lastTestResult(): ?array
+	{
+		$session = Session::load();
+		$result = $session->pushTestResult ?? null;
+
+		return is_array($result) ? $result : null;
+	}
+
+	/**
+	 * @param array<string, mixed> $result
+	 */
+	protected function rememberTestResult(array $result): void
+	{
+		$session = Session::load();
+		$session->pushTestResult = $result;
 	}
 
 	public function vapidPublicKey()

@@ -26,6 +26,7 @@ class FlyingFleetsTable
 	protected $planetId = null;
 	protected $IsPhalanx = false;
 	protected $missions = false;
+	protected bool $compactOmitTooltips = false;
 
 	public function __construct() {
 
@@ -41,6 +42,11 @@ class FlyingFleetsTable
 
 	public function setPhalanxMode() {
 		$this->IsPhalanx = true;
+	}
+
+	public function setCompactOmitTooltips(bool $omit): void
+	{
+		$this->compactOmitTooltips = $omit;
 	}
 
 	public function setMissions($missions) {
@@ -287,7 +293,7 @@ class FlyingFleetsTable
 	{
 		global $LNG;
 		$FleetTotalC  = $fleetRow['fleet_resource_metal'] + $fleetRow['fleet_resource_crystal'] + $fleetRow['fleet_resource_deuterium'] + $fleetRow['fleet_resource_darkmatter'];
-		if ($FleetTotalC != 0 && !$this->IsPhalanx)
+		if ($FleetTotalC != 0 && !$this->IsPhalanx && !$this->compactOmitTooltips)
 		{
 			$textForBlind = $LNG['tech'][900].': ';
 			$textForBlind .= floatToString($fleetRow['fleet_resource_metal']).' '.$LNG['tech'][901];
@@ -315,6 +321,9 @@ class FlyingFleetsTable
 	private function CreateFleetPopupedFleetLink($fleetRow, $Text, $FleetType)
 	{
 		global $LNG, $USER, $resource;
+		if ($this->compactOmitTooltips) {
+			return $Text;
+		}
 		$SpyTech		= $USER[$resource[106]];
 		$Owner			= $fleetRow['fleet_owner'] == $this->userId;
 		$FleetRec		= explode(';', (string) $fleetRow['fleet_array']);

@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\ElementRequirementService;
 use HiveNova\Core\ResourceUpdate;
 
 /**
@@ -38,18 +39,20 @@ class ShowResearchPage extends AbstractGamePage
 	{
 		global $USER;
 		$db = Database::get();
-		$sql	= "SELECT * FROM %%PLANETS%% WHERE id_owner = :owner;";
+		// Only queue columns — full planet rows are unnecessary for lab-busy checks.
+		$sql	= "SELECT id, b_building, b_building_id FROM %%PLANETS%% WHERE id_owner = :owner AND b_building > 0;";
 		$planets	= $db->select($sql, array(
 			':owner'	=> $USER['id'],
 		));
 
 		foreach ($planets as $planet)
 		{
-			if ($planet['b_building'] == 0)
-				continue;
-
 			$CurrentQueue		= safe_unserialize($planet['b_building_id']);
+			if (!is_array($CurrentQueue)) {
+				continue;
+			}
 			foreach($CurrentQueue as $ListIDArray) {
+				// 6 = Research Lab, 31 = University
 				if($ListIDArray[0] == 6 || $ListIDArray[0] == 31)
 					return false;
 			}
@@ -364,7 +367,7 @@ class ShowResearchPage extends AbstractGamePage
 
 	public function show()
 	{
-		global $PLANET, $USER, $LNG, $resource, $reslist, $pricelist;
+		global $PLANET, $USER, $LNG, $resource, $reslist, $pricelist, $requirements;
 
 		if ($PLANET[$resource[31]] == 0)
 		{
@@ -406,11 +409,13 @@ class ShowResearchPage extends AbstractGamePage
 		$TechQueue		= $queueData['queue'];
 		$QueueCount		= count($TechQueue);
 		$ResearchList	= array();
+		$requirementService = new ElementRequirementService();
+		$techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+		$requirementMap = is_array($requirements) ? $requirements : array();
 
 		foreach($reslist['tech'] as $elementId)
 		{
-			if (!BuildFunctions::isTechnologieAccessible($USER, $PLANET, $elementId))
-				continue;
+			$techAccessible	= BuildFunctions::isTechnologieAccessible($USER, $PLANET, $elementId);
 
 			if(isset($queueData['quickinfo'][$elementId]))
 			{
@@ -424,7 +429,7 @@ class ShowResearchPage extends AbstractGamePage
 			$costResources		= BuildFunctions::getElementPrice($USER, $PLANET, $elementId, false, $levelToBuild+1);
 			$costOverflow		= BuildFunctions::getRestPrice($USER, $PLANET, $elementId, $costResources);
 			$elementTime    	= BuildFunctions::getBuildingTime($USER, $PLANET, $elementId, $costResources);
-			$buyable			= $QueueCount != 0 || BuildFunctions::isElementBuyable($USER, $PLANET, $elementId, $costResources);
+			$buyable			= $techAccessible && ($QueueCount != 0 || BuildFunctions::isElementBuyable($USER, $PLANET, $elementId, $costResources));
 
 			$ResearchList[$elementId]	= array(
 				'id'				=> $elementId,
@@ -435,6 +440,15 @@ class ShowResearchPage extends AbstractGamePage
 				'elementTime'    	=> $elementTime,
 				'buyable'			=> $buyable,
 				'levelToBuild'		=> $levelToBuild,
+				'techAccessible'	=> $techAccessible,
+				'requirements'		=> $requirementService->listForElement(
+					(int) $elementId,
+					$USER,
+					$PLANET,
+					$requirementMap,
+					$resource,
+					$techNames
+				),
 			);
 		}
 
@@ -447,6 +461,7 @@ class ShowResearchPage extends AbstractGamePage
 		));
 
 		$this->tplObj->loadscript('page-filters.js');
+		$this->tplObj->loadscript('element-focus.js');
 		$this->display('page.research.default.tpl');
 	}
 }

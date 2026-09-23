@@ -1,6 +1,6 @@
 <ul id="rules">
 	<li>
-		<h1>1. Comptes</h1>
+		<h2>1. Comptes</h2>
 		<p>Chaque joueur est autorisé à contrôler un seul compte. Chaque compte est en droit d'être joué par un seul joueur à la fois, le sitting de compte étant la seule exception.
 Le sitting autorise un joueur donné à son compte a surveillé par les règlements suivants:
 <br />
@@ -22,7 +22,7 @@ Le sitting autorise un joueur donné à son compte a surveillé par les règleme
 <br />- Remove an account from vacation mode.</p>
 	</li>
 	<li>
-		<h1>2. Pushing</h1>
+		<h2>2. Pushing</h2>
 		<p>It is not allowed for any account to obtain unfair profit out of a lower ranked account in a matter of resources.
 This includes but is not limited to:
 
@@ -37,22 +37,22 @@ This includes but is not limited to:
 <br />2:1:1 Where each unit of deuterium is worth 1 unit of crystal or 2 units of metal.</p>
 	</li>
 	<li>
-				<h1>3. Bashing</h1>
+				<h2>3. Bashing</h2>
 		<p>Il est interdit d`attaquer la lune ou la planète d`un joueur actif plus de 6 fois en 24 heures. Cette règle est aussi valable pour les missions de destruction de lune. Les attaques avec des sondes d`espionnage et des missiles interplanétaires ne sont pas concernées par cette règle concernant l`acharnement ("bashing").
 Le bashing d`un joueur n`est autorisé dans le cadre de guerres entre alliances.</p>
 	</li>
 	<li>
-		<h1>4. Bugusing</h1>
+		<h2>4. Bugusing</h2>
 		<p>Utiliser un bug ou une erreur de programmation de façon intentionnelle afin d`en tirer un profit personnel, ou ne pas signaler un bug est strictement interdit.
 Utiliser un programme comme interface entre le joueur et son compte est prohibé. Toute autre forme d`informations générées automatiquement dans le but d`avantager un groupe de joueurs est également interdit.</p>
 	</li>
 	<li>
-		<h1>5. Forbidden content</h1>
+		<h2>5. Forbidden content</h2>
 		<p>Toutes sortes de menaces IRL envers un joueur, un membre de l`équipe, un administrateur, sont interdites..
 <br />En plus, Envoyer des message spam ou faire de la publiciter pour votre jeu est interdit aussi.</p>
 	</li>
 	<li>
-		<h1>6. Wars</h1>
+		<h2>6. Wars</h2>
 		<p>After the Leaders of the alliances both agree to the war, it is officially on. And will continue until one of the alliances cancels it. To officially cancel the war they need to cancel the war pact from in-game, and announce it in the thread they started initially.
 While the war is on, the bashing rule between the alliances involved does not count. Meaning any members belonging to the alliances in said war can be attack an infinite amount of times with out punishment.
 If either alliance gives up and cancels the war, the bashing rule will take effect again, and any members breaking it after the war has ended with be punished with a 1 day ban, More if the degree of attack is extremely high.

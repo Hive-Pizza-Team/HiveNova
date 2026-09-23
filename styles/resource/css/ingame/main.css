@@ -63,7 +63,7 @@ header .fixed {
     max-width: 950px;
     height: 100px;
     z-index: 2;
-    padding: 0 0 0 16px;
+    padding: 0 12px 0 16px;
 }
 
 menu {
@@ -77,7 +77,15 @@ menu .fixed {
     list-style: none;
     position: fixed;
     top: 100px;
+    bottom: 0;
     width: 180px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+    box-sizing: border-box;
+    scrollbar-width: thin;
 }
 
 menu li {
@@ -85,14 +93,15 @@ menu li {
 }
 
 menu a {
-    text-align: center;
+    text-align: left;
     background: var(--color-menu-bg);
-
+    color: var(--color-chrome-menu-item);
 }
 
 menu li:hover>a {
     text-decoration: none;
-    background: var(--color-accent);
+    background: var(--color-chrome-menu-hover-bg);
+    color: var(--color-chrome-menu-hover-text);
     transition: background-color 0.3s;
 }
 
@@ -449,19 +458,95 @@ td.fleet-ship-bulk-actions {
     /* new */
     display: flex;
     justify-content: space-evenly;
+    align-items: stretch;
     flex-grow: 10;
+    min-width: 0;
+    padding: 10px 2px;
+    box-sizing: border-box;
 }
 
 #resource,
-#resource_mobile {
+#resource_mobile,
+.resource-cell {
     /* new */
     text-align: center;
     align-items: center;
+    flex: 1 1 0;
+    min-width: 108px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.resource-cell + .resource-cell {
+    border-left: 1px solid var(--color-chrome-res-divider);
+}
+
+.resource-cell a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-height: 44px;
+    text-decoration: none;
+}
+
+.resource-cell__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-chrome-res-divider);
+    border-radius: 4px;
+}
+
+.resource-cell__icon img {
+    display: block;
+    width: 42px;
+    height: 22px;
+    border-radius: 0;
 }
 
 .resource_name {
-    color: var(--color-res-name);
+    color: var(--color-chrome-res-label);
     font-weight: bold;
+}
+
+#resources_mobile .res_current,
+#resources_mobile .res_current_value {
+    color: var(--color-chrome-res-amount);
+}
+
+#resources_mobile .res_max {
+    color: var(--color-chrome-res-max);
+}
+
+#resources_mobile .is-over-capacity,
+#resources_mobile .res_current_max,
+#resources_mobile .is-energy-deficit {
+    color: var(--color-chrome-res-over);
+}
+
+#resources_mobile a:hover,
+#resources_mobile a:hover .resource_name {
+    color: var(--color-chrome-res-label);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#resources_mobile a:hover .res_current,
+#resources_mobile a:hover .res_current_value {
+    color: var(--color-chrome-res-amount);
+}
+
+#resources_mobile a:hover .res_max {
+    color: var(--color-chrome-res-max);
+}
+
+#resources_mobile a:hover .is-over-capacity,
+#resources_mobile a:hover .res_current_max,
+#resources_mobile a:hover .is-energy-deficit {
+    color: var(--color-chrome-res-over);
 }
 
 .planetSelectorWrapper {
@@ -516,22 +601,75 @@ td.fleet-ship-bulk-actions {
 #menu a {
     display: block;
     margin: 0;
-    padding: 4px 24px;
+    padding: 8px 10px;
+    text-align: left;
+    color: var(--color-chrome-menu-item);
+    border-left: 3px solid transparent;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+}
+
+#menu a:hover {
+    background: var(--color-chrome-menu-hover-bg);
+    color: var(--color-chrome-menu-hover-text);
+}
+
+#menu a.active {
+    background: var(--color-chrome-menu-active-bg);
+    border-left-color: var(--color-chrome-menu-active-bar);
+    color: var(--color-chrome-menu-hover-text);
 }
 
 div#disclamer {
-    text-align: center;
+    text-align: left;
     font-size: 11px;
     margin-top: 4px;
     margin-bottom: 16px;
+    padding: 8px 10px 0;
+    color: var(--color-chrome-menu-footer);
+}
+
+div#disclamer a {
+    color: var(--color-chrome-menu-footer);
 }
 
 .menu-separator {
     min-height: 8px;
 }
 
+#menu .menu-section {
+    display: block;
+    min-height: 0;
+    padding: 8px 10px;
+    color: var(--color-chrome-menu-section);
+    background: var(--color-chrome-menu-section-bg);
+    background-image: none;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    box-sizing: border-box;
+}
+
 #options select {
     max-width: 170px;
+}
+
+.res-prod-pos {
+    color: var(--color-success);
+}
+
+.res-prod-neg {
+    color: var(--color-danger);
+}
+
+.res-prod-zero {
+    color: var(--color-text-bright);
+}
+
+.resources-apply-bar {
+    display: none;
 }
 
 /* CONTENT */
@@ -1514,6 +1652,51 @@ table.tablesorter thead tr .headerSortDown {
 
 }
 
+/* PWA install banner is a sibling of .wrapper, but the left nav is
+   position:fixed. Without a viewport-wide fixed layer, Options/Logout
+   (and #disclamer) paint through the in-flow banner on desktop (#566). */
+.pwa-install-banner:not([hidden]) {
+    display: block;
+    position: fixed;
+    z-index: 550;
+    padding: 12px 14px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
+    right: 16px;
+    bottom: 16px;
+    left: auto;
+    width: min(420px, calc(100vw - 32px));
+}
+
+.pwa-install-banner__title {
+    font-weight: bold;
+    margin: 0 0 6px;
+}
+
+.pwa-install-banner__text {
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.pwa-install-banner__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pwa-install-banner__actions .button {
+    flex: 1 1 auto;
+    min-height: 44px;
+}
+
+.buildlist-more-toggle {
+    display: none;
+}
+
 @media screen and (max-width: 699px) {
     body.full {
         padding-top: max(12px, env(safe-area-inset-top, 0px));
@@ -1553,7 +1736,7 @@ table.tablesorter thead tr .headerSortDown {
         width: 100%;
         height: auto;
         min-height: 80px;
-        padding: 8px 6px 6px 6px;
+        padding: 8px 10px 8px 8px;
         max-width: none;
         overflow: visible;
         box-sizing: border-box;
@@ -1595,18 +1778,41 @@ table.tablesorter thead tr .headerSortDown {
         flex-grow: 1;
         min-width: 0;
         align-self: start;
-        padding-top: 2px;
+        justify-content: flex-start;
+        gap: 0;
+        padding: 0 12px 0 0;
+        overflow-x: auto;
+        scroll-padding-inline: 8px;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
     }
 
-    #resource_mobile {
-        min-width: 0;
-        font-size: 10px;
+    #resource_mobile,
+    .resource-cell {
+        flex: 1 1 0;
+        min-width: 56px;
+        min-height: 44px;
+        padding: 4px 8px;
+        font-size: 12px;
         line-height: 1.2;
+        scroll-snap-align: start;
     }
 
-    #resource_mobile img {
+    .resource-cell a {
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    #resource_mobile img,
+    .resource-cell__icon img {
         max-width: 28px;
         height: auto;
+    }
+
+    .resource-cell__icon {
+        padding: 2px 6px;
     }
 
     .planetSelectorWrapper {
@@ -1649,17 +1855,22 @@ table.tablesorter thead tr .headerSortDown {
         background: var(--color-bg-surface);
         border-top: none;
         margin: 0;
-        padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 12px;
-        font-size: 17px;
+        padding: calc(12px + env(safe-area-inset-top, 0px)) 0 12px;
+        font-size: 16px;
         line-height: 1.35;
         box-sizing: border-box;
     }
 
     menu .fixed {
         position: static;
+        top: auto;
+        bottom: auto;
         width: 100%;
         max-width: 480px;
         margin: 0 auto;
+        overflow: visible;
+        max-height: none;
+        padding-bottom: 0;
     }
 
     menu li {
@@ -1668,24 +1879,43 @@ table.tablesorter thead tr .headerSortDown {
         border-bottom: 1px solid var(--color-border);
     }
 
-    menu .menu-separator {
+    menu .menu-separator:not(.menu-section) {
         min-height: 12px;
         border-bottom: none;
         background: transparent;
     }
 
     #menu a {
-        padding: 14px 20px;
-        min-height: 48px;
+        padding: 10px 12px;
+        min-height: 44px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-size: 17px;
-        font-weight: 600;
+        justify-content: flex-start;
+        text-align: left;
+        font-size: 16px;
+        font-weight: 500;
         letter-spacing: 0.01em;
         box-sizing: border-box;
         width: 100%;
+        color: var(--color-chrome-menu-item);
+        border-left: 3px solid transparent;
+    }
+
+    #menu a:hover,
+    #menu a.active {
+        background: var(--color-chrome-menu-active-bg);
+        color: var(--color-chrome-menu-hover-text);
+    }
+
+    #menu a.active {
+        border-left-color: var(--color-chrome-menu-active-bar);
+    }
+
+    #menu .menu-section {
+        padding: 10px 12px;
+        color: var(--color-chrome-menu-section);
+        background: var(--color-chrome-menu-section-bg);
+        font-size: 12px;
     }
 
     .no-mobile {
@@ -1715,9 +1945,23 @@ table.tablesorter thead tr .headerSortDown {
         max-width: 95vw !important;
     }
 
-    #fancybox-close {
+    /* Fancybox close is a 30×30 sprite at top/right -15px. Dialog.open uses
+       padding:0, so that offset hangs off the wrap; the 44px tap-target then
+       revealed neighboring sprite frames (broken X + spinner). Keep the 44px
+       hit area, paint only the 30px icon, and sit inside the wrap.
+       Two IDs so this wins over jquery.fancybox.css loaded after main.css. */
+    #fancybox-wrap #fancybox-close {
+        top: 6px;
+        right: 6px;
+        width: 44px;
+        height: 44px;
         min-width: 44px;
         min-height: 44px;
+        box-sizing: border-box;
+        padding: 7px;
+        background-repeat: no-repeat;
+        background-origin: content-box;
+        background-clip: content-box;
     }
 
     #tooltip.tooltip-mobile-active {
@@ -1812,39 +2056,14 @@ table.tablesorter thead tr .headerSortDown {
     }
 
     .pwa-install-banner:not([hidden]) {
-        display: block;
-        position: fixed;
         left: 8px;
         right: 8px;
+        width: auto;
         bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 8px);
-        z-index: 550;
-        padding: 12px 14px;
-        background: var(--color-bg-surface);
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
 
-    .pwa-install-banner__title {
-        font-weight: bold;
-        margin: 0 0 6px;
-    }
-
-    .pwa-install-banner__text {
-        margin: 0 0 10px;
-        font-size: 13px;
-        line-height: 1.4;
-    }
-
-    .pwa-install-banner__actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .pwa-install-banner__actions .button {
-        flex: 1 1 auto;
-        min-height: 44px;
+    body:has(#toggle-menu:checked) .pwa-install-banner:not([hidden]) {
+        display: none;
     }
 
     #bottom-nav {
@@ -1872,8 +2091,10 @@ table.tablesorter thead tr .headerSortDown {
         text-decoration: none;
         color: var(--color-text);
         min-height: 44px;
+        min-width: 44px;
         padding: 4px 2px;
         cursor: pointer;
+        box-sizing: border-box;
     }
 
     #bottom-nav a.active {
@@ -2216,6 +2437,14 @@ table.tablesorter thead tr .headerSortDown {
         line-height: 1.4;
     }
 
+    .fleet-target-error {
+        margin-top: 6px;
+        color: var(--color-danger);
+        font-size: 12px;
+        line-height: 1.4;
+        font-weight: 700;
+    }
+
     .fleet-select-table .fleet-ship-stepper button.fleet-ship-btn {
         min-height: 36px;
         min-width: 36px;
@@ -2342,6 +2571,111 @@ table.tablesorter thead tr .headerSortDown {
         padding: 10px;
     }
 
+    body#resources content,
+    body#resources .resources-form,
+    body#resources .resources-table {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    body#resources table.resources-table {
+        display: block;
+        width: 100%;
+        overflow: visible;
+        border-spacing: 0;
+    }
+
+    body#resources .resources-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    body#resources .resources-table__cols {
+        display: none;
+    }
+
+    body#resources .resources-table__title th {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    body#resources .resources-table__row {
+        display: block;
+        width: 100%;
+        margin: 0 0 10px;
+        padding: 10px;
+        box-sizing: border-box;
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+    }
+
+    body#resources .resources-table__row td {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 6px 0;
+        text-align: left;
+        background: transparent;
+        border: 0;
+    }
+
+    body#resources .resources-table__row td::before {
+        content: attr(data-label);
+        color: var(--color-chrome-res-label);
+        font-weight: 700;
+        grid-column: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    body#resources .resources-table__row td > * {
+        grid-column: 2;
+        justify-self: end;
+    }
+
+    body#resources .resources-table__label {
+        display: block;
+        width: 100%;
+        font-weight: 700;
+        padding-bottom: 4px;
+        border-bottom: 1px solid var(--color-chrome-res-divider);
+        margin-bottom: 4px;
+        text-align: left;
+        grid-template-columns: 1fr;
+    }
+
+    body#resources .resources-table__label::before {
+        content: none;
+    }
+
+    body#resources .resources-table__factor select,
+    body#resources .resources-apply-bar input,
+    body#resources .resources-table input[type="submit"] {
+        width: 100%;
+        min-height: 44px;
+        box-sizing: border-box;
+    }
+
+    body#resources .resources-apply-inline {
+        display: none;
+    }
+
+    body#resources .resources-apply-bar {
+        display: block;
+        position: sticky;
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+        z-index: 50;
+        margin: 0 -8px;
+        padding: 8px;
+        background: var(--color-bg-surface);
+        border-top: 1px solid var(--color-border);
+    }
+
     body#messages content {
         overflow-x: hidden;
         max-width: 100%;
@@ -2420,7 +2754,17 @@ table.tablesorter thead tr .headerSortDown {
         white-space: normal;
     }
 
+    body#messages .msg-pagination-row {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 6px 0;
+    }
+
     body#messages .msg-pagination-row td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
         white-space: normal;
         text-align: left !important;
         word-break: break-word;
@@ -2483,6 +2827,48 @@ table.tablesorter thead tr .headerSortDown {
         border-radius: 8px;
         color: var(--color-text);
         padding: 8px 14px;
+    }
+
+    /* #615: compact Buildings queue so a multi-item card does not eat the viewport */
+    #buildlist.infos1 {
+        overflow: visible;
+        max-height: none;
+        touch-action: pan-y;
+    }
+
+    #buildlist .buildb,
+    #buildlist .bulida {
+        min-height: 0;
+        padding: 6px 8px;
+    }
+
+    #buildlist #progressbar {
+        margin-top: 4px;
+    }
+
+    #buildlist.buildlist--collapsible:not(.is-expanded) .buildlist-item--queued {
+        display: none;
+    }
+
+    #buildlist .buildlist-more-toggle {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 10px 12px;
+        min-height: 44px;
+        border: 0;
+        border-bottom: 1px solid var(--color-border);
+        border-radius: 0;
+        background: var(--color-card-header-bg);
+        color: var(--color-text);
+        font-size: 13px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #buildlist .buildlist-more-toggle[aria-expanded="true"] {
+        border-bottom-color: rgba(0, 210, 190, 0.45);
     }
 }
 
@@ -3089,4 +3475,151 @@ table.tablesorter thead tr .headerSortDown {
 	.achievement-celebration__modal--legendary {
 		animation: none;
 	}
+}
+
+/* Empire / Imperium overview */
+.empire-overview td,
+.empire-section table td {
+	background-color: var(--color-bg-surface-dark);
+	background-image: none;
+}
+
+.empire-resource-row td {
+	background-color: var(--color-bg-surface-dark);
+	background-image: none;
+}
+
+.empire-overview .empire-total-col {
+	font-size: inherit;
+	font-weight: 700;
+}
+
+.empire-overview .empire-planet-thumb img {
+	width: 48px;
+	height: 48px;
+	object-fit: cover;
+	vertical-align: middle;
+}
+
+.empire-section {
+	margin: 8px 0;
+}
+
+.empire-section summary {
+	cursor: pointer;
+	padding: 4px 6px;
+}
+
+/* Tech Tree discoverability — next unlock + first-session nudge */
+.techtree-next {
+	margin: 0 0 12px;
+}
+
+.techtree-next__title {
+	margin: 0 0 8px;
+	font-size: 1.05em;
+}
+
+.techtree-next__cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.techtree-next__card {
+	flex: 1 1 180px;
+	background: var(--color-bg-surface);
+	border: 1px solid var(--color-border);
+	border-radius: 8px;
+	padding: 10px 12px;
+	box-sizing: border-box;
+}
+
+.techtree-next__name {
+	margin: 0 0 6px;
+	font-size: 1em;
+}
+
+.techtree-next__missing,
+.techtree-next__progress {
+	margin: 0 0 8px;
+	font-size: 13px;
+	line-height: 1.35;
+}
+
+.techtree-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	margin: 0 0 10px;
+}
+
+.techtree-nudge {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 10px;
+	padding: 10px 12px;
+	background: var(--color-bg-surface);
+	border: 1px solid var(--color-chrome-menu-active-bar, #5eb0d4);
+	border-radius: 8px;
+	box-sizing: border-box;
+}
+
+.techtree-nudge[hidden] {
+	display: none;
+}
+
+.techtree-nudge__text {
+	margin: 0;
+	flex: 1 1 180px;
+	line-height: 1.4;
+}
+
+.techtree-nudge .btn {
+	min-height: 44px;
+}
+
+/* Requirement deep-links (research / buildings / shipyard) */
+.element-short-desc {
+	margin: 0.25em 0.6em 0.5em;
+	text-align: left;
+	clear: both;
+}
+
+.element-requirements {
+	margin: 0.4em 0;
+	text-align: left;
+}
+
+.requirement-link {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.requirement-link--unmet {
+	color: #ffd600;
+}
+
+.requirement-link--met {
+	color: var(--color-success);
+}
+
+.requirement-level {
+	margin-left: 0.25em;
+}
+
+.element-locked {
+	opacity: 0.78;
+}
+
+.infos.element-focus,
+.infoso.element-focus,
+.element-focus,
+.infos:target,
+.infoso:target {
+	outline: 2px solid var(--color-accent, #9b6dff);
+	box-shadow: 0 0 0 2px rgba(155, 109, 255, 0.35);
 }

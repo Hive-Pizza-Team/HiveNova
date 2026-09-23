@@ -81,7 +81,7 @@ $LNG['one_is_no_0']	= 'Não';
 
 //---------------	Botões	------------------------// 
 $LNG['button_submit']		= 'Enviar';
-$LNG['button_add']			= 'Perfil';
+$LNG['button_add']			= 'Adicionar';
 $LNG['button_delete']		= 'Apagar';
 $LNG['button_filter']		= 'Filtrar';
 $LNG['button_deselect']		= 'Remover selecionados';
@@ -1606,3 +1606,4 @@ $LNG['ref_stats_no_referrers']        = 'No referral signups yet.';
 $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
+$LNG['modul_43'] = 'Unused';

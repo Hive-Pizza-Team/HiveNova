@@ -23,6 +23,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\DatabaseBC;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
+use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\Session;
 use HiveNova\Core\Theme;
 use HiveNova\Core\Universe;
@@ -116,7 +117,15 @@ if(defined('DATABASE_VERSION') && DATABASE_VERSION === 'OLD')
 	}
 }
 
-$config = Config::get();
+try {
+	$config = Config::get();
+} catch (\Throwable $e) {
+	// Unknown uni on register checkUsername Ajax: fail-closed JSON, not HTML 503.
+	if (RegisterUsernameCheckAccess::abortClosedIfAjaxConfigFault($e)) {
+		exit;
+	}
+	throw $e;
+}
 date_default_timezone_set($config->timezone);
 
 $apiPublic = false;

@@ -57,7 +57,7 @@ class PublicSeoTest extends TestCase
 	public function testDocumentTitleHomeDefaultTemplateWhenKeyMissing(): void
 	{
 		$title = PublicSeo::documentTitle('index', 'Moon', []);
-		$this->assertSame('Moon — Free browser space strategy game', $title);
+		$this->assertSame('Moon — Free browser space strategy — Uni 1 frontier', $title);
 	}
 
 	public function testDocumentTitleInnerPageUsesSiteTitle(): void
@@ -123,5 +123,73 @@ class PublicSeoTest extends TestCase
 		$this->assertSame('noindex, follow', PublicSeo::robotsContent('lostPassword'));
 		$this->assertSame('noindex, follow', PublicSeo::robotsContent('news', false));
 		$this->assertSame('index, follow', PublicSeo::robotsContent('rules', true));
+		$this->assertSame('index, follow', PublicSeo::robotsContent('disclamer', true));
+	}
+
+	public function testSitemapPagesOmitNewsAndKeepContact(): void
+	{
+		$this->assertNotContains('news', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('disclamer', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('index', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('register', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('rules', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('screens', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('battleHall', PublicSeo::SITEMAP_PAGES);
+		$this->assertContains('banList', PublicSeo::SITEMAP_PAGES);
+	}
+
+	public function testTwitterSiteHandle(): void
+	{
+		$this->assertSame('@PizzaOnHive', PublicSeo::TWITTER_SITE);
+	}
+
+	public function testDisclaimerAliasRedirectsToLegacySpelling(): void
+	{
+		$this->assertSame('disclamer', PublicSeo::loginPageAlias('disclaimer'));
+		$this->assertNull(PublicSeo::loginPageAlias('disclamer'));
+		$this->assertNull(PublicSeo::loginPageAlias('rules'));
+		$this->assertSame('index.php?page=disclamer', PublicSeo::aliasRedirectLocation('disclamer', 'en'));
+		$this->assertSame('index.php?page=disclamer&lang=de', PublicSeo::aliasRedirectLocation('disclamer', 'de'));
+		$this->assertSame('index.php?page=disclamer', PublicSeo::loginAliasRedirectTarget('disclaimer', 'en'));
+		$this->assertSame('index.php?page=disclamer&lang=de', PublicSeo::loginAliasRedirectTarget('disclaimer', 'de'));
+		$this->assertNull(PublicSeo::loginAliasRedirectTarget('disclamer'));
+		$this->assertNull(PublicSeo::loginAliasRedirectTarget('rules'));
+	}
+
+	public function testEntitySameAsListsGenuinePublicUrls(): void
+	{
+		$sameAs = PublicSeo::entitySameAs();
+		$this->assertSame([
+			'https://discord.gg/bP6ksCeEUk',
+			'https://github.com/Hive-Pizza-Team/HiveNova',
+			'https://peakd.com/@hive.pizza',
+			'https://hive.pizza/',
+		], $sameAs);
+		$this->assertNotContains('https://twitter.com/PizzaOnHive', $sameAs);
+		$this->assertNotContains('https://x.com/PizzaOnHive', $sameAs);
+	}
+
+	public function testIndexJsonLdVideoGameIncludesSameAsAndPublisher(): void
+	{
+		$json = PublicSeo::indexJsonLd(
+			'Moon',
+			'https://moon.hive.pizza/',
+			'A free browser space strategy game.',
+			'https://moon.hive.pizza/styles/resource/images/login/HiveNova.png'
+		);
+		$data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+		$this->assertSame('https://schema.org', $data['@context']);
+		$this->assertSame('VideoGame', $data['@type']);
+		$this->assertSame('Moon', $data['name']);
+		$this->assertSame('https://moon.hive.pizza/', $data['url']);
+		$this->assertSame(PublicSeo::entitySameAs(), $data['sameAs']);
+		$this->assertSame('Organization', $data['publisher']['@type']);
+		$this->assertSame('Hive Pizza Team', $data['publisher']['name']);
+		$this->assertSame('https://hive.pizza/', $data['publisher']['url']);
+		$this->assertSame(PublicSeo::entitySameAs(), $data['publisher']['sameAs']);
+		$this->assertArrayNotHasKey('aggregateRating', $data);
+		$this->assertArrayNotHasKey('reviewCount', $data);
+		$this->assertStringNotContainsString('\\/', $json);
 	}
 }

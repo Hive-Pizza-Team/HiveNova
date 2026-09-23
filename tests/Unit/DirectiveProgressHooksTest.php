@@ -10,11 +10,13 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../Support/CommanderDatabaseStub.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 require_once __DIR__ . '/../Support/RestoreGameGlobals.php';
+require_once __DIR__ . '/../Support/DirectiveUnlockFixtures.php';
 
 class DirectiveProgressHooksTest extends TestCase
 {
 	use SwapDatabaseInstance;
 	use RestoreGameGlobals;
+	use DirectiveUnlockFixtures;
 
 	private CommanderDatabaseStub $db;
 
@@ -54,7 +56,7 @@ class DirectiveProgressHooksTest extends TestCase
 
 	public function testUnknownDefenseIdFallsBackWhenOver400(): void
 	{
-		DirectiveService::selectDirective(8, 1, DirectiveCatalog::DEFENSIVE);
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::DEFENSIVE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		DirectiveHooks::afterBuildCompleted([499 => 1], ['id' => 8, 'universe' => 1]);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
 		$this->assertSame(1, $progress['defense_complete']);
@@ -62,17 +64,28 @@ class DirectiveProgressHooksTest extends TestCase
 
 	public function testDefenseCompletionIncrementsDefensive(): void
 	{
-		DirectiveService::selectDirective(8, 1, DirectiveCatalog::DEFENSIVE);
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::DEFENSIVE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		DirectiveHooks::afterBuildCompleted([401 => 3], ['id' => 8, 'universe' => 1]);
 		DirectiveHooks::afterHoldSuccess(8, 1);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
 		$this->assertSame(3, $progress['defense_complete']);
-		$this->assertSame(1, $progress['hold_success']);
+		$this->assertArrayNotHasKey('hold_success', $progress);
+		$this->assertNull($this->db->userDirectives[0]['completed_at']);
+	}
+
+	public function testSixDefensesCompleteDefensiveWithoutHold(): void
+	{
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::DEFENSIVE, [], ['hangar' => 1]);
+		DirectiveHooks::afterBuildCompleted([401 => 6], ['id' => 8, 'universe' => 1]);
+		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
+		$this->assertSame(6, $progress['defense_complete']);
+		$this->assertArrayNotHasKey('hold_success', $progress);
+		$this->assertNotEmpty($this->db->userDirectives[0]['completed_at']);
 	}
 
 	public function testExpeditionCompletionHookIncrementsExploration(): void
 	{
-		DirectiveService::selectDirective(8, 1, DirectiveCatalog::EXPLORATION);
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::EXPLORATION, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		DirectiveHooks::afterExpeditionDispatch(8, 1);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
 		$this->assertSame(1, $progress['expedition_dispatch']);
@@ -98,7 +111,7 @@ class DirectiveProgressHooksTest extends TestCase
 
 	public function testTransportAboveThresholdIncrementsTrade(): void
 	{
-		DirectiveService::selectDirective(8, 1, DirectiveCatalog::TRADE);
+		DirectiveService::selectDirective(8, 1, DirectiveCatalog::TRADE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		DirectiveHooks::afterTransport(8, 8000, 2000, 0, 1);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
 		$this->assertSame(1, $progress['trade_run']);

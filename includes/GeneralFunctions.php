@@ -375,14 +375,17 @@ function parse_ship_amount($value): int
 
 function pretty_number_plain($n, $dec = 0)
 {
+	$n = \HiveNova\Core\NumericCast::toFiniteFloat($n);
 	return number_format(floatToString($n, $dec), $dec, ',', '.');
 }
 
 function pretty_number($n, $dec = 0)
 {
+	$n = \HiveNova\Core\NumericCast::toFiniteFloat($n);
 	$formatted = number_format(floatToString($n, $dec), $dec, ',', '.');
 	if (isset($GLOBALS['userNumberFormat']) && $GLOBALS['userNumberFormat'] !== 'eu') {
-		$raw = $dec > 0 ? floatToString($n, $dec) : intval($n);
+		// floatToString, not intval: tiny/huge STATPOINTS floats must not fatal or wrap.
+		$raw = floatToString($n, $dec);
 		return "<span class='ln' data-n='" . $raw . "'>" . $formatted . '</span>';
 	}
 	return $formatted;
@@ -666,6 +669,10 @@ function exceptionHandler($exception)
 		exit;
 	}
 
+	if (\HiveNova\Core\RegisterUsernameCheckAccess::abortClosedIfAjaxConfigFault($exception)) {
+		return;
+	}
+
 	if (!headers_sent()) {
 		if (!class_exists('\HiveNova\Core\HTTP', false)) {
 			
@@ -798,7 +805,26 @@ function exceptionHandler($exception)
 		file_put_contents('includes/error.log', $errorText, FILE_APPEND);
 	}
 
-	/* Debug via Support Ticket */
+	// PHP diagnostics stay in error.log. Do not open player Support tickets for
+	// warnings/notices or admin-panel faults (see PhpErrorTicketPolicy).
+	$mode = defined('MODE') ? (string) MODE : '';
+	if (!\HiveNova\Core\PhpErrorTicketPolicy::shouldOpenSupportTicket((int) $errno, $mode)) {
+		return;
+	}
+
+	$fingerprint = \HiveNova\Core\PhpErrorTicketPolicy::fingerprint(
+		(int) $errno,
+		(string) $exception->getFile(),
+		(int) $exception->getLine(),
+		(string) $exception->getMessage()
+	);
+	$cacheDir = defined('CACHE_PATH') ? CACHE_PATH : (ROOT_PATH . 'cache/');
+	$cacheFile = rtrim((string) $cacheDir, '/') . '/php-error-tickets.json';
+	$now = defined('TIMESTAMP') ? (int) TIMESTAMP : time();
+	if (!\HiveNova\Core\PhpErrorTicketPolicy::claimFingerprint($fingerprint, $now, $cacheFile)) {
+		return;
+	}
+
 	global $USER;
 	if (isset($USER) && isset($USER['username']) && isset($USER['id'])) {
 		$ErrSource = $USER['id'];
@@ -807,7 +833,7 @@ function exceptionHandler($exception)
 		$ErrSource = 1;
 		$ErrName = 'System';
 	}
-	
+
 	try {
 		$ticketObj	= new \HiveNova\Core\SupportTickets;
 		$ticketID	= $ticketObj->createTicket($ErrSource, '1', $errorType[$errno]);

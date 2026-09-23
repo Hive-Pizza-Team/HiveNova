@@ -6,6 +6,7 @@ use HiveNova\Core\BattleShareComposer;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
+use HiveNova\Mission\CombatReportChrome;
 
 /**
  *  2Moons 
@@ -51,6 +52,21 @@ class ShowRaportPage extends AbstractGamePage
 		}
 
 		return implode(' & ', $names);
+	}
+
+	/**
+	 * Full game chrome (left + top nav) for logged-in commanders; popup/report-only for guests.
+	 *
+	 * @param mixed $user
+	 */
+	private function applyCombatReportChrome(mixed $user): bool
+	{
+		$showMenus = CombatReportChrome::showGameMenus(is_array($user) ? $user : []);
+		if (!$showMenus) {
+			$this->setWindow('popup');
+		}
+
+		return $showMenus;
 	}
 
 	/**
@@ -187,7 +203,7 @@ class ShowRaportPage extends AbstractGamePage
 		global $LNG, $USER;
 		
 		$LNG->includeData(array('FLEET', 'TECH'));
-		$this->setWindow('popup');
+		$showMenus = $this->applyCombatReportChrome($USER);
 
 		$db = Database::get();
 
@@ -238,7 +254,7 @@ class ShowRaportPage extends AbstractGamePage
 			'Raport'	=> $combatReport,
 			'Info'		=> array($reportData["attacker"], $reportData["defender"]),
 			'pageTitle'	=> $LNG['lm_topkb'],
-			'hideSidebarMenu' => true,
+			'hideSidebarMenu' => !$showMenus,
 		) + $this->battleShareAssignVars(
 			$combatReport,
 			$RID,
@@ -256,8 +272,8 @@ class ShowRaportPage extends AbstractGamePage
 	{
 		global $LNG, $USER;
 		
-		$LNG->includeData(array('FLEET', 'TECH'));		
-		$this->setWindow('popup');
+		$LNG->includeData(array('FLEET', 'TECH'));
+		$showMenus = $this->applyCombatReportChrome($USER);
 
 		$db = Database::get();
 
@@ -304,7 +320,7 @@ class ShowRaportPage extends AbstractGamePage
 		$this->assign(array(
 			'Raport'	=> $combatReport,
 			'pageTitle'	=> $LNG['sys_mess_attack_report'],
-			'hideSidebarMenu' => true,
+			'hideSidebarMenu' => !$showMenus,
 		) + $this->battleShareAssignVars(
 			$combatReport,
 			$RID,

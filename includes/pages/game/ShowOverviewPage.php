@@ -86,7 +86,48 @@ class ShowOverviewPage extends AbstractGamePage
 		$fleetTableObj = new FlyingFleetsTable;
 		$fleetTableObj->setUser($USER['id']);
 		$fleetTableObj->setPlanet($PLANET['id']);
+		if ((($_COOKIE['hn_compact'] ?? '') === '1')) {
+			$fleetTableObj->setCompactOmitTooltips(true);
+		}
 		return $fleetTableObj->renderTable();
+	}
+
+	/**
+	 * Session-cached universe activity counts (15s), same pattern as attack-alert cache.
+	 *
+	 * @return array{0: int|string, 1: int|string}
+	 */
+	private function universeActivityCounts(int $universe): array
+	{
+		$session = Session::load();
+		$cachedAt = isset($session->overviewActivityAt) ? (int) $session->overviewActivityAt : 0;
+		if (
+			$cachedAt > 0
+			&& (TIMESTAMP - $cachedAt) < 15
+			&& isset($session->overviewUsersOnline, $session->overviewFleetsOnline)
+			&& (int) ($session->overviewActivityUni ?? 0) === $universe
+		) {
+			return [$session->overviewUsersOnline, $session->overviewFleetsOnline];
+		}
+
+		$usersOnline = Database::get()->selectSingle(
+			'SELECT COUNT(*)
+			FROM %%USERS%% WHERE universe = :universe AND onlinetime >= UNIX_TIMESTAMP(NOW() - INTERVAL 15 MINUTE)',
+			array(':universe' => $universe)
+		)['COUNT(*)'];
+
+		$fleetsOnline = Database::get()->selectSingle(
+			'SELECT COUNT(*)
+			FROM %%FLEETS%% WHERE fleet_universe = :universe',
+			array(':universe' => $universe)
+		)['COUNT(*)'];
+
+		$session->overviewUsersOnline = $usersOnline;
+		$session->overviewFleetsOnline = $fleetsOnline;
+		$session->overviewActivityAt = TIMESTAMP;
+		$session->overviewActivityUni = $universe;
+
+		return [$usersOnline, $fleetsOnline];
 	}
 
 	private function buildPlanetVizData($moonRow = null)
@@ -257,26 +298,17 @@ class ShowOverviewPage extends AbstractGamePage
 			$AdminsOnline[$AdminRow['id']]	= $AdminRow['username'];
 		}
 
-        $sql = "SELECT userName FROM %%CHAT_ON%% WHERE dateTime > DATE_SUB(NOW(), interval 2 MINUTE) AND channel = 0";
-        $chatUsers = $db->select($sql);
-
-        foreach ($chatUsers as $chatRow) {
-			$chatOnline[]	= $chatRow['userName'];
-		}
-
 		$Messages		= $USER['messages'];
-		
-		// Fehler: Wenn Spieler gelöscht werden, werden sie nicht mehr in der Tabelle angezeigt.
-		$sql = "SELECT u.id, u.username, s.total_points FROM %%USERS%% as u
-		LEFT JOIN %%STATPOINTS%% as s ON s.id_owner = u.id AND s.stat_type = '1' WHERE ref_id = :userID;";
-        $RefLinksRAW = $db->select($sql, array(
-            ':userID'   => $USER['id']
-        ));
-
 		$config	= Config::get();
 
+		// Referral list is only rendered when ref_active; skip the JOIN otherwise.
         if($config->ref_active)
 		{
+			$sql = "SELECT u.id, u.username, s.total_points FROM %%USERS%% as u
+			LEFT JOIN %%STATPOINTS%% as s ON s.id_owner = u.id AND s.stat_type = '1' WHERE ref_id = :userID;";
+			$RefLinksRAW = $db->select($sql, array(
+				':userID'   => $USER['id']
+			));
 			foreach ($RefLinksRAW as $RefRow) {
 				$RefLinks[$RefRow['id']]	= array(
 					'username'	=> $RefRow['username'],
@@ -302,25 +334,21 @@ class ShowOverviewPage extends AbstractGamePage
 		}
 		
 		$universe = Universe::current();
-
-		$usersOnline = Database::get()->selectSingle(
-			'SELECT COUNT(*)
-			FROM %%USERS%% WHERE universe = :universe AND onlinetime >= UNIX_TIMESTAMP(NOW() - INTERVAL 15 MINUTE)',
-			array(':universe' => $universe)
-		)['COUNT(*)'];
-
-		$fleetsOnline = Database::get()->selectSingle(
-			'SELECT COUNT(*)
-			FROM %%FLEETS%% WHERE fleet_universe = :universe',
-			array(':universe' => $universe)
-		)['COUNT(*)'];
+		[$usersOnline, $fleetsOnline] = $this->universeActivityCounts((int) $universe);
 
 		$commanderBriefing = null;
 		$commanderEnabled = defined('MODULE_COMMANDER') && isModuleAvailable(MODULE_COMMANDER);
 		if ($commanderEnabled) {
 			$this->tplObj->loadscript('commander-briefing.js');
-			$commanderBriefing = DirectiveService::getBriefingData((int) $USER['id'], (int) Universe::current());
+			$commanderBriefing = DirectiveService::getBriefingData(
+				(int) $USER['id'],
+				(int) Universe::current(),
+				$USER,
+				$PLANET
+			);
 		}
+
+		$this->tplObj->loadscript('overview.js');
 
 		$seasonWipe = (new SeasonService(new DatabaseSeasonStore()))->overviewWipeCountdown($config);
 		if (!empty($seasonWipe['show'])) {
@@ -358,7 +386,7 @@ class ShowOverviewPage extends AbstractGamePage
 			'ref_active'				=> $config->ref_active,
 			'ref_minpoints'				=> $config->ref_minpoints,
 			'RefLinks'					=> $RefLinks,
-			'chatOnline'				=> $chatOnline,
+			'chatOnline'				=> [],
 			'servertime'				=> _date("M D d H:i:s", TIMESTAMP, $USER['timezone']),
 			'path'						=> HTTP_PATH,
 			'planetVizJson'				=> json_encode(

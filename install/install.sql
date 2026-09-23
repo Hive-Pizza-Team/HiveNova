@@ -182,7 +182,7 @@ CREATE TABLE `%PREFIX%config` (
   `noobprotection` int(11) NOT NULL DEFAULT '1',
   `noobprotectiontime` int(11) NOT NULL DEFAULT '5000',
   `noobprotectionmulti` int(11) NOT NULL DEFAULT '5',
-  `forum_url` varchar(128) NOT NULL DEFAULT 'https://discord.gg/BWqmGbtuDn',
+  `forum_url` varchar(128) NOT NULL DEFAULT 'https://discord.gg/bP6ksCeEUk',
   `adm_attack` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `debug` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `lang` varchar(2) NOT NULL DEFAULT '',
@@ -909,7 +909,8 @@ CREATE TABLE `%PREFIX%topkb` (
   `result` varchar(1) NOT NULL,
   `time` int(11) NOT NULL,
   `universe` tinyint(3) unsigned NOT NULL,
-  KEY `time` (`universe`,`rid`,`time`)
+  KEY `time` (`universe`,`rid`,`time`),
+  KEY `universe_units` (`universe`,`units`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `%PREFIX%universe_events` (
@@ -1200,7 +1201,9 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'hive_inactive_memo', 1, '0', '4', '*', '*', '*', 'HiveNova\\Cronjob\\InactiveHiveMemoCronjob', 0, NULL),
 (NULL, 'hive_social_memo', 1, '*/5', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SocialHiveMemoCronjob', 0, NULL),
 (NULL, 'directive_period', 1, '0', '*', '*', '*', '*', 'HiveNova\\Cronjob\\DirectivePeriodCronjob', 0, NULL),
-(NULL, 'season', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SeasonCronjob', 0, NULL);
+(NULL, 'season', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SeasonCronjob', 0, NULL),
+(NULL, 'building_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\BuildingCompletePushCronjob', 0, NULL),
+(NULL, 'research_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\ResearchCompletePushCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);
@@ -1655,6 +1658,28 @@ CREATE TABLE `%PREFIX%bot_detection_state` (
   `last_digest_hash` char(64) NOT NULL DEFAULT '',
   `updated_at` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`universe`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%push_building_notified` (
+  `planet_id` int(10) unsigned NOT NULL,
+  `element_id` smallint(5) unsigned NOT NULL,
+  `level` smallint(5) unsigned NOT NULL,
+  `build_end` int(10) unsigned NOT NULL,
+  `notified_at` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`planet_id`, `element_id`, `level`, `build_end`),
+  KEY `build_end` (`build_end`),
+  KEY `notified_at` (`notified_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%push_research_notified` (
+  `user_id` int(10) unsigned NOT NULL,
+  `element_id` smallint(5) unsigned NOT NULL,
+  `level` smallint(5) unsigned NOT NULL,
+  `tech_end` int(10) unsigned NOT NULL,
+  `notified_at` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`user_id`, `element_id`, `level`, `tech_end`),
+  KEY `tech_end` (`tech_end`),
+  KEY `notified_at` (`notified_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%achievements` (

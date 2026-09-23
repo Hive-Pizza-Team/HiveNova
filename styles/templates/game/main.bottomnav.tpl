@@ -9,6 +9,12 @@
 		<span>{$LNG.lm_buildings}</span>
 	</a>
 	{/if}
+	{if $smarty.const.MODULE_TECHTREE|isModuleAvailable}
+	<a href="game.php?page=techtree" class="{if $smarty.get.page|default:'' == 'techtree'}active{/if}">
+		<i class="fas fa-sitemap" aria-hidden="true"></i>
+		<span>{$LNG.lm_technology}</span>
+	</a>
+	{/if}
 	{if $smarty.const.MODULE_TRADER|isModuleAvailable}
 	<a href="game.php?page=fleetTable" class="{if $smarty.get.page|default:'' == 'fleetTable' || $smarty.get.page|default:'' == 'fleetStep1' || $smarty.get.page|default:'' == 'fleetStep2' || $smarty.get.page|default:'' == 'fleetStep3'}active{/if}">
 		<i class="fas fa-rocket" aria-hidden="true"></i>

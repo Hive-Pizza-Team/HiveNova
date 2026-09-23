@@ -6,11 +6,11 @@
 	
 	{/if}
 {if !empty($Queue)}
-<div id="buildlist" class="infos1">
+<div id="buildlist" class="infos1{if $Queue|count > 1} buildlist--collapsible{/if}">
 	
 		{foreach $Queue as $List}
 		{$ID = $List.element}
-		<div class="buildlist-item">
+		<div class="buildlist-item{if !$List@first} buildlist-item--queued{/if}">
 		<div class="buildb">
 				{$List@iteration}.:
 				{if !($isBusy.research && ($ID == 6 || $ID == 31)) && !($isBusy.shipyard && ($ID == 15 || $ID == 21)) && $RoomIsOk && $CanBuildElement && $BuildInfoList[$ID].buyable}
@@ -41,6 +41,9 @@
 				<span style="color:lime" data-time="{$List.endtime}" class="timer">{$List.display}</span>
 		</div>
 		</div>
+		{if $List@first && $Queue|count > 1}
+		<button type="button" class="buildlist-more-toggle" id="buildlistMoreToggle" aria-expanded="false" aria-controls="buildlist" data-label-more="{$LNG.bd_queue_more}" data-label-less="{$LNG.bd_queue_less}">{$LNG.bd_queue_more}</button>
+		{/if}
 	{/foreach}
 
 	{if $Queue|count > 1}
@@ -57,7 +60,7 @@
 
 {foreach $BuildInfoList as $ID => $Element}
 {if ($ID == 1 || $ID == 2 || $ID == 3 || $ID == 4 || $ID == 12 || $ID == 22 || $ID == 23 || $ID == 24)}
-<div class="infos">
+<div class="infos{if !$Element.techAccessible} element-locked{/if}" id="g{$ID}">
 <div class="buildn">
 <a href="#" onclick="return Dialog.info({$ID})">{$LNG.tech.{$ID}}</a>{if $Element.level > 0} ({$LNG.bd_lvl} {$Element.level}{if $Element.maxLevel != 255}/{$Element.maxLevel}{/if}){/if}
 	</div>
@@ -69,6 +72,7 @@
 						{foreach $Element.costOverflow as $ResType => $ResCount}
 						<a href='#' onclick="return Dialog.info({$ResType});">{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
+						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 						<br>
 {if !empty($Element.infoEnergy)}
 							{$LNG.bd_next_level}<br>
@@ -86,7 +90,9 @@
 					<a href='#' onclick="return Dialog.info({$RessID});">{$LNG.tech.{$RessID}}</a>: <b><span style="color:{if $Element.costOverflow[$RessID] == 0}lime{else}#ffd600{/if}">{$RessAmount|number}</span></b>
 					{/foreach}</span><br><br>
 					
-					{if $Element.maxLevel == $Element.levelToBuild}
+					{if !$Element.techAccessible}
+						&nbsp;
+					{elseif $Element.maxLevel == $Element.levelToBuild}
 						<span style="color:#ffd600">{$LNG.bd_maxlevel} || <button>End Game</button></span>
 					{elseif ($isBusy.research && ($ID == 6 || $ID == 31)) || ($isBusy.shipyard && ($ID == 15 || $ID == 21))}
 						<span style="color:#ffd600">{$LNG.bd_working}</span>
@@ -145,7 +151,7 @@
 						{/if}
 					</div>
 </div>
- {else} <div class="infoso">
+ {else} <div class="infoso{if !$Element.techAccessible} element-locked{/if}" id="g{$ID}">
 <div class="buildn">
 <a href="#" onclick="return Dialog.info({$ID})">{$LNG.tech.{$ID}}</a>{if $Element.level > 0} ({$LNG.bd_lvl} {$Element.level}{if $Element.maxLevel != 255}/{$Element.maxLevel}{/if}){/if}
 	</div>
@@ -157,6 +163,7 @@
 						{foreach $Element.costOverflow as $ResType => $ResCount}
 						<a href='#' onclick="return Dialog.info({$ResType});">{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
+						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 						<br>
 {if !empty($Element.infoEnergy)}
 							{$LNG.bd_next_level}<br>
@@ -174,7 +181,9 @@
 					<a href='#' onclick="return Dialog.info({$RessID});">{$LNG.tech.{$RessID}}</a>: <b><span style="color:{if $Element.costOverflow[$RessID] == 0}lime{else}#ffd600{/if}">{$RessAmount|number}</span></b>
 					{/foreach}</span><br><br>
 					
-					{if $Element.maxLevel == $Element.levelToBuild}
+					{if !$Element.techAccessible}
+						&nbsp;
+					{elseif $Element.maxLevel == $Element.levelToBuild}
 						<span style="color:#ffd600">{$LNG.bd_maxlevel}</span>
 					{elseif ($isBusy.research && ($ID == 6 || $ID == 31)) || ($isBusy.shipyard && ($ID == 15 || $ID == 21))}
 						<span style="color:#ffd600">{$LNG.bd_working}</span>

@@ -66,11 +66,11 @@ $fullPages = [
     'imperium', 'marketplace', 'trader', 'officier', 'techtree',
     'battlesimulator', 'battlehall', 'records', 'changelog', 'chat',
     'buddylist', 'banlist', 'board', 'questions', 'ticket', 'viz', 'eventFirehose',
+    'raport',
 ];
 
 $popupPages = [
     ['page' => 'messages', 'mode' => 'write'],
-    ['page' => 'raport', 'mode' => 'show'],
     ['page' => 'notes', 'mode' => 'show'],
     ['page' => 'information', 'mode' => 'show', 'id' => '1'],
     ['page' => 'playerCard', 'id' => '1'],
@@ -109,6 +109,18 @@ foreach ($popupPages as $query) {
         $fail++;
     }
 }
+
+$guestCookie = tempnam(sys_get_temp_dir(), 'bottom_nav_guest_');
+[$guestBody, $guestUrl] = curl_get("$baseUrl/game.php?page=raport&raport=smoke-guest", $guestCookie);
+if (!isIngameGameUrl($baseUrl, $guestUrl)) {
+    echo "[ SKIP ] logged-out raport left ingame → $guestUrl\n";
+} elseif (strpos($guestBody, 'id="bottom-nav"') !== false) {
+    echo "[ FAIL ] logged-out raport must not include bottom-nav\n";
+    $fail++;
+} else {
+    echo "[ OK   ] logged-out raport has no bottom-nav\n";
+}
+@unlink($guestCookie);
 
 if ($fail === 0) {
     echo "Bottom navigation present on full pages and absent on popup pages.\n";

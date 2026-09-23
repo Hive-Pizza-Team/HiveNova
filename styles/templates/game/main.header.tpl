@@ -11,6 +11,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 	<link rel="manifest" href="manifest.php?uni={$USER.universe}">
 	<meta name="theme-color" content="#1a1a2e">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<link rel="apple-touch-icon" href="styles/resource/images/pwa/apple-touch-icon.png">
 	<meta name="robots" content="noindex, nofollow">
 	{if !empty($goto)}
 	<meta http-equiv="refresh" content="{$gotoinsec};URL={$goto}">
@@ -21,6 +25,7 @@
 	{/if}
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/boilerplate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/main.css?v={$REV}">
+	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/prestige.css?v={$REV}">
 	{if $loadAchievementsCss|default:false}
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/achievements.css?v={$REV}">
 	{/if}
@@ -68,7 +73,7 @@
 	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}" defer></script>
 	{foreach item=scriptname from=$scripts}
-	<script type="text/javascript" src="./scripts/game/{$scriptname}.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/game/{$scriptname}.js?v={$REV}" defer></script>
 	{/foreach}
 	{block name="script"}{/block}
 	<script type="text/javascript">

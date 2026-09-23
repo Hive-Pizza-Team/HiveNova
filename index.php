@@ -29,11 +29,17 @@ use HiveNova\Core\Language;
 $page 		= \HiveNova\Core\HTTP::_GP('page', 'index');
 $mode 		= \HiveNova\Core\HTTP::_GP('mode', 'show');
 $page		= str_replace(array('_', '\\', '/', '.', "\0"), '', $page);
+$aliasTarget	= \HiveNova\Core\PublicSeo::loginAliasRedirectTarget($page, \HiveNova\Core\HTTP::_GP('lang', ''));
+if ($aliasTarget !== null) {
+	header('Location: '.$aliasTarget, true, 301);
+	exit;
+}
 $pageClass	= 'Show'.ucfirst($page).'Page';
 
 $fqcn		= 'HiveNova\\Page\\Login\\' . $pageClass;
 
 if(!class_exists($fqcn)) {
+	http_response_code(404);
 	ShowErrorPage::printError($LNG['page_doesnt_exist']);
 }
 
@@ -48,6 +54,7 @@ if(isset($pageProps['requireModule']) && $pageProps['requireModule'] !== 0 && !i
 
 if(!is_callable(array($pageObj, $mode))) {
 	if(!isset($pageProps['defaultController']) || !is_callable(array($pageObj, $pageProps['defaultController']))) {
+		http_response_code(404);
 		ShowErrorPage::printError($LNG['page_doesnt_exist']);
 	}
 	$mode	= $pageProps['defaultController'];

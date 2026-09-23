@@ -647,6 +647,87 @@ class ReferralCaptureServiceTest extends TestCase
 		}
 	}
 
+	public function testRegisterStatesKeepsReferrerWhenReferralsActive(): void
+	{
+		$savedUnis = $this->getUniverseList();
+		try {
+			$this->resetUniverseList([1]);
+			$states = $this->service([1 => true])->registerStates(
+				$this->dbWithReferrer(['id' => 68, 'username' => 'QuartzVellum51', 'universe' => 1]),
+				68
+			);
+
+			$this->assertSame([
+				1 => [
+					'id'     => 68,
+					'name'   => 'QuartzVellum51',
+					'status' => ReferralCaptureService::STATUS_OK,
+				],
+			], $states);
+		} finally {
+			$this->resetUniverseList($savedUnis);
+		}
+	}
+
+	public function testRegisterStatesExplainsInactiveUniverseWithoutCrediting(): void
+	{
+		$savedUnis = $this->getUniverseList();
+		try {
+			$this->resetUniverseList([1]);
+			$states = $this->service([1 => false])->registerStates(
+				$this->dbWithReferrer(['id' => 68, 'username' => 'QuartzVellum51', 'universe' => 1]),
+				68
+			);
+
+			$this->assertSame([
+				1 => [
+					'id'     => 0,
+					'name'   => 'QuartzVellum51',
+					'status' => ReferralCaptureService::STATUS_INACTIVE,
+				],
+			], $states);
+		} finally {
+			$this->resetUniverseList($savedUnis);
+		}
+	}
+
+	public function testRegisterStatesOmitsUnknownCode(): void
+	{
+		$savedUnis = $this->getUniverseList();
+		try {
+			$this->resetUniverseList([1]);
+			$this->assertSame(
+				[],
+				$this->service([1 => true])->registerStates($this->dbWithReferrer(null), 404)
+			);
+			$this->assertSame([], $this->service()->registerStates($this->dbWithReferrer(null), 0));
+		} finally {
+			$this->resetUniverseList($savedUnis);
+		}
+	}
+
+	public function testRegisterStatesAliasCanBeActiveOnOneUniverseAndInactiveOnAnother(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->method('selectSingle')->willReturnCallback(static function (string $sql, array $params): array {
+			unset($sql);
+			if ((int) ($params[':universe'] ?? 0) === 1) {
+				return ['id' => 1, 'username' => 'npc', 'universe' => 1];
+			}
+
+			return ['id' => 712, 'username' => 'SeasonNpc', 'universe' => 3];
+		});
+
+		$states = $this->service([1 => true, 3 => false])->registerStates($db, 1);
+
+		$this->assertSame(ReferralCaptureService::STATUS_OK, $states[1]['status']);
+		$this->assertSame(1, $states[1]['id']);
+		$this->assertSame('npc', $states[1]['name']);
+		$this->assertSame(ReferralCaptureService::STATUS_INACTIVE, $states[3]['status']);
+		$this->assertSame(0, $states[3]['id']);
+		$this->assertSame('SeasonNpc', $states[3]['name']);
+	}
+
 	public function testCaptureRejectsReferrerWithZeroUniverse(): void
 	{
 		$result = $this->service()->capture(

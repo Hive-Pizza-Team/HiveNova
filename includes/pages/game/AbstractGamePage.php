@@ -7,9 +7,11 @@ use HiveNova\Core\AssetRevision;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
+use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\TechTreeNudgeService;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
 use HiveNova\Core\Session;
@@ -82,22 +84,14 @@ abstract class AbstractGamePage
 
 	protected function getUser(): array
 	{
-		if ($this->user !== null) {
-			return $this->user;
-		}
-
 		global $USER;
-		return $USER;
+		return GamePageState::resolve($this->user, $USER ?? null);
 	}
 
 	protected function getPlanet(): array
 	{
-		if ($this->planet !== null) {
-			return $this->planet;
-		}
-
 		global $PLANET;
-		return $PLANET;
+		return GamePageState::resolve($this->planet, $PLANET ?? null);
 	}
 
 	protected function initTemplate() {
@@ -151,7 +145,7 @@ abstract class AbstractGamePage
 		$config			= Config::get();
 
 		$PlanetSelect	= array();
-		if($USER['bana']==1) { echo 'You received a Ban. If you think this is a mistake, write on our Discord: <a href="https://discord.gg/BWqmGbtuDn">https://discord.gg/BWqmGbtuDn</a>'; die(); }
+		if($USER['bana']==1) { echo 'You received a Ban. If you think this is a mistake, write on our Discord: <a href="' . DISCORD_URL . '">' . DISCORD_URL . '</a>'; die(); }
 		if(isset($USER['PLANETS'])) {
 			$USER['PLANETS']	= getPlanets($USER);
 		} else {
@@ -171,6 +165,7 @@ abstract class AbstractGamePage
 			$resourceTable[$resourceID]['name']			= $resource[$resourceID];
 			$resourceTable[$resourceID]['current']		= $PLANET[$resource[$resourceID]];
 			$resourceTable[$resourceID]['max']			= $PLANET[$resource[$resourceID].'_max'];
+			$resourceTable[$resourceID]['tickerLimit']	= $PLANET[$resource[$resourceID].'_max'] * $config->max_overflow;
 			if($USER['urlaubs_modus'] == 1 || $PLANET['planet_type'] != 1)
 			{
 				$resourceTable[$resourceID]['production']	= $PLANET[$resource[$resourceID].'_perhour'];
@@ -230,6 +225,7 @@ abstract class AbstractGamePage
 			'loadAchievementsCss'=> $loadAchievementsCss,
 			// Set by base.js at ≤699px; skip assets CSS hides on mobile (nav logo, etc.).
 			'compactViewport'	=> (($_COOKIE['hn_compact'] ?? '') === '1'),
+			'showTechTreeNudge'	=> TechTreeNudgeService::shouldShow($_COOKIE, HTTP::_GP('page', '')),
 		));
 
 		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {

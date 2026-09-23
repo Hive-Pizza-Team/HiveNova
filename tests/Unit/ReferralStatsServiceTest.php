@@ -171,6 +171,27 @@ class ReferralStatsServiceTest extends TestCase
 		$this->assertSame(1700000000, $rows[0]['register_time']);
 	}
 
+	public function testGetRecentRecruitsClampsHugeTotalPoints(): void
+	{
+		$db = $this->createStub(DatabaseInterface::class);
+		$db->method('select')->willReturn([
+			[
+				'recruit_id'        => 20,
+				'recruit_username'  => 'recruit1',
+				'register_time'     => 1700000000,
+				'ref_bonus'         => 1,
+				'referrer_id'       => 10,
+				'referrer_username' => 'alice',
+				'total_points'      => 1.9966429737744E+20,
+			],
+		]);
+
+		$rows = $this->service->getRecentRecruits($db, 1, 1000, 10, 0);
+
+		$this->assertSame(PHP_INT_MAX, $rows[0]['total_points']);
+		$this->assertSame(ReferralStatsService::STATUS_READY, $rows[0]['bonus_status']);
+	}
+
 	public function testCountRecruits(): void
 	{
 		$db = $this->createStub(DatabaseInterface::class);

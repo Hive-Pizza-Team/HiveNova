@@ -5,6 +5,7 @@ namespace HiveNova\Page\Game;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
+use HiveNova\Core\AcsJoinService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FleetTargetInfoService;
 
@@ -63,12 +64,13 @@ class ShowFleetStep2Page extends AbstractGamePage
 		$fleetArray    				= $_SESSION['fleet'][$token]['fleet'];
 
 		$db = Database::get();
-		$sql = "SELECT p.id, p.id_owner, p.der_metal, p.der_crystal, u.ally_id FROM %%PLANETS%% p LEFT JOIN %%USERS%% u ON u.id = p.id_owner WHERE p.universe = :universe AND p.galaxy = :targetGalaxy AND p.`system` = :targetSystem AND p.planet = :targetPlanet AND p.planet_type = '1';";
+		$sql = "SELECT p.id, p.id_owner, p.der_metal, p.der_crystal, u.ally_id FROM %%PLANETS%% p LEFT JOIN %%USERS%% u ON u.id = p.id_owner WHERE p.universe = :universe AND p.galaxy = :targetGalaxy AND p.`system` = :targetSystem AND p.planet = :targetPlanet AND p.planet_type = :targetType;";
 		$targetPlanetData = $db->selectSingle($sql, array(
 			':universe' => Universe::current(),
 			':targetGalaxy' => $targetGalaxy,
 			':targetSystem' => $targetSystem,
-			':targetPlanet' => $targetPlanet
+			':targetPlanet' => $targetPlanet,
+			':targetType' => ($targetType == 2 ? 1 : $targetType),
 		));
 		if (!is_array($targetPlanetData)) {
 			$targetPlanetData = array();
@@ -82,6 +84,18 @@ class ShowFleetStep2Page extends AbstractGamePage
 			)));
 		}
 
+		$targetPlanetId = ((int) $targetType === 2) ? 0 : (int) ($targetPlanetData['id'] ?? 0);
+		$postedGroup = (int) $fleetGroup;
+		$explicitGroup = 0;
+		if ($postedGroup > 0) {
+			$locked = AcsJoinService::lockJoin((int) $USER['id'], $postedGroup, $targetPlanetId);
+			$explicitGroup = $locked === null ? 0 : (int) $locked['id'];
+		}
+		$matchedGroup = ($explicitGroup === 0 && $targetPlanetId > 0)
+			? AcsJoinService::invitedGroupAtTarget((int) $USER['id'], $targetPlanetId)
+			: 0;
+		$fleetGroup = AcsJoinService::resolveGroup($explicitGroup, $matchedGroup);
+
 		$MisInfo		     		= array();
 		$MisInfo['galaxy']     		= $targetGalaxy;
 		$MisInfo['system'] 	  		= $targetSystem;
@@ -89,6 +103,7 @@ class ShowFleetStep2Page extends AbstractGamePage
 		$MisInfo['planettype'] 		= $targetType;
 		$MisInfo['IsAKS']			= $fleetGroup;
 		$MisInfo['Ship'] 			= $fleetArray;
+		$MisInfo['startPlanetId']	= (int) $PLANET['id'];
 
 		$MissionOutput	 			= FleetFunctions::GetFleetMissions($USER, $MisInfo, $targetPlanetData);
 
@@ -98,6 +113,7 @@ class ShowFleetStep2Page extends AbstractGamePage
 			&& (int) $USER['ally_id'] === (int) $targetPlanetData['ally_id']
 			&& (int) $targetPlanetData['id_owner'] !== (int) $USER['id'];
 
+		$targetMission = AcsJoinService::missionAfterGroup($explicitGroup, $fleetGroup, (int) $targetMission);
 		$targetMission = FleetFunctions::SuggestDefaultMission(
 			$targetMission,
 			$MissionOutput['MissionSelector'],
@@ -141,9 +157,6 @@ class ShowFleetStep2Page extends AbstractGamePage
 		$_SESSION['fleet'][$token]['fleetGroup']	= $fleetGroup;
 		$_SESSION['fleet'][$token]['fleetSpeed']	= $fleetSpeed;
 		$_SESSION['fleet'][$token]['ownPlanet']		= $PLANET['id'];
-
-		if(!empty($fleet_group))
-			$targetMission	= 2;
 
 		$fleetData	= array(
 			'fleetroom'			=> floatToString($_SESSION['fleet'][$token]['fleetRoom']),

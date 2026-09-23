@@ -1,35 +1,35 @@
 <ul id="rules">
 	<li>
-		<h1>1. Accounts and Play</h1>
+		<h2>1. Accounts and Play</h2>
 		<p>We cannot monitor how many accounts each player uses, and so it will be permitted by all players to play with as many game accounts as they find entertaining.  Human time and attention are the real limits, not "accounts".  
 <br /></p>
 <br /><p>We support a fair and fun "spirit of the game".  Therefore, any and all automation deleveloped (ie "botting") should be disclosed to the team so that we can open up similar tools for all players.
 
 </p>
 
-		<h1>2. Don't Push "Up"</h1>
+		<h2>2. Don't Push "Up"</h2>
 		<p>In the spirit of fair and fun play, we encourage all forms of team work, especially outward and downwards in points, and this includes in-game resources.  We will attempt to make game conditions to support this type of teamwork - and avoid game conditions that support snowball strategies.  The top player's points will determine the limits of pushing, and it should generally be encouraged that players with less points than the top player do anything they find fun to "catch up".  
 
 <br />We cannot monitor or evaluate outside transactions of tangible or intangible nature, so players are permitted to gift, trade, bargain or buy in-game assets out of game.
 </p>
 	</li>
 	<li>
-		<h1>3. Bashing</h1>
+		<h2>3. Bashing</h2>
 		<p>It is not allowed to attack any given planet or moon owned by a player over 6 times in a single 24 hours period.
 Bashing is only allowed when your Alliance is at war with another Alliance. The war must be announced in the forum and both leaders must agree to the terms.
 The bashing rule only applies for active users and excludes misile attacks and espionage missions.</p>
 	</li>
 	<li>
-		<h1>4. Bug Exploiting</h1>
+		<h2>4. Bug Exploiting</h2>
 		<p>Using a bug for anyones profit intentionally or not reporting a bug intentionally is strictly forbidden.</p>
 	</li>
 	<li>
-		<h1>5. Forbidden content</h1>
+		<h2>5. Forbidden content</h2>
 		<p>Implying that you are going to locate and harm another player, is forbidden.
 <br />Also spam, mass sending messages, and advertisements of foreign games/products arent allowed.</p>
 	</li>
 	<li>
-		<h1>6. Wars</h1>
+		<h2>6. Wars</h2>
 		<p>After the Leaders of the alliances both agree to the war, it is officially on. And will continue until one of the alliances cancels it. To officially cancel the war they need to cancel the war pact from in-game, and announce it in the thread they started initially.
 While the war is on, the bashing rule between the alliances involved does not count. Meaning any members belonging to the alliances in said war can be attack an infinite amount of times with out punishment.
 If either alliance gives up and cancels the war, the bashing rule will take effect again, and any members breaking it after the war has ended with be punished with a 1 day ban, More if the degree of attack is extremely high.

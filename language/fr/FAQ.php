@@ -104,4 +104,5 @@ $LNG['questions'][2][4]['body'] = <<< BODY
 <h3>Gestion de l'Alliance</h3>
 <p>Dans ce menu, vous pouvez modifier la description de l'Alliance, la supprimer, modifier les rangs ou grades, les pactes ou encore éditer les membres.<br> Le texte externe est une brève description de votre Alliance pour tous les membres qui visitent la page de l'Alliance, alors que le texte interne est un contenu exclusif pour les membres de l'Alliance, comme ennemis.<br>Dans les paramètres, vous pouvez également modifier l'image qui est affichée pour l'Alliance et vous pouvez aussi spécifier l'état du recrutement. Vous pouvez modifier le nom du rang de l'administrateur, qui est typiquement «leader» ou «fondateur»<br>"Dissoudre l'Alliance" est la fonction qui permet de supprimer l'Alliance définitivement.</p>
 BODY;
+$LNG['faq_intro'] = 'Start with energy and mines, then unlock the Shipyard from Technologies (Gigafactory level 2). Open a topic below, or go to Technologies any time you need building or ship requirements.';
 

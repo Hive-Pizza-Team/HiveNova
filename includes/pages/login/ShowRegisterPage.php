@@ -10,7 +10,12 @@ use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\PasswordPolicy;
+use HiveNova\Core\RegisterValidation;
+use HiveNova\Core\RegisterUsernameAvailability;
+use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\HiveUtil;
+use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\Mail;
 
 /**
@@ -48,7 +53,8 @@ class ShowRegisterPage extends AbstractLoginPage
 		$referralCapture	= new ReferralCaptureService();
 		$referralRequest	= ReferralCaptureService::requestBag();
 		$referralPublicCode	= ReferralCaptureService::publicCodeFrom($referralRequest, $_COOKIE);
-		$referralByUniverse	= $referralCapture->resolveByUniverse(
+		// Includes inactive universes so the form can explain a dropped invite.
+		$referralByUniverse	= $referralCapture->registerStates(
 			Database::get(),
 			$referralPublicCode
 		);
@@ -62,8 +68,14 @@ class ShowRegisterPage extends AbstractLoginPage
 		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
 			$config = Config::get($uniId);
-			$universeSelect[$uniId]	= $config->uni_name.($config->game_disable == 0 || $config->reg_closed == 1 ? $LNG['uni_closed'] : '');
-			$universeSeasonal[$uniId]	= isset($config->season_mode) && (int) $config->season_mode === 1 ? 1 : 0;
+			$closed = (int) $config->game_disable === 0 || (int) $config->reg_closed === 1;
+			$universeSelect[$uniId]	= LoginUniverseDefaults::selectOptionLabel(
+				(string) $config->uni_name,
+				LoginUniverseDefaults::isSeasonal($config),
+				$closed ? (string) $LNG['uni_closed'] : '',
+				(string) ($LNG['uni_option_keychain_pizza'] ?? 'Needs Hive Keychain + PIZZA entry')
+			);
+			$universeSeasonal[$uniId]	= LoginUniverseDefaults::isSeasonal($config) ? 1 : 0;
 		}
 		
 		if(!isset($externalAuth['account'], $externalAuth['method']))
@@ -98,18 +110,30 @@ class ShowRegisterPage extends AbstractLoginPage
 
 		$defaultEmailUniverse = $this->getDefaultEmailUniverseId(true);
 		$defaultHiveUniverse = $this->getDefaultHiveUniverseId(true);
-		$referralSeed = $referralByUniverse[$defaultEmailUniverse] ?? array('id' => 0, 'name' => '');
-		if ((int) ($referralSeed['id'] ?? 0) > 0 && ($referralSeed['name'] ?? '') !== '')
+		$referralSeed = $referralByUniverse[$defaultEmailUniverse] ?? array('id' => 0, 'name' => '', 'status' => '');
+		$referralInactive = ($referralSeed['status'] ?? '') === ReferralCaptureService::STATUS_INACTIVE;
+		$seedName = (string) ($referralSeed['name'] ?? '');
+		$seedId = (int) ($referralSeed['id'] ?? 0);
+		if (!$referralInactive && $seedId > 0 && $seedName !== '')
 		{
 			$referralData = array(
-				'id'   => (int) $referralSeed['id'],
-				'name' => (string) $referralSeed['name'],
+				'id'   => $seedId,
+				'name' => $seedName,
+			);
+		}
+		elseif ($referralInactive && $seedName !== '')
+		{
+			// Keep the name visible, but do not submit a referralID the server will drop.
+			$referralData = array(
+				'id'   => 0,
+				'name' => $seedName,
 			);
 		}
 		
 		$this->assign(array(
 			'referralData'		=> $referralData,
 			'referralByUniverse'	=> $referralByUniverse,
+			'referralInactive'	=> $referralInactive,
 			'accountName'		=> $accountName,
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,
@@ -117,14 +141,107 @@ class ShowRegisterPage extends AbstractLoginPage
 			'defaultUniverse'		=> $defaultEmailUniverse,
 			'defaultEmailUniverse'	=> $defaultEmailUniverse,
 			'defaultHiveUniverse'	=> $defaultHiveUniverse,
-			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], 6),
+			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], PasswordPolicy::minLength()),
 			'registerRulesDesc'			=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
 			'registerTabEmail'			=> $LNG['registerTabEmail'],
 			'registerTabHive'			=> $LNG['registerTabHive'],
 			'registerHiveKeychainInfo'	=> $LNG['registerHiveKeychainInfo'],
+			'registerUsernameCheckConfig'	=> array(
+				'url'         => 'index.php?page=register&mode=checkUsername&ajax=1',
+				'debounceMs'  => 300,
+				'i18n'        => array(
+					'available'   => $LNG['registerUsernameCheckAvailable'],
+					'suggestions' => $LNG['registerUsernameCheckSuggestions'],
+				),
+			),
 		));
 		
 		$this->display('page.register.default.tpl');
+	}
+
+	/**
+	 * Live username availability for the register form.
+	 * index.php?page=register&mode=checkUsername&ajax=1
+	 */
+	function checkUsername()
+	{
+		global $LNG;
+
+		$sessionId = session_id();
+		if ($sessionId === '' && isset($_COOKIE[session_name()])) {
+			$sessionId = (string) $_COOKIE[session_name()];
+		}
+
+		$userName = HTTP::_GP('username', '', UTF8_SUPPORT);
+		$hiveSignup = HTTP::_GP('hiveSignup', 0) === 1;
+
+		$gate = RegisterUsernameCheckAccess::runLookup(
+			static function (int $universeId) use ($userName, $hiveSignup) {
+				return RegisterUsernameAvailability::fromDefaults(Database::get())->check(
+					$userName,
+					$universeId,
+					$hiveSignup
+				);
+			},
+			Session::getClientIp(),
+			HTTP::_GP('uni', 0),
+			(int) Universe::current(),
+			$sessionId !== '' ? $sessionId : null
+		);
+		if (!$gate['allow']) {
+			if ($gate['httpStatus'] === RegisterUsernameCheckAccess::HTTP_TOO_MANY_REQUESTS) {
+				HTTP::sendHeader('HTTP/1.1 429 Too Many Requests');
+				HTTP::sendHeader('Retry-After', (string) $gate['retryAfter']);
+			}
+			$message = $gate['reason'] === RegisterUsernameCheckAccess::REASON_CLOSED
+				? ($LNG['registerErrorUniClosed'] ?? '')
+				: '';
+			$this->sendJSON(RegisterUsernameCheckAccess::denyPayload(
+				(string) $gate['reason'],
+				$message
+			));
+		}
+
+		$result = $gate['result'];
+
+		$message = '';
+		if ($result['available']) {
+			$message = !empty($result['hiveOwn'])
+				? $LNG['registerUsernameCheckHiveOwn']
+				: $LNG['registerUsernameCheckAvailable'];
+		} else {
+			$message = match ($result['reason']) {
+				RegisterUsernameAvailability::REASON_TAKEN_GAME => $LNG['registerUsernameCheckTakenGame'],
+				RegisterUsernameAvailability::REASON_TAKEN_HIVE => $LNG['registerUsernameCheckTakenHive'],
+				RegisterUsernameAvailability::REASON_MISSING_HIVE => $LNG['registerUsernameCheckMissingHive'],
+				default => $this->invalidUsernameMessage($userName, $hiveSignup),
+			};
+		}
+
+		$this->sendJSON(array(
+			'ok'          => true,
+			'available'   => $result['available'],
+			'reason'      => $result['reason'],
+			'suggestions' => $result['suggestions'],
+			'message'     => $message,
+			'hiveOwn'     => !empty($result['hiveOwn']),
+		));
+	}
+
+	private function invalidUsernameMessage(string $userName, bool $hiveSignup): string
+	{
+		global $LNG;
+
+		if ($hiveSignup) {
+			return $LNG['registerErrorHiveAccountInvalid'] ?? $LNG['registerErrorUsernameChar'];
+		}
+
+		$key = RegisterValidation::usernameErrorKey($userName);
+		if ($key !== null && isset($LNG[$key])) {
+			return $LNG[$key];
+		}
+
+		return $LNG['registerErrorUsernameChar'];
 	}
 	
 	function send() 
@@ -177,28 +294,22 @@ class ShowRegisterPage extends AbstractLoginPage
 			}
 		}
 		
-		if(empty($userName)) {
-			$errors[]	= $LNG['registerErrorUsernameEmpty'];
-		}
-		
-		if(!PlayerUtil::isNameValid($userName)) {
-			$errors[]	= $LNG['registerErrorUsernameChar'];
+		$usernameFormatKey = RegisterValidation::usernameErrorKey($userName);
+		if($usernameFormatKey !== null) {
+			$errors[]	= $LNG[$usernameFormatKey];
 		}
 
-		if(strlen((string) $password) < 6) {
-			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], 6);
+		if(!PasswordPolicy::isLongEnough((string) $password)) {
+			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], PasswordPolicy::minLength());
 		}
 			
 		if($password != $password2) {
 			$errors[]	= $LNG['registerErrorPasswordSame'];
 		}
-			
-		if(!PlayerUtil::isMailValid($mailAddress)) {
-			$errors[]	= $LNG['registerErrorMailInvalid'];
-		}
-			
-		if(empty($mailAddress)) {
-			$errors[]	= $LNG['registerErrorMailEmpty'];
+
+		$mailErrorKey = RegisterValidation::mailErrorKey($mailAddress);
+		if($mailErrorKey !== null) {
+			$errors[]	= $LNG[$mailErrorKey];
 		}
 		
 		if($mailAddress != $mailAddress2) {
@@ -365,6 +476,8 @@ class ShowRegisterPage extends AbstractLoginPage
 		$verifyPath	= 'index.php?page=vertify&i='.$validationID.'&k='.$validationKey.'&uni='.$universeId;
 		$verifyURL	= EmailRegistrationService::buildVerifyUrl($universeId, (int) $validationID, $validationKey);
 		
+		// user_valid = 0 skips the email click and still activates through vertify,
+		// which writes ref_id / ref_bonus when referralID was captured.
 		if($config->user_valid == 0 || !empty($externalAuthUID))
 		{
 			$this->redirectTo($verifyPath);

@@ -45,6 +45,7 @@ $pages = [
     'notes',
     'settings',
     'imperium',
+    'empire',
     'information',
     'marketplace',
     'trader',
@@ -70,7 +71,7 @@ $pass = 0;
 $fail = 0;
 $warn = 0;
 
-function curl_get(string $url, string $cookieFile): array {
+function curl_get(string $url, string $cookieFile, ?array &$meta = null): array {
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -82,6 +83,9 @@ function curl_get(string $url, string $cookieFile): array {
     $body   = curl_exec($ch);
     $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error  = curl_error($ch);
+    if ($meta !== null) {
+        $meta['content_type'] = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    }
     curl_close($ch);
     return [$status, $body ?: '', $error];
 }
@@ -158,22 +162,34 @@ echo "Base URL : $baseUrl\n";
 echo "User     : $username\n\n";
 
 $emptyCookies = tempnam(sys_get_temp_dir(), 'smoke_nocookie_');
-echo "[ API  ] unauthenticated bootstrap ... ";
-[$status, $body, $curlErr] = curl_get("$baseUrl/api.php?r=bootstrap", $emptyCookies);
-$apiUnauth = is_string($body) ? json_decode($body, true) : null;
-if ($curlErr) {
-    echo "FAIL curl error: $curlErr\n";
-    $fail++;
-} elseif ($status !== 401 || !is_array($apiUnauth) || ($apiUnauth['ok'] ?? true) !== false || ($apiUnauth['error'] ?? '') !== 'auth') {
-    echo "FAIL expected 401 JSON {ok:false,error:auth} (HTTP $status)\n";
-    $fail++;
-} elseif (!str_contains((string) $body, '"ok"') || str_starts_with(ltrim((string) $body), '<')) {
-    echo "FAIL body is not JSON\n";
-    $fail++;
-} else {
-    echo "OK\n";
-    $pass++;
+
+function assert_unauth_api_json(string $label, string $url, string $cookieFile): void {
+    global $pass, $fail;
+    echo "[ API  ] $label ... ";
+    $meta = [];
+    [$status, $body, $curlErr] = curl_get($url, $cookieFile, $meta);
+    $apiUnauth = is_string($body) ? json_decode($body, true) : null;
+    $ctype = strtolower((string) ($meta['content_type'] ?? ''));
+    if ($curlErr) {
+        echo "FAIL curl error: $curlErr\n";
+        $fail++;
+    } elseif ($status !== 401 || !is_array($apiUnauth) || ($apiUnauth['ok'] ?? true) !== false || ($apiUnauth['error'] ?? '') !== 'auth') {
+        echo "FAIL expected 401 JSON {ok:false,error:auth} (HTTP $status)\n";
+        $fail++;
+    } elseif (!str_contains($ctype, 'application/json')) {
+        echo "FAIL Content-Type is not application/json (got: " . ($meta['content_type'] ?? '') . ")\n";
+        $fail++;
+    } elseif (!str_contains((string) $body, '"ok"') || str_starts_with(ltrim((string) $body), '<')) {
+        echo "FAIL body is not JSON\n";
+        $fail++;
+    } else {
+        echo "OK\n";
+        $pass++;
+    }
 }
+
+assert_unauth_api_json('unauthenticated /api.php', "$baseUrl/api.php", $emptyCookies);
+assert_unauth_api_json('unauthenticated bootstrap', "$baseUrl/api.php?r=bootstrap", $emptyCookies);
 
 echo "[ REACT ] /react/ ... ";
 [$status, $body, $curlErr] = curl_get("$baseUrl/react/", $emptyCookies);
@@ -518,8 +534,19 @@ if ($status >= 400) {
     echo "[ FAIL ] $label unexpected Content-Type: $ctype\n";
     $fail++;
 } else {
-    echo "[ OK   ] $label HTTP $status (name: {$manifest['name']})\n";
-    $pass++;
+    $iconSizes = [];
+    foreach (($manifest['icons'] ?? []) as $icon) {
+        if (($icon['type'] ?? '') === 'image/png') {
+            $iconSizes[] = $icon['sizes'] ?? '';
+        }
+    }
+    if (!in_array('192x192', $iconSizes, true) || !in_array('512x512', $iconSizes, true)) {
+        echo "[ FAIL ] $label missing 192/512 PNG icons\n";
+        $fail++;
+    } else {
+        echo "[ OK   ] $label HTTP $status (name: {$manifest['name']})\n";
+        $pass++;
+    }
 }
 
 // CombatReport.php: must issue a redirect (not crash with class-not-found).

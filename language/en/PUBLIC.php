@@ -29,8 +29,8 @@ $LNG['siteTitleDisclamer']			= 'Contact Admin';
 $LNG['siteTitleLostPassword']		= 'Lost Password?';
 
 // Public SEO (EN is fallback for other languages)
-$LNG['metaTitleHome']				= '%s — Free Hive browser space strategy game';
-$LNG['metaDescriptionIndex']		= 'Free-to-play Hive space strategy browser game. Build fleets, ally up, fight for the galaxy — come get mooned!';
+$LNG['metaTitleHome']				= '%s — Free browser space strategy — Uni 1 frontier';
+$LNG['metaDescriptionIndex']		= 'Free browser space strategy — Uni 1 frontier. No download. Build fleets in the browser. Uni 1 does not wipe — room to explore, neighbors welcome.';
 $LNG['metaDescriptionRegister']		= 'Create your free %s account. Play in any browser — no download. Register with email or Hive Keychain.';
 $LNG['metaDescriptionRules']		= 'Official %s game rules: accounts, multi-accounting, bashing, bugs, and fair play.';
 $LNG['metaDescriptionScreens']		= 'Screenshots from %s — the free Hive space strategy browser game.';
@@ -103,7 +103,7 @@ $LNG['loginPassword']				= 'Password';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'With the login I accept the %s.';
 $LNG['loginWelcome']				= 'Welcome to %s';
-$LNG['loginServerDesc']				= '%s is a real-time space empire game on Hive — free to play in any browser.';
+$LNG['loginServerDesc']				= 'Build fleets in your browser. No download. Uni 1 does not wipe.';
 $LNG['loginHiveAccount']			= 'Hive Account';
 $LNG['loginKeychainButton']			= 'Sign in with Keychain';
 
@@ -145,7 +145,7 @@ $LNG['registerErrorMailEmpty']		= 'You must specify an E-Mail address!';
 $LNG['registerErrorMailInvalid']	= 'Invalid E-Mail address!';
 $LNG['registerErrorMailSame']		= 'Email addresses do not match!';
 $LNG['registerErrorMailExist']		= 'The E-Mail address is already registered!';
-$LNG['registerErrorRules']			= 'You have to accept the rules pleb!';
+$LNG['registerErrorRules']			= 'You must accept the rules.';
 $LNG['registerErrorCaptcha']		= 'The security code is incorrect!';
 $LNG['registerErrorHiveAccountInvalid']	= 'You must enter a valid Hive account!';
 $LNG['registerErrorHiveSignature']	= 'Hive Keychain signature is missing or invalid!';
@@ -160,7 +160,7 @@ $LNG['registerSendComplete']		= 'Thank you for the registration. You must check 
 
 $LNG['registerWelcomePMSenderName']	= 'Administrator';
 $LNG['registerWelcomePMSubject']	= 'Welcome';
-$LNG['registerWelcomePMText']		= 'Welcome to %s! First build a solar power plant, because energy is needed for the production of raw materials. To build one, left click in the menu on "buildings". Then build the 4th Building from the top. </br> When you have energy, you can begin to build mines. Go to buildings on the menu and build a ore extractor, followed by a silicon refiner. </br></br>In order to be able to build ships you need to have a shipyard. To see what is needed to unlock that building you can take a look at "Technologies" at the left menu.</br>If you have more questions you can look at a tutorial post, our discord or find an alliance. </br></br> The team wishes you much fun exploring the universe!';
+$LNG['registerWelcomePMText']		= 'Welcome to %s! First build a solar power plant, because energy is needed for the production of raw materials. To build one, left click in the menu on "buildings". Then build the 4th Building from the top. </br> When you have energy, you can begin to build mines. Go to buildings on the menu and build a ore extractor, followed by a silicon refiner. </br></br>In order to be able to build ships you need to have a shipyard. To see what is needed to unlock that building you can take a look at "Tech Tree" at the left menu.</br>If you have more questions you can look at a tutorial post, our discord or find an alliance. </br></br> The team wishes you much fun exploring the universe!';
 
 //Vertify
 
@@ -212,7 +212,7 @@ $LNG['disclamerLabelMail']			= 'Support Email:';
 $LNG['disclamerLabelNotice']		= 'More information';
 
 $LNG['registerErrorHiveRequiredSeason'] = 'This universe requires a linked Hive account.';
-$LNG['lobby_kicker'] = 'Free to play on Hive';
+$LNG['lobby_kicker'] = 'Free browser space strategy';
 $LNG['lobby_hero_alt'] = 'In-game view of Moon — build, fight, and expand across the galaxy';
 $LNG['lobby_hero_caption'] = 'Built on Hive';
 $LNG['lobby_feed_title_one'] = '%s universe is live';
@@ -229,4 +229,24 @@ $LNG['lobby_viz_legend_galaxy'] = 'Galaxy';
 $LNG['lobby_viz_legend_fleet'] = 'Fleet in flight';
 $LNG['lobby_viz_legend_attack'] = 'Source / destination';
 $LNG['lobby_viz_caption_title_uni'] = 'Live fleet map · %s';
+$LNG['disclamerLabelDiscord'] = 'Discord:';
+$LNG['disclamerNoticeFallback'] = 'Community support is available on Discord.';
+$LNG['screenAltGalaxy'] = 'Galaxy map';
+$LNG['screenAltFleet'] = 'Fleet dispatch';
+$LNG['screenAltBuild'] = 'Buildings and construction';
+$LNG['screenAltOverview'] = 'Planet overview';
+$LNG['screenAltImperium'] = 'Empire overview';
+$LNG['screenAltAlly'] = 'Alliance';
+$LNG['registerErrorUsernameLength'] = 'The username must be between 3 and 25 characters.';
+$LNG['registerUsernameCheckTakenGame'] = 'This username is already taken in this universe.';
+$LNG['registerUsernameCheckTakenHive'] = 'This name already exists as a Hive blockchain account. If it is yours, register with Keychain.';
+$LNG['registerUsernameCheckSuggestions'] = 'Available similar names:';
+$LNG['registerUsernameCheckHiveOwn'] = 'This Hive account exists. Continue with Keychain to register as this identity.';
+$LNG['registerUsernameCheckMissingHive'] = 'No Hive account exists with this name.';
+$LNG['registerUsernameCheckAvailable'] = 'Username is available.';
+$LNG['lobby_tagline'] = 'Build fleets in your browser. No download. Uni 1 does not wipe.';
+$LNG['lobby_cta_primary'] = 'Play free — Uni 1';
+$LNG['lobby_cta_season'] = 'Want a one-week season with Hive ranks? That\'s Uni 3 — needs Hive Keychain.';
+$LNG['uni_option_keychain_pizza'] = 'Needs Hive Keychain + PIZZA entry';
+$LNG['registerReferralInactive'] = 'Referral invites are turned off in this universe, so this signup will not credit a referrer.';
 $LNG['hn_try_new_ui'] = 'Try new UI';

@@ -163,6 +163,23 @@ class MessageRepositoryTest extends TestCase
         $this->assertSame([':universe' => 3], $clause['params']);
     }
 
+    public function testGetMessagesPagedCanOmitBodyColumn(): void
+    {
+        $this->stubDatabase();
+        MessageRepository::getMessagesPaged(9, 100, 0, 10, '', 3, false);
+        $this->assertStringNotContainsString('message_text', $this->lastSelect['sql']);
+    }
+
+    public function testGetMessageBodiesSelectsOnlyRequestedIds(): void
+    {
+        $this->stubDatabase();
+        MessageRepository::getMessageBodies(9, [3, 5, 5, 0], false, 3);
+        $this->assertStringContainsString('message_id IN (3,5)', $this->lastSelect['sql']);
+        $this->assertStringContainsString('message_owner = :userId', $this->lastSelect['sql']);
+        $this->assertSame(9, $this->lastSelect['params'][':userId']);
+        $this->assertSame(3, $this->lastSelect['params'][':universe']);
+    }
+
     public function testMarkAsReadScopesToUniverse(): void
     {
         $this->stubDatabase();

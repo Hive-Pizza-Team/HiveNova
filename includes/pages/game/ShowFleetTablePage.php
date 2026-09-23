@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\AcsJoinService;
 use HiveNova\Core\FleetFunctions;
 
 /**
@@ -161,7 +162,13 @@ class ShowFleetTablePage extends AbstractGamePage
 				// get target player language while sending ACS invite instead of attack owner.
 				$GetTargetLang			= getLanguage(null, $newUserID);
 				$inviteTitle			= $GetTargetLang['fl_acs_invitation_title'];
-				$inviteMessage 			= $GetTargetLang['fl_player'] . $USER['username'] . $GetTargetLang['fl_acs_invitation_message'];
+				$inviteMessage			= AcsJoinService::inviteMessage(
+					$GetTargetLang['fl_player'],
+					$USER['username'],
+					$GetTargetLang['fl_acs_invitation_message'],
+					$GetTargetLang['fl_acs_invitation_join'],
+					(int) $acsData['id']
+				);
 				PlayerUtil::sendMessage($newUserID, $USER['id'], $USER['username'], 1, $inviteTitle, $inviteMessage, TIMESTAMP);
 			}
 		}
@@ -218,8 +225,30 @@ class ShowFleetTablePage extends AbstractGamePage
 		$targetPlanet	= HTTP::_GP('planet', (int) $PLANET['planet']);
 		$targetType		= HTTP::_GP('planettype', (int) $PLANET['planet_type']);
 		$targetMission	= HTTP::_GP('target_mission', 0);
+		$joinFleetGroup	= 0;
+		$joinAcsId		= HTTP::_GP('joinAcs', 0);
+		if ($joinAcsId > 0) {
+			$joinTarget = AcsJoinService::targetForMember((int) $USER['id'], $joinAcsId);
+			if ($joinTarget === null) {
+				$this->printMessage($LNG['fl_acs_join_failed'], array(array(
+					'label'	=> $LNG['sys_back'],
+					'url'	=> 'game.php?page=fleetTable'
+				)));
+			}
+			$targetGalaxy	= $joinTarget['galaxy'];
+			$targetSystem	= $joinTarget['system'];
+			$targetPlanet	= $joinTarget['planet'];
+			$targetType		= $joinTarget['planet_type'];
+			$targetMission	= FLEET_MISSION_ACS;
+			$joinFleetGroup	= $joinTarget['id'];
+		}
 
-        $sql = "SELECT * FROM %%FLEETS%% WHERE fleet_owner = :userID AND fleet_mission <> 10 ORDER BY fleet_end_time ASC;";
+        $sql = "SELECT fleet_id, fleet_mission, fleet_mess, fleet_no_m_return,
+			fleet_start_galaxy, fleet_start_system, fleet_start_planet, fleet_start_time,
+			fleet_end_galaxy, fleet_end_system, fleet_end_planet, fleet_end_time,
+			fleet_resource_metal, fleet_resource_crystal, fleet_resource_deuterium, fleet_resource_darkmatter,
+			fleet_amount, fleet_array, fleet_meta
+			FROM %%FLEETS%% WHERE fleet_owner = :userID AND fleet_mission <> 10 ORDER BY fleet_end_time ASC;";
         $fleetResult = $db->select($sql, array(
             ':userID'   => $USER['id']
         ));
@@ -297,8 +326,10 @@ class ShowFleetTablePage extends AbstractGamePage
 			'targetPlanet'			=> $targetPlanet,
 			'targetType'			=> $targetType,
 			'targetMission'			=> $targetMission,
+			'joinFleetGroup'		=> $joinFleetGroup,
 			'acsData'				=> $acsData,
 			'isVacation'			=> IsVacationMode($USER),
+			'compactViewport'		=> (($_COOKIE['hn_compact'] ?? '') === '1'),
 			'bonusAttack'			=> $USER[$resource[109]] * 10 + $USER['factor']['Attack'] * 100,
 			'bonusDefensive'		=> $USER[$resource[110]] * 10 + $USER['factor']['Defensive'] * 100,
 			'bonusShield'			=> $USER[$resource[111]] * 10 + $USER['factor']['Shield'] * 100,

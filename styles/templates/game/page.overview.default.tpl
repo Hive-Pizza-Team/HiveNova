@@ -169,6 +169,18 @@ $("#tn3").hide();
 	</div>
 </div>
 <br>
+{if $ref_active}
+<div class="infos overview-recruits">
+	<div class="planeto">{$LNG.ov_reflink}</div>
+	<input id="referral" type="text" value="{$path}index.php?ref={$userid}" readonly="readonly" style="width:100%;max-width:450px;">
+	{foreach $RefLinks as $RefID => $RefLink}
+	<div><a href="#" onclick="return Dialog.Playercard({$RefID});">{$RefLink.username|escape}</a> — {$RefLink.points|default:0|shortly_number} / {$ref_minpoints|default:0|shortly_number}</div>
+	{foreachelse}
+	<div>{$LNG.ov_noreflink}</div>
+	{/foreach}
+</div>
+<br>
+{/if}
 <div class="infos">		
 {if $AllPlanets}<div class="planeto">{$LNG.lv_planet}</div>
 
@@ -208,5 +220,4 @@ $("#tn3").hide();
 
 {/block}
 {block name="script" append}
-    <script src="scripts/game/overview.js"></script>
 {/block}

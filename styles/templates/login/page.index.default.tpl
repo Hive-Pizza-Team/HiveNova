@@ -6,12 +6,13 @@
 			<p class="lobby-kicker">{$LNG.lobby_kicker}</p>
 			<h1 class="lobby-title">{$gameName|escape}</h1>
 			<p class="lobby-hero-hook">{$lobbyHook} <span class="lobby-hero-hook-em">{$lobbyHookEm}</span></p>
-			<p class="lobby-tagline">{$descText}</p>
+			<p class="lobby-tagline">{$LNG.lobby_tagline|default:$descText}</p>
 			<div class="lobby-cta-row">
-				<a class="lobby-cta lobby-cta--primary" href="{$registerUrl|escape}">{$LNG.buttonRegister}</a>
+				<a class="lobby-cta lobby-cta--primary" href="{$registerUrl|escape}">{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}</a>
 				<a class="lobby-cta lobby-cta--ghost" href="#lobby-login">{$LNG.loginHeader}</a>
 				<a class="lobby-cta lobby-cta--ghost" href="react/" onclick="document.cookie='hn_ui=react;path=/;max-age=31536000;samesite=lax'">{$LNG.hn_try_new_ui}</a>
 			</div>
+			<p class="lobby-cta-note">{$LNG.lobby_cta_season}</p>
 			<ul class="lobby-bullets" id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul>
 		</div>
 		<figure class="lobby-hero-visual" aria-label="{$LNG.lobby_viz_label|escape}">
@@ -69,7 +70,7 @@
 					<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 						<div class="login-form-fields">
 						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultEmailUniverse}</select>
-							<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}">
+							<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}" data-remember-username="email" autocomplete="username">
 							<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
 						{$verkeySafe = $verkey|default:[]}
 						{if $verkeySafe.capaktiv == 1}
@@ -93,7 +94,7 @@
 					<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
 						<div class="login-form-fields">
 							<select name="uni" id="loginHive-universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultHiveUniverse}</select>
-							<input name="username" id="loginHive-username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}">
+							<input name="username" id="loginHive-username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}" data-remember-username="hive" autocomplete="username">
 							<input name="password" id="loginHive-password" type="hidden">
 							<input name="hiveAccount" id="loginHive-hiveAccount" type="hidden">
 							<button type="button" onclick="HiveKeychainLogin()" class="button_keychain" title="{$LNG.loginKeychainButton}">
@@ -204,8 +205,8 @@
 			</div>
 
 			<div class="contentbox lobby-register-box">
-				<h2>{$LNG.buttonRegister}</h2>
-				<a href="{$registerUrl|escape}"><input value="{$LNG.buttonRegister}"></a>
+				<h2>{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}</h2>
+				<a href="{$registerUrl|escape}"><input value="{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}"></a>
 			</div>
 		</div>
 	</section>

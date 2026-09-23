@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AccountEditorSubmit;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
@@ -51,7 +52,7 @@ function ShowAccountEditorPage()
 					$before = $GLOBALS['DATABASE']->getFirstRow("SELECT `metal`,`crystal`,`deuterium`,`universe`  FROM ".PLANETS." WHERE `id` = '". $id ."';");
 				if (!empty($id_dark))
 					$before_dm = $GLOBALS['DATABASE']->getFirstRow("SELECT `darkmatter`, `universe` FROM ".USERS." WHERE `id` = '". $id_dark ."';");
-				if ($_POST['add'])
+				if (AccountEditorSubmit::isAdd($_POST))
 				{
 					if (!empty($id)) {
 						$SQL  = "UPDATE ".PLANETS." SET ";
@@ -74,7 +75,7 @@ function ShowAccountEditorPage()
 						$after_dm 	= array('darkmatter' => ($before_dm['darkmatter'] + $dark));
 					}
 				}
-				elseif ($_POST['delete'])
+				elseif (AccountEditorSubmit::isDelete($_POST))
 				{
 					if (!empty($id)) {
 						$SQL  = "UPDATE ".PLANETS." SET ";
@@ -102,7 +103,7 @@ function ShowAccountEditorPage()
 					$adminId = (int) Session::load()->userId;
 					$memoSuffix = ' uni='.(int) Universe::getEmulated().' admin='.$adminId;
 					$deltaDm = abs((float) $dark);
-					if ($_POST['add']) {
+					if (AccountEditorSubmit::isAdd($_POST)) {
 						Database::get()->insert(
 							'INSERT INTO %%DM_TRANSACTIONS%% SET
 								timestamp = NOW(),
@@ -115,7 +116,7 @@ function ShowAccountEditorPage()
 								':memo' => 'account_editor_add'.$memoSuffix,
 							]
 						);
-					} elseif ($_POST['delete']) {
+					} elseif (AccountEditorSubmit::isDelete($_POST)) {
 						Database::get()->insert(
 							'INSERT INTO %%DM_TRANSACTIONS%% SET
 								timestamp = NOW(),
@@ -149,9 +150,9 @@ function ShowAccountEditorPage()
 					$LOG->save();
 				}
 
-				if ($_POST['add']) {
+				if (AccountEditorSubmit::isAdd($_POST)) {
 					$template->message($LNG['ad_add_res_sucess'], '?page=accounteditor&edit=resources');
-				} else if ($_POST['delete']) {
+				} else if (AccountEditorSubmit::isDelete($_POST)) {
 					$template->message($LNG['ad_delete_res_sucess'], '?page=accounteditor&edit=resources');
 				}
 				exit;
@@ -170,7 +171,7 @@ function ShowAccountEditorPage()
 				{
 					$before[$ID] = $before1[$resource[$ID]];
 				}
-				if ($_POST['add'])
+				if (AccountEditorSubmit::isAdd($_POST))
 				{
 					$SQL  = "UPDATE ".PLANETS." SET ";
 					$SQL .= "`eco_hash` = '', ";
@@ -184,7 +185,7 @@ function ShowAccountEditorPage()
 					$SQL .= "`id` = '".HTTP::_GP('id', 0)."' AND `universe` = '".Universe::getEmulated()."';";
 					$GLOBALS['DATABASE']->query($SQL);
 				}
-				elseif ($_POST['delete'])
+				elseif (AccountEditorSubmit::isDelete($_POST))
 				{
 					$SQL  = "UPDATE ".PLANETS." SET ";
 					$SQL .= "`eco_hash` = '', ";
@@ -206,9 +207,9 @@ function ShowAccountEditorPage()
 				$LOG->new = $after;
 				$LOG->save();
 
-				if ($_POST['add']) {
+				if (AccountEditorSubmit::isAdd($_POST)) {
 					$template->message($LNG['ad_add_ships_sucess'], '?page=accounteditor&edit=ships');
-				} else if ($_POST['delete']) {
+				} else if (AccountEditorSubmit::isDelete($_POST)) {
 					$template->message($LNG['ad_delete_ships_sucess'], '?page=accounteditor&edit=ships');
 				}
 				exit;
@@ -239,7 +240,7 @@ function ShowAccountEditorPage()
 				{
 					$before[$ID] = $before1[$resource[$ID]];
 				}
-				if ($_POST['add'])
+				if (AccountEditorSubmit::isAdd($_POST))
 				{
 					$SQL  = "UPDATE ".PLANETS." SET ";
 					foreach($reslist['defense'] as $ID)
@@ -252,7 +253,7 @@ function ShowAccountEditorPage()
 					$SQL .= "`id` = '".HTTP::_GP('id', 0)."' AND `universe` = '".Universe::getEmulated()."';";
 					$GLOBALS['DATABASE']->query($SQL);
 				}
-				elseif ($_POST['delete'])
+				elseif (AccountEditorSubmit::isDelete($_POST))
 				{
 					$SQL  = "UPDATE ".PLANETS." SET ";
 					foreach($reslist['defense'] as $ID)
@@ -274,9 +275,9 @@ function ShowAccountEditorPage()
 				$LOG->new = $after;
 				$LOG->save();
 
-				if ($_POST['add']) {
+				if (AccountEditorSubmit::isAdd($_POST)) {
 					$template->message($LNG['ad_add_defenses_success'], '?page=accounteditor&edit=defenses');
-				} else if ($_POST['delete']) {
+				} else if (AccountEditorSubmit::isDelete($_POST)) {
 					$template->message($LNG['ad_delete_defenses_success'], '?page=accounteditor&edit=defenses');
 				}
 				exit;
@@ -311,7 +312,7 @@ function ShowAccountEditorPage()
 				{
 					$before[$ID] = $PlanetData[$resource[$ID]];
 				}
-				if ($_POST['add'])
+				if (AccountEditorSubmit::isAdd($_POST))
 				{
 					$Fields	= 0;
 					$SQL  = "UPDATE ".PLANETS." SET ";
@@ -329,7 +330,7 @@ function ShowAccountEditorPage()
 					$SQL .= "`id` = '".HTTP::_GP('id', 0)."' AND `universe` = '".Universe::getEmulated()."';";
 					$GLOBALS['DATABASE']->query($SQL);
 				}
-				elseif ($_POST['delete'])
+				elseif (AccountEditorSubmit::isDelete($_POST))
 				{
 					$Fields	= 0;
 					$QryUpdate	= array();
@@ -357,9 +358,9 @@ function ShowAccountEditorPage()
 				$LOG->new = $after;
 				$LOG->save();
 
-				if ($_POST['add']) {
+				if (AccountEditorSubmit::isAdd($_POST)) {
 					$template->message($LNG['ad_add_build_success'], '?page=accounteditor&edit=buildings');
-				} else if ($_POST['delete']) {
+				} else if (AccountEditorSubmit::isDelete($_POST)) {
 					$template->message($LNG['ad_delete_build_success'], '?page=accounteditor&edit=buildings');
 				}
 				exit;
@@ -389,7 +390,7 @@ function ShowAccountEditorPage()
 				{
 					$before[$ID] = $before1[$resource[$ID]];
 				}
-				if ($_POST['add'])
+				if (AccountEditorSubmit::isAdd($_POST))
 				{
 					$SQL  = "UPDATE ".USERS." SET ";
 					foreach($reslist['tech'] as $ID)
@@ -402,7 +403,7 @@ function ShowAccountEditorPage()
 					$SQL .= "`id` = '".HTTP::_GP('id', 0)."' AND `universe` = '".Universe::getEmulated()."';";
 					$GLOBALS['DATABASE']->query($SQL);
 				}
-				elseif ($_POST['delete'])
+				elseif (AccountEditorSubmit::isDelete($_POST))
 				{
 					$SQL  = "UPDATE ".USERS." SET ";
 					foreach($reslist['tech'] as $ID)
@@ -423,9 +424,9 @@ function ShowAccountEditorPage()
 				$LOG->new = $after;
 				$LOG->save();
 				
-				if ($_POST['add']) {
+				if (AccountEditorSubmit::isAdd($_POST)) {
 					$template->message($LNG['ad_add_tech_success'], '?page=accounteditor&edit=researchs');
-				} else if ($_POST['delete']) {
+				} else if (AccountEditorSubmit::isDelete($_POST)) {
 					$template->message($LNG['ad_delete_tech_success'], '?page=accounteditor&edit=researchs');
 				}
 				exit;
@@ -522,7 +523,7 @@ function ShowAccountEditorPage()
 				{
 					$before[$ID] = $before1[$resource[$ID]];
 				}
-				if ($_POST['add'])
+				if (AccountEditorSubmit::isAdd($_POST))
 				{
 					$SQL  = "UPDATE ".USERS." SET ";
 					foreach($reslist['officier'] as $ID)
@@ -535,7 +536,7 @@ function ShowAccountEditorPage()
 					$SQL .= "`id` = '".HTTP::_GP('id', 0)."' AND `universe` = '".Universe::getEmulated()."';";
 					$GLOBALS['DATABASE']->query($SQL);
 				}
-				elseif ($_POST['delete'])
+				elseif (AccountEditorSubmit::isDelete($_POST))
 				{
 					$SQL  = "UPDATE ".USERS." SET ";
 					foreach($reslist['officier'] as $ID)
@@ -556,9 +557,9 @@ function ShowAccountEditorPage()
 				$LOG->new = $after;
 				$LOG->save();
 				
-				if ($_POST['add']) {
+				if (AccountEditorSubmit::isAdd($_POST)) {
 					$template->message($LNG['ad_add_offi_success'], '?page=accounteditor&edit=officiers');
-				} else if ($_POST['delete']) {
+				} else if (AccountEditorSubmit::isDelete($_POST)) {
 					$template->message($LNG['ad_delete_offi_success'], '?page=accounteditor&edit=officiers');
 				}
 				exit;

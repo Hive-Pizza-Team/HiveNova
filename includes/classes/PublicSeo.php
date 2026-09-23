@@ -32,14 +32,20 @@ class PublicSeo
 		'register',
 	];
 
-	/** Pages listed in sitemap.xml (public marketing surface). */
+	/** Twitter card @site handle (public lobby head tags). */
+	public const TWITTER_SITE = '@PizzaOnHive';
+
+	/**
+	 * Pages listed in sitemap.xml (public marketing surface).
+	 * Omit empty/noindex URLs (news) until they have indexable content.
+	 * `disclamer` stays once Contact Admin has Discord fallback content.
+	 */
 	public const SITEMAP_PAGES = [
 		'index',
 		'register',
 		'rules',
 		'screens',
 		'battleHall',
-		'news',
 		'disclamer',
 		'banList',
 	];
@@ -55,6 +61,46 @@ class PublicSeo
 		}
 
 		return $page;
+	}
+
+	/**
+	 * Correct-spelling alias → 2Moons login page id.
+	 * Admin `?page=disclamer` is intentional legacy and is not redirected.
+	 */
+	public static function loginPageAlias(string $page): ?string
+	{
+		$page = trim($page);
+		if ($page === 'disclaimer') {
+			return 'disclamer';
+		}
+
+		return null;
+	}
+
+	/**
+	 * Relative Location for a known login-page alias, or null if $page is canonical.
+	 */
+	public static function loginAliasRedirectTarget(string $page, string $lang = '', string $defaultLang = 'en'): ?string
+	{
+		$canonical = self::loginPageAlias($page);
+		if ($canonical === null) {
+			return null;
+		}
+
+		return self::aliasRedirectLocation($canonical, $lang, $defaultLang);
+	}
+
+	/**
+	 * Relative Location target for a login-page alias (301).
+	 */
+	public static function aliasRedirectLocation(string $canonicalPage, string $lang = '', string $defaultLang = 'en'): string
+	{
+		$query = ['page' => $canonicalPage];
+		if ($lang !== '' && $lang !== $defaultLang) {
+			$query['lang'] = $lang;
+		}
+
+		return 'index.php?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 	}
 
 	/**
@@ -116,7 +162,7 @@ class PublicSeo
 		$key = self::PAGE_TITLE_KEYS[$page] ?? null;
 
 		if ($page === 'index' || $key === 'metaTitleHome') {
-			$template = isset($LNG['metaTitleHome']) ? (string) $LNG['metaTitleHome'] : '%s — Free browser space strategy game';
+			$template = isset($LNG['metaTitleHome']) ? (string) $LNG['metaTitleHome'] : '%s — Free browser space strategy — Uni 1 frontier';
 			return sprintf($template, $gameName);
 		}
 
@@ -188,5 +234,56 @@ class PublicSeo
 		}
 
 		return 'index, follow';
+	}
+
+	/**
+	 * Genuine public entity URLs for Google sameAs (lobby VideoGame / publisher).
+	 *
+	 * @return list<string>
+	 */
+	public static function entitySameAs(): array
+	{
+		$discord = defined('DISCORD_URL') && DISCORD_URL !== ''
+			? (string) DISCORD_URL
+			: 'https://discord.gg/bP6ksCeEUk';
+
+		return [
+			$discord,
+			'https://github.com/Hive-Pizza-Team/HiveNova',
+			'https://peakd.com/@hive.pizza',
+			'https://hive.pizza/',
+		];
+	}
+
+	/**
+	 * JSON-LD for the public lobby homepage (VideoGame + nested publisher).
+	 */
+	public static function indexJsonLd(string $gameName, string $canonicalUrl, string $description, string $imageUrl): string
+	{
+		$sameAs = self::entitySameAs();
+
+		return json_encode([
+			'@context'    => 'https://schema.org',
+			'@type'       => 'VideoGame',
+			'name'        => $gameName,
+			'url'         => $canonicalUrl,
+			'description' => $description,
+			'image'       => $imageUrl,
+			'genre'       => 'Strategy',
+			'applicationCategory' => 'Game',
+			'operatingSystem' => 'Any',
+			'sameAs'      => $sameAs,
+			'offers'      => [
+				'@type'         => 'Offer',
+				'price'         => '0',
+				'priceCurrency' => 'USD',
+			],
+			'publisher'   => [
+				'@type'  => 'Organization',
+				'name'   => 'Hive Pizza Team',
+				'url'    => 'https://hive.pizza/',
+				'sameAs' => $sameAs,
+			],
+		], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 	}
 }

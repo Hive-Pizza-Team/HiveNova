@@ -10,11 +10,13 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../Support/CommanderDatabaseStub.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 require_once __DIR__ . '/../Support/RestoreGameGlobals.php';
+require_once __DIR__ . '/../Support/DirectiveUnlockFixtures.php';
 
 class DirectiveProgressServiceTest extends TestCase
 {
 	use SwapDatabaseInstance;
 	use RestoreGameGlobals;
+	use DirectiveUnlockFixtures;
 
 	private CommanderDatabaseStub $db;
 
@@ -42,7 +44,7 @@ class DirectiveProgressServiceTest extends TestCase
 
 	public function testRecordIncrementsAndCompletes(): void
 	{
-		DirectiveService::selectDirective(3, 1, DirectiveCatalog::EXPLORATION);
+		DirectiveService::selectDirective(3, 1, DirectiveCatalog::EXPLORATION, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		for ($i = 0; $i < 5; $i++) {
 			DirectiveProgressService::record(3, 'expedition_dispatch', ['universe' => 1]);
 		}
@@ -54,7 +56,7 @@ class DirectiveProgressServiceTest extends TestCase
 
 	public function testTradeIgnoresSubThresholdCargo(): void
 	{
-		DirectiveService::selectDirective(3, 1, DirectiveCatalog::TRADE);
+		DirectiveService::selectDirective(3, 1, DirectiveCatalog::TRADE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		DirectiveProgressService::record(3, 'transport_delivery', ['universe' => 1, 'cargo' => 100]);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);
 		$this->assertSame(0, $progress['trade_run']);
@@ -81,9 +83,20 @@ class DirectiveProgressServiceTest extends TestCase
 		$this->assertFalse(DirectiveProgressService::targetsMet([], []));
 	}
 
+	public function testHoldEventDoesNotAdvanceDefensive(): void
+	{
+		DirectiveService::selectDirective(3, 1, DirectiveCatalog::DEFENSIVE, [], ['hangar' => 1]);
+		DirectiveProgressService::record(3, 'hold_success', ['universe' => 1]);
+		$row = $this->db->userDirectives[0];
+		$progress = json_decode((string) $row['progress_json'], true);
+		$this->assertSame(0, $progress['defense_complete']);
+		$this->assertArrayNotHasKey('hold_success', $progress);
+		$this->assertNull($row['completed_at']);
+	}
+
 	public function testRecordRecoversFromInvalidProgressJson(): void
 	{
-		DirectiveService::selectDirective(3, 1, DirectiveCatalog::EXPLORATION);
+		DirectiveService::selectDirective(3, 1, DirectiveCatalog::EXPLORATION, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
 		$this->db->userDirectives[0]['progress_json'] = 'not-json';
 		DirectiveProgressService::record(3, 'expedition_dispatch', ['universe' => 1]);
 		$progress = json_decode((string) $this->db->userDirectives[0]['progress_json'], true);

@@ -5,6 +5,7 @@ namespace HiveNova\Mission;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\FleetFunctions;
+use HiveNova\Core\FleetMissionAvailability;
 use HiveNova\Core\PlayerUtil;
 
 /**
@@ -84,7 +85,7 @@ class MissionCaseDestruction extends MissionCaseCombat
 				$deathstars	= 0.0;
 				foreach ($fleetAttack as $attackFleetDetail)
 				{
-					$deathstars	+= (float) ($attackFleetDetail['unit'][214] ?? 0);
+					$deathstars	+= FleetMissionAvailability::moonDestroyerCount($attackFleetDetail['unit'] ?? []);
 				}
 				$moonDestroyChance	= round((100 - sqrt((float) ($targetPlanet['diameter'] ?? 0))) * sqrt($deathstars), 1);
 

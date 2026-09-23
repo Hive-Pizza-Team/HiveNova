@@ -45,8 +45,13 @@
 			{/if}
 			<div class="rowForm">
 				<label for="reg-email-username">{$LNG.registerUsername}</label>
-				<input type="text" class="input" name="username" id="reg-email-username" maxlength="32">
+				<div class="reg-username-wrap">
+					<input type="text" class="input" name="username" id="reg-email-username" maxlength="25" spellcheck="false" autocomplete="username" data-username-check="email" data-remember-username="email" aria-describedby="reg-email-username-msg">
+					<span class="reg-username-mark" aria-hidden="true"></span>
+				</div>
 				{if !empty($error.username)}<span class="error errorUsername"></span>{/if}
+				<p class="reg-username-message" id="reg-email-username-msg" aria-live="polite"></p>
+				<ul class="reg-username-suggestions" id="reg-email-username-suggestions" hidden></ul>
 				<span class="inputDesc">{$LNG.registerUsernameDesc}</span>
 			</div>
 			<div class="rowForm">
@@ -86,6 +91,9 @@
 				<span class="text reg-referral-name">{$referralData.name|escape}</span>
 				<div class="clear"></div>
 			</div>
+			<div class="rowForm reg-referral-inactive"{if !$referralInactive} hidden{/if}>
+				<p>{$LNG.registerReferralInactive}</p>
+			</div>
 			{if $recaptchaEnable}
 			<div class="rowForm" id="captchaRow">
 				<div>
@@ -124,7 +132,11 @@
 			</div>
 			<div class="rowForm">
 				<label for="reg-hive-username">{$LNG.hiveAccount}</label>
-				<input type="text" id="reg-hive-username" name="username" maxlength="16">
+				<div class="reg-username-wrap">
+					<input type="text" id="reg-hive-username" name="username" maxlength="16" spellcheck="false" autocomplete="username" data-username-check="hive" data-remember-username="hive" aria-describedby="reg-hive-username-msg">
+					<span class="reg-username-mark" aria-hidden="true"></span>
+				</div>
+				<p class="reg-username-message" id="reg-hive-username-msg" aria-live="polite"></p>
 			</div>
 			<input type="hidden" name="password" id="password">
 			<input type="hidden" name="passwordReplay" id="passwordReplay">
@@ -139,6 +151,14 @@
 				<div class="clear"></div>
 			</div>
 			{/if}
+			<div class="rowForm reg-referral-row"{if empty($referralData.name)} hidden{/if}>
+				<label>{$LNG.registerReferral}</label>
+				<span class="text reg-referral-name">{$referralData.name|escape}</span>
+				<div class="clear"></div>
+			</div>
+			<div class="rowForm reg-referral-inactive"{if !$referralInactive} hidden{/if}>
+				<p>{$LNG.registerReferralInactive}</p>
+			</div>
 			<div class="rowForm">
 				<label for="reg-hive-rules">{$LNG.registerRules}</label>
 				<input type="checkbox" name="rules" id="reg-hive-rules" value="1">
@@ -157,5 +177,7 @@
 {if $recaptchaEnable}
 <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl={$lang}"></script>
 {/if}
+<script type="application/json" id="reg-username-check-config">{$registerUsernameCheckConfig|json}</script>
+<script type="text/javascript" src="scripts/login/register-username.js?v={$REV}"></script>
 <script type="text/javascript" src="scripts/login/register.js"></script>
 {/block}

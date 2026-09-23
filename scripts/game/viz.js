@@ -1,6 +1,6 @@
 /**
  * Fleet viz map — loads Three.js after first paint / idle.
- * Config: #viz-config JSON { threeSrc, maxGalaxy, maxSystem, maxPlanets, fleets }
+ * Config: #viz-config JSON { threeSrc, maxGalaxy, maxSystem, maxPlanets, fleetsUrl?, fleets }
  */
 (function () {
 	'use strict';
@@ -64,8 +64,8 @@
 		var maxGalaxy = cfg.maxGalaxy;
 		var maxSystem = cfg.maxSystem;
 		var maxPlanets = cfg.maxPlanets;
-		var systemStep = isMobile ? 3 : 1;
-		var planetStep = isMobile ? 3 : 1;
+		var systemStep = isMobile ? 4 : 2;
+		var planetStep = isMobile ? 4 : 2;
 		var pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.5);
 		var arcSegments = isMobile ? 16 : 48;
 		var glowSize = isMobile ? 32 : 64;
@@ -375,8 +375,26 @@
 		}
 
 		schedule(function () {
-			loadScript(cfg.threeSrc)
-				.then(function () {
+			var fleetsPromise = Promise.resolve(cfg.fleets || []);
+			if (cfg.fleetsUrl) {
+				fleetsPromise = fetch(cfg.fleetsUrl, {
+					credentials: 'same-origin',
+					headers: { 'Accept': 'application/json' },
+				}).then(function (res) {
+					if (!res.ok) {
+						return [];
+					}
+					return res.json();
+				}).then(function (data) {
+					return (data && data.fleets) ? data.fleets : [];
+				}).catch(function () {
+					return [];
+				});
+			}
+
+			Promise.all([loadScript(cfg.threeSrc), fleetsPromise])
+				.then(function (results) {
+					cfg.fleets = results[1] || [];
 					bootViz(cfg);
 				})
 				.catch(function () {

@@ -6,6 +6,8 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\BuildFunctions;
+use HiveNova\Core\ElementRequirementService;
+use HiveNova\Core\ShipyardPageModeService;
 
 /**
  *  2Moons 
@@ -156,11 +158,26 @@ class ShowShipyardPage extends AbstractGamePage
 	
 	public function show()
 	{
-		global $USER, $PLANET, $LNG, $resource, $reslist;
+		global $USER, $PLANET, $LNG, $resource, $reslist, $requirements;
 		
 		if ($PLANET[$resource[21]] == 0)
 		{
-			$this->printMessage($LNG['bd_shipyard_required']);
+			$requirementService = new ElementRequirementService();
+			$techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+			$rows = $requirementService->listForElement(
+				ElementRequirementService::SHIPYARD,
+				$USER,
+				$PLANET,
+				is_array($requirements) ? $requirements : array(),
+				$resource,
+				$techNames
+			);
+			$this->printMessage(
+				$LNG['bd_shipyard_required'] . $requirementService->unmetRequirementLinksHtml(
+					$rows,
+					(string) ($LNG['tt_lvl'] ?? 'Level ')
+				)
+			);
 		}
 		$Messages		= $USER['messages'];
 
@@ -235,9 +252,13 @@ class ShowShipyardPage extends AbstractGamePage
 		}
 		
 		
-		$mode		= HTTP::_GP('mode', 'fleet');
-		
-		if($mode == 'defense') {
+		$mode = ShipyardPageModeService::resolveMode(
+			HTTP::_GP('mode', ShipyardPageModeService::MODE_FLEET),
+			isModuleAvailable(MODULE_SHIPYARD_FLEET),
+			isModuleAvailable(MODULE_SHIPYARD_DEFENSIVE)
+		);
+
+		if (ShipyardPageModeService::isDefenseMode($mode)) {
 			$elementIDs	= array_merge($reslist['defense'], $reslist['missile']);
 		} else {
 			$elementIDs	= $reslist['fleet'];
@@ -251,16 +272,17 @@ class ShowShipyardPage extends AbstractGamePage
 		}
 		
 		$MaxMissiles	= BuildFunctions::getMaxConstructibleRockets($USER, $PLANET, $Missiles);
+		$requirementService = new ElementRequirementService();
+		$techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+		$requirementMap = is_array($requirements) ? $requirements : array();
 
 		foreach($elementIDs as $Element)
 		{
-			if(!BuildFunctions::isTechnologieAccessible($USER, $PLANET, $Element))
-				continue;
-			
+			$techAccessible		= BuildFunctions::isTechnologieAccessible($USER, $PLANET, $Element);
 			$costResources		= BuildFunctions::getElementPrice($USER, $PLANET, $Element);
 			$costOverflow		= BuildFunctions::getRestPrice($USER, $PLANET, $Element, $costResources);
 			$elementTime    	= BuildFunctions::getBuildingTime($USER, $PLANET, $Element, $costResources);
-			$buyable			= BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources);
+			$buyable			= $techAccessible && BuildFunctions::isElementBuyable($USER, $PLANET, $Element, $costResources);
 			$maxBuildable		= BuildFunctions::getMaxConstructibleElements($USER, $PLANET, $Element, $costResources);
 			$SolarEnergy		= round((($PLANET['temp_max']+160)/6)*Config::get()->energySpeed, 1);
 
@@ -279,6 +301,15 @@ class ShowShipyardPage extends AbstractGamePage
 				'buyable'			=> $buyable,
 				'maxBuildable'		=> floatToString($maxBuildable),
 				'AlreadyBuild'		=> $AlreadyBuild,
+				'techAccessible'	=> $techAccessible,
+				'requirements'		=> $requirementService->listForElement(
+					(int) $Element,
+					$USER,
+					$PLANET,
+					$requirementMap,
+					$resource,
+					$techNames
+				),
 			);
 		}
 		
@@ -288,11 +319,17 @@ class ShowShipyardPage extends AbstractGamePage
 			'BuildList'		=> $buildList,
 			'maxlength'		=> strlen((string) Config::get()->max_fleet_per_build),
 			'mode'			=> $mode,
+			'shipyardTabs'	=> ShipyardPageModeService::tabs(
+				$mode,
+				isModuleAvailable(MODULE_SHIPYARD_FLEET),
+				isModuleAvailable(MODULE_SHIPYARD_DEFENSIVE)
+			),
 			'messages'		=> ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)): false,
 			'SolarEnergy'		=> $SolarEnergy,
 		));
 
 		$this->tplObj->loadscript('page-filters.js');
+		$this->tplObj->loadscript('element-focus.js');
 		$this->display('page.shipyard.default.tpl');
 	}
 }

@@ -149,8 +149,8 @@ class ReferralStatsService
 
 		$out = [];
 		foreach ($rows as $row) {
-			$points = (int) $row['total_points'];
-			$refBonus = (int) $row['ref_bonus'];
+			$points = NumericCast::toInt($row['total_points']);
+			$refBonus = NumericCast::toInt($row['ref_bonus']);
 			$out[] = [
 				'recruit_id'         => (int) $row['recruit_id'],
 				'recruit_username'   => (string) $row['recruit_username'],

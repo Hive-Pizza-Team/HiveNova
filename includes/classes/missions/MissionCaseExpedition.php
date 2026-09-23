@@ -424,7 +424,7 @@ class MissionCaseExpedition extends MissionFunctions implements Mission
 <div class="raportMessage">
 <table>
 <tr>
-<td colspan="2"><a href="CombatReport.php?raport=%s" target="_blank"><span class="%s">%s %s (%s)</span></a></td>
+<td colspan="2"><a href="CombatReport.php?raport=%s"><span class="%s">%s %s (%s)</span></a></td>
 </tr>
 <tr>
 <td>%s</td><td><span class="%s">%s: %s</span>&nbsp;<span class="%s">%s: %s</span></td>
@@ -717,7 +717,9 @@ HTML;
 			$Message .= '<br><br>'.$logbook;
 
 		PlayerUtil::sendMessage($this->_fleet['fleet_owner'], 0, $LNG['sys_mess_tower'], 15,
-			$LNG['sys_expe_report'], $Message, $this->_fleet['fleet_end_stay'], NULL, 1, $this->_fleet['fleet_universe']);
+			ExpeditionMessageBuilder::reportSubject($LNG['sys_expe_report'], $LNG['sys_adress_planet'], $this->_fleet),
+			ExpeditionMessageBuilder::withDestination($Message, $this->_fleet, $LNG['sys_expe_destination']),
+			$this->_fleet['fleet_end_stay'], NULL, 1, $this->_fleet['fleet_universe']);
 
 		PushNotificationService::notifyExpeditionResult((int) $this->_fleet['fleet_owner'], $pendingChoice);
 
@@ -749,7 +751,8 @@ HTML;
 		);
 
 		PlayerUtil::sendMessage($this->_fleet['fleet_owner'], 0, $LNG['sys_mess_tower'], 4, $LNG['sys_mess_fleetback'],
-			$Message, $this->_fleet['fleet_end_time'], NULL, 1, $this->_fleet['fleet_universe']);
+			ExpeditionMessageBuilder::withDestination($Message, $this->_fleet, $LNG['sys_expe_destination']),
+			$this->_fleet['fleet_end_time'], NULL, 1, $this->_fleet['fleet_universe']);
 
 		$this->RestoreFleet();
 	}

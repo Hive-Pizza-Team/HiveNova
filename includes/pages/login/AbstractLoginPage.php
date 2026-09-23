@@ -72,7 +72,8 @@ abstract class AbstractLoginPage
 	}
 
 	/**
-	 * Email/password flows default to the newest open seasonal universe (Uni3).
+	 * Email/password flows default to Universe 1 when it is an open
+	 * non-seasonal universe, otherwise the newest non-seasonal open universe.
 	 */
 	protected function getDefaultEmailUniverseId($forRegistration = false)
 	{
@@ -207,22 +208,7 @@ abstract class AbstractLoginPage
 		$ogImageUrl			= $basePath.'styles/resource/images/login/HiveNova.png';
 		$jsonLd				= '';
 		if ($seoPage === 'index') {
-			$jsonLd = json_encode([
-				'@context'    => 'https://schema.org',
-				'@type'       => 'VideoGame',
-				'name'        => $gameName,
-				'url'         => $canonicalUrl,
-				'description' => $metaDescription,
-				'image'       => $ogImageUrl,
-				'genre'       => 'Strategy',
-				'applicationCategory' => 'Game',
-				'operatingSystem' => 'Any',
-				'offers'      => [
-					'@type'         => 'Offer',
-					'price'         => '0',
-					'priceCurrency' => 'USD',
-				],
-			], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
 		}
 		
 		$this->assign(array(
@@ -240,6 +226,7 @@ abstract class AbstractLoginPage
 			'ogImageUrl'		=> $ogImageUrl,
 			'ogImageWidth'		=> 1024,
 			'ogImageHeight'		=> 768,
+			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
 			'jsonLd'			=> $jsonLd,
 		));

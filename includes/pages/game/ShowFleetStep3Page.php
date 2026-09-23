@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
+use HiveNova\Core\AcsJoinService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FleetDispatchService;
 use HiveNova\Core\FleetTargetInfoService;
@@ -100,7 +101,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 			)));
 		}
 
-		if ($targetMission != 2) {
+		if ((int) $targetMission !== FLEET_MISSION_ACS) {
 			$fleetGroup = 0;
 		}
 
@@ -150,20 +151,6 @@ class ShowFleetStep3Page extends AbstractGamePage
 		$ACSTime = 0;
 		$db = Database::get();
 
-		if (!empty($fleetGroup)) {
-			$sql = "SELECT ankunft FROM %%USERS_ACS%% INNER JOIN %%AKS%% ON id = acsID
-			WHERE acsID = :acsID AND :maxFleets > (SELECT COUNT(*) FROM %%FLEETS%% WHERE fleet_group = :acsID);";
-			$ACSTime = $db->selectSingle($sql, array(
-				':acsID'     => $fleetGroup,
-				':maxFleets' => $config->max_fleets_per_acs,
-			), 'ankunft');
-
-			if (empty($ACSTime)) {
-				$fleetGroup    = 0;
-				$targetMission = 1;
-			}
-		}
-
 		$sql = "SELECT id, id_owner, der_metal, der_crystal, destruyed, ally_deposit FROM %%PLANETS%% WHERE universe = :universe AND galaxy = :targetGalaxy AND `system` = :targetSystem AND planet = :targetPlanet AND planet_type = :targetType;";
 		$targetPlanetData = $db->selectSingle($sql, array(
 			':universe'     => Universe::current(),
@@ -172,6 +159,22 @@ class ShowFleetStep3Page extends AbstractGamePage
 			':targetPlanet' => $targetPlanet,
 			':targetType'   => ($targetType == 2 ? 1 : $targetType),
 		)) ?: null;
+
+		if ((int) $targetMission === FLEET_MISSION_ACS) {
+			$acsTargetId = 0;
+			if ((int) $targetType !== 2 && is_array($targetPlanetData)) {
+				$acsTargetId = (int) ($targetPlanetData['id'] ?? 0);
+			}
+			$joined = AcsJoinService::lockJoin((int) $USER['id'], (int) $fleetGroup, $acsTargetId);
+			if ($joined === null) {
+				$this->printMessage($LNG['fl_acs_join_failed'], array(array(
+					'label' => $LNG['sys_back'],
+					'url'   => 'game.php?page=fleetStep1'
+				)));
+			}
+			$fleetGroup = (int) $joined['id'];
+			$ACSTime = (int) $joined['ankunft'];
+		}
 
 		// Determine target player data
 		if ($targetMission == 7 || $targetMission == 15 || $targetMission == 16 || $targetMission == 18) {
@@ -199,6 +202,7 @@ class ShowFleetStep3Page extends AbstractGamePage
 		$MisInfo['planettype'] = $targetType;
 		$MisInfo['IsAKS']    = $fleetGroup;
 		$MisInfo['Ship']     = $fleetArray;
+		$MisInfo['startPlanetId'] = (int) $PLANET['id'];
 
 		$availableMissions = FleetFunctions::GetFleetMissions($USER, $MisInfo, $targetPlanetData);
 

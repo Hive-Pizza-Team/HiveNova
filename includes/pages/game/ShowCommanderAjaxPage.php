@@ -26,7 +26,7 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 
 	public function status()
 	{
-		global $USER;
+		global $USER, $PLANET;
 
 		if (!isModuleAvailable(MODULE_COMMANDER)) {
 			$this->sendJSON([
@@ -36,7 +36,12 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 			return;
 		}
 
-		$briefing = DirectiveService::getBriefingData((int) $USER['id'], (int) Universe::current());
+		$briefing = DirectiveService::getBriefingData(
+			(int) $USER['id'],
+			(int) Universe::current(),
+			$USER,
+			$PLANET
+		);
 		$this->sendJSON([
 			'ok' => true,
 			'enabled' => true,
@@ -46,7 +51,7 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 
 	public function selectDirective()
 	{
-		global $USER, $LNG;
+		global $USER, $PLANET, $LNG;
 
 		if (!$this->guardMutation()) {
 			return;
@@ -54,7 +59,13 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 
 		$key = HTTP::_GP('directive_key', '');
 		try {
-			$row = DirectiveService::selectDirective((int) $USER['id'], (int) Universe::current(), $key);
+			$row = DirectiveService::selectDirective(
+				(int) $USER['id'],
+				(int) Universe::current(),
+				$key,
+				$USER,
+				$PLANET
+			);
 			$this->sendJSON([
 				'ok' => true,
 				'directive_key' => $row['directive_key'],
@@ -169,6 +180,7 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 		return match ($code) {
 			DirectiveService::ERROR_LOCKED => $LNG['cm_already_selected'] ?? 'Directive already selected',
 			DirectiveService::ERROR_UNKNOWN => $LNG['cm_unknown_directive'] ?? 'Unknown directive',
+			DirectiveService::ERROR_REQUIREMENTS => $LNG['cm_directive_requirements'] ?? 'Required ships or research not unlocked',
 			DirectiveService::ERROR_DISABLED => $LNG['cm_module_disabled'] ?? 'Commander module disabled',
 			DirectiveService::ERROR_CLAIMED => $LNG['cm_reward_claimed'] ?? 'Reward already claimed',
 			DirectiveService::ERROR_NOT_COMPLETE => $LNG['cm_not_complete'] ?? 'Directive is not complete',

@@ -93,6 +93,25 @@ class GalaxyRowsTest extends TestCase
         $this->assertTrue($data[6]['action']['esp']);
         $this->assertTrue($data[6]['action']['message']);
         $this->assertTrue($data[6]['action']['buddy']);
+        $this->assertFalse($data[6]['missions'][9]);
+    }
+
+    public function test_get_galaxy_data_offers_destroy_when_current_planet_has_black_moon(): void
+    {
+        $GLOBALS['resource'][SHIP_BLACK_MOON] = 'lune_noir';
+        $GLOBALS['PLANET']['lune_noir'] = 2;
+
+        $this->seedGalaxyRow([
+            'planet' => 6,
+            'id_owner' => 2,
+            'userid' => 2,
+            'username' => 'rival',
+            'buddy' => 0,
+        ]);
+
+        $data = $this->galaxyRows()->setGalaxy(1)->setSystem(5)->getGalaxyData();
+
+        $this->assertTrue($data[6]['missions'][9]);
     }
 
     public function test_get_galaxy_data_includes_salvage_on_occupied_slot(): void
@@ -484,7 +503,8 @@ class GalaxyRowsTest extends TestCase
     {
         $GLOBALS['resource'][42] = 'sensor_phalanx';
         $GLOBALS['resource'][117] = 'impulse_motor_tech';
-        $GLOBALS['resource'][214] = 'deathstar';
+        $GLOBALS['resource'][SHIP_DEATHSTAR] = 'deathstar';
+        $GLOBALS['resource'][SHIP_BLACK_MOON] = 'lune_noir';
         $GLOBALS['resource'][503] = 'interplanetary_missile';
         $GLOBALS['resource'][903] = 'deuterium';
 
@@ -508,6 +528,7 @@ class GalaxyRowsTest extends TestCase
             'sensor_phalanx' => 0,
             'deuterium' => 0,
             'deathstar' => 0,
+            'lune_noir' => 0,
             'interplanetary_missile' => 0,
         ];
 

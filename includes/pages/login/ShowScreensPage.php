@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Login;
 
 use DirectoryIterator;
+use HiveNova\Core\PublicScreensService;
 
 /**
  *  2Moons 
@@ -31,6 +32,8 @@ class ShowScreensPage extends AbstractLoginPage
 	
 	function show() 
 	{
+		global $LNG;
+
 		$screenshots	= array();
 		$directoryIterator = new DirectoryIterator('styles/resource/images/login/screens/');
         foreach ($directoryIterator as $fileInfo)
@@ -41,15 +44,17 @@ class ShowScreensPage extends AbstractLoginPage
 				continue;
             }			
 			
-			$thumbnail = 'styles/resource/images/login/screens/'.$fileInfo->getFilename();
-			if(file_exists('styles/resource/images/login/screens/thumbnails/'.$fileInfo->getFilename()))
+			$filename = $fileInfo->getFilename();
+			$thumbnail = 'styles/resource/images/login/screens/'.$filename;
+			if(file_exists('styles/resource/images/login/screens/thumbnails/'.$filename))
 			{
-				$thumbnail = 'styles/resource/images/login/screens/thumbnails/'.$fileInfo->getFilename();
+				$thumbnail = 'styles/resource/images/login/screens/thumbnails/'.$filename;
 			}
 			
 			$screenshots[]	= array(
-				'path' 		=> 'styles/resource/images/login/screens/'.$fileInfo->getFilename(),
+				'path' 		=> 'styles/resource/images/login/screens/'.$filename,
 				'thumbnail' => $thumbnail,
+				'alt'		=> PublicScreensService::altText($filename, $LNG),
 			);
 		}
 		

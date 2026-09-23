@@ -2,6 +2,11 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\ElementRequirementService;
+use HiveNova\Core\TechTreeGuideService;
+use HiveNova\Core\TechTreeNudgeService;
+use HiveNova\Core\TechTreeOrderService;
+
 /**
  *  2Moons 
  *   by Jan-Otto Kröpke 2009-2016
@@ -44,31 +49,60 @@ class ShowTechtreePage extends AbstractGamePage
         $names = array();
         $ext = array();
         $Messages = $USER['messages'];
+        $requirementService = new ElementRequirementService();
+        $techNames = is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array();
+        $requirementMap = is_array($requirements) ? $requirements : array();
 
         foreach ($elementIDs as $elementId) {
             if (!isset($resource[$elementId])) {
                 continue;
             }
 
-            $requirementsList = array();
-            if (isset($requirements[$elementId])) {
-                foreach ($requirements[$elementId] as $requireID => $RedCount) {
-                    $requirementsList[(string) $requireID] = array(
-                        'count' => $RedCount,
-                        'own'   => isset($PLANET[$resource[$requireID]]) ? $PLANET[$resource[$requireID]] : $USER[$resource[$requireID]],
-                    );
-                    $names[(string) $requireID] = $LNG['tech'][$requireID] ?? (string) $requireID;
-                }
-            }
+            $requirementsList = $requirementService->listForElement(
+                (int) $elementId,
+                $USER,
+                $PLANET,
+                $requirementMap,
+                $resource,
+                $techNames
+            );
 
             // Keep empty-req techs out of the payload — expand only shows requirement rows historically when requireList truthy.
             if ($requirementsList === array()) {
                 continue;
             }
 
+            foreach ($requirementsList as $row) {
+                $names[(string) $row['id']] = $row['name'];
+            }
+
             $items[(string) $elementId] = $requirementsList;
-            $names[(string) $elementId] = $LNG['tech'][$elementId] ?? (string) $elementId;
+            $names[(string) $elementId] = $techNames[$elementId] ?? (string) $elementId;
             $ext[(string) $elementId] = ($elementId >= 600 && $elementId <= 699) ? 'jpg' : 'gif';
+        }
+
+        $orderService = new TechTreeOrderService($requirementMap);
+        $order = $orderService->orderByCategory(array_map('intval', array_keys($items)));
+        $guide = new TechTreeGuideService($requirementMap);
+        $nextUnlocks = $guide->nextUnlocks(
+            is_array($USER) ? $USER : array(),
+            is_array($PLANET) ? $PLANET : array(),
+            is_array($resource) ? $resource : array(),
+            is_array($LNG['tech'] ?? null) ? $LNG['tech'] : array(),
+            array(
+                'need'  => $LNG['tt_need_level'] ?? 'Need %s %d (%d/%d)',
+                'ready' => $LNG['tt_ready'] ?? 'Requirements met — go start it.',
+                'sep'   => $LNG['tt_need_join'] ?? '; ',
+            ),
+            3
+        );
+
+        if (!TechTreeNudgeService::isSeen($_COOKIE)) {
+            setcookie(
+                TechTreeNudgeService::COOKIE,
+                TechTreeNudgeService::COOKIE_VALUE,
+                TechTreeNudgeService::cookieOptions(TIMESTAMP, TechTreeNudgeService::isSecureRequest())
+            );
         }
 
         $dpath = $THEME->getTheme();
@@ -79,11 +113,16 @@ class ShowTechtreePage extends AbstractGamePage
             'names' => $names,
             'ext' => $ext,
             'items' => $items,
+            'order' => $order,
+            'starterIds' => $guide->startHereIds(),
+            'defaultFilter' => 'start',
+            'seenCookie' => TechTreeNudgeService::COOKIE,
         ), JSON_UNESCAPED_UNICODE);
 
         $this->assign(array(
             'TechCategories' => array(0, 100, 200, 400, 500, 600),
             'techTreeJson'   => $techTreeJson,
+            'nextUnlocks'    => $nextUnlocks,
             'messages'       => ($Messages > 0) ? (($Messages == 1) ? $LNG['ov_have_new_message'] : sprintf($LNG['ov_have_new_messages'], $Messages)) : false,
         ));
 

@@ -8,6 +8,8 @@ use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\SocialHiveMemoService;
+use HiveNova\Core\MessageInboxService;
+use HiveNova\Mission\CombatReportMessageBuilder;
 use HiveNova\Repository\MessageRepository;
 
 /**
@@ -286,7 +288,7 @@ class ShowMessagesPage extends AbstractGamePage
     {
         global $LNG, $USER;
 
-        $MessCategory      	= HTTP::_GP('category', -1);
+        $MessCategory      	= (int) HTTP::_GP('category', -1);
         $page			= HTTP::_GP('side', 1);
         $filter			= HTTP::_GP('filter', '') === 'lost' ? 'lost' : '';
 
@@ -322,6 +324,8 @@ class ShowMessagesPage extends AbstractGamePage
         $Total[100]		= array_sum($Total);
         $Total[999]		= $MessOut;
 
+        $MessCategory	= MessageInboxService::resolveCategory($MessCategory, $UnRead);
+
         $CategoryList        = array();
 
         foreach($TitleColor as $CategoryID => $CategoryColor) {
@@ -337,7 +341,8 @@ class ShowMessagesPage extends AbstractGamePage
         $MessageCount  = MessageRepository::countMessages($USER['id'], $MessCategory, false, $filter, (int) $USER['universe']);
         $maxPage       = max(1, ceil($MessageCount / MESSAGES_PER_PAGE));
         $page          = max(1, min($page, $maxPage));
-        $MessageResult = MessageRepository::getMessagesPaged($USER['id'], $MessCategory, ($page - 1) * MESSAGES_PER_PAGE, MESSAGES_PER_PAGE, $filter, (int) $USER['universe']);
+        // Meta only on first paint — bodies arrive via mode=bodies after paint.
+        $MessageResult = MessageRepository::getMessagesPaged($USER['id'], $MessCategory, ($page - 1) * MESSAGES_PER_PAGE, MESSAGES_PER_PAGE, $filter, (int) $USER['universe'], false);
 
 		////
 
@@ -353,7 +358,7 @@ class ShowMessagesPage extends AbstractGamePage
                 'sender'	=> $MessageRow['message_sender'],
                 'type'		=> $MessageRow['message_type'],
                 'unread'	=> $MessageRow['message_unread'],
-                'text'		=> in_array($MessageRow['message_type'], [1, 50]) ? nl2br($MessageRow['message_text']) : $MessageRow['message_text'],
+                'text'		=> '',
             );
         }
 
@@ -375,8 +380,39 @@ class ShowMessagesPage extends AbstractGamePage
             'lostFilter'	=> $filter === 'lost',
             'canFilterLost'	=> in_array($MessCategory, [0, 3, 15], true),
             'filterQuery'	=> $filter === 'lost' ? '&filter=lost' : '',
+            'messageBodyIds'=> $MessagesID,
         ));
 
         $this->display('page.messages.default.tpl');
+    }
+
+    /**
+     * AJAX: hydrate message bodies after first paint.
+     */
+    function bodies()
+    {
+        global $USER, $LNG;
+
+        $rawIds = HTTP::_GP('ids', '');
+        if (is_array($rawIds)) {
+            $ids = $rawIds;
+        } else {
+            $ids = array_filter(array_map('intval', explode(',', (string) $rawIds)));
+        }
+        $ids = array_slice(array_values(array_unique($ids)), 0, MESSAGES_PER_PAGE);
+        $outbox = ((int) HTTP::_GP('outbox', 0)) === 1;
+
+        $rows = MessageRepository::getMessageBodies((int) $USER['id'], $ids, $outbox, (int) $USER['universe']);
+        $bodies = [];
+        foreach ($rows as $row) {
+            $type = (int) $row['message_type'];
+            $text = (string) $row['message_text'];
+            $bodies[(string) $row['message_id']] = CombatReportMessageBuilder::sameTabHtml(
+                in_array($type, [1, 50], true) ? nl2br($text) : $text
+            );
+        }
+
+        HTTP::sendHeader('Content-Type', 'application/json; charset=UTF-8');
+        $this->sendJSON(['bodies' => $bodies]);
     }
 }
