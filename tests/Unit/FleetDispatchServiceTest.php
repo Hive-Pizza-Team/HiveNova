@@ -540,6 +540,105 @@ class FleetDispatchServiceTest extends TestCase
         );
     }
 
+    public function testValidateMissionAllowsHoldAgainstNoobProtectedAlly(): void
+    {
+        $this->fake->achievement->statPoints = ['total_points' => 50000];
+
+        FleetDispatchService::validateMission(
+            ['id' => 10, 'id_owner' => 2, 'destruyed' => 0],
+            [
+                'id' => 2,
+                'authlevel' => 0,
+                'authattack' => 0,
+                'onlinetime' => TIMESTAMP,
+                'urlaubs_modus' => 0,
+                'banaday' => 0,
+                'total_points' => 1000,
+                'ally_id' => 7,
+            ],
+            FLEET_MISSION_ALLY_STATION,
+            [
+                'id' => 1,
+                'authlevel' => 0,
+                'ally_id' => 7,
+                'onlinetime' => TIMESTAMP,
+                'banaday' => 0,
+            ],
+            $this->baseFleetData([
+                'availableMissions' => [
+                    'MissionSelector' => [FLEET_MISSION_ALLY_STATION],
+                    'StayBlock' => [1 => 1],
+                ],
+                'stayTime' => 1,
+            ]),
+            Config::get()
+        );
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function testValidateMissionAllowsHoldAgainstStrongerAlly(): void
+    {
+        $this->fake->achievement->statPoints = ['total_points' => 1000];
+
+        FleetDispatchService::validateMission(
+            ['id' => 10, 'id_owner' => 2, 'destruyed' => 0],
+            [
+                'id' => 2,
+                'authlevel' => 0,
+                'authattack' => 0,
+                'onlinetime' => TIMESTAMP,
+                'urlaubs_modus' => 0,
+                'banaday' => 0,
+                'total_points' => 50000,
+                'ally_id' => 7,
+            ],
+            FLEET_MISSION_ALLY_STATION,
+            [
+                'id' => 1,
+                'authlevel' => 0,
+                'ally_id' => 7,
+                'onlinetime' => TIMESTAMP,
+                'banaday' => 0,
+            ],
+            $this->baseFleetData([
+                'availableMissions' => [
+                    'MissionSelector' => [FLEET_MISSION_ALLY_STATION],
+                    'StayBlock' => [1 => 1],
+                ],
+                'stayTime' => 1,
+            ]),
+            Config::get()
+        );
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function testValidateMissionStillBlocksSpyOnNoob(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Player is noob');
+
+        $this->fake->achievement->statPoints = ['total_points' => 50000];
+
+        FleetDispatchService::validateMission(
+            ['id' => 10, 'id_owner' => 2, 'destruyed' => 0],
+            [
+                'id' => 2,
+                'authlevel' => 0,
+                'authattack' => 0,
+                'onlinetime' => TIMESTAMP,
+                'urlaubs_modus' => 0,
+                'banaday' => 0,
+                'total_points' => 1000,
+            ],
+            FLEET_MISSION_SPY,
+            ['id' => 1, 'authlevel' => 0, 'ally_id' => 0],
+            $this->baseFleetData(['availableMissions' => ['MissionSelector' => [FLEET_MISSION_SPY]]]),
+            Config::get()
+        );
+    }
+
     public function testValidateMissionThrowsWhenTargetIsTooStrong(): void
     {
         $this->expectException(\RuntimeException::class);

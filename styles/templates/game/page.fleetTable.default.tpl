@@ -113,6 +113,7 @@
 <input type="hidden" name="planet" value="{$targetPlanet}">
 <input type="hidden" name="type" value="{$targetType}">
 <input type="hidden" name="target_mission" value="{$targetMission}">
+<input type="hidden" name="fleet_group" value="{$joinFleetGroup}">
 <table class="table519 fleet-select-table">
 	<tr>
 		<th colspan="3">{$LNG.fl_new_mission_title}</th>

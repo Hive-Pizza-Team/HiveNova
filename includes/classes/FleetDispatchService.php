@@ -246,8 +246,9 @@ class FleetDispatchService
             }
         }
 
-        // Admin attack protection & noob protection
-        if ($mission == FLEET_MISSION_ATTACK || $mission == FLEET_MISSION_ACS || $mission == FLEET_MISSION_ALLY_STATION || $mission == FLEET_MISSION_SPY || $mission == FLEET_MISSION_DESTROY) {
+        // Hostile missions only. Hold is supportive (alliance or buddy) and is not
+        // gated by noob protection or the admin-attack flag.
+        if ($mission == FLEET_MISSION_ATTACK || $mission == FLEET_MISSION_ACS || $mission == FLEET_MISSION_SPY || $mission == FLEET_MISSION_DESTROY) {
             if (Config::get()->adm_attack == 1 && $targetPlayerData['authattack'] > $USER['authlevel']) {
                 throw new \RuntimeException($LNG['fl_admin_attack']);
             }

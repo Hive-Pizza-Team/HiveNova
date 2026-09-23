@@ -1568,3 +1568,5 @@ $LNG['tt_nudge'] = 'See what unlocks what → Tech Tree.';
 $LNG['tt_nudge_open'] = 'Tech Tree';
 $LNG['tt_nudge_dismiss'] = 'Dismiss';
 $LNG['cm_directive_requirements'] = 'You have not unlocked the ships or research needed for that directive';
+$LNG['fl_acs_invitation_join'] = 'Join the attack';
+$LNG['fl_acs_join_failed'] = 'This ACS can no longer be joined.';

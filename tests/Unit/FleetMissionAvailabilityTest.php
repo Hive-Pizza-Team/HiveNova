@@ -81,6 +81,30 @@ class FleetMissionAvailabilityTest extends TestCase
 		]));
 	}
 
+	public function testAcsMissionOfferedWhenJoiningExistingGroup(): void
+	{
+		$missions = FleetMissionAvailability::forTarget(
+			$this->user(),
+			$this->missionInfo([202 => 10], 1, ['IsAKS' => 9]),
+			$this->enemyMoon(['planet_type' => 1])
+		);
+
+		$this->assertContains(FLEET_MISSION_ACS, $missions);
+		$this->assertContains(FLEET_MISSION_ATTACK, $missions);
+	}
+
+	public function testAcsMissionHiddenWithoutGroup(): void
+	{
+		$missions = FleetMissionAvailability::forTarget(
+			$this->user(),
+			$this->missionInfo([202 => 10], 1),
+			$this->enemyMoon(['planet_type' => 1])
+		);
+
+		$this->assertNotContains(FLEET_MISSION_ACS, $missions);
+		$this->assertContains(FLEET_MISSION_ALLY_STATION, $missions);
+	}
+
 	public function testDestroyMissionOfferedForBlackMoonOnEnemyMoon(): void
 	{
 		$missions = FleetMissionAvailability::forTarget(
