@@ -5,6 +5,7 @@ namespace HiveNova\Page\Game;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
+use HiveNova\Core\AcsJoinService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FleetTargetInfoService;
 
@@ -83,6 +84,18 @@ class ShowFleetStep2Page extends AbstractGamePage
 			)));
 		}
 
+		$targetPlanetId = ((int) $targetType === 2) ? 0 : (int) ($targetPlanetData['id'] ?? 0);
+		$postedGroup = (int) $fleetGroup;
+		$explicitGroup = 0;
+		if ($postedGroup > 0) {
+			$locked = AcsJoinService::lockJoin((int) $USER['id'], $postedGroup, $targetPlanetId);
+			$explicitGroup = $locked === null ? 0 : (int) $locked['id'];
+		}
+		$matchedGroup = ($explicitGroup === 0 && $targetPlanetId > 0)
+			? AcsJoinService::invitedGroupAtTarget((int) $USER['id'], $targetPlanetId)
+			: 0;
+		$fleetGroup = AcsJoinService::resolveGroup($explicitGroup, $matchedGroup);
+
 		$MisInfo		     		= array();
 		$MisInfo['galaxy']     		= $targetGalaxy;
 		$MisInfo['system'] 	  		= $targetSystem;
@@ -100,6 +113,7 @@ class ShowFleetStep2Page extends AbstractGamePage
 			&& (int) $USER['ally_id'] === (int) $targetPlanetData['ally_id']
 			&& (int) $targetPlanetData['id_owner'] !== (int) $USER['id'];
 
+		$targetMission = AcsJoinService::missionAfterGroup($explicitGroup, $fleetGroup, (int) $targetMission);
 		$targetMission = FleetFunctions::SuggestDefaultMission(
 			$targetMission,
 			$MissionOutput['MissionSelector'],
@@ -143,9 +157,6 @@ class ShowFleetStep2Page extends AbstractGamePage
 		$_SESSION['fleet'][$token]['fleetGroup']	= $fleetGroup;
 		$_SESSION['fleet'][$token]['fleetSpeed']	= $fleetSpeed;
 		$_SESSION['fleet'][$token]['ownPlanet']		= $PLANET['id'];
-
-		if(!empty($fleet_group))
-			$targetMission	= 2;
 
 		$fleetData	= array(
 			'fleetroom'			=> floatToString($_SESSION['fleet'][$token]['fleetRoom']),

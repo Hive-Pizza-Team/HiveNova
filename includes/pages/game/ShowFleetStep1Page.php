@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
+use HiveNova\Core\AcsJoinService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FrequentLocationService;
 use HiveNova\Core\FleetTargetInfoService;
@@ -49,6 +50,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 		$targetType 			= HTTP::_GP('type', (int) $PLANET['planet_type']);
 		
 		$mission				= HTTP::_GP('target_mission', 0);
+		$fleetGroup				= HTTP::_GP('fleet_group', 0);
 				
 		$Fleet		= array();
 		$FleetRoom	= 0;
@@ -101,13 +103,15 @@ class ShowFleetStep1Page extends AbstractGamePage
 		}
 		
 		$this->tplObj->loadscript('flotten.js');
-		$this->tplObj->execscript('updateVars();FleetTime();var relativeTime3 = Math.floor(Date.now() / 1000);window.setInterval(function() {if(relativeTime3 < Math.floor(Date.now() / 1000)) {FleetTime();relativeTime3++;}}, 1000);');
+		$resetAcsJs = ((int) $fleetGroup > 0) ? 'false' : 'true';
+		$this->tplObj->execscript('updateVars('.$resetAcsJs.');FleetTime();var relativeTime3 = Math.floor(Date.now() / 1000);window.setInterval(function() {if(relativeTime3 < Math.floor(Date.now() / 1000)) {FleetTime();relativeTime3++;}}, 1000);');
 
 
 
 		$this->assign(array(
 			'token'			=> $token,
 			'mission'		=> $mission,
+			'fleetGroup'	=> (int) $fleetGroup,
 			'shortcutList'	=> $shortcutList,
 			'shortcutMax'	=> $shortcutAmount,
 			'frequentLocationList'	=> $frequentLocationList,
@@ -192,6 +196,8 @@ class ShowFleetStep1Page extends AbstractGamePage
 		$userId = (int) $USER['id'];
 		$cached = $this->getCachedFleetStep1Lists($userId);
 		if ($cached !== null) {
+			// Invites arrive from another player; do not serve a stale ACS list.
+			$cached['ACSList'] = AcsJoinService::listForUser($userId);
 			return $cached;
 		}
 
@@ -199,7 +205,7 @@ class ShowFleetStep1Page extends AbstractGamePage
 		$lists = [
 			'shortcutList'         => $this->GetUserShotcut(),
 			'colonyList'           => $this->GetColonyList(),
-			'ACSList'              => $this->GetAvalibleACS(),
+			'ACSList'              => AcsJoinService::listForUser($userId),
 			'frequentLocationList' => FrequentLocationService::listForUser($userId, $ownBodies),
 		];
 
@@ -298,52 +304,6 @@ class ShowFleetStep1Page extends AbstractGamePage
 		}
 		
 		return $ShortcutList;
-	}
-	
-	private function GetAvalibleACS()
-	{
-		global $USER;
-
-		if (!isModuleAvailable(MODULE_MISSION_ACS)) {
-			return array();
-		}
-		
-		$db = Database::get();
-
-		if (!$db->selectSingle(
-			'SELECT 1 AS ok FROM %%USERS_ACS%% WHERE userID = :userID LIMIT 1;',
-			[':userID' => $USER['id']],
-			'ok'
-		)) {
-			return array();
-		}
-
-        $maxFleets = (int) Config::get()->max_fleets_per_acs;
-        $sql = "SELECT acs.id, acs.name, planet.galaxy, planet.system, planet.planet, planet.planet_type
-		FROM %%USERS_ACS%%
-		INNER JOIN %%AKS%% acs ON acsID = acs.id
-		INNER JOIN %%PLANETS%% planet ON planet.id = acs.target
-		LEFT JOIN (
-			SELECT f.fleet_group, COUNT(*) AS fleetCount
-			FROM %%FLEETS%% f
-			INNER JOIN %%USERS_ACS%% ua ON ua.acsID = f.fleet_group AND ua.userID = :userIDJoin
-			GROUP BY f.fleet_group
-		) fleetCounts ON fleetCounts.fleet_group = acs.id
-		WHERE userID = :userID
-		AND :maxFleets > COALESCE(fleetCounts.fleetCount, 0);";
-        $ACSResult = $db->select($sql, array(
-            ':userID'       => $USER['id'],
-            ':userIDJoin'   => $USER['id'],
-            ':maxFleets'    => $maxFleets,
-        ));
-
-        $ACSList	= array();
-		
-		foreach ($ACSResult as $ACSRow) {
-			$ACSList[]	= $ACSRow;
-		}
-		
-		return $ACSList;
 	}
 	
 	function targetInfo()
