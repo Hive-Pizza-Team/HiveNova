@@ -11,8 +11,15 @@ if (file_exists($hivePhp)) {
 
 class HiveUtil
 {
+	/** @var list<string>|null Test seam so RPC retries can target a closed port. */
+	static public $rpcNodesOverride = null;
+
 	static public function getRpcNodes(): array
 	{
+		if (self::$rpcNodesOverride !== null) {
+			return self::$rpcNodesOverride;
+		}
+
 		return \HIVE_RPC_NODES;
 	}
 
@@ -88,11 +95,12 @@ class HiveUtil
 	{
 		foreach (HiveUtil::rpcNodesToTry($maxNodes) as $rpcNode) {
 			try {
-				$hive = new Hive([
+				$result = self::callHive([
 					'rpcNodes' => [$rpcNode],
 					'timeout'  => \HIVE_RPC_TIMEOUT,
-				]);
-				$result = $hive->call($method, $params);
+				], static function (Hive $hive) use ($method, $params) {
+					return $hive->call($method, $params);
+				});
 			} catch (\Throwable $e) {
 				continue;
 			}
@@ -103,6 +111,27 @@ class HiveUtil
 		}
 
 		return null;
+	}
+
+	/**
+	 * Run $callback with a Hive client, then restore the previous error handler.
+	 *
+	 * Hive::__construct() pushes a handler that throws on every diagnostic, including
+	 * E_DEPRECATED. Leaving it in place turns vendor deprecations into uncaught errors.
+	 * The locked hive-php build installs that handler before the constructor can throw.
+	 *
+	 * @template T
+	 * @param callable(Hive): T $callback
+	 * @return T
+	 */
+	static public function callHive(array $options, callable $callback): mixed
+	{
+		try {
+			$hive = new Hive($options);
+			return $callback($hive);
+		} finally {
+			restore_error_handler();
+		}
 	}
 
 	static public function isAccountValid($hiveaccount): bool
@@ -130,14 +159,26 @@ class HiveUtil
 
 		$result = HiveUtil::rpcCall('condenser_api.get_accounts', '[["'.$hiveaccount.'"]]');
 
-		if (!is_array($result) || count($result) == 0 || !isset($result[0]) || !array_key_exists('posting', $result[0])) {
+		return self::postingSignatureMatches((string) $hiveaccount, (string) $signedblob, $result);
+	}
+
+	/**
+	 * Confirm a Keychain blob against the posting key in a get_accounts row.
+	 * Decode failures and vendor throwables are invalid signatures, not page fatals.
+	 */
+	static public function postingSignatureMatches(string $hiveaccount, string $signedblob, mixed $accountResult): bool
+	{
+		if (!is_array($accountResult) || count($accountResult) == 0 || !isset($accountResult[0]) || !is_array($accountResult[0]) || !array_key_exists('posting', $accountResult[0])) {
 			return false;
 		}
 
-		$publicKeyString = $result[0]['posting']['key_auths'][0][0];
-		$publicKey = (new Hive())->publicKeyFrom($publicKeyString);
+		$publicKeyString = $accountResult[0]['posting']['key_auths'][0][0] ?? null;
+		if (!is_string($publicKeyString) || $publicKeyString === '') {
+			return false;
+		}
 
-		if (is_null($publicKey)) {
+		$publicKey = self::publicKeyFromString($publicKeyString);
+		if ($publicKey === null) {
 			return false;
 		}
 
@@ -149,6 +190,24 @@ class HiveUtil
 		}
 
 		return (bool) $verified;
+	}
+
+	/**
+	 * Decode a Hive public key without installing Hive's throw-on-deprecation handler.
+	 * stephenhill/base58 1.x marks Base58::__construct($service = null) implicitly nullable;
+	 * PHP 8.4+ deprecates that while the class is compiled. Hive::__construct promotes the
+	 * deprecation to an exception, which is the Keychain register "Unknown error".
+	 */
+	static public function publicKeyFromString(string $publicKeyString): ?\Hive\Helpers\PublicKey
+	{
+		try {
+			// Compile Base58 before PublicKey constructs it, under the caller's handler.
+			class_exists(\StephenHill\Base58::class);
+
+			return new \Hive\Helpers\PublicKey($publicKeyString);
+		} catch (\Throwable $e) {
+			return null;
+		}
 	}
 
 	static public function accountExists($hiveaccount): bool
