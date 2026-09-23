@@ -27,6 +27,51 @@ class LoginUniverseDefaultsTest extends TestCase
 		parent::tearDown();
 	}
 
+	public function test_for_email_prefers_universe_1_when_newer_universes_are_not_seasonal(): void
+	{
+		// novadev shape (#627): ids 1/5/6 are Universe 1/2/3 and season_mode
+		// is off on every row. Password login and registration still land on Uni 1.
+		$this->resetUniverseList([1, 5, 6]);
+		Config::setInstance($this->uniConfig(1, 'Universe 1', open: true, seasonal: false, players: 10), 1);
+		Config::setInstance($this->uniConfig(5, 'Universe 2', open: true, seasonal: false, players: 20), 5);
+		Config::setInstance($this->uniConfig(6, 'Universe 3', open: true, seasonal: false, players: 30), 6);
+
+		$this->assertSame(1, LoginUniverseDefaults::forEmail(false));
+		$this->assertSame(1, LoginUniverseDefaults::forEmail(true));
+	}
+
+	public function test_for_email_uses_newest_non_seasonal_when_universe_1_is_closed(): void
+	{
+		$this->resetUniverseList([1, 5, 6]);
+		Config::setInstance($this->uniConfig(1, 'Universe 1', open: false, seasonal: false, players: 0), 1);
+		Config::setInstance($this->uniConfig(5, 'Universe 2', open: true, seasonal: false, players: 20), 5);
+		Config::setInstance($this->uniConfig(6, 'Universe 3', open: true, seasonal: false, players: 30), 6);
+
+		$this->assertSame(6, LoginUniverseDefaults::forEmail(false));
+		$this->assertSame(6, LoginUniverseDefaults::forEmail(true));
+	}
+
+	public function test_for_email_registration_skips_universe_1_when_registration_is_closed(): void
+	{
+		$this->resetUniverseList([1, 6]);
+		Config::setInstance($this->uniConfig(1, 'Universe 1', open: true, seasonal: false, players: 10, regClosed: true), 1);
+		Config::setInstance($this->uniConfig(6, 'Universe 3', open: true, seasonal: false, players: 30), 6);
+
+		$this->assertSame(1, LoginUniverseDefaults::forEmail(false));
+		$this->assertSame(6, LoginUniverseDefaults::forEmail(true));
+	}
+
+	public function test_for_email_skips_seasonal_universe_1_for_a_non_seasonal_alternative(): void
+	{
+		$this->resetUniverseList([1, 5, 6]);
+		Config::setInstance($this->uniConfig(1, 'Universe 1', open: true, seasonal: true, players: 10), 1);
+		Config::setInstance($this->uniConfig(5, 'Universe 2', open: true, seasonal: false, players: 20), 5);
+		Config::setInstance($this->uniConfig(6, 'Universe 3', open: true, seasonal: false, players: 30), 6);
+
+		$this->assertSame(6, LoginUniverseDefaults::forEmail(false));
+		$this->assertSame(6, LoginUniverseDefaults::forEmail(true));
+	}
+
 	public function test_for_email_login_prefers_non_seasonal(): void
 	{
 		Config::setInstance($this->uniConfig(1, 'Classic', open: true, seasonal: false, players: 200), 1);

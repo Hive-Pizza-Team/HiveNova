@@ -97,7 +97,7 @@ function refreshFormData() {
 
 function setACSTarget(galaxy, solarsystem, planet, type, tacs) {
 	setTarget(galaxy, solarsystem, planet, type);
-	updateVars();
+	updateVars(false);
 	document.getElementsByName("fleet_group")[0].value = tacs;
 }
 

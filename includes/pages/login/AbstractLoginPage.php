@@ -72,7 +72,8 @@ abstract class AbstractLoginPage
 	}
 
 	/**
-	 * Email/password flows default to a non-seasonal open universe (Uni 1).
+	 * Email/password flows default to Universe 1 when it is an open
+	 * non-seasonal universe, otherwise the newest non-seasonal open universe.
 	 */
 	protected function getDefaultEmailUniverseId($forRegistration = false)
 	{

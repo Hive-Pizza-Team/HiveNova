@@ -7,7 +7,7 @@
 </div>
 <form action="game.php?page=fleetStep2" method="post" onsubmit="return CheckTarget()" id="form">
 	<input type="hidden" name="token" value="{$token}">
-	<input type="hidden" name="fleet_group" value="0">
+	<input type="hidden" name="fleet_group" value="{$fleetGroup}">
 	<input type="hidden" name="target_mission" value="{$mission}">
 	<table class="table519" style="table-layout: fixed;">
 		<tr style="height:20px;">
@@ -168,18 +168,12 @@
 	{if $ACSList}
 	<table class="table519" style="table-layout: fixed;">
 		<tr style="height:20px;">
-			<th colspan="{$themeSettings.COLONY_ROWS_ON_FLEET1}">{$LNG.fl_acs_title}</th>
+			<th colspan="{$themeSettings.ACS_ROWS_ON_FLEET1}">{$LNG.fl_acs_title}</th>
 		</tr>
 		{foreach $ACSList as $ACSRow}
-		{if ($ACSRow@iteration % $themeSettings.ACS_ROWS_ON_FLEET1) === 1}<tr style="height:20px;">{/if}
 		<tr style="height:20px;">
 			<td><a href="javascript:setACSTarget({$ACSRow.galaxy},{$ACSRow.system},{$ACSRow.planet},{$ACSRow.planet_type},{$ACSRow.id});">{$ACSRow.name} - [{$ACSRow.galaxy}:{$ACSRow.system}:{$ACSRow.planet}]</a></td>
 		</tr>
-		{if $ACSRow@last && ($ACSRow@iteration % $themeSettings.ACS_ROWS_ON_FLEET1) !== 0}
-		{$to = $themeSettings.ACS_ROWS_ON_FLEET1 - ($ACSRow@iteration % $themeSettings.ACS_ROWS_ON_FLEET1)}
-		{for $foo=1 to $to}<td>&nbsp;</td>{/for}
-		{/if}
-		{if ($ACSRow@iteration % $themeSettings.ACS_ROWS_ON_FLEET1) === 0}</tr>{/if}
 		{/foreach}
 	</table>
 	{/if}
