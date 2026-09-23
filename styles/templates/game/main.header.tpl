@@ -25,6 +25,7 @@
 	{/if}
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/boilerplate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/main.css?v={$REV}">
+	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/prestige.css?v={$REV}">
 	{if $loadAchievementsCss|default:false}
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/achievements.css?v={$REV}">
 	{/if}
