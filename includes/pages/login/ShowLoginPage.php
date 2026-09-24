@@ -83,7 +83,7 @@ class ShowLoginPage extends AbstractLoginPage
 			}
 
 			if($verify == "false") {
-				HTTP::redirectTo('index.php?code=1');
+				$this->redirectFailedLogin();
 			}
 
 			$session	= Session::create();
@@ -96,7 +96,15 @@ class ShowLoginPage extends AbstractLoginPage
 		}
 		else
 		{
-			HTTP::redirectTo('index.php?code=1');
+			$this->redirectFailedLogin();
 		}
+	}
+
+	private function redirectFailedLogin(): void
+	{
+		if (isset($_COOKIE['hn_ui']) && $_COOKIE['hn_ui'] === 'react' && is_file(ROOT_PATH.'react/index.html')) {
+			HTTP::redirectTo('react/?code=1');
+		}
+		HTTP::redirectTo('index.php?code=1');
 	}
 }

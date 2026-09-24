@@ -71,7 +71,7 @@ $pass = 0;
 $fail = 0;
 $warn = 0;
 
-function curl_get(string $url, string $cookieFile): array {
+function curl_get(string $url, string $cookieFile, ?array &$meta = null): array {
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -83,6 +83,9 @@ function curl_get(string $url, string $cookieFile): array {
     $body   = curl_exec($ch);
     $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error  = curl_error($ch);
+    if ($meta !== null) {
+        $meta['content_type'] = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    }
     curl_close($ch);
     return [$status, $body ?: '', $error];
 }
@@ -157,6 +160,51 @@ function status(int $code): string {
 echo "=== HiveNova Smoke Test ===\n";
 echo "Base URL : $baseUrl\n";
 echo "User     : $username\n\n";
+
+$emptyCookies = tempnam(sys_get_temp_dir(), 'smoke_nocookie_');
+
+function assert_unauth_api_json(string $label, string $url, string $cookieFile): void {
+    global $pass, $fail;
+    echo "[ API  ] $label ... ";
+    $meta = [];
+    [$status, $body, $curlErr] = curl_get($url, $cookieFile, $meta);
+    $apiUnauth = is_string($body) ? json_decode($body, true) : null;
+    $ctype = strtolower((string) ($meta['content_type'] ?? ''));
+    if ($curlErr) {
+        echo "FAIL curl error: $curlErr\n";
+        $fail++;
+    } elseif ($status !== 401 || !is_array($apiUnauth) || ($apiUnauth['ok'] ?? true) !== false || ($apiUnauth['error'] ?? '') !== 'auth') {
+        echo "FAIL expected 401 JSON {ok:false,error:auth} (HTTP $status)\n";
+        $fail++;
+    } elseif (!str_contains($ctype, 'application/json')) {
+        echo "FAIL Content-Type is not application/json (got: " . ($meta['content_type'] ?? '') . ")\n";
+        $fail++;
+    } elseif (!str_contains((string) $body, '"ok"') || str_starts_with(ltrim((string) $body), '<')) {
+        echo "FAIL body is not JSON\n";
+        $fail++;
+    } else {
+        echo "OK\n";
+        $pass++;
+    }
+}
+
+assert_unauth_api_json('unauthenticated /api.php', "$baseUrl/api.php", $emptyCookies);
+assert_unauth_api_json('unauthenticated bootstrap', "$baseUrl/api.php?r=bootstrap", $emptyCookies);
+
+echo "[ REACT ] /react/ ... ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/react/", $emptyCookies);
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif (is_string($body) && str_contains($body, 'React UI is not built')) {
+    echo "SKIP (frontend not built)\n";
+} elseif ($status === 200 && is_string($body) && str_contains($body, 'id="root"')) {
+    echo "OK\n";
+    $pass++;
+} else {
+    echo "FAIL expected SPA shell (HTTP $status)\n";
+    $fail++;
+}
 
 // --- Login ---
 echo "[ LOGIN ] POST $baseUrl/index.php?page=login ... ";
@@ -294,6 +342,37 @@ if ($curlErr) {
     $fail++;
 } else {
     echo "OK (events=" . count($feed['events']) . ")\n";
+    $pass++;
+}
+
+echo "[ API  ] bootstrap           ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/api.php?r=bootstrap", $cookieFile);
+$boot = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status >= 400) {
+    echo "FAIL HTTP $status\n";
+    $fail++;
+} elseif (!is_array($boot) || ($boot['ok'] ?? false) !== true || !isset($boot['data']['user']['id'])) {
+    echo "FAIL expected JSON {ok:true,data.user}\n";
+    $fail++;
+} else {
+    echo "OK (userId=" . (int) $boot['data']['user']['id'] . ")\n";
+    $pass++;
+}
+
+echo "[ API  ] overview rename GET ";
+[$status, $body, $curlErr] = curl_get("$baseUrl/api.php?r=overview&action=rename", $cookieFile);
+$renameGet = is_string($body) ? json_decode($body, true) : null;
+if ($curlErr) {
+    echo "FAIL curl error: $curlErr\n";
+    $fail++;
+} elseif ($status !== 405 || !is_array($renameGet) || ($renameGet['error'] ?? '') !== 'method') {
+    echo "FAIL expected 405 method (HTTP $status)\n";
+    $fail++;
+} else {
+    echo "OK\n";
     $pass++;
 }
 

@@ -38,6 +38,7 @@
     {if $smarty.const.MODULE_SUPPORT|isModuleAvailable}<li><a href="game.php?page=ticket"{if $navPage == 'ticket'} class="active"{/if}>{$LNG.lm_support}</a></li>{/if}
     {if $smarty.const.MODULE_SEARCH|isModuleAvailable}<li><a href="game.php?page=search"{if $navPage == 'search'} class="active"{/if}>{$LNG.lm_search}</a></li>{/if}
     {if $smarty.const.MODULE_BANLIST|isModuleAvailable}<li><a href="game.php?page=banList"{if $navPage == 'banList'} class="active"{/if}>{$LNG.lm_banned}</a></li>{/if}
+    <li><a href="react/" id="hn-try-react" onclick="document.cookie='hn_ui=react;path=/;max-age=31536000;samesite=lax'">{$LNG.hn_try_new_ui}</a></li>
     <li><a href="game.php?page=logout"{if $navPage == 'logout'} class="active"{/if}>{$LNG.lm_logout}</a></li>
     {if $showAdminLink}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
 </ul>

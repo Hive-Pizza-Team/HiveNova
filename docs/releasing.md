@@ -1,6 +1,6 @@
 # Releasing HiveNova
 
-How we tag and publish releases. Tags mark **deployed (or about-to-deploy) `master` commits** — not feature branches.
+How we tag and publish releases. Tags mark **deployed (or about-to-deploy) `master` commits** — not feature branches. Merging to `master` also runs `.github/workflows/deploy.yaml` (see README **Production deploy**).
 
 ## Versioning
 

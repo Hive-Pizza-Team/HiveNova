@@ -9,6 +9,14 @@ If you also front the site with a reverse proxy that blocks `*.txt`, add an exce
     allow all;
     }
 
+    location /react/ {
+    try_files $uri $uri/ /react/index.html;
+    }
+
+    location /react/assets/ {
+    try_files $uri =404;
+    }
+
     location /cache/ {
     deny all;
     }

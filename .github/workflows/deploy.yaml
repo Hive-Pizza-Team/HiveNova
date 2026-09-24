@@ -1,0 +1,128 @@
+name: Deploy
+
+# Merge to master (or a manual run) SSHs as deploy, fast-forwards the game
+# checkout, runs migrate.php when the DB is behind, then rsyncs the React SPA.
+#
+# Required GitHub secrets:
+#   DEPLOY_HOST       hostname or IP (no user@)
+#   DEPLOY_SSH_KEY    private key whose public half is in deploy's authorized_keys
+# Optional:
+#   DEPLOY_KNOWN_HOSTS  ssh-keyscan output (recommended; otherwise TOFU via ssh-keyscan)
+# Repo variables (Settings → Variables):
+#   DEPLOY_USER   default deploy
+#   DEPLOY_PATH   default /var/www/NextMoon
+#   DEPLOY_PORT   default 22
+#
+# Protect master with required CI checks so this only runs after a green PR.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Print remote actions; do not change the server or SPA files
+        type: boolean
+        default: false
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.repository == 'Hive-Pizza-Team/HiveNova'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+      DRY_RUN: ${{ github.event.inputs.dry_run == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require master for a real deploy
+        if: ${{ env.DRY_RUN != 'true' && github.ref != 'refs/heads/master' }}
+        run: |
+          echo "Non-dry-run deploy must run from master (got ${GITHUB_REF})." >&2
+          exit 1
+
+      - name: Require deploy secrets
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "${DEPLOY_HOST:-}" ]; then
+            echo "Set secret DEPLOY_HOST (hostname or IP, no user@)." >&2
+            exit 1
+          fi
+          if [ -z "${DEPLOY_SSH_KEY:-}" ]; then
+            echo "Set secret DEPLOY_SSH_KEY on the production environment or the repo." >&2
+            exit 1
+          fi
+
+      - uses: docker/setup-buildx-action@v3
+        if: ${{ env.DRY_RUN != 'true' }}
+
+      - name: Build SPA in Docker
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: ./scripts/build-spa.sh
+
+      - uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: SSH known_hosts
+        env:
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          PORT="${DEPLOY_PORT:-22}"
+          if [ -n "${DEPLOY_KNOWN_HOSTS:-}" ]; then
+            printf '%s\n' "$DEPLOY_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_KNOWN_HOSTS is unset; using ssh-keyscan (TOFU). Pin the host key in that secret."
+            ssh-keyscan -p "$PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Git pull, composer, migrate
+        run: |
+          set -euo pipefail
+          USER="${DEPLOY_USER:-deploy}"
+          ROOT="${DEPLOY_PATH:-/var/www/NextMoon}"
+          PORT="${DEPLOY_PORT:-22}"
+          extra=""
+          if [ "$DRY_RUN" = true ]; then
+            extra="--dry-run"
+          fi
+          echo "SSH ${USER}@${DEPLOY_HOST}:${PORT} → ${ROOT}"
+          scp -P "$PORT" \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            scripts/deploy.sh \
+            "${USER}@${DEPLOY_HOST}:/tmp/hivenova-deploy.sh"
+          ssh -p "$PORT" \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            "${USER}@${DEPLOY_HOST}" \
+            "HN_DEPLOY_ROOT='${ROOT}' HN_DEPLOY_BRANCH=master bash /tmp/hivenova-deploy.sh ${extra}"
+
+      - name: Rsync SPA
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: |
+          set -euo pipefail
+          USER="${DEPLOY_USER:-deploy}"
+          ROOT="${DEPLOY_PATH:-/var/www/NextMoon}"
+          PORT="${DEPLOY_PORT:-22}"
+          HN_DEPLOY_HOST="${USER}@${DEPLOY_HOST}" \
+          HN_DEPLOY_ROOT="$ROOT" \
+          HN_DEPLOY_SSH="-p ${PORT} -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+          ./scripts/deploy-spa.sh --skip-build
