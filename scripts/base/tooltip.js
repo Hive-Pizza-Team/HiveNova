@@ -16,8 +16,10 @@
 var MOBILE_TOOLTIP_INERT_HREF = 'javascript:void(0)';
 var MOBILE_TOOLTIP_GUARD_MS = 500;
 var MOBILE_TOOLTIP_TAP_SLOP = 16;
+var TOOLTIP_TOUCH_HOVER_GUARD_MS = 800;
 var mobileTooltipGuardUntil = 0;
 var mobileTooltipTouch = null;
+var lastTooltipTouchAt = 0;
 var suppressNextMobileTooltipClick = false;
 
 function mobileTooltipMediaQuery() {
@@ -60,6 +62,39 @@ function shouldDismissMobileTooltip(targetInsideTip, now, guardUntil) {
 	return !isMobileTooltipGuardActive(now, guardUntil);
 }
 
+function noteTooltipTouch(now) {
+	lastTooltipTouchAt = now || Date.now();
+	return lastTooltipTouchAt;
+}
+
+function isRecentTooltipTouch(now, lastTouchAt, guardMs) {
+	if (!lastTouchAt) {
+		return false;
+	}
+	return ((now || Date.now()) - lastTouchAt) < (guardMs || TOOLTIP_TOUCH_HOVER_GUARD_MS);
+}
+
+function shouldUseHoverTooltip(mobile, recentTouch) {
+	return !mobile && !recentTouch;
+}
+
+function tooltipClickAction(suppressClick, guardActive, mobile) {
+	if (suppressClick || guardActive) {
+		return 'swallow';
+	}
+	if (!mobile) {
+		return 'ignore';
+	}
+	return 'open';
+}
+
+function isHoverTooltipEnabled() {
+	return shouldUseHoverTooltip(
+		isMobileTooltip(),
+		isRecentTooltipTouch(Date.now(), lastTooltipTouchAt, TOOLTIP_TOUCH_HOVER_GUARD_MS)
+	);
+}
+
 function resetTooltipOverlay(tip) {
 	tip = tip || $('#tooltip');
 	tip.stop(true, true);
@@ -79,8 +114,12 @@ function resetTooltipOverlay(tip) {
 
 function positionMobileTooltip(tip) {
 	tip.css({
+		position: 'fixed',
 		top: Math.max(8, (window.innerHeight - tip.outerHeight()) / 2),
-		left: Math.max(8, (window.innerWidth - tip.outerWidth()) / 2)
+		left: Math.max(8, (window.innerWidth - tip.outerWidth()) / 2),
+		right: 'auto',
+		bottom: 'auto',
+		transform: 'none'
 	});
 }
 
@@ -123,7 +162,8 @@ function openMobileTooltip(el, e) {
 }
 
 function dismissMobileTooltipIfOutside(target) {
-	if (!isMobileTooltip()) {
+	var tip = $('#tooltip');
+	if (!tip.hasClass('tooltip-mobile-active') && !isMobileTooltip()) {
 		return;
 	}
 	var inside = $(target).closest('.tooltip, .tooltip_sticky, #tooltip').length > 0;
@@ -140,18 +180,16 @@ $(document).ready(function () {
 		$(this).attr('href', normalizeTooltipTriggerHref($(this).attr('href')));
 	});
 
+	// A finger tap is the signal. Landscape phones are often ≥700px wide, and some
+	// browsers still report a fine pointer there, so mouseenter never runs.
 	$(".tooltip, .tooltip_sticky").live('touchstart', function (e) {
-		if (!isMobileTooltip()) {
-			return;
-		}
+		noteTooltipTouch();
 		var point = touchPointFromEvent(e);
 		mobileTooltipTouch = point ? { x: point.x, y: point.y, el: this } : { el: this };
 	});
 
 	$(".tooltip, .tooltip_sticky").live('touchend', function (e) {
-		if (!isMobileTooltip()) {
-			return;
-		}
+		noteTooltipTouch();
 		var start = mobileTooltipTouch && mobileTooltipTouch.el === this ? mobileTooltipTouch : null;
 		var end = touchPointFromEvent(e);
 		mobileTooltipTouch = null;
@@ -162,28 +200,30 @@ $(document).ready(function () {
 	});
 
 	$(".tooltip, .tooltip_sticky").live('click', function (e) {
-		if (!isMobileTooltip()) {
-			return;
-		}
-		if (suppressNextMobileTooltipClick || isMobileTooltipGuardActive()) {
+		var action = tooltipClickAction(
+			suppressNextMobileTooltipClick,
+			isMobileTooltipGuardActive(),
+			isMobileTooltip()
+		);
+		if (action === 'swallow') {
 			suppressNextMobileTooltipClick = false;
 			e.preventDefault();
 			e.stopPropagation();
+			return;
+		}
+		if (action !== 'open') {
 			return;
 		}
 		openMobileTooltip(this, e);
 	});
 
 	$(document).on('click touchend', function (e) {
-		if (!isMobileTooltip()) {
-			return;
-		}
 		dismissMobileTooltipIfOutside(e.target);
 	});
 
 	$(".tooltip").live({
 		mouseenter : function (e) {
-			if (isMobileTooltip()) {
+			if (!isHoverTooltipEnabled()) {
 				return;
 			}
 			var tip = $('#tooltip');
@@ -192,9 +232,15 @@ $(document).ready(function () {
 		},
 		mouseleave : function () {
 			var tip = $('#tooltip');
+			if (tip.hasClass('tooltip-mobile-active') || !isHoverTooltipEnabled()) {
+				return;
+			}
 			tip.hide();
 		},
 		mousemove : function (e) {
+			if (!isHoverTooltipEnabled() || $('#tooltip').hasClass('tooltip-mobile-active')) {
+				return;
+			}
 			var tip = $('#tooltip');
 			var mousex = e.pageX + 20;
 			var mousey = e.pageY + 20;
@@ -215,7 +261,7 @@ $(document).ready(function () {
 		}
 	});
 	$(".tooltip_sticky").live('mouseenter', function (e) {
-		if (isMobileTooltip()) {
+		if (!isHoverTooltipEnabled()) {
 			return;
 		}
 		var tip = $('#tooltip');
@@ -229,6 +275,10 @@ $(document).ready(function () {
 	});
 	$(".tooltip_sticky_div").live('mouseleave', function () {
 		var tip = $('#tooltip');
+		if (tip.hasClass('tooltip-mobile-active')) {
+			tip.removeClass('tooltip_sticky_div');
+			return;
+		}
 		tip.removeClass('tooltip_sticky_div');
 		tip.hide();
 	});
@@ -256,11 +306,15 @@ if (typeof module !== 'undefined' && module.exports) {
 		MOBILE_TOOLTIP_INERT_HREF: MOBILE_TOOLTIP_INERT_HREF,
 		MOBILE_TOOLTIP_GUARD_MS: MOBILE_TOOLTIP_GUARD_MS,
 		MOBILE_TOOLTIP_TAP_SLOP: MOBILE_TOOLTIP_TAP_SLOP,
+		TOOLTIP_TOUCH_HOVER_GUARD_MS: TOOLTIP_TOUCH_HOVER_GUARD_MS,
 		mobileTooltipMediaQuery: mobileTooltipMediaQuery,
 		normalizeTooltipTriggerHref: normalizeTooltipTriggerHref,
 		armMobileTooltipGuard: armMobileTooltipGuard,
 		isMobileTooltipGuardActive: isMobileTooltipGuardActive,
 		isStationaryTooltipTouch: isStationaryTooltipTouch,
-		shouldDismissMobileTooltip: shouldDismissMobileTooltip
+		shouldDismissMobileTooltip: shouldDismissMobileTooltip,
+		isRecentTooltipTouch: isRecentTooltipTouch,
+		shouldUseHoverTooltip: shouldUseHoverTooltip,
+		tooltipClickAction: tooltipClickAction
 	};
 }
