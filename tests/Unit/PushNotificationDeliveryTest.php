@@ -183,6 +183,56 @@ class PushNotificationDeliveryTest extends TestCase
 		});
 	}
 
+	public function testNotifyUserSelectsSubscriptionsWhenEncodingColumnIsMissing(): void
+	{
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub): void {
+			$stub->rejectContentEncoding = true;
+			$stub->subscriptionsByEndpoint['https://fcm.googleapis.com/fcm/send/legacy'] = [
+				'user_id'  => 9,
+				'endpoint' => 'https://fcm.googleapis.com/fcm/send/legacy',
+				'p256dh'   => 'pk',
+				'auth'     => 'ak',
+			];
+			$seen = [];
+			$logs = [];
+			PushNotificationService::setErrorLogger(static function (string $line) use (&$logs): void {
+				$logs[] = $line;
+			});
+			PushNotificationService::setWebPushFactory(static function (array $rows) use (&$seen) {
+				$seen = $rows;
+
+				return [new class {
+					public function isSuccess(): bool
+					{
+						return true;
+					}
+
+					public function isSubscriptionExpired(): bool
+					{
+						return false;
+					}
+
+					public function getEndpoint(): string
+					{
+						return 'https://fcm.googleapis.com/fcm/send/legacy';
+					}
+
+					public function getReason(): string
+					{
+						return '';
+					}
+				}];
+			});
+
+			$result = PushNotificationService::notifyUser(9, 'Building complete', 'Ore Extractor');
+			$this->assertTrue($result['ok']);
+			$this->assertCount(1, $seen);
+			$this->assertSame('https://fcm.googleapis.com/fcm/send/legacy', $seen[0]['endpoint']);
+			$this->assertNotEmpty($logs);
+			$this->assertStringContainsString('content_encoding', $logs[0]);
+		});
+	}
+
 	public function testNotifyUserSkipsWhenUserHasNoSubscription(): void
 	{
 		$this->withDatabaseStub(function (): void {

@@ -1,6 +1,7 @@
 <?php
 
 use HiveNova\Core\BuildingCompletePushService;
+use HiveNova\Core\PushNotificationService;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/BuildingCompletePushDatabaseStub.php';
@@ -238,11 +239,31 @@ class BuildingCompletePushServiceTest extends TestCase
 		$this->assertFalse($service->isConfigured());
 	}
 
+	public function testDeliveryFailureReasonPrefersSkipThenLastError(): void
+	{
+		$method = new ReflectionMethod(BuildingCompletePushService::class, 'deliveryFailureReason');
+		$method->setAccessible(true);
+
+		$this->assertSame('not_configured', $method->invoke(null, ['skipped' => 'not_configured', 'lastError' => 'ignored']));
+		$this->assertSame('gateway down', $method->invoke(null, ['skipped' => null, 'lastError' => 'gateway down']));
+		$this->assertSame('delivery_failed', $method->invoke(null, []));
+	}
+
 	public function testNotifyJobDefaultNotifierDoesNotMarkSentWhenPushServiceNoops(): void
 	{
-		$service = new BuildingCompletePushService(configured: true);
-		$this->assertFalse($service->notifyJob(1, 2, 'Home', 1, 5, 100, 'en'));
-		$this->assertSame(0, $this->db->notified['2:1:5:100']['notified_at'] ?? 1);
+		$logs = [];
+		PushNotificationService::setErrorLogger(static function (string $line) use (&$logs): void {
+			$logs[] = $line;
+		});
+		try {
+			$service = new BuildingCompletePushService(configured: true);
+			$this->assertFalse($service->notifyJob(1, 2, 'Home', 1, 5, 100, 'en'));
+			$this->assertSame(0, $this->db->notified['2:1:5:100']['notified_at'] ?? 1);
+			$this->assertNotEmpty($logs);
+			$this->assertStringContainsString('reason=not_configured', $logs[0]);
+		} finally {
+			PushNotificationService::setErrorLogger(null);
+		}
 	}
 
 	public function testNotifyJobsDoesNotMarkSentWhenDeliveryFailsAndRetries(): void

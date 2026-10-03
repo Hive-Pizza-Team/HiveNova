@@ -7,8 +7,11 @@ use HiveNova\Core\DatabaseInterface;
  */
 class PushSubscriptionDatabaseStub implements DatabaseInterface
 {
-	/** @var array<string, array{user_id: int, endpoint: string, p256dh: string, auth: string}> */
+	/** @var array<string, array{user_id: int, endpoint: string, p256dh: string, auth: string, content_encoding?: string|null}> */
 	public array $subscriptionsByEndpoint = [];
+
+	/** When true, queries that mention content_encoding throw (pre-migration 51). */
+	public bool $rejectContentEncoding = false;
 
 	public array $updates = [];
 	public array $inserts = [];
@@ -50,6 +53,7 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 
 	public function select($qry, array $params = [])
 	{
+		$this->rejectContentEncodingQuery($qry);
 		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':userId'])) {
 			$userId = (int) $params[':userId'];
 			$rows = [];
@@ -132,34 +136,52 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 
 	public function insert($qry, array $params = [])
 	{
+		$this->rejectContentEncodingQuery($qry);
 		$this->inserts[] = $params;
-		$this->subscriptionsByEndpoint[$params[':endpoint']] = [
-			'user_id'  => (int) $params[':userId'],
-			'endpoint' => $params[':endpoint'],
-			'p256dh'   => $params[':p256dh'],
-			'auth'     => $params[':auth'],
-		];
+		$this->subscriptionsByEndpoint[$params[':endpoint']] = $this->subscriptionRow($params);
 
 		return 1;
 	}
 
 	public function update($qry, array $params = [])
 	{
+		$this->rejectContentEncodingQuery($qry);
 		$this->updates[] = ['qry' => $qry, 'params' => $params];
 
 		if (str_contains($qry, 'settings_push')) {
 			$this->settingsPushByUser[(int) $params[':userId']] = (int) $params[':enabled'];
 		}
 
-		if (isset($params[':endpoint'])) {
-			$this->subscriptionsByEndpoint[$params[':endpoint']] = [
-				'user_id'  => (int) $params[':userId'],
-				'endpoint' => $params[':endpoint'],
-				'p256dh'   => $params[':p256dh'],
-				'auth'     => $params[':auth'],
-			];
+		if (isset($params[':endpoint'], $params[':p256dh'])) {
+			$this->subscriptionsByEndpoint[$params[':endpoint']] = $this->subscriptionRow($params);
 		}
 
 		return 1;
+	}
+
+	/**
+	 * @param array<string, mixed> $params
+	 * @return array{user_id: int, endpoint: string, p256dh: string, auth: string, content_encoding?: string|null}
+	 */
+	private function subscriptionRow(array $params): array
+	{
+		$row = [
+			'user_id'  => (int) $params[':userId'],
+			'endpoint' => $params[':endpoint'],
+			'p256dh'   => $params[':p256dh'],
+			'auth'     => $params[':auth'],
+		];
+		if (array_key_exists(':contentEncoding', $params)) {
+			$row['content_encoding'] = $params[':contentEncoding'];
+		}
+
+		return $row;
+	}
+
+	private function rejectContentEncodingQuery(string $qry): void
+	{
+		if ($this->rejectContentEncoding && str_contains($qry, 'content_encoding')) {
+			throw new \RuntimeException('unknown column content_encoding');
+		}
 	}
 }

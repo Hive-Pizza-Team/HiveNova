@@ -153,9 +153,11 @@ class PushNotificationService
 	}
 
 	/**
-	 * Use the subscription's encoding when the client stored one (aes128gcm / aesgcm).
-	 * Omit (null) instead of forcing aes128gcm — a mismatched encoding is accepted by
-	 * FCM (201) but Chrome drops the payload before the SW push handler runs.
+	 * Browser content coding from subscribe (`aes128gcm` / `aesgcm`), or null when absent.
+	 *
+	 * minishlink/web-push v10 treats a missing contentEncoding as legacy `aesgcm`.
+	 * Current Chrome only decrypts RFC 8291 `aes128gcm`, so FCM can return 201 while
+	 * the service worker never runs and no building-complete notification appears.
 	 */
 	public static function resolveContentEncoding(mixed $encoding): ?string
 	{
@@ -212,41 +214,81 @@ class PushNotificationService
 			$userAgent = substr($userAgent, 0, 255);
 		}
 
-		if ($existingUserId !== false && $existingUserId !== null && $existingUserId !== '') {
+		$exists = $existingUserId !== false && $existingUserId !== null && $existingUserId !== '';
+		self::persistSubscription($exists, $userId, $subscription, $userAgent);
+		self::deleteOtherSubscriptionsForUser($userId, $subscription['endpoint']);
+
+		return true;
+	}
+
+	/**
+	 * Store the browser's content coding when the column exists. Older databases
+	 * that have not applied migration 51 still save the endpoint so opt-in is not lost.
+	 */
+	private static function persistSubscription(bool $exists, int $userId, array $subscription, ?string $userAgent): void
+	{
+		$params = [
+			':userId'           => $userId,
+			':p256dh'           => $subscription['keys']['p256dh'],
+			':auth'             => $subscription['keys']['auth'],
+			':userAgent'        => $userAgent,
+			':createdAt'        => defined('TIMESTAMP') ? TIMESTAMP : time(),
+			':endpoint'         => $subscription['endpoint'],
+			':contentEncoding'  => self::resolveContentEncoding($subscription['contentEncoding'] ?? null),
+		];
+
+		try {
+			self::writeSubscriptionRow($exists, $params, true);
+		} catch (\Throwable $e) {
+			self::logFailure(
+				'PushNotificationService: subscription write without content_encoding ('
+				. self::sanitizeClientError($e->getMessage()) . ')'
+			);
+			unset($params[':contentEncoding']);
+			self::writeSubscriptionRow($exists, $params, false);
+		}
+	}
+
+	/**
+	 * @param array<string, mixed> $params
+	 */
+	private static function writeSubscriptionRow(bool $exists, array $params, bool $withEncoding): void
+	{
+		$db = Database::get();
+		if ($exists && $withEncoding) {
 			// One browser endpoint per origin — reassign to whoever is logged in now.
 			// Same device switching accounts/universes must work; a stolen subscription
 			// object could re-point alerts (tradeoff vs hard block in #163).
 			$db->update(
-				'UPDATE %%PUSH_SUBSCRIPTIONS%% SET user_id = :userId, p256dh = :p256dh, auth = :auth, user_agent = :userAgent, created_at = :createdAt WHERE endpoint = :endpoint',
-				[
-					':userId'    => $userId,
-					':p256dh'    => $subscription['keys']['p256dh'],
-					':auth'      => $subscription['keys']['auth'],
-					':userAgent' => $userAgent,
-					':createdAt' => TIMESTAMP,
-					':endpoint'  => $subscription['endpoint'],
-				]
+				'UPDATE %%PUSH_SUBSCRIPTIONS%% SET user_id = :userId, p256dh = :p256dh, auth = :auth, content_encoding = :contentEncoding, user_agent = :userAgent, created_at = :createdAt WHERE endpoint = :endpoint',
+				$params
 			);
-			self::deleteOtherSubscriptionsForUser($userId, $subscription['endpoint']);
 
-			return true;
+			return;
+		}
+		if ($exists) {
+			$db->update(
+				'UPDATE %%PUSH_SUBSCRIPTIONS%% SET user_id = :userId, p256dh = :p256dh, auth = :auth, user_agent = :userAgent, created_at = :createdAt WHERE endpoint = :endpoint',
+				$params
+			);
+
+			return;
+		}
+		if ($withEncoding) {
+			$db->insert(
+				'INSERT INTO %%PUSH_SUBSCRIPTIONS%% (user_id, endpoint, p256dh, auth, content_encoding, user_agent, created_at)
+				VALUES (:userId, :endpoint, :p256dh, :auth, :contentEncoding, :userAgent, :createdAt)',
+				$params
+			);
+
+			return;
 		}
 
 		$db->insert(
 			'INSERT INTO %%PUSH_SUBSCRIPTIONS%% (user_id, endpoint, p256dh, auth, user_agent, created_at)
 			VALUES (:userId, :endpoint, :p256dh, :auth, :userAgent, :createdAt)',
-			[
-				':userId'    => $userId,
-				':endpoint'  => $subscription['endpoint'],
-				':p256dh'    => $subscription['keys']['p256dh'],
-				':auth'      => $subscription['keys']['auth'],
-				':userAgent' => $userAgent,
-				':createdAt' => TIMESTAMP,
-			]
+			$params
 		);
-		self::deleteOtherSubscriptionsForUser($userId, $subscription['endpoint']);
-
-		return true;
 	}
 
 	/**
@@ -361,11 +403,7 @@ class PushNotificationService
 			return self::skipResult(self::SKIP_DISABLED);
 		}
 
-		$db = Database::get();
-		$rows = $db->select(
-			'SELECT endpoint, p256dh, auth FROM %%PUSH_SUBSCRIPTIONS%% WHERE user_id = :userId',
-			[':userId' => $userId]
-		);
+		$rows = self::loadSubscriptionRows($userId);
 
 		if (!is_array($rows) || $rows === []) {
 			return self::skipResult(self::SKIP_NO_SUBSCRIPTION);
@@ -796,24 +834,47 @@ class PushNotificationService
 	}
 
 	/**
+	 * @return list<array<string, mixed>>
+	 */
+	private static function loadSubscriptionRows(int $userId): array
+	{
+		$db = Database::get();
+		try {
+			$rows = $db->select(
+				'SELECT endpoint, p256dh, auth, content_encoding FROM %%PUSH_SUBSCRIPTIONS%% WHERE user_id = :userId',
+				[':userId' => $userId]
+			);
+		} catch (\Throwable $e) {
+			self::logFailure(
+				'PushNotificationService: subscription select without content_encoding ('
+				. self::sanitizeClientError($e->getMessage()) . ')'
+			);
+			$rows = $db->select(
+				'SELECT endpoint, p256dh, auth FROM %%PUSH_SUBSCRIPTIONS%% WHERE user_id = :userId',
+				[':userId' => $userId]
+			);
+		}
+
+		return is_array($rows) ? $rows : [];
+	}
+
+	/**
 	 * @param array<string, mixed> $row
-	 * @return array{endpoint: string, keys: array{p256dh: string, auth: string}, contentEncoding?: string}
+	 * @return array{endpoint: string, keys: array{p256dh: string, auth: string}, contentEncoding: string}
 	 */
 	public static function subscriptionCreatePayload(array $row): array
 	{
-		$payload = [
+		$encoding = self::resolveContentEncoding($row['content_encoding'] ?? $row['contentEncoding'] ?? null);
+
+		return [
 			'endpoint' => (string) ($row['endpoint'] ?? ''),
 			'keys'     => [
 				'p256dh' => (string) ($row['p256dh'] ?? ''),
 				'auth'   => (string) ($row['auth'] ?? ''),
 			],
+			// Never omit: web-push-php v10 then encrypts as legacy aesgcm, which Chrome drops.
+			'contentEncoding' => $encoding ?? self::CONTENT_ENCODING,
 		];
-		$encoding = self::resolveContentEncoding($row['content_encoding'] ?? $row['contentEncoding'] ?? null);
-		if ($encoding !== null) {
-			$payload['contentEncoding'] = $encoding;
-		}
-
-		return $payload;
 	}
 
 	private static function p256PrivateKeyPem(string $d): string
