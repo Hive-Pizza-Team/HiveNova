@@ -34,7 +34,7 @@
 			<th colspan="2">{$LNG.ow_support}</th>
 		</tr>
 		<tr>
-			<td colspan="2"><a href="https://github.com/jkroepke/2Moons/" target="_blank">Project Homepage</a>
+			<td colspan="2"><a href="https://github.com/Hive-Pizza-Team/HiveNova" target="_blank">HiveNova</a>
 				<!--<br><a target="_blank" href="http://2moons.cc/" target="_blank">2moons.cc - {$LNG.ow_forum}</a>--></td>
 		</tr>
 		<!--
@@ -233,7 +233,7 @@
 	google.setOnLoadCallback(initialize);
 	function initialize() {
 		var feedControl = new google.feeds.FeedControl();
-		feedControl.addFeed("https://github.com/jkroepke/2Moons/commits/master.atom", "");
+		feedControl.addFeed("https://github.com/Hive-Pizza-Team/HiveNova/commits/master.atom", "");
 		//feedControl.addFeed("http://code.google.com/feeds/p/2moons/svnchanges/basic", "");
 		feedControl.draw(document.getElementById("feed"));
 		//var feedControl = new google.feeds.FeedControl();
