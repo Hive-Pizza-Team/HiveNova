@@ -59,7 +59,8 @@ class ShowBattleHallPage extends AbstractGamePage
 			return;
 		}
 
-		$top = (new BattleHallService())->listTopBattles((int) Universe::current());
+		$missingName = (string) ($LNG['tkb_deleted_player'] ?? BattleHallService::MISSING_NAME);
+		$top = (new BattleHallService())->listTopBattles((int) Universe::current(), 100, $missingName);
 
 		$TopKBList = [];
 		foreach ($top as $data) {
