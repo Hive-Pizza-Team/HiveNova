@@ -299,29 +299,24 @@ class DatabaseSeasonStore implements SeasonStore
 	public function reportHallOfFame(int $universe, int $limit = 10): array
 	{
 		$limit = max(1, min(100, $limit));
-		$sql = 'SELECT %%TOPKB%%.`units`, %%TOPKB%%.`result`, (
-			SELECT DISTINCT
-			IF(%%TOPKB_USERS%%.username = \'\', GROUP_CONCAT(%%USERS%%.username SEPARATOR \' & \'), GROUP_CONCAT(%%TOPKB_USERS%%.username SEPARATOR \' & \'))
-			FROM %%TOPKB_USERS%%
-			LEFT JOIN %%USERS%% ON uid = %%USERS%%.id
-			WHERE %%TOPKB_USERS%%.rid = %%TOPKB%%.rid AND role = 1
-		) AS attacker,
-		(
-			SELECT DISTINCT
-			IF(%%TOPKB_USERS%%.username = \'\', GROUP_CONCAT(%%USERS%%.username SEPARATOR \' & \'), GROUP_CONCAT(%%TOPKB_USERS%%.username SEPARATOR \' & \'))
-			FROM %%TOPKB_USERS%% INNER JOIN %%USERS%% ON uid = id
-			WHERE %%TOPKB_USERS%%.rid = %%TOPKB%%.`rid` AND `role` = 2
-		) AS defender
-		FROM %%TOPKB%% WHERE universe = :universe AND %%TOPKB%%.units > 0
-		ORDER BY %%TOPKB%%.units DESC LIMIT ' . $limit;
-		$rows = Database::get()->select($sql, [':universe' => $universe]);
+		$rows = Database::get()->select(
+			'SELECT rid, units, result
+			FROM %%TOPKB%%
+			WHERE universe = :universe AND units > 0
+			ORDER BY units DESC
+			LIMIT ' . $limit,
+			[':universe' => $universe]
+		);
+		$names = (new BattleHallService())->participantNames(array_column($rows, 'rid'));
 		$out = [];
 		foreach ($rows as $row) {
+			$rid = (string) ($row['rid'] ?? '');
+			$sides = $names[$rid] ?? ['attacker' => '', 'defender' => ''];
 			$out[] = [
 				'units'    => (int) $row['units'],
 				'result'   => (string) ($row['result'] ?? ''),
-				'attacker' => (string) ($row['attacker'] ?? ''),
-				'defender' => (string) ($row['defender'] ?? ''),
+				'attacker' => $sides['attacker'],
+				'defender' => $sides['defender'],
 			];
 		}
 
