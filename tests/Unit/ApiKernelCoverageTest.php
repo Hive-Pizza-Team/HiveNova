@@ -290,6 +290,10 @@ class ApiKernelCoverageTest extends TestCase
 		if (session_status() === PHP_SESSION_ACTIVE) {
 			session_write_close();
 		}
+		$sessionDir = CACHE_PATH.'sessions';
+		if (!is_dir($sessionDir)) {
+			mkdir($sessionDir, 0777, true);
+		}
 		$_SESSION = [];
 		$sessionObj = new ReflectionProperty(\HiveNova\Core\Session::class, 'obj');
 		$sessionObj->setAccessible(true);
@@ -755,7 +759,7 @@ class ApiKernelCoverageTest extends TestCase
 		$_REQUEST = $params;
 		$_GET = $method === 'GET' ? $params : [];
 		$_POST = $method === 'POST' ? $params : [];
-		if ($method === 'POST' && !isset($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+		if ($method === 'POST') {
 			$_SERVER['HTTP_X_CSRF_TOKEN'] = ApiCsrf::token();
 		}
 	}
