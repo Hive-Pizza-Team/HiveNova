@@ -8,7 +8,8 @@
 #
 # Prerequisites:
 #   - composer install
-#   - Local PHP dev server running on :8000  (php -S localhost:8000)
+#   - Local PHP dev server running on :8000  (php -S localhost:8000 router.php)
+#   - For smoke against /react/: ./scripts/build-spa.sh (Docker; no host npm)
 #   - For --integration: MySQL with game installed (php tests/ci-install.php)
 #   - For --coverage: PHP with Xdebug coverage mode; pip install diff-cover
 
@@ -75,6 +76,7 @@ check_error_log() {
 
 run "Language check"   php .github/scripts/check-language-files.php
 run "CSS check"        bash tests/check-css.sh
+run "Deploy scripts"  bash tests/check-deploy-scripts.sh
 run "JS tests"         npm run test:js
 run "PHPStan"          composer phpstan
 

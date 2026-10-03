@@ -1578,3 +1578,5 @@ $LNG['pl_hive_linked'] = 'Hive: @%s';
 $LNG['pl_prestige_hp_range'] = '%1$s — %2$s–%3$s HP';
 $LNG['pl_prestige_hp_open'] = '%1$s — %2$s+ HP';
 $LNG['pl_prestige_pizza_open'] = '%1$s — %2$s+ PIZZA staked';
+$LNG['hn_try_new_ui'] = 'Try new UI';
+$LNG['hn_classic_ui'] = 'Classic version';

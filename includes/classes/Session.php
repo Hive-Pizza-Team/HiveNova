@@ -54,13 +54,10 @@ class Session
 		ini_set('session.save_path', CACHE_PATH.'sessions');
 		ini_set('upload_tmp_dir', CACHE_PATH.'sessions');
 		
-		$HTTP_ROOT = MODE === 'INSTALL' ? dirname(HTTP_ROOT) : HTTP_ROOT;
-		$cookiePath = ($HTTP_ROOT !== '' && $HTTP_ROOT !== '/') ? $HTTP_ROOT : '/';
-
 		date_default_timezone_set('UTC');
 		session_set_cookie_params([
 			'lifetime' => SESSION_LIFETIME,
-			'path'     => $cookiePath,
+			'path'     => self::cookiePath(),
 			'domain'   => '',
 			'secure'   => (bool) HTTPS,
 			'httponly' => true,
@@ -70,6 +67,14 @@ class Session
 		session_name('2Moons');
 
 		return true;
+	}
+
+	/**
+	 * Host-wide path so /react and /uniN/game.php share the session cookie.
+	 */
+	public static function cookiePath(): string
+	{
+		return '/';
 	}
 
 	static private function getTempPath()
@@ -420,6 +425,10 @@ class Session
 
 	public function selectActivePlanet()
 	{
+		if (defined('MODE') && MODE === 'API') {
+			return;
+		}
+
 		$httpData	= HTTP::_GP('cp', 0);
 
 		if(!empty($httpData))

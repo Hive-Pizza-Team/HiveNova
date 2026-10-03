@@ -15,6 +15,8 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\ApiJsonResponse;
+use HiveNova\Core\ApiRouteTable;
 use HiveNova\Core\Cache;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
@@ -48,7 +50,9 @@ error_reporting(E_ALL);
 date_default_timezone_set(@date_default_timezone_get());
 
 ini_set('display_errors', getenv('APP_ENV') === 'development' ? 1 : 0);
-header('Content-Type: text/html; charset=UTF-8');
+if (MODE !== 'API') {
+	header('Content-Type: text/html; charset=UTF-8');
+}
 define('TIMESTAMP',	time());
 
 require 'includes/constants.php';
@@ -72,6 +76,9 @@ if (MODE === 'INSTALL')
 }
 
 if(!file_exists('includes/config.php') || filesize('includes/config.php') === 0) {
+	if (MODE === 'API') {
+		ApiJsonResponse::sendError('install', 503);
+	}
 	HTTP::redirectTo('install/index.php');
 }
 
@@ -90,6 +97,9 @@ try {
 }
 
 if ($dbNeedsUpgrade) {
+    if (MODE === 'API') {
+        ApiJsonResponse::sendError('upgrade', 503);
+    }
     HTTP::redirectTo('install/index.php?mode=upgrade');
 }
 
@@ -118,8 +128,16 @@ try {
 }
 date_default_timezone_set($config->timezone);
 
+$apiPublic = false;
+if (MODE === 'API') {
+	$apiResource = ApiRouteTable::sanitizeResource((string) HTTP::_GP('r', 'bootstrap'));
+	if ($apiResource === '') {
+		$apiResource = 'bootstrap';
+	}
+	$apiPublic = ApiRouteTable::isPublic($apiResource);
+}
 
-if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
+if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON' || (MODE === 'API' && !$apiPublic))
 {
 	$session	= Session::load();
 
@@ -127,6 +145,9 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	if(!$session->isValidSession())
 	{
 	    $session->delete();
+		if (MODE === 'API') {
+			ApiJsonResponse::sendError('auth', 401);
+		}
 		HTTP::redirectTo('index.php?code=3');
 	}
 
@@ -167,6 +188,9 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	if(!(!$session->isValidSession() && isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)>=2 && MODE === 'INGAME'))
 	if(empty($USER))
 	{
+		if (MODE === 'API') {
+			ApiJsonResponse::sendError('auth', 401);
+		}
 		HTTP::redirectTo('index.php?code=3');
 	}
 
@@ -181,20 +205,29 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 			$session->delete();
 			HTTP::redirectTo('index.php');
 		}
+		if (MODE === 'API') {
+			ApiJsonResponse::sendError('closed', 403, (string) $config->close_reason);
+		}
 		// fullSide=false: closed-game path runs before $PLANET is loaded; full nav would crash getPlanet().
 		ShowErrorPage::printError($LNG['sys_closed_game'].'<br><br>'.$config->close_reason, null, null, false);
 	}
 
 	if($USER['bana'] == 1) {
+		if (MODE === 'API') {
+			ApiJsonResponse::sendError('banned', 403);
+		}
 		ShowErrorPage::printError("<font size=\"6px\">".$LNG['css_account_banned_message']."</font><br><br>".sprintf($LNG['css_account_banned_expire'], _date($LNG['php_tdformat'], $USER['banaday'], $USER['timezone']))."<br><br>".$LNG['css_goto_homeside'], null, null, false);
 	}
 
 	if(!(!$session->isValidSession() && isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)>=2 && MODE === 'INGAME'))
-	if (MODE === 'INGAME')
+	if (MODE === 'INGAME' || MODE === 'API')
 	{
 		$universeAmount	= count(Universe::availableUniverses());
 		if(Universe::current() != $USER['universe'] && $universeAmount > 1)
 		{
+			if (MODE === 'API') {
+				ApiJsonResponse::sendError('universe', 403);
+			}
 			HTTP::redirectToUniverse($USER['universe']);
 		}
 

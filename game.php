@@ -27,6 +27,7 @@ use HiveNova\Page\Game\ShowErrorPage;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Config;
 use HiveNova\Core\DatabaseSeasonStore;
+use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
 use HiveNova\Core\SeasonService;
 
@@ -47,6 +48,12 @@ if (isset($uniConfig->season_mode) && (int) $uniConfig->season_mode === 1 && iss
 
 if(!class_exists($fqcn)) {
 	ShowErrorPage::printError($LNG['page_doesnt_exist']);
+}
+
+if (isset($_COOKIE['hn_ui']) && $_COOKIE['hn_ui'] === 'react' && $page === 'overview'
+	&& (int) HTTP::_GP('stay', 0) === 0 && empty($_POST)
+	&& is_file(ROOT_PATH.'react/index.html')) {
+	HTTP::redirectTo('react/overview');
 }
 
 $pageObj	= new $fqcn;

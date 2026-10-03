@@ -30,6 +30,19 @@ class PlanetImageUtilTest extends TestCase
 		$this->assertSame('mond', PlanetImageUtil::remapLegacyImage('mond', -10, 10));
 	}
 
+	public function testHiveThemeImageKeepsFiveVariantCatalogAndClampsLegacy(): void
+	{
+		$this->assertSame('trockenplanet03', PlanetImageUtil::hiveThemeImage('trockenplanet03'));
+		$this->assertSame('trockenplanet05', PlanetImageUtil::hiveThemeImage('trockenplanet09'));
+		$this->assertSame(
+			'trockenplanet01',
+			PlanetImageUtil::hiveThemeImage('trockenplanet09', 240, 250)
+		);
+		$this->assertSame('mond', PlanetImageUtil::hiveThemeImage('mond'));
+		$this->assertSame('trockenplanet', PlanetImageUtil::hiveThemeImage('trockenplanet'));
+		$this->assertSame('eisplanet03', PlanetImageUtil::hiveThemeImage('eisplanet06'));
+	}
+
 	public function testCatalogTempRangeMatchesFiveBuckets(): void
 	{
 		$first = PlanetImageUtil::catalogTempRangeForVariant(1, 120, 260);

@@ -72,6 +72,30 @@ class PlanetImageUtil
 	}
 
 	/**
+	 * Hive theme ships variants 01–05. DB may still hold nova catalog 06–10.
+	 */
+	public static function hiveThemeImage(string $image, ?int $tempMin = null, ?int $tempMax = null): string
+	{
+		$familyKey = self::parseFamilyKey($image);
+		if ($familyKey === null) {
+			return $image;
+		}
+		if (preg_match('/planet(\d+)$/', $image, $matches) !== 1) {
+			return $image;
+		}
+		$n = (int) $matches[1];
+		if ($n >= 1 && $n <= self::VARIANT_COUNT) {
+			return $image;
+		}
+		if ($tempMin !== null && $tempMax !== null) {
+			return self::remapLegacyImage($image, $tempMin, $tempMax);
+		}
+		$variant = (int) max(1, min(self::VARIANT_COUNT, (int) ceil($n * self::VARIANT_COUNT / 10)));
+
+		return self::buildImageName($familyKey, $variant);
+	}
+
+	/**
 	 * @return array{tempMin: int, tempMax: int}
 	 */
 	public static function catalogTempRangeForVariant(int $variant, int $rangeMin, int $rangeMax): array

@@ -658,6 +658,17 @@ function exceptionHandler($exception)
 {
 	/** @var $exception ErrorException|Exception */
 
+	if (defined('MODE') && MODE === 'API') {
+		if (!headers_sent()) {
+			http_response_code(500);
+			header('Content-Type: application/json');
+			header('Cache-Control: no-store');
+		}
+		$message = getenv('APP_ENV') === 'development' ? $exception->getMessage() : '';
+		echo \HiveNova\Core\ApiJsonResponse::encodeError('server', $message);
+		exit;
+	}
+
 	if (\HiveNova\Core\RegisterUsernameCheckAccess::abortClosedIfAjaxConfigFault($exception)) {
 		return;
 	}

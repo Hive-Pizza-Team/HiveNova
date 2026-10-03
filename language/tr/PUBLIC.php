@@ -255,3 +255,4 @@ $LNG['lobby_cta_primary'] = 'Play free — Uni 1';
 $LNG['lobby_cta_season'] = 'Want a one-week season with Hive ranks? That\'s Uni 3 — needs Hive Keychain.';
 $LNG['uni_option_keychain_pizza'] = 'Needs Hive Keychain + PIZZA entry';
 $LNG['registerReferralInactive'] = 'Referral invites are turned off in this universe, so this signup will not credit a referrer.';
+$LNG['hn_try_new_ui'] = 'Try new UI';
