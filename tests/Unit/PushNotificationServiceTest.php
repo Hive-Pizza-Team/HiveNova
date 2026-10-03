@@ -320,14 +320,16 @@ class PushNotificationServiceTest extends TestCase
 		$this->assertSame('aesgcm', PushNotificationService::resolveContentEncoding('AESGCM'));
 	}
 
-	public function testSubscriptionCreatePayloadOmitsForcedEncoding(): void
+	public function testSubscriptionCreatePayloadDefaultsToAes128gcm(): void
 	{
 		$plain = PushNotificationService::subscriptionCreatePayload([
 			'endpoint' => 'https://fcm.googleapis.com/fcm/send/x',
 			'p256dh'   => 'pk',
 			'auth'     => 'ak',
 		]);
-		$this->assertArrayNotHasKey('contentEncoding', $plain);
+		$this->assertSame('aes128gcm', $plain['contentEncoding']);
+		$subscription = \Minishlink\WebPush\Subscription::create($plain);
+		$this->assertSame('aes128gcm', $subscription->getContentEncoding());
 
 		$with = PushNotificationService::subscriptionCreatePayload([
 			'endpoint'          => 'https://fcm.googleapis.com/fcm/send/x',
@@ -336,6 +338,52 @@ class PushNotificationServiceTest extends TestCase
 			'content_encoding'  => 'aes128gcm',
 		]);
 		$this->assertSame('aes128gcm', $with['contentEncoding']);
+
+		$legacy = PushNotificationService::subscriptionCreatePayload([
+			'endpoint'         => 'https://fcm.googleapis.com/fcm/send/x',
+			'p256dh'           => 'pk',
+			'auth'             => 'ak',
+			'contentEncoding'  => 'aesgcm',
+		]);
+		$this->assertSame('aesgcm', $legacy['contentEncoding']);
+	}
+
+	public function testSaveSubscriptionStoresBrowserContentEncoding(): void
+	{
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub): void {
+			$subscription = $this->validSubscription();
+			$subscription['contentEncoding'] = 'aes128gcm';
+
+			$this->assertTrue(PushNotificationService::saveSubscription(42, $subscription, 'Chrome'));
+			$stored = $stub->subscriptionsByEndpoint['https://fcm.googleapis.com/fcm/send/example'];
+			$this->assertSame('aes128gcm', $stored['content_encoding']);
+		});
+	}
+
+	public function testSaveSubscriptionFallsBackWhenEncodingColumnMissing(): void
+	{
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub): void {
+			$stub->rejectContentEncoding = true;
+			$logs = [];
+			PushNotificationService::setErrorLogger(static function (string $line) use (&$logs): void {
+				$logs[] = $line;
+			});
+			try {
+				$subscription = $this->validSubscription();
+				$subscription['contentEncoding'] = 'aes128gcm';
+				$this->assertTrue(PushNotificationService::saveSubscription(42, $subscription));
+				$endpoint = 'https://fcm.googleapis.com/fcm/send/example';
+				$this->assertArrayHasKey($endpoint, $stub->subscriptionsByEndpoint);
+				$this->assertArrayNotHasKey('content_encoding', $stub->subscriptionsByEndpoint[$endpoint]);
+				$this->assertNotEmpty($logs);
+
+				$this->assertTrue(PushNotificationService::saveSubscription(42, $subscription));
+				$this->assertSame(42, $stub->subscriptionsByEndpoint[$endpoint]['user_id']);
+				$this->assertGreaterThanOrEqual(2, count($logs));
+			} finally {
+				PushNotificationService::setErrorLogger(null);
+			}
+		});
 	}
 
 	public function testVapidKeysMatchForGeneratedPair(): void
