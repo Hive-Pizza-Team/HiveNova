@@ -135,7 +135,30 @@ class PublicSeoTest extends TestCase
 		$this->assertContains('rules', PublicSeo::SITEMAP_PAGES);
 		$this->assertContains('screens', PublicSeo::SITEMAP_PAGES);
 		$this->assertContains('battleHall', PublicSeo::SITEMAP_PAGES);
-		$this->assertContains('banList', PublicSeo::SITEMAP_PAGES);
+		$this->assertNotContains('banList', PublicSeo::SITEMAP_PAGES);
+		$this->assertSame('noindex, follow', PublicSeo::robotsContent('banList'));
+	}
+
+	public function testFooterLinksUseLocalizedTitlesAndLanguageUrls(): void
+	{
+		$lng = [
+			'siteTitleRegister'   => 'Register',
+			'siteTitleRules'      => 'Rules',
+			'siteTitleScreens'    => 'Screenshots',
+			'siteTitleBattleHall' => 'Hall of Fame',
+		];
+
+		$links = PublicSeo::footerLinks('https://moon.hive.pizza/', 'de', $lng);
+
+		$this->assertSame(
+			['Register', 'Rules', 'Screenshots', 'Hall of Fame'],
+			array_column($links, 'label')
+		);
+		$this->assertSame(
+			'https://moon.hive.pizza/index.php?page=rules&lang=de',
+			$links[1]['url']
+		);
+		$this->assertSame([], PublicSeo::footerLinks('https://moon.hive.pizza/', 'en', []));
 	}
 
 	public function testTwitterSiteHandle(): void
@@ -188,6 +211,9 @@ class PublicSeoTest extends TestCase
 		$this->assertSame('Hive Pizza Team', $data['publisher']['name']);
 		$this->assertSame('https://hive.pizza/', $data['publisher']['url']);
 		$this->assertSame(PublicSeo::entitySameAs(), $data['publisher']['sameAs']);
+		$this->assertSame('Organization', $data['contributor']['@type']);
+		$this->assertSame('Team Mithril', $data['contributor']['name']);
+		$this->assertSame('https://github.com/srbde', $data['contributor']['url']);
 		$this->assertArrayNotHasKey('aggregateRating', $data);
 		$this->assertArrayNotHasKey('reviewCount', $data);
 		$this->assertStringNotContainsString('\\/', $json);

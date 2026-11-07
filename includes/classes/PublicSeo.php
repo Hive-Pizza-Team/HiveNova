@@ -27,9 +27,16 @@ class PublicSeo
 		'rules',
 		'screens',
 		'battleHall',
-		'banList',
 		'disclamer',
 		'register',
+	];
+
+	/** Pages linked from the public footer (internal linking for crawlers and visitors). */
+	public const FOOTER_PAGES = [
+		'register',
+		'rules',
+		'screens',
+		'battleHall',
 	];
 
 	/** Twitter card @site handle (public lobby head tags). */
@@ -47,7 +54,6 @@ class PublicSeo
 		'screens',
 		'battleHall',
 		'disclamer',
-		'banList',
 	];
 
 	/**
@@ -237,6 +243,29 @@ class PublicSeo
 	}
 
 	/**
+	 * Footer links to the public marketing pages, in the visitor's language.
+	 *
+	 * @param object $LNG ArrayAccess language bag
+	 * @return list<array{url: string, label: string}>
+	 */
+	public static function footerLinks(string $basePath, string $lang, $LNG, string $defaultLang = 'en'): array
+	{
+		$links = [];
+		foreach (self::FOOTER_PAGES as $page) {
+			$key = self::PAGE_TITLE_KEYS[$page] ?? null;
+			if ($key === null || !isset($LNG[$key])) {
+				continue;
+			}
+			$links[] = [
+				'url'   => self::canonicalUrl($basePath, $page, $lang, $defaultLang),
+				'label' => (string) $LNG[$key],
+			];
+		}
+
+		return $links;
+	}
+
+	/**
 	 * Genuine public entity URLs for Google sameAs (lobby VideoGame / publisher).
 	 *
 	 * @return list<string>
@@ -283,6 +312,11 @@ class PublicSeo
 				'name'   => 'Hive Pizza Team',
 				'url'    => 'https://hive.pizza/',
 				'sameAs' => $sameAs,
+			],
+			'contributor' => [
+				'@type'  => 'Organization',
+				'name'   => 'Team Mithril',
+				'url'    => 'https://github.com/srbde',
 			],
 		], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 	}
