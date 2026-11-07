@@ -10,6 +10,7 @@ use HiveNova\Core\GameAssetPrefetchService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\LobbyActivityFeed;
 use HiveNova\Core\LoginUniverseDefaults;
+use HiveNova\Core\PublicSeo;
 use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
@@ -194,7 +195,16 @@ class ShowIndexPage extends AbstractLoginPage
 			);
 		}
 
+		$lobbyFaq = [];
+		for ($i = 1; $i <= 5; $i++) {
+			if (isset($LNG['lobby_faq_q'.$i], $LNG['lobby_faq_a'.$i])) {
+				$lobbyFaq[] = ['q' => (string) $LNG['lobby_faq_q'.$i], 'a' => (string) $LNG['lobby_faq_a'.$i]];
+			}
+		}
+
 		$this->assign(array(
+			'lobbyFaq'				=> $lobbyFaq,
+			'faqJsonLd'				=> PublicSeo::faqJsonLd($lobbyFaq),
 			'universeSelect'		=> $universeSelect,
 			'defaultUniverse'		=> $defaultEmailUniverse,
 			'defaultEmailUniverse'	=> $defaultEmailUniverse,

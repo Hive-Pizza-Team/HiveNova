@@ -1,10 +1,18 @@
 <footer>
+	{if !empty($footerLinks)}
+	<nav class="footer-inner footer-links" aria-label="{$gameName|escape}">
+		{foreach $footerLinks as $footerLink}
+		<a href="{$footerLink.url|escape}">{$footerLink.label|escape}</a>{if !$footerLink@last}
+		<span class="footer-sep">&bull;</span>{/if}
+		{/foreach}
+	</nav>
+	{/if}
 	<div class="footer-inner">
 		<span class="footer-powered">{$LNG.footerPoweredBy} <a href="https://hive.io" target="_blank"><img src="styles/resource/images/login/badge_powered-by-hive_dark.svg" alt="Hive" class="footer-hive-logo" width="51" height="18"></a></span>
 		<span class="footer-sep">&bull;</span>
 		<a href="https://github.com/Hive-Pizza-Team/HiveNova" title="HiveNova" target="_blank">HiveNova</a> 2026
 		<span class="footer-sep">&bull;</span>
-		<a href="https://thecrazygm.com/hivetools/utility/tipjar/mithril.pizza/1/hbd/support%20moon" target="_blank">Team Mithril</a> &amp; <a href="https://peakd.com/@hive.pizza" target="_blank">Hive Pizza Team</a>
+		<a href="https://tools.crypto-dreamr.com/tipjar/moon.records/1.000/hbd/Get%20mooned!" target="_blank">Team Mithril</a> &amp; <a href="https://peakd.com/@hive.pizza" target="_blank">Hive Pizza Team</a>
 		<span class="footer-sep">&bull;</span>
 		<a href="https://discord.gg/bP6ksCeEUk" title="Discord" target="_blank">Discord</a>
 	</div>

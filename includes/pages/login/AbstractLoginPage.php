@@ -228,6 +228,7 @@ abstract class AbstractLoginPage
 			'ogImageHeight'		=> 768,
 			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
+			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
 			'jsonLd'			=> $jsonLd,
 		));
 

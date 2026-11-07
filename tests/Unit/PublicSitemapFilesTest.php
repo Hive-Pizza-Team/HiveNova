@@ -22,7 +22,9 @@ class PublicSitemapFilesTest extends TestCase
 
 		$expected = [];
 		foreach (PublicSeo::SITEMAP_PAGES as $page) {
-			$expected[] = PublicSeo::canonicalUrl('https://moon.hive.pizza/', $page, 'en');
+			foreach (self::languageKeys() as $lang) {
+				$expected[] = PublicSeo::canonicalUrl('https://moon.hive.pizza/', $page, $lang);
+			}
 		}
 
 		sort($locs);
@@ -30,8 +32,56 @@ class PublicSitemapFilesTest extends TestCase
 
 		$this->assertSame($expected, $locs);
 		$this->assertNotContains('https://moon.hive.pizza/index.php?page=news', $locs);
+		$this->assertNotContains('https://moon.hive.pizza/index.php?page=banList', $locs);
 		$this->assertContains('https://moon.hive.pizza/', $locs);
 		$this->assertContains('https://moon.hive.pizza/index.php?page=disclamer', $locs);
+		$this->assertContains('https://moon.hive.pizza/index.php?page=rules&lang=de', $locs);
+	}
+
+	public function testSitemapXmlIsInSyncWithGenerator(): void
+	{
+		$raw = file_get_contents(ROOT_PATH.'sitemap.xml');
+		$this->assertIsString($raw);
+		$raw = str_replace("\r\n", "\n", $raw);
+		$this->assertSame(1, preg_match('#<lastmod>(\d{4}-\d{2}-\d{2})</lastmod>#', $raw, $m));
+
+		$this->assertSame(
+			PublicSeo::sitemapXml('https://moon.hive.pizza/', self::languageKeys(), $m[1]),
+			$raw,
+			'sitemap.xml is stale; run: php scripts/generate-sitemap.php --lastmod='.$m[1]
+		);
+	}
+
+	public function testSitemapXmlCarriesHreflangAlternatesAndLastmod(): void
+	{
+		$xml = PublicSeo::sitemapXml('https://moon.hive.pizza/', ['en', 'de'], '2026-01-02');
+		$doc = simplexml_load_string($xml);
+		$this->assertNotFalse($doc);
+
+		$this->assertCount(count(PublicSeo::SITEMAP_PAGES) * 2, $doc->url);
+		$this->assertSame('2026-01-02', (string) $doc->url[0]->lastmod);
+		$this->assertStringNotContainsString('<changefreq>', $xml);
+		$this->assertStringNotContainsString('<priority>', $xml);
+
+		// Attributes are in no namespace. Array access on an xhtml-namespaced
+		// element looks them up in that namespace and returns empty strings.
+		$hreflangs = [];
+		foreach ($doc->url[0]->children('http://www.w3.org/1999/xhtml') as $link) {
+			$attrs = $link->attributes();
+			$hreflangs[(string) $attrs['hreflang']] = (string) $attrs['href'];
+		}
+		$this->assertSame(['en', 'de', 'x-default'], array_keys($hreflangs));
+		$this->assertSame('https://moon.hive.pizza/', $hreflangs['x-default']);
+		$this->assertSame('https://moon.hive.pizza/index.php?lang=de', $hreflangs['de']);
+	}
+
+	/** @return list<string> */
+	private static function languageKeys(): array
+	{
+		$keys = array_map('basename', glob(ROOT_PATH.'language/*', GLOB_ONLYDIR));
+		sort($keys);
+
+		return $keys;
 	}
 
 	public function testSitemapIndexIsXmlNotHtml(): void
