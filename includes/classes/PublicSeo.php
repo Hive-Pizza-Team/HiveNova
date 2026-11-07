@@ -243,6 +243,36 @@ class PublicSeo
 	}
 
 	/**
+	 * sitemap.xml body: one <url> per page per language, each carrying the full
+	 * hreflang alternate set (including x-default) so translations are discoverable.
+	 *
+	 * @param list<string> $langKeys
+	 */
+	public static function sitemapXml(string $basePath, array $langKeys, string $lastmod, string $defaultLang = 'en'): string
+	{
+		$esc = static fn (string $s): string => htmlspecialchars($s, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+		$languages = array_fill_keys($langKeys, '');
+
+		$xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+			.'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'."\n";
+
+		foreach (self::SITEMAP_PAGES as $page) {
+			$alternates = self::hreflangUrls($basePath, $page, $languages, $defaultLang);
+			foreach ($langKeys as $langKey) {
+				$xml .= "\t<url>\n"
+					."\t\t<loc>".$esc(self::canonicalUrl($basePath, $page, $langKey, $defaultLang))."</loc>\n"
+					."\t\t<lastmod>".$esc($lastmod)."</lastmod>\n";
+				foreach ($alternates as $code => $href) {
+					$xml .= "\t\t".'<xhtml:link rel="alternate" hreflang="'.$esc((string) $code).'" href="'.$esc($href).'"/>'."\n";
+				}
+				$xml .= "\t</url>\n";
+			}
+		}
+
+		return $xml."</urlset>\n";
+	}
+
+	/**
 	 * Footer links to the public marketing pages, in the visitor's language.
 	 *
 	 * @param object $LNG ArrayAccess language bag
