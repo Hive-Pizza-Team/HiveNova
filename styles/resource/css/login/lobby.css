@@ -319,6 +319,59 @@
 		0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
+.lobby-h1 {
+	display: contents;
+}
+
+.lobby-about {
+	margin: 0 0 28px;
+	padding: 18px 18px 14px;
+	background: rgba(5, 14, 24, 0.72);
+	border: 1px solid rgba(227, 19, 55, 0.28);
+	border-radius: 14px;
+	color: #b7cfe0;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.lobby-about h2 {
+	margin: 18px 0 8px;
+	font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+	font-size: 18px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #fff;
+}
+
+.lobby-about-intro {
+	margin: 0;
+	max-width: 52rem;
+	font-size: 15px;
+}
+
+.lobby-how {
+	margin: 0;
+	padding-left: 18px;
+}
+
+.lobby-how strong,
+.lobby-faq dt {
+	color: #fff;
+}
+
+.lobby-faq {
+	margin: 0;
+}
+
+.lobby-faq dt {
+	margin-top: 10px;
+	font-weight: 700;
+}
+
+.lobby-faq dd {
+	margin: 2px 0 0;
+}
+
 .lobby-alive {
 	margin: 0 0 28px;
 	padding: 18px 18px 14px;

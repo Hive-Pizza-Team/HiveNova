@@ -315,6 +315,28 @@ class PublicSeo
 	}
 
 	/**
+	 * FAQPage JSON-LD. Only emit for Q&A pairs that are also visible on the page.
+	 *
+	 * @param list<array{q: string, a: string}> $items
+	 */
+	public static function faqJsonLd(array $items): string
+	{
+		if ($items === []) {
+			return '';
+		}
+
+		return json_encode([
+			'@context'   => 'https://schema.org',
+			'@type'      => 'FAQPage',
+			'mainEntity' => array_map(static fn (array $item): array => [
+				'@type'          => 'Question',
+				'name'           => $item['q'],
+				'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']],
+			], $items),
+		], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+	}
+
+	/**
 	 * JSON-LD for the public lobby homepage (VideoGame + nested publisher).
 	 */
 	public static function indexJsonLd(string $gameName, string $canonicalUrl, string $description, string $imageUrl): string

@@ -3,8 +3,7 @@
 <div class="lobby">
 	<section class="lobby-hero" aria-label="{$gameName|escape}">
 		<div class="lobby-hero-brand">
-			<p class="lobby-kicker">{$LNG.lobby_kicker}</p>
-			<h1 class="lobby-title">{$gameName|escape}</h1>
+			<h1 class="lobby-h1"><span class="lobby-kicker">{$LNG.lobby_kicker}</span> <span class="lobby-title">{$gameName|escape}</span></h1>
 			<p class="lobby-hero-hook">{$lobbyHook} <span class="lobby-hero-hook-em">{$lobbyHookEm}</span></p>
 			<p class="lobby-tagline">{$LNG.lobby_tagline|default:$descText}</p>
 			<div class="lobby-cta-row">
@@ -28,6 +27,25 @@
 				</ul>
 			</figcaption>
 		</figure>
+	</section>
+
+	<section class="lobby-about" aria-labelledby="lobby-how-heading">
+		<p class="lobby-about-intro">{$LNG.lobby_about_intro|escape}</p>
+		<h2 id="lobby-how-heading">{$LNG.lobby_how_title|escape}</h2>
+		<ul class="lobby-how">
+			<li><strong>{$LNG.lobby_how_build_title|escape}</strong> {$LNG.lobby_how_build|escape}</li>
+			<li><strong>{$LNG.lobby_how_fight_title|escape}</strong> {$LNG.lobby_how_fight|escape}</li>
+			<li><strong>{$LNG.lobby_how_pace_title|escape}</strong> {$LNG.lobby_how_pace|escape}</li>
+		</ul>
+		{if !empty($lobbyFaq)}
+		<h2 id="lobby-faq-heading">{$LNG.lobby_faq_title|escape}</h2>
+		<dl class="lobby-faq" aria-labelledby="lobby-faq-heading">
+			{foreach $lobbyFaq as $faq}
+			<dt>{$faq.q|escape}</dt>
+			<dd>{$faq.a|escape}</dd>
+			{/foreach}
+		</dl>
+		{/if}
 	</section>
 
 	<section class="lobby-alive" aria-labelledby="lobby-feed-heading">

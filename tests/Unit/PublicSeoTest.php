@@ -161,6 +161,24 @@ class PublicSeoTest extends TestCase
 		$this->assertSame([], PublicSeo::footerLinks('https://moon.hive.pizza/', 'en', []));
 	}
 
+	public function testFaqJsonLdMirrorsVisibleQuestions(): void
+	{
+		$this->assertSame('', PublicSeo::faqJsonLd([]));
+
+		$json = PublicSeo::faqJsonLd([
+			['q' => 'Is MOON free?', 'a' => 'Yes. <b>No</b> download.'],
+			['q' => 'Mobile?', 'a' => 'Yes.'],
+		]);
+		$data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+		$this->assertSame('FAQPage', $data['@type']);
+		$this->assertCount(2, $data['mainEntity']);
+		$this->assertSame('Question', $data['mainEntity'][0]['@type']);
+		$this->assertSame('Is MOON free?', $data['mainEntity'][0]['name']);
+		$this->assertSame('Answer', $data['mainEntity'][0]['acceptedAnswer']['@type']);
+		$this->assertStringNotContainsString('<b>', $json);
+	}
+
 	public function testTwitterSiteHandle(): void
 	{
 		$this->assertSame('@PizzaOnHive', PublicSeo::TWITTER_SITE);
