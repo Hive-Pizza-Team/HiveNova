@@ -3,7 +3,7 @@
 <div class="lobby">
 	<section class="lobby-hero" aria-label="{$gameName|escape}">
 		<div class="lobby-hero-brand">
-			<h1 class="lobby-h1"><span class="lobby-kicker">{$LNG.lobby_kicker}</span> <span class="lobby-title">{$gameName|escape}</span></h1>
+			<h1 class="lobby-h1"><span class="lobby-kicker">{$LNG.lobby_kicker}</span><span class="lobby-title">{$gameName|escape}</span></h1>
 			<p class="lobby-hero-hook">{$lobbyHook} <span class="lobby-hero-hook-em">{$lobbyHookEm}</span></p>
 			<p class="lobby-tagline">{$LNG.lobby_tagline|default:$descText}</p>
 			<div class="lobby-cta-row">

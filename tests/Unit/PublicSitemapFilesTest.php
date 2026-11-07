@@ -63,10 +63,12 @@ class PublicSitemapFilesTest extends TestCase
 		$this->assertStringNotContainsString('<changefreq>', $xml);
 		$this->assertStringNotContainsString('<priority>', $xml);
 
-		$links = $doc->url[0]->children('xhtml', true);
+		// Attributes are in no namespace. Array access on an xhtml-namespaced
+		// element looks them up in that namespace and returns empty strings.
 		$hreflangs = [];
-		foreach ($links->link as $link) {
-			$hreflangs[(string) $link['hreflang']] = (string) $link['href'];
+		foreach ($doc->url[0]->children('http://www.w3.org/1999/xhtml') as $link) {
+			$attrs = $link->attributes();
+			$hreflangs[(string) $attrs['hreflang']] = (string) $attrs['href'];
 		}
 		$this->assertSame(['en', 'de', 'x-default'], array_keys($hreflangs));
 		$this->assertSame('https://moon.hive.pizza/', $hreflangs['x-default']);

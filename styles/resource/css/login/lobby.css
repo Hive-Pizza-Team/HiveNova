@@ -320,7 +320,11 @@
 }
 
 .lobby-h1 {
-	display: contents;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 14px;
+	margin: 0;
 }
 
 .lobby-about {
