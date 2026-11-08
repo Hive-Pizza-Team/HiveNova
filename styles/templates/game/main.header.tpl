@@ -8,6 +8,7 @@
 <head>
 	<title>{block name="title"} - {$uni_name} - {$game_name}{/block}</title>
 	<meta charset="utf-8">
+	<script src="https://analytics.thecrazygm.com/api/script.js" data-site-id="bd1ff2de3096" defer></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 	<link rel="manifest" href="manifest.php?uni={$USER.universe}">
 	<meta name="theme-color" content="#1a1a2e">
