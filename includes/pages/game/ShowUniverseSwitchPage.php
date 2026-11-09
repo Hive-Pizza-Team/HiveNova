@@ -26,7 +26,7 @@ class ShowUniverseSwitchPage extends AbstractGamePage
 
 	function show()
 	{
-		global $USER;
+		global $USER, $LNG;
 
 		$accounts = $this->switchService->listLinkedAccounts(
 			$USER,
@@ -36,6 +36,19 @@ class ShowUniverseSwitchPage extends AbstractGamePage
 				return (string) Config::get($universeId)->uni_name;
 			}
 		);
+
+		foreach ($accounts as &$account) {
+			$account['universeIdLabel'] = sprintf(
+				(string) ($LNG['us_universe_id'] ?? 'Universe %s'),
+				(string) $account['universeId']
+			);
+			$account['confirmMessage'] = sprintf(
+				(string) ($LNG['us_confirm'] ?? 'Leave this universe session and enter %s as %s?'),
+				(string) $account['universeName'],
+				(string) $account['username']
+			);
+		}
+		unset($account);
 
 		$switchable = array_values(array_filter(
 			$accounts,
