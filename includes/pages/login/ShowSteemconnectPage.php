@@ -6,6 +6,7 @@ use HiveNova\Auth\SteemconnectAuth;
 use HiveNova\Auth\externalAuth;
 
 use HiveNova\Core\Session;
+use HiveNova\Core\UserLanguageService;
 
 /**
  *  SteemNova
@@ -66,6 +67,7 @@ class ShowSteemconnectPage extends AbstractLoginPage
 		$session->data			= $authObj->getAccountData();
 		Session::regenerateId();
 		$session->save();
+		UserLanguageService::syncFromLobbyOnLogin((int) $loginData['id']);
 		$this->redirectTo("game.php");	
 	}
 }

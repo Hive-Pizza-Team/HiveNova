@@ -25,6 +25,7 @@ use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\Session;
 use HiveNova\Core\Theme;
 use HiveNova\Core\Universe;
+use HiveNova\Core\UserLanguageService;
 use HiveNova\Page\Game\ShowErrorPage;
 
 if (isset($_POST['GLOBALS']) || isset($_GET['GLOBALS'])) {
@@ -168,6 +169,10 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	if(empty($USER))
 	{
 		HTTP::redirectTo('index.php?code=3');
+	}
+
+	if (!empty($USER['id'])) {
+		UserLanguageService::applyExplicitRequestToUser($USER);
 	}
 
 	$LNG	= new Language($USER['lang']);

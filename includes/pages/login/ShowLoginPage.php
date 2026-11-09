@@ -9,6 +9,7 @@ use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\HiveUtil;
+use HiveNova\Core\UserLanguageService;
 
 /**
  *  2Moons 
@@ -91,6 +92,8 @@ class ShowLoginPage extends AbstractLoginPage
 			$session->adminAccess	= 0;
 			Session::regenerateId();
 			$session->save();
+
+			UserLanguageService::syncFromLobbyOnLogin((int) $loginData['id']);
 
 			HTTP::redirectTo('game.php');
 		}
