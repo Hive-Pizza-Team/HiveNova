@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\DatabaseSeasonGrantBadgeSource;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
@@ -78,7 +79,11 @@ class ShowPlayerCardPage extends AbstractGamePage
 		}
 
 		$months = $LNG['months'] ?? [];
-		$prestige = (new PrestigeBadgeService())->forProfile($query, array(
+		$prestige = (new PrestigeBadgeService(
+			null,
+			null,
+			new DatabaseSeasonGrantBadgeSource()
+		))->forProfile($query, array(
 			'member_since' => (string) ($LNG['pl_member_since'] ?? 'Member since %s'),
 			'hive_linked'  => (string) ($LNG['pl_hive_linked'] ?? 'Hive: @%s'),
 			'hp_range'     => (string) ($LNG['pl_prestige_hp_range'] ?? '%1$s — %2$s–%3$s HP'),

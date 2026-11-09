@@ -21,6 +21,7 @@
     {if $smarty.const.MODULE_RECORDS|isModuleAvailable}<li><a href="game.php?page=records"{if $navPage == 'records'} class="active"{/if}>{$LNG.lm_records}</a></li>{/if}
     {if $smarty.const.MODULE_BATTLEHALL|isModuleAvailable}<li><a href="game.php?page=battleHall"{if $navPage == 'battleHall'} class="active"{/if}>{$LNG.lm_topkb}</a></li>{/if}
     {if $smarty.const.MODULE_ACHIEVEMENTS|isModuleAvailable}<li><a href="game.php?page=achievements"{if $navPage == 'achievements'} class="active"{/if}>{$LNG.lm_achievements}</a></li>{/if}
+    <li><a href="game.php?page=medals"{if $navPage == 'medals' || $navPage == 'nfts'} class="active"{/if}>{$LNG.lm_medals}</a></li>
     <li><a href="game.php?page=viz"{if $navPage == 'viz'} class="active"{/if}>{$LNG.lm_viz}</a></li>
     <li><a href="game.php?page=eventFirehose"{if $navPage == 'eventFirehose'} class="active"{/if}>{$LNG.ef_title}</a></li>
     {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=trader"{if $navPage == 'trader'} class="active"{/if}>{$LNG.lm_trader}</a></li>{/if}
