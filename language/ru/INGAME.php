@@ -1523,3 +1523,6 @@ $LNG['pl_hive_linked'] = 'Hive: @%s';
 $LNG['pl_prestige_hp_range'] = '%1$s — %2$s–%3$s HP';
 $LNG['pl_prestige_hp_open'] = '%1$s — %2$s+ HP';
 $LNG['pl_prestige_pizza_open'] = '%1$s — %2$s+ PIZZA staked';
+$LNG['push_fleet_return_title'] = 'Fleet returned';
+$LNG['push_fleet_return_body'] = '%s returned to %s [%d:%d:%d]';
+$LNG['push_fleet_return_body_many'] = '%s returned to %s and %d more fleets are home';
