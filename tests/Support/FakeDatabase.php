@@ -47,6 +47,24 @@ class FakeDatabase implements DatabaseInterface
      */
     public array $eventFleetFollowUps = [];
 
+    /**
+     * Due fleet_event rows for FleetEventDrainService lock/unlock passes.
+     *
+     * @var list<array{fleetID: int, time: int, lock: ?string}>
+     */
+    public array $fleetEvents = [];
+
+    /**
+     * Queued rowCounts for successive FLEETS_EVENT lock UPDATEs when fleetEvents
+     * is empty (simple drain-loop tests).
+     *
+     * @var list<int>
+     */
+    public array $fleetEventLockCounts = [];
+
+    /** @var list<array{sql: string, params: array<string, mixed>}> */
+    public array $fleetEventUpdates = [];
+
     public ?int $lastRowCount = null;
 
     public int $transactionDepth = 0;
@@ -445,6 +463,56 @@ class FakeDatabase implements DatabaseInterface
 
     public function update($qry, array $params = [])
     {
+        if (str_contains($qry, '%%FLEETS_EVENT%%')) {
+            $this->fleetEventUpdates[] = ['sql' => $qry, 'params' => $params];
+            if (str_contains($qry, '`lock` = :token') && str_contains($qry, '`lock` IS NULL')) {
+                if ($this->fleetEvents !== []) {
+                    $locked = 0;
+                    $now = (int) ($params[':time'] ?? 0);
+                    $token = (string) ($params[':token'] ?? '');
+                    foreach ($this->fleetEvents as &$event) {
+                        if (($event['lock'] ?? null) !== null) {
+                            continue;
+                        }
+                        if ((int) ($event['time'] ?? 0) > $now) {
+                            continue;
+                        }
+                        $event['lock'] = $token;
+                        $locked++;
+                    }
+                    unset($event);
+                    $this->lastRowCount = $locked;
+                } else {
+                    $this->lastRowCount = (int) array_shift($this->fleetEventLockCounts);
+                }
+                return true;
+            }
+            if (str_contains($qry, '`lock` = NULL') && str_contains($qry, '`lock` = :token')) {
+                $token = (string) ($params[':token'] ?? '');
+                $failed = [];
+                foreach ($params as $key => $value) {
+                    if (str_starts_with((string) $key, ':failed')) {
+                        $failed[] = (int) $value;
+                    }
+                }
+                $cleared = 0;
+                foreach ($this->fleetEvents as &$event) {
+                    if (($event['lock'] ?? null) !== $token) {
+                        continue;
+                    }
+                    if ($failed !== [] && in_array((int) $event['fleetID'], $failed, true)) {
+                        continue;
+                    }
+                    $event['lock'] = null;
+                    $cleared++;
+                }
+                unset($event);
+                $this->lastRowCount = $cleared;
+                return true;
+            }
+            $this->lastRowCount = 0;
+            return true;
+        }
         if (str_contains($qry, '%%SALVAGE_PACKAGES%%')) {
             $this->lastRowCount = 0;
             foreach ($this->salvagePackages as &$row) {
