@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\EnergyBalanceService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\ImperiumView;
 use HiveNova\Core\ResourceUpdate;
@@ -140,6 +141,7 @@ class ShowImperiumPage extends AbstractGamePage
 			'resource'         => array(),
 			'resourcePerHour'  => array(),
 			'energyAvailable'  => array(),
+			'energyConsumed'   => array(),
 			'planet_type'      => array(),
 		);
 
@@ -158,8 +160,11 @@ class ShowImperiumPage extends AbstractGamePage
 			$planetList['resource'][RESOURCE_CRYSTAL][$Planet['id']] = $Planet['crystal'];
 			$planetList['resource'][RESOURCE_DEUTERIUM][$Planet['id']] = $Planet['deuterium'];
 			$planetList['resource'][RESOURCE_ENERGY][$Planet['id']] = $Planet['energy'];
-			$planetList['energyAvailable'][$Planet['id']] = ImperiumView::energyAvailable(
+			$planetList['energyAvailable'][$Planet['id']] = EnergyBalanceService::available(
 				$Planet['energy'] ?? 0,
+				$Planet['energy_used'] ?? 0
+			);
+			$planetList['energyConsumed'][$Planet['id']] = EnergyBalanceService::consumed(
 				$Planet['energy_used'] ?? 0
 			);
 

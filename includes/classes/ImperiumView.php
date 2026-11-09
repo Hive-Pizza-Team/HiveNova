@@ -10,11 +10,11 @@ use ArrayAccess;
 class ImperiumView
 {
 	/**
-	 * Available energy as shown in the top bar: produced + used (used is ≤ 0).
+	 * Available energy: produced + used (energy_used ≤ 0 by convention).
 	 */
 	public static function energyAvailable(float|int|string $energy, float|int|string $energyUsed): float
 	{
-		return (float) $energy + (float) $energyUsed;
+		return EnergyBalanceService::available($energy, $energyUsed);
 	}
 
 	/**

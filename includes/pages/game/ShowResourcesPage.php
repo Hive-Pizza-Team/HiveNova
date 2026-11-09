@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\EnergyBalanceService;
 use HiveNova\Core\PlanetProductionBonus;
 use HiveNova\Core\ResourceUpdate;
 
@@ -195,11 +196,18 @@ class ShowResourcesPage extends AbstractGamePage
 			911	=> $basicIncome[911] * $config->energySpeed,
 		);
 		
+		$energySummary = EnergyBalanceService::resourcesSummary(
+			$PLANET[$resource[911]],
+			$PLANET[$resource[911].'_used'],
+			$basicProduction[911]
+		);
+
 		$totalProduction	= array(
 			901 => $PLANET[$resource[901].'_perhour'] + $basicProduction[901],
 			902 => $PLANET[$resource[902].'_perhour'] + $basicProduction[902],
 			903	=> $PLANET[$resource[903].'_perhour'] + $basicProduction[903],
-			911	=> $PLANET[$resource[911]] + $basicProduction[911] + $PLANET[$resource[911].'_used'],
+			// Same available balance as the header / Empire (not an hourly stock).
+			911	=> $energySummary['available'],
 		);
 		
 		$bonusProduction	= array(
@@ -213,14 +221,14 @@ class ShowResourcesPage extends AbstractGamePage
 			901 => $totalProduction[901] * 24,
 			902 => $totalProduction[902] * 24,
 			903	=> $totalProduction[903] * 24,
-			911	=> $totalProduction[911],
+			911	=> $energySummary['daily'],
 		);
 		
 		$weeklyProduction	= array(
 			901 => $totalProduction[901] * 168,
 			902 => $totalProduction[902] * 168,
 			903	=> $totalProduction[903] * 168,
-			911	=> $totalProduction[911],
+			911	=> $energySummary['weekly'],
 		);
 			
 		$prodSelector	= array();
@@ -238,6 +246,8 @@ class ShowResourcesPage extends AbstractGamePage
 			'bonusProduction'	=> $bonusProduction,
 			'dailyProduction'	=> $dailyProduction,
 			'weeklyProduction'	=> $weeklyProduction,
+			'energyConsumed'		=> $energySummary['consumed'],
+			'energyProduced'		=> $energySummary['produced'],
 			'storage'			=> $storage,
 		));
 		
