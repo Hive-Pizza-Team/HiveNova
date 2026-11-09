@@ -14,6 +14,7 @@ class PublicSeo
 		'rules'        => 'siteTitleRules',
 		'screens'      => 'siteTitleScreens',
 		'battleHall'   => 'siteTitleBattleHall',
+		'battle'       => 'siteTitleBattleHall',
 		'banList'      => 'siteTitleBanList',
 		'disclamer'    => 'siteTitleDisclamer',
 		'register'     => 'siteTitleRegister',
@@ -27,6 +28,7 @@ class PublicSeo
 		'rules',
 		'screens',
 		'battleHall',
+		'battle',
 		'disclamer',
 		'register',
 	];
