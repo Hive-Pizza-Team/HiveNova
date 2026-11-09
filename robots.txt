@@ -6,4 +6,4 @@ Disallow: /admin.php
 Disallow: /game.php
 Disallow: /cronjob.php
 
-Sitemap: https://moon.hive.pizza/sitemap.xml
+Sitemap: https://moonsiege.com/sitemap.xml

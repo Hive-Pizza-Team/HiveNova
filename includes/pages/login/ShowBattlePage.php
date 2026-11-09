@@ -4,6 +4,7 @@ namespace HiveNova\Page\Login;
 
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\Language;
 use HiveNova\Core\PublicBattleReportService;
 use HiveNova\Core\PublicSeo;
 
@@ -26,12 +27,15 @@ class ShowBattlePage extends AbstractLoginPage
 		$rid = trim((string) HTTP::_GP('rid', ''));
 		$service = new PublicBattleReportService();
 		$payload = $rid !== '' ? $service->loadPublicReport($rid) : null;
+		$seoBase = PublicSeo::canonicalBasePath();
+		$lang = $LNG->getLanguage();
 
 		if ($payload === null) {
 			$this->seoAllowIndex = false;
 			$this->assign([
 				'reportFound' => false,
-				'ctaHref'     => 'index.php?page=register&ref=1&src=battlereport',
+				'ctaHref'     => PublicSeo::signupCtaUrl('battlereport'),
+				'hallHref'    => PublicSeo::canonicalUrl($seoBase, 'battleHall', $lang),
 			]);
 			$this->display('page.battle.default.tpl');
 			return;
@@ -42,19 +46,34 @@ class ShowBattlePage extends AbstractLoginPage
 		$defender = (string) $hall['defender'];
 		$unitsCompact = PublicBattleReportService::formatCompactUnits($hall['units']);
 		$when = _date($LNG['php_tdformat'], (int) $hall['time']);
-
-		$titleTpl = (string) ($LNG['metaTitleBattleReport'] ?? '%s vs %s: %s units | %s Battle Hall');
 		$gameName = (string) Config::get()->game_name;
-		$attackerLabel = $attacker !== '' ? $attacker : '?';
-		$defenderLabel = $defender !== '' ? $defender : '?';
-		$this->seoDocumentTitle = sprintf($titleTpl, $attackerLabel, $defenderLabel, $unitsCompact, $gameName);
-		$descTpl = (string) ($LNG['metaDescriptionBattleReport'] ?? 'Battle report: %s vs %s (%s units) on %s. Play free on the frontier.');
-		$this->seoMetaDescription = sprintf($descTpl, $attackerLabel, $defenderLabel, $unitsCompact, $gameName);
 
-		$basePath = PROTOCOL.HTTP_HOST.HTTP_BASE;
-		$baseCanonical = PublicSeo::canonicalUrl($basePath, 'battle', $LNG->getLanguage());
-		$sep = str_contains($baseCanonical, '?') ? '&' : '?';
-		$this->seoCanonicalUrl = $baseCanonical.$sep.'rid='.rawurlencode($hall['rid']);
+		$this->seoDocumentTitle = PublicSeo::battleReportDocumentTitle(
+			$attacker,
+			$defender,
+			$unitsCompact,
+			$gameName,
+			$LNG
+		);
+		$this->seoMetaDescription = PublicSeo::battleReportMetaDescription(
+			$attacker,
+			$defender,
+			$unitsCompact,
+			$when,
+			$gameName,
+			$LNG
+		);
+		$this->seoCanonicalUrl = PublicSeo::battleReportUrl($seoBase, (string) $hall['rid'], $lang);
+		$this->setSeoMeta([
+			'hreflangUrls' => PublicSeo::hreflangUrls(
+				$seoBase,
+				'battle',
+				Language::getAllowedLangs(false),
+				'en',
+				['rid' => (string) $hall['rid']]
+			),
+			'pageHeading' => $this->seoDocumentTitle,
+		]);
 
 		$this->assign([
 			'reportFound'  => true,
@@ -64,8 +83,8 @@ class ShowBattlePage extends AbstractLoginPage
 			'defender'     => $defender,
 			'unitsCompact' => $unitsCompact,
 			'battleTime'   => $when,
-			'ctaHref'      => 'index.php?page=register&ref=1&src=battlereport',
-			'hallHref'     => 'index.php?page=battleHall',
+			'ctaHref'      => PublicSeo::signupCtaUrl('battlereport'),
+			'hallHref'     => PublicSeo::canonicalUrl($seoBase, 'battleHall', $lang),
 		]);
 		$this->display('page.battle.default.tpl');
 	}

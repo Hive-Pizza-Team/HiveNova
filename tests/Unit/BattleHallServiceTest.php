@@ -125,4 +125,50 @@ class BattleHallServiceTest extends TestCase
 
 		$this->assertStringContainsString('LIMIT 100', $db->selects[0][0]);
 	}
+
+	public function testFindByRidReturnsNullForUnknown(): void
+	{
+		$db = new class extends RecordingDatabase {
+			public function selectSingle($qry, array $params = array(), $field = null)
+			{
+				$this->selectSingles[] = [$qry, $params];
+				return [];
+			}
+		};
+		$this->swapDatabaseInstance($db);
+		$this->assertNull((new BattleHallService($db))->findByRid('missing'));
+		$this->assertNull((new BattleHallService($db))->findByRid(''));
+	}
+
+	public function testFindByRidAssemblesSides(): void
+	{
+		$db = new class extends RecordingDatabase {
+			public function selectSingle($qry, array $params = array(), $field = null)
+			{
+				return [
+					'rid' => 'abc',
+					'units' => 5000,
+					'result' => 'a',
+					'time' => 1700000000,
+					'universe' => 1,
+				];
+			}
+			public function select($qry, array $params = array())
+			{
+				return [
+					['rid' => 'abc', 'role' => 1, 'names' => 'Alice'],
+					['rid' => 'abc', 'role' => 2, 'names' => 'Bob'],
+				];
+			}
+			public function quote($str)
+			{
+				return "'" . addslashes((string) $str) . "'";
+			}
+		};
+		$this->swapDatabaseInstance($db);
+		$row = (new BattleHallService($db))->findByRid('abc');
+		$this->assertSame('Alice', $row['attacker']);
+		$this->assertSame('Bob', $row['defender']);
+		$this->assertSame(1, $row['universe']);
+	}
 }
