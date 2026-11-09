@@ -15,28 +15,38 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-$token	= getRandomString();
-$db		= \HiveNova\Core\Database::get();
+$db = \HiveNova\Core\Database::get();
 
-$fleetResult	= $db->update("UPDATE %%FLEETS_EVENT%% SET `lock` = :token WHERE `lock` IS NULL AND `time` <= :time;", array(
-	':time'		=> TIMESTAMP,
-	':token'	=> $token
-));
+// One request can need TargetEvent → EndStayEvent → ReturnEvent when a player
+// returns after fleet_end_stay / fleet_end_time are already past. Drain due
+// events until none remain (or a safety cap) so Hold fleets are not left stuck.
+$maxPasses = 5;
+for ($pass = 0; $pass < $maxPasses; $pass++) {
+	$token = getRandomString();
+	$db->update(
+		'UPDATE %%FLEETS_EVENT%% SET `lock` = :token WHERE `lock` IS NULL AND `time` <= :time;',
+		[
+			':time' => TIMESTAMP,
+			':token' => $token,
+		]
+	);
 
-if($db->rowCount() !== 0) {
-	
-	
-	$fleetObj	= new \HiveNova\Core\FlyingFleetHandler();
+	if ($db->rowCount() === 0) {
+		break;
+	}
+
+	$fleetObj = new \HiveNova\Core\FlyingFleetHandler();
 	$fleetObj->setToken($token);
 	$failedFleetIds = $fleetObj->run();
 
 	if ($failedFleetIds === []) {
-		$db->update("UPDATE %%FLEETS_EVENT%% SET `lock` = NULL WHERE `lock` = :token;", array(
-			':token' => $token
-		));
+		$db->update(
+			'UPDATE %%FLEETS_EVENT%% SET `lock` = NULL WHERE `lock` = :token;',
+			[':token' => $token]
+		);
 	} else {
-		$placeholders = array();
-		$params = array(':token' => $token);
+		$placeholders = [];
+		$params = [':token' => $token];
 		foreach ($failedFleetIds as $index => $fleetId) {
 			$key = ':failed'.$index;
 			$placeholders[] = $key;

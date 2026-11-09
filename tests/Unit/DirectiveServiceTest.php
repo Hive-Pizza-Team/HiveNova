@@ -98,11 +98,10 @@ class DirectiveServiceTest extends TestCase
 			}
 		}
 		$this->assertIsArray($defensive);
-		$this->assertSame(['defense_complete' => 6], $defensive['targets']);
-		$this->assertArrayNotHasKey('hold_success', $defensive['targets']);
+		$this->assertSame(['defense_complete' => 6, 'hold_success' => 1], $defensive['targets']);
 	}
 
-	public function testBriefingClaimsDefensiveWhenDefensesAlreadyMetWithoutHold(): void
+	public function testBriefingDoesNotCompleteDefensiveUntilHoldSucceeds(): void
 	{
 		DirectiveService::selectDirective(10, 1, DirectiveCatalog::DEFENSIVE, [], ['hangar' => 1]);
 		$this->db->userDirectives[0]['progress_json'] = json_encode([
@@ -112,10 +111,13 @@ class DirectiveServiceTest extends TestCase
 
 		$data = DirectiveService::getBriefingData(10, 1, [], ['hangar' => 1]);
 
-		$this->assertTrue($data['directive']['completed']);
-		$this->assertNotEmpty($this->db->userDirectives[0]['completed_at']);
+		$this->assertFalse($data['directive']['completed']);
+		$this->assertNull($this->db->userDirectives[0]['completed_at']);
 		$this->assertSame(
-			[['counter' => 'defense_complete', 'have' => 6, 'need' => 6, 'pct' => 100]],
+			[
+				['counter' => 'defense_complete', 'have' => 6, 'need' => 6, 'pct' => 100],
+				['counter' => 'hold_success', 'have' => 0, 'need' => 1, 'pct' => 0],
+			],
 			$data['directive']['bars']
 		);
 	}
