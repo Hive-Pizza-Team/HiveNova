@@ -2,6 +2,7 @@
 <html lang="{$lang}" class="no-js">
 <head>
 	<meta charset="utf-8">
+	<script src="https://analytics.thecrazygm.com/api/script.js" data-site-id="bd1ff2de3096" defer></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="robots" content="{$robotsContent}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/tokens.css?v={$REV}">
