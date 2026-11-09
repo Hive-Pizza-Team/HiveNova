@@ -201,11 +201,11 @@ abstract class AbstractLoginPage
 		$languages		= Language::getAllowedLangs(false);
 		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
 		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
-		$hreflangUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
+		$canonicalUrl		= PublicSeo::canonicalUrl(PublicSeo::canonicalBasePath($basePath), $seoPage, $lang);
+		$hreflangUrls		= PublicSeo::hreflangUrls(PublicSeo::canonicalBasePath($basePath), $seoPage, $languages);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
-		$ogImageUrl			= $basePath.'styles/resource/images/login/HiveNova.png';
+		$ogImageUrl			= PublicSeo::canonicalBasePath($basePath).'styles/resource/images/login/HiveNova.png';
 		$jsonLd				= '';
 		if ($seoPage === 'index') {
 			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
@@ -228,7 +228,7 @@ abstract class AbstractLoginPage
 			'ogImageHeight'		=> 768,
 			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
-			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
+			'footerLinks'		=> PublicSeo::footerLinks(PublicSeo::canonicalBasePath($basePath), $lang, $LNG),
 			'jsonLd'			=> $jsonLd,
 		));
 

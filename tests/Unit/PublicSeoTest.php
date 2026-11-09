@@ -6,6 +6,14 @@ use PHPUnit\Framework\TestCase;
 
 class PublicSeoTest extends TestCase
 {
+
+	public function testCanonicalBasePathIgnoresRequestHost(): void
+	{
+		$this->assertSame(PublicSeo::CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://moon.hive.pizza/'));
+		$this->assertSame(PublicSeo::CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://www.moonsiege.com/'));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::CANONICAL_ORIGIN);
+	}
+
 	public function testNormalizePageDefaultsEmptyToIndex(): void
 	{
 		$this->assertSame('index', PublicSeo::normalizePage(''));

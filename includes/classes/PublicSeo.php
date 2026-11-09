@@ -42,6 +42,9 @@ class PublicSeo
 	/** Twitter card @site handle (public lobby head tags). */
 	public const TWITTER_SITE = '@PizzaOnHive';
 
+	/** Public marketing host for canonical / hreflang / sitemap / og:url (#644). */
+	public const CANONICAL_ORIGIN = 'https://moonsiege.com/';
+
 	/**
 	 * Pages listed in sitemap.xml (public marketing surface).
 	 * Omit empty/noindex URLs (news) until they have indexable content.
@@ -68,6 +71,16 @@ class PublicSeo
 
 		return $page;
 	}
+
+	/**
+	 * Absolute public base (trailing slash) used for SEO tags and sitemap locs.
+	 * Always moonsiege.com so alternate hosts do not claim their own canonical (#644).
+	 */
+	public static function canonicalBasePath(?string $requestBasePath = null): string
+	{
+		return self::CANONICAL_ORIGIN;
+	}
+
 
 	/**
 	 * Correct-spelling alias → 2Moons login page id.
