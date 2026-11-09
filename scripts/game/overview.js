@@ -27,6 +27,27 @@ function updateOverviewTimers() {
 		}
 	});
 
+	// Fleet event countdowns (expedition EndStay/Return, etc.). Reloading lets
+	// FleetHandler run so commander briefing progress and active-expedition
+	// rows refresh without a manual extra reload (#455).
+	$('.fleets').each(function() {
+		var fleetTime = $(this).data('fleet-time');
+		if (fleetTime === undefined || fleetTime === null) {
+			return;
+		}
+
+		var remaining = Math.floor(fleetTime - (serverTime.getTime() - startTime) / 1000);
+		if (remaining <= 0) {
+			$(this).text('-');
+			if (overviewTimersWereActive) {
+				needsReload = true;
+			}
+		} else {
+			overviewTimersWereActive = true;
+			$(this).text(GetRestTimeFormat(remaining));
+		}
+	});
+
 	if (needsReload && !overviewTimerReloadPending) {
 		overviewTimerReloadPending = true;
 		window.setTimeout(function() {
@@ -60,17 +81,6 @@ function updateSeasonWipeResetLabels() {
 $(document).ready(function()
 {
 	updateSeasonWipeResetLabels();
-
-	window.setInterval(function() {
-		$('.fleets').each(function() {
-			var s		= $(this).data('fleet-time') - (serverTime.getTime() - startTime) / 1000;
-			if(s <= 0) {
-				$(this).text('-');
-			} else {
-				$(this).text(GetRestTimeFormat(s));
-			}
-		})
-	}, 1000);
 
 	window.setInterval(updateOverviewTimers, 1000);
 	updateOverviewTimers();

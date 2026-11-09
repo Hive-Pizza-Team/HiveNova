@@ -73,22 +73,44 @@ class FlyingFleetHandler
 			}
 
 			$missionName	= self::$missionObjPattern[$fleetRow['fleet_mission']];
-
-			/** @var \HiveNova\Mission\Mission $missionObj */
-			$missionObj	= new $missionName($fleetRow);
+			$fleetId		= (int) $fleetRow['fleet_id'];
 
 			try {
-				switch($fleetRow['fleet_mess'])
-				{
-					case 0:
-						$missionObj->TargetEvent();
-					break;
-					case 1:
-						$missionObj->ReturnEvent();
-					break;
-					case 2:
-						$missionObj->EndStayEvent();
-					break;
+				// One locked row can advance through multiple due stages in a
+				// single request (e.g. overdue EndStay then Return) so Overview
+				// briefing/slots match after one reload instead of two.
+				$current = $fleetRow;
+				for ($step = 0; $step < 3 && is_array($current); $step++) {
+					/** @var \HiveNova\Mission\Mission $missionObj */
+					$missionObj	= new $missionName($current);
+
+					switch ((int) $current['fleet_mess']) {
+						case FLEET_OUTWARD:
+							$missionObj->TargetEvent();
+							break;
+						case FLEET_RETURN:
+							$missionObj->ReturnEvent();
+							break;
+						case FLEET_HOLD:
+							$missionObj->EndStayEvent();
+							break;
+						default:
+							break 2;
+					}
+
+					$current = $db->selectSingle(
+						'SELECT %%FLEETS%%.*
+						FROM %%FLEETS%%
+						INNER JOIN %%FLEETS_EVENT%% ON fleetID = fleet_id
+						WHERE fleet_id = :fleetId
+							AND `lock` = :token
+							AND `time` <= :time;',
+						array(
+							':fleetId'	=> $fleetId,
+							':token'	=> $this->token,
+							':time'		=> TIMESTAMP,
+						)
+					);
 				}
 			} catch (\Throwable $e) {
 				error_log(sprintf(
