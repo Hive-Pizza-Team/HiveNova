@@ -7,7 +7,7 @@ use HiveNova\Core\Template;
 use HiveNova\Core\Universe;
 
 if (!allowedTo(str_replace([dirname(__FILE__), '\\', '/', '.php'], '', __FILE__))) {
-    exit;
+    throw new Exception("Permission error!");
 }
 
 function ShowAchievementsPage()
