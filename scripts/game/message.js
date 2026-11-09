@@ -29,7 +29,8 @@ Message	= {
 		}
 	},
 
-	getMessages: function (MessID, page) {
+	getMessages: function (MessID, page, options) {
+		options = options || {};
 		if (typeof page === "undefined") {
 			page = 1;
 		}
@@ -42,6 +43,9 @@ Message	= {
 			$('#loading').hide();
 			$('#messagestable').remove();
 			$('#content table:eq(0)').after(data);
+			if (!options.skipHistory && window.HiveNovaHistoryNav) {
+				HiveNovaHistoryNav.recordMessagesHistory(window.history, MessID, page);
+			}
 		});
 	},
 
@@ -120,5 +124,14 @@ Message	= {
 $(function () {
 	if (window.Message && typeof Message.loadBodies === 'function') {
 		Message.loadBodies();
+	}
+	if (window.HiveNovaHistoryNav && window.Message && typeof Message.getMessages === 'function') {
+		window.addEventListener('popstate', function (event) {
+			var restored = HiveNovaHistoryNav.messagesStateFromPopstate(event);
+			if (!restored) {
+				return;
+			}
+			Message.getMessages(restored.messcat, restored.site, { skipHistory: true });
+		});
 	}
 });
