@@ -27,6 +27,15 @@ final class TestableShowCommanderAjaxPage extends ShowCommanderAjaxPage
 	{
 		$this->jsonResponse = $data;
 	}
+
+	protected function renderBriefingHtml(array $briefing): string
+	{
+		$key = is_array($briefing['directive'] ?? null)
+			? (string) ($briefing['directive']['key'] ?? 'none')
+			: 'none';
+
+		return '<div id="commander" data-directive="' . htmlspecialchars($key, ENT_QUOTES) . '"></div>';
+	}
 }
 
 class ShowCommanderAjaxPageTest extends TestCase
@@ -92,6 +101,10 @@ class ShowCommanderAjaxPageTest extends TestCase
 		$page->selectDirective();
 		$this->assertTrue($page->jsonResponse['ok']);
 		$this->assertSame(DirectiveCatalog::INDUSTRIAL, $page->jsonResponse['directive_key']);
+		$this->assertArrayHasKey('briefing', $page->jsonResponse);
+		$this->assertSame(DirectiveCatalog::INDUSTRIAL, $page->jsonResponse['briefing']['directive']['key']);
+		$this->assertStringContainsString('id="commander"', $page->jsonResponse['html']);
+		$this->assertStringContainsString('data-directive="' . DirectiveCatalog::INDUSTRIAL . '"', $page->jsonResponse['html']);
 	}
 
 	public function testSelectDirectiveRejectsUnknownKey(): void
@@ -143,6 +156,8 @@ class ShowCommanderAjaxPageTest extends TestCase
 		$this->assertEquals(50 + $reward['crystal'], $GLOBALS['PLANET']['crystal']);
 		$this->assertEquals(25 + $reward['deuterium'], $GLOBALS['PLANET']['deuterium']);
 		$this->assertEquals(100 + $reward['metal'], $this->db->planets[9]['metal']);
+		$this->assertTrue($page->jsonResponse['briefing']['directive']['claimed']);
+		$this->assertStringContainsString('id="commander"', $page->jsonResponse['html']);
 	}
 
 	public function testResolveBranchHttpLayer(): void

@@ -7,6 +7,7 @@ use HiveNova\Core\ExpeditionChoiceService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use RuntimeException;
+use Smarty;
 
 class ShowCommanderAjaxPage extends AbstractGamePage
 {
@@ -29,7 +30,7 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 		global $USER, $PLANET;
 
 		if (!isModuleAvailable(MODULE_COMMANDER)) {
-			$this->sendJSON([
+			$this->respondJSON([
 				'ok' => true,
 				'enabled' => false,
 			]);
@@ -42,10 +43,11 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 			$USER,
 			$PLANET
 		);
-		$this->sendJSON([
+		$this->respondJSON([
 			'ok' => true,
 			'enabled' => true,
 			'briefing' => $briefing,
+			'html' => $this->renderBriefingHtml($briefing),
 		]);
 	}
 
@@ -66,10 +68,10 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 				$USER,
 				$PLANET
 			);
-			$this->sendJSON([
+			$this->respondJSON(array_merge([
 				'ok' => true,
 				'directive_key' => $row['directive_key'],
-			]);
+			], $this->briefingRefresh()));
 		} catch (RuntimeException $e) {
 			$this->sendDirectiveError($e->getMessage(), $LNG);
 		}
@@ -89,7 +91,10 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 				(int) Universe::current(),
 				(int) $PLANET['id']
 			);
-			$this->sendJSON(['ok' => true, 'reward' => $reward]);
+			$this->respondJSON(array_merge([
+				'ok' => true,
+				'reward' => $reward,
+			], $this->briefingRefresh()));
 		} catch (RuntimeException $e) {
 			$this->sendDirectiveError($e->getMessage(), $LNG);
 		}
@@ -107,7 +112,10 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 		$branchKey = HTTP::_GP('branch_key', '');
 		try {
 			$choice = ExpeditionChoiceService::resolveBranch((int) $fleetId, (int) $USER['id'], $branchKey);
-			$this->sendJSON(['ok' => true, 'choice' => $choice]);
+			$this->respondJSON(array_merge([
+				'ok' => true,
+				'choice' => $choice,
+			], $this->briefingRefresh()));
 		} catch (RuntimeException $e) {
 			$code = $e->getMessage();
 			$status = match ($code) {
@@ -116,12 +124,61 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 				default => '400 Bad Request',
 			};
 			HTTP::sendHeader('HTTP/1.1 ' . $status);
-			$this->sendJSON([
+			$this->respondJSON([
 				'ok' => false,
 				'error' => $code,
 				'message' => $this->errorMessage($code, $LNG),
 			]);
 		}
+	}
+
+	/**
+	 * @return array{briefing: array<string, mixed>, html: string}
+	 */
+	protected function briefingRefresh(): array
+	{
+		global $USER, $PLANET;
+
+		$briefing = DirectiveService::getBriefingData(
+			(int) $USER['id'],
+			(int) Universe::current(),
+			$USER,
+			$PLANET
+		);
+
+		return [
+			'briefing' => $briefing,
+			'html' => $this->renderBriefingHtml($briefing),
+		];
+	}
+
+	/**
+	 * @param array<string, mixed> $briefing
+	 */
+	protected function renderBriefingHtml(array $briefing): string
+	{
+		global $LNG;
+
+		$this->initTemplate();
+		$this->tplObj->setCaching(Smarty::CACHING_OFF);
+		$this->assign([
+			'commanderBriefing' => $briefing,
+			'LNG' => $LNG,
+		]);
+		if (is_object($LNG) && method_exists($LNG, 'getLanguage')) {
+			$this->tplObj->compile_id = $LNG->getLanguage();
+		}
+
+		return (string) $this->tplObj->fetch('partials/commander.briefing.tpl');
+	}
+
+	/**
+	 * @param array<string, mixed> $data
+	 */
+	protected function respondJSON(array $data): void
+	{
+		HTTP::sendHeader('Content-Type', 'application/json; charset=UTF-8');
+		$this->sendJSON($data);
 	}
 
 	private function guardMutation(): bool
@@ -130,12 +187,12 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 
 		if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
 			HTTP::sendHeader('HTTP/1.1 405 Method Not Allowed');
-			$this->sendJSON(['ok' => false, 'error' => 'method_not_allowed']);
+			$this->respondJSON(['ok' => false, 'error' => 'method_not_allowed']);
 			return false;
 		}
 		if (!DirectiveService::isSameOriginRequest()) {
 			HTTP::sendHeader('HTTP/1.1 403 Forbidden');
-			$this->sendJSON([
+			$this->respondJSON([
 				'ok' => false,
 				'error' => 'cross_origin',
 				'message' => $LNG['cm_cross_origin'] ?? 'Cross-origin request rejected',
@@ -145,7 +202,7 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 		$token = HTTP::_GP('token', '');
 		if (!DirectiveService::validateCsrfToken($token)) {
 			HTTP::sendHeader('HTTP/1.1 403 Forbidden');
-			$this->sendJSON([
+			$this->respondJSON([
 				'ok' => false,
 				'error' => 'invalid_token',
 				'message' => $LNG['cm_invalid_token'] ?? 'Invalid token',
@@ -154,7 +211,7 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 		}
 		if (!isModuleAvailable(MODULE_COMMANDER)) {
 			HTTP::sendHeader('HTTP/1.1 403 Forbidden');
-			$this->sendJSON([
+			$this->respondJSON([
 				'ok' => false,
 				'error' => DirectiveService::ERROR_DISABLED,
 				'message' => $LNG['cm_module_disabled'] ?? 'Commander module disabled',
@@ -168,7 +225,7 @@ class ShowCommanderAjaxPage extends AbstractGamePage
 	private function sendDirectiveError(string $code, mixed $LNG): void
 	{
 		HTTP::sendHeader('HTTP/1.1 400 Bad Request');
-		$this->sendJSON([
+		$this->respondJSON([
 			'ok' => false,
 			'error' => $code,
 			'message' => $this->errorMessage($code, $LNG),
