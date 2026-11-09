@@ -1,4 +1,4 @@
--- Admin-gated Hive account create requests (#638 P1).
+-- Admin-gated Hive account create requests (#638 P1; migration 52 (51 is push_expired_endpoints)).
 CREATE TABLE IF NOT EXISTS `%PREFIX%hive_account_create_requests` (
 	`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 	`user_id` int(10) unsigned NOT NULL,
