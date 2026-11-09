@@ -600,3 +600,18 @@
 		display: none;
 	}
 }
+
+/* Turkish (#420): do not CSS-uppercase under lang=tr (dotted İ on English chrome). */
+html[lang="tr"] .lobby-kicker,
+html[lang="tr"] .lobby-title,
+html[lang="tr"] .lobby-hero-hook-em,
+html[lang="tr"] .lobby-cta,
+html[lang="tr"] .lobby-viz-caption-title,
+html[lang="tr"] .lobby-viz-legend-item,
+html[lang="tr"] .lobby-hero-hook-em,
+html[lang="tr"] .lobby-about h2,
+html[lang="tr"] .lobby-alive-head h2,
+html[lang="tr"] .lobby-pulse,
+html[lang="tr"] .lobby-feed-type {
+	text-transform: none;
+}

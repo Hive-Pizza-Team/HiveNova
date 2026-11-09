@@ -493,3 +493,11 @@
     color: #e6c36a;
     font-size: 11px;
 }
+
+/* Turkish (#420): avoid dotted İ on CSS-uppercased Latin chrome. */
+html[lang="tr"] .reg-tab-btn,
+html[lang="tr"] .uni-stats-badges .uni-badge,
+html[lang="tr"] .uni-stats-config-term,
+html[lang="tr"] .rowForm label {
+	text-transform: none;
+}
