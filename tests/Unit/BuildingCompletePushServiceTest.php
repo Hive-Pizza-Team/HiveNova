@@ -118,6 +118,58 @@ class BuildingCompletePushServiceTest extends TestCase
 		}
 	}
 
+	public function testQueueEmptyMessageUsesLanguageAndDeepLink(): void
+	{
+		$message = BuildingCompletePushService::queueEmptyMessage('Homeworld', [
+			'push_queue_empty_title' => 'Construction queue empty',
+			'push_queue_empty_body'  => 'No buildings left in the queue on %s',
+		]);
+
+		$this->assertSame('Construction queue empty', $message['title']);
+		$this->assertSame('No buildings left in the queue on Homeworld', $message['body']);
+		$this->assertSame('game.php?page=buildings', $message['data']['url']);
+		$this->assertSame('construction_queue_empty', $message['data']['type']);
+	}
+
+	public function testNotifyQueueEmptyDeliversWhenConfigured(): void
+	{
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function (int $userId, string $title, string $body, array $data) use (&$sent): bool {
+				$sent[] = compact('userId', 'title', 'body', 'data');
+
+				return true;
+			},
+			configured: true,
+			languageLoader: static fn (): array => [
+				'push_queue_empty_title' => 'Construction queue empty',
+				'push_queue_empty_body'  => 'No buildings left in the queue on %s',
+			],
+		);
+
+		$this->assertTrue($service->notifyQueueEmptyForUser(9, 'Colony', 'en'));
+		$this->assertCount(1, $sent);
+		$this->assertSame(9, $sent[0]['userId']);
+		$this->assertSame('construction_queue_empty', $sent[0]['data']['type']);
+		$this->assertStringContainsString('Colony', $sent[0]['body']);
+	}
+
+	public function testNotifyQueueEmptySkipsWhenNotConfigured(): void
+	{
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function () use (&$sent): bool {
+				$sent[] = 1;
+
+				return true;
+			},
+			configured: false,
+		);
+
+		$this->assertFalse($service->notifyQueueEmptyForUser(9, 'Colony', 'en'));
+		$this->assertSame([], $sent);
+	}
+
 	public function testNotifyJobSkippedWhenNotConfigured(): void
 	{
 		$sent = [];

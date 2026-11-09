@@ -1523,3 +1523,7 @@ $LNG['pl_hive_linked'] = 'Hive: @%s';
 $LNG['pl_prestige_hp_range'] = '%1$s — %2$s–%3$s HP';
 $LNG['pl_prestige_hp_open'] = '%1$s — %2$s+ HP';
 $LNG['pl_prestige_pizza_open'] = '%1$s — %2$s+ PIZZA staked';
+$LNG['push_fleet_returned_title'] = 'Fleet returned';
+$LNG['push_fleet_returned_body'] = '%s returned to [%d:%d:%d]';
+$LNG['push_queue_empty_title'] = 'Construction queue empty';
+$LNG['push_queue_empty_body'] = 'No buildings left in the queue on %s';

@@ -122,6 +122,10 @@ class MissionFunctions
 
 		Database::get()->update($sql, $param);
 
+		if ($onStart) {
+			FleetReturnedPushService::notifyFleetReturned($this->_fleet, true);
+		}
+
 		if (isset($param[':planetId']) && isset($param[':darkmatter']) && $param[':darkmatter'] > 0) {
 			# get user ID
 			$sql = 'SELECT id_owner FROM %%PLANETS%% WHERE `id` = :planetId';

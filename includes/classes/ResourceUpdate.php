@@ -277,11 +277,20 @@ class ResourceUpdate
 		$this->completedBuildingJobs = [];
 		while($this->CheckPlanetBuildingQueue())
 			$this->SetNextQueueElementOnTop();
+		$userId = (int) ($this->USER['id'] ?? 0);
+		$lang = (string) ($this->USER['lang'] ?? 'en');
 		BuildingCompletePushService::notifyCompletedJobs(
-			(int) ($this->USER['id'] ?? 0),
+			$userId,
 			$this->completedBuildingJobs,
-			(string) ($this->USER['lang'] ?? 'en')
+			$lang
 		);
+		if ($this->completedBuildingJobs !== [] && empty($this->PLANET['b_building_id'])) {
+			BuildingCompletePushService::notifyQueueEmpty(
+				$userId,
+				(string) ($this->PLANET['name'] ?? ''),
+				$lang
+			);
+		}
 	}
 	
 	private function CheckPlanetBuildingQueue()
