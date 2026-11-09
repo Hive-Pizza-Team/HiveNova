@@ -5,7 +5,7 @@
 <table class="resources-table">
 <tbody>
 <tr class="resources-table__title">
-	<th colspan="5">{$header}</th>
+	<th colspan="6">{$header}</th>
 </tr>
 <tr class="resources-table__cols no-mobile">
 	<td>&nbsp;</td>
@@ -46,7 +46,7 @@
 	<td data-label="{$LNG.tech.901}"><span class="res-prod-pos">{$storage.901}</span></td>
 	<td data-label="{$LNG.tech.902}"><span class="res-prod-pos">{$storage.902}</span></td>
 	<td data-label="{$LNG.tech.903}"><span class="res-prod-pos">{$storage.903}</span></td>
-	<td data-label="{$LNG.tech.911}">-</td>
+	<td data-label="{$LNG.tech.911}"><span class="resources-table__value">-</span></td>
 </tr>
 <tr class="resources-table__row">
 	<td class="resources-table__label">{$LNG.rs_sum}:</td>
