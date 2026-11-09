@@ -39,6 +39,12 @@ abstract class AbstractLoginPage
 	public $defaultWindow = 'normal';
 	/** @var bool When false, public pages emit noindex (e.g. empty news). */
 	protected $seoAllowIndex = true;
+	/** @var string|null Override for document <title> (public battle reports). */
+	protected $seoDocumentTitle = null;
+	/** @var string|null Override for meta description. */
+	protected $seoMetaDescription = null;
+	/** @var string|null Override for canonical URL (must be absolute). */
+	protected $seoCanonicalUrl = null;
 	
 	protected function __construct() {
 		
@@ -199,9 +205,9 @@ abstract class AbstractLoginPage
 		$seoPage		= PublicSeo::normalizePage(HTTP::_GP('page', ''));
 		$gameName		= (string) $config->game_name;
 		$languages		= Language::getAllowedLangs(false);
-		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
-		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
+		$documentTitle		= $this->seoDocumentTitle ?? PublicSeo::documentTitle($seoPage, $gameName, $LNG);
+		$metaDescription	= $this->seoMetaDescription ?? PublicSeo::metaDescription($seoPage, $gameName, $LNG);
+		$canonicalUrl		= $this->seoCanonicalUrl ?? PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
 		$hreflangUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);

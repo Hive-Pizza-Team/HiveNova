@@ -806,3 +806,8 @@ footer {
     margin-left: auto;
     margin-right: auto;
 }
+.battlehall-cta{margin:0 0 1.25rem;padding:1rem 1.1rem;background:rgba(2,12,22,.55);border:1px solid rgba(70,210,255,.22)}
+.battlehall-cta-hook{margin:0 0 .75rem;font-size:1.05rem}
+.battlehall-cta-btn{display:inline-block;padding:.65rem 1.1rem;font-weight:700;text-decoration:none;color:#041018;background:#7ee0ff}
+.battlehall-cta-footer{margin:1.25rem 0 0}
+.public-battle-report h1{font-size:1.35rem}
