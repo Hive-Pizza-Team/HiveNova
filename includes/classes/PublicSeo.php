@@ -44,6 +44,18 @@ class PublicSeo
 	/** Twitter card @site handle (public lobby head tags). */
 	public const TWITTER_SITE = '@PizzaOnHive';
 
+	/** Public marketing host for canonical / hreflang / sitemap / og:url (#644). */
+	public const CANONICAL_ORIGIN = 'https://moonsiege.com/';
+
+	/** Default referral code on public Battle Hall / report CTAs (#645). */
+	public const SIGNUP_REF = 1;
+
+	/** 1200x630 Open Graph card for Battle Hall and public reports. */
+	public const SHARE_IMAGE_PATH = 'styles/resource/images/login/battle-hall-og.png';
+	public const SHARE_IMAGE_WIDTH = 1200;
+	public const SHARE_IMAGE_HEIGHT = 630;
+
+
 	/**
 	 * Pages listed in sitemap.xml (public marketing surface).
 	 * Omit empty/noindex URLs (news) until they have indexable content.
@@ -70,6 +82,16 @@ class PublicSeo
 
 		return $page;
 	}
+
+	/**
+	 * Absolute public base (trailing slash) used for SEO tags and sitemap locs.
+	 * Always moonsiege.com so alternate hosts do not claim their own canonical (#644).
+	 */
+	public static function canonicalBasePath(?string $requestBasePath = null): string
+	{
+		return self::CANONICAL_ORIGIN;
+	}
+
 
 	/**
 	 * Correct-spelling alias → 2Moons login page id.
@@ -116,16 +138,31 @@ class PublicSeo
 	 *
 	 * Homepage (default language) uses the bare base path. Other pages and
 	 * non-default languages use index.php with query params.
+	 * Extra query keys (e.g. rid) are included; never pass ref/src here.
 	 *
-	 * @param string $basePath Trailing-slash site root, e.g. https://moon.hive.pizza/
+	 * @param string $basePath Trailing-slash site root, e.g. https://moonsiege.com/
+	 * @param array<string, scalar> $extraQuery
 	 */
-	public static function canonicalUrl(string $basePath, string $page, string $lang, string $defaultLang = 'en'): string
-	{
+	public static function canonicalUrl(
+		string $basePath,
+		string $page,
+		string $lang,
+		string $defaultLang = 'en',
+		array $extraQuery = [],
+	): string {
 		$page = self::normalizePage($page);
 		$query = [];
 
 		if ($page !== 'index') {
 			$query['page'] = $page;
+		}
+
+		foreach ($extraQuery as $key => $value) {
+			$key = (string) $key;
+			if ($key === '' || $key === 'page' || $key === 'lang' || $key === 'ref' || $key === 'src') {
+				continue;
+			}
+			$query[$key] = $value;
 		}
 
 		if ($lang !== '' && $lang !== $defaultLang) {
@@ -140,21 +177,63 @@ class PublicSeo
 	}
 
 	/**
+	 * Public Battle Hall report URL (login-side, indexable).
+	 */
+	public static function battleReportUrl(
+		string $basePath,
+		string $rid,
+		string $lang = 'en',
+		string $defaultLang = 'en',
+	): string {
+		return self::canonicalUrl($basePath, 'battle', $lang, $defaultLang, ['rid' => $rid]);
+	}
+
+	/**
+	 * Absolute OG/Twitter share card URL (1200x630 Battle Hall art).
+	 */
+	public static function shareImageUrl(?string $basePath = null): string
+	{
+		return ($basePath ?? self::CANONICAL_ORIGIN).self::SHARE_IMAGE_PATH;
+	}
+
+	/**
+	 * Lobby signup CTA with referral + source attribution (#645).
+	 */
+	public static function signupCtaUrl(string $src = 'battlehall', int $ref = self::SIGNUP_REF): string
+	{
+		$src = preg_replace('/[^a-z0-9_-]/i', '', $src) ?? '';
+		if ($src === '') {
+			$src = 'battlehall';
+		}
+
+		return self::CANONICAL_ORIGIN.'?'.http_build_query([
+			'ref' => max(0, $ref),
+			'src' => $src,
+		], '', '&', PHP_QUERY_RFC3986);
+	}
+
+	/**
 	 * Map of hreflang code => absolute URL, including x-default (default language homepage/page).
 	 *
 	 * @param array<string, string> $languages langKey => display name
+	 * @param array<string, scalar> $extraQuery
 	 * @return array<string, string>
 	 */
-	public static function hreflangUrls(string $basePath, string $page, array $languages, string $defaultLang = 'en'): array
-	{
+	public static function hreflangUrls(
+		string $basePath,
+		string $page,
+		array $languages,
+		string $defaultLang = 'en',
+		array $extraQuery = [],
+	): array {
 		$page = self::normalizePage($page);
 		$urls = [];
 
 		foreach (array_keys($languages) as $langKey) {
-			$urls[$langKey] = self::canonicalUrl($basePath, $page, (string) $langKey, $defaultLang);
+			$urls[$langKey] = self::canonicalUrl($basePath, $page, (string) $langKey, $defaultLang, $extraQuery);
 		}
 
-		$urls['x-default'] = self::canonicalUrl($basePath, $page, $defaultLang, $defaultLang);
+		$urls['x-default'] = self::canonicalUrl($basePath, $page, $defaultLang, $defaultLang, $extraQuery);
 
 		return $urls;
 	}
@@ -242,6 +321,96 @@ class PublicSeo
 		}
 
 		return 'index, follow';
+	}
+
+	/**
+	 * Per-universe Battle Hall document title.
+	 *
+	 * @param object|array<string, string> $LNG
+	 */
+	public static function battleHallDocumentTitle(string $universeName, string $gameName, $LNG): string
+	{
+		$template = isset($LNG['metaTitleBattleHallUni'])
+			? (string) $LNG['metaTitleBattleHallUni']
+			: 'Battle Hall — %s | %s';
+
+		return sprintf($template, $universeName !== '' ? $universeName : 'Universe', $gameName);
+	}
+
+	/**
+	 * Per-universe Battle Hall meta description.
+	 *
+	 * @param object|array<string, string> $LNG
+	 */
+	public static function battleHallMetaDescription(string $universeName, string $gameName, $LNG): string
+	{
+		$template = isset($LNG['metaDescriptionBattleHallUni'])
+			? (string) $LNG['metaDescriptionBattleHallUni']
+			: 'Hall of fame battles in %s on %s. See the biggest fleet fights and play free — room to explore and space to claim.';
+
+		return sprintf($template, $universeName !== '' ? $universeName : 'Universe', $gameName);
+	}
+
+	/**
+	 * Public battle report document title.
+	 *
+	 * @param object|array<string, string> $LNG
+	 */
+	public static function battleReportDocumentTitle(
+		string $attacker,
+		string $defender,
+		string $compactUnits,
+		string $gameName,
+		$LNG,
+	): string {
+		$template = isset($LNG['metaTitleBattleReport'])
+			? (string) $LNG['metaTitleBattleReport']
+			: '%s vs %s: %s units destroyed | %s Battle Hall';
+
+		return sprintf(
+			$template,
+			$attacker !== '' ? $attacker : 'Attacker',
+			$defender !== '' ? $defender : 'Defender',
+			$compactUnits !== '' ? $compactUnits : '0',
+			$gameName
+		);
+	}
+
+	/**
+	 * Public battle report meta description.
+	 *
+	 * @param object|array<string, string> $LNG
+	 */
+	public static function battleReportMetaDescription(
+		string $attacker,
+		string $defender,
+		string $compactUnits,
+		string $formattedDate,
+		string $gameName,
+		$LNG,
+	): string {
+		$template = isset($LNG['metaDescriptionBattleReport'])
+			? (string) $LNG['metaDescriptionBattleReport']
+			: '%s vs %s — %s units destroyed on %s. Play %s free: room to explore and space to claim.';
+
+		return sprintf(
+			$template,
+			$attacker !== '' ? $attacker : 'Attacker',
+			$defender !== '' ? $defender : 'Defender',
+			$compactUnits !== '' ? $compactUnits : '0',
+			$formattedDate !== '' ? $formattedDate : 'unknown date',
+			$gameName
+		);
+	}
+
+	/**
+	 * Whether this public page should use the Battle Hall share card.
+	 */
+	public static function usesBattleShareImage(string $page): bool
+	{
+		$page = self::normalizePage($page);
+
+		return $page === 'battleHall' || $page === 'battle';
 	}
 
 	/**
