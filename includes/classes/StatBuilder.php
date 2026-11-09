@@ -4,6 +4,7 @@ namespace HiveNova\Core;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\Cronjob;
 
 /**
  *  2Moons 
@@ -61,8 +62,31 @@ class StatBuilder
 		foreach($UniData as $Uni => $Amount) {
 			$config	= Config::get($Uni);
 			$config->users_amount = $Amount;
+			// Global config key: last successful MakeStats (cron or admin), not cron-log alone.
+			$config->stat_last_update = $this->time;
 			$config->save();
 		}
+	}
+
+	/**
+	 * Unix time of the last stats rebuild for the UI "Updated" stamp.
+	 * Prefers config.stat_last_update (set by MakeStats); falls back to statistic cron log.
+	 */
+	public static function getLastUpdateTime(): int
+	{
+		$configTime = 0;
+		try {
+			$configTime = (int) Config::get()->stat_last_update;
+		} catch (\Throwable) {
+			$configTime = 0;
+		}
+
+		if ($configTime > 0) {
+			return $configTime;
+		}
+
+		$cronTime = Cronjob::getLastExecutionTime('statistic');
+		return $cronTime !== false ? (int) $cronTime : 0;
 	}
 	
 	private function GetUsersInfosFromDB()

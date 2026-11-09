@@ -77,6 +77,7 @@ class StatBuilderTest extends TestCase
             'stat' => 0,
             'stat_level' => 2,
             'stat_settings' => 1000,
+            'stat_last_update' => 0,
             'users_amount' => 0,
         ]), 1);
         Config::setInstance(new Config([
@@ -84,6 +85,7 @@ class StatBuilderTest extends TestCase
             'stat' => 0,
             'stat_level' => 2,
             'stat_settings' => 1000,
+            'stat_last_update' => 0,
             'users_amount' => 0,
         ]), 2);
     }
@@ -527,6 +529,29 @@ class StatBuilderTest extends TestCase
 
         $this->assertSame(9, Config::get(1)->users_amount);
         $this->assertSame(4, Config::get(2)->users_amount);
+        $this->assertSame(TIMESTAMP, Config::get(1)->stat_last_update);
+        $this->assertSame(TIMESTAMP, Config::get(2)->stat_last_update);
+    }
+
+    public function testMakeStatsWritesStatLastUpdateTimestamp(): void
+    {
+        $this->seedMakeStatsData([
+            'planet' => ['metal_mine' => 1],
+            'user'   => ['light_fighter' => 2],
+        ]);
+
+        $builder = $this->newBuilder();
+        $builder->MakeStats();
+
+        $this->assertSame(TIMESTAMP, Config::get(1)->stat_last_update);
+        $this->assertSame(TIMESTAMP, StatBuilder::getLastUpdateTime());
+    }
+
+    public function testGetLastUpdateTimePrefersNewerConfigOverCronFallback(): void
+    {
+        Config::get(1)->stat_last_update = 1_700_000_000;
+
+        $this->assertSame(1_700_000_000, StatBuilder::getLastUpdateTime());
     }
 
     public function testMakeStatsWithFakedMinimalDataReturnsStatsInfo(): void
@@ -597,11 +622,12 @@ class StatBuilderTest extends TestCase
     public function testMakeStatsZerosStaffWhenStatModeExcludesThem(): void
     {
         Config::setInstance(new Config([
-            'uni'           => 1,
-            'stat'          => 1,
-            'stat_level'    => 2,
-            'stat_settings' => 1000,
-            'users_amount'  => 0,
+            'uni'              => 1,
+            'stat'             => 1,
+            'stat_level'       => 2,
+            'stat_settings'    => 1000,
+            'stat_last_update' => 0,
+            'users_amount'     => 0,
         ]), 1);
 
         $this->seedMakeStatsData([
