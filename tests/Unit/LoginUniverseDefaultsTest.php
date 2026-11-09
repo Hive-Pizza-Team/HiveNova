@@ -99,6 +99,66 @@ class LoginUniverseDefaultsTest extends TestCase
 		$this->assertSame(1, LoginUniverseDefaults::forHive());
 	}
 
+	public function test_prefer_referral_keeps_email_default_when_it_has_active_referral(): void
+	{
+		$this->resetUniverseList([1, 6]);
+		Config::setInstance($this->uniConfig(1, 'Universe 1', open: true, seasonal: false, players: 10), 1);
+		Config::setInstance($this->uniConfig(6, 'Universe 3', open: true, seasonal: false, players: 30), 6);
+
+		$map = [
+			1 => ['id' => 68, 'name' => 'Quartz', 'status' => 'ok'],
+			6 => ['id' => 0, 'name' => '', 'status' => ''],
+		];
+
+		$this->assertSame(1, LoginUniverseDefaults::preferReferralUniverse(1, $map, true));
+	}
+
+	public function test_prefer_referral_overrides_email_default_that_would_zero_uni1_invite(): void
+	{
+		// #459: password default landed on Uni 3 while ?ref= belonged to Uni 1.
+		$this->resetUniverseList([1, 5, 6]);
+		Config::setInstance($this->uniConfig(1, 'Universe 1', open: true, seasonal: false, players: 10), 1);
+		Config::setInstance($this->uniConfig(5, 'Universe 2', open: true, seasonal: false, players: 20), 5);
+		Config::setInstance($this->uniConfig(6, 'Universe 3', open: true, seasonal: false, players: 30), 6);
+
+		$map = [
+			1 => ['id' => 68, 'name' => 'QuartzVellum51', 'status' => 'ok'],
+		];
+
+		$this->assertSame(1, LoginUniverseDefaults::preferReferralUniverse(6, $map, true));
+	}
+
+	public function test_prefer_referral_skips_reg_closed_and_seasonal_referral_targets(): void
+	{
+		$this->resetUniverseList([1, 3, 5, 6]);
+		Config::setInstance($this->uniConfig(1, 'Universe 1', open: true, seasonal: false, players: 10, regClosed: true), 1);
+		Config::setInstance($this->uniConfig(3, 'Season', open: true, seasonal: true, players: 17), 3);
+		Config::setInstance($this->uniConfig(5, 'Universe 2', open: true, seasonal: false, players: 20), 5);
+		Config::setInstance($this->uniConfig(6, 'Universe 3', open: true, seasonal: false, players: 30), 6);
+
+		$map = [
+			1 => ['id' => 68, 'name' => 'ClosedUni', 'status' => 'ok'],
+			3 => ['id' => 99, 'name' => 'SeasonRef', 'status' => 'ok'],
+			6 => ['id' => 12, 'name' => 'OpenRef', 'status' => 'ok'],
+		];
+
+		// Email default 5 has no referral; skip reg-closed Uni 1 and seasonal Uni 3.
+		$this->assertSame(6, LoginUniverseDefaults::preferReferralUniverse(5, $map, true));
+	}
+
+	public function test_prefer_referral_ignores_inactive_status_entries(): void
+	{
+		$this->resetUniverseList([1, 6]);
+		Config::setInstance($this->uniConfig(1, 'Universe 1', open: true, seasonal: false, players: 10), 1);
+		Config::setInstance($this->uniConfig(6, 'Universe 3', open: true, seasonal: false, players: 30), 6);
+
+		$map = [
+			1 => ['id' => 0, 'name' => 'Quartz', 'status' => 'inactive'],
+		];
+
+		$this->assertSame(6, LoginUniverseDefaults::preferReferralUniverse(6, $map, true));
+	}
+
 	public function test_newest_open_skips_closed(): void
 	{
 		$this->resetUniverseList([1, 3]);

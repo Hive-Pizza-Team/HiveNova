@@ -65,7 +65,8 @@ class ShowIndexPage extends AbstractLoginPage
 			$_COOKIE
 		);
 		$registerUrl		= $referralCapture->registerUrl(
-			(int) ($referral['code'] ?? $referral['id'])
+			(int) ($referral['code'] ?? $referral['id']),
+			$referralCapture->registrationUniverseId($referral)
 		);
 
 		$universeSelect	= array();

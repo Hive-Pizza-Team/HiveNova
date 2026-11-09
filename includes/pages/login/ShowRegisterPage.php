@@ -109,7 +109,11 @@ class ShowRegisterPage extends AbstractLoginPage
 			$accountName	= $accountData['name'];
 		}
 
-		$defaultEmailUniverse = $this->getDefaultEmailUniverseId(true);
+		$defaultEmailUniverse = LoginUniverseDefaults::preferReferralUniverse(
+			$this->getDefaultEmailUniverseId(true),
+			$referralByUniverse,
+			true
+		);
 		$defaultHiveUniverse = $this->getDefaultHiveUniverseId(true);
 		$referralSeed = $referralByUniverse[$defaultEmailUniverse] ?? array('id' => 0, 'name' => '', 'status' => '');
 		$referralInactive = ($referralSeed['status'] ?? '') === ReferralCaptureService::STATUS_INACTIVE;

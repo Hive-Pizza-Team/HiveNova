@@ -12,6 +12,55 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	}
 
+	var referralByUniverse = {};
+	var referralMapNode = document.getElementById('reg-referral-by-uni');
+	if (referralMapNode) {
+		try {
+			referralByUniverse = JSON.parse(referralMapNode.textContent || '{}') || {};
+		} catch (e) {
+			referralByUniverse = {};
+		}
+	}
+
+	function syncReferralWithUniverse(uniId) {
+		var entry = referralByUniverse[uniId] || referralByUniverse[String(uniId)] || null;
+		var status = entry && entry.status ? String(entry.status) : '';
+		var inactive = status === 'inactive';
+		var id = (!inactive && entry && entry.id) ? String(entry.id) : '0';
+		var name = entry && entry.name ? String(entry.name) : '';
+		document.querySelectorAll('.reg-referral-id').forEach(function(input) {
+			input.value = id;
+		});
+		document.querySelectorAll('.reg-referral-row').forEach(function(row) {
+			var nameEl = row.querySelector('.reg-referral-name');
+			if (nameEl) {
+				nameEl.textContent = name;
+			}
+			if (name && (id !== '0' || inactive)) {
+				row.removeAttribute('hidden');
+			} else {
+				row.setAttribute('hidden', 'hidden');
+			}
+		});
+		document.querySelectorAll('.reg-referral-inactive').forEach(function(row) {
+			if (inactive) {
+				row.removeAttribute('hidden');
+			} else {
+				row.setAttribute('hidden', 'hidden');
+			}
+		});
+	}
+
+	function isSeasonalUni(uniId) {
+		return seasonalUnis[uniId] == 1 || seasonalUnis[String(uniId)] == 1;
+	}
+
+	function currentUniId() {
+		var activePanel = document.querySelector('.reg-tab-panel.active');
+		var sel = activePanel ? activePanel.querySelector('.changeAction') : document.querySelector('.changeAction');
+		return sel ? sel.value : '';
+	}
+
 	function activateTab(target) {
 		btns.forEach(function(b) {
 			b.classList.remove('active');
@@ -27,16 +76,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		if (panel) {
 			panel.classList.add('active');
 		}
-	}
-
-	function isSeasonalUni(uniId) {
-		return seasonalUnis[uniId] == 1 || seasonalUnis[String(uniId)] == 1;
-	}
-
-	function currentUniId() {
-		var activePanel = document.querySelector('.reg-tab-panel.active');
-		var sel = activePanel ? activePanel.querySelector('.changeAction') : document.querySelector('.changeAction');
-		return sel ? sel.value : '';
+		// Email and Hive selects can start on different defaults; re-seed referral
+		// from the active panel's universe so a Uni 1 invite is not left attached
+		// to a Hive tab that is preselected on another universe.
+		syncReferralWithUniverse(currentUniId());
 	}
 
 	function applySeasonalRegister(uniId) {
@@ -80,45 +123,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			syncReferralWithUniverse(val);
 		});
 	});
-
-	var referralByUniverse = {};
-	var referralMapNode = document.getElementById('reg-referral-by-uni');
-	if (referralMapNode) {
-		try {
-			referralByUniverse = JSON.parse(referralMapNode.textContent || '{}') || {};
-		} catch (e) {
-			referralByUniverse = {};
-		}
-	}
-
-	function syncReferralWithUniverse(uniId) {
-		var entry = referralByUniverse[uniId] || referralByUniverse[String(uniId)] || null;
-		var status = entry && entry.status ? String(entry.status) : '';
-		var inactive = status === 'inactive';
-		var id = (!inactive && entry && entry.id) ? String(entry.id) : '0';
-		var name = entry && entry.name ? String(entry.name) : '';
-		document.querySelectorAll('.reg-referral-id').forEach(function(input) {
-			input.value = id;
-		});
-		document.querySelectorAll('.reg-referral-row').forEach(function(row) {
-			var nameEl = row.querySelector('.reg-referral-name');
-			if (nameEl) {
-				nameEl.textContent = name;
-			}
-			if (name && (id !== '0' || inactive)) {
-				row.removeAttribute('hidden');
-			} else {
-				row.setAttribute('hidden', 'hidden');
-			}
-		});
-		document.querySelectorAll('.reg-referral-inactive').forEach(function(row) {
-			if (inactive) {
-				row.removeAttribute('hidden');
-			} else {
-				row.setAttribute('hidden', 'hidden');
-			}
-		});
-	}
 
 	applySeasonalRegister(currentUniId());
 	syncReferralWithUniverse(currentUniId());
