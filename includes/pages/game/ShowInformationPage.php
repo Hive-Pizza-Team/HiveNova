@@ -11,6 +11,7 @@ use HiveNova\Core\ElementRequirementService;
 use HiveNova\Core\LeftoverBonus;
 use HiveNova\Core\PlanetProductionBonus;
 use HiveNova\Core\ResourceUpdate;
+use HiveNova\Core\HiveAccountUpgradeService;
 use HiveNova\Core\SeasonService;
 
 /**
@@ -390,12 +391,14 @@ class ShowInformationPage extends AbstractGamePage
 		if ((int) $elementID === 921) {
 			$hiveAccount = (string) ($USER['hive_account'] ?? '');
 			$depositWallet = (new SeasonService(new DatabaseSeasonStore()))->depositWallet(Config::get());
+			$hiveSoftPrompt = (new HiveAccountUpgradeService())->softPrompt($USER, 'game.php?page=settings');
 			$this->assign(array(
 				'hiveAccount'			=> $hiveAccount,
 				'universe'				=> $USER['universe'],
 				'hasHiveAccount'		=> $hiveAccount !== '',
 				'depositWallet'			=> $depositWallet,
 				'disableDepositButton'	=> ($USER['universe'] === '1' || $hiveAccount === ''),
+				'hiveSoftPrompt'		=> $hiveSoftPrompt,
 			));
 		}
 		

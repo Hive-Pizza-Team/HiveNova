@@ -12,7 +12,7 @@ use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\PasswordPolicy;
-use HiveNova\Core\HiveUtil;
+use HiveNova\Core\HiveAccountUpgradeService;
 use HiveNova\Core\Theme;
 use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\SeasonService;
@@ -40,6 +40,33 @@ class ShowSettingsPage extends AbstractGamePage
 	{
 		parent::__construct();
 	}
+
+	private function hiveUpgradeService(): HiveAccountUpgradeService
+	{
+		return new HiveAccountUpgradeService();
+	}
+
+	private function hiveSignerCallbackUrl(): string
+	{
+		return PROTOCOL.HTTP_HOST.HTTP_ROOT.'game.php?page=settings&mode=hiveSignerReturn';
+	}
+
+	/**
+	 * Map HiveAccountUpgradeService error codes to player-facing language keys.
+	 */
+	private function hiveLinkErrorMessage(string $errorCode): string
+	{
+		global $LNG;
+
+		return match ($errorCode) {
+			HiveAccountUpgradeService::ERR_INVALID_SIGNATURE,
+			HiveAccountUpgradeService::ERR_INVALID_TOKEN => (string) ($LNG['op_hive_link_bad_proof'] ?? $LNG['op_user_name_no_alphanumeric']),
+			HiveAccountUpgradeService::ERR_TAKEN => (string) ($LNG['op_hive_link_taken'] ?? $LNG['op_user_name_no_alphanumeric']),
+			HiveAccountUpgradeService::ERR_ALREADY_LINKED => (string) ($LNG['op_hive_link_already'] ?? $LNG['op_user_name_no_alphanumeric']),
+			HiveAccountUpgradeService::ERR_EMPTY => (string) ($LNG['op_hive_link_empty'] ?? $LNG['op_user_name_no_alphanumeric']),
+			default => (string) ($LNG['op_hive_link_invalid'] ?? $LNG['op_user_name_no_alphanumeric']),
+		};
+	}
 	
 	public function show()
 	{
@@ -57,6 +84,7 @@ class ShowSettingsPage extends AbstractGamePage
 		else
 		{
 			$depositWallet = (new SeasonService(new DatabaseSeasonStore()))->depositWallet(Config::get());
+			$upgrade = $this->hiveUpgradeService()->upgradePanel($USER, $this->hiveSignerCallbackUrl());
 
 			$this->assign(array(
 				'Selectors'			=> array(
@@ -109,11 +137,64 @@ class ShowSettingsPage extends AbstractGamePage
 					(int) $USER['id'],
 					PROTOCOL.HTTP_HOST.HTTP_ROOT
 				),
-				'SELF_URL'          => PROTOCOL.HTTP_HOST.HTTP_ROOT
+				'SELF_URL'          => PROTOCOL.HTTP_HOST.HTTP_ROOT,
+				'hiveNeedsUpgrade'  => $upgrade['needsUpgrade'],
+				'hiveCanHiveSigner' => $upgrade['canHiveSigner'],
+				'hiveSignerUrl'     => $upgrade['hiveSignerUrl'],
+				'hiveCreateAvailable' => $upgrade['createAvailable'],
 			));
 			
 			$this->display('page.settings.default.tpl');
 		}
+	}
+
+	/**
+	 * Landing page after HiveSigner OAuth redirect (token arrives in URL hash).
+	 */
+	public function hiveSignerReturn()
+	{
+		global $LNG;
+
+		$this->assign([
+			'hiveSignerPostUrl' => 'game.php?page=settings&mode=linkHiveSigner',
+			'hiveSignerWorking' => $LNG['op_hive_signer_working'] ?? 'Linking Hive account…',
+			'hiveSignerMissingToken' => $LNG['op_hive_link_bad_proof'] ?? 'Hive proof missing or invalid.',
+		]);
+		$this->display('page.settings.hivesigner.tpl');
+	}
+
+	/**
+	 * Complete HiveSigner link from access token posted by hiveSignerReturn.
+	 */
+	public function linkHiveSigner()
+	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			$this->redirectTo('game.php?page=settings');
+			return;
+		}
+
+		global $USER, $LNG;
+
+		$accessToken = HTTP::_GP('access_token', '', true);
+		$result = $this->hiveUpgradeService()->linkWithHiveSignerToken(
+			$USER,
+			$accessToken,
+			(int) Universe::current()
+		);
+
+		if (!$result['ok']) {
+			$this->printMessage($this->hiveLinkErrorMessage((string) ($result['error'] ?? '')), [[
+				'label' => $LNG['sys_back'],
+				'url'   => 'game.php?page=settings',
+			]]);
+			return;
+		}
+
+		$USER['hive_account'] = $result['account'];
+		$this->printMessage($LNG['op_hive_link_success'] ?? $LNG['op_options_changed'], [[
+			'label' => $LNG['sys_forward'],
+			'url'   => 'game.php?page=settings',
+		]]);
 	}
 
 	public function timezones()
@@ -436,50 +517,20 @@ class ShowSettingsPage extends AbstractGamePage
 			));
 		}
 
-		if(!empty($hivesign) && !empty($hiveAccount) && $USER['hive_account'] != $hiveAccount) {
-			// validate signature before saving hive account in DB
-			if (!HiveUtil::isAccountValid($hiveAccount))
-			{
-				$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
-					'label'	=> $LNG['sys_back'],
-					'url'	=> 'game.php?page=settings'
-				)));
-			} else if (!HiveUtil::isSignValid($hiveAccount, $hivesign)) {
-				$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
+		if (!empty($hivesign) && !empty($hiveAccount) && $USER['hive_account'] != $hiveAccount) {
+			$linkResult = $this->hiveUpgradeService()->linkWithSignature(
+				$USER,
+				$hiveAccount,
+				$hivesign,
+				(int) Universe::current()
+			);
+			if (!$linkResult['ok']) {
+				$this->printMessage($this->hiveLinkErrorMessage((string) ($linkResult['error'] ?? '')), array(array(
 					'label'	=> $LNG['sys_back'],
 					'url'	=> 'game.php?page=settings'
 				)));
 			} else {
-
-				// check if hiveaccount is already linked to a user
-				$db = Database::get();
-				$universe = Universe::current();
-				$sql = "SELECT COUNT(*) as state FROM %%USERS%% WHERE `hive_account` = :hiveAccount AND `universe` = :universe;";
-				$linkedAccounts = $db->selectSingle($sql, array(
-					':hiveAccount'	=> $hiveAccount,
-					':universe'     => $universe
-				), 'state');
-		
-				if($linkedAccounts != 0) {
-					$this->printMessage($LNG['op_user_name_no_alphanumeric'], array(array(
-						'label'	=> $LNG['sys_back'],
-						'url'	=> 'game.php?page=settings'
-					)));
-				} else {
-					$sql	= "UPDATE %%USERS%% SET hive_account = :hiveaccount WHERE id = :userID;";
-					$db->update($sql, array(
-						':hiveaccount'  => $hiveAccount,
-						':userID'       => $USER['id']
-					));
-					if (isModuleAvailable(MODULE_ACHIEVEMENTS)) {
-						\HiveNova\Core\AchievementService::record(
-							(int) $USER['id'],
-							'hive_account_valid',
-							['valid' => 1],
-							true
-						);
-					}
-				}
+				$USER['hive_account'] = $linkResult['account'];
 			}
 		}
 
