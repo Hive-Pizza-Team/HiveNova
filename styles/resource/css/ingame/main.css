@@ -2571,23 +2571,36 @@ table.tablesorter thead tr .headerSortDown {
         padding: 10px;
     }
 
+    /* #414: keep Resources inside ~390px; percent + Apply stay reachable */
+    body#resources {
+        overflow-x: clip;
+        max-width: 100%;
+    }
+
     body#resources content,
     body#resources .resources-form,
     body#resources .resources-table {
         max-width: 100%;
-        overflow-x: hidden;
+        overflow-x: clip;
+        min-width: 0;
     }
 
     body#resources table.resources-table {
         display: block;
         width: 100%;
+        max-width: 100%;
         overflow: visible;
         border-spacing: 0;
+        table-layout: fixed;
     }
 
-    body#resources .resources-table tbody {
+    body#resources .resources-table tbody,
+    body#resources .resources-table__title,
+    body#resources .resources-table__row {
         display: block;
         width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     body#resources .resources-table__cols {
@@ -2597,22 +2610,21 @@ table.tablesorter thead tr .headerSortDown {
     body#resources .resources-table__title th {
         display: block;
         width: 100%;
+        max-width: 100%;
         box-sizing: border-box;
+        overflow-wrap: anywhere;
     }
 
     body#resources .resources-table__row {
-        display: block;
-        width: 100%;
         margin: 0 0 10px;
         padding: 10px;
-        box-sizing: border-box;
         background: var(--color-bg-surface);
         border: 1px solid var(--color-border);
     }
 
     body#resources .resources-table__row td {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) minmax(0, auto);
         align-items: center;
         gap: 8px;
         width: 100%;
@@ -2622,6 +2634,7 @@ table.tablesorter thead tr .headerSortDown {
         text-align: left;
         background: transparent;
         border: 0;
+        min-width: 0;
     }
 
     body#resources .resources-table__row td::before {
@@ -2636,6 +2649,9 @@ table.tablesorter thead tr .headerSortDown {
     body#resources .resources-table__row td > * {
         grid-column: 2;
         justify-self: end;
+        min-width: 0;
+        max-width: 100%;
+        overflow-wrap: anywhere;
     }
 
     body#resources .resources-table__label {
@@ -2647,16 +2663,36 @@ table.tablesorter thead tr .headerSortDown {
         margin-bottom: 4px;
         text-align: left;
         grid-template-columns: 1fr;
+        overflow-wrap: anywhere;
     }
 
     body#resources .resources-table__label::before {
         content: none;
     }
 
-    body#resources .resources-table__factor select,
+    /* Percent control: full card width so it is not clipped at ~390px.
+       Beat .resources-table__row td > * (grid-column: 2) with equal/higher specificity. */
+    body#resources .resources-table__row td.resources-table__factor {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: stretch;
+    }
+
+    body#resources .resources-table__row td.resources-table__factor::before {
+        grid-column: 1;
+    }
+
+    body#resources .resources-table__row td.resources-table__factor > * {
+        grid-column: 1;
+        justify-self: stretch;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    body#resources .resources-table__row td.resources-table__factor select,
     body#resources .resources-apply-bar input,
     body#resources .resources-table input[type="submit"] {
         width: 100%;
+        max-width: 100%;
         min-height: 44px;
         box-sizing: border-box;
     }
@@ -2670,8 +2706,11 @@ table.tablesorter thead tr .headerSortDown {
         position: sticky;
         bottom: calc(56px + env(safe-area-inset-bottom, 0px));
         z-index: 50;
-        margin: 0 -8px;
-        padding: 8px;
+        width: 100%;
+        max-width: 100%;
+        margin: 8px 0 0;
+        padding: 8px 0;
+        box-sizing: border-box;
         background: var(--color-bg-surface);
         border-top: 1px solid var(--color-border);
     }

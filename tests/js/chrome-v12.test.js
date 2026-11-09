@@ -202,10 +202,17 @@ describe('chrome-v1.2 mobile', () => {
 
 	it('stacks #414 Resources at mobile width and keeps Apply reachable', () => {
 		assert.match(mobileCss, /body#resources \.resources-table__row \{[\s\S]*?display:\s*block/);
-		assert.match(mobileCss, /body#resources[\s\S]*overflow-x:\s*hidden/);
+		assert.match(mobileCss, /body#resources[\s\S]*overflow-x:\s*clip/);
+		assert.match(mobileCss, /body#resources \.resources-table__row td\.resources-table__factor \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+		assert.match(mobileCss, /body#resources \.resources-table__row td\.resources-table__factor > \* \{[\s\S]*?grid-column:\s*1/);
+		assert.match(mobileCss, /body#resources \.resources-table__row td\.resources-table__factor select[\s\S]*?width:\s*100%/);
 		assert.match(mobileCss, /body#resources \.resources-apply-bar \{[\s\S]*?display:\s*block/);
+		assert.match(mobileCss, /body#resources \.resources-apply-bar \{[\s\S]*?max-width:\s*100%/);
+		assert.match(mobileCss, /body#resources \.resources-apply-bar \{[\s\S]*?margin:\s*8px 0 0/);
+		assert.match(hiveCss, /body#resources[\s\S]*overflow-x:\s*clip/);
 		assert.match(resourcesTpl, /class="resources-form"/);
 		assert.match(resourcesTpl, /class="resources-table"/);
+		assert.match(resourcesTpl, /colspan="6"/);
 		assert.match(resourcesTpl, /resources-apply-bar/);
 		assert.match(resourcesTpl, /data-label="\{\$LNG\.tech\.901\}"/);
 	});
