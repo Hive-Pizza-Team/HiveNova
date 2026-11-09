@@ -4,6 +4,7 @@ namespace HiveNova\Page\Login;
 
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
+use HiveNova\Core\UserLanguageService;
 
 /**
  *  2Moons 
@@ -69,6 +70,7 @@ class ShowExternalAuthPage extends AbstractLoginPage
 		$session->adminAccess	= 0;
 		Session::regenerateId();
 		$session->save();
+		UserLanguageService::syncFromLobbyOnLogin((int) $loginData['id']);
 		$this->redirectTo("game.php");	
 	}
 }

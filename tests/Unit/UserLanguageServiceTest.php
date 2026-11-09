@@ -8,11 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 class UserLanguageServiceTest extends TestCase
 {
-	protected function tearDown(): void
-	{
-		unset($_REQUEST['lang'], $_COOKIE['lang']);
-		parent::tearDown();
-	}
+	/** @var list<string> */
+	private array $allowed = ['en', 'de', 'fr', 'pl'];
 
 	public function testResolvePrefersRequestOverCookie(): void
 	{
@@ -21,89 +18,147 @@ class UserLanguageServiceTest extends TestCase
 			UserLanguageService::resolveFromRequest(
 				['lang' => 'de'],
 				['lang' => 'fr'],
-				true
+				true,
+				$this->allowed
 			)
 		);
 	}
 
-	public function testResolveFallsBackToCookieWhenEnabled(): void
+	public function testResolveFallsBackToCookieWhenRequested(): void
 	{
 		$this->assertSame(
-			'pl',
-			UserLanguageService::resolveFromRequest([], ['lang' => 'pl'], true)
+			'fr',
+			UserLanguageService::resolveFromRequest(
+				[],
+				['lang' => 'fr'],
+				true,
+				$this->allowed
+			)
 		);
+	}
+
+	public function testResolveIgnoresCookieWhenDisabled(): void
+	{
 		$this->assertNull(
-			UserLanguageService::resolveFromRequest([], ['lang' => 'pl'], false)
+			UserLanguageService::resolveFromRequest(
+				[],
+				['lang' => 'de'],
+				false,
+				$this->allowed
+			)
 		);
 	}
 
 	public function testResolveRejectsDisallowedCodes(): void
 	{
 		$this->assertNull(
-			UserLanguageService::resolveFromRequest(['lang' => 'xx'], ['lang' => 'yy'], true)
+			UserLanguageService::resolveFromRequest(
+				['lang' => 'xx'],
+				['lang' => 'yy'],
+				true,
+				$this->allowed
+			)
 		);
 	}
 
-	public function testApplyToUserPersistsAndSkipsUnchanged(): void
+	public function testResolveForRegisterUsesCandidateThenLobbyThenDefault(): void
 	{
-		$db = $this->createMock(DatabaseInterface::class);
-		$db->expects($this->once())
-			->method('update')
-			->with(
-				$this->stringContains('SET lang'),
-				[':lang' => 'de', ':userId' => 42]
-			);
-
-		$this->assertTrue(UserLanguageService::applyToUser(42, 'de', 'en', $db));
-		$this->assertFalse(UserLanguageService::applyToUser(42, 'de', 'de', $db));
-		$this->assertFalse(UserLanguageService::applyToUser(42, 'xx', 'en', $db));
-		$this->assertFalse(UserLanguageService::applyToUser(0, 'de', 'en', $db));
+		$this->assertSame(
+			'de',
+			UserLanguageService::resolveForRegister('de', 'en', [], [], $this->allowed)
+		);
+		$this->assertSame(
+			'fr',
+			UserLanguageService::resolveForRegister('', 'en', [], ['lang' => 'fr'], $this->allowed)
+		);
+		$this->assertSame(
+			'en',
+			UserLanguageService::resolveForRegister('xx', 'en', [], [], $this->allowed)
+		);
 	}
 
-	public function testSyncFromLobbyOnLoginUsesCookie(): void
+	public function testApplyToUserSkipsWhenUnchanged(): void
 	{
-		$_COOKIE['lang'] = 'es';
-		unset($_REQUEST['lang']);
-
-		$db = $this->createMock(DatabaseInterface::class);
-		$db->expects($this->once())
-			->method('update')
-			->with(
-				$this->stringContains('SET lang'),
-				[':lang' => 'es', ':userId' => 7]
-			);
-
-		$this->assertSame('es', UserLanguageService::syncFromLobbyOnLogin(7, 'en', $db));
-	}
-
-	public function testApplyExplicitRequestUpdatesUserArray(): void
-	{
-		$_REQUEST['lang'] = 'fr';
-		$_COOKIE['lang'] = 'de';
-
-		$db = $this->createMock(DatabaseInterface::class);
-		$db->expects($this->once())
-			->method('update')
-			->with(
-				$this->stringContains('SET lang'),
-				[':lang' => 'fr', ':userId' => 9]
-			);
-
-		$user = ['id' => 9, 'lang' => 'en'];
-		$this->assertTrue(UserLanguageService::applyExplicitRequestToUser($user, $db));
-		$this->assertSame('fr', $user['lang']);
-	}
-
-	public function testApplyExplicitRequestIgnoresCookieOnly(): void
-	{
-		unset($_REQUEST['lang']);
-		$_COOKIE['lang'] = 'de';
-
 		$db = $this->createMock(DatabaseInterface::class);
 		$db->expects($this->never())->method('update');
 
+		$this->assertFalse(UserLanguageService::applyToUser(42, 'de', 'de', $db));
+	}
+
+	public function testApplyToUserPersistsWhenChanged(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->once())
+			->method('update')
+			->with(
+				$this->stringContains('SET lang = :lang'),
+				[
+					':lang'   => 'de',
+					':userId' => 42,
+				]
+			);
+
+		$this->assertTrue(UserLanguageService::applyToUser(42, 'de', 'en', $db));
+	}
+
+	public function testSyncFromLobbyOnLoginCopiesCookieLanguage(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->once())->method('update');
+
+		$this->assertSame(
+			'de',
+			UserLanguageService::syncFromLobbyOnLogin(
+				7,
+				'en',
+				$db,
+				[],
+				['lang' => 'de']
+			)
+		);
+	}
+
+	public function testSyncFromLobbyOnLoginNoopsWithoutLobbyLanguage(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->never())->method('update');
+
+		$this->assertNull(
+			UserLanguageService::syncFromLobbyOnLogin(7, 'en', $db, [], [])
+		);
+	}
+
+	public function testApplyExplicitRequestUpdatesLoadedUser(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->once())->method('update');
+
 		$user = ['id' => 9, 'lang' => 'en'];
-		$this->assertFalse(UserLanguageService::applyExplicitRequestToUser($user, $db));
-		$this->assertSame('en', $user['lang']);
+		$this->assertTrue(
+			UserLanguageService::applyExplicitRequestToUser(
+				$user,
+				$db,
+				['lang' => 'de']
+			)
+		);
+		$this->assertSame('de', $user['lang']);
+	}
+
+	public function testApplyExplicitRequestIgnoresCookie(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->never())->method('update');
+
+		$savedCookie = $_COOKIE;
+		$_COOKIE['lang'] = 'de';
+		try {
+			$user = ['id' => 9, 'lang' => 'en'];
+			$this->assertFalse(
+				UserLanguageService::applyExplicitRequestToUser($user, $db, [])
+			);
+			$this->assertSame('en', $user['lang']);
+		} finally {
+			$_COOKIE = $savedCookie;
+		}
 	}
 }

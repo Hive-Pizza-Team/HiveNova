@@ -171,7 +171,7 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 		HTTP::redirectTo('index.php?code=3');
 	}
 
-	if (!empty($USER['id'])) {
+	if (MODE === 'INGAME' && !empty($USER['id'])) {
 		UserLanguageService::applyExplicitRequestToUser($USER);
 	}
 

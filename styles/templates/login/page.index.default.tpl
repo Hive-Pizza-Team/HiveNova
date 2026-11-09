@@ -86,7 +86,8 @@
 					<h2>{$LNG.loginPassword} {$LNG.loginHeader}</h2>
 					<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 						<div class="login-form-fields">
-						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultEmailUniverse}</select>
+							<input type="hidden" name="lang" value="{$lang}">
+							<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultEmailUniverse}</select>
 							<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}" data-remember-username="email" autocomplete="username">
 							<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
 						{$verkeySafe = $verkey|default:[]}
@@ -110,6 +111,7 @@
 					<h2>{$LNG.loginHiveAccount} {$LNG.loginHeader}</h2>
 					<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
 						<div class="login-form-fields">
+							<input type="hidden" name="lang" value="{$lang}">
 							<select name="uni" id="loginHive-universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultHiveUniverse}</select>
 							<input name="username" id="loginHive-username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}" data-remember-username="hive" autocomplete="username">
 							<input name="password" id="loginHive-password" type="hidden">
