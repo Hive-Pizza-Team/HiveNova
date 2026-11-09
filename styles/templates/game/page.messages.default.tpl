@@ -74,7 +74,7 @@
 	{foreachelse}
 	<tr class="msg-empty-row">
 		<td colspan="4">
-			<p class="msg-empty-copy">{$LNG.mg_empty_compose}</p>
+			<p class="msg-empty-copy">{$LNG.mg_no_messages}</p>
 			<p><a href="game.php?page=messages&amp;mode=write" class="msg-compose-link" onclick="return Dialog.open(this.href, 650, 350);">{$LNG.mg_send_new}</a></p>
 		</td>
 	</tr>
