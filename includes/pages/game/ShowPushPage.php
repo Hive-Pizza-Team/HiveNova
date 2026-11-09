@@ -144,6 +144,12 @@ class ShowPushPage extends AbstractGamePage
 			return;
 		}
 
+		if (PushNotificationService::isEndpointBlocked($data['endpoint'])) {
+			HTTP::sendHeader('HTTP/1.1 410 Gone');
+			$this->sendJSON(['error' => 'subscription_expired']);
+			return;
+		}
+
 		PushNotificationService::saveSubscription(
 			(int) $USER['id'],
 			$data,

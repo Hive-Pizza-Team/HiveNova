@@ -670,6 +670,62 @@ describe('HiveNovaPush', () => {
 		assert.equal(subscribeCalls, 0);
 	});
 
+	it('rotates a subscription the server marks expired', async () => {
+		let unsubscribed = false;
+		let subscribeCalls = 0;
+		const posted = [];
+		const dead = {
+			toJSON() { return { endpoint: 'dead', keys: { p256dh: 'p', auth: 'a' } }; },
+			async unsubscribe() { unsubscribed = true; }
+		};
+		const { api } = loadPush({
+			runReady: false,
+			Notification: { permission: 'granted' },
+			navigator: {
+				serviceWorker: {
+					register: async () => ({
+						pushManager: {
+							getSubscription: async () => dead,
+							subscribe: async () => {
+								subscribeCalls += 1;
+								return {
+									toJSON() { return { endpoint: 'fresh', keys: { p256dh: 'p', auth: 'a' } }; }
+								};
+							}
+						}
+					})
+				}
+			},
+			fetchImpl(url, init) {
+				if (String(url).includes('mode=status')) {
+					return Promise.resolve({
+						ok: true,
+						json: async () => ({ configured: true, publicKey: 'pk', enabled: true })
+					});
+				}
+				if (String(url).includes('mode=subscribe')) {
+					const body = JSON.parse(init.body);
+					posted.push(body.endpoint);
+					if (body.endpoint === 'dead') {
+						return Promise.resolve({
+							ok: false,
+							status: 410,
+							json: async () => ({ error: 'subscription_expired' })
+						});
+					}
+					return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+				}
+				return Promise.resolve({ ok: true, json: async () => ({}) });
+			}
+		});
+
+		const result = await api.enable({ activate: true });
+		assert.deepEqual(result, { ok: true });
+		assert.equal(unsubscribed, true);
+		assert.equal(subscribeCalls, 1);
+		assert.deepEqual(posted, ['dead', 'fresh']);
+	});
+
 	it('maybeAutoSubscribe turns preference off when notifications are blocked', async () => {
 		const { api, checkbox, fetches } = loadPush({
 			runReady: false,

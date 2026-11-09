@@ -13,6 +13,9 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	/** @var array<string, array{planet_id: int, element_id: int, level: int, build_end: int}> */
 	public array $notified = [];
 
+	/** @var list<array{user_id: int, endpoint: string, p256dh: string, auth: string}> */
+	public array $subscriptions = [];
+
 	/** @var list<array{qry: string, params: array<string, mixed>}> */
 	public array $inserts = [];
 
@@ -24,6 +27,18 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 
 	public function select($qry, array $params = [])
 	{
+		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':userId'])) {
+			$userId = (int) $params[':userId'];
+			$rows = [];
+			foreach ($this->subscriptions as $row) {
+				if ((int) $row['user_id'] === $userId) {
+					$rows[] = $row;
+				}
+			}
+
+			return $rows;
+		}
+
 		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%') && str_contains($qry, 'notified_at = 0')) {
 			$pending = [];
 			foreach ($this->notified as $row) {
@@ -67,6 +82,10 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 
 	public function selectSingle($qry, array $params = [], $field = false)
 	{
+		if (str_contains($qry, 'settings_push')) {
+			return 1;
+		}
+
 		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%')) {
 			$key = $this->key(
 				(int) ($params[':planetId'] ?? 0),
@@ -113,6 +132,15 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	public function delete($qry, array $params = [])
 	{
 		$this->deletes[] = ['qry' => $qry, 'params' => $params];
+		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':endpoint'])) {
+			$endpoint = (string) $params[':endpoint'];
+			$this->subscriptions = array_values(array_filter(
+				$this->subscriptions,
+				static fn (array $row): bool => ($row['endpoint'] ?? '') !== $endpoint
+			));
+
+			return 1;
+		}
 		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%') && isset($params[':old'])) {
 			$old = (int) $params[':old'];
 			foreach ($this->notified as $key => $row) {

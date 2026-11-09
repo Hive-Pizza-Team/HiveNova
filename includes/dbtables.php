@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 50);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 51);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -73,6 +73,7 @@ $dbTableNames	= array(
 	'LOG_SHIPYARD'		=> DB_PREFIX.'log_shipyard',
 	'BOT_DETECTION_STATE'	=> DB_PREFIX.'bot_detection_state',
 	'PUSH_SUBSCRIPTIONS'	=> DB_PREFIX.'push_subscriptions',
+	'PUSH_EXPIRED_ENDPOINTS'	=> DB_PREFIX.'push_expired_endpoints',
 	'PUSH_BUILDING_NOTIFIED'	=> DB_PREFIX.'push_building_notified',
 	'PUSH_RESEARCH_NOTIFIED'	=> DB_PREFIX.'push_research_notified',
 	'ACHIEVEMENTS'			=> DB_PREFIX.'achievements',
