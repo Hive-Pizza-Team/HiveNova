@@ -84,6 +84,22 @@ define('HIVE_RPC_NODES'				, [
 	'https://api.openhive.network',
 ]);
 
+// HiveSigner OAuth (optional Keychain fallback for in-product Hive link / #638).
+// Empty client id disables the HiveSigner button; ops set HIVESIGNER_CLIENT_ID
+// in a local override or deploy config when the app is registered.
+if (!defined('HIVESIGNER_CLIENT_ID')) {
+	define('HIVESIGNER_CLIENT_ID', '');
+}
+if (!defined('HIVESIGNER_SCOPE')) {
+	define('HIVESIGNER_SCOPE', 'login');
+}
+if (!defined('HIVESIGNER_AUTHORIZE_URL')) {
+	define('HIVESIGNER_AUTHORIZE_URL', 'https://hivesigner.com/oauth2/authorize');
+}
+if (!defined('HIVESIGNER_ME_URL')) {
+	define('HIVESIGNER_ME_URL', 'https://hivesigner.com/api/me');
+}
+
 // =============================================================================
 // GAME ENGINE
 // =============================================================================
