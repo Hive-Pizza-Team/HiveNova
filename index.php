@@ -24,12 +24,22 @@ require 'includes/common.php';
 
 use HiveNova\Page\Login\ShowErrorPage;
 use HiveNova\Core\Language;
+use HiveNova\Core\PublicSeo;
 
+$hostRedirect = PublicSeo::lobbyCanonicalRedirectLocation(
+	(string) HTTP_HOST,
+	(string) ($_SERVER['REQUEST_URI'] ?? '/'),
+	(bool) HTTPS
+);
+if ($hostRedirect !== null) {
+	header('Location: '.$hostRedirect, true, 301);
+	exit;
+}
 
 $page 		= \HiveNova\Core\HTTP::_GP('page', 'index');
 $mode 		= \HiveNova\Core\HTTP::_GP('mode', 'show');
 $page		= str_replace(array('_', '\\', '/', '.', "\0"), '', $page);
-$aliasTarget	= \HiveNova\Core\PublicSeo::loginAliasRedirectTarget($page, \HiveNova\Core\HTTP::_GP('lang', ''));
+$aliasTarget	= PublicSeo::loginAliasRedirectTarget($page, \HiveNova\Core\HTTP::_GP('lang', ''));
 if ($aliasTarget !== null) {
 	header('Location: '.$aliasTarget, true, 301);
 	exit;

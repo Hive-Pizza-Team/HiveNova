@@ -194,6 +194,8 @@ abstract class AbstractLoginPage
 			$basePath = PROTOCOL.HTTP_HOST.HTTP_BASE;
 		}
 
+		// SEO absolute URLs always use moonsiege.com regardless of request host.
+		$seoBasePath		= PublicSeo::CANONICAL_BASE;
 		$config			= Config::get();
 		$lang			= $LNG->getLanguage();
 		$seoPage		= PublicSeo::normalizePage(HTTP::_GP('page', ''));
@@ -201,11 +203,11 @@ abstract class AbstractLoginPage
 		$languages		= Language::getAllowedLangs(false);
 		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
 		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
-		$hreflangUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
+		$canonicalUrl		= PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang);
+		$hreflangUrls		= PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
-		$ogImageUrl			= $basePath.'styles/resource/images/login/HiveNova.png';
+		$ogImageUrl			= $seoBasePath.'styles/resource/images/login/HiveNova.png';
 		$jsonLd				= '';
 		if ($seoPage === 'index') {
 			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
@@ -228,7 +230,7 @@ abstract class AbstractLoginPage
 			'ogImageHeight'		=> 768,
 			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
-			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
+			'footerLinks'		=> PublicSeo::footerLinks($seoBasePath, $lang, $LNG),
 			'jsonLd'			=> $jsonLd,
 		));
 

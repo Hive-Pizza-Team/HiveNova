@@ -4,7 +4,7 @@
  * Regenerate sitemap.xml from PublicSeo::SITEMAP_PAGES and the language/ directories.
  *
  * Usage:
- *   php scripts/generate-sitemap.php [--lastmod=YYYY-MM-DD] [--base=https://moon.hive.pizza/]
+ *   php scripts/generate-sitemap.php [--lastmod=YYYY-MM-DD] [--base=https://moonsiege.com/]
  *
  * Run after changing SITEMAP_PAGES, adding a language, or editing public page
  * content, then commit the result. PublicSitemapFilesTest fails if the file drifts.
@@ -12,11 +12,15 @@
 
 use HiveNova\Core\PublicSeo;
 
-require dirname(__DIR__).'/vendor/autoload.php';
+$loader = require dirname(__DIR__).'/vendor/autoload.php';
+if ($loader instanceof \Composer\Autoload\ClassLoader) {
+	// Worktrees often symlink vendor from another checkout; bind PSR-4 to this tree.
+	$loader->setPsr4('HiveNova\\Core\\', [dirname(__DIR__).'/includes/classes/']);
+}
 
 $opts = getopt('', ['lastmod::', 'base::']);
 $lastmod = $opts['lastmod'] ?? gmdate('Y-m-d');
-$base = $opts['base'] ?? 'https://moon.hive.pizza/';
+$base = $opts['base'] ?? PublicSeo::CANONICAL_BASE;
 
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $lastmod)) {
 	fwrite(STDERR, "--lastmod must be YYYY-MM-DD\n");

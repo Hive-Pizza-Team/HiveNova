@@ -1,3 +1,7 @@
+# Production lobby canonical host: https://moonsiege.com (PublicSeo::CANONICAL_BASE).
+# At the edge: 301 http→https, and 301 moon.hive.pizza / www.moonsiege.com lobby
+# URLs to https://moonsiege.com{$uri} while leaving game.php on the request host
+# (session cookies are host-scoped).
 
 nova.hive.pizza {
     root * /var/www/HiveNova

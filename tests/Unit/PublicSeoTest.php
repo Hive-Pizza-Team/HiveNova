@@ -13,38 +13,62 @@ class PublicSeoTest extends TestCase
 		$this->assertSame('rules', PublicSeo::normalizePage('rules'));
 	}
 
+	public function testCanonicalBaseIsMoonsiege(): void
+	{
+		$this->assertSame('moonsiege.com', PublicSeo::CANONICAL_HOST);
+		$this->assertSame('https://moonsiege.com/', PublicSeo::CANONICAL_BASE);
+	}
+
 	public function testCanonicalHomepageDefaultLangIsBareBase(): void
 	{
-		$url = PublicSeo::canonicalUrl('https://moon.hive.pizza/', 'index', 'en');
-		$this->assertSame('https://moon.hive.pizza/', $url);
+		$url = PublicSeo::canonicalUrl(PublicSeo::CANONICAL_BASE, 'index', 'en');
+		$this->assertSame('https://moonsiege.com/', $url);
 	}
 
 	public function testCanonicalHomepageNonDefaultLang(): void
 	{
-		$url = PublicSeo::canonicalUrl('https://moon.hive.pizza/', 'index', 'de');
-		$this->assertSame('https://moon.hive.pizza/index.php?lang=de', $url);
+		$url = PublicSeo::canonicalUrl(PublicSeo::CANONICAL_BASE, 'index', 'de');
+		$this->assertSame('https://moonsiege.com/index.php?lang=de', $url);
 	}
 
 	public function testCanonicalInnerPageIncludesQuery(): void
 	{
-		$url = PublicSeo::canonicalUrl('https://moon.hive.pizza/', 'rules', 'en');
-		$this->assertSame('https://moon.hive.pizza/index.php?page=rules', $url);
+		$url = PublicSeo::canonicalUrl(PublicSeo::CANONICAL_BASE, 'rules', 'en');
+		$this->assertSame('https://moonsiege.com/index.php?page=rules', $url);
 	}
 
 	public function testCanonicalNonDefaultLangPreservesPage(): void
 	{
-		$url = PublicSeo::canonicalUrl('https://moon.hive.pizza/', 'rules', 'de');
-		$this->assertSame('https://moon.hive.pizza/index.php?page=rules&lang=de', $url);
+		$url = PublicSeo::canonicalUrl(PublicSeo::CANONICAL_BASE, 'rules', 'de');
+		$this->assertSame('https://moonsiege.com/index.php?page=rules&lang=de', $url);
 	}
 
 	public function testHreflangIncludesXDefaultAndAbsoluteUrls(): void
 	{
 		$langs = ['en' => 'English', 'de' => 'Deutsch'];
-		$urls = PublicSeo::hreflangUrls('https://moon.hive.pizza/', 'screens', $langs);
+		$urls = PublicSeo::hreflangUrls(PublicSeo::CANONICAL_BASE, 'screens', $langs);
 
-		$this->assertSame('https://moon.hive.pizza/index.php?page=screens', $urls['en']);
-		$this->assertSame('https://moon.hive.pizza/index.php?page=screens&lang=de', $urls['de']);
-		$this->assertSame('https://moon.hive.pizza/index.php?page=screens', $urls['x-default']);
+		$this->assertSame('https://moonsiege.com/index.php?page=screens', $urls['en']);
+		$this->assertSame('https://moonsiege.com/index.php?page=screens&lang=de', $urls['de']);
+		$this->assertSame('https://moonsiege.com/index.php?page=screens', $urls['x-default']);
+	}
+
+	public function testLobbyCanonicalRedirectFromAliasHostsPreservesQuery(): void
+	{
+		$this->assertSame(
+			'https://moonsiege.com/?ref=1&src=x',
+			PublicSeo::lobbyCanonicalRedirectLocation('moon.hive.pizza', '/?ref=1&src=x', true)
+		);
+		$this->assertSame(
+			'https://moonsiege.com/index.php?page=rules&lang=de',
+			PublicSeo::lobbyCanonicalRedirectLocation('www.moonsiege.com', '/index.php?page=rules&lang=de', true)
+		);
+		$this->assertSame(
+			'https://moonsiege.com/',
+			PublicSeo::lobbyCanonicalRedirectLocation('moonsiege.com', '/', false)
+		);
+		$this->assertNull(PublicSeo::lobbyCanonicalRedirectLocation('moonsiege.com', '/', true));
+		$this->assertNull(PublicSeo::lobbyCanonicalRedirectLocation('localhost', '/', false));
 	}
 
 	public function testDocumentTitleHomeUsesTemplate(): void
@@ -148,17 +172,17 @@ class PublicSeoTest extends TestCase
 			'siteTitleBattleHall' => 'Hall of Fame',
 		];
 
-		$links = PublicSeo::footerLinks('https://moon.hive.pizza/', 'de', $lng);
+		$links = PublicSeo::footerLinks(PublicSeo::CANONICAL_BASE, 'de', $lng);
 
 		$this->assertSame(
 			['Register', 'Rules', 'Screenshots', 'Hall of Fame'],
 			array_column($links, 'label')
 		);
 		$this->assertSame(
-			'https://moon.hive.pizza/index.php?page=rules&lang=de',
+			'https://moonsiege.com/index.php?page=rules&lang=de',
 			$links[1]['url']
 		);
-		$this->assertSame([], PublicSeo::footerLinks('https://moon.hive.pizza/', 'en', []));
+		$this->assertSame([], PublicSeo::footerLinks(PublicSeo::CANONICAL_BASE, 'en', []));
 	}
 
 	public function testFaqJsonLdMirrorsVisibleQuestions(): void
@@ -214,16 +238,16 @@ class PublicSeoTest extends TestCase
 	{
 		$json = PublicSeo::indexJsonLd(
 			'Moon',
-			'https://moon.hive.pizza/',
+			PublicSeo::CANONICAL_BASE,
 			'A free browser space strategy game.',
-			'https://moon.hive.pizza/styles/resource/images/login/HiveNova.png'
+			PublicSeo::CANONICAL_BASE.'styles/resource/images/login/HiveNova.png'
 		);
 		$data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
 		$this->assertSame('https://schema.org', $data['@context']);
 		$this->assertSame('VideoGame', $data['@type']);
 		$this->assertSame('Moon', $data['name']);
-		$this->assertSame('https://moon.hive.pizza/', $data['url']);
+		$this->assertSame('https://moonsiege.com/', $data['url']);
 		$this->assertSame(PublicSeo::entitySameAs(), $data['sameAs']);
 		$this->assertSame('Organization', $data['publisher']['@type']);
 		$this->assertSame('Hive Pizza Team', $data['publisher']['name']);

@@ -7,6 +7,26 @@ namespace HiveNova\Core;
  */
 class PublicSeo
 {
+	/**
+	 * Single public lobby host for canonical, hreflang, og:url, sitemap, and robots.
+	 * Request host may differ (moon.hive.pizza, www); SEO tags always use this.
+	 */
+	public const CANONICAL_HOST = 'moonsiege.com';
+
+	/** Trailing-slash HTTPS root used in all public SEO absolute URLs. */
+	public const CANONICAL_BASE = 'https://moonsiege.com/';
+
+	/**
+	 * Hosts that 301 to CANONICAL_HOST on the public lobby (index.php) only.
+	 * game.php must not redirect: session cookies are host-scoped (domain '').
+	 *
+	 * @var list<string>
+	 */
+	public const ALIAS_HOSTS = [
+		'moon.hive.pizza',
+		'www.moonsiege.com',
+	];
+
 	/** @var array<string, string> page => Language siteTitle* key (index uses metaTitleHome) */
 	public const PAGE_TITLE_KEYS = [
 		'index'        => 'metaTitleHome',
@@ -113,9 +133,9 @@ class PublicSeo
 	 * Absolute canonical URL for a public login page.
 	 *
 	 * Homepage (default language) uses the bare base path. Other pages and
-	 * non-default languages use index.php with query params.
+	 * non-default languages use index.php with query params (not /?lang=).
 	 *
-	 * @param string $basePath Trailing-slash site root, e.g. https://moon.hive.pizza/
+	 * @param string $basePath Trailing-slash site root, e.g. https://moonsiege.com/
 	 */
 	public static function canonicalUrl(string $basePath, string $page, string $lang, string $defaultLang = 'en'): string
 	{
@@ -135,6 +155,37 @@ class PublicSeo
 		}
 
 		return $basePath.'index.php?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+	}
+
+	/**
+	 * Absolute Location for a lobby host/HTTPS consolidation redirect, or null.
+	 *
+	 * Preserves path and query (ref, src, lang, page). Only for LOGIN/index.php
+	 * callers — never game.php / admin.php.
+	 *
+	 * @param string $host        HTTP_HOST (port stripped)
+	 * @param string $requestUri  REQUEST_URI including query string
+	 * @param bool   $https       Whether the request is already HTTPS
+	 */
+	public static function lobbyCanonicalRedirectLocation(string $host, string $requestUri, bool $https): ?string
+	{
+		$host = strtolower(explode(':', $host, 2)[0]);
+		$isAlias = in_array($host, self::ALIAS_HOSTS, true);
+		$isCanonical = $host === self::CANONICAL_HOST;
+		if (!$isAlias && !$isCanonical) {
+			return null;
+		}
+
+		if (!$isAlias && $https) {
+			return null;
+		}
+
+		$path = $requestUri !== '' ? $requestUri : '/';
+		if ($path[0] !== '/') {
+			$path = '/'.$path;
+		}
+
+		return 'https://'.self::CANONICAL_HOST.$path;
 	}
 
 	/**
