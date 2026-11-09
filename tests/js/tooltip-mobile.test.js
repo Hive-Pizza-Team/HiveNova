@@ -40,6 +40,69 @@ describe('mobile tooltip helpers', () => {
 		assert.equal(tooltip.isStationaryTooltipTouch(start, { x: 40, y: 80 }), false);
 		assert.equal(tooltip.isStationaryTooltipTouch(null, { x: 0, y: 0 }), true);
 	});
+
+	it('ignores blank tooltip content so empty #tooltip chrome is not shown', () => {
+		assert.equal(tooltip.tooltipTriggerContent(undefined), '');
+		assert.equal(tooltip.tooltipTriggerContent('   '), '');
+		assert.equal(tooltip.tooltipTriggerContent('<span>Spy</span>'), '<span>Spy</span>');
+	});
+
+	it('scrubs Fancybox and empty tooltip leftovers after playercard navigation', () => {
+		const calls = [];
+		const tip = {
+			stop() {
+				calls.push('stop');
+				return this;
+			},
+			hide() {
+				calls.push('hide');
+				return this;
+			},
+			empty() {
+				calls.push('empty');
+				return this;
+			},
+			removeData() {
+				calls.push('removeData');
+				return this;
+			},
+			css() {
+				return this;
+			},
+			removeClass() {
+				calls.push('removeClass');
+				return this;
+			},
+			removeAttr() {
+				return this;
+			},
+		};
+		const overlay = { hide() { calls.push('overlay'); } };
+		const wrap = { hide() { calls.push('wrap'); } };
+		const root$ = Object.assign(
+			(sel) => {
+				if (sel === '#tooltip') return tip;
+				if (sel === '#fancybox-overlay') return overlay;
+				if (sel === '#fancybox-wrap') return wrap;
+				return { hide() { return this; } };
+			},
+			{
+				fancybox: {
+					close() {
+						calls.push('close');
+					},
+				},
+			}
+		);
+		assert.equal(tooltip.scrubFancyboxAndTooltip(root$), true);
+		assert.ok(calls.includes('close'));
+		assert.ok(calls.includes('overlay'));
+		assert.ok(calls.includes('wrap'));
+		assert.ok(calls.includes('stop'));
+		assert.ok(calls.includes('hide'));
+		assert.ok(calls.includes('empty'));
+		assert.ok(calls.includes('removeData'));
+	});
 });
 
 describe('tooltip.js mobile bindings', () => {

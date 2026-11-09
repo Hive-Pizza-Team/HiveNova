@@ -10,7 +10,7 @@
 	</tr>
 	<tr>
 		<td colspan="2">{$LNG.pl_homeplanet}</td>
-		<td colspan="2">{$applyDetail.name} <a href="game.php?page=galaxy&amp;galaxy={$applyDetail.galaxy}&amp;system={$applyDetail.system}" target="_top">[{$applyDetail.coordinates}]</a></td>
+		<td colspan="2">{$applyDetail.name} <a href="game.php?page=galaxy&amp;galaxy={$applyDetail.galaxy}&amp;system={$applyDetail.system}" target="_top" onclick="if(window.top&amp;&amp;typeof window.top.scrubFancyboxAndTooltip==='function'){try{window.top.scrubFancyboxAndTooltip(window.top.jQuery);}catch(e){}}">[{$applyDetail.coordinates}]</a></td>
 	</tr>
 	<tr>
 		<td colspan="2">{$LNG.al_request_register_time}</td>

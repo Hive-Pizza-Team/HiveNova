@@ -77,6 +77,39 @@ function resetTooltipOverlay(tip) {
 	});
 }
 
+/**
+ * Leftover Fancybox/tooltip chrome after Stats → playercard → homeplanet
+ * can leave #tooltip visible with empty content (tiny blank square).
+ * Always safe to call on pageshow / galaxy ready.
+ */
+function scrubFancyboxAndTooltip(root$) {
+	root$ = root$ || (typeof jQuery !== 'undefined' ? jQuery : null);
+	if (!root$) {
+		return false;
+	}
+	if (root$.fancybox && typeof root$.fancybox.close === 'function') {
+		try {
+			root$.fancybox.close();
+		} catch (err) {
+			/* ignore close races during navigation */
+		}
+	}
+	root$('#fancybox-overlay').hide();
+	root$('#fancybox-wrap').hide();
+	var tip = root$('#tooltip');
+	resetTooltipOverlay(tip);
+	tip.hide().empty().removeData('mobile-source');
+	return true;
+}
+
+function tooltipTriggerContent(raw) {
+	if (raw == null) {
+		return '';
+	}
+	var content = String(raw).replace(/^\s+|\s+$/g, '');
+	return content;
+}
+
 function positionMobileTooltip(tip) {
 	tip.css({
 		top: Math.max(8, (window.innerHeight - tip.outerHeight()) / 2),
@@ -95,7 +128,7 @@ function touchPointFromEvent(e) {
 
 function openMobileTooltip(el, e) {
 	var tip = $('#tooltip');
-	var content = $(el).attr('data-tooltip-content');
+	var content = tooltipTriggerContent($(el).attr('data-tooltip-content'));
 	if (!content) {
 		return false;
 	}
@@ -186,8 +219,13 @@ $(document).ready(function () {
 			if (isMobileTooltip()) {
 				return;
 			}
+			var content = tooltipTriggerContent($(this).attr('data-tooltip-content'));
+			if (!content) {
+				return;
+			}
 			var tip = $('#tooltip');
-			tip.html($(this).attr('data-tooltip-content'));
+			resetTooltipOverlay(tip);
+			tip.html(content);
 			tip.show();
 		},
 		mouseleave : function () {
@@ -218,8 +256,13 @@ $(document).ready(function () {
 		if (isMobileTooltip()) {
 			return;
 		}
+		var content = tooltipTriggerContent($(this).attr('data-tooltip-content'));
+		if (!content) {
+			return;
+		}
 		var tip = $('#tooltip');
-		tip.html($(this).attr('data-tooltip-content'));
+		resetTooltipOverlay(tip);
+		tip.html(content);
 		tip.addClass('tooltip_sticky_div');
 		tip.css({
 			top : e.pageY - tip.outerHeight() / 2,
@@ -233,22 +276,19 @@ $(document).ready(function () {
 		tip.hide();
 	});
 
-	$(window).on('pageshow', function (e) {
-		var persisted = !!(e.originalEvent && e.originalEvent.persisted);
-		var overlay = $('#fancybox-overlay');
-		var wrap = $('#fancybox-wrap');
-		if (!persisted && !overlay.is(':visible') && !wrap.is(':visible')) {
-			return;
-		}
-		if ($.fancybox && typeof $.fancybox.close === 'function') {
-			$.fancybox.close();
-		}
-		overlay.hide();
-		wrap.hide();
-		resetTooltipOverlay($('#tooltip'));
-		$('#tooltip').hide().removeData('mobile-source');
+	// Scrub on every pageshow (including first load and bfcache). The old
+	// "only if fancybox :visible" gate missed empty leftover #tooltip chrome
+	// after Stats → playercard → homeplanet navigation (#507/#522).
+	$(window).on('pageshow', function () {
+		scrubFancyboxAndTooltip($);
 	});
 });
+}
+
+if (typeof window !== 'undefined') {
+	window.scrubFancyboxAndTooltip = scrubFancyboxAndTooltip;
+	window.resetTooltipOverlay = resetTooltipOverlay;
+	window.tooltipTriggerContent = tooltipTriggerContent;
 }
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -261,6 +301,9 @@ if (typeof module !== 'undefined' && module.exports) {
 		armMobileTooltipGuard: armMobileTooltipGuard,
 		isMobileTooltipGuardActive: isMobileTooltipGuardActive,
 		isStationaryTooltipTouch: isStationaryTooltipTouch,
-		shouldDismissMobileTooltip: shouldDismissMobileTooltip
+		shouldDismissMobileTooltip: shouldDismissMobileTooltip,
+		tooltipTriggerContent: tooltipTriggerContent,
+		scrubFancyboxAndTooltip: scrubFancyboxAndTooltip,
+		resetTooltipOverlay: resetTooltipOverlay
 	};
 }

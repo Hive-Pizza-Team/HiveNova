@@ -42,6 +42,12 @@ $(function () {
 		$('#galaxy_form').attr('target', '_top');
 	}
 
+	// Defense in depth for #507/#522: scrub any Fancybox/#tooltip leftovers
+	// that survived Stats → playercard → homeplanet (target=_top) navigation.
+	if (typeof scrubFancyboxAndTooltip === 'function') {
+		scrubFancyboxAndTooltip($);
+	}
+
 	if (!window.matchMedia('(max-width: 699px)').matches) {
 		return;
 	}
