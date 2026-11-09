@@ -121,4 +121,16 @@ describe('tooltip.js mobile bindings', () => {
 		assert.doesNotMatch(src, /attr\('href',\s*'#'\)/);
 		assert.match(src, /javascript:void\(0\)/);
 	});
+
+	it('always scrubs dialog chrome on pageshow', () => {
+		assert.match(src, /scrubFancyboxAndTooltip/);
+		assert.match(src, /\$\(window\)\.on\('pageshow'/);
+		assert.doesNotMatch(src, /overlay\.is\(':visible'\)/);
+	});
+
+	it('resets overlay and skips empty sticky content before show', () => {
+		assert.match(src, /tooltipTriggerContent\(\$\(this\)\.attr\('data-tooltip-content'\)\)/);
+		assert.match(src, /resetTooltipOverlay\(tip\)/);
+		assert.match(src, /if \(!content\) \{\s*return;/);
+	});
 });

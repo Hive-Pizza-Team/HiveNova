@@ -12,13 +12,15 @@ class PlayerCardIframeNavTest extends TestCase
 
 		$this->assertStringNotContainsString('parent.location', $tpl);
 		$this->assertMatchesRegularExpression(
-			'/<a href="game\.php\?page=galaxy&amp;galaxy=\{\$galaxy\}&amp;system=\{\$system\}" target="_top">/',
+			'/<a href="game\.php\?page=galaxy&amp;galaxy=\{\$galaxy\}&amp;system=\{\$system\}" target="_top"[^>]*>/',
 			$tpl
 		);
 		$this->assertMatchesRegularExpression(
-			'/<a href="game\.php\?page=alliance&amp;mode=info&amp;id=\{\$allyid\}" target="_top">/',
+			'/<a href="game\.php\?page=alliance&amp;mode=info&amp;id=\{\$allyid\}" target="_top"[^>]*>/',
 			$tpl
 		);
+		$this->assertStringContainsString('scrubFancyboxAndTooltip', $tpl);
+		$this->assertStringContainsString('window.top', $tpl);
 	}
 
 	public function testAllianceApplyHomeplanetLinkBreaksOutOfFancybox(): void
@@ -27,8 +29,9 @@ class PlayerCardIframeNavTest extends TestCase
 
 		$this->assertStringNotContainsString('parent.location', $tpl);
 		$this->assertMatchesRegularExpression(
-			'/<a href="game\.php\?page=galaxy&amp;galaxy=\{\$applyDetail\.galaxy\}&amp;system=\{\$applyDetail\.system\}" target="_top">/',
+			'/<a href="game\.php\?page=galaxy&amp;galaxy=\{\$applyDetail\.galaxy\}&amp;system=\{\$applyDetail\.system\}" target="_top"[^>]*>/',
 			$tpl
 		);
+		$this->assertStringContainsString('scrubFancyboxAndTooltip', $tpl);
 	}
 }
