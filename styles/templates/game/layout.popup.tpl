@@ -11,5 +11,8 @@
 
 <div id="content">{block name="content"}{/block}</div>
 {include file="main.footer.tpl" nocache}
+{if empty($hideSidebarMenu)}
+<script src="scripts/game/menu-sections.js?v={$REV}"></script>
+{/if}
 </body>
 </html>

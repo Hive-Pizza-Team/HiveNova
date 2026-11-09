@@ -1,46 +1,67 @@
 {assign var=navPage value=$smarty.get.page|default:'overview'}
-<ul id="menu">
-    <li class="menu-separator menu-section">{$LNG.lm_menu_section_overview}</li>
-    <li><a href="game.php?page=overview"{if $navPage == 'overview'} class="active"{/if}>{$LNG.lm_overview}</a></li>
-    {if $smarty.const.MODULE_BUILDING|isModuleAvailable}<li><a href="game.php?page=buildings"{if $navPage == 'buildings'} class="active"{/if}>{$LNG.lm_buildings}</a></li>{/if}
-    {if $smarty.const.MODULE_SHIPYARD_FLEET|isModuleAvailable || $smarty.const.MODULE_SHIPYARD_DEFENSIVE|isModuleAvailable}<li><a href="game.php?page=shipyard&amp;mode=fleet"{if $navPage == 'shipyard'} class="active"{/if}>{$LNG.lm_shipshard}</a></li>{/if}
-    {if $smarty.const.MODULE_RESEARCH|isModuleAvailable}<li><a href="game.php?page=research"{if $navPage == 'research'} class="active"{/if}>{$LNG.lm_research}</a></li>{/if}
-    {if $smarty.const.MODULE_TECHTREE|isModuleAvailable}<li><a href="game.php?page=techtree"{if $navPage == 'techtree'} class="active"{/if}>{$LNG.lm_technology}</a></li>{/if}
-    {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetTable"{if $navPage == 'fleetTable' || $navPage == 'fleetStep1' || $navPage == 'fleetStep2' || $navPage == 'fleetStep3'} class="active"{/if}>{$LNG.lm_fleet}</a></li>{/if}
-    {if $smarty.const.MODULE_GALAXY|isModuleAvailable}<li><a href="game.php?page=galaxy"{if $navPage == 'galaxy'} class="active"{/if}>{$LNG.lm_galaxy}</a></li>{/if}
-    {if $smarty.const.MODULE_IMPERIUM|isModuleAvailable}<li><a href="game.php?page=imperium"{if $navPage == 'imperium'} class="active"{/if}>{$LNG.lm_empire}</a></li>{/if}
-    {if $smarty.const.MODULE_MESSAGES|isModuleAvailable}<li><a href="game.php?page=messages"{if $navPage == 'messages'} class="active"{/if}>{$LNG.lm_messages}{nocache}{if $new_message > 0}<span id="newmes"> (<span id="newmesnum">{$new_message}</span>)</span>{/if}{/nocache}</a></li>{/if}
-    <li><a href="game.php?page=questions"{if $navPage == 'questions'} class="active"{/if}>{$LNG.lm_faq}</a></li>
-    {if $smarty.const.MODULE_OFFICIER|isModuleAvailable || $smarty.const.MODULE_DMEXTRAS|isModuleAvailable}<li><a href="game.php?page=officier"{if $navPage == 'officier'} class="active"{/if}>{$LNG.lm_officiers}</a></li>{/if}
+<ul id="menu" class="menu--sections" data-menu-sections>
+	<li class="menu-group" data-menu-group="basics">
+		<button type="button" class="menu-section menu-section__toggle" aria-expanded="true" aria-controls="menu-group-basics" data-menu-toggle>
+			<span class="menu-section__label">{$LNG.lm_menu_section_overview}</span>
+			<span class="menu-section__chevron" aria-hidden="true"></span>
+		</button>
+		<ul id="menu-group-basics" class="menu-group__list">
+			<li><a href="game.php?page=overview"{if $navPage == 'overview'} class="active"{/if}>{$LNG.lm_overview}</a></li>
+			{if $smarty.const.MODULE_BUILDING|isModuleAvailable}<li><a href="game.php?page=buildings"{if $navPage == 'buildings'} class="active"{/if}>{$LNG.lm_buildings}</a></li>{/if}
+			{if $smarty.const.MODULE_SHIPYARD_FLEET|isModuleAvailable || $smarty.const.MODULE_SHIPYARD_DEFENSIVE|isModuleAvailable}<li><a href="game.php?page=shipyard&amp;mode=fleet"{if $navPage == 'shipyard'} class="active"{/if}>{$LNG.lm_shipshard}</a></li>{/if}
+			{if $smarty.const.MODULE_RESEARCH|isModuleAvailable}<li><a href="game.php?page=research"{if $navPage == 'research'} class="active"{/if}>{$LNG.lm_research}</a></li>{/if}
+			{if $smarty.const.MODULE_TECHTREE|isModuleAvailable}<li><a href="game.php?page=techtree"{if $navPage == 'techtree'} class="active"{/if}>{$LNG.lm_technology}</a></li>{/if}
+			{if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetTable"{if $navPage == 'fleetTable' || $navPage == 'fleetStep1' || $navPage == 'fleetStep2' || $navPage == 'fleetStep3'} class="active"{/if}>{$LNG.lm_fleet}</a></li>{/if}
+			{if $smarty.const.MODULE_GALAXY|isModuleAvailable}<li><a href="game.php?page=galaxy"{if $navPage == 'galaxy'} class="active"{/if}>{$LNG.lm_galaxy}</a></li>{/if}
+			{if $smarty.const.MODULE_IMPERIUM|isModuleAvailable}<li><a href="game.php?page=imperium"{if $navPage == 'imperium'} class="active"{/if}>{$LNG.lm_empire}</a></li>{/if}
+			{if $smarty.const.MODULE_MESSAGES|isModuleAvailable}<li><a href="game.php?page=messages"{if $navPage == 'messages'} class="active"{/if}>{$LNG.lm_messages}{nocache}{if $new_message > 0}<span id="newmes"> (<span id="newmesnum">{$new_message}</span>)</span>{/if}{/nocache}</a></li>{/if}
+			<li><a href="game.php?page=questions"{if $navPage == 'questions'} class="active"{/if}>{$LNG.lm_faq}</a></li>
+			{if $smarty.const.MODULE_OFFICIER|isModuleAvailable || $smarty.const.MODULE_DMEXTRAS|isModuleAvailable}<li><a href="game.php?page=officier"{if $navPage == 'officier'} class="active"{/if}>{$LNG.lm_officiers}</a></li>{/if}
+		</ul>
+	</li>
 
-    {* Advanced product order applied: Resources, Simulator, Statistics, Records, Hall of Fame, Achievements, then remaining Advanced items. *}
-    <li class="menu-separator menu-section">{$LNG.lm_menu_section_empire}</li>
-    {if $smarty.const.MODULE_RESSOURCE_LIST|isModuleAvailable}<li><a href="game.php?page=resources"{if $navPage == 'resources'} class="active"{/if}>{$LNG.lm_resources}</a></li>{/if}
-    {if $smarty.const.MODULE_SIMULATOR|isModuleAvailable}<li><a href="game.php?page=battleSimulator"{if $navPage == 'battleSimulator'} class="active"{/if}>{$LNG.lm_battlesim}</a></li>{/if}
-    {if $smarty.const.MODULE_STATISTICS|isModuleAvailable}<li><a href="game.php?page=statistics"{if $navPage == 'statistics'} class="active"{/if}>{$LNG.lm_statistics}</a></li>{/if}
-    {if $smarty.const.MODULE_RECORDS|isModuleAvailable}<li><a href="game.php?page=records"{if $navPage == 'records'} class="active"{/if}>{$LNG.lm_records}</a></li>{/if}
-    {if $smarty.const.MODULE_BATTLEHALL|isModuleAvailable}<li><a href="game.php?page=battleHall"{if $navPage == 'battleHall'} class="active"{/if}>{$LNG.lm_topkb}</a></li>{/if}
-    {if $smarty.const.MODULE_ACHIEVEMENTS|isModuleAvailable}<li><a href="game.php?page=achievements"{if $navPage == 'achievements'} class="active"{/if}>{$LNG.lm_achievements}</a></li>{/if}
-    <li><a href="game.php?page=viz"{if $navPage == 'viz'} class="active"{/if}>{$LNG.lm_viz}</a></li>
-    <li><a href="game.php?page=eventFirehose"{if $navPage == 'eventFirehose'} class="active"{/if}>{$LNG.ef_title}</a></li>
-    {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=trader"{if $navPage == 'trader'} class="active"{/if}>{$LNG.lm_trader}</a></li>{/if}
-    {if $smarty.const.MODULE_FLEET_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetDealer"{if $navPage == 'fleetDealer'} class="active"{/if}>{$LNG.lm_fleettrader}</a></li>{/if}
-    {if $smarty.const.MODULE_ALLIANCE|isModuleAvailable}<li><a href="game.php?page=alliance"{if $navPage == 'alliance'} class="active"{/if}>{$LNG.lm_alliance}</a></li>{/if}
-    {if false}
-    <li><a href="index.php?page=rules" target="rules">{$LNG.lm_rules}</a></li>{/if}
+	{* Advanced product order applied: Resources, Simulator, Statistics, Records, Hall of Fame, Achievements, then remaining Advanced items. *}
+	<li class="menu-group" data-menu-group="empire">
+		<button type="button" class="menu-section menu-section__toggle" aria-expanded="true" aria-controls="menu-group-empire" data-menu-toggle>
+			<span class="menu-section__label">{$LNG.lm_menu_section_empire}</span>
+			<span class="menu-section__chevron" aria-hidden="true"></span>
+		</button>
+		<ul id="menu-group-empire" class="menu-group__list">
+			{if $smarty.const.MODULE_RESSOURCE_LIST|isModuleAvailable}<li><a href="game.php?page=resources"{if $navPage == 'resources'} class="active"{/if}>{$LNG.lm_resources}</a></li>{/if}
+			{if $smarty.const.MODULE_SIMULATOR|isModuleAvailable}<li><a href="game.php?page=battleSimulator"{if $navPage == 'battleSimulator'} class="active"{/if}>{$LNG.lm_battlesim}</a></li>{/if}
+			{if $smarty.const.MODULE_STATISTICS|isModuleAvailable}<li><a href="game.php?page=statistics"{if $navPage == 'statistics'} class="active"{/if}>{$LNG.lm_statistics}</a></li>{/if}
+			{if $smarty.const.MODULE_RECORDS|isModuleAvailable}<li><a href="game.php?page=records"{if $navPage == 'records'} class="active"{/if}>{$LNG.lm_records}</a></li>{/if}
+			{if $smarty.const.MODULE_BATTLEHALL|isModuleAvailable}<li><a href="game.php?page=battleHall"{if $navPage == 'battleHall'} class="active"{/if}>{$LNG.lm_topkb}</a></li>{/if}
+			{if $smarty.const.MODULE_ACHIEVEMENTS|isModuleAvailable}<li><a href="game.php?page=achievements"{if $navPage == 'achievements'} class="active"{/if}>{$LNG.lm_achievements}</a></li>{/if}
+			<li><a href="game.php?page=viz"{if $navPage == 'viz'} class="active"{/if}>{$LNG.lm_viz}</a></li>
+			<li><a href="game.php?page=eventFirehose"{if $navPage == 'eventFirehose'} class="active"{/if}>{$LNG.ef_title}</a></li>
+			{if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=trader"{if $navPage == 'trader'} class="active"{/if}>{$LNG.lm_trader}</a></li>{/if}
+			{if $smarty.const.MODULE_FLEET_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetDealer"{if $navPage == 'fleetDealer'} class="active"{/if}>{$LNG.lm_fleettrader}</a></li>{/if}
+			{if $smarty.const.MODULE_ALLIANCE|isModuleAvailable}<li><a href="game.php?page=alliance"{if $navPage == 'alliance'} class="active"{/if}>{$LNG.lm_alliance}</a></li>{/if}
+			{if false}
+			<li><a href="index.php?page=rules" target="rules">{$LNG.lm_rules}</a></li>{/if}
+		</ul>
+	</li>
 
-    <li class="menu-separator menu-section">{$LNG.lm_menu_section_account}</li>
-    {if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="javascript:OpenPopup('?page=notes', 'notes', 720, 300);"{if $navPage == 'notes'} class="active"{/if}>{$LNG.lm_notes}</a></li>{/if}
-    {if $smarty.const.MODULE_BUDDYLIST|isModuleAvailable}<li><a href="game.php?page=buddyList"{if $navPage == 'buddyList'} class="active"{/if}>{$LNG.lm_buddylist}</a></li>{/if}
-    <li><a href="game.php?page=settings"{if $navPage == 'settings'} class="active"{/if}>{$LNG.lm_options}</a></li>
-    {if $showReferralDashboard}<li><a href="game.php?page=referrals"{if $navPage == 'referrals'} class="active"{/if}>{$LNG.lm_referrals}</a></li>{/if}
-    <li><a href="{$discordUrl}" target="copy">Discord</a></li>
-    {if $smarty.const.MODULE_SUPPORT|isModuleAvailable}<li><a href="game.php?page=ticket"{if $navPage == 'ticket'} class="active"{/if}>{$LNG.lm_support}</a></li>{/if}
-    {if $smarty.const.MODULE_SEARCH|isModuleAvailable}<li><a href="game.php?page=search"{if $navPage == 'search'} class="active"{/if}>{$LNG.lm_search}</a></li>{/if}
-    {if $smarty.const.MODULE_BANLIST|isModuleAvailable}<li><a href="game.php?page=banList"{if $navPage == 'banList'} class="active"{/if}>{$LNG.lm_banned}</a></li>{/if}
-    <li><a href="game.php?page=logout"{if $navPage == 'logout'} class="active"{/if}>{$LNG.lm_logout}</a></li>
-    {if $showAdminLink}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
+	<li class="menu-group" data-menu-group="account">
+		<button type="button" class="menu-section menu-section__toggle" aria-expanded="true" aria-controls="menu-group-account" data-menu-toggle>
+			<span class="menu-section__label">{$LNG.lm_menu_section_account}</span>
+			<span class="menu-section__chevron" aria-hidden="true"></span>
+		</button>
+		<ul id="menu-group-account" class="menu-group__list">
+			{if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="javascript:OpenPopup('?page=notes', 'notes', 720, 300);"{if $navPage == 'notes'} class="active"{/if}>{$LNG.lm_notes}</a></li>{/if}
+			{if $smarty.const.MODULE_BUDDYLIST|isModuleAvailable}<li><a href="game.php?page=buddyList"{if $navPage == 'buddyList'} class="active"{/if}>{$LNG.lm_buddylist}</a></li>{/if}
+			<li><a href="game.php?page=settings"{if $navPage == 'settings'} class="active"{/if}>{$LNG.lm_options}</a></li>
+			{if $showReferralDashboard}<li><a href="game.php?page=referrals"{if $navPage == 'referrals'} class="active"{/if}>{$LNG.lm_referrals}</a></li>{/if}
+			<li><a href="{$discordUrl}" target="copy">Discord</a></li>
+			{if $smarty.const.MODULE_SUPPORT|isModuleAvailable}<li><a href="game.php?page=ticket"{if $navPage == 'ticket'} class="active"{/if}>{$LNG.lm_support}</a></li>{/if}
+			{if $smarty.const.MODULE_SEARCH|isModuleAvailable}<li><a href="game.php?page=search"{if $navPage == 'search'} class="active"{/if}>{$LNG.lm_search}</a></li>{/if}
+			{if $smarty.const.MODULE_BANLIST|isModuleAvailable}<li><a href="game.php?page=banList"{if $navPage == 'banList'} class="active"{/if}>{$LNG.lm_banned}</a></li>{/if}
+			{if $showAdminLink}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
+		</ul>
+	</li>
+	<li class="menu-pin"><a href="game.php?page=logout"{if $navPage == 'logout'} class="active"{/if}>{$LNG.lm_logout}</a></li>
 </ul>
 <div id="disclamer" class="no-mobile">
-    {if $commit != ''}<a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
+	{if $commit != ''}<a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
 </div>
