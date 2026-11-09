@@ -19,11 +19,17 @@ function fakeHistory(initialState) {
 		},
 		pushState(state, _title, url) {
 			entries.splice(index + 1);
-			entries.push({ state: state || null, url: url || entries[index].url });
+			entries.push({
+				state: state || null,
+				url: url === undefined || url === null ? entries[index].url : url
+			});
 			index = entries.length - 1;
 		},
 		replaceState(state, _title, url) {
-			entries[index] = { state: state || null, url: url || entries[index].url };
+			entries[index] = {
+				state: state || null,
+				url: url === undefined || url === null ? entries[index].url : url
+			};
 		},
 		back() {
 			if (index > 0) {
@@ -128,6 +134,7 @@ describe('HiveNovaHistoryNav dialog history', () => {
 		assert.equal(historyNav._isDialogOpenForTests(), true);
 		assert.equal(history.state[historyNav.DIALOG_STATE_KEY], true);
 		assert.equal(history.length, 2);
+		assert.equal(history._url(), 'game.php?page=overview');
 	});
 
 	it('closes the dialog on popstate without leaving the page URL', () => {
@@ -201,11 +208,21 @@ describe('history-nav wiring', () => {
 			path.join(__dirname, '../../scripts/game/base.js'),
 			'utf8'
 		);
-		assert.match(header, /scripts\/game\/history-nav\.js/);
+		const galaxy = fs.readFileSync(
+			path.join(__dirname, '../../styles/templates/game/page.galaxy.default.tpl'),
+			'utf8'
+		);
+		const stats = fs.readFileSync(
+			path.join(__dirname, '../../styles/templates/game/page.statistics.default.tpl'),
+			'utf8'
+		);
+		assert.match(header, /scripts\/game\/history-nav\.js[\s\S]*scripts\/game\/base\.js/);
 		assert.match(messageSrc, /HiveNovaHistoryNav\.recordMessagesHistory/);
 		assert.match(messageSrc, /seedMessagesHistoryFromLocation/);
 		assert.match(baseSrc, /HiveNovaHistoryNav\.recordDialogOpen/);
 		assert.match(baseSrc, /HiveNovaHistoryNav\.recordDialogClose/);
-		assert.match(baseSrc, /HiveNovaHistoryNav\.handlePopstate/);
+		assert.doesNotMatch(baseSrc, /HiveNovaHistoryNav\.handlePopstate/);
+		assert.match(galaxy, /method="get"/);
+		assert.match(stats, /method="get"/);
 	});
 });
