@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\FeedbackContextService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\SupportTickets;
 
@@ -83,10 +84,18 @@ class ShowTicketPage extends AbstractGamePage
 	
 	function create() 
 	{
+		global $LNG;
+
 		$categoryList	= $this->ticketObj->getCategoryList();
+		$defaultSubject	= $LNG['fb_default_subject'] ?? FeedbackContextService::DEFAULT_SUBJECT;
+		$subject		= HTTP::_GP('subject', $defaultSubject, true);
+		$message		= HTTP::_GP('message', '', true);
 		
 		$this->assign(array(
-			'categoryList'	=> $categoryList,
+			'categoryList'		=> $categoryList,
+			'ticketSubject'		=> $subject,
+			'ticketMessage'		=> $message,
+			'feedbackComposeHint'=> $LNG['fb_compose_hint'] ?? '',
 		));
 			
 		$this->display('page.ticket.create.tpl');		

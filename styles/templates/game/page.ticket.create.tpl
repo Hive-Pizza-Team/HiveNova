@@ -7,7 +7,7 @@
 		<th colspan="2">{$LNG.ti_create_head}</th>
 	</tr>
 	<tr>
-		<td colspan="2" class="left">{$LNG.ti_create_info}</td>
+		<td colspan="2" class="left">{$LNG.ti_create_info}{if $feedbackComposeHint|default:'' != ''}<p>{$feedbackComposeHint}</p>{/if}</td>
 	</tr>
 	<tr>
 		<td style="width:30%"><label for="category">{$LNG.ti_category}</label></td>
@@ -15,11 +15,11 @@
 	</tr>
 	<tr>
 		<td><label for="subject">{$LNG.ti_subject}</label></td>
-		<td><input type="text" id="subject" name="subject" size="40" maxlength="255" required></td>
+		<td><input type="text" id="subject" name="subject" size="40" maxlength="255" value="{$ticketSubject|default:''|escape:'html'}" required></td>
 	</tr>
 	<tr>
 		<td><label for="message">{$LNG.ti_message}</label></td>
-		<td><textarea id="message" name="message" row="60" cols="8" style="height:100px;" required></textarea></td>
+		<td><textarea id="message" name="message" row="60" cols="8" style="height:160px;" required>{$ticketMessage|default:''|escape:'html'}</textarea></td>
 	</tr>
 	<tr>
 		<td colspan="2"><input type="submit" value="{$LNG.ti_submit}"></td>

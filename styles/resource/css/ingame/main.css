@@ -1693,6 +1693,46 @@ table.tablesorter thead tr .headerSortDown {
     min-height: 44px;
 }
 
+/* Always-visible feedback entry; sits above #bottom-nav on mobile. */
+.feedback-fab {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 450;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: var(--color-bg-surface, #1a1a2e);
+    border: 1px solid var(--color-border, #3a3a55);
+    color: var(--color-text, #e8e8f0);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
+}
+
+.feedback-fab:hover,
+.feedback-fab:focus {
+    color: var(--color-accent, #7eb6ff);
+    border-color: var(--color-accent, #7eb6ff);
+}
+
+.feedback-fab i {
+    font-size: 16px;
+}
+
+@media screen and (max-width: 699px) {
+    .feedback-fab {
+        right: 12px;
+        bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+        padding: 10px 12px;
+    }
+}
+
 .buildlist-more-toggle {
     display: none;
 }

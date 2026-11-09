@@ -15,6 +15,10 @@
 		<a href="https://tools.crypto-dreamr.com/tipjar/moon.records/1.000/hbd/Get%20mooned!" target="_blank">Team Mithril</a> &amp; <a href="https://peakd.com/@hive.pizza" target="_blank">Hive Pizza Team</a>
 		<span class="footer-sep">&bull;</span>
 		<a href="https://discord.gg/bP6ksCeEUk" title="Discord" target="_blank">Discord</a>
+		{if $feedbackHref|default:'' != ''}
+		<span class="footer-sep">&bull;</span>
+		<a href="{$feedbackHref|escape}" title="{$LNG.footerFeedback|escape}" target="_blank" rel="noopener noreferrer">{$LNG.footerFeedback}</a>
+		{/if}
 	</div>
 </footer>
 </div>

@@ -92,6 +92,12 @@
 	</div>
 </div>
 {include file="main.bottomnav.tpl"}
+{if $feedbackHref|default:'' != ''}
+<a id="feedback-fab" class="feedback-fab" href="{$feedbackHref|escape:'html'}"{if $feedbackExternal|default:false} target="_blank" rel="noopener noreferrer"{/if} title="{$LNG.lm_feedback|escape:'html'}">
+	<i class="fas fa-comment-dots" aria-hidden="true"></i>
+	<span>{$LNG.lm_feedback}</span>
+</a>
+{/if}
 <script src="scripts/game/attack-alert.js?v={$REV}"></script>
 
 </body>

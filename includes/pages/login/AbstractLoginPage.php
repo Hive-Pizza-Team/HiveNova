@@ -4,6 +4,7 @@ namespace HiveNova\Page\Login;
 
 use HiveNova\Core\AssetRevision;
 use HiveNova\Core\Config;
+use HiveNova\Core\FeedbackContextService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
 use HiveNova\Core\LoginUniverseDefaults;
@@ -211,6 +212,15 @@ abstract class AbstractLoginPage
 			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
 		}
 		
+		$feedbackHref = FeedbackContextService::githubIssueHref([
+			'pageUrl'   => (string) ($_SERVER['REQUEST_URI'] ?? ('index.php?'.$this->getQueryString())),
+			'universe'  => Universe::current(),
+			'userAgent' => (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''),
+			'language'  => $lang,
+			'version'   => (string) $config->VERSION,
+			'timestamp' => defined('TIMESTAMP') ? TIMESTAMP : time(),
+		], (string) ($LNG['fb_default_subject'] ?? FeedbackContextService::DEFAULT_SUBJECT));
+
 		$this->assign(array(
             'lang'    			=> $lang,
 			'bodyclass'			=> $this->getWindow(),
@@ -230,6 +240,7 @@ abstract class AbstractLoginPage
 			'seoPage'			=> $seoPage,
 			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
 			'jsonLd'			=> $jsonLd,
+			'feedbackHref'		=> $feedbackHref,
 		));
 
 		$this->assign(array(

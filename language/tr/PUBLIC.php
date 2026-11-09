@@ -274,3 +274,5 @@ $LNG['lobby_faq_q4'] = 'Bir evren sıfırlandığında ne olur?';
 $LNG['lobby_faq_a4'] = 'Uni 1 hiçbir zaman sıfırlanmaz. Uni 3 her hafta sıfırlanır ve ödüller PIZZA token olarak verilir.';
 $LNG['lobby_faq_q5'] = 'Mobilde çalışır mı?';
 $LNG['lobby_faq_a5'] = 'Evet. Telefon, tablet ve bilgisayarda her modern tarayıcıda çalışır.';
+$LNG['footerFeedback'] = 'Feedback';
+$LNG['fb_default_subject'] = 'Feedback / bug report';

@@ -269,3 +269,5 @@ $LNG['lobby_faq_q4'] = 'O que acontece quando um universo é reiniciado?';
 $LNG['lobby_faq_a4'] = 'O Uni 1 nunca é reiniciado. O Uni 3 reinicia toda semana, e os prêmios são pagos em tokens PIZZA.';
 $LNG['lobby_faq_q5'] = 'Funciona no celular?';
 $LNG['lobby_faq_a5'] = 'Sim. Funciona em qualquer navegador moderno, no celular, tablet ou computador.';
+$LNG['footerFeedback'] = 'Feedback';
+$LNG['fb_default_subject'] = 'Feedback / bug report';

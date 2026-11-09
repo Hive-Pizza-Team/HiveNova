@@ -256,3 +256,5 @@ $LNG['lobby_faq_q4'] = 'Que se passe-t-il quand un univers est réinitialisé?';
 $LNG['lobby_faq_a4'] = 'Uni 1 n\'est jamais réinitialisé. Uni 3 repart à zéro chaque semaine, et ses prix sont versés en jetons PIZZA.';
 $LNG['lobby_faq_q5'] = 'Est-ce que ça fonctionne sur mobile?';
 $LNG['lobby_faq_a5'] = 'Oui. Le jeu fonctionne dans tout navigateur moderne, sur téléphone, tablette et ordinateur.';
+$LNG['footerFeedback'] = 'Feedback';
+$LNG['fb_default_subject'] = 'Feedback / bug report';

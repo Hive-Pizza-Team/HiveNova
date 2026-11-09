@@ -35,6 +35,7 @@
     <li><a href="game.php?page=settings"{if $navPage == 'settings'} class="active"{/if}>{$LNG.lm_options}</a></li>
     {if $showReferralDashboard}<li><a href="game.php?page=referrals"{if $navPage == 'referrals'} class="active"{/if}>{$LNG.lm_referrals}</a></li>{/if}
     <li><a href="{$discordUrl}" target="copy">Discord</a></li>
+    {if $feedbackHref|default:'' != ''}<li><a href="{$feedbackHref|escape:'html'}"{if $feedbackExternal|default:false} target="_blank" rel="noopener noreferrer"{/if}{if $navPage == 'ticket'} class="active"{/if}>{$LNG.lm_feedback}</a></li>{/if}
     {if $smarty.const.MODULE_SUPPORT|isModuleAvailable}<li><a href="game.php?page=ticket"{if $navPage == 'ticket'} class="active"{/if}>{$LNG.lm_support}</a></li>{/if}
     {if $smarty.const.MODULE_SEARCH|isModuleAvailable}<li><a href="game.php?page=search"{if $navPage == 'search'} class="active"{/if}>{$LNG.lm_search}</a></li>{/if}
     {if $smarty.const.MODULE_BANLIST|isModuleAvailable}<li><a href="game.php?page=banList"{if $navPage == 'banList'} class="active"{/if}>{$LNG.lm_banned}</a></li>{/if}

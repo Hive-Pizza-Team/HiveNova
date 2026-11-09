@@ -265,3 +265,5 @@ $LNG['lobby_faq_q4'] = 'Was passiert, wenn ein Universum zurückgesetzt wird?';
 $LNG['lobby_faq_a4'] = 'Uni 1 wird nie zurückgesetzt. Uni 3 startet jede Woche neu, und die Preise werden in PIZZA-Token ausgezahlt.';
 $LNG['lobby_faq_q5'] = 'Funktioniert es auf dem Handy?';
 $LNG['lobby_faq_a5'] = 'Ja. Es läuft in jedem modernen Browser auf Smartphone, Tablet und Desktop.';
+$LNG['footerFeedback'] = 'Feedback';
+$LNG['fb_default_subject'] = 'Feedback / bug report';

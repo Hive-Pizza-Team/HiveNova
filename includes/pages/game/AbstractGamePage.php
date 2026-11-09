@@ -7,6 +7,7 @@ use HiveNova\Core\AssetRevision;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
+use HiveNova\Core\FeedbackContextService;
 use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
@@ -199,6 +200,19 @@ abstract class AbstractGamePage
 			$commitShort = substr($commit, 0, 7);
 		}
 
+		$feedbackEntry = FeedbackContextService::resolveEntryPoint([
+			'pageUrl'   => (string) ($_SERVER['REQUEST_URI'] ?? ('game.php?'.$this->getQueryString())),
+			'universe'  => $USER['universe'] ?? null,
+			'userId'    => $USER['id'] ?? null,
+			'username'  => $USER['username'] ?? null,
+			'planet'    => FeedbackContextService::formatPlanetLabel($PLANET),
+			'userAgent' => (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''),
+			'language'  => $LNG->getLanguage(),
+			'version'   => (string) $config->VERSION,
+			'commit'    => $commitShort !== '' ? $commitShort : $commit,
+			'timestamp' => defined('TIMESTAMP') ? TIMESTAMP : time(),
+		], isModuleAvailable(MODULE_SUPPORT));
+
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
 			'new_message' 		=> $USER['messages'],
@@ -226,6 +240,8 @@ abstract class AbstractGamePage
 			// Set by base.js at ≤699px; skip assets CSS hides on mobile (nav logo, etc.).
 			'compactViewport'	=> (($_COOKIE['hn_compact'] ?? '') === '1'),
 			'showTechTreeNudge'	=> TechTreeNudgeService::shouldShow($_COOKIE, HTTP::_GP('page', '')),
+			'feedbackHref'		=> $feedbackEntry['href'],
+			'feedbackExternal'	=> $feedbackEntry['external'],
 		));
 
 		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {

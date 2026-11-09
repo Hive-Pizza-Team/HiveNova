@@ -266,3 +266,5 @@ $LNG['lobby_faq_q4'] = 'Co się dzieje, gdy wszechświat jest resetowany?';
 $LNG['lobby_faq_a4'] = 'Uni 1 nigdy nie jest resetowane. Uni 3 resetuje się co tydzień, a nagrody są wypłacane w tokenach PIZZA.';
 $LNG['lobby_faq_q5'] = 'Czy działa na telefonie?';
 $LNG['lobby_faq_a5'] = 'Tak. Działa w każdej nowoczesnej przeglądarce na telefonie, tablecie i komputerze.';
+$LNG['footerFeedback'] = 'Feedback';
+$LNG['fb_default_subject'] = 'Feedback / bug report';

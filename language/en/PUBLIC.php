@@ -268,3 +268,5 @@ $LNG['lobby_faq_q4'] = 'What happens when a universe wipes?';
 $LNG['lobby_faq_a4'] = 'Uni 1 does not wipe. Uni 3 resets every week, and its prizes are paid in PIZZA tokens.';
 $LNG['lobby_faq_q5'] = 'Does it work on mobile?';
 $LNG['lobby_faq_a5'] = 'Yes. It runs in any modern browser on phones, tablets and desktops.';
+$LNG['footerFeedback'] = 'Feedback';
+$LNG['fb_default_subject'] = 'Feedback / bug report';
