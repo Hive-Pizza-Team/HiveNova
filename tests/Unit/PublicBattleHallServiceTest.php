@@ -30,7 +30,7 @@ class PublicBattleHallServiceTest extends TestCase
 		$this->assertSame(
 			'index.php?page=register&ref=9&lang=de',
 			PublicBattleHallService::registerCtaUrl('de', 'en', ['ref' => 9])
-		)
+		);
 	}
 
 	public function testDecorateHallListAddsReportUrls(): void
