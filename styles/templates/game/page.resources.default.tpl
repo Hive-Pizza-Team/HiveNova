@@ -5,7 +5,7 @@
 <table class="resources-table">
 <tbody>
 <tr class="resources-table__title">
-	<th colspan="5">{$header}</th>
+	<th colspan="6">{$header}</th>
 </tr>
 <tr class="resources-table__cols no-mobile">
 	<td>&nbsp;</td>
@@ -13,6 +13,7 @@
     <td><a href='#' onclick='return Dialog.info(902)'>{$LNG.tech.902}</a></td>
     <td><a href='#' onclick='return Dialog.info(903)'>{$LNG.tech.903}</a></td>
     <td><a href='#' onclick='return Dialog.info(911)'>{$LNG.tech.911}</a></td>
+    <td>{$LNG.rs_prod_factor}</td>
 </tr>
 <tr class="resources-table__row">
 	<td class="resources-table__label">{$LNG.rs_basic_income}</td>
