@@ -107,6 +107,15 @@ class DirectiveProgressHooksTest extends TestCase
 			$missionSource,
 			'EndStay completion must credit exploration so recalled fleets never count'
 		);
+		$setStatePos = strpos($missionSource, "\$this->setState(FLEET_RETURN);\n\t\t\$this->SaveFleet();");
+		$hookPos = strpos($missionSource, 'DirectiveHooks::afterExpeditionDispatch');
+		$this->assertNotFalse($setStatePos);
+		$this->assertNotFalse($hookPos);
+		$this->assertLessThan(
+			$hookPos,
+			$setStatePos,
+			'Return must be saved before the directive hook so hook failures cannot leave EndStay locked'
+		);
 	}
 
 	public function testTransportAboveThresholdIncrementsTrade(): void
