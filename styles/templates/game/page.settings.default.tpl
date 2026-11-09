@@ -64,6 +64,16 @@
 				<li>{$LNG.op_hive_upgrade_step_create}</li>
 			</ol>
 			<p><small>{$LNG.op_hive_upgrade_keep_playing}</small></p>
+			{if $hiveCreatePending}
+			<p><strong>{$LNG.op_hive_create_pending}</strong> (@{$hiveCreatePending.desired_name|escape:'html'})</p>
+			{elseif $hiveCreateAvailable}
+			<form action="game.php?page=settings&amp;mode=requestHiveCreate" method="post" style="margin-top:0.75em">
+				<label for="desiredHiveName">{$LNG.op_hive_create_label}</label>
+				<input id="desiredHiveName" name="desiredHiveName" maxlength="16" size="16" type="text" autocomplete="off">
+				<button type="submit" class="login-button button_standard">{$LNG.op_hive_create_submit}</button>
+				<br><small>{$LNG.op_hive_create_help}</small>
+			</form>
+			{/if}
 		</td>
 	</tr>
 	{/if}

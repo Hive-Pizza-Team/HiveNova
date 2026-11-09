@@ -13,6 +13,7 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\PasswordPolicy;
 use HiveNova\Core\HiveAccountUpgradeService;
+use HiveNova\Core\HiveAccountCreateRequestService;
 use HiveNova\Core\Theme;
 use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\SeasonService;
@@ -85,6 +86,9 @@ class ShowSettingsPage extends AbstractGamePage
 		{
 			$depositWallet = (new SeasonService(new DatabaseSeasonStore()))->depositWallet(Config::get());
 			$upgrade = $this->hiveUpgradeService()->upgradePanel($USER, $this->hiveSignerCallbackUrl());
+			$createService = new HiveAccountCreateRequestService();
+			$pendingCreate = $createService->findPendingForUser((int) $USER['id'], (int) Universe::current());
+			$createAvailable = $upgrade['needsUpgrade'] && $createService->isEligible($USER) && $pendingCreate === null;
 
 			$this->assign(array(
 				'Selectors'			=> array(
@@ -141,11 +145,53 @@ class ShowSettingsPage extends AbstractGamePage
 				'hiveNeedsUpgrade'  => $upgrade['needsUpgrade'],
 				'hiveCanHiveSigner' => $upgrade['canHiveSigner'],
 				'hiveSignerUrl'     => $upgrade['hiveSignerUrl'],
-				'hiveCreateAvailable' => $upgrade['createAvailable'],
+				'hiveCreateAvailable' => $createAvailable,
+				'hiveCreatePending' => $pendingCreate,
 			));
 			
 			$this->display('page.settings.default.tpl');
 		}
+	}
+
+	/**
+	 * Password player requests a sponsored Hive username (admin-gated; #638 P1).
+	 */
+	public function requestHiveCreate()
+	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			HTTP::redirectTo('game.php?page=settings');
+			return;
+		}
+
+		global $USER, $LNG;
+
+		$desired = HTTP::_GP('desiredHiveName', '');
+		$result = (new HiveAccountCreateRequestService())->submit(
+			$USER,
+			(int) Universe::current(),
+			(string) $desired,
+			TIMESTAMP
+		);
+
+		if (!$result['ok']) {
+			$message = match ($result['code']) {
+				HiveAccountCreateRequestService::CODE_INVALID_NAME => (string) ($LNG['op_hive_create_invalid'] ?? $LNG['op_user_name_no_alphanumeric']),
+				HiveAccountCreateRequestService::CODE_NAME_EXISTS => (string) ($LNG['op_hive_create_exists'] ?? $LNG['op_user_name_no_alphanumeric']),
+				HiveAccountCreateRequestService::CODE_PENDING_EXISTS => (string) ($LNG['op_hive_create_pending'] ?? $LNG['op_options_changed']),
+				HiveAccountCreateRequestService::CODE_NOT_ELIGIBLE => (string) ($LNG['op_hive_create_not_eligible'] ?? $LNG['op_user_name_no_alphanumeric']),
+				default => (string) ($LNG['op_hive_create_invalid'] ?? $LNG['op_user_name_no_alphanumeric']),
+			};
+			$this->printMessage($message, array(array(
+				'label'	=> $LNG['sys_back'],
+				'url'	=> 'game.php?page=settings'
+			)));
+			return;
+		}
+
+		$this->printMessage($LNG['op_hive_create_submitted'] ?? 'Create request submitted for admin review.', array(array(
+			'label'	=> $LNG['sys_forward'],
+			'url'	=> 'game.php?page=settings'
+		)));
 	}
 
 	/**
