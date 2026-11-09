@@ -96,6 +96,32 @@
     max-width: 460px;
 }
 
+.reg-errors {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(227, 19, 55, 0.55);
+    border-radius: 8px;
+    background: rgba(80, 12, 24, 0.55);
+    color: #f0c8d0;
+    font-size: 12px;
+}
+
+.reg-errors ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.reg-errors li {
+    margin: 0 0 4px;
+}
+
+.reg-tab-panel .error {
+    display: block;
+    color: #f0a0ac;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
 .reg-tab-panel .contentbox form {
     background: transparent;
     border-radius: 0;

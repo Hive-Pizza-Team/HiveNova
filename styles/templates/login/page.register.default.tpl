@@ -15,8 +15,13 @@
 	</div>
 
 	<div class="reg-tab-panel active" id="reg-email" role="tabpanel">
-		<form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register">
+		<form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register" data-universe-path="{$registerUniversePathAttr}">
 		<input type="hidden" value="send" name="mode">
+		{if !empty($registerErrors)}
+		<div class="rowForm reg-errors" role="alert">
+			<ul>{foreach $registerErrors as $registerError}<li>{$registerError}</li>{/foreach}</ul>
+		</div>
+		{/if}
 		<div class="rowForm reg-season-hive-notice" hidden>
 			<p>{$LNG.registerErrorHiveRequiredSeason}</p>
 		</div>
@@ -26,7 +31,7 @@
 			<div class="rowForm">
 				<label for="universe">{$LNG.universe}</label>
 				<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$defaultEmailUniverse}</select>
-				{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
+				{if !empty($error.uni)}<span class="error errorUni">{$error.uni}</span>{/if}
 			</div>
 			{if !empty($externalAuth.account)}
 			{if $facebookEnable}
@@ -46,10 +51,10 @@
 			<div class="rowForm">
 				<label for="reg-email-username">{$LNG.registerUsername}</label>
 				<div class="reg-username-wrap">
-					<input type="text" class="input" name="username" id="reg-email-username" maxlength="25" spellcheck="false" autocomplete="username" data-username-check="email" data-remember-username="email" aria-describedby="reg-email-username-msg">
+					<input type="text" class="input" name="username" id="reg-email-username" maxlength="25" spellcheck="false" autocomplete="username" data-username-check="email" data-remember-username="email" aria-describedby="reg-email-username-msg" value="{$registerValues.username|default:''|escape}">
 					<span class="reg-username-mark" aria-hidden="true"></span>
 				</div>
-				{if !empty($error.username)}<span class="error errorUsername"></span>{/if}
+				{if !empty($error.username)}<span class="error errorUsername">{$error.username}</span>{/if}
 				<p class="reg-username-message" id="reg-email-username-msg" aria-live="polite"></p>
 				<ul class="reg-username-suggestions" id="reg-email-username-suggestions" hidden></ul>
 				<span class="inputDesc">{$LNG.registerUsernameDesc}</span>
@@ -57,25 +62,25 @@
 			<div class="rowForm">
 				<label for="reg-email-password">{$LNG.registerPassword}</label>
 				<input type="password" class="input" name="password" id="reg-email-password">
-				{if !empty($error.password)}<span class="error errorPassword"></span>{/if}
+				{if !empty($error.password)}<span class="error errorPassword">{$error.password}</span>{/if}
 				<span class="inputDesc">{$registerPasswordDesc}</span>
 			</div>
 			<div class="rowForm">
 				<label for="reg-email-passwordReplay">{$LNG.registerPasswordReplay}</label>
 				<input type="password" class="input" name="passwordReplay" id="reg-email-passwordReplay">
-				{if !empty($error.passwordReplay)}<span class="error errorPasswordReplay"></span>{/if}
+				{if !empty($error.passwordReplay)}<span class="error errorPasswordReplay">{$error.passwordReplay}</span>{/if}
 				<span class="inputDesc">{$LNG.registerPasswordReplayDesc}</span>
 			</div>
 			<div class="rowForm">
 				<label for="reg-email-email">{$LNG.registerEmail}</label>
-				<input type="email" class="input" name="email" id="reg-email-email">
-				{if !empty($error.email)}<span class="error errorEmail"></span>{/if}
+				<input type="email" class="input" name="email" id="reg-email-email" value="{$registerValues.email|default:''|escape}">
+				{if !empty($error.email)}<span class="error errorEmail">{$error.email}</span>{/if}
 				<span class="inputDesc">{$LNG.registerEmailDesc}</span>
 			</div>
 			<div class="rowForm">
 				<label for="reg-email-emailReplay">{$LNG.registerEmailReplay}</label>
-				<input type="email" class="input" name="emailReplay" id="reg-email-emailReplay">
-				{if !empty($error.emailReplay)}<span class="error errorEmailReplay"></span>{/if}
+				<input type="email" class="input" name="emailReplay" id="reg-email-emailReplay" value="{$registerValues.emailReplay|default:''|escape}">
+				{if !empty($error.emailReplay)}<span class="error errorEmailReplay">{$error.emailReplay}</span>{/if}
 				<span class="inputDesc">{$LNG.registerEmailReplayDesc}</span>
 			</div>
 			{if $languages|count > 1}
@@ -105,8 +110,8 @@
 			{/if}
 			<div class="rowForm">
 				<label for="reg-email-rules">{$LNG.registerRules}</label>
-				<input type="checkbox" name="rules" id="reg-email-rules" value="1">
-				{if !empty($error.rules)}<span class="error errorRules"></span>{/if}
+				<input type="checkbox" name="rules" id="reg-email-rules" value="1"{if !empty($registerValues.rules)} checked{/if}>
+				{if !empty($error.rules)}<span class="error errorRules">{$error.rules}</span>{/if}
 				<span class="inputDesc">{$registerRulesDesc}</span>
 			</div>
 			<div class="rowForm">
@@ -116,8 +121,13 @@
 	</div>
 
 	<div class="reg-tab-panel" id="reg-hive" role="tabpanel">
-		<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" onsubmit="return false;">
+		<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" data-universe-path="{$registerUniversePathAttr}" onsubmit="return false;">
 		<input type="hidden" value="send" name="mode">
+		{if !empty($registerErrors) && !empty($registerValues.hiveAccount)}
+		<div class="rowForm reg-errors" role="alert">
+			<ul>{foreach $registerErrors as $registerError}<li>{$registerError}</li>{/foreach}</ul>
+		</div>
+		{/if}
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
 		<input type="hidden" value="{$referralData.id}" name="referralID" class="reg-referral-id">
@@ -128,14 +138,15 @@
 			<div class="rowForm">
 				<label for="reg-hive-universe">{$LNG.universe}</label>
 				<select name="uni" id="reg-hive-universe" class="changeAction">{html_options options=$universeSelect selected=$defaultHiveUniverse}</select>
-				{if !empty($error.uni)}<span class="error errorUni"></span>{/if}
+				{if !empty($error.uni)}<span class="error errorUni">{$error.uni}</span>{/if}
 			</div>
 			<div class="rowForm">
 				<label for="reg-hive-username">{$LNG.hiveAccount}</label>
 				<div class="reg-username-wrap">
-					<input type="text" id="reg-hive-username" name="username" maxlength="16" spellcheck="false" autocomplete="username" data-username-check="hive" data-remember-username="hive" aria-describedby="reg-hive-username-msg">
+					<input type="text" id="reg-hive-username" name="username" maxlength="16" spellcheck="false" autocomplete="username" data-username-check="hive" data-remember-username="hive" aria-describedby="reg-hive-username-msg" value="{$registerValues.username|default:''|escape}">
 					<span class="reg-username-mark" aria-hidden="true"></span>
 				</div>
+				{if !empty($error.username)}<span class="error errorUsername">{$error.username}</span>{/if}
 				<p class="reg-username-message" id="reg-hive-username-msg" aria-live="polite"></p>
 			</div>
 			<input type="hidden" name="password" id="password">
@@ -161,8 +172,8 @@
 			</div>
 			<div class="rowForm">
 				<label for="reg-hive-rules">{$LNG.registerRules}</label>
-				<input type="checkbox" name="rules" id="reg-hive-rules" value="1">
-				{if !empty($error.rules)}<span class="error errorRules"></span>{/if}
+				<input type="checkbox" name="rules" id="reg-hive-rules" value="1"{if !empty($registerValues.rules)} checked{/if}>
+				{if !empty($error.rules)}<span class="error errorRules">{$error.rules}</span>{/if}
 				<span class="inputDesc">{$registerRulesDesc}</span>
 			</div>
 			<div class="rowForm">

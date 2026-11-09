@@ -27,7 +27,11 @@
 		var form = select.closest('form');
 		if (form) {
 			var action = form.getAttribute('data-action') || form.getAttribute('action') || '';
-			if (LoginConfig.unisWildcast) {
+			// Register keeps the lobby path; universe travels in the uni field (#377).
+			var bindUniversePath = form.getAttribute('data-universe-path') !== '0';
+			if (!bindUniversePath) {
+				form.setAttribute('action', action);
+			} else if (LoginConfig.unisWildcast) {
 				var wildBase = basePath.replace('://', '://uni' + universe + '.');
 				form.setAttribute('action', wildBase + action);
 			} else {
@@ -37,6 +41,10 @@
 		document.querySelectorAll('.fb_login').forEach(function (el) {
 			var href = el.getAttribute('data-href');
 			if (!href) {
+				return;
+			}
+			if (form && form.getAttribute('data-universe-path') === '0') {
+				el.setAttribute('href', href);
 				return;
 			}
 			if (LoginConfig.unisWildcast) {

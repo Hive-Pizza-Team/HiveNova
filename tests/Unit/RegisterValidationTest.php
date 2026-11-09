@@ -43,4 +43,43 @@ class RegisterValidationTest extends TestCase
 	{
 		$this->assertNull(RegisterValidation::usernameErrorKey('Commander'));
 	}
+
+	public function test_local_error_keys_for_empty_email_submit(): void
+	{
+		$result = RegisterValidation::localErrorKeys([
+			'username'       => '',
+			'password'       => '',
+			'passwordReplay' => '',
+			'email'          => '',
+			'emailReplay'    => '',
+			'rules'          => 0,
+			'hiveAccount'    => '',
+		]);
+
+		$this->assertContains('registerErrorUsernameEmpty', $result['keys']);
+		$this->assertContains('registerErrorPasswordLength', $result['keys']);
+		$this->assertContains('registerErrorMailEmpty', $result['keys']);
+		$this->assertContains('registerErrorRules', $result['keys']);
+		$this->assertSame('registerErrorUsernameEmpty', $result['fields']['username']);
+		$this->assertSame('registerErrorMailEmpty', $result['fields']['email']);
+		$this->assertSame('registerErrorRules', $result['fields']['rules']);
+	}
+
+	public function test_local_error_keys_skip_email_format_for_hive_signup(): void
+	{
+		$result = RegisterValidation::localErrorKeys([
+			'username'            => 'alice',
+			'password'            => 'sig',
+			'passwordReplay'      => 'sig',
+			'email'               => '',
+			'emailReplay'         => '',
+			'rules'               => 1,
+			'hiveAccount'         => 'alice',
+			'hiveSignatureValid'  => true,
+			'seasonRequiresHive'  => false,
+		]);
+
+		$this->assertNotContains('registerErrorMailEmpty', $result['keys']);
+		$this->assertNotContains('registerErrorPasswordLength', $result['keys']);
+	}
 }

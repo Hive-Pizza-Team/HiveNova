@@ -16,6 +16,7 @@ use HiveNova\Core\RegisterUsernameAvailability;
 use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\LoginUniverseDefaults;
+use HiveNova\Core\LoginUniverseFormAction;
 use HiveNova\Core\Mail;
 
 /**
@@ -35,10 +36,29 @@ use HiveNova\Core\Mail;
 
 class ShowRegisterPage extends AbstractLoginPage
 {
+	/** @var list<string> */
+	private array $registerErrors = array();
+
+	/** @var array<string, string> */
+	private array $registerFieldErrors = array();
+
 	function __construct()
 	{
 		$this->defaultWindow = 'light';
 		parent::__construct();
+	}
+
+	/**
+	 * Stay on the register form with validation messages (never printMessage /uniN/ Info).
+	 *
+	 * @param list<string> $messages
+	 * @param array<string, string> $fieldErrors
+	 */
+	private function redisplayWithErrors(array $messages, array $fieldErrors = array()): void
+	{
+		$this->registerErrors = array_values($messages);
+		$this->registerFieldErrors = $fieldErrors;
+		$this->show();
 	}
 	
 	function show()
@@ -110,6 +130,11 @@ class ShowRegisterPage extends AbstractLoginPage
 
 		$defaultEmailUniverse = $this->getDefaultEmailUniverseId(true);
 		$defaultHiveUniverse = $this->getDefaultHiveUniverseId(true);
+		$postedUniverse = (int) HTTP::_GP('uni', 0);
+		if ($postedUniverse > 0 && isset($universeSelect[$postedUniverse])) {
+			$defaultEmailUniverse = $postedUniverse;
+			$defaultHiveUniverse = $postedUniverse;
+		}
 		$referralSeed = $referralByUniverse[$defaultEmailUniverse] ?? array('id' => 0, 'name' => '', 'status' => '');
 		$referralInactive = ($referralSeed['status'] ?? '') === ReferralCaptureService::STATUS_INACTIVE;
 		$seedName = (string) ($referralSeed['name'] ?? '');
@@ -129,6 +154,14 @@ class ShowRegisterPage extends AbstractLoginPage
 				'name' => $seedName,
 			);
 		}
+
+		$registerValues = array(
+			'username'     => (string) HTTP::_GP('username', '', UTF8_SUPPORT),
+			'email'        => (string) HTTP::_GP('email', ''),
+			'emailReplay'  => (string) HTTP::_GP('emailReplay', ''),
+			'rules'        => (int) HTTP::_GP('rules', 0) === 1 ? 1 : 0,
+			'hiveAccount'  => (string) HTTP::_GP('hiveAccount', ''),
+		);
 		
 		$this->assign(array(
 			'referralData'		=> $referralData,
@@ -141,6 +174,10 @@ class ShowRegisterPage extends AbstractLoginPage
 			'defaultUniverse'		=> $defaultEmailUniverse,
 			'defaultEmailUniverse'	=> $defaultEmailUniverse,
 			'defaultHiveUniverse'	=> $defaultHiveUniverse,
+			'registerUniversePathAttr'	=> LoginUniverseFormAction::universePathAttribute('register'),
+			'registerValues'			=> $registerValues,
+			'registerErrors'			=> $this->registerErrors,
+			'error'						=> $this->registerFieldErrors,
 			'registerPasswordDesc'		=> sprintf($LNG['registerPasswordDesc'], PasswordPolicy::minLength()),
 			'registerRulesDesc'			=> sprintf($LNG['registerRulesDesc'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
 			'registerTabEmail'			=> $LNG['registerTabEmail'],
@@ -251,10 +288,9 @@ class ShowRegisterPage extends AbstractLoginPage
 
 		if($config->game_disable == 0 || $config->reg_closed == 1)
 		{
-			$this->printMessage($LNG['registerErrorUniClosed'], array(array(
-				'label'	=> $LNG['registerBack'],
-				'url'	=> 'javascript:window.history.back()',
-			)));
+			$this->redisplayWithErrors(array($LNG['registerErrorUniClosed']), array(
+				'uni' => $LNG['registerErrorUniClosed'],
+			));
 		}
 
 		$userName 		= HTTP::_GP('username', '', UTF8_SUPPORT);
@@ -286,47 +322,52 @@ class ShowRegisterPage extends AbstractLoginPage
 		}
 		$hiveAccount   = HTTP::_GP('hiveAccount', '');
 
-		$errors 	= array();
-
-		if ($hiveAccount !== '') {
-			if (!HiveUtil::isSignValid($hiveAccount, $password)) {
-				$errors[]	= $LNG['registerErrorHiveSignature'] ?? $LNG['registerErrorHiveAccountInvalid'];
-			}
-		}
-		
-		$usernameFormatKey = RegisterValidation::usernameErrorKey($userName);
-		if($usernameFormatKey !== null) {
-			$errors[]	= $LNG[$usernameFormatKey];
-		}
-
-		if(!PasswordPolicy::isLongEnough((string) $password)) {
-			$errors[]	= sprintf($LNG['registerErrorPasswordLength'], PasswordPolicy::minLength());
-		}
-			
-		if($password != $password2) {
-			$errors[]	= $LNG['registerErrorPasswordSame'];
-		}
-
-		$mailErrorKey = RegisterValidation::mailErrorKey($mailAddress);
-		if($mailErrorKey !== null) {
-			$errors[]	= $LNG[$mailErrorKey];
-		}
-		
-		if($mailAddress != $mailAddress2) {
-			$errors[]	= $LNG['registerErrorMailSame'];
-		}
-		
-		if($rulesChecked != 1) {
-			$errors[]	= $LNG['registerErrorRules'];
-		}
-
-		if(!empty($hiveAccount) && !HiveUtil::isAccountValid($hiveAccount)) {
-			$errors[]	= $LNG['registerErrorHiveAccountInvalid'];
-		}
-
 		$seasonConfig = Config::get(Universe::current());
-		if (isset($seasonConfig->season_mode) && (int) $seasonConfig->season_mode === 1 && $hiveAccount === '') {
-			$errors[]	= $LNG['registerErrorHiveRequiredSeason'] ?? $LNG['registerErrorHiveAccountInvalid'];
+		$seasonRequiresHive = isset($seasonConfig->season_mode) && (int) $seasonConfig->season_mode === 1;
+
+		$local = RegisterValidation::localErrorKeys(array(
+			'username'            => $userName,
+			'password'            => $password,
+			'passwordReplay'      => $password2,
+			'email'               => $mailAddress,
+			'emailReplay'         => $mailAddress2,
+			'rules'               => $rulesChecked,
+			'hiveAccount'         => $hiveAccount,
+			'hiveSignatureValid'  => $hiveAccount !== '' ? HiveUtil::isSignValid($hiveAccount, $password) : null,
+			'seasonRequiresHive'  => $seasonRequiresHive,
+		));
+
+		$errors = array();
+		$fieldErrors = array();
+		foreach ($local['keys'] as $key) {
+			if ($key === 'registerErrorPasswordLength') {
+				$errors[] = sprintf($LNG['registerErrorPasswordLength'], PasswordPolicy::minLength());
+				continue;
+			}
+			if ($key === 'registerErrorHiveSignature') {
+				$errors[] = $LNG['registerErrorHiveSignature'] ?? $LNG['registerErrorHiveAccountInvalid'];
+				continue;
+			}
+			if ($key === 'registerErrorHiveRequiredSeason') {
+				$errors[] = $LNG['registerErrorHiveRequiredSeason'] ?? $LNG['registerErrorHiveAccountInvalid'];
+				continue;
+			}
+			$errors[] = $LNG[$key] ?? $key;
+		}
+		foreach ($local['fields'] as $field => $key) {
+			if ($key === 'registerErrorPasswordLength') {
+				$fieldErrors[$field] = sprintf($LNG['registerErrorPasswordLength'], PasswordPolicy::minLength());
+				continue;
+			}
+			if ($key === 'registerErrorHiveSignature') {
+				$fieldErrors[$field] = $LNG['registerErrorHiveSignature'] ?? $LNG['registerErrorHiveAccountInvalid'];
+				continue;
+			}
+			if ($key === 'registerErrorHiveRequiredSeason') {
+				$fieldErrors[$field] = $LNG['registerErrorHiveRequiredSeason'] ?? $LNG['registerErrorHiveAccountInvalid'];
+				continue;
+			}
+			$fieldErrors[$field] = $LNG[$key] ?? $key;
 		}
 		
 		$db = Database::get();
@@ -387,20 +428,24 @@ class ShowRegisterPage extends AbstractLoginPage
 		
 		if($countUsername != 0) {
 			$errors[]	= $LNG['registerErrorUsernameExist'];
+			$fieldErrors['username'] = $LNG['registerErrorUsernameExist'];
 		}
 
 		if(HiveUtil::accountExists($userName) && empty($hiveAccount)) {
 			// disallow registering a non-hive account with same name as an existing hive account
 			// to avoid collisions
 			$errors[]	= $LNG['registerErrorUsernameExist'];
+			$fieldErrors['username'] = $LNG['registerErrorUsernameExist'];
 		}
 			
 		if($countMail != 0) {
 			$errors[]	= $LNG['registerErrorMailExist'];
+			$fieldErrors['email'] = $LNG['registerErrorMailExist'];
 		}
 
 		if(!empty($hiveAccount) && $countHiveAccount != 0) {
 			$errors[]	= $LNG['registerErrorHiveAccountExist'];
+			$fieldErrors['username'] = $LNG['registerErrorHiveAccountExist'];
 		}
 		
 		if ($config->capaktiv === '1')
@@ -410,14 +455,12 @@ class ShowRegisterPage extends AbstractLoginPage
             if (!$resp->isSuccess())
             {
                 $errors[]	= $LNG['registerErrorCaptcha'];
+				$fieldErrors['captcha'] = $LNG['registerErrorCaptcha'];
             }
 		}
 						
 		if (!empty($errors)) {
-			$this->printMessage(implode("<br>\r\n", $errors), array(array(
-				'label'	=> $LNG['registerBack'],
-				'url'	=> 'javascript:window.history.back()',
-			)));
+			$this->redisplayWithErrors($errors, $fieldErrors);
 		}
 
 		$methodClass		= 'HiveNova\\Auth\\'.ucwords($externalAuthMethod).'Auth';
