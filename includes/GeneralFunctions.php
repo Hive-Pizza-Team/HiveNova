@@ -784,7 +784,8 @@ function exceptionHandler($exception)
 
 	echo str_replace(array('\\', ROOT_PATH, substr(ROOT_PATH, 0, 15)), array('/', '/', 'FILEPATH '), ob_get_clean());
 
-	$errorText	= date("[d-M-Y H:i:s]", TIMESTAMP) . ' ' . $errorType[$errno] . ': "' . strip_tags((string) $exception->getMessage()) . "\"\r\n";
+	$errorLabel	= $errorType[$errno] ?? ('ERRNO_' . (int) $errno);
+	$errorText	= date("[d-M-Y H:i:s]", TIMESTAMP) . ' ' . $errorLabel . ': "' . strip_tags((string) $exception->getMessage()) . "\"\r\n";
 	$errorText	.= 'File: ' . $exception->getFile() . ' | Line: ' . $exception->getLine() . "\r\n";
 	$errorText	.= 'URL: ' . PROTOCOL . HTTP_HOST . ($_SERVER['REQUEST_URI'] ?? '(cli)') . ' | Version: ' . $VERSION . "\r\n";
 	$errorText	.= "Stack trace:\r\n";
@@ -794,42 +795,8 @@ function exceptionHandler($exception)
 		file_put_contents('includes/error.log', $errorText, FILE_APPEND);
 	}
 
-	// PHP diagnostics stay in error.log. Do not open player Support tickets for
-	// warnings/notices or admin-panel faults (see PhpErrorTicketPolicy).
-	$mode = defined('MODE') ? (string) MODE : '';
-	if (!\HiveNova\Core\PhpErrorTicketPolicy::shouldOpenSupportTicket((int) $errno, $mode)) {
-		return;
-	}
-
-	$fingerprint = \HiveNova\Core\PhpErrorTicketPolicy::fingerprint(
-		(int) $errno,
-		(string) $exception->getFile(),
-		(int) $exception->getLine(),
-		(string) $exception->getMessage()
-	);
-	$cacheDir = defined('CACHE_PATH') ? CACHE_PATH : (ROOT_PATH . 'cache/');
-	$cacheFile = rtrim((string) $cacheDir, '/') . '/php-error-tickets.json';
-	$now = defined('TIMESTAMP') ? (int) TIMESTAMP : time();
-	if (!\HiveNova\Core\PhpErrorTicketPolicy::claimFingerprint($fingerprint, $now, $cacheFile)) {
-		return;
-	}
-
-	global $USER;
-	if (isset($USER) && isset($USER['username']) && isset($USER['id'])) {
-		$ErrSource = $USER['id'];
-		$ErrName = $USER['username'];
-	} else {
-		$ErrSource = 1;
-		$ErrName = 'System';
-	}
-
-	try {
-		$ticketObj	= new \HiveNova\Core\SupportTickets;
-		$ticketID	= $ticketObj->createTicket($ErrSource, '1', $errorType[$errno]);
-		$ticketObj->createAnswer($ticketID, $ErrSource, $ErrName, $errorType[$errno], $errorText, 0);
-	} catch (\Throwable) {
-		// Support tickets need DB; if the original fault is PDO/connection, calling Database again would recurse.
-	}
+	// PHP diagnostics stay in error.log / the 503 page above.
+	// Never open player Support tickets from exceptionHandler (subject WARNING/ERROR/…).
 }
 /*
  *
