@@ -26,6 +26,15 @@ class EventFirehoseWriter
 
 	public const OUTCOME_FORMED = 'formed';
 
+	/** Moon-destruction attempt: moon shattered (any Stage-2 success). */
+	public const OUTCOME_DESTROYED = 'destroyed';
+
+	/** Moon-destruction attempt: Stage-2 ran, moon survived. */
+	public const OUTCOME_HELD = 'held';
+
+	/** Moon-destruction attempt: combat repel or no Battle Fortress survivors (no Stage-2). */
+	public const OUTCOME_REPELLED = 'repelled';
+
 	public const SMALL_MAX = 1_000_000;
 
 	public const MEDIUM_MAX = 100_000_000;
@@ -118,6 +127,37 @@ class EventFirehoseWriter
 			self::OUTCOME_FORMED,
 			$actorName,
 			''
+		);
+	}
+
+	/**
+	 * Every Destroy-mission moon attempt (success, fail, or combat repel).
+	 */
+	public static function recordMoonDestruction(
+		int $universe,
+		int $time,
+		float $diameter,
+		string $outcome,
+		string $actorName = '',
+		string $targetName = ''
+	): void {
+		$allowed = [
+			self::OUTCOME_DESTROYED,
+			self::OUTCOME_HELD,
+			self::OUTCOME_REPELLED,
+		];
+		if (!in_array($outcome, $allowed, true)) {
+			$outcome = self::OUTCOME_HELD;
+		}
+
+		self::insert(
+			$universe,
+			$time,
+			self::EVENT_MOON,
+			self::moonSizeBucket($diameter),
+			$outcome,
+			$actorName,
+			$targetName
 		);
 	}
 

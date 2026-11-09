@@ -5,7 +5,7 @@ namespace HiveNova\Mission;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\FleetFunctions;
-use HiveNova\Core\FleetMissionAvailability;
+use HiveNova\Core\MoonDestructionReportService;
 use HiveNova\Core\PlayerUtil;
 
 /**
@@ -63,17 +63,24 @@ class MissionCaseDestruction extends MissionCaseCombat
 	) {
 		$db	= Database::get();
 
+		$survivingDestroyers	= MoonDestructionReportService::countSurvivingDestroyers($fleetAttack);
+		$moonName				= (string) ($targetPlanet['name'] ?? '');
+		$moonDiameter			= (int) ($targetPlanet['diameter'] ?? 0);
+
 		$reportInfo	= array(
 			'thisFleet'				=> $this->_fleet,
 			'debris'				=> $debris,
 			'stealResource'			=> $stealResource,
 			'moonChance'			=> NULL,
 			'moonDestroy'			=> true,
-			'moonName'				=> NULL,
+			'moonName'				=> $moonName !== '' ? $moonName : NULL,
+			'moonDiameter'			=> $moonDiameter,
+			'survivingDestroyers'	=> $survivingDestroyers,
 			'moonDestroyChance'		=> NULL,
 			'moonDestroySuccess'	=> NULL,
 			'fleetDestroyChance'	=> NULL,
 			'fleetDestroySuccess'	=> false,
+			'moonDestroyBranch'		=> MoonDestructionReportService::BRANCH_REPELLED,
 		);
 
 		$destroyedMoonParentId	= null;
@@ -82,11 +89,17 @@ class MissionCaseDestruction extends MissionCaseCombat
 		{
 			// Win
 			case "a":
-				$deathstars	= 0.0;
-				foreach ($fleetAttack as $attackFleetDetail)
+				// Stage-2 dual rolls only if ≥1 Battle Fortress survives Stage-1 combat.
+				if ($survivingDestroyers <= 0)
 				{
-					$deathstars	+= FleetMissionAvailability::moonDestroyerCount($attackFleetDetail['unit'] ?? []);
+					$reportInfo['moonDestroySuccess'] = -1;
+					$attackStatus	= 'wons';
+					$defendStatus	= 'loos';
+					$class			= array('raportWin', 'raportLose');
+					break;
 				}
+
+				$deathstars	= (float) $survivingDestroyers;
 				$moonDestroyChance	= round((100 - sqrt((float) ($targetPlanet['diameter'] ?? 0))) * sqrt($deathstars), 1);
 
 				// Max 100% | Min 0%
@@ -115,7 +128,7 @@ class MissionCaseDestruction extends MissionCaseCombat
 					$sql		= 'UPDATE %%FLEETS%% SET
 					fleet_end_type	= 1,
 					fleet_end_id	= :planetId,
-					fleet_mission	= IF(fleet_mission = 9, 1, fleet_mission)
+					fleet_mission	= IF(fleet_mission = '.FLEET_MISSION_DESTROY.', '.FLEET_MISSION_ATTACK.', fleet_mission)
 					WHERE fleet_end_id = :moonId
 					AND fleet_id != :fleetId;';
 
@@ -188,6 +201,11 @@ class MissionCaseDestruction extends MissionCaseCombat
 				$reportInfo['moonDestroySuccess'] = -1;
 				break;
 		}
+
+		$reportInfo['moonDestroyBranch'] = MoonDestructionReportService::classify(
+			(int) $reportInfo['moonDestroySuccess'],
+			(bool) $reportInfo['fleetDestroySuccess']
+		);
 
 		return array($reportInfo, $attackStatus, $defendStatus, $class, $destroyedMoonParentId, $planetDebris);
 	}

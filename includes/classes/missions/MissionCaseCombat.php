@@ -8,6 +8,7 @@ use HiveNova\Core\EventFirehoseWriter;
 use HiveNova\Core\DiscordWebhookService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MissionFunctions;
+use HiveNova\Core\MoonDestructionReportService;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
 use HiveNova\Repository\PlanetRepository;
@@ -383,17 +384,21 @@ abstract class MissionCaseCombat extends MissionFunctions implements Mission
 		));
 
 		$i = 0;
+		$isMoonDestruction	= !empty($reportInfo['moonDestroy']);
 
 		foreach(array($userAttack, $userDefend) as $data)
 		{
 			foreach($data as $userID => $userName)
 			{
 				$LNG		= $this->getLanguage(NULL, $userID);
+				$reportSubject	= $isMoonDestruction
+					? ($LNG['sys_mess_destruc_report'] ?? $LNG['sys_mess_attack_report'])
+					: $LNG['sys_mess_attack_report'];
 
 				$message	= sprintf($messageHTML,
 					$reportID,
 					$class[$i],
-					$LNG['sys_mess_attack_report'],
+					$reportSubject,
 					sprintf(
 						$LNG['sys_adress_planet'],
 						$this->_fleet['fleet_end_galaxy'],
@@ -422,7 +427,7 @@ abstract class MissionCaseCombat extends MissionFunctions implements Mission
 					pretty_number($debris[902])
 				);
 
-				PlayerUtil::sendMessage($userID, 0, $LNG['sys_mess_tower'], 3, $LNG['sys_mess_attack_report'],
+				PlayerUtil::sendMessage($userID, 0, $LNG['sys_mess_tower'], 3, $reportSubject,
 					$message, $this->_fleet['fleet_start_time'], NULL, 1, $this->_fleet['fleet_universe']);
 
 				$sql	= "INSERT INTO %%TOPKB_USERS%% SET
@@ -576,6 +581,37 @@ abstract class MissionCaseCombat extends MissionFunctions implements Mission
 			(int) $this->_fleet['fleet_owner'],
 			(string) $this->_fleet['fleet_array']
 		);
+
+		// Detectability + Discord for every Destroy attempt against a moon body.
+		if ($isMoonDestruction && (int) $this->_fleet['fleet_end_type'] === 3) {
+			$attackerName = (string) (reset($userAttack) ?: '');
+			$snapshot = MoonDestructionReportService::snapshot(
+				(int) ($reportInfo['moonDestroySuccess'] ?? -1),
+				(bool) ($reportInfo['fleetDestroySuccess'] ?? false),
+				(int) ($reportInfo['survivingDestroyers'] ?? 0),
+				(string) ($reportInfo['moonName'] ?? ''),
+				(int) ($reportInfo['moonDiameter'] ?? 0),
+				(int) $this->_fleet['fleet_end_galaxy'],
+				(int) $this->_fleet['fleet_end_system'],
+				(int) $this->_fleet['fleet_end_planet']
+			);
+
+			EventFirehoseWriter::recordMoonDestruction(
+				(int) $this->_fleet['fleet_universe'],
+				(int) $this->_fleet['fleet_start_time'],
+				(float) ($snapshot['moonDiameter'] ?? 0),
+				MoonDestructionReportService::firehoseOutcome($snapshot['branch']),
+				$attackerName,
+				(string) ($snapshot['moonName'] ?? '')
+			);
+
+			DiscordWebhookService::notifyMoonDestructionAttempt(
+				(int) $this->_fleet['fleet_universe'],
+				$attackerName,
+				$reportID,
+				$snapshot
+			);
+		}
 	}
 
 	function EndStayEvent()

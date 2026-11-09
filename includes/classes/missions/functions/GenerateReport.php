@@ -33,8 +33,33 @@ function GenerateReport($combatResult, $reportInfo)
 		'moonDestroyChance'		=> (int) $reportInfo['moonDestroyChance'],
 		'moonDestroySuccess'	=> (int) $reportInfo['moonDestroySuccess'],
 		'fleetDestroyChance'	=> (int) $reportInfo['fleetDestroyChance'],
-		'fleetDestroySuccess'	=> (int) $reportInfo['fleetDestroySuccess']
+		'fleetDestroySuccess'	=> (int) $reportInfo['fleetDestroySuccess'],
+		'moonDiameter'			=> (int) ($reportInfo['moonDiameter'] ?? 0),
+		'survivingDestroyers'	=> (int) ($reportInfo['survivingDestroyers'] ?? 0),
+		'moonDestroyBranch'		=> (string) ($reportInfo['moonDestroyBranch'] ?? ''),
+		'moonDestroyedLabel'	=> (string) ($reportInfo['moonDestroyedLabel'] ?? ''),
+		'fortressLossLabel'		=> (string) ($reportInfo['fortressLossLabel'] ?? ''),
 	);
+
+	if ($DATA['mode'] === 1) {
+		if ($DATA['moon']['moonDestroyBranch'] === '') {
+			$DATA['moon']['moonDestroyBranch'] = \HiveNova\Core\MoonDestructionReportService::classify(
+				(int) $DATA['moon']['moonDestroySuccess'],
+				(bool) $DATA['moon']['fleetDestroySuccess']
+			);
+		}
+		if ($DATA['moon']['moonDestroyedLabel'] === '') {
+			$DATA['moon']['moonDestroyedLabel'] = \HiveNova\Core\MoonDestructionReportService::moonDestroyedLabel(
+				(int) $DATA['moon']['moonDestroySuccess']
+			);
+		}
+		if ($DATA['moon']['fortressLossLabel'] === '') {
+			$DATA['moon']['fortressLossLabel'] = \HiveNova\Core\MoonDestructionReportService::fortressLossLabel(
+				(int) $DATA['moon']['moonDestroySuccess'],
+				(bool) $DATA['moon']['fleetDestroySuccess']
+			);
+		}
+	}
 	
 	if(isset($reportInfo['additionalInfo']))
 	{

@@ -401,6 +401,6 @@ function missionCombatMoonDestructionSetup(
 
     return missionCombatDestructionFleet([
         'fleet_end_id' => 100,
-        'fleet_end_type' => 1,
+        'fleet_end_type' => 3,
     ]);
 }

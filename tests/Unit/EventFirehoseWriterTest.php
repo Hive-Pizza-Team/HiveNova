@@ -95,4 +95,31 @@ class EventFirehoseWriterTest extends TestCase
 		EventFirehoseWriter::recordMoon(1, 1, 5000);
 		$this->assertSame([], $this->fake->achievement->universeEvents);
 	}
+
+	public function test_record_moon_destruction_stores_attempt_outcome(): void
+	{
+		EventFirehoseWriter::recordMoonDestruction(
+			1,
+			1_700_000_000,
+			7200,
+			EventFirehoseWriter::OUTCOME_REPELLED,
+			'Alice',
+			'Luna'
+		);
+
+		$rows = $this->fake->achievement->universeEvents;
+		$this->assertCount(1, $rows);
+		$row = $rows[0];
+		$this->assertSame('moon', $row['event_type']);
+		$this->assertSame('medium', $row['size_bucket']);
+		$this->assertSame(EventFirehoseWriter::OUTCOME_REPELLED, $row['outcome']);
+		$this->assertSame('Alice', $row['actor_name']);
+		$this->assertSame('Luna', $row['target_name']);
+	}
+
+	public function test_record_moon_destruction_rejects_unknown_outcome(): void
+	{
+		EventFirehoseWriter::recordMoonDestruction(1, 1, 5000, 'nope', 'Bob');
+		$this->assertSame(EventFirehoseWriter::OUTCOME_HELD, $this->fake->achievement->universeEvents[0]['outcome']);
+	}
 }
