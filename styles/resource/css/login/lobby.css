@@ -511,6 +511,18 @@
 	margin-top: 12px;
 }
 
+/* iOS Safari auto-zooms focused controls under 16px (UA default ~13.33px). */
+.lobby .login-form-fields select,
+.lobby .login-form-fields input[type="text"],
+.lobby .login-form-fields input[type="password"],
+.lobby .login-form-fields input[type="email"],
+.lobby .rowForm select,
+.lobby .rowForm input[type="text"],
+.lobby .rowForm input[type="password"],
+.lobby .rowForm input[type="email"] {
+	font-size: 16px;
+}
+
 @keyframes lobby-pulse {
 	0% { box-shadow: 0 0 0 0 rgba(125, 255, 154, 0.55); }
 	70% { box-shadow: 0 0 0 10px rgba(125, 255, 154, 0); }
