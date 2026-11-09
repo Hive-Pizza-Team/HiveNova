@@ -58,4 +58,31 @@ class FlyingFleetHandlerTest extends TestCase
         $this->assertSame(1, FlyingFleetHandlerProbeMission::$finished);
         $this->assertSame([1], $failedFleetIds);
     }
+
+    public function testRunChainsDueEndStayIntoReturnInOnePass(): void
+    {
+        $this->fake->eventFleets = [
+            [
+                'fleet_id' => 7,
+                'fleet_mission' => 99,
+                'fleet_mess' => FLEET_HOLD,
+            ],
+        ];
+        $this->fake->eventFleetFollowUps[7] = [
+            [
+                'fleet_id' => 7,
+                'fleet_mission' => 99,
+                'fleet_mess' => FLEET_RETURN,
+            ],
+        ];
+
+        $handler = new FlyingFleetHandler();
+        $handler->setToken('tok');
+        $failedFleetIds = $handler->run();
+
+        $this->assertSame([], $failedFleetIds);
+        $this->assertSame(1, FlyingFleetHandlerProbeMission::$endStay);
+        $this->assertSame(1, FlyingFleetHandlerProbeMission::$returned);
+        $this->assertSame(0, FlyingFleetHandlerProbeMission::$started);
+    }
 }

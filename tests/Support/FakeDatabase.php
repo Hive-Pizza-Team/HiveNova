@@ -38,6 +38,15 @@ class FakeDatabase implements DatabaseInterface
     /** @var list<array<string, mixed>> */
     public array $eventFleets = [];
 
+    /**
+     * Optional next fleet rows for FlyingFleetHandler due-event chaining.
+     * Keyed by fleet_id; each value is a list of rows returned by successive
+     * selectSingle follow-ups (empty/missing => stop chaining).
+     *
+     * @var array<int, list<array<string, mixed>>>
+     */
+    public array $eventFleetFollowUps = [];
+
     public ?int $lastRowCount = null;
 
     public int $transactionDepth = 0;
@@ -263,6 +272,23 @@ class FakeDatabase implements DatabaseInterface
             $row = $rows[0] ?? null;
             if ($row === null) {
                 return $field === false ? null : false;
+            }
+            return $field === false ? $row : ($row[$field] ?? false);
+        }
+        // FlyingFleetHandler due-event chaining follow-up (lock + time still due).
+        if (
+            str_contains($qry, '%%FLEETS%%')
+            && str_contains($qry, '%%FLEETS_EVENT%%')
+            && isset($params[':fleetId'])
+        ) {
+            $fleetId = (int) $params[':fleetId'];
+            $queue = $this->eventFleetFollowUps[$fleetId] ?? [];
+            if ($queue === []) {
+                return $field === false ? false : false;
+            }
+            $row = array_shift($this->eventFleetFollowUps[$fleetId]);
+            if (!is_array($row)) {
+                return $field === false ? false : false;
             }
             return $field === false ? $row : ($row[$field] ?? false);
         }

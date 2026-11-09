@@ -86,13 +86,24 @@ class CommanderDatabaseStub implements DatabaseInterface
 		if (str_contains($qry, '%%FLEETS%%')) {
 			$userId = (int) ($params[':userId'] ?? 0);
 			$fleetId = (int) ($params[':fleetId'] ?? 0);
+			$mission = array_key_exists(':mission', $params) ? (int) $params[':mission'] : null;
+			$returnState = array_key_exists(':returnState', $params) ? (int) $params[':returnState'] : null;
 			return array_values(array_filter(
 				$this->fleets,
-				static function (array $row) use ($userId, $fleetId): bool {
+				static function (array $row) use ($userId, $fleetId, $mission, $returnState): bool {
 					if ($fleetId !== 0 && (int) $row['fleet_id'] !== $fleetId) {
 						return false;
 					}
-					return $userId === 0 || (int) $row['fleet_owner'] === $userId;
+					if ($userId !== 0 && (int) $row['fleet_owner'] !== $userId) {
+						return false;
+					}
+					if ($mission !== null && (int) ($row['fleet_mission'] ?? 0) !== $mission) {
+						return false;
+					}
+					if ($returnState !== null && (int) ($row['fleet_mess'] ?? 0) === $returnState) {
+						return false;
+					}
+					return true;
 				}
 			));
 		}
