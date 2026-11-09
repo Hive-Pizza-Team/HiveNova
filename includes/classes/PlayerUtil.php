@@ -841,5 +841,17 @@ class PlayerUtil
 			':unread'	=> $unread,
 			':universe'	=> $universe,
 		));
+
+		try {
+			SocialMessagePushService::notifySocialMessage(
+				(int) $userId,
+				(int) $senderId,
+				(int) $messageType,
+				is_string($senderName) ? $senderName : '',
+				is_string($subject) ? $subject : ''
+			);
+		} catch (\Throwable $e) {
+			PushNotificationService::logFailure('PlayerUtil::sendMessage push: ' . $e->getMessage());
+		}
 	}
 }

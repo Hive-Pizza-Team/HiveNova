@@ -142,6 +142,53 @@ class BuildingCompletePushService
 	}
 
 	/**
+	 * @param array<string, mixed>|null $lng
+	 * @return array{title: string, body: string, data: array<string, mixed>}
+	 */
+	public static function queueEmptyMessage(string $planetName, ?array $lng = null): array
+	{
+		$lng = $lng ?? (isset($GLOBALS['LNG']) && is_array($GLOBALS['LNG']) ? $GLOBALS['LNG'] : []);
+		$title = is_string($lng['push_queue_empty_title'] ?? null)
+			? $lng['push_queue_empty_title']
+			: 'Construction queue empty';
+		$template = is_string($lng['push_queue_empty_body'] ?? null)
+			? $lng['push_queue_empty_body']
+			: 'No buildings left in the queue on %s';
+		$planetName = $planetName !== '' ? $planetName : 'planet';
+
+		return [
+			'title' => $title,
+			'body'  => sprintf($template, $planetName),
+			'data'  => [
+				'url'  => self::NOTIFY_URL,
+				'type' => 'construction_queue_empty',
+			],
+		];
+	}
+
+	public static function notifyQueueEmpty(int $userId, string $planetName, string $lang = 'en'): bool
+	{
+		return (new self())->notifyQueueEmptyForUser($userId, $planetName, $lang);
+	}
+
+	public function notifyQueueEmptyForUser(int $userId, string $planetName, string $lang = 'en'): bool
+	{
+		if ($userId <= 0 || !$this->isConfigured()) {
+			return false;
+		}
+
+		try {
+			$message = self::queueEmptyMessage($planetName, $this->loadLanguage($lang));
+
+			return $this->deliver($userId, $message);
+		} catch (Throwable $e) {
+			PushNotificationService::logFailure('BuildingCompletePushService::notifyQueueEmpty: ' . $e->getMessage());
+
+			return false;
+		}
+	}
+
+	/**
 	 * @param list<array{planetId?: int, planetName?: string, elementId?: int, level?: int, buildEnd?: int}> $jobs
 	 */
 	public static function notifyCompletedJobs(int $userId, array $jobs, string $lang = 'en'): int
