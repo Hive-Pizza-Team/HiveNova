@@ -1,6 +1,7 @@
 {block name="title" prepend}{$LNG.lm_galaxy}{/block}
 {block name="content"}
-	<form action="?page=galaxy" method="post" id="galaxy_form" data-fuel-warning="{$LNG.gl_fuel_warning|escape:'html'}">
+	<form action="game.php" method="get" id="galaxy_form" data-fuel-warning="{$LNG.gl_fuel_warning|escape:'html'}">
+	<input type="hidden" name="page" value="galaxy">
 	<input type="hidden" id="auto" value="dr">
 	<div class="galaxy-coords-picker">
 		<div class="galaxy-coords-group">
@@ -387,7 +388,7 @@
 				</tr>
 			</table>
 			{/capture}
-			<a class="tooltip" href="#" data-tooltip-content="{$smarty.capture.legendTooltip|escape:'html'}">{$LNG.gl_legend}</a>
+			<a class="tooltip" href="javascript:void(0)" data-tooltip-content="{$smarty.capture.legendTooltip|escape:'html'}">{$LNG.gl_legend}</a>
 			{else}
 			{$LNG.gl_legend}
 			{/if}

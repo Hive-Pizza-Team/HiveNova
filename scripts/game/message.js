@@ -44,7 +44,7 @@ Message	= {
 			$('#messagestable').remove();
 			$('#content table:eq(0)').after(data);
 			if (!options.skipHistory && window.HiveNovaHistoryNav) {
-				HiveNovaHistoryNav.recordMessagesHistory(window.history, MessID, page);
+				HiveNovaHistoryNav.recordMessagesHistory(window.history, MessID, page, window.location);
 			}
 		});
 	},
@@ -126,6 +126,7 @@ $(function () {
 		Message.loadBodies();
 	}
 	if (window.HiveNovaHistoryNav && window.Message && typeof Message.getMessages === 'function') {
+		HiveNovaHistoryNav.seedMessagesHistoryFromLocation(window.history, window.location, Message.MessID);
 		window.addEventListener('popstate', function (event) {
 			var restored = HiveNovaHistoryNav.messagesStateFromPopstate(event);
 			if (!restored) {

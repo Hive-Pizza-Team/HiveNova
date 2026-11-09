@@ -1,6 +1,7 @@
 {block name="title" prepend}{$LNG.lm_statistics}{/block}
 {block name="content"}
-<form name="stats" id="stats" method="post" action="">
+<form name="stats" id="stats" method="get" action="game.php">
+	<input type="hidden" name="page" value="statistics">
 	<table class="table519">
 		<tr>
 			<th>{$LNG.st_statistics} ({$LNG.st_updated}: {$stat_date})</th>

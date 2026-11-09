@@ -1,127 +1,194 @@
 'use strict';
 
-const { describe, it } = require('node:test');
+const { describe, it, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
 const historyNav = require('../../scripts/game/history-nav.js');
 
+function fakeHistory(initialState) {
+	const entries = [{ state: initialState || null, url: 'game.php?page=overview' }];
+	let index = 0;
+	return {
+		get state() {
+			return entries[index].state;
+		},
+		get length() {
+			return entries.length;
+		},
+		pushState(state, _title, url) {
+			entries.splice(index + 1);
+			entries.push({ state: state || null, url: url || entries[index].url });
+			index = entries.length - 1;
+		},
+		replaceState(state, _title, url) {
+			entries[index] = { state: state || null, url: url || entries[index].url };
+		},
+		back() {
+			if (index > 0) {
+				index -= 1;
+			}
+		},
+		_url() {
+			return entries[index].url;
+		},
+		_index() {
+			return index;
+		}
+	};
+}
+
+function clickEvent(target, overrides) {
+	return Object.assign({
+		target,
+		defaultPrevented: false,
+		metaKey: false,
+		ctrlKey: false,
+		shiftKey: false,
+		altKey: false,
+		button: 0,
+		preventDefault() {
+			this.defaultPrevented = true;
+		}
+	}, overrides || {});
+}
+
 describe('HiveNovaHistoryNav hash guard', () => {
-	it('treats empty and bare hash hrefs as history no-ops', () => {
-		assert.equal(historyNav.isHashOnlyHref(undefined), true);
-		assert.equal(historyNav.isHashOnlyHref(''), true);
+	beforeEach(() => {
+		historyNav._resetForTests();
+	});
+
+	it('treats empty and bare hash hrefs as hash-only', () => {
 		assert.equal(historyNav.isHashOnlyHref('#'), true);
-		assert.equal(historyNav.isHashOnlyHref(' # '), true);
+		assert.equal(historyNav.isHashOnlyHref(''), true);
+		assert.equal(historyNav.isHashOnlyHref('  #  '), true);
+		assert.equal(historyNav.isHashOnlyHref('#g21'), false);
 		assert.equal(historyNav.isHashOnlyHref('game.php?page=buildings'), false);
-		assert.equal(historyNav.isHashOnlyHref('#panel'), false);
-		assert.equal(historyNav.isHashOnlyHref('javascript:void(0)'), false);
 	});
 
-	it('prevents default for hash-only anchor clicks', () => {
-		const prevented = [];
-		const event = {
-			defaultPrevented: false,
-			metaKey: false,
-			ctrlKey: false,
-			shiftKey: false,
-			altKey: false,
-			button: 0,
-			target: {
-				closest: function () {
-					return {
-						getAttribute: function () {
-							return '#';
-						}
-					};
-				}
-			},
-			preventDefault: function () {
-				prevented.push(true);
-				this.defaultPrevented = true;
-			}
-		};
-		historyNav.suppressHashOnlyNavigation(event);
-		assert.equal(prevented.length, 1);
+	it('detects trailing empty hashes that should be stripped', () => {
+		assert.equal(historyNav.shouldStripEmptyHash('https://x/game.php?page=buildings#', ''), true);
+		assert.equal(historyNav.shouldStripEmptyHash('https://x/game.php?page=buildings#', '#'), true);
+		assert.equal(historyNav.shouldStripEmptyHash('https://x/game.php?page=buildings#g1', '#g1'), false);
+		assert.equal(historyNav.shouldStripEmptyHash('https://x/game.php?page=buildings', ''), false);
 	});
 
-	it('leaves real navigation links alone', () => {
-		let prevented = false;
-		const event = {
-			defaultPrevented: false,
-			button: 0,
-			target: {
-				closest: function () {
-					return {
-						getAttribute: function () {
-							return 'game.php?page=statistics';
-						}
-					};
-				}
+	it('prevents default navigation for bare href="#"', () => {
+		const anchor = {
+			tagName: 'A',
+			getAttribute(name) {
+				return name === 'href' ? '#' : null;
 			},
-			preventDefault: function () {
-				prevented = true;
+			closest(sel) {
+				return sel === 'a[href]' ? this : null;
 			}
 		};
+		const event = clickEvent(anchor);
 		historyNav.suppressHashOnlyNavigation(event);
-		assert.equal(prevented, false);
+		assert.equal(event.defaultPrevented, true);
+	});
+
+	it('leaves real fragment and page links alone', () => {
+		const fragment = {
+			tagName: 'A',
+			getAttribute(name) {
+				return name === 'href' ? '#g21' : null;
+			},
+			closest(sel) {
+				return sel === 'a[href]' ? this : null;
+			}
+		};
+		const page = {
+			tagName: 'A',
+			getAttribute(name) {
+				return name === 'href' ? 'game.php?page=buildings' : null;
+			},
+			closest(sel) {
+				return sel === 'a[href]' ? this : null;
+			}
+		};
+		const fragEvent = clickEvent(fragment);
+		const pageEvent = clickEvent(page);
+		historyNav.suppressHashOnlyNavigation(fragEvent);
+		historyNav.suppressHashOnlyNavigation(pageEvent);
+		assert.equal(fragEvent.defaultPrevented, false);
+		assert.equal(pageEvent.defaultPrevented, false);
 	});
 });
 
-describe('HiveNovaHistoryNav messages history', () => {
-	it('builds message URLs and replaces until a messages state exists', () => {
+describe('HiveNovaHistoryNav dialog history', () => {
+	beforeEach(() => {
+		historyNav._resetForTests();
+	});
+
+	it('pushes a dialog stub so Back can close the overlay', () => {
+		const history = fakeHistory();
+		assert.equal(historyNav.recordDialogOpen(history), true);
+		assert.equal(historyNav._isDialogOpenForTests(), true);
+		assert.equal(history.state[historyNav.DIALOG_STATE_KEY], true);
+		assert.equal(history.length, 2);
+	});
+
+	it('closes the dialog on popstate without leaving the page URL', () => {
+		const history = fakeHistory();
+		historyNav.recordDialogOpen(history);
+		let closed = 0;
+		const result = historyNav.handlePopstate({ state: null }, function () {
+			closed += 1;
+		});
+		assert.equal(result.handled, true);
+		assert.equal(closed, 1);
+		assert.equal(historyNav._isDialogOpenForTests(), false);
+	});
+
+	it('drops the stub entry when the dialog is closed via the UI', () => {
+		const history = fakeHistory();
+		historyNav.recordDialogOpen(history);
+		assert.equal(history._index(), 1);
+		historyNav.recordDialogClose(history);
+		assert.equal(history._index(), 0);
+		assert.equal(historyNav._isDialogOpenForTests(), false);
+		const result = historyNav.handlePopstate({ state: history.state });
+		assert.equal(result.handled, false);
+		assert.equal(result.reason, 'ignore');
+	});
+});
+
+describe('HiveNovaHistoryNav messages history helpers', () => {
+	it('builds category/side URLs and records pushState after the first entry', () => {
+		const history = fakeHistory();
 		assert.equal(
-			historyNav.messagesHistoryUrl(3, 1),
-			'game.php?page=messages&messcat=3'
+			historyNav.messagesHistoryUrl(100, 1),
+			'game.php?page=messages&category=100'
 		);
 		assert.equal(
 			historyNav.messagesHistoryUrl(3, 2),
-			'game.php?page=messages&messcat=3&site=2'
+			'game.php?page=messages&category=3&side=2'
 		);
-		assert.equal(historyNav.shouldReplaceMessagesHistory(null), true);
-		assert.equal(historyNav.shouldReplaceMessagesHistory({}), true);
-		assert.equal(
-			historyNav.shouldReplaceMessagesHistory(
-				historyNav.buildMessagesHistoryState(1, 1)
-			),
-			false
-		);
+
+		historyNav.recordMessagesHistory(history, 100, 1);
+		assert.equal(history._url(), 'game.php?page=messages&category=100');
+		assert.equal(history.state[historyNav.MESSAGE_STATE_KEY], true);
+
+		historyNav.recordMessagesHistory(history, 3, 2);
+		assert.equal(history._url(), 'game.php?page=messages&category=3&side=2');
+		assert.equal(history.length, 2);
 	});
 
-	it('records replace then push for successive AJAX message views', () => {
-		const calls = [];
-		const historyObj = {
-			state: null,
-			replaceState: function (state, title, url) {
-				calls.push(['replace', state, url]);
-				this.state = state;
-			},
-			pushState: function (state, title, url) {
-				calls.push(['push', state, url]);
-				this.state = state;
-			}
-		};
-		historyNav.recordMessagesHistory(historyObj, 3, 1);
-		historyNav.recordMessagesHistory(historyObj, 3, 2);
-		assert.deepEqual(calls.map(function (c) { return c[0]; }), ['replace', 'push']);
-		assert.equal(calls[0][2], 'game.php?page=messages&messcat=3');
-		assert.equal(calls[1][2], 'game.php?page=messages&messcat=3&site=2');
-	});
-
-	it('reads message state from popstate events only', () => {
+	it('reads message state from popstate events', () => {
 		assert.equal(historyNav.messagesStateFromPopstate({ state: null }), null);
-		assert.equal(historyNav.messagesStateFromPopstate({ state: { foo: 1 } }), null);
 		assert.deepEqual(
 			historyNav.messagesStateFromPopstate({
-				state: historyNav.buildMessagesHistoryState(5, 4)
+				state: historyNav.buildMessagesHistoryState(15, 4)
 			}),
-			{ messcat: 5, site: 4 }
+			{ messcat: 15, site: 4 }
 		);
 	});
 });
 
 describe('history-nav wiring', () => {
-	it('is loaded from the game header and used by message.js', () => {
+	it('is loaded from the game header and used by Dialog/Message scripts', () => {
 		const header = fs.readFileSync(
 			path.join(__dirname, '../../styles/templates/game/main.header.tpl'),
 			'utf8'
@@ -130,9 +197,15 @@ describe('history-nav wiring', () => {
 			path.join(__dirname, '../../scripts/game/message.js'),
 			'utf8'
 		);
+		const baseSrc = fs.readFileSync(
+			path.join(__dirname, '../../scripts/game/base.js'),
+			'utf8'
+		);
 		assert.match(header, /scripts\/game\/history-nav\.js/);
 		assert.match(messageSrc, /HiveNovaHistoryNav\.recordMessagesHistory/);
-		assert.match(messageSrc, /messagesStateFromPopstate/);
-		assert.match(messageSrc, /skipHistory/);
+		assert.match(messageSrc, /seedMessagesHistoryFromLocation/);
+		assert.match(baseSrc, /HiveNovaHistoryNav\.recordDialogOpen/);
+		assert.match(baseSrc, /HiveNovaHistoryNav\.recordDialogClose/);
+		assert.match(baseSrc, /HiveNovaHistoryNav\.handlePopstate/);
 	});
 });
