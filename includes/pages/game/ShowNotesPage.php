@@ -29,8 +29,6 @@ class ShowNotesPage extends AbstractGamePage
 	function __construct() 
 	{
 		parent::__construct();
-		$this->setWindow('popup');
-		$this->initTemplate();
 	}
 	
 	function show()
