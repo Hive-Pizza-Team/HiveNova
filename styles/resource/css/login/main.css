@@ -806,11 +806,3 @@ footer {
     margin-left: auto;
     margin-right: auto;
 }
-
-/* Turkish (#420): avoid dotted İ on CSS-uppercased Latin chrome. */
-html[lang="tr"] .hero-section h1,
-html[lang="tr"] .contentbox h1,
-.contentbox h2,
-html[lang="tr"] .box-inner h1 {
-	text-transform: none;
-}

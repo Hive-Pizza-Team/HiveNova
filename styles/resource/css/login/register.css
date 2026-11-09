@@ -20,6 +20,11 @@
     margin-bottom: 10px;
 }
 
+/*
+ * #420 — reg-tab labels that are still English (e.g. "Hive Keychain") set
+ * lang="en" in the template so uppercase under html[lang=tr] stays HIVE not HİVE.
+ * Translated tabs (e.g. "Şifre", "E-posta") omit lang="en" and keep Turkish casing.
+ */
 .reg-tab-btn {
     flex: 1;
     max-width: 220px;
@@ -492,12 +497,4 @@
     margin: 0;
     color: #e6c36a;
     font-size: 11px;
-}
-
-/* Turkish (#420): avoid dotted İ on CSS-uppercased Latin chrome. */
-html[lang="tr"] .reg-tab-btn,
-html[lang="tr"] .uni-stats-badges .uni-badge,
-html[lang="tr"] .uni-stats-config-term,
-html[lang="tr"] .rowForm label {
-	text-transform: none;
 }

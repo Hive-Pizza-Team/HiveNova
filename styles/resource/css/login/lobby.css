@@ -1,5 +1,14 @@
 /* Lobby — public landing composition */
 
+/*
+ * #420 — Turkic page language (html[lang=tr]) makes text-transform:uppercase
+ * map Latin "i" → "İ" (LİVE / HİVE / UNİVERSE). Untranslated English chrome
+ * must keep English casing. Mark those nodes with lang="en" in the lobby
+ * template so case mapping follows English rules. Do not blanket
+ * :lang(tr) { -webkit-locale: "en" } — that breaks legitimate Turkish
+ * uppercase (e.g. "Giriş" → "GİRİŞ" on .lobby-cta--ghost / .lobby-about).
+ */
+
 .lobby {
 	max-width: 1120px;
 	margin: 0 auto;
@@ -599,19 +608,4 @@
 	.lobby-bullets {
 		display: none;
 	}
-}
-
-/* Turkish (#420): do not CSS-uppercase under lang=tr (dotted İ on English chrome). */
-html[lang="tr"] .lobby-kicker,
-html[lang="tr"] .lobby-title,
-html[lang="tr"] .lobby-hero-hook-em,
-html[lang="tr"] .lobby-cta,
-html[lang="tr"] .lobby-viz-caption-title,
-html[lang="tr"] .lobby-viz-legend-item,
-html[lang="tr"] .lobby-hero-hook-em,
-html[lang="tr"] .lobby-about h2,
-html[lang="tr"] .lobby-alive-head h2,
-html[lang="tr"] .lobby-pulse,
-html[lang="tr"] .lobby-feed-type {
-	text-transform: none;
 }
