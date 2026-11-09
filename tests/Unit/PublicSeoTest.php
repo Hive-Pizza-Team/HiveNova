@@ -6,6 +6,29 @@ use PHPUnit\Framework\TestCase;
 
 class PublicSeoTest extends TestCase
 {
+
+	public function testCanonicalBasePathIgnoresRequestHost(): void
+	{
+		$this->assertSame(PublicSeo::CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://moon.hive.pizza/'));
+		$this->assertSame(PublicSeo::CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://www.moonsiege.com/'));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::CANONICAL_ORIGIN);
+	}
+
+	public function testCanonicalUrlKeepsExtraQueryAndStripsRefSrc(): void
+	{
+		$url = PublicSeo::canonicalUrl(
+			'https://moonsiege.com/',
+			'battle',
+			'de',
+			'en',
+			['rid' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'ref' => 1, 'src' => 'x', 'page' => 'ignored']
+		);
+		$this->assertSame(
+			'https://moonsiege.com/index.php?page=battle&rid=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&lang=de',
+			$url
+		);
+	}
+
 	public function testNormalizePageDefaultsEmptyToIndex(): void
 	{
 		$this->assertSame('index', PublicSeo::normalizePage(''));

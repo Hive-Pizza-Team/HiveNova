@@ -2,7 +2,10 @@
 
 namespace HiveNova\Page\Login;
 
-use HiveNova\Core\Database;
+use HiveNova\Core\BattleHallService;
+use HiveNova\Core\Config;
+use HiveNova\Core\PublicBattleSeo;
+use HiveNova\Core\PublicSeo;
 use HiveNova\Core\Universe;
 
 /**
@@ -32,45 +35,45 @@ class ShowBattleHallPage extends AbstractLoginPage
 	function show() 
 	{
 		global $LNG;
-		$db = Database::get();
 
-		$sql = "SELECT *, (
-			SELECT DISTINCT
-			IF(%%TOPKB_USERS%%.username = '', GROUP_CONCAT(%%USERS%%.username SEPARATOR ' & '), GROUP_CONCAT(%%TOPKB_USERS%%.username SEPARATOR ' & '))
-			FROM %%TOPKB_USERS%%
-			LEFT JOIN %%USERS%% ON uid = %%USERS%%.id
-			WHERE %%TOPKB_USERS%%.`rid` = %%TOPKB%%.`rid` AND `role` = 1
-		) as `attacker`,
-		(
-			SELECT DISTINCT
-			IF(%%TOPKB_USERS%%.username = '', GROUP_CONCAT(%%USERS%%.username SEPARATOR ' & '), GROUP_CONCAT(%%TOPKB_USERS%%.username SEPARATOR ' & '))
-			FROM %%TOPKB_USERS%% INNER JOIN %%USERS%% ON uid = id
-			WHERE %%TOPKB_USERS%%.`rid` = %%TOPKB%%.`rid` AND `role` = 2
-		) as `defender`
-		FROM %%TOPKB%% WHERE `universe` = :universe ORDER BY units DESC LIMIT 100;";
+		$universeId = (int) Universe::current();
+		$universeName = (string) Config::get($universeId)->uni_name;
+		$gameName = (string) Config::get()->game_name;
+		$seoBasePath = PublicSeo::canonicalBasePath($this->publicBasePath());
 
-		$hallRaw = $db->select($sql, array(
-			':universe'	=> Universe::current(),
-		));
+		$top = (new BattleHallService())->listTopBattles($universeId);
 
-		$hallList	= array();
-		foreach($hallRaw as $hallRow) {
-			$hallList[]	= array(
-				'result'	=> $hallRow['result'],
-				'time'		=> _date($LNG['php_tdformat'], $hallRow['time']),
-				'units'		=> $hallRow['units'],
-				'rid'		=> $hallRow['rid'],
-				'attacker'	=> $hallRow['attacker'],
-				'defender'	=> $hallRow['defender'],
-			);
+		$hallList = [];
+		foreach ($top as $hallRow) {
+			$rid = (string) $hallRow['rid'];
+			$hallList[] = [
+				'result'   => $hallRow['result'],
+				'time'     => _date($LNG['php_tdformat'], $hallRow['time']),
+				'units'    => $hallRow['units'],
+				'rid'      => $rid,
+				'attacker' => $hallRow['attacker'],
+				'defender' => $hallRow['defender'],
+				'reportUrl'=> PublicBattleSeo::reportUrl($rid, $LNG->getLanguage()),
+			];
 		}
 
-		$universeSelect	= $this->getUniverseSelector();
-		
-		$this->assign(array(
-			'universeSelect'	=> $universeSelect,
-			'hallList'			=> $hallList,
-		));
+		$this->overrideSeo([
+			'documentTitle'   => PublicBattleSeo::hallDocumentTitle($gameName, $universeName, $LNG),
+			'metaDescription' => PublicBattleSeo::hallMetaDescription($gameName, $universeName, $LNG),
+			'pageHeading'     => $LNG['siteTitleBattleHall'] ?? 'Battle Hall',
+			'ogImageUrl'      => PublicBattleSeo::ogImageUrl($seoBasePath),
+			'ogImageWidth'    => PublicBattleSeo::OG_IMAGE_WIDTH,
+			'ogImageHeight'   => PublicBattleSeo::OG_IMAGE_HEIGHT,
+		]);
+
+		$this->assign([
+			'universeSelect' => $this->getUniverseSelector(),
+			'hallList'       => $hallList,
+			'signupCtaUrl'   => PublicBattleSeo::signupCtaUrl(PublicBattleSeo::SRC_HALL),
+			'signupCtaLabel' => $LNG['battleHall_cta'] ?? 'Play Moon free',
+			'signupCtaBlurb' => $LNG['battleHall_cta_blurb'] ?? '',
+			'universeName'   => $universeName,
+		]);
 		$this->display('page.battleHall.default.tpl');
 	}
 }

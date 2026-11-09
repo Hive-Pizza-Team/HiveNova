@@ -1,0 +1,107 @@
+.public-battle-cta {
+	margin: 0 0 1.25rem;
+	padding: 0.85rem 1rem;
+	text-align: center;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: rgba(0, 0, 0, 0.25);
+}
+
+.public-battle-cta--footer {
+	margin-top: 1.5rem;
+}
+
+.public-battle-cta__blurb {
+	margin: 0 0 0.75rem;
+	line-height: 1.45;
+}
+
+.public-battle-cta__actions {
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	justify-content: center;
+	align-items: center;
+}
+
+.public-battle-cta__btn {
+	display: inline-block;
+	padding: 0.65rem 1.25rem;
+	font-weight: 700;
+	text-decoration: none;
+	color: #111;
+	background: #c9a227;
+	border: 1px solid #a8841a;
+}
+
+.public-battle-cta__btn:hover,
+.public-battle-cta__btn:focus {
+	filter: brightness(1.08);
+	text-decoration: none;
+}
+
+.public-battle-cta__link {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.battle-report {
+	width: 100%;
+	text-align: center;
+	max-width: 960px;
+	margin: 0 auto;
+}
+
+.battle-report__players {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 1rem;
+	font-size: 1.15rem;
+	font-weight: 700;
+}
+
+.battle-report__versus {
+	opacity: 0.75;
+}
+
+.battle-report__player--attacker {
+	color: #00ff00;
+}
+
+.battle-report__player--defender {
+	color: #ff5555;
+}
+
+.battle-report__summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 0.75rem;
+	text-align: left;
+}
+
+.battle-report__summary-item {
+	padding: 0.65rem 0.75rem;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	background: rgba(0, 0, 0, 0.2);
+}
+
+.battle-report__summary-label {
+	font-size: 0.8rem;
+	opacity: 0.75;
+	margin-bottom: 0.25rem;
+}
+
+.battle-report__summary-value {
+	font-weight: 600;
+}
+
+.battle-report__result--attacker {
+	color: #00ff00;
+}
+
+.battle-report__result--defender {
+	color: #ff5555;
+}

@@ -39,6 +39,12 @@ abstract class AbstractLoginPage
 	public $defaultWindow = 'normal';
 	/** @var bool When false, public pages emit noindex (e.g. empty news). */
 	protected $seoAllowIndex = true;
+	/**
+	 * Optional SEO field overrides applied in display() (title, description, canonical, OG…).
+	 *
+	 * @var array<string, mixed>
+	 */
+	protected $seoOverrides = [];
 	
 	protected function __construct() {
 		
@@ -101,6 +107,32 @@ abstract class AbstractLoginPage
 	
 	protected function setWindow($window) {
 		$this->window	= $window;
+	}
+
+	/**
+	 * @param array<string, mixed> $overrides
+	 */
+	protected function overrideSeo(array $overrides): void
+	{
+		$this->seoOverrides = array_merge($this->seoOverrides, $overrides);
+	}
+
+	/**
+	 * Public absolute base path used for canonical / OG URLs (trailing slash).
+	 */
+	protected function publicBasePath(): string
+	{
+		if (UNIS_WILDCAST) {
+			$hostParts = explode('.', HTTP_HOST);
+			if (preg_match('/uni[0-9]+/', $hostParts[0])) {
+				array_shift($hostParts);
+			}
+			$host = implode('.', $hostParts);
+
+			return PROTOCOL.$host.HTTP_BASE;
+		}
+
+		return PROTOCOL.HTTP_HOST.HTTP_BASE;
 	}
 		
 	protected function getWindow() {
@@ -183,16 +215,8 @@ abstract class AbstractLoginPage
 			$this->getPageData();
 		}
 
-		if (UNIS_WILDCAST) {
-			$hostParts = explode('.', HTTP_HOST);
-			if (preg_match('/uni[0-9]+/', $hostParts[0])) {
-				array_shift($hostParts);
-			}
-			$host = implode('.', $hostParts);
-			$basePath = PROTOCOL.$host.HTTP_BASE;
-		} else {
-			$basePath = PROTOCOL.HTTP_HOST.HTTP_BASE;
-		}
+		$basePath = $this->publicBasePath();
+		$seoBasePath = PublicSeo::canonicalBasePath($basePath);
 
 		$config			= Config::get();
 		$lang			= $LNG->getLanguage();
@@ -201,22 +225,19 @@ abstract class AbstractLoginPage
 		$languages		= Language::getAllowedLangs(false);
 		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
 		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
-		$hreflangUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
+		$canonicalUrl		= PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang);
+		$hreflangUrls		= PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
-		$ogImageUrl			= $basePath.'styles/resource/images/login/HiveNova.png';
+		$ogImageUrl			= $seoBasePath.'styles/resource/images/login/HiveNova.png';
+		$ogImageWidth		= 1024;
+		$ogImageHeight		= 768;
 		$jsonLd				= '';
 		if ($seoPage === 'index') {
 			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
 		}
-		
-		$this->assign(array(
-            'lang'    			=> $lang,
-			'bodyclass'			=> $this->getWindow(),
-			'basepath'			=> $basePath,
-			'isMultiUniverse'	=> count(Universe::availableUniverses()) > 1,
-			'unisWildcast'		=> UNIS_WILDCAST,
+
+		$seo = array_merge([
 			'documentTitle'		=> $documentTitle,
 			'metaDescription'	=> $metaDescription,
 			'canonicalUrl'		=> $canonicalUrl,
@@ -224,12 +245,31 @@ abstract class AbstractLoginPage
 			'pageHeading'		=> $pageHeading,
 			'robotsContent'		=> $robotsContent,
 			'ogImageUrl'		=> $ogImageUrl,
-			'ogImageWidth'		=> 1024,
-			'ogImageHeight'		=> 768,
-			'twitterSite'		=> PublicSeo::TWITTER_SITE,
-			'seoPage'			=> $seoPage,
-			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
+			'ogImageWidth'		=> $ogImageWidth,
+			'ogImageHeight'		=> $ogImageHeight,
 			'jsonLd'			=> $jsonLd,
+			'seoPage'			=> $seoPage,
+		], $this->seoOverrides);
+		
+		$this->assign(array(
+            'lang'    			=> $lang,
+			'bodyclass'			=> $this->getWindow(),
+			'basepath'			=> $basePath,
+			'isMultiUniverse'	=> count(Universe::availableUniverses()) > 1,
+			'unisWildcast'		=> UNIS_WILDCAST,
+			'documentTitle'		=> $seo['documentTitle'],
+			'metaDescription'	=> $seo['metaDescription'],
+			'canonicalUrl'		=> $seo['canonicalUrl'],
+			'hreflangUrls'		=> $seo['hreflangUrls'],
+			'pageHeading'		=> $seo['pageHeading'],
+			'robotsContent'		=> $seo['robotsContent'],
+			'ogImageUrl'		=> $seo['ogImageUrl'],
+			'ogImageWidth'		=> $seo['ogImageWidth'],
+			'ogImageHeight'		=> $seo['ogImageHeight'],
+			'twitterSite'		=> PublicSeo::TWITTER_SITE,
+			'seoPage'			=> $seo['seoPage'],
+			'footerLinks'		=> PublicSeo::footerLinks($seoBasePath, $lang, $LNG),
+			'jsonLd'			=> $seo['jsonLd'],
 		));
 
 		$this->assign(array(

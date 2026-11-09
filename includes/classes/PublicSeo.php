@@ -14,6 +14,7 @@ class PublicSeo
 		'rules'        => 'siteTitleRules',
 		'screens'      => 'siteTitleScreens',
 		'battleHall'   => 'siteTitleBattleHall',
+		'battle'       => 'siteTitleBattleHall',
 		'banList'      => 'siteTitleBanList',
 		'disclamer'    => 'siteTitleDisclamer',
 		'register'     => 'siteTitleRegister',
@@ -27,6 +28,7 @@ class PublicSeo
 		'rules',
 		'screens',
 		'battleHall',
+		'battle',
 		'disclamer',
 		'register',
 	];
@@ -42,10 +44,14 @@ class PublicSeo
 	/** Twitter card @site handle (public lobby head tags). */
 	public const TWITTER_SITE = '@PizzaOnHive';
 
+	/** Public marketing host for canonical / hreflang / sitemap / og:url (#644). */
+	public const CANONICAL_ORIGIN = 'https://moonsiege.com/';
+
 	/**
 	 * Pages listed in sitemap.xml (public marketing surface).
 	 * Omit empty/noindex URLs (news) until they have indexable content.
 	 * `disclamer` stays once Contact Admin has Discord fallback content.
+	 * Individual `battle` report URLs are indexable but not bulk-listed here.
 	 */
 	public const SITEMAP_PAGES = [
 		'index',
@@ -67,6 +73,15 @@ class PublicSeo
 		}
 
 		return $page;
+	}
+
+	/**
+	 * Absolute public base (trailing slash) used for SEO tags and sitemap locs.
+	 * Always moonsiege.com so alternate hosts do not claim their own canonical (#644).
+	 */
+	public static function canonicalBasePath(?string $requestBasePath = null): string
+	{
+		return self::CANONICAL_ORIGIN;
 	}
 
 	/**
@@ -114,16 +129,34 @@ class PublicSeo
 	 *
 	 * Homepage (default language) uses the bare base path. Other pages and
 	 * non-default languages use index.php with query params.
+	 * Extra query keys (e.g. rid) are kept; ref/src must not be passed in.
 	 *
 	 * @param string $basePath Trailing-slash site root, e.g. https://moon.hive.pizza/
+	 * @param array<string, scalar> $extraQuery Additional canonical query params (no ref/src)
 	 */
-	public static function canonicalUrl(string $basePath, string $page, string $lang, string $defaultLang = 'en'): string
-	{
+	public static function canonicalUrl(
+		string $basePath,
+		string $page,
+		string $lang,
+		string $defaultLang = 'en',
+		array $extraQuery = [],
+	): string {
 		$page = self::normalizePage($page);
 		$query = [];
 
 		if ($page !== 'index') {
 			$query['page'] = $page;
+		}
+
+		foreach ($extraQuery as $key => $value) {
+			$key = (string) $key;
+			if ($key === '' || $key === 'page' || $key === 'lang' || $key === 'ref' || $key === 'src') {
+				continue;
+			}
+			if ($value === '' || $value === null) {
+				continue;
+			}
+			$query[$key] = $value;
 		}
 
 		if ($lang !== '' && $lang !== $defaultLang) {
@@ -141,18 +174,24 @@ class PublicSeo
 	 * Map of hreflang code => absolute URL, including x-default (default language homepage/page).
 	 *
 	 * @param array<string, string> $languages langKey => display name
+	 * @param array<string, scalar> $extraQuery
 	 * @return array<string, string>
 	 */
-	public static function hreflangUrls(string $basePath, string $page, array $languages, string $defaultLang = 'en'): array
-	{
+	public static function hreflangUrls(
+		string $basePath,
+		string $page,
+		array $languages,
+		string $defaultLang = 'en',
+		array $extraQuery = [],
+	): array {
 		$page = self::normalizePage($page);
 		$urls = [];
 
 		foreach (array_keys($languages) as $langKey) {
-			$urls[$langKey] = self::canonicalUrl($basePath, $page, (string) $langKey, $defaultLang);
+			$urls[$langKey] = self::canonicalUrl($basePath, $page, (string) $langKey, $defaultLang, $extraQuery);
 		}
 
-		$urls['x-default'] = self::canonicalUrl($basePath, $page, $defaultLang, $defaultLang);
+		$urls['x-default'] = self::canonicalUrl($basePath, $page, $defaultLang, $defaultLang, $extraQuery);
 
 		return $urls;
 	}
