@@ -1586,3 +1586,7 @@ $LNG['us_empty'] = 'No other linked universe accounts found. Link the same Hive 
 $LNG['us_invalid'] = 'That universe switch link is invalid or expired. Stay logged in and try again from Switch universe.';
 $LNG['us_username'] = 'Commander';
 $LNG['us_switched'] = 'Entered %s as %s.';
+$LNG['us_confirm'] = 'Leave this universe session and enter %s as %s?';
+$LNG['us_warning'] = 'Switching ends your session here. Fleets and queues in this universe keep running.';
+$LNG['us_universe_id'] = 'Universe %s';
+$LNG['us_col_id'] = 'ID';
