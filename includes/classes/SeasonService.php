@@ -14,7 +14,7 @@ class SeasonService
 	public const DEFAULT_PRECLOSE = 14400;
 
 	/** @var list<string> */
-	public const ALLOWED_PAGES = ['season', 'logout', 'settings'];
+	public const ALLOWED_PAGES = ['season', 'logout', 'settings', 'universeswitch'];
 
 	/** @var callable|null fn(int $userId, string $subject, string $text, int $universe): void */
 	private $messageSender = null;
