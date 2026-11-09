@@ -12,6 +12,7 @@ use HiveNova\Core\LobbyActivityFeed;
 use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\PublicSeo;
 use HiveNova\Core\ReferralCaptureService;
+use HiveNova\Core\RememberUsernameService;
 use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
 
@@ -202,6 +203,8 @@ class ShowIndexPage extends AbstractLoginPage
 			}
 		}
 
+		$rememberedUsernames = RememberUsernameService::readAll($_COOKIE);
+
 		$this->assign(array(
 			'lobbyFaq'				=> $lobbyFaq,
 			'faqJsonLd'				=> PublicSeo::faqJsonLd($lobbyFaq),
@@ -228,6 +231,8 @@ class ShowIndexPage extends AbstractLoginPage
 			'lobbyVizMtime'			=> (string) (@filemtime(ROOT_PATH . 'scripts/login/lobby-viz.js') ?: 0),
 			'lobbyCssMtime'			=> (string) (@filemtime(ROOT_PATH . 'styles/resource/css/login/lobby.css') ?: 0),
 			'registerUrl'			=> $registerUrl,
+			'rememberedEmailUsername'	=> $rememberedUsernames[RememberUsernameService::KIND_EMAIL],
+			'rememberedHiveUsername'	=> $rememberedUsernames[RememberUsernameService::KIND_HIVE],
 		));
 
 		if ($loginErrorMessage) {

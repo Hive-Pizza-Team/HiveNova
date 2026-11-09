@@ -108,6 +108,7 @@ describe('remember username', () => {
 		remember.write(storage, 'email', 'old');
 		const formListeners = {};
 		const form = {
+			contains() { return true; },
 			addEventListener(type, fn) {
 				(formListeners[type] || (formListeners[type] = [])).push(fn);
 			}
@@ -129,5 +130,34 @@ describe('remember username', () => {
 		email.value = 'submitted';
 		formListeners.submit.forEach((fn) => fn());
 		assert.equal(remember.read(storage).email, 'submitted');
+	});
+
+	it('seeds storage from server-prefilled values and click before programmatic submit', () => {
+		const storage = fakeStorage();
+		const formListeners = {};
+		const form = {
+			contains(node) { return node && node.id === 'login-btn'; },
+			addEventListener(type, fn) {
+				(formListeners[type] || (formListeners[type] = [])).push(fn);
+			}
+		};
+		const email = fakeInput({
+			'data-remember-username': 'email',
+			form,
+			value: 'FromCookie'
+		});
+		remember.bind(fakeDoc([email]), storage);
+		assert.equal(remember.read(storage).email, 'FromCookie');
+
+		email.value = 'BeforeRecaptcha';
+		const btn = {
+			id: 'login-btn',
+			closest(selector) {
+				assert.match(selector, /button|submit|g-recaptcha|button_keychain/);
+				return this;
+			}
+		};
+		formListeners.click.forEach((fn) => fn({ target: btn }));
+		assert.equal(remember.read(storage).email, 'BeforeRecaptcha');
 	});
 });

@@ -5,10 +5,10 @@ namespace HiveNova\Page\Login;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\HiveUtil;
+use HiveNova\Core\RememberUsernameService;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
-use HiveNova\Core\PlayerUtil;
-use HiveNova\Core\HiveUtil;
 
 /**
  *  2Moons 
@@ -85,6 +85,9 @@ class ShowLoginPage extends AbstractLoginPage
 			if($verify == "false") {
 				HTTP::redirectTo('index.php?code=1');
 			}
+
+			$rememberKind = RememberUsernameService::kindFromLoginRequest($_POST);
+			(new RememberUsernameService())->persist($rememberKind, $username);
 
 			$session	= Session::create();
 			$session->userId		= (int) $loginData['id'];

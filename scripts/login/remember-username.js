@@ -115,8 +115,25 @@
 			}
 			input.addEventListener('input', save);
 			input.addEventListener('change', save);
+			// Seed localStorage from server-prefilled (cookie) values so later
+			// client-only restores still work if cookies are cleared.
+			if (String(input.value || '').replace(/^\s+|\s+$/g, '') !== '') {
+				save();
+			}
 			if (input.form && typeof input.form.addEventListener === 'function') {
 				input.form.addEventListener('submit', save);
+				// HTMLFormElement.submit() (reCAPTCHA / Keychain) skips the
+				// submit event; capture the click that starts those flows.
+				input.form.addEventListener('click', function (evt) {
+					var target = evt.target;
+					if (!target || typeof target.closest !== 'function') {
+						return;
+					}
+					var control = target.closest('button, input[type="submit"], input.g-recaptcha, .button_keychain');
+					if (control && input.form.contains(control)) {
+						save();
+					}
+				}, true);
 			}
 			bound.push(input);
 		});

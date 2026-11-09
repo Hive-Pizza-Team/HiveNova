@@ -87,8 +87,8 @@
 					<form id="login" name="login" action="index.php?page=login" data-action="index.php?page=login" method="post">
 						<div class="login-form-fields">
 						<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultEmailUniverse}</select>
-							<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}" data-remember-username="email" autocomplete="username">
-							<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}">
+							<input name="username" id="username" type="text" placeholder="{$LNG.loginUsername}" value="{$rememberedEmailUsername|default:''|escape:'html'}" data-remember-username="email" autocomplete="username">
+							<input name="password" id="password" type="password" placeholder="{$LNG.loginPassword}" autocomplete="current-password">
 						{$verkeySafe = $verkey|default:[]}
 						{if $verkeySafe.capaktiv == 1}
 							<script src='https://www.google.com/recaptcha/api.js'></script>
@@ -111,7 +111,7 @@
 					<form id="loginHive" action="index.php?page=login" data-action="index.php?page=login" method="post" onsubmit="return false;">
 						<div class="login-form-fields">
 							<select name="uni" id="loginHive-universe" class="changeAction">{html_options options=$universeSelect|default:[] selected=$defaultHiveUniverse}</select>
-							<input name="username" id="loginHive-username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}" data-remember-username="hive" autocomplete="username">
+							<input name="username" id="loginHive-username" type="text" maxlength="16" placeholder="{$LNG.loginHiveAccount}" value="{$rememberedHiveUsername|default:''|escape:'html'}" data-remember-username="hive" autocomplete="username">
 							<input name="password" id="loginHive-password" type="hidden">
 							<input name="hiveAccount" id="loginHive-hiveAccount" type="hidden">
 							<button type="button" onclick="HiveKeychainLogin()" class="button_keychain" title="{$LNG.loginKeychainButton}">
