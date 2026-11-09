@@ -20,6 +20,8 @@ class AssetRevision
 	{
 		return [
 			'styles/resource/css/ingame/main.css',
+			'styles/resource/css/feedback.css',
+			'scripts/game/feedback.js',
 			'scripts/game/push-subscribe.js',
 			'scripts/game/base.js',
 			'scripts/game/pwa-install.js',

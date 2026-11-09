@@ -33,6 +33,7 @@
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/tokens.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="{$dpath}formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/buttons.css?v={$REV}">
+	<link rel="stylesheet" type="text/css" href="./styles/resource/css/feedback.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/fontawesome/css/ingame-icons.css?v={$REV}">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 	{assign var="ingamePage" value=$smarty.get.page|default:'overview'}
