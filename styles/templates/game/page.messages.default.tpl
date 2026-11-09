@@ -8,11 +8,14 @@
 	{if ($CategoryRow@iteration % 6) === 1}<tr>{/if}
 	{if $CategoryRow@last && ($CategoryRow@iteration % 6) !== 0}<td>&nbsp;</td>{/if}
 	<td class="msg-cat-cell"><a href="game.php?page=messages&category={$CategoryID}" class="msg-cat-link{if $CategoryID == $MessID} msg-cat-current{/if}" style="color:{$CategoryRow.color};">{$LNG.mg_type.{$CategoryID}}</a>
-	<br><span class="msg-cat-counts"><span id="unread_{$CategoryID}">{$CategoryRow.unread}</span>/<span id="total_{$CategoryID}">{$CategoryRow.total}</span></span>
+	<br><span class="msg-cat-counts" title="{$LNG.mg_unread} / {$LNG.mg_total}"><span id="unread_{$CategoryID}">{$CategoryRow.unread}</span> {$LNG.mg_unread} / <span id="total_{$CategoryID}">{$CategoryRow.total}</span> {$LNG.mg_total}</span>
 	</td>
 	{if $CategoryRow@last || ($CategoryRow@iteration % 6) === 0}</tr>{/if}
 	{/foreach}
 </table>
+<p class="msg-compose-bar">
+	<a href="game.php?page=messages&amp;mode=write" class="msg-compose-link" onclick="return Dialog.open(this.href, 650, 350);" title="{$LNG.mg_send_new}">{$LNG.mg_send_new}</a>
+</p>
 <form action="game.php?page=messages" method="post">
 <input type="hidden" name="mode" value="action">
 <input type="hidden" name="ajax" value="1">
@@ -70,7 +73,10 @@
 	</tr>
 	{foreachelse}
 	<tr class="msg-empty-row">
-		<td colspan="4">{$LNG.mg_no_messages}</td>
+		<td colspan="4">
+			<p class="msg-empty-copy">{$LNG.mg_empty_compose}</p>
+			<p><a href="game.php?page=messages&amp;mode=write" class="msg-compose-link" onclick="return Dialog.open(this.href, 650, 350);">{$LNG.mg_send_new}</a></p>
+		</td>
 	</tr>
 	{/foreach}
 	{include file="shared.messages.pagination.tpl"}

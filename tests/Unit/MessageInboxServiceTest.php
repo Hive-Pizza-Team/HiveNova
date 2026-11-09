@@ -39,4 +39,22 @@ class MessageInboxServiceTest extends TestCase
 			100 => 4,
 		]));
 	}
+
+	public function testBuildCategoryStatsSumsOnlyInboxTypesAndCastsAggregates(): void
+	{
+		$stats = MessageInboxService::buildCategoryStats([
+			['message_type' => '1', 'message_unread' => '1', 'count' => '1'],
+			['message_type' => '3', 'message_unread' => null, 'count' => '2'],
+			['message_type' => '100', 'message_unread' => '9', 'count' => '9'],
+		], 4);
+
+		$this->assertSame(1, $stats['unread'][1]);
+		$this->assertSame(1, $stats['total'][1]);
+		$this->assertSame(0, $stats['unread'][3]);
+		$this->assertSame(2, $stats['total'][3]);
+		$this->assertSame(1, $stats['unread'][100], 'All unread must not double-count bogus type 100 rows');
+		$this->assertSame(3, $stats['total'][100]);
+		$this->assertSame(4, $stats['total'][999]);
+		$this->assertSame(0, $stats['unread'][999]);
+	}
 }

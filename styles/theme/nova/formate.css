@@ -418,6 +418,19 @@ div#disclamer a {
   text-align: center !important;
 }
 
+.msg-empty-copy {
+  margin: 0 0 8px;
+}
+
+.msg-compose-bar {
+  margin: 8px 0 12px;
+  text-align: right;
+}
+
+.msg-compose-link {
+  font-weight: 700;
+}
+
 .fleet-target-error {
   margin-top: 6px;
   color: #e74c3c;

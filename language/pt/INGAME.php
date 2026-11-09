@@ -1576,3 +1576,7 @@ $LNG['pl_hive_linked'] = 'Hive: @%s';
 $LNG['pl_prestige_hp_range'] = '%1$s — %2$s–%3$s HP';
 $LNG['pl_prestige_hp_open'] = '%1$s — %2$s+ HP';
 $LNG['pl_prestige_pizza_open'] = '%1$s — %2$s+ PIZZA staked';
+$LNG['mg_unread'] = 'Unread';
+$LNG['mg_compose_recipient'] = 'Commander name';
+$LNG['mg_compose_hint'] = 'Enter a commander name to write a private message.';
+$LNG['mg_empty_compose'] = 'No messages yet. Write a message to another commander.';

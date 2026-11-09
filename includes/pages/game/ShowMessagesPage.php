@@ -252,8 +252,43 @@ class ShowMessagesPage extends AbstractGamePage
 
         $db = Database::get();
 
-        $receiverID       	= HTTP::_GP('id', 0);
+        $receiverID       	= (int) HTTP::_GP('id', 0);
         $Subject 			= HTTP::_GP('subject', $LNG['mg_no_subject'], true);
+        $username			= trim((string) HTTP::_GP('username', '', UTF8_SUPPORT));
+
+        if ($receiverID <= 0 && $username !== '') {
+            $sql = "SELECT id FROM %%USERS%% WHERE universe = :universe AND username = :username;";
+            $receiverID = (int) $db->selectSingle($sql, array(
+                ':universe' => (int) $USER['universe'],
+                ':username' => $username,
+            ), 'id');
+            if ($receiverID <= 0) {
+                $this->assign(array(
+                    'composeError'	=> $LNG['mg_error'],
+                    'composeUsername' => $username,
+                ));
+                $this->display('page.messages.write.select.tpl');
+                return;
+            }
+        }
+
+        if ($receiverID <= 0) {
+            $this->assign(array(
+                'composeError'	=> '',
+                'composeUsername' => '',
+            ));
+            $this->display('page.messages.write.select.tpl');
+            return;
+        }
+
+        if ($receiverID === (int) $USER['id']) {
+            $this->assign(array(
+                'composeError'	=> $LNG['mg_error'],
+                'composeUsername' => $username,
+            ));
+            $this->display('page.messages.write.select.tpl');
+            return;
+        }
 
         $sql = "SELECT a.galaxy, a.system, a.planet, b.username, b.id_planet, b.settings_blockPM
         FROM %%PLANETS%% as a, %%USERS%% as b WHERE b.id = :receiverId AND a.id = b.id_planet;";
@@ -300,13 +335,10 @@ class ShowMessagesPage extends AbstractGamePage
         $TitleColor    	= array ( 0 => '#FFFF00', 1 => '#FF6699', 2 => '#FF3300', 3 => '#FF9900', 4 => '#773399', 5 => '#009933', 15 => '#6495ed', 50 => '#666600', 99 => '#007070', 100 => '#ABABAB', 999 => '#CCCCCC');
 
         $sql = "SELECT COUNT(*) as state FROM %%MESSAGES%% WHERE message_sender = :userID AND message_type != 50 AND message_universe = :universe;";
-        $MessOut = $db->selectSingle($sql, array(
+        $MessOut = (int) $db->selectSingle($sql, array(
             ':userID'   => $USER['id'],
             ':universe' => (int) $USER['universe'],
         ), 'state');
-
-        $Total			= array(0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 15 => 0, 50 => 0, 99 => 0, 100 => 0, 999 => 0);
-        $UnRead			= array(0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 15 => 0, 50 => 0, 99 => 0, 100 => 0, 999 => 0);
 
         $sql = "SELECT message_type, SUM(message_unread) as message_unread, COUNT(*) as count FROM %%MESSAGES%% WHERE message_owner = :userID AND message_deleted IS NULL AND message_universe = :universe GROUP BY message_type;";
         $CategoryResult = $db->select($sql, array(
@@ -314,15 +346,9 @@ class ShowMessagesPage extends AbstractGamePage
             ':universe' => (int) $USER['universe'],
         ));
 
-        foreach ($CategoryResult as $CategoryRow)
-        {
-            $UnRead[$CategoryRow['message_type']]	= $CategoryRow['message_unread'];
-            $Total[$CategoryRow['message_type']]	= $CategoryRow['count'];
-        }
-
-        $UnRead[100]	= array_sum($UnRead);
-        $Total[100]		= array_sum($Total);
-        $Total[999]		= $MessOut;
+        $categoryStats	= MessageInboxService::buildCategoryStats($CategoryResult ?: [], $MessOut);
+        $UnRead			= $categoryStats['unread'];
+        $Total			= $categoryStats['total'];
 
         $MessCategory	= MessageInboxService::resolveCategory($MessCategory, $UnRead);
 

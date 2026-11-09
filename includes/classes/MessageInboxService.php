@@ -3,7 +3,7 @@
 namespace HiveNova\Core;
 
 /**
- * Inbox category resolution for the messages page.
+ * Inbox category resolution and overview counters for the messages page.
  */
 class MessageInboxService
 {
@@ -26,7 +26,7 @@ class MessageInboxService
 	}
 
 	/**
-	 * Default / unknown category → All messages so the list is not blank.
+	 * Default / unknown category → first unread inbox type, otherwise All.
 	 *
 	 * @param array<int|string, mixed> $unreadByCategory
 	 */
@@ -43,5 +43,45 @@ class MessageInboxService
 		}
 
 		return self::CATEGORY_ALL;
+	}
+
+	/**
+	 * Build unread/total maps for overview tiles.
+	 *
+	 * Sums only real inbox types into All (never double-counts All/Outbox slots).
+	 * Casts SQL aggregates to int so unlabeled "0/1" cannot come from string/NULL drift.
+	 *
+	 * @param list<array<string, mixed>> $categoryRows Rows with message_type, message_unread, count
+	 * @return array{unread: array<int, int>, total: array<int, int>}
+	 */
+	public static function buildCategoryStats(array $categoryRows, int $outboxTotal): array
+	{
+		$unread = [];
+		$total = [];
+		foreach (self::CATEGORIES as $type) {
+			$unread[$type] = 0;
+			$total[$type] = 0;
+		}
+
+		foreach ($categoryRows as $row) {
+			$type = (int) ($row['message_type'] ?? -1);
+			if (!in_array($type, self::INBOX_TYPES, true)) {
+				continue;
+			}
+			$unread[$type] = (int) ($row['message_unread'] ?? 0);
+			$total[$type] = (int) ($row['count'] ?? 0);
+		}
+
+		foreach (self::INBOX_TYPES as $type) {
+			$unread[self::CATEGORY_ALL] += $unread[$type];
+			$total[self::CATEGORY_ALL] += $total[$type];
+		}
+
+		$total[self::CATEGORY_OUTBOX] = max(0, $outboxTotal);
+
+		return [
+			'unread' => $unread,
+			'total' => $total,
+		];
 	}
 }

@@ -36,6 +36,9 @@ class MessagesPaginationTemplateTest extends TestCase
 				'mg_subject' => 'Subject',
 				'mg_page' => 'Page',
 				'mg_no_messages' => 'No messages',
+				'mg_send_new' => 'Write a message',
+				'mg_unread' => 'Unread',
+				'mg_total' => 'Total',
 				'mg_answer_to' => 'Reply to',
 			],
 			'CategoryList' => [
@@ -125,5 +128,38 @@ class MessagesPaginationTemplateTest extends TestCase
 		$this->assertStringContainsString('typeof Message.loadBodies === \'function\'', $html);
 		$this->assertStringContainsString('mode=bodies', $html);
 		$this->assertStringContainsString('data-message-body', $html);
+	}
+
+	public function testEmptyInboxShowsCopyAndComposeAffordance(): void
+	{
+		$html = $this->renderMessagesPage([
+			'MessageCount' => 0,
+			'MessageList' => [],
+			'maxPage' => 1,
+			'page' => 1,
+			'CategoryList' => [
+				1 => ['color' => '#fff', 'unread' => 0, 'total' => 0],
+			],
+		]);
+
+		$this->assertStringContainsString('No messages', $html);
+		$this->assertStringContainsString('Write a message', $html);
+		$this->assertStringContainsString('href="game.php?page=messages&amp;mode=write"', $html);
+		$this->assertStringContainsString('Dialog.open(this.href, 650, 350)', $html);
+		$this->assertStringContainsString('msg-compose-bar', $html);
+		$this->assertStringNotContainsString('msg-action-bar', $html);
+	}
+
+	public function testCategoryCountsAreLabeledUnreadAndTotal(): void
+	{
+		$html = $this->renderMessagesPage([
+			'CategoryList' => [
+				1 => ['color' => '#fff', 'unread' => 1, 'total' => 1],
+			],
+		]);
+
+		$this->assertStringContainsString('title="Unread / Total"', $html);
+		$this->assertStringContainsString('id="unread_1">1</span> Unread /', $html);
+		$this->assertStringContainsString('id="total_1">1</span> Total', $html);
 	}
 }
