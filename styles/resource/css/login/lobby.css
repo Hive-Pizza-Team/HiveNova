@@ -508,7 +508,20 @@
 }
 
 .lobby-register-box {
+	width: fit-content;
+	max-width: 100%;
 	margin-top: 12px;
+	box-sizing: border-box;
+}
+
+.lobby-register-cta {
+	display: inline-flex;
+	width: auto;
+	max-width: 100%;
+	box-sizing: border-box;
+	white-space: normal;
+	text-align: center;
+	overflow: visible;
 }
 
 @keyframes lobby-pulse {
