@@ -1566,3 +1566,4 @@ $LNG['se_season_blog_key'] = 'Season blog posting key';
 $LNG['se_season_blog_key_info'] = 'Leave blank to keep the stored key. Used to publish the end-of-season Hive post. The key is never shown again.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
 $LNG['modul_43'] = 'Unused';
+$LNG['mip_missing_user'] = 'Deleted / unknown (#%s)';
