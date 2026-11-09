@@ -15,7 +15,7 @@
 	</div>
 
 	<div class="reg-tab-panel active" id="reg-email" role="tabpanel">
-		<form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register">
+		<form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register" data-uni-in-body="1">
 		<input type="hidden" value="send" name="mode">
 		<div class="rowForm reg-season-hive-notice" hidden>
 			<p>{$LNG.registerErrorHiveRequiredSeason}</p>
@@ -116,7 +116,7 @@
 	</div>
 
 	<div class="reg-tab-panel" id="reg-hive" role="tabpanel">
-		<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" onsubmit="return false;">
+		<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" data-uni-in-body="1" onsubmit="return false;">
 		<input type="hidden" value="send" name="mode">
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
