@@ -187,6 +187,15 @@
 			}
 		}
 
+		var universeClusters = [];
+		for (var uci = 0; uci < universes.length; uci++) {
+			universeClusters.push({
+				x: origins[uci].x,
+				y: origins[uci].y,
+				label: String(universes[uci].name || ('Universe ' + universes[uci].id)),
+			});
+		}
+
 		var maxGalaxyHint = 1;
 		for (var ug = 0; ug < universes.length; ug++) {
 			maxGalaxyHint = Math.max(maxGalaxyHint, parseInt(universes[ug].maxGalaxy, 10) || 1);
@@ -629,7 +638,7 @@
 					new THREE.LineBasicMaterial({
 						color: color,
 						transparent: true,
-						opacity: 0.55,
+						opacity: 0.82,
 						depthWrite: false,
 					})
 				));
@@ -639,7 +648,7 @@
 					new THREE.LineBasicMaterial({
 						color: 0xffffff,
 						transparent: true,
-						opacity: 0.22,
+						opacity: 0.4,
 						depthWrite: false,
 					})
 				));
@@ -698,6 +707,24 @@
 		var labelCtx = labelCanvas.getContext('2d');
 		var tmpVec = new THREE.Vector3();
 
+		function projectToLabel(x, y) {
+			var w = container.clientWidth;
+			var h = container.clientHeight;
+			tmpVec.set(x, y, 0).project(camera);
+			return {
+				x: (tmpVec.x + 1) / 2 * w,
+				y: (1 - tmpVec.y) / 2 * h,
+			};
+		}
+
+		function strokeFillText(text, x, y, fill, stroke) {
+			labelCtx.lineWidth = 3;
+			labelCtx.strokeStyle = stroke;
+			labelCtx.fillStyle = fill;
+			labelCtx.strokeText(text, x, y);
+			labelCtx.fillText(text, x, y);
+		}
+
 		function drawLabels() {
 			var w = container.clientWidth;
 			var h = container.clientHeight;
@@ -706,18 +733,23 @@
 			labelCanvas.height = Math.max(1, Math.floor(h * dpr));
 			labelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 			labelCtx.clearRect(0, 0, w, h);
+			labelCtx.textAlign = 'center';
+			labelCtx.textBaseline = 'middle';
+
+			/* Universe names always on-map (#400) — caption alone is not enough. */
+			labelCtx.font = 'bold 13px "Trebuchet MS", "Segoe UI", sans-serif';
+			for (var ui = 0; ui < universeClusters.length; ui++) {
+				var cluster = universeClusters[ui];
+				var pt = projectToLabel(cluster.x, cluster.y + ringR * 0.15);
+				strokeFillText(cluster.label, pt.x, pt.y, 'rgba(230, 245, 255, 0.95)', 'rgba(0, 0, 0, 0.85)');
+			}
 
 			if (!isNarrow && galaxyNodes.length <= 24) {
 				labelCtx.font = '10px "Trebuchet MS", "Segoe UI", sans-serif';
-				labelCtx.textAlign = 'center';
-				labelCtx.textBaseline = 'middle';
-				labelCtx.fillStyle = 'rgba(160, 210, 230, 0.7)';
 				for (var ni = 0; ni < galaxyNodes.length; ni++) {
 					var node = galaxyNodes[ni];
-					tmpVec.set(node.x, node.y - 2.2, 0).project(camera);
-					var nx = (tmpVec.x + 1) / 2 * w;
-					var ny = (1 - tmpVec.y) / 2 * h;
-					labelCtx.fillText(node.label, nx, ny);
+					var gp = projectToLabel(node.x, node.y - 2.2);
+					strokeFillText(node.label, gp.x, gp.y, 'rgba(180, 220, 240, 0.9)', 'rgba(0, 0, 0, 0.75)');
 				}
 			}
 		}
