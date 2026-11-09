@@ -35,7 +35,7 @@ class CommanderBriefingLanguageTest extends TestCase
 		$this->assertStringContainsString("btn.attr('data-key')", $js);
 	}
 
-	public function testDefensiveCopyIsShipyardDefensesOnly(): void
+	public function testDefensiveCopyNamesDefensesAndHold(): void
 	{
 		$lng = new Language('en');
 		$lng->includeData(['INGAME']);
@@ -45,9 +45,13 @@ class CommanderBriefingLanguageTest extends TestCase
 		$need = (string) DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']['defense_complete'];
 
 		$this->assertStringContainsString($need, $desc);
-		$this->assertDoesNotMatchRegularExpression('/hold/i', $desc);
-		$this->assertDoesNotMatchRegularExpression('/hold/i', $suggest);
-		$this->assertSame(['defense_complete' => 6], DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']);
+		$this->assertMatchesRegularExpression('/Hold \(A\)/i', $desc);
+		$this->assertMatchesRegularExpression('/buddy|ally/i', $desc);
+		$this->assertMatchesRegularExpression('/Hold \(A\)/i', $suggest);
+		$this->assertSame(
+			['defense_complete' => 6, 'hold_success' => 1],
+			DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']
+		);
 	}
 
 	public function testTradeCopyStatesThresholdForeignAndQuota(): void

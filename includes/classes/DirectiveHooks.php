@@ -79,11 +79,10 @@ class DirectiveHooks
 	}
 
 	/**
-	 * MissionCaseStayAlly still calls this when a hold ends.
-	 * Defensive Posture does not score holds: mission 5 needs an alliance or buddy,
-	 * and noob protection blocks a new commander from holding on established Uni 1 targets.
+	 * MissionCaseStayAlly calls this when a Hold (A) stay ends.
 	 */
 	public static function afterHoldSuccess(int $userId, int $universe = 1): void
 	{
+		DirectiveProgressService::record($userId, 'hold_success', ['universe' => $universe]);
 	}
 }
