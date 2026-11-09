@@ -3,6 +3,8 @@
 namespace HiveNova\Page\Login;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\HTTP;
+use HiveNova\Core\PublicBattleHallService;
 use HiveNova\Core\Universe;
 
 /**
@@ -32,6 +34,13 @@ class ShowBattleHallPage extends AbstractLoginPage
 	function show() 
 	{
 		global $LNG;
+
+		$rid = trim((string) HTTP::_GP('raport', ''));
+		if ($rid !== '') {
+			$this->showPublicReport($rid);
+			return;
+		}
+
 		$db = Database::get();
 
 		$sql = "SELECT *, (
@@ -53,9 +62,9 @@ class ShowBattleHallPage extends AbstractLoginPage
 			':universe'	=> Universe::current(),
 		));
 
-		$hallList	= array();
+		$hallRows = array();
 		foreach($hallRaw as $hallRow) {
-			$hallList[]	= array(
+			$hallRows[]	= array(
 				'result'	=> $hallRow['result'],
 				'time'		=> _date($LNG['php_tdformat'], $hallRow['time']),
 				'units'		=> $hallRow['units'],
@@ -65,12 +74,84 @@ class ShowBattleHallPage extends AbstractLoginPage
 			);
 		}
 
+		$lang = (string) $LNG->getLanguage();
+		$hallList = PublicBattleHallService::decorateHallList($hallRows, $lang);
 		$universeSelect	= $this->getUniverseSelector();
 		
 		$this->assign(array(
 			'universeSelect'	=> $universeSelect,
 			'hallList'			=> $hallList,
+			'registerCtaUrl'	=> PublicBattleHallService::registerCtaUrl($lang),
+			'registerCtaLabel'	=> $LNG['bh_public_register_cta'],
+			'registerCtaLead'	=> $LNG['bh_public_register_lead'],
 		));
 		$this->display('page.battleHall.default.tpl');
+	}
+
+	/**
+	 * Indexable public combat report under the lobby host (not game.php).
+	 */
+	private function showPublicReport(string $rid): void
+	{
+		global $LNG;
+
+		$db = Database::get();
+
+		$sql = "SELECT 
+			raport, time,
+			(
+				SELECT
+				GROUP_CONCAT(username SEPARATOR ' & ') as attacker
+				FROM %%USERS%%
+				WHERE id IN (SELECT uid FROM %%TOPKB_USERS%% WHERE %%TOPKB_USERS%%.rid = %%RW%%.rid AND role = 1)
+			) as attacker,
+			(
+				SELECT
+				GROUP_CONCAT(username SEPARATOR ' & ') as defender
+				FROM %%USERS%%
+				WHERE id IN (SELECT uid FROM %%TOPKB_USERS%% WHERE %%TOPKB_USERS%%.rid = %%RW%%.rid AND role = 2)
+			) as defender
+			FROM %%RW%%
+			WHERE rid = :reportID;";
+		$reportData = $db->selectSingle($sql, array(
+			':reportID'	=> $rid,
+		));
+
+		if (empty($reportData)) {
+			HTTP::redirectTo('index.php?page=battleHall');
+			return;
+		}
+
+		$combatReport = safe_unserialize($reportData['raport']);
+		if (!is_array($combatReport)) {
+			HTTP::redirectTo('index.php?page=battleHall');
+			return;
+		}
+
+		$lang = (string) $LNG->getLanguage();
+		$attacker = (string) ($reportData['attacker'] ?? '');
+		$defender = (string) ($reportData['defender'] ?? '');
+		$vsLabel = trim($attacker.' VS '.$defender);
+		if ($vsLabel === 'VS') {
+			$vsLabel = $LNG['siteTitleBattleHall'];
+		}
+		$pageTitle = sprintf($LNG['bh_public_report_title'], $vsLabel);
+
+		$rawTime = (int) ($combatReport['time'] ?? $reportData['time'] ?? 0);
+		$combatReport['time'] = _date($LNG['php_tdformat'], $rawTime);
+
+		$this->assign(array(
+			'Raport'           => $combatReport,
+			'Info'             => array($attacker, $defender),
+			'pageTitle'        => $pageTitle,
+			'registerCtaUrl'   => PublicBattleHallService::registerCtaUrl($lang),
+			'registerCtaLabel' => $LNG['bh_public_register_cta'],
+			'registerCtaLead'  => $LNG['bh_public_register_lead'],
+			'hallIndexUrl'     => 'index.php?page=battleHall'.($lang !== '' && $lang !== 'en' ? '&lang='.rawurlencode($lang) : ''),
+			'hallIndexLabel'   => $LNG['siteTitleBattleHall'],
+			'fullReportUrl'    => 'game.php?page=raport&mode=battlehall&raport='.rawurlencode($rid),
+			'fullReportLabel'  => $LNG['bh_public_full_report'],
+		));
+		$this->display('page.battleHall.report.tpl');
 	}
 }

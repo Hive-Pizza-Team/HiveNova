@@ -3,6 +3,10 @@
 {if $isMultiUniverse}<p>
 {html_options options=$universeSelect selected=$UNI class="changeUni" id="universe" name="universe"}
 </p>{/if}
+<section class="bh-public-cta" aria-label="{$registerCtaLabel|escape:'html'}">
+	<p class="bh-public-cta__lead">{$registerCtaLead}</p>
+	<p><a class="bh-public-cta__btn" href="{$registerCtaUrl}">{$registerCtaLabel}</a></p>
+</section>
 <table>
 <tr>
 	<th style="color:lime">{$LNG.tkb_platz}</th>
@@ -14,12 +18,18 @@
 <tr>
 	<td>{$hallRow@iteration}</td>
 	<td>
+	{if $hallRow.reportUrl}
+	<a href="{$hallRow.reportUrl}">
+	{/if}
 	{if $hallRow.result == "a"}
 	<span style="color:#00FF00">{$hallRow.attacker}</span><span style="color:#FFFFFF"><b> VS </b></span><span style="color:#FF0000">{$hallRow.defender}</span>
 	{elseif $hallRow.result == "r"}
 	<span style="color:#FF0000">{$hallRow.attacker}</span><span style="color:#FFFFFF"><b> VS </b></span><span style="color:#00FF00">{$hallRow.defender}</span>
 	{else}
 	{$hallRow.attacker}<b> VS </b>{$hallRow.defender}
+	{/if}
+	{if $hallRow.reportUrl}
+	</a>
 	{/if}
 	</td>
 	<td>{$hallRow.time}</td>
