@@ -1725,19 +1725,17 @@ table.tablesorter thead tr .headerSortDown {
     font-size: 16px;
 }
 
+.buildlist-more-toggle {
+    display: none;
+}
+
 @media screen and (max-width: 699px) {
     .feedback-fab {
         right: 12px;
         bottom: calc(64px + env(safe-area-inset-bottom, 0px));
         padding: 10px 12px;
     }
-}
 
-.buildlist-more-toggle {
-    display: none;
-}
-
-@media screen and (max-width: 699px) {
     body.full {
         padding-top: max(12px, env(safe-area-inset-top, 0px));
     }
