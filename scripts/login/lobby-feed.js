@@ -73,9 +73,8 @@
 		time.textContent = event.time == null ? '' : String(event.time);
 
 		li.appendChild(uni);
-		if (headline.textContent) {
-			li.appendChild(headline);
-		}
+		// Always keep the headline cell so legacy empty names do not shift columns.
+		li.appendChild(headline);
 		li.appendChild(size);
 		li.appendChild(type);
 		li.appendChild(outcome);
