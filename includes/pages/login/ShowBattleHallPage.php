@@ -2,7 +2,7 @@
 
 namespace HiveNova\Page\Login;
 
-use HiveNova\Core\Database;
+use HiveNova\Core\BattleHallService;
 use HiveNova\Core\Universe;
 
 /**
@@ -32,26 +32,9 @@ class ShowBattleHallPage extends AbstractLoginPage
 	function show() 
 	{
 		global $LNG;
-		$db = Database::get();
 
-		$sql = "SELECT *, (
-			SELECT DISTINCT
-			IF(%%TOPKB_USERS%%.username = '', GROUP_CONCAT(%%USERS%%.username SEPARATOR ' & '), GROUP_CONCAT(%%TOPKB_USERS%%.username SEPARATOR ' & '))
-			FROM %%TOPKB_USERS%%
-			LEFT JOIN %%USERS%% ON uid = %%USERS%%.id
-			WHERE %%TOPKB_USERS%%.`rid` = %%TOPKB%%.`rid` AND `role` = 1
-		) as `attacker`,
-		(
-			SELECT DISTINCT
-			IF(%%TOPKB_USERS%%.username = '', GROUP_CONCAT(%%USERS%%.username SEPARATOR ' & '), GROUP_CONCAT(%%TOPKB_USERS%%.username SEPARATOR ' & '))
-			FROM %%TOPKB_USERS%% INNER JOIN %%USERS%% ON uid = id
-			WHERE %%TOPKB_USERS%%.`rid` = %%TOPKB%%.`rid` AND `role` = 2
-		) as `defender`
-		FROM %%TOPKB%% WHERE `universe` = :universe ORDER BY units DESC LIMIT 100;";
-
-		$hallRaw = $db->select($sql, array(
-			':universe'	=> Universe::current(),
-		));
+		$missingName = (string) ($LNG['tkb_deleted_player'] ?? BattleHallService::MISSING_NAME);
+		$hallRaw = (new BattleHallService())->listTopBattles((int) Universe::current(), 100, $missingName);
 
 		$hallList	= array();
 		foreach($hallRaw as $hallRow) {

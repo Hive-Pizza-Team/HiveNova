@@ -162,8 +162,11 @@ class DatabaseSeasonStoreTest extends TestCase
 		];
 		$hof = $store->reportHallOfFame(2, 10);
 		$this->assertSame(100, $hof[0]['units']);
+		$this->assertSame('', $hof[0]['attacker']);
+		$this->assertSame('', $hof[0]['defender']);
 		$this->assertStringContainsString('%%TOPKB%%', $this->db->selects[1][0]);
 		$this->assertStringContainsString('units > 0', $this->db->selects[1][0]);
+		$this->assertStringNotContainsString('INNER JOIN', $this->db->selects[1][0]);
 
 		$this->db->selectResult = [
 			['feat_key' => 'feat_first_ship', 'claimed_at' => 50, 'username' => 'Sam', 'hive_account' => 'samacct'],
@@ -174,5 +177,38 @@ class DatabaseSeasonStoreTest extends TestCase
 
 		$this->db->selectSingleResult = ['c' => 4];
 		$this->assertSame(4, $store->countEntries(2, 1));
+	}
+
+	public function testReportHallOfFameKeepsSnapshotWhenUserRowIsGone(): void
+	{
+		$db = new class extends RecordingDatabase {
+			public function select($qry, array $params = array())
+			{
+				$this->selects[] = [$qry, $params];
+				if (str_contains($qry, '%%TOPKB_USERS%%')) {
+					return [
+						['rid' => 'r1', 'role' => 1, 'uid' => 1, 'snapshot_name' => 'eco', 'live_name' => 'eco'],
+						['rid' => 'r1', 'role' => 2, 'uid' => 404, 'snapshot_name' => 'SomePlayer', 'live_name' => null],
+					];
+				}
+
+				return [
+					['rid' => 'r1', 'units' => 2500, 'result' => 'a'],
+				];
+			}
+
+			public function quote($str)
+			{
+				return "'" . addslashes((string) $str) . "'";
+			}
+		};
+		$this->swapDatabaseInstance($db);
+
+		$hof = (new DatabaseSeasonStore())->reportHallOfFame(1, 10);
+
+		$this->assertSame('eco', $hof[0]['attacker']);
+		$this->assertSame('SomePlayer', $hof[0]['defender']);
+		$this->assertStringContainsString('LEFT JOIN %%USERS%%', $db->selects[1][0]);
+		$this->assertStringNotContainsString('INNER JOIN', $db->selects[1][0]);
 	}
 }
