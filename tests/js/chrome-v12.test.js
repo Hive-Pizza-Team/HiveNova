@@ -201,13 +201,18 @@ describe('chrome-v1.2 mobile', () => {
 	});
 
 	it('stacks #414 Resources at mobile width and keeps Apply reachable', () => {
-		assert.match(mobileCss, /body#resources \.resources-table__row \{[\s\S]*?display:\s*block/);
+		assert.match(mobileCss, /body#resources \.resources-table tbody,\s*body#resources \.resources-table__title,\s*body#resources \.resources-table__row \{[\s\S]*?display:\s*block/);
+		assert.match(mobileCss, /body#resources \.resources-table__row td \{[\s\S]*?display:\s*flex/);
+		assert.match(mobileCss, /body#resources \.resources-table__factor select[\s\S]*?min-width:\s*0/);
 		assert.match(mobileCss, /body#resources[\s\S]*overflow-x:\s*hidden/);
 		assert.match(mobileCss, /body#resources \.resources-apply-bar \{[\s\S]*?display:\s*block/);
+		assert.match(mobileCss, /body#resources \.resources-apply-bar \{[\s\S]*?max-width:\s*100%/);
 		assert.match(resourcesTpl, /class="resources-form"/);
 		assert.match(resourcesTpl, /class="resources-table"/);
+		assert.match(resourcesTpl, /colspan="6"/);
 		assert.match(resourcesTpl, /resources-apply-bar/);
 		assert.match(resourcesTpl, /data-label="\{\$LNG\.tech\.901\}"/);
+		assert.match(resourcesTpl, /\{\$LNG\.rs_prod_factor\}/);
 	});
 
 	it('collapses extra Buildings queue rows on mobile so the list can scroll', () => {
