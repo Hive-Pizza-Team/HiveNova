@@ -129,4 +129,62 @@ class DiscordFeatNotifyTest extends TestCase
         DiscordWebhookService::notifySeasonReminder(1, '   ');
         $this->assertSame([], $this->posts);
     }
+
+    public function testNotifyMoonDestructionAttemptPostsEveryAttempt(): void
+    {
+        $token = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0123456789-_xx';
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'game_name' => 'Moon',
+            'discord_feat_webhook' => 'https://discord.com/api/webhooks/123456789012345678/' . $token,
+        ]), 1);
+
+        $snapshot = \HiveNova\Core\MoonDestructionReportService::snapshot(
+            0,
+            true,
+            2,
+            'Thraupis',
+            8942,
+            1,
+            19,
+            8
+        );
+
+        DiscordWebhookService::notifyMoonDestructionAttempt(1, 'Alice', 'rid-deadbeef', $snapshot);
+
+        $this->assertCount(1, $this->posts);
+        $payload = json_decode($this->posts[0]['json'], true);
+        $embed = $payload['embeds'][0];
+        $this->assertSame('Moon', $payload['username']);
+        $this->assertSame('Moon destruction attempt', $embed['title']);
+        $this->assertStringContainsString('Alice', $embed['description']);
+        $this->assertStringContainsString('[1:19:8]', $embed['description']);
+        $fields = [];
+        foreach ($embed['fields'] as $field) {
+            $fields[$field['name']] = $field['value'];
+        }
+        $this->assertSame('Alice', $fields['Attacker']);
+        $this->assertSame('2', $fields['Surviving Battle Fortresses']);
+        $this->assertSame('NO', $fields['Moon destroyed']);
+        $this->assertSame('YES', $fields['Fortresses lost (destruction roll)']);
+        $this->assertStringContainsString('Thraupis', $fields['Moon']);
+        $this->assertStringContainsString('8942', $fields['Moon']);
+        $this->assertStringContainsString('rid-deadbeef', $fields['Report']);
+    }
+
+    public function testNotifyMoonDestructionAttemptSkipsWhenWebhookMissing(): void
+    {
+        Config::setInstance(new Config([
+            'uni' => 1,
+            'discord_feat_webhook' => '',
+        ]), 1);
+        DiscordWebhookService::notifyMoonDestructionAttempt(1, 'Alice', 'rid', [
+            'coords' => '[1:1:1] (moon)',
+            'moonDestroyedLabel' => '—',
+            'fortressLossLabel' => '—',
+            'survivingDestroyers' => 0,
+            'branch' => 'repelled',
+        ]);
+        $this->assertSame([], $this->posts);
+    }
 }
