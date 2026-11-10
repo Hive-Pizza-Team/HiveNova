@@ -152,6 +152,7 @@ Compare branch defaults to `origin/develop`; override with `DIFF_COVER_COMPARE_B
 GitHub Actions runs on every push and pull request (`.github/workflows/ci.yaml`):
 
 - **language-check** — validates that all language files are syntactically valid PHP and that every key present in the English reference file exists in each translation
+- **screenshot-check** (pull requests only) — fails if the PR touches `styles/`, `scripts/`, or `chat/` and the PR body has no screenshot image (label `skip-screenshot` or `[skip-screenshot]` in the body to bypass)
 - **phpstan** — runs PHPStan level 0 on `includes/classes/` (existing findings baselined in `phpstan-baseline.neon`)
 - **test** — runs the PHPUnit unit test suite on PHP 8.3 with xdebug coverage; uploads `coverage/clover.xml`
 - **integration** — MySQL + PHPUnit integration suite with coverage; uploads `coverage/integration-clover.xml`

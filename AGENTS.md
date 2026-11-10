@@ -12,6 +12,7 @@ At the start of every session in this workspace, read these in order before doin
 ## Git and branches
 
 - **Never push directly to `master` or `develop`.** Use a feature branch and open a **pull request** to request merging into those branches instead.
+- PRs that change `styles/`, `scripts/`, or `chat/` must include a **screenshot in the PR body** (CI `screenshot-check`). See `.cursor/rules/pr-screenshot-for-rendering.mdc`.
 
 ## Code Intelligence
 
