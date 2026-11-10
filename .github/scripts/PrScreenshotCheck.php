@@ -55,22 +55,69 @@ final class PrScreenshotCheck
 		return stripos($body, self::SKIP_BODY_MARKER) !== false;
 	}
 
-	public static function bodyHasScreenshot(string $body): bool
+	/**
+	 * Collect image URLs from markdown images, <img src>, and bare user-attachments links.
+	 *
+	 * @return list<string>
+	 */
+	public static function imageUrls(string $body): array
 	{
 		if ($body === '') {
+			return [];
+		}
+		$urls = [];
+		if (preg_match_all('/!\[[^\]]*]\(([^)]+)\)/', $body, $m) > 0) {
+			foreach ($m[1] as $url) {
+				$urls[] = trim($url);
+			}
+		}
+		if (preg_match_all('/<img\s[^>]*src=["\']([^"\']+)["\']/i', $body, $m) > 0) {
+			foreach ($m[1] as $url) {
+				$urls[] = trim($url);
+			}
+		}
+		if (preg_match_all('#https?://[^)\s]*user-attachments/assets/[A-Za-z0-9-]+#', $body, $m) > 0) {
+			foreach ($m[0] as $url) {
+				$urls[] = trim($url);
+			}
+		}
+		return array_values(array_unique(array_filter($urls, static fn($u) => $u !== '')));
+	}
+
+	public static function bodyHasScreenshot(string $body): bool
+	{
+		return self::imageUrls($body) !== [];
+	}
+
+	/**
+	 * True when at least one image is bound to this PR: user-attachments, or a
+	 * raw/blob GitHub URL whose ref equals $headRef (URL-encoded segments OK).
+	 */
+	public static function bodyHasPrBoundScreenshot(string $body, string $headRef): bool
+	{
+		$urls = self::imageUrls($body);
+		if ($urls === []) {
 			return false;
 		}
-		// Markdown image: ![alt](url)
-		if (preg_match('/!\[[^\]]*]\([^)]+\)/', $body) === 1) {
+		$headRef = trim($headRef);
+		if ($headRef === '') {
+			// No head ref available (local CLI without --head): keep legacy "any image" behavior.
 			return true;
 		}
-		// HTML <img ...>
-		if (preg_match('/<img\s/i', $body) === 1) {
-			return true;
-		}
-		// GitHub / browser upload URLs without markdown wrapper
-		if (preg_match('#https?://[^)\s]*user-attachments/assets/[A-Za-z0-9-]+#', $body) === 1) {
-			return true;
+
+		$quoted = preg_quote($headRef, '#');
+		foreach ($urls as $url) {
+			if (preg_match('#user-attachments/assets/[A-Za-z0-9-]+#', $url) === 1) {
+				return true;
+			}
+			// raw.githubusercontent.com/org/repo/<headRef>/path
+			if (preg_match('#raw\.githubusercontent\.com/[^/]+/[^/]+/' . $quoted . '/#', $url) === 1) {
+				return true;
+			}
+			// github.com/org/repo/blob|raw/<headRef>/path
+			if (preg_match('#github\.com/[^/]+/[^/]+/(?:blob|raw)/' . $quoted . '/#', $url) === 1) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -80,7 +127,7 @@ final class PrScreenshotCheck
 	 * @param list<string> $labelNames
 	 * @return array{required: bool, skipped: bool, ok: bool, rendering: list<string>, reason: string}
 	 */
-	public static function evaluate(array $changedPaths, string $body, array $labelNames): array
+	public static function evaluate(array $changedPaths, string $body, array $labelNames, string $headRef = ''): array
 	{
 		$rendering = self::renderingPaths($changedPaths);
 		if ($rendering === []) {
@@ -103,13 +150,23 @@ final class PrScreenshotCheck
 			];
 		}
 
-		if (self::bodyHasScreenshot($body)) {
+		if (self::bodyHasPrBoundScreenshot($body, $headRef)) {
 			return [
 				'required' => true,
 				'skipped' => false,
 				'ok' => true,
 				'rendering' => $rendering,
-				'reason' => 'PR body includes a screenshot.',
+				'reason' => 'PR body includes a PR-bound screenshot (branch raw/blob URL or user-attachments).',
+			];
+		}
+
+		if (self::bodyHasScreenshot($body) && $headRef !== '') {
+			return [
+				'required' => true,
+				'skipped' => false,
+				'ok' => false,
+				'rendering' => $rendering,
+				'reason' => 'Screenshot links must point at this PR branch (or user-attachments), not master/develop/another branch.',
 			];
 		}
 
