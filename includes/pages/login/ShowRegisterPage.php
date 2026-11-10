@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\ReferralCaptureService;
+use HiveNova\Core\RememberUsernameService;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
@@ -130,6 +131,8 @@ class ShowRegisterPage extends AbstractLoginPage
 			);
 		}
 		
+		$rememberedUsernames = RememberUsernameService::readAll($_COOKIE);
+
 		$this->assign(array(
 			'referralData'		=> $referralData,
 			'referralByUniverse'	=> $referralByUniverse,
@@ -146,6 +149,8 @@ class ShowRegisterPage extends AbstractLoginPage
 			'registerTabEmail'			=> $LNG['registerTabEmail'],
 			'registerTabHive'			=> $LNG['registerTabHive'],
 			'registerHiveKeychainInfo'	=> $LNG['registerHiveKeychainInfo'],
+			'rememberedEmailUsername'	=> $rememberedUsernames[RememberUsernameService::KIND_EMAIL],
+			'rememberedHiveUsername'	=> $rememberedUsernames[RememberUsernameService::KIND_HIVE],
 			'registerUsernameCheckConfig'	=> array(
 				'url'         => 'index.php?page=register&mode=checkUsername&ajax=1',
 				'debounceMs'  => 300,
