@@ -3,17 +3,17 @@
 <div class="lobby">
 	<section class="lobby-hero" aria-label="{$gameName|escape}">
 		<div class="lobby-hero-brand">
-			<h1 class="lobby-h1"><span class="lobby-kicker">{$LNG.lobby_kicker}</span><span class="lobby-title">{$gameName|escape}</span></h1>
-			<p class="lobby-hero-hook">{$lobbyHook} <span class="lobby-hero-hook-em">{$lobbyHookEm}</span></p>
-			<p class="lobby-tagline">{$LNG.lobby_tagline|default:$descText}</p>
+			<h1 class="lobby-h1"><span class="lobby-kicker" lang="en">{$LNG.lobby_kicker}</span><span class="lobby-title">{$gameName|escape}</span></h1>
+			<p class="lobby-hero-hook" lang="en">{$lobbyHook} <span class="lobby-hero-hook-em">{$lobbyHookEm}</span></p>
+			<p class="lobby-tagline" lang="en">{$LNG.lobby_tagline|default:$descText}</p>
 			<div class="lobby-cta-row">
-				<a class="lobby-cta lobby-cta--primary" href="{$registerUrl|escape}">{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}</a>
+				<a class="lobby-cta lobby-cta--primary" href="{$registerUrl|escape}" lang="en">{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}</a>
 				<a class="lobby-cta lobby-cta--ghost" href="#lobby-login">{$LNG.loginHeader}</a>
 			</div>
-			<p class="lobby-cta-note">{$LNG.lobby_cta_season}</p>
+			<p class="lobby-cta-note" lang="en">{$LNG.lobby_cta_season}</p>
 			<ul class="lobby-bullets" id="desc_list">{foreach $gameInformations as $info}<li>{$info}</li>{/foreach}</ul>
 		</div>
-		<figure class="lobby-hero-visual" aria-label="{$LNG.lobby_viz_label|escape}">
+		<figure class="lobby-hero-visual" aria-label="{$LNG.lobby_viz_label|escape}" lang="en">
 			<div class="lobby-viz-stage">
 				<div id="lobby-viz" class="lobby-viz" role="img" aria-hidden="true"></div>
 				<script type="application/json" id="lobby-viz-config">{$lobbyVizConfigJson nofilter}</script>
@@ -48,7 +48,7 @@
 		{/if}
 	</section>
 
-	<section class="lobby-alive" aria-labelledby="lobby-feed-heading">
+	<section class="lobby-alive" aria-labelledby="lobby-feed-heading" lang="en">
 		<div class="lobby-alive-head">
 			<h2 id="lobby-feed-heading">{$lobbyFeedTitle}</h2>
 			<p class="lobby-alive-sub">{$LNG.lobby_feed_sub}</p>
@@ -76,7 +76,7 @@
 				<button class="reg-tab-btn active" data-tab="login-password" role="tab" aria-selected="true" aria-controls="login-password">
 					&#128274;&nbsp; {$LNG.loginPassword}
 				</button>
-				<button class="reg-tab-btn" data-tab="login-hive" role="tab" aria-selected="false" aria-controls="login-hive">
+				<button class="reg-tab-btn" data-tab="login-hive" role="tab" aria-selected="false" aria-controls="login-hive" lang="en">
 					<img src="styles/resource/images/login/keychain-round-logo.svg" alt="" class="reg-tab-icon reg-tab-icon--keychain"> Hive Keychain
 				</button>
 			</div>
@@ -221,7 +221,7 @@
 				{/foreach}
 			</div>
 
-			<div class="contentbox lobby-register-box">
+			<div class="contentbox lobby-register-box" lang="en">
 				<h2>{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}</h2>
 				<a href="{$registerUrl|escape}"><input value="{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}"></a>
 			</div>
