@@ -15,12 +15,21 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminPageSidAuth;
 use HiveNova\Core\Config;
+use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
 
-if ($USER['id'] != ROOT_USER || ($_GET['sid'] ?? '') != session_id()) exit;
+if (!AdminPageSidAuth::canAccessRoot(
+	(int) $USER['id'],
+	ROOT_USER,
+	(string) HTTP::_GP('sid', ''),
+	(string) session_id()
+)) {
+	AdminPageSidAuth::deny();
+}
 
 function ShowResetPage()
 {
