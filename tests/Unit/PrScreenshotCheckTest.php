@@ -8,13 +8,15 @@ require_once dirname(__DIR__, 2) . '/.github/scripts/PrScreenshotCheck.php';
 
 final class PrScreenshotCheckTest extends TestCase
 {
-	public function testRenderingPathsDetectsStylesScriptsChatOnly(): void
+	public function testRenderingPathsDetectsUiAndPageControllers(): void
 	{
 		$paths = PrScreenshotCheck::renderingPaths([
 			'includes/classes/Foo.php',
 			'styles/templates/game/page.overview.default.tpl',
 			'scripts/game/base.js',
 			'chat/js/chat.js',
+			'includes/pages/game/ShowOverviewPage.class.php',
+			'install/custom.layout.tpl',
 			'language/en/INGAME.php',
 			'\\styles\\theme\\hive\\formate.css',
 		]);
@@ -23,8 +25,21 @@ final class PrScreenshotCheckTest extends TestCase
 			'styles/templates/game/page.overview.default.tpl',
 			'scripts/game/base.js',
 			'chat/js/chat.js',
+			'includes/pages/game/ShowOverviewPage.class.php',
+			'install/custom.layout.tpl',
 			'styles/theme/hive/formate.css',
 		], $paths);
+	}
+
+	public function testEvaluateFailsForPageControllerWithoutScreenshot(): void
+	{
+		$result = PrScreenshotCheck::evaluate(
+			['includes/pages/login/ShowRegisterPage.php'],
+			'## Summary\nCapture src=',
+			[]
+		);
+		$this->assertFalse($result['ok']);
+		$this->assertTrue($result['required']);
 	}
 
 	public function testEvaluatePassesWhenNoRenderingFiles(): void

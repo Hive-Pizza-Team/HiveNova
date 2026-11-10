@@ -11,6 +11,7 @@ final class PrScreenshotCheck
 		'styles/',
 		'scripts/',
 		'chat/',
+		'includes/pages/',
 	];
 
 	public const SKIP_LABEL = 'skip-screenshot';
@@ -25,11 +26,17 @@ final class PrScreenshotCheck
 		$hits = [];
 		foreach ($paths as $path) {
 			$normalized = ltrim(str_replace('\\', '/', (string) $path), '/');
+			$matched = false;
 			foreach (self::RENDERING_PREFIXES as $prefix) {
 				if (str_starts_with($normalized, $prefix)) {
 					$hits[] = $normalized;
+					$matched = true;
 					break;
 				}
+			}
+			// Any Smarty template, including outside styles/ (e.g. install or one-offs).
+			if (!$matched && str_ends_with(strtolower($normalized), '.tpl')) {
+				$hits[] = $normalized;
 			}
 		}
 		return array_values(array_unique($hits));
