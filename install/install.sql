@@ -1660,6 +1660,20 @@ CREATE TABLE `%PREFIX%bot_detection_state` (
   PRIMARY KEY (`universe`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `%PREFIX%push_subscriptions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `endpoint` varchar(2048) NOT NULL,
+  `p256dh` varchar(255) NOT NULL,
+  `auth` varchar(255) NOT NULL,
+  `content_encoding` varchar(16) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `created_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `endpoint` (`endpoint`(768)),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `%PREFIX%push_building_notified` (
   `planet_id` int(10) unsigned NOT NULL,
   `element_id` smallint(5) unsigned NOT NULL,
