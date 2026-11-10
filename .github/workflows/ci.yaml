@@ -15,6 +15,18 @@ jobs:
       - name: JS tests
         run: npm run test:js
 
+  screenshot-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch PR base for rendering diff
+        run: git fetch --no-tags origin ${{ github.base_ref }}
+      - name: Require screenshot when rendering paths change
+        run: php .github/scripts/check-pr-screenshot.php
+
   phpstan:
     runs-on: ubuntu-latest
     steps:

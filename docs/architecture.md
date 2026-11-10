@@ -74,6 +74,7 @@ Trajectory: carve god-objects (`FleetFunctions`, `ResourceUpdate`, `ShowAlliance
 - Shared Smarty templates: `styles/templates/game|adm|login/`.
 - Skins: `styles/theme/{hive,nova,gow,EpicBlueXIII}/`. Default is `hive` (`DEFAULT_THEME`).
 - Prefer fixing `hive` (and shared templates) first; treat other themes as best-effort unless the bug is theme-specific.
+- PRs that change `styles/`, `scripts/`, `chat/`, `includes/pages/**`, or any `*.tpl` must include a screenshot in the PR body (CI `screenshot-check`; see `.cursor/rules/pr-screenshot-for-rendering.mdc`).
 
 ## Language
 
