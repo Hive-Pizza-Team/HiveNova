@@ -806,8 +806,183 @@ footer {
     margin-left: auto;
     margin-right: auto;
 }
-.battlehall-cta{margin:0 0 1.25rem;padding:1rem 1.1rem;background:rgba(2,12,22,.55);border:1px solid rgba(70,210,255,.22)}
-.battlehall-cta-hook{margin:0 0 .75rem;font-size:1.05rem}
-.battlehall-cta-btn{display:inline-block;padding:.65rem 1.1rem;font-weight:700;text-decoration:none;color:#041018;background:#7ee0ff}
-.battlehall-cta-footer{margin:1.25rem 0 0}
-.public-battle-report h1{font-size:1.35rem}
+/* Public Battle Hall / report signup surface (#645) — matches lobby CTA language */
+.public-battle {
+	margin: 0 auto;
+	max-width: 36rem;
+	text-align: center;
+}
+
+.public-battle--hall {
+	margin: 0 0 1.25rem;
+	padding: 0 0 1rem;
+	border-bottom: 1px solid rgba(227, 19, 55, 0.25);
+}
+
+.public-battle-kicker {
+	margin: 0 0 0.55rem;
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #8eabc0;
+}
+
+.public-battle-match {
+	margin: 0 0 1rem;
+	padding: 1.15rem 1rem 1.05rem;
+	background: rgba(5, 14, 24, 0.72);
+	border: 1px solid rgba(227, 19, 55, 0.28);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.public-battle-vs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: center;
+	gap: 0.45rem 0.7rem;
+	margin: 0;
+	font-size: clamp(1.15rem, 3.2vw, 1.55rem);
+	font-weight: 900;
+	letter-spacing: 0.02em;
+	line-height: 1.25;
+	color: #f0f0f8;
+}
+
+.public-battle-vs-sep {
+	font-size: 0.72em;
+	font-weight: 800;
+	letter-spacing: 0.12em;
+	color: #8eabc0;
+}
+
+.public-battle-side--attacker,
+.public-battle-side--win {
+	color: #6dff9a;
+}
+
+.public-battle-side--defender,
+.public-battle-side--lose {
+	color: #ff6b7f;
+}
+
+.public-battle-match--attacker .public-battle-side--attacker,
+.public-battle-match--defender .public-battle-side--defender {
+	text-shadow: 0 0 18px rgba(109, 255, 154, 0.28);
+}
+
+.public-battle-match--attacker .public-battle-side--defender,
+.public-battle-match--defender .public-battle-side--attacker {
+	opacity: 0.88;
+}
+
+.public-battle-meta {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.35rem 1rem;
+	margin: 0.85rem 0 0;
+	padding: 0;
+	list-style: none;
+	font-size: 13px;
+	color: #b7cfe0;
+}
+
+.public-battle-meta strong {
+	color: #f0f0f8;
+	font-weight: 800;
+}
+
+.public-battle-note {
+	margin: 0 0 0.85rem;
+	font-size: 13px;
+	line-height: 1.45;
+	color: #8eabc0;
+}
+
+.public-battle-hook {
+	margin: 0 0 0.85rem;
+	font-size: 14px;
+	line-height: 1.45;
+	font-style: italic;
+	color: #b7cfe0;
+}
+
+.public-battle-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 10px;
+	margin: 0;
+}
+
+.public-battle-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 42px;
+	padding: 0 22px;
+	border: 1px solid #E31337;
+	font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+	font-size: 13px;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	text-decoration: none !important;
+	transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.public-battle-btn--primary,
+.public-battle-btn--primary:visited {
+	background: #E31337;
+	color: #fff !important;
+}
+
+.public-battle-btn--primary:hover {
+	background: #ff2a4d;
+	color: #fff !important;
+	transform: translateY(-1px);
+}
+
+.public-battle-btn--ghost,
+.public-battle-btn--ghost:visited {
+	background: rgba(5, 14, 24, 0.55);
+	color: #f0f0f8 !important;
+}
+
+.public-battle-btn--ghost:hover {
+	color: #fff !important;
+	border-color: #fff;
+}
+
+.public-battle-table {
+	width: 100%;
+}
+
+.public-battle-table th {
+	color: #E31337;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	font-size: 11px;
+}
+
+.public-battle-rowlink {
+	text-decoration: none;
+	color: inherit;
+}
+
+.public-battle-rowlink:hover .public-battle-vs-sep {
+	color: #f0f0f8;
+}
+
+.public-battle-legend {
+	margin: 0.5rem 0 0;
+	font-size: 12px;
+	color: #8eabc0;
+}
+
+.public-battle-legend .public-battle-side {
+	margin-left: 0.4rem;
+}

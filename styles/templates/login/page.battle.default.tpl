@@ -1,29 +1,34 @@
 {block name="title"}{$documentTitle}{/block}
 {block name="content"}
 {if !$reportFound}
-<p>{$LNG.sys_raport_not_found|default:'Battle report not found.'}</p>
-<p><a href="index.php?page=battleHall">{$LNG.siteTitleBattleHall|default:'Battle Hall'}</a></p>
+<div class="public-battle public-battle--missing">
+	<p class="public-battle-note">{$LNG.sys_raport_not_found|default:'Battle report not found.'}</p>
+	<div class="public-battle-actions">
+		<a class="public-battle-btn public-battle-btn--ghost" href="{$hallHref|default:'index.php?page=battleHall'}">{$LNG.siteTitleBattleHall|default:'Battle Hall'}</a>
+	</div>
+</div>
 {else}
-<section class="battlehall-cta">
-	<p class="battlehall-cta-hook">{$LNG.battleHallCtaHook|default:'Frontier fights. Room to explore. Space to claim.'}</p>
-	<p><a class="battlehall-cta-btn" href="{$ctaHref}">{$LNG.battleHallCtaButton|default:'Play Moon free'}</a></p>
-</section>
-<article class="public-battle-report">
-	<h1>
-	{if $hall.result == "a"}
-	<span style="color:#00FF00">{$attacker|escape}</span> VS <span style="color:#FF0000">{$defender|escape}</span>
-	{elseif $hall.result == "r"}
-	<span style="color:#FF0000">{$attacker|escape}</span> VS <span style="color:#00FF00">{$defender|escape}</span>
-	{else}
-	{$attacker|escape} VS {$defender|escape}
-	{/if}
-	</h1>
-	<p>{$battleTime} · {$unitsCompact} {$LNG.tkb_units|default:'units'}</p>
+<article class="public-battle">
+	<header class="public-battle-match{if $hall.result == "a"} public-battle-match--attacker{elseif $hall.result == "r"} public-battle-match--defender{/if}">
+		<p class="public-battle-kicker">{$LNG.siteTitleBattleHall|default:'Battle Hall'}</p>
+		<h2 class="public-battle-vs">
+			<span class="public-battle-side public-battle-side--attacker">{$attacker|escape}</span>
+			<span class="public-battle-vs-sep" aria-hidden="true">VS</span>
+			<span class="public-battle-side public-battle-side--defender">{$defender|escape}</span>
+		</h2>
+		<ul class="public-battle-meta">
+			<li>{$battleTime}</li>
+			<li><strong>{$unitsCompact}</strong> {$LNG.tkb_units|default:'units'}</li>
+		</ul>
+	</header>
 	{if $combat}
-	<p class="public-battle-report-note">{$LNG.battlePublicReportSummary|default:'Full combat detail is available in-game after you join.'}</p>
+	<p class="public-battle-note">{$LNG.battlePublicReportSummary|default:'Full combat detail is available in-game after you join.'}</p>
 	{/if}
+	<p class="public-battle-hook">{$LNG.battleHallCtaHook|default:'Frontier fights. Room to explore. Space to claim.'}</p>
+	<div class="public-battle-actions">
+		<a class="public-battle-btn public-battle-btn--primary" href="{$ctaHref}">{$LNG.battleHallCtaButton|default:'Play Moon free'}</a>
+		<a class="public-battle-btn public-battle-btn--ghost" href="{$hallHref}">{$LNG.siteTitleBattleHall|default:'Battle Hall'}</a>
+	</div>
 </article>
-<p><a href="{$hallHref}">{$LNG.siteTitleBattleHall|default:'Battle Hall'}</a></p>
-<p class="battlehall-cta-footer"><a class="battlehall-cta-btn" href="{$ctaHref}">{$LNG.battleHallCtaButton|default:'Play Moon free'}</a></p>
 {/if}
 {/block}
