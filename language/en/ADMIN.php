@@ -1566,3 +1566,5 @@ $LNG['se_season_blog_key'] = 'Season blog posting key';
 $LNG['se_season_blog_key_info'] = 'Leave blank to keep the stored key. Used to publish the end-of-season Hive post. The key is never shown again.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
 $LNG['modul_43'] = 'Unused';
+$LNG['se_seo_canonical_origin'] = 'Public canonical origin';
+$LNG['se_seo_canonical_origin_info'] = 'Absolute https origin used for lobby canonical, hreflang, Open Graph, and sitemap locs. Alternate hosts (e.g. moon.hive.pizza) keep this value so SEO does not split across domains. Example: https://moonsiege.com/';

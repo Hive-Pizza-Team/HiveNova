@@ -170,6 +170,7 @@ CREATE TABLE `%PREFIX%config` (
   `initial_fields` smallint(5) unsigned NOT NULL DEFAULT '163',
   `uni_name` varchar(30) NOT NULL,
   `game_name` varchar(30) NOT NULL,
+  `seo_canonical_origin` varchar(255) NOT NULL DEFAULT 'https://moonsiege.com/',
   `game_disable` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `close_reason` text NOT NULL,
   `metal_basic_income` int(11) NOT NULL DEFAULT '20',

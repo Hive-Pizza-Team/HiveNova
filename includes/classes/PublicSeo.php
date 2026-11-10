@@ -42,8 +42,11 @@ class PublicSeo
 	/** Twitter card @site handle (public lobby head tags). */
 	public const TWITTER_SITE = '@PizzaOnHive';
 
-	/** Public marketing host for canonical / hreflang / sitemap / og:url (#644). */
-	public const CANONICAL_ORIGIN = 'https://moonsiege.com/';
+	/**
+	 * Default public marketing host when config is unset (#644).
+	 * Override via Admin → Server configuration (`seo_canonical_origin`).
+	 */
+	public const DEFAULT_CANONICAL_ORIGIN = 'https://moonsiege.com/';
 
 	/**
 	 * Pages listed in sitemap.xml (public marketing surface).
@@ -73,12 +76,61 @@ class PublicSeo
 	}
 
 	/**
-	 * Absolute public base (trailing slash) used for SEO tags and sitemap locs.
-	 * Always moonsiege.com so alternate hosts do not claim their own canonical (#644).
+	 * Normalize an absolute public origin to `scheme://host[/port]/` (#644).
+	 * Empty or invalid values fall back to DEFAULT_CANONICAL_ORIGIN.
 	 */
-	public static function canonicalBasePath(?string $requestBasePath = null): string
+	public static function normalizeCanonicalOrigin(?string $origin): string
 	{
-		return self::CANONICAL_ORIGIN;
+		$origin = trim((string) $origin);
+		if ($origin === '') {
+			return self::DEFAULT_CANONICAL_ORIGIN;
+		}
+
+		if (!preg_match('#^https?://#i', $origin)) {
+			$origin = 'https://'.$origin;
+		}
+
+		$parts = parse_url($origin);
+		if ($parts === false || empty($parts['host'])) {
+			return self::DEFAULT_CANONICAL_ORIGIN;
+		}
+
+		$scheme = strtolower((string) ($parts['scheme'] ?? 'https'));
+		if ($scheme !== 'http' && $scheme !== 'https') {
+			return self::DEFAULT_CANONICAL_ORIGIN;
+		}
+
+		$host = strtolower((string) $parts['host']);
+		if ($host === '' || !preg_match('/^[a-z0-9.-]+$/i', $host)) {
+			return self::DEFAULT_CANONICAL_ORIGIN;
+		}
+
+		$port = isset($parts['port']) ? ':'.$parts['port'] : '';
+
+		return $scheme.'://'.$host.$port.'/';
+	}
+
+	/**
+	 * Absolute public base (trailing slash) used for SEO tags and sitemap locs.
+	 * Uses Admin Server config `seo_canonical_origin` so alternate request hosts
+	 * do not claim their own canonical (#644). Request host is ignored.
+	 *
+	 * @param string|null $configuredOrigin Optional override (tests / callers with config in hand)
+	 */
+	public static function canonicalBasePath(?string $requestBasePath = null, ?string $configuredOrigin = null): string
+	{
+		if ($configuredOrigin === null && Config::hasInstances()) {
+			try {
+				$config = Config::get();
+				if (isset($config->seo_canonical_origin)) {
+					$configuredOrigin = (string) $config->seo_canonical_origin;
+				}
+			} catch (\Throwable $e) {
+				$configuredOrigin = null;
+			}
+		}
+
+		return self::normalizeCanonicalOrigin($configuredOrigin);
 	}
 
 

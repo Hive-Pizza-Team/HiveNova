@@ -28,7 +28,7 @@ class Config
 
 
 	// Global configkeys
-	protected static $globalConfigKeys	= array('VERSION', 'game_name', 'stat', 'stat_level', 'stat_last_update',
+	protected static $globalConfigKeys	= array('VERSION', 'game_name', 'seo_canonical_origin', 'stat', 'stat_level', 'stat_last_update',
 										   'stat_settings', 'stat_update_time', 'stat_last_db_update', 'stats_fly_lock',
 										   'cron_lock', 'ts_modon', 'ts_server', 'ts_tcpport', 'ts_udpport', 'ts_timeout',
 										   'ts_version', 'ts_cron_last', 'ts_cron_interval', 'ts_login', 'ts_password',
@@ -58,6 +58,15 @@ class Config
 	 *
 	 * @return Config
 	 */
+
+	/**
+	 * True when at least one universe config row is already loaded in-process.
+	 * Used to avoid booting the DB from helpers that only optionally read config.
+	 */
+	public static function hasInstances(): bool
+	{
+		return self::$instances !== [];
+	}
 
 	static public function get($universe = 0)
 	{

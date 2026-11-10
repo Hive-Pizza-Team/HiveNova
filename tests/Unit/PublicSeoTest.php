@@ -7,11 +7,29 @@ use PHPUnit\Framework\TestCase;
 class PublicSeoTest extends TestCase
 {
 
-	public function testCanonicalBasePathIgnoresRequestHost(): void
+	public function testNormalizeCanonicalOriginDefaultsAndCleans(): void
 	{
-		$this->assertSame(PublicSeo::CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://moon.hive.pizza/'));
-		$this->assertSame(PublicSeo::CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://www.moonsiege.com/'));
-		$this->assertSame('https://moonsiege.com/', PublicSeo::CANONICAL_ORIGIN);
+		$this->assertSame('https://moonsiege.com/', PublicSeo::normalizeCanonicalOrigin(''));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::normalizeCanonicalOrigin('not a url'));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::normalizeCanonicalOrigin('https://moonsiege.com'));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::normalizeCanonicalOrigin('https://moonsiege.com/path?x=1'));
+		$this->assertSame('https://example.test/', PublicSeo::normalizeCanonicalOrigin('example.test'));
+		$this->assertSame('http://localhost:8080/', PublicSeo::normalizeCanonicalOrigin('http://localhost:8080/foo'));
+	}
+
+	public function testCanonicalBasePathIgnoresRequestHostAndUsesDefaultWithoutConfig(): void
+	{
+		$this->assertSame(PublicSeo::DEFAULT_CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://moon.hive.pizza/'));
+		$this->assertSame(PublicSeo::DEFAULT_CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://www.moonsiege.com/'));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::DEFAULT_CANONICAL_ORIGIN);
+	}
+
+	public function testCanonicalBasePathHonorsConfiguredOriginOverride(): void
+	{
+		$this->assertSame(
+			'https://canonical.example/',
+			PublicSeo::canonicalBasePath('https://moon.hive.pizza/', 'https://Canonical.Example/')
+		);
 	}
 
 	public function testNormalizePageDefaultsEmptyToIndex(): void
