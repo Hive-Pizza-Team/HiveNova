@@ -9,7 +9,8 @@
  * Usage (local / tests):
  *   php .github/scripts/check-pr-screenshot.php \
  *     --files=styles/theme/hive/formate.css,scripts/game/base.js \
- *     --body='## Shot\n![ui](https://example.com/a.png)' \
+ *     --body='## Shot\n![ui](https://raw.githubusercontent.com/org/repo/my-branch/docs/review/a.png)' \
+ *     --head=my-branch \
  *     --labels=enhancement
  *
  * Exit 0 = pass / not applicable; exit 1 = missing required screenshot.
@@ -20,13 +21,14 @@ declare(strict_types=1);
 require __DIR__ . '/PrScreenshotCheck.php';
 
 /**
- * @return array{files: list<string>, body: string, labels: list<string>, fromEvent: bool}
+ * @return array{files: list<string>, body: string, labels: list<string>, head: string, fromEvent: bool}
  */
 function parseArgs(array $argv): array
 {
 	$files = null;
 	$body = null;
 	$labels = [];
+	$head = '';
 
 	foreach (array_slice($argv, 1) as $arg) {
 		if (str_starts_with($arg, '--files=')) {
@@ -37,8 +39,10 @@ function parseArgs(array $argv): array
 		} elseif (str_starts_with($arg, '--labels=')) {
 			$raw = substr($arg, strlen('--labels='));
 			$labels = $raw === '' ? [] : (preg_split('/\s*,\s*/', $raw) ?: []);
+		} elseif (str_starts_with($arg, '--head=')) {
+			$head = substr($arg, strlen('--head='));
 		} elseif ($arg === '--help' || $arg === '-h') {
-			fwrite(STDOUT, "Usage: check-pr-screenshot.php [--files=a,b] [--body=...] [--labels=a,b]\n");
+			fwrite(STDOUT, "Usage: check-pr-screenshot.php [--files=a,b] [--body=...] [--head=branch] [--labels=a,b]\n");
 			exit(0);
 		} else {
 			fwrite(STDERR, "Unknown argument: $arg\n");
@@ -47,7 +51,13 @@ function parseArgs(array $argv): array
 	}
 
 	if ($files !== null && $body !== null) {
-		return ['files' => array_values($files), 'body' => $body, 'labels' => array_values($labels), 'fromEvent' => false];
+		return [
+			'files' => array_values($files),
+			'body' => $body,
+			'labels' => array_values($labels),
+			'head' => $head,
+			'fromEvent' => false,
+		];
 	}
 
 	$eventPath = getenv('GITHUB_EVENT_PATH') ?: '';
@@ -72,9 +82,16 @@ function parseArgs(array $argv): array
 	}
 
 	$baseRef = (string) ($pr['base']['ref'] ?? (getenv('GITHUB_BASE_REF') ?: 'master'));
+	$headRef = (string) ($pr['head']['ref'] ?? (getenv('GITHUB_HEAD_REF') ?: ''));
 	$files = changedFilesAgainstBase($baseRef);
 
-	return ['files' => $files, 'body' => $bodyText, 'labels' => $labelNames, 'fromEvent' => true];
+	return [
+		'files' => $files,
+		'body' => $bodyText,
+		'labels' => $labelNames,
+		'head' => $headRef,
+		'fromEvent' => true,
+	];
 }
 
 /**
@@ -102,9 +119,12 @@ function changedFilesAgainstBase(string $baseRef): array
 }
 
 $input = parseArgs($argv);
-$result = PrScreenshotCheck::evaluate($input['files'], $input['body'], $input['labels']);
+$result = PrScreenshotCheck::evaluate($input['files'], $input['body'], $input['labels'], $input['head'] ?? '');
 
 fwrite(STDOUT, $result['reason'] . "\n");
+if (($input['head'] ?? '') !== '') {
+	fwrite(STDOUT, "PR head: {$input['head']}\n");
+}
 if ($result['rendering'] !== []) {
 	fwrite(STDOUT, "Rendering paths:\n");
 	foreach ($result['rendering'] as $path) {
@@ -116,7 +136,9 @@ if ($result['ok']) {
 	exit(0);
 }
 
-fwrite(STDERR, "\nAdd a screenshot to the PR description (markdown image / <img> / user-attachments URL),\n");
-fwrite(STDERR, "or set label 'skip-screenshot' / include [skip-screenshot] with a reason.\n");
+fwrite(STDERR, "\nCommit a screenshot on THIS PR branch (e.g. docs/review/pr-N.jpg) and link it with a\n");
+fwrite(STDERR, "raw.githubusercontent.com URL for the same branch, or paste a user-attachments image.\n");
+fwrite(STDERR, "Do not link screenshots on master/develop/another branch.\n");
+fwrite(STDERR, "Or set label 'skip-screenshot' / include [skip-screenshot] with a reason.\n");
 fwrite(STDERR, "See .cursor/rules/pr-screenshot-for-rendering.mdc\n");
 exit(1);

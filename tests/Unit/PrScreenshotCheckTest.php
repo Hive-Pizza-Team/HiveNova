@@ -74,8 +74,9 @@ final class PrScreenshotCheckTest extends TestCase
 		$this->assertTrue($result['ok']);
 	}
 
-	public function testEvaluatePassesWithHtmlImg(): void
+	public function testEvaluatePassesWithHtmlImgWithoutHeadRef(): void
 	{
+		// No --head / head ref: any image still counts (local CLI).
 		$result = PrScreenshotCheck::evaluate(
 			['scripts/game/flotten.js'],
 			'<p><img src="https://example.com/shot.png" alt="fleet"></p>',
@@ -89,9 +90,33 @@ final class PrScreenshotCheckTest extends TestCase
 		$result = PrScreenshotCheck::evaluate(
 			['chat/style.css'],
 			'See https://github.com/user-attachments/assets/deadbeef-0000-0000-0000-000000000001',
-			[]
+			[],
+			'fix/any-branch'
 		);
 		$this->assertTrue($result['ok']);
+	}
+
+	public function testEvaluatePassesWithRawUrlOnPrBranch(): void
+	{
+		$result = PrScreenshotCheck::evaluate(
+			['styles/resource/css/login/lobby.css'],
+			'![lobby](https://raw.githubusercontent.com/Hive-Pizza-Team/HiveNova/fix/lobby-hero/docs/review/pr-1.jpg)',
+			[],
+			'fix/lobby-hero'
+		);
+		$this->assertTrue($result['ok']);
+	}
+
+	public function testEvaluateFailsWhenScreenshotOnlyOnMaster(): void
+	{
+		$result = PrScreenshotCheck::evaluate(
+			['styles/resource/css/login/lobby.css'],
+			'![lobby](https://raw.githubusercontent.com/Hive-Pizza-Team/HiveNova/master/docs/review/pr-shot-lobby.jpg)',
+			[],
+			'fix/lobby-hero'
+		);
+		$this->assertFalse($result['ok']);
+		$this->assertStringContainsString('PR branch', $result['reason']);
 	}
 
 	public function testSkipLabelBypassesRequirement(): void
@@ -129,8 +154,25 @@ final class PrScreenshotCheckTest extends TestCase
 	{
 		$php = escapeshellarg(PHP_BINARY);
 		$script = escapeshellarg(dirname(__DIR__, 2) . '/.github/scripts/check-pr-screenshot.php');
-		$cmd = $php . ' ' . $script . ' --files=styles/a.css --body=' . escapeshellarg('![x](https://example.com/x.png)');
+		$body = '![x](https://raw.githubusercontent.com/Hive-Pizza-Team/HiveNova/fix/a/docs/review/x.png)';
+		$cmd = $php . ' ' . $script
+			. ' --files=styles/a.css'
+			. ' --head=fix/a'
+			. ' --body=' . escapeshellarg($body);
 		exec($cmd . ' 2>&1', $output, $code);
 		$this->assertSame(0, $code, implode("\n", $output));
+	}
+
+	public function testCliEntryFailsWhenScreenshotOnOtherBranch(): void
+	{
+		$php = escapeshellarg(PHP_BINARY);
+		$script = escapeshellarg(dirname(__DIR__, 2) . '/.github/scripts/check-pr-screenshot.php');
+		$body = '![x](https://raw.githubusercontent.com/Hive-Pizza-Team/HiveNova/master/docs/review/x.png)';
+		$cmd = $php . ' ' . $script
+			. ' --files=styles/a.css'
+			. ' --head=fix/a'
+			. ' --body=' . escapeshellarg($body);
+		exec($cmd . ' 2>&1', $output, $code);
+		$this->assertSame(1, $code, implode("\n", $output));
 	}
 }

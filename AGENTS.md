@@ -12,7 +12,7 @@ At the start of every session in this workspace, read these in order before doin
 ## Git and branches
 
 - **Never push directly to `master` or `develop`.** Use a feature branch and open a **pull request** to request merging into those branches instead.
-- PRs that change `styles/`, `scripts/`, `chat/`, `includes/pages/**`, or any `*.tpl` must include a **screenshot in the PR body** (CI `screenshot-check`). See `.cursor/rules/pr-screenshot-for-rendering.mdc`.
+- PRs that change `styles/`, `scripts/`, `chat/`, `includes/pages/**`, or any `*.tpl` must include a **screenshot tied to the PR branch** (commit under `docs/review/` on that branch and link it, or paste a `user-attachments` image into the PR body). Do **not** link screenshots on `master`, `develop`, or another feature branch. CI: `screenshot-check`. See `.cursor/rules/pr-screenshot-for-rendering.mdc`.
 
 ## Code Intelligence
 
