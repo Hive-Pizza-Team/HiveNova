@@ -1682,6 +1682,14 @@ CREATE TABLE `%PREFIX%push_research_notified` (
   KEY `notified_at` (`notified_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `%PREFIX%push_expired_endpoints` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `endpoint` varchar(2048) NOT NULL,
+  `expired_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `endpoint` (`endpoint`(768))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `%PREFIX%achievements` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `universe` tinyint(3) unsigned NOT NULL DEFAULT '1',

@@ -13,6 +13,10 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 	public array $updates = [];
 	public array $inserts = [];
 	public array $deletes = [];
+	/** @var array<string, int> */
+	public array $expiredEndpoints = [];
+
+	public array $replaces = [];
 	/** @var array<int, int> */
 	public array $settingsPushByUser = [];
 
@@ -26,6 +30,16 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 			}
 
 			return $field === false ? $row : ($row[$field] ?? false);
+		}
+
+		if (str_contains($qry, '%%PUSH_EXPIRED_ENDPOINTS%%')) {
+			$endpoint = (string) ($params[':endpoint'] ?? '');
+			if (!isset($this->expiredEndpoints[$endpoint])) {
+				return false;
+			}
+			$expiredAt = $this->expiredEndpoints[$endpoint];
+
+			return $field === false ? ['expired_at' => $expiredAt] : $expiredAt;
 		}
 
 		if (str_contains($qry, '%%USERS%%') && str_contains($qry, 'settings_push')) {
@@ -68,6 +82,22 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 	public function delete($qry, array $params = [])
 	{
 		$this->deletes[] = ['qry' => $qry, 'params' => $params];
+
+		if (str_contains($qry, '%%PUSH_EXPIRED_ENDPOINTS%%')) {
+			if (isset($params[':cutoff'])) {
+				$cutoff = (int) $params[':cutoff'];
+				foreach ($this->expiredEndpoints as $endpoint => $expiredAt) {
+					if ($expiredAt < $cutoff) {
+						unset($this->expiredEndpoints[$endpoint]);
+					}
+				}
+			}
+			if (isset($params[':endpoint'])) {
+				unset($this->expiredEndpoints[(string) $params[':endpoint']]);
+			}
+
+			return 1;
+		}
 
 		if (!str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%')) {
 			return 1;
@@ -117,7 +147,15 @@ class PushSubscriptionDatabaseStub implements DatabaseInterface
 		return 1;
 	}
 
-	public function replace($qry, array $params = []) { return 0; }
+	public function replace($qry, array $params = [])
+	{
+		$this->replaces[] = ['qry' => $qry, 'params' => $params];
+		if (str_contains($qry, '%%PUSH_EXPIRED_ENDPOINTS%%') && isset($params[':endpoint'])) {
+			$this->expiredEndpoints[(string) $params[':endpoint']] = (int) ($params[':expiredAt'] ?? 0);
+		}
+
+		return 1;
+	}
 	public function query($qry) { return 0; }
 	public function nativeQuery($qry) { return false; }
 	public function lastInsertId() { return false; }

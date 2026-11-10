@@ -113,7 +113,10 @@ class PushNotificationDeliveryTest extends TestCase
 				'p256dh'   => 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpY',
 				'auth'     => 'tBHItJI5svbpez7KI4CCXg',
 			];
-			PushNotificationService::setErrorLogger(static function (): void {});
+			$logs = [];
+			PushNotificationService::setErrorLogger(static function (string $line) use (&$logs): void {
+				$logs[] = $line;
+			});
 			PushNotificationService::setWebPushFactory(static function () use ($endpoint) {
 				return [new class($endpoint) {
 					public function __construct(private string $endpoint)
@@ -137,7 +140,7 @@ class PushNotificationDeliveryTest extends TestCase
 
 					public function getReason(): string
 					{
-						return '410 Gone';
+						return 'Client error: POST ' . $this->endpoint;
 					}
 				}];
 			});
@@ -145,6 +148,96 @@ class PushNotificationDeliveryTest extends TestCase
 			$result = PushNotificationService::notifyUser(3, 'Title', 'Body');
 			$this->assertFalse($result['ok']);
 			$this->assertArrayNotHasKey($endpoint, $stub->subscriptionsByEndpoint);
+			$this->assertArrayHasKey($endpoint, $stub->expiredEndpoints);
+			$this->assertTrue(PushNotificationService::shouldStopRetrying($result));
+			$this->assertNotEmpty($logs);
+			$this->assertStringContainsString('removed expired subscription host=fcm.googleapis.com', $logs[0]);
+			$this->assertStringNotContainsString('/fcm/send/expired', $logs[0]);
+			$this->assertFalse(PushNotificationService::saveSubscription(3, [
+				'endpoint' => $endpoint,
+				'keys'     => [
+					'p256dh' => 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpY',
+					'auth'   => 'tBHItJI5svbpez7KI4CCXg',
+				],
+			]));
+		});
+	}
+
+	public function testMixedFailureStillRetries(): void
+	{
+		$this->assertFalse(PushNotificationService::shouldStopRetrying([
+			'ok' => false,
+			'failed' => 2,
+			'failures' => [
+				['host' => 'fcm.googleapis.com', 'status' => 410, 'expired' => true],
+				['host' => 'fcm.googleapis.com', 'status' => 500, 'expired' => false],
+			],
+		]));
+	}
+
+	public function testHttp410RemovesSubscriptionWithoutLibraryExpiredFlag(): void
+	{
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub): void {
+			$endpoint = 'https://fcm.googleapis.com/fcm/send/gone';
+			$stub->subscriptionsByEndpoint[$endpoint] = [
+				'user_id'  => 4,
+				'endpoint' => $endpoint,
+				'p256dh'   => 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpY',
+				'auth'     => 'tBHItJI5svbpez7KI4CCXg',
+			];
+			PushNotificationService::setErrorLogger(static function (): void {});
+			PushNotificationService::setWebPushFactory(static function () use ($endpoint) {
+				return [new class($endpoint) {
+					public function __construct(private string $endpoint)
+					{
+					}
+
+					public function isSuccess(): bool
+					{
+						return false;
+					}
+
+					public function isSubscriptionExpired(): bool
+					{
+						return false;
+					}
+
+					public function getEndpoint(): string
+					{
+						return $this->endpoint;
+					}
+
+					public function getResponse(): object
+					{
+						return new class {
+							public function getStatusCode(): int
+							{
+								return 410;
+							}
+						};
+					}
+
+					public function getReason(): string
+					{
+						return '410 Gone';
+					}
+				}];
+			});
+
+			$result = PushNotificationService::notifyUser(4, 'Title', 'Body');
+			$this->assertTrue($result['failures'][0]['expired'] ?? false);
+			$this->assertArrayNotHasKey($endpoint, $stub->subscriptionsByEndpoint);
+			$this->assertTrue(PushNotificationService::isEndpointBlocked($endpoint));
+		});
+	}
+
+	public function testExpiredBlockLapsesAfterTtl(): void
+	{
+		$this->withDatabaseStub(function (PushSubscriptionDatabaseStub $stub): void {
+			$endpoint = 'https://fcm.googleapis.com/fcm/send/old';
+			$stub->expiredEndpoints[$endpoint] = TIMESTAMP - PushNotificationService::EXPIRED_BLOCK_TTL - 5;
+			$this->assertFalse(PushNotificationService::isEndpointBlocked($endpoint, TIMESTAMP));
+			$this->assertArrayNotHasKey($endpoint, $stub->expiredEndpoints);
 		});
 	}
 
