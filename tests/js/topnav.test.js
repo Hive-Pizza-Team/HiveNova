@@ -267,6 +267,29 @@ describe('HiveNovaTopnav', () => {
 		assert.equal(calls, 2);
 	});
 
+	it('creditResources bumps ticker available and data-real', () => {
+		var node = makeElement('0');
+		global.$ = function (arg) {
+			if (typeof arg === 'string') {
+				assert.equal(arg, '[id="current_metal"]');
+				return mockJQueryCollection([node]);
+			}
+			return mockJQueryCollection([arg]);
+		};
+
+		var config = {
+			available: 1000,
+			production: 0,
+			limit: [0, 100000],
+			valueElem: 'current_metal'
+		};
+		topnav._registerTickerForTests(config);
+		topnav.creditResources({ metal: 2500, crystal: 0, deuterium: 0 });
+		assert.equal(config.available, 3500);
+		assert.equal(node.attrs['data-real'], 3500);
+		assert.equal(node._html, 'S3500');
+	});
+
 	it('onResume syncs clock then resyncs tickers', () => {
 		var clockCalls = 0;
 		var updateCalls = 0;

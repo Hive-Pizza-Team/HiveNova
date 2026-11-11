@@ -77,6 +77,23 @@
 		return parseInt(resourceElements('current_' + name).first().data('real'), 10);
 	}
 
+	function creditResources(deltas) {
+		if (!deltas || typeof deltas !== 'object') {
+			return;
+		}
+		for (var i = 0; i < tickerConfigs.length; i++) {
+			var config = tickerConfigs[i];
+			var name = String(config.valueElem || '').replace(/^current_/, '');
+			var add = parseFloat(deltas[name]);
+			if (!name || !isFinite(add) || !add) {
+				continue;
+			}
+			config.available = parseFloat(config.available) + add;
+			resourceElements(config.valueElem).attr('data-real', config.available);
+			updateElements(config);
+		}
+	}
+
 	function resyncAll() {
 		for (var i = 0; i < tickerConfigs.length; i++) {
 			updateElements(tickerConfigs[i]);
@@ -111,10 +128,12 @@
 
 	root.resourceTicker = resourceTicker;
 	root.getRessource = getRessource;
+	root.creditResources = creditResources;
 
 	var api = {
 		resourceTicker: resourceTicker,
 		getRessource: getRessource,
+		creditResources: creditResources,
 		computeResource: computeResource,
 		updateElements: updateElements,
 		resyncAll: resyncAll,
