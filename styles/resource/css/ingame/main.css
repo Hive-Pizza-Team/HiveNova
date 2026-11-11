@@ -2272,7 +2272,18 @@ table.tablesorter thead tr .headerSortDown {
         display: inline-flex;
         flex-wrap: nowrap;
         align-items: center;
-        gap: 0;
+        gap: 4px;
+    }
+
+    /* ~44×44 tap targets; keep Spy/Message/Buddy artwork at native size. */
+    .galaxy-planet-row .galaxy-card-actions-cell a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 12px;
     }
 
     .galaxy-planet-row .galaxy-card-actions-cell img {
@@ -2280,7 +2291,7 @@ table.tablesorter thead tr .headerSortDown {
         min-height: 20px;
         width: 20px;
         height: 20px;
-        padding: 1px;
+        padding: 0;
     }
 
     .galaxy-coords-picker {
