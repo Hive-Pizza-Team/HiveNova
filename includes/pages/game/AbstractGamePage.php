@@ -7,6 +7,7 @@ use HiveNova\Core\AssetRevision;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
+use HiveNova\Core\EnergyBalanceService;
 use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
@@ -178,9 +179,11 @@ abstract class AbstractGamePage
 
 		foreach($reslist['resstype'][2] as $resourceID)
 		{
-			$resourceTable[$resourceID]['name']			= $resource[$resourceID];
-			$resourceTable[$resourceID]['used']			= $PLANET[$resource[$resourceID].'_used'];
-			$resourceTable[$resourceID]['max']			= $PLANET[$resource[$resourceID]];
+			$resourceTable[$resourceID] = EnergyBalanceService::headerResourceFields(
+				$PLANET[$resource[$resourceID]] ?? 0,
+				$PLANET[$resource[$resourceID].'_used'] ?? 0,
+				$resource[$resourceID]
+			);
 		}
 
 		foreach($reslist['resstype'][3] as $resourceID)

@@ -54,21 +54,21 @@
 	<td data-label="{$LNG.tech.901}"><span class="{if $totalProduction.901 > 0}res-prod-pos{elseif $totalProduction.901 < 0}res-prod-neg{else}res-prod-zero{/if}">{$totalProduction.901|number} /h</span></td>
 	<td data-label="{$LNG.tech.902}"><span class="{if $totalProduction.902 > 0}res-prod-pos{elseif $totalProduction.902 < 0}res-prod-neg{else}res-prod-zero{/if}">{$totalProduction.902|number} /h</span></td>
 	<td data-label="{$LNG.tech.903}"><span class="{if $totalProduction.903 > 0}res-prod-pos{elseif $totalProduction.903 < 0}res-prod-neg{else}res-prod-zero{/if}">{$totalProduction.903|number} /h</span></td>
-	<td data-label="{$LNG.tech.911}"><span class="{if $totalProduction.911 > 0}res-prod-pos{elseif $totalProduction.911 < 0}res-prod-neg{else}res-prod-zero{/if}">{$totalProduction.911|number} /h</span></td>
+	<td data-label="{$LNG.tech.911}"><span class="{if $totalProduction.911 < 0}res-prod-neg{elseif $totalProduction.911 > 0}res-prod-pos{else}res-prod-zero{/if}">{$energyConsumed|number} / {$energyProduced|number}</span></td>
 </tr>
 <tr class="resources-table__row">
 	<td class="resources-table__label">{$LNG.rs_daily}</td>
 	<td data-label="{$LNG.tech.901}"><span class="{if $dailyProduction.901 > 0}res-prod-pos{elseif $dailyProduction.901 < 0}res-prod-neg{else}res-prod-zero{/if}">{$dailyProduction.901|number} /day</span></td>
 	<td data-label="{$LNG.tech.902}"><span class="{if $dailyProduction.902 > 0}res-prod-pos{elseif $dailyProduction.902 < 0}res-prod-neg{else}res-prod-zero{/if}">{$dailyProduction.902|number} /day</span></td>
 	<td data-label="{$LNG.tech.903}"><span class="{if $dailyProduction.903 > 0}res-prod-pos{elseif $dailyProduction.903 < 0}res-prod-neg{else}res-prod-zero{/if}">{$dailyProduction.903|number} /day</span></td>
-	<td data-label="{$LNG.tech.911}"><span class="{if $dailyProduction.911 > 0}res-prod-pos{elseif $dailyProduction.911 < 0}res-prod-neg{else}res-prod-zero{/if}">{$dailyProduction.911|number} /day</span></td>
+	<td data-label="{$LNG.tech.911}"><span class="res-prod-zero">—</span></td>
 </tr>
 <tr class="resources-table__row">
 	<td class="resources-table__label">{$LNG.rs_weekly}</td>
 	<td data-label="{$LNG.tech.901}"><span class="{if $weeklyProduction.901 > 0}res-prod-pos{elseif $weeklyProduction.901 < 0}res-prod-neg{else}res-prod-zero{/if}">{$weeklyProduction.901|number} /week</span></td>
 	<td data-label="{$LNG.tech.902}"><span class="{if $weeklyProduction.902 > 0}res-prod-pos{elseif $weeklyProduction.902 < 0}res-prod-neg{else}res-prod-zero{/if}">{$weeklyProduction.902|number} /week</span></td>
 	<td data-label="{$LNG.tech.903}"><span class="{if $weeklyProduction.903 > 0}res-prod-pos{elseif $weeklyProduction.903 < 0}res-prod-neg{else}res-prod-zero{/if}">{$weeklyProduction.903|number} /week</span></td>
-	<td data-label="{$LNG.tech.911}"><span class="{if $weeklyProduction.911 > 0}res-prod-pos{elseif $weeklyProduction.911 < 0}res-prod-neg{else}res-prod-zero{/if}">{$weeklyProduction.911|number} /week</span></td>
+	<td data-label="{$LNG.tech.911}"><span class="res-prod-zero">—</span></td>
 </tr>
 </tbody>
 </table>
