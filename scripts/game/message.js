@@ -10,22 +10,62 @@ Message	= {
 			$('#unread_4').text('0');
 			$('#unread_5').text('0');
 			$('#unread_15').text('0');
+			$('#unread_50').text('0');
 			$('#unread_99').text('0');
 			$('#unread_100').text('0');
 			$('#newmes').text('');
 		} else {
-			var count = parseInt($('#unread_'+Message.MessID).text());
-			var lmnew = parseInt($('#newmesnum').text());
-				
-			$('#unread_'+Message.MessID).text(Math.max(0, $('#unread_100').text() - 10));
+			var count = parseInt($('#unread_'+Message.MessID).text(), 10) || 0;
+			var lmnew = parseInt($('#newmesnum').text(), 10) || 0;
+			var allUnread = parseInt($('#unread_100').text(), 10) || 0;
+
 			if(Message.MessID != 999) {
-				$('#unread_100').text($('#unread_100').text() - count);
+				$('#unread_'+Message.MessID).text('0');
+				$('#unread_100').text(Math.max(0, allUnread - count));
 			}
-			
+
 			if(lmnew - count <= 0)
 				$('#newmes').text('');
 			else
 				$('#newmesnum').text(lmnew - count);
+		}
+	},
+
+	/**
+	 * After bodies hydrate, drop unread counts for rows that were marked read.
+	 */
+	applyMarkedRead: function(ids) {
+		if (!ids || !ids.length) {
+			return;
+		}
+		var dropped = 0;
+		ids.forEach(function (id) {
+			var row = document.getElementById('message_' + id);
+			if (!row || row.className.indexOf('mes_unread') === -1) {
+				return;
+			}
+			dropped += 1;
+			document.querySelectorAll('.message_' + id).forEach(function (el) {
+				el.className = el.className.replace(/\bmes_unread\b/g, '').replace(/\s+/g, ' ').trim();
+			});
+		});
+		if (dropped <= 0) {
+			return;
+		}
+		var category = Message.MessID || parseInt(($('#messagestable').closest('form').find('input[name="messcat"]').val() || '100'), 10);
+		var unreadCat = $('#unread_' + category);
+		var unreadAll = $('#unread_100');
+		var lmnew = parseInt($('#newmesnum').text(), 10) || 0;
+		if (unreadCat.length && category !== 999) {
+			unreadCat.text(Math.max(0, (parseInt(unreadCat.text(), 10) || 0) - dropped));
+		}
+		if (unreadAll.length && category !== 999) {
+			unreadAll.text(Math.max(0, (parseInt(unreadAll.text(), 10) || 0) - dropped));
+		}
+		if (lmnew - dropped <= 0) {
+			$('#newmes').text('');
+		} else {
+			$('#newmesnum').text(lmnew - dropped);
 		}
 	},
 
@@ -103,6 +143,10 @@ Message	= {
 		}
 		var outboxTag = document.getElementById('message-body-outbox');
 		var outbox = outboxTag && outboxTag.textContent.trim() === '1' ? 1 : 0;
+		var messcat = document.querySelector('input[name="messcat"]');
+		if (messcat) {
+			Message.MessID = parseInt(messcat.value, 10) || 0;
+		}
 		$.getJSON('game.php?page=messages&mode=bodies&ajax=1&outbox=' + outbox + '&ids=' + ids.join(','), function (data) {
 			if (!data || !data.bodies) {
 				return;
@@ -113,6 +157,7 @@ Message	= {
 					cell.innerHTML = data.bodies[id];
 				}
 			});
+			Message.applyMarkedRead(data.markedRead || []);
 		});
 	}
 };

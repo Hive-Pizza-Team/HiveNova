@@ -408,6 +408,28 @@ div#disclamer a {
   opacity: 0.75;
 }
 
+.msg-counts-legend {
+  font-size: 11px;
+  opacity: 0.8;
+  text-align: center !important;
+  padding: 4px 8px !important;
+}
+
+.msg-compose-row td {
+  text-align: center !important;
+  padding: 8px 10px !important;
+}
+
+.msg-compose-link {
+  font-weight: 700;
+}
+
+.msg-compose-error {
+  color: #e74c3c;
+  font-weight: 700;
+  text-align: center !important;
+}
+
 .msg-cat-current {
   font-weight: 700;
   text-decoration: underline;

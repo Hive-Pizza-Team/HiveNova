@@ -4,11 +4,14 @@
 	<tr>
 		<th colspan="6">{$LNG.mg_overview}<span id="loading" class="msg-loading"> ({$LNG.loading})</span></th>
 	</tr>
+	<tr>
+		<td colspan="6" class="msg-counts-legend">{$LNG.mg_unread} / {$LNG.mg_total}</td>
+	</tr>
 	{foreach $CategoryList as $CategoryID => $CategoryRow}
 	{if ($CategoryRow@iteration % 6) === 1}<tr>{/if}
 	{if $CategoryRow@last && ($CategoryRow@iteration % 6) !== 0}<td>&nbsp;</td>{/if}
 	<td class="msg-cat-cell"><a href="game.php?page=messages&category={$CategoryID}" class="msg-cat-link{if $CategoryID == $MessID} msg-cat-current{/if}" style="color:{$CategoryRow.color};">{$LNG.mg_type.{$CategoryID}}</a>
-	<br><span class="msg-cat-counts"><span id="unread_{$CategoryID}">{$CategoryRow.unread}</span>/<span id="total_{$CategoryID}">{$CategoryRow.total}</span></span>
+	<br><span class="msg-cat-counts" title="{$LNG.mg_unread} / {$LNG.mg_total}"><span id="unread_{$CategoryID}">{$CategoryRow.unread}</span>/<span id="total_{$CategoryID}">{$CategoryRow.total}</span></span>
 	</td>
 	{if $CategoryRow@last || ($CategoryRow@iteration % 6) === 0}</tr>{/if}
 	{/foreach}
@@ -22,6 +25,9 @@
 <table id="messagestable" class="msg-table">
 	<tr>
 		<th colspan="4">{$LNG.mg_message_title}{if $canFilterLost} — {if $lostFilter}<a href="game.php?page=messages&amp;category={$MessID}">{$LNG.mg_filter_all}</a>{else}<a href="game.php?page=messages&amp;category={$MessID}&amp;filter=lost">{$LNG.mg_filter_lost}</a>{/if}{/if}</th>
+	</tr>
+	<tr class="msg-compose-row">
+		<td colspan="4"><a href="#" onclick="return Dialog.open('game.php?page=messages&amp;mode=compose', 520, 240);" class="msg-compose-link">{$LNG.mg_send_new}</a></td>
 	</tr>
 	{if $MessID != 999 && $MessageCount > 0}
 	<tr>
@@ -109,6 +115,9 @@ document.addEventListener('DOMContentLoaded', function () {
 				cell.innerHTML = data.bodies[id];
 			}
 		});
+		if (window.Message && typeof Message.applyMarkedRead === 'function') {
+			Message.applyMarkedRead(data.markedRead || []);
+		}
 	});
 });
 </script>
