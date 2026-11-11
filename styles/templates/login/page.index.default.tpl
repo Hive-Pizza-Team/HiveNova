@@ -223,7 +223,7 @@
 
 			<div class="contentbox lobby-register-box">
 				<h2>{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}</h2>
-				<a href="{$registerUrl|escape}"><input value="{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}"></a>
+				<a class="lobby-cta lobby-cta--primary lobby-register-cta" href="{$registerUrl|escape}">{$LNG.lobby_cta_primary|default:$LNG.buttonRegister}</a>
 			</div>
 		</div>
 	</section>
