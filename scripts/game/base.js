@@ -445,8 +445,19 @@ $(function() {
 	});
 });
 
+const resolveHiveKeychain = async () => {
+	if (typeof HiveNovaKeychain !== 'undefined' && HiveNovaKeychain && typeof HiveNovaKeychain.wait === 'function') {
+		return HiveNovaKeychain.wait();
+	}
+	if (typeof window !== 'undefined' && window.hive_keychain) {
+		return window.hive_keychain;
+	}
+	return typeof hive_keychain !== 'undefined' ? hive_keychain : null;
+};
+
 const HiveKeychainLogin = async () => {
-	if (typeof(hive_keychain) == "undefined") {
+	const keychain = await resolveHiveKeychain();
+	if (!keychain || typeof keychain.requestSignBuffer !== 'function') {
 		alert('You must install HiveKeychain extension first');
 		return;
 	}
@@ -461,7 +472,7 @@ const HiveKeychainLogin = async () => {
 		if (!hiveaccount) {
 			return;
 		}
-		await hive_keychain.requestSignBuffer(
+		await keychain.requestSignBuffer(
 			hiveaccount,
 			`${hiveaccount} is my account.`,
 			"Posting",
@@ -487,7 +498,8 @@ const DepositPizzaTokens = async (hiveaccount, universe, wallet) => {
 		alert(typeof needHiveForDeposit !== 'undefined' ? needHiveForDeposit : 'Link a Hive account in Settings before you can deposit PIZZA.');
 		return;
 	}
-	if (typeof(hive_keychain) == "undefined") {
+	const keychain = await resolveHiveKeychain();
+	if (!keychain || typeof keychain.requestSendToken !== 'function') {
 		alert('You must install HiveKeychain extension first');
 		return;
 	}
@@ -501,7 +513,7 @@ const DepositPizzaTokens = async (hiveaccount, universe, wallet) => {
 		const depositWallet = (wallet && String(wallet).trim()) ? String(wallet).trim() : 'moon.deposit';
 		const memo = 'u' + universe;
 		const tokenSymbol = 'PIZZA';
-		hive_keychain.requestSendToken(hiveaccount, depositWallet, amount.toFixed(3), memo, tokenSymbol, (response) => {
+		keychain.requestSendToken(hiveaccount, depositWallet, amount.toFixed(3), memo, tokenSymbol, (response) => {
 			console.debug(JSON.stringify(response));
 		});
 	} catch (error) {
@@ -524,7 +536,8 @@ const extractHiveTxId = (response) => {
 }
 
 const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
-	if (typeof(hive_keychain) == "undefined") {
+	const keychain = await resolveHiveKeychain();
+	if (!keychain || typeof keychain.requestSendToken !== 'function') {
 		alert('You must install HiveKeychain extension first');
 		return;
 	}
@@ -534,7 +547,7 @@ const DepositSeasonPizza = async (hiveaccount, wallet, amount, memo) => {
 		if (isNaN(qty) || qty <= 0 || !wallet) {
 			return;
 		}
-		hive_keychain.requestSendToken(hiveaccount, wallet, qty.toFixed(3), memo, 'PIZZA', (response) => {
+		keychain.requestSendToken(hiveaccount, wallet, qty.toFixed(3), memo, 'PIZZA', (response) => {
 			console.debug(JSON.stringify(response));
 			const txid = extractHiveTxId(response);
 			if (!txid) {
@@ -679,12 +692,17 @@ const broadcastBattleShare = (draft, parentAuthor, parentPermlink, title, tags, 
 	});
 };
 
-const HiveKeychainShareBattle = (draft, destination, callback) => {
-	if (typeof hive_keychain === 'undefined') {
+const HiveKeychainShareBattle = async (draft, destination, callback) => {
+	const keychain = await resolveHiveKeychain();
+	if (!keychain) {
 		if (typeof callback === 'function') {
 			callback('Keychain missing');
 		}
 		return;
+	}
+	// Prefer the resolved bridge for later broadcastBattleShare calls in this turn.
+	if (typeof window !== 'undefined') {
+		window.hive_keychain = keychain;
 	}
 	if (!draft || !draft.hive_account || !draft.permlink || !draft.body) {
 		if (typeof callback === 'function') {
