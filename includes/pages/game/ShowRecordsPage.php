@@ -4,7 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Universe;
-use HiveNova\Core\Cronjob;
+use HiveNova\Core\StatBuilder;
 
 /**
  *  2Moons 
@@ -79,7 +79,7 @@ class ShowRecordsPage extends AbstractGamePage
 			'researchList'	=> $researchList,
 			'buildList'		=> $buildList,
 			'officerList'	=> $officerList,
-			'update'		=> _date($LNG['php_tdformat'], Cronjob::getLastExecutionTime('statistic'), $USER['timezone']),
+			'update'		=> _date($LNG['php_tdformat'], StatBuilder::getLastUpdateTime(), $USER['timezone']),
 		));
 		
 		$this->display('page.records.default.tpl');
