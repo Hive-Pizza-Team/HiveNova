@@ -22,6 +22,7 @@ class AssetRevision
 			'styles/resource/css/ingame/main.css',
 			'scripts/game/push-subscribe.js',
 			'scripts/game/base.js',
+			'scripts/game/menu-sections.js',
 			'scripts/game/pwa-install.js',
 			'scripts/game/message.js',
 			'scripts/game/battlesim.js',
