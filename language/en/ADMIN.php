@@ -54,7 +54,7 @@ $LNG['time_minutes'] = 'Minutes';
 $LNG['time_seconds'] = 'Seconds';
 //###########################################################//
 
-$LNG['info_information'] = 'Send or report bugs in the forum for <a href="%s" target="tracker">2Moons</a><br>Otherwise we cannot support!';
+$LNG['info_information'] = 'Report bugs in the <a href="%s" target="tracker">HiveNova issue tracker</a>.<br>Otherwise we cannot support!';
 
 //---------------	Sim ou não	------------------------//
 $LNG['one_is_yes_1'] = 'Yes';
@@ -95,7 +95,7 @@ $LNG['count_res'] = 'Number of resources';
 //---------------	Modulos   ------------------------//
 $LNG['buildings_title'] = 'Buildings';
 $LNG['ships_title'] = 'Ships';
-$LNG['defenses_title'] = 'Defences';
+$LNG['defenses_title'] = 'Defenses';
 $LNG['researchs_title'] = 'Research';
 $LNG['officiers_title'] = 'Officers';
 //###########################################################//
@@ -108,7 +108,7 @@ $LNG['ad_back_to_menu'] = 'Return to home menu';
 $LNG['ad_editor_title'] = 'Account Editor';
 $LNG['ad_editor_buildings'] = 'Buildings';
 $LNG['ad_editor_ships'] = 'Ships';
-$LNG['ad_editor_defenses'] = 'Defences';
+$LNG['ad_editor_defenses'] = 'Defenses';
 $LNG['ad_editor_researchs'] = 'Research';
 $LNG['ad_editor_officiers'] = 'Officers';
 $LNG['ad_editor_personal'] = 'Personal Data';
@@ -133,7 +133,7 @@ $LNG['ad_delete_offi_success'] = 'The Officers were removed successfully!';
 
 //	Recursos
 $LNG['ad_add_res_sucess'] = 'Resources have been added successfully!';
-$LNG['ad_delete_res_sucess'] = 'The Researches were removed successfully!';
+$LNG['ad_delete_res_sucess'] = 'The resources were removed successfully!';
 $LNG['ad_main_title'] = 'Resources and Technologies';
 
 //	Naves
@@ -143,8 +143,8 @@ $LNG['ad_add_ships_sucess'] = 'The ships have been added successfully!';
 $LNG['ad_delete_ships_sucess'] = 'The ships were removed successfully!';
 
 //	Defesas
-$LNG['ad_defenses_title'] = 'Defences';
-$LNG['ad_defenses'] = 'Defences';
+$LNG['ad_defenses_title'] = 'Defenses';
+$LNG['ad_defenses'] = 'Defenses';
 $LNG['ad_add_defenses_success'] = 'The defenses were added successfully!';
 $LNG['ad_delete_defenses_success'] = 'The defenses were removed successfully!';
 
@@ -230,7 +230,7 @@ $LNG['bo_bbb_go_back'] = '[Back]';
 $LNG['bo_bbb_go_act'] = '[Reload]';
 $LNG['bo_permanent'] = 'Ban permanent';
 $LNG['bo_bbb_title_1'] = 'Suspension System';
-$LNG['bo_bbb_title_2'] = 'When it should be unlocked';
+$LNG['bo_bbb_title_2'] = 'Ban ends';
 $LNG['bo_bbb_title_3'] = 'Suspension system • <font color="red">This player is locked</font>';
 $LNG['bo_bbb_title_4'] = 'In order to reduce the time duration, it is necessary to add a "-" before the number desired introduced, that is in the number of minutes that you want to reduce, such as: -5';
 $LNG['bo_bbb_title_5'] = 'Locked';
@@ -313,9 +313,9 @@ $LNG['ma_modes'] = array('Game', 'Mail', 'Game & Mail');
 //###########################################################//
 
 //---------------	Pagina Inicial	------------------------//
-$LNG['ow_title'] = 'Welcome to 2Moons!';
+$LNG['ow_title'] = 'Welcome to Moon';
 $LNG['ow_donate'] = 'Donate';
-$LNG['ow_welcome_text'] = 'Welcome to popular 2Moons! (:';
+$LNG['ow_welcome_text'] = 'Welcome to Moon, the HiveNova universe.';
 $LNG['ow_overview'] = 'Control';
 $LNG['ow_support'] = 'Support';
 $LNG['ow_credits'] = 'Credits';
@@ -349,18 +349,18 @@ $LNG['se_normal_speed_fleet'] = 'Normal speed: 1';
 $LNG['se_normal_speed_halt'] = 'Normal speed: 1';
 $LNG['se_fleet_speed'] = 'Fleet Speed';
 $LNG['se_resources_producion_speed'] = 'Speed of production of resources';
-$LNG['se_storage_producion_speed'] = 'Resource storage multiplicator';
+$LNG['se_storage_producion_speed'] = 'Resource storage multiplier';
 $LNG['se_halt_speed'] = 'Expedition speed';
 $LNG['se_forum_link'] = 'Forum Link';
-$LNG['se_server_op_close'] = 'Server Online?';
+$LNG['se_server_op_close'] = 'Game open';
 $LNG['se_server_status_message'] = 'Closed server message';
 $LNG['se_server_planet_parameters'] = 'Settings of the planets';
 $LNG['se_initial_fields'] = 'Initial Fields:';
 $LNG['se_fields'] = 'Field';
 $LNG['se_per_hour'] = 'per hour';
-$LNG['se_metal_production'] = 'Production of Metal Basic';
-$LNG['se_crystal_production'] = 'Production of Crystal Basic';
-$LNG['se_deuterium_production'] = 'Production of Deuterium Basic';
+$LNG['se_metal_production'] = 'Basic metal production';
+$LNG['se_crystal_production'] = 'Basic crystal production';
+$LNG['se_deuterium_production'] = 'Basic deuterium production';
 $LNG['se_several_parameters'] = 'Other Parameters';
 $LNG['se_title_admins_protection'] = 'When this function is enabled, administrators or moderators can not be attacked';
 $LNG['se_admin_protection'] = 'Admin Game Protection';
@@ -369,8 +369,8 @@ $LNG['se_save_parameters'] = 'Save';
 $LNG['se_configuration_title'] = 'Configuration of server';
 $LNG['se_server_naame'] = 'Set name';
 $LNG['se_cookie_name'] = 'Cookie Name';
-$LNG['se_cookie_advert'] = 'When you change the name of the Cookie should go back to login.<br>It is recommended to change the name if you have several universes.';
-$LNG['se_debug_message'] = 'Debug mode displays a record of consultations at the moment';
+$LNG['se_cookie_advert'] = 'After you change the cookie name, log in again.<br>Use a different name if you run several universes.';
+$LNG['se_debug_message'] = 'Debug mode logs database queries as they run.';
 $LNG['se_def_cdr'] = 'Defense for the Debris';
 $LNG['se_ships_cdr'] = 'Fleet for the Debris';
 $LNG['se_def_cdr_message'] = 'Sets the percentage of the generated debris defenses after an attack';
@@ -408,8 +408,8 @@ $LNG['se_planets_min'] = 'Max planets without research';
 $LNG['se_planets_min_info'] = 'From the outset, the player has the opportunity to occupy the specified number of planets';
 $LNG['se_planets_tech'] = 'Amount max of Colonies with Astrophysics';
 $LNG['se_planets_tech_info'] = 'This is how many planets user can have with Astrophysics';
-$LNG['se_planets_officier'] = 'Maximum number of additional planet by officers';
-$LNG['se_planets_officier_info'] = 'Per level of the officer, the user should have a new amount of planets to colonize';
+$LNG['se_planets_officier'] = 'Maximum extra planets from officers';
+$LNG['se_planets_officier_info'] = 'Caps the extra planets officers can grant. A value of 0 grants none.';
 $LNG['se_planets_per_tech'] = 'Additional planets per level of Astrophysics';
 $LNG['se_planets_per_tech_info'] = 'This is the amount of colonies unlock per level';
 $LNG['se_ref_active'] = 'Activate Referallink';
@@ -433,7 +433,7 @@ $LNG['se_news'] = 'News';
 $LNG['se_verfiy_mail'] = 'The system of checking email';
 $LNG['se_verfiy_mail_info'] = 'If this option is active players has to activate their accounts.';
 $LNG['se_smtp'] = 'Settings of SMTP';
-$LNG['se_smtp_info'] = 'Enter the SMTP server to allow communication between the 2Moons server and their players by SMTP mail server.';
+$LNG['se_smtp_info'] = 'SMTP settings let Moon email players through your mail server.';
 $LNG['se_mail_active'] = 'Enables it to Email?';
 $LNG['se_mail_use'] = 'Version of email:';
 $LNG['se_mail_sel_0'] = 'Function PHP mail()';
@@ -619,22 +619,22 @@ $LNG['mu_user_list'] = 'Player List';
 $LNG['mu_moon_list'] = 'Moon List';
 $LNG['mu_mess_list'] = 'Message List';
 $LNG['mu_planet_list'] = 'Planet List';
-$LNG['mu_error_list'] = 'Errors in Data Base';
+$LNG['mu_error_list'] = 'Database errors';
 $LNG['mu_active_planets'] = 'Active Planets';
 $LNG['mu_tools'] = 'Tools';
 $LNG['mu_md5_encripter'] = 'Password hash';
 $LNG['mu_optimize_db'] = 'Verify database';
 $LNG['mu_manual_points_update'] = 'Manual points';
-$LNG['mu_mpu_confirmation'] = 'The Updater is automatico points, this allows you to see what is that your server is currently doing (As memory consumed, SQL, etc.)';
+$LNG['mu_mpu_confirmation'] = 'Points update automatically. Run an update now? The result shows memory use, SQL, and similar server activity.';
 $LNG['mu_search_page'] = 'Advanced search';
-$LNG['mu_info_account_page'] = 'Information Account';
+$LNG['mu_info_account_page'] = 'Account information';
 $LNG['mu_planets_options'] = 'Planets Options';
 $LNG['mu_user_logs'] = 'Admin Log';
 $LNG['mu_support'] = 'Support Tickets';
 $LNG['mu_chat'] = 'Chat Configuration';
 $LNG['mu_module'] = 'Modules';
-$LNG['mu_mod_update'] = 'Checking version of MOD';
-$LNG['mu_fb_options'] = 'Registration by Facebook';
+$LNG['mu_mod_update'] = 'Mod version check';
+$LNG['mu_fb_options'] = 'Facebook Connect';
 $LNG['mu_ts_options'] = 'Teamspeak Options';
 $LNG['mu_game_info'] = 'Information';
 $LNG['mu_vaild_users'] = 'User activity';
@@ -981,7 +981,7 @@ $LNG['se_search_info'] = 'Search';
 $LNG['se_asc_desc'] = 'ASC / DESC';
 $LNG['se_search_order'] = 'Sort';
 $LNG['se_search_edit'] = 'Edit';
-$LNG['se_delete_succes_p'] = 'Delete with success';
+$LNG['se_delete_succes_p'] = 'Deleted successfully';
 $LNG['se_confirm_planet'] = 'The planet chosen will be completely erased, even being the main planet or colonia, you want to continue?. Name of the planet:';
 
 // Pesquisa na tabela de Utilizadores
@@ -1041,7 +1041,7 @@ $LNG['lang_reg'] = 'Language';
 
 //	Usários
 $LNG['new_title'] = 'Create new player';
-$LNG['new_user_success'] = 'Player created with success!';
+$LNG['new_user_success'] = 'Player created successfully!';
 $LNG['new_add_user'] = 'Add new players';
 $LNG['new_range'] = 'Rank';
 $LNG['new_coord'] = 'Coordinates';
@@ -1101,8 +1101,8 @@ $LNG['qe_planetname'] = 'Planet';
 $LNG['qe_level'] = 'Level';
 $LNG['qe_count'] = 'Available';
 $LNG['qe_input'] = 'Edit';
-$LNG['qe_edit_planet_sucess'] = 'Planet %s [%d:%d:%d] edited with success!';
-$LNG['qe_edit_player_sucess'] = 'Player %s (ID: %d) edited with success!';
+$LNG['qe_edit_planet_sucess'] = 'Planet %s [%d:%d:%d] edited successfully!';
+$LNG['qe_edit_player_sucess'] = 'Player %s (ID: %d) edited successfully!';
 $LNG['qe_info'] = 'Info';
 $LNG['qe_owner'] = 'Owner';
 $LNG['qe_fields'] = 'Fields';
@@ -1154,7 +1154,7 @@ $LNG['modul_7'] = 'Chat';
 $LNG['modul_8'] = 'DM Bank';
 $LNG['modul_9'] = 'Fleet';
 $LNG['modul_10'] = 'Fleet - Handler';
-$LNG['modul_40'] = 'Fleet Shortcuts';
+$LNG['modul_40'] = 'Missile attack';
 $LNG['modul_11'] = 'Galaxy';
 $LNG['modul_12'] = 'Hall of Fame';
 $LNG['modul_13'] = 'Trader';
@@ -1185,7 +1185,7 @@ $LNG['modul_37'] = 'Statistics Banner';
 $LNG['modul_26'] = 'Search';
 $LNG['modul_27'] = 'Support Tickets';
 $LNG['modul_28'] = 'Techtree';
-$LNG['modul_41'] = 'Facebook Application';
+$LNG['modul_41'] = 'Fleet Shortcuts';
 $LNG['modul_47'] = 'Salvage mission';
 $LNG['modul_46'] = 'Achievements';
 $LNG['mod_module'] = 'Modules';
@@ -1266,8 +1266,8 @@ $LNG['up_del'] = 'Deleted in:';
 $LNG['up_submit'] = 'Send';
 $LNG['up_version'] = 'Version';
 $LNG['up_chmod_error'] = "No write permission (s) for folder:\n\n";
-$LNG['up_need_curl'] = 'Error: CURL is not present.<br>The maintaining of 2Moons requires cURL to run download files.';
-$LNG['up_no_xml_ext'] = 'Error: XML Parser is not present.<br>The maintaining of 2Moons requires XML Parser to process the files present.';
+$LNG['up_need_curl'] = 'Error: cURL is not present.<br>HiveNova updates require cURL to download files.';
+$LNG['up_no_xml_ext'] = 'Error: XML Parser is not present.<br>HiveNova updates require XML Parser to process the files.';
 $LNG['up_offline'] = 'Update of server unavailable';
 
 // Página de chat
@@ -1565,4 +1565,4 @@ $LNG['se_season_blog'] = 'Season blog Hive account';
 $LNG['se_season_blog_key'] = 'Season blog posting key';
 $LNG['se_season_blog_key_info'] = 'Leave blank to keep the stored key. Used to publish the end-of-season Hive post. The key is never shown again.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
-$LNG['modul_43'] = 'Unused';
+$LNG['modul_43'] = 'Unused slot';
