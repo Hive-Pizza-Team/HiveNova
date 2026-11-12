@@ -131,6 +131,7 @@ class ReferralStatsService
 				recruit.username AS recruit_username,
 				recruit.register_time,
 				recruit.ref_bonus,
+				recruit.signup_src,
 				ref.id AS referrer_id,
 				ref.username AS referrer_username,
 				COALESCE(stats.total_points, 0) AS total_points
@@ -151,12 +152,14 @@ class ReferralStatsService
 		foreach ($rows as $row) {
 			$points = NumericCast::toInt($row['total_points']);
 			$refBonus = NumericCast::toInt($row['ref_bonus']);
+			$signupSrc = ReferralCaptureService::sanitizeSource($row['signup_src'] ?? null);
 			$out[] = [
 				'recruit_id'         => (int) $row['recruit_id'],
 				'recruit_username'   => (string) $row['recruit_username'],
 				'register_time'      => (int) $row['register_time'],
 				'referrer_id'        => (int) $row['referrer_id'],
 				'referrer_username'  => (string) $row['referrer_username'],
+				'signup_src'         => $signupSrc ?? '',
 				'total_points'       => $points,
 				'bonus_status'       => self::bonusStatus($refBonus, $points, $refMinPoints),
 			];

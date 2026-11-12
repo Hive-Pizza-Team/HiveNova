@@ -69,6 +69,134 @@ class ReferralCaptureServiceTest extends TestCase
 		);
 	}
 
+	public function testRegisterUrlAppendsSignupSrcWithoutBreakingReferralSignature(): void
+	{
+		$this->assertSame(
+			'index.php?page=register&referralID=42&uni=3&src=discord',
+			$this->service()->registerUrl(42, 3, 'Discord')
+		);
+		$this->assertSame(
+			'index.php?page=register&src=peakd',
+			$this->service()->registerUrl(0, 0, 'peakd')
+		);
+		$this->assertSame(
+			'index.php?page=register',
+			$this->service()->registerUrl(0, 0, '!!!')
+		);
+	}
+
+	public function testSanitizeSourceTrimsLowercasesAndStripsInvalid(): void
+	{
+		$this->assertSame('discord', ReferralCaptureService::sanitizeSource('  Discord '));
+		$this->assertSame('gtop100', ReferralCaptureService::sanitizeSource('GTop100'));
+		$this->assertSame('peakd', ReferralCaptureService::sanitizeSource('Peak_D!'));
+		$this->assertSame('peak-d', ReferralCaptureService::sanitizeSource('Peak-D!'));
+		$this->assertSame(
+			str_repeat('a', 32),
+			ReferralCaptureService::sanitizeSource(str_repeat('A', 40))
+		);
+		$this->assertNull(ReferralCaptureService::sanitizeSource(''));
+		$this->assertNull(ReferralCaptureService::sanitizeSource('!!!'));
+		$this->assertNull(ReferralCaptureService::sanitizeSource(null));
+		$this->assertNull(ReferralCaptureService::sanitizeSource(['x']));
+	}
+
+	public function testSourceFromPrefersSrcOverUtmSourceThenCookie(): void
+	{
+		$this->assertSame('x', ReferralCaptureService::sourceFrom(
+			['src' => 'x', 'utm_source' => 'peakd'],
+			[ReferralCaptureService::COOKIE_SRC => 'email']
+		));
+		$this->assertSame('peakd', ReferralCaptureService::sourceFrom(
+			['utm_source' => 'PeakD'],
+			[ReferralCaptureService::COOKIE_SRC => 'email']
+		));
+		$this->assertSame('email', ReferralCaptureService::sourceFrom(
+			[],
+			[ReferralCaptureService::COOKIE_SRC => 'email']
+		));
+		$this->assertNull(ReferralCaptureService::sourceFrom(
+			['src' => '!!!', 'utm_source' => '@@@'],
+			[]
+		));
+		$this->assertSame('reddit', ReferralCaptureService::sourceFrom(
+			['src' => '!!!'],
+			[ReferralCaptureService::COOKIE_SRC => 'reddit']
+		));
+	}
+
+	public function testCapturePersistsSrcCookieIndependentlyOfReferral(): void
+	{
+		$result = $this->service([1 => true])->capture(
+			$this->dbWithReferrer([]),
+			['src' => 'Discord'],
+			[]
+		);
+
+		$this->assertSame(['id' => 0, 'name' => '', 'universe' => 0, 'code' => 0], $result);
+		$this->assertCount(1, $this->cookiesWritten);
+		$this->assertSame(ReferralCaptureService::COOKIE_SRC, $this->cookiesWritten[0]['name']);
+		$this->assertSame('discord', $this->cookiesWritten[0]['value']);
+		$this->assertSame(
+			TIMESTAMP + ReferralCaptureService::COOKIE_TTL_SECONDS,
+			$this->cookiesWritten[0]['expire']
+		);
+	}
+
+	public function testCaptureWithRefAndSrcPersistsBothCookieFamilies(): void
+	{
+		$result = $this->service([2 => true])->capture(
+			$this->dbWithReferrer(['id' => 12, 'username' => 'Bob', 'universe' => 2]),
+			['ref' => 12, 'src' => 'x'],
+			[]
+		);
+
+		$this->assertSame(12, $result['id']);
+		$this->assertCount(3, $this->cookiesWritten);
+		$this->assertSame(ReferralCaptureService::COOKIE_SRC, $this->cookiesWritten[0]['name']);
+		$this->assertSame('x', $this->cookiesWritten[0]['value']);
+		$this->assertSame(ReferralCaptureService::COOKIE_REF, $this->cookiesWritten[1]['name']);
+		$this->assertSame(ReferralCaptureService::COOKIE_REF_UNI, $this->cookiesWritten[2]['name']);
+	}
+
+	public function testCaptureFallsBackToSrcCookieAndUtmSource(): void
+	{
+		$fromCookie = $this->service()->captureSignupSource(
+			[],
+			[ReferralCaptureService::COOKIE_SRC => 'reddit']
+		);
+		$this->assertSame('reddit', $fromCookie);
+		$this->assertSame('reddit', $this->cookiesWritten[0]['value']);
+
+		$this->cookiesWritten = [];
+		$fromUtm = $this->service()->captureSignupSource(['utm_source' => 'peakd'], []);
+		$this->assertSame('peakd', $fromUtm);
+		$this->assertSame('peakd', $this->cookiesWritten[0]['value']);
+	}
+
+	public function testClearReferralCookiesDoesNotClearSrc(): void
+	{
+		$result = $this->service([1 => true])->capture(
+			$this->dbWithReferrer([]),
+			['ref' => 99, 'src' => 'matrix'],
+			[]
+		);
+
+		$this->assertSame(0, $result['id']);
+		$names = array_column($this->cookiesWritten, 'name');
+		$this->assertContains(ReferralCaptureService::COOKIE_SRC, $names);
+		$this->assertContains(ReferralCaptureService::COOKIE_REF, $names);
+		$srcCookie = null;
+		foreach ($this->cookiesWritten as $cookie) {
+			if ($cookie['name'] === ReferralCaptureService::COOKIE_SRC) {
+				$srcCookie = $cookie;
+			}
+		}
+		$this->assertNotNull($srcCookie);
+		$this->assertSame('matrix', $srcCookie['value']);
+		$this->assertGreaterThan(TIMESTAMP, $srcCookie['expire']);
+	}
+
 	public function testIsAliasAndAliasUserId(): void
 	{
 		$this->assertTrue(ReferralCaptureService::isAlias(1));

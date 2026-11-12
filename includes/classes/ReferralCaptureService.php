@@ -18,7 +18,9 @@ class ReferralCaptureService
 {
 	public const COOKIE_REF = 'ref';
 	public const COOKIE_REF_UNI = 'ref_uni';
+	public const COOKIE_SRC = 'src';
 	public const COOKIE_TTL_SECONDS = 2592000; // 30 days
+	public const SIGNUP_SRC_MAX_LENGTH = 32;
 
 	public const STATUS_OK = 'ok';
 	public const STATUS_INACTIVE = 'inactive';
@@ -53,14 +55,62 @@ class ReferralCaptureService
 	}
 
 	/**
-	 * @return array{ref: int, referralID: int}
+	 * @return array{ref: int, referralID: int, src: string, utm_source: string}
 	 */
 	public static function requestBag(): array
 	{
 		return [
-			'ref'        => HTTP::_GP('ref', 0),
-			'referralID' => HTTP::_GP('referralID', 0),
+			'ref'         => HTTP::_GP('ref', 0),
+			'referralID'  => HTTP::_GP('referralID', 0),
+			'src'         => HTTP::_GP('src', ''),
+			'utm_source'  => HTTP::_GP('utm_source', ''),
 		];
+	}
+
+	/**
+	 * Sanitize a channel-source slug: trim, lowercase, [a-z0-9-] only, max 32.
+	 * Empty / invalid results become null.
+	 */
+	public static function sanitizeSource(mixed $raw): ?string
+	{
+		if ($raw === null || is_array($raw) || is_object($raw) || is_bool($raw)) {
+			return null;
+		}
+
+		$value = strtolower(trim((string) $raw));
+		$value = preg_replace('/[^a-z0-9-]/', '', $value) ?? '';
+		$value = substr($value, 0, self::SIGNUP_SRC_MAX_LENGTH);
+
+		return $value === '' ? null : $value;
+	}
+
+	/**
+	 * Channel source priority: query src, then utm_source, then cookie.
+	 * Independent of referralID / ref so universe switches that clear a referral
+	 * do not drop the signup source.
+	 *
+	 * @param array<string, mixed> $request
+	 * @param array<string, mixed> $cookies
+	 */
+	public static function sourceFrom(array $request, array $cookies): ?string
+	{
+		foreach (['src', 'utm_source'] as $key) {
+			if (!array_key_exists($key, $request)) {
+				continue;
+			}
+
+			$raw = $request[$key];
+			if ((!is_string($raw) && !is_numeric($raw)) || trim((string) $raw) === '') {
+				continue;
+			}
+
+			$sanitized = self::sanitizeSource($raw);
+			if ($sanitized !== null) {
+				return $sanitized;
+			}
+		}
+
+		return self::sanitizeSource($cookies[self::COOKIE_SRC] ?? null);
 	}
 
 	public static function isAlias(int $code): bool
@@ -117,20 +167,29 @@ class ReferralCaptureService
 	}
 
 	/**
-	 * Build the register CTA URL, optionally with referral + universe context.
+	 * Build the register CTA URL, optionally with referral + universe + source context.
+	 *
+	 * Signature stays backward compatible: callers that only pass referral/universe
+	 * behave as before. Source is independent so a missing referral still keeps src.
 	 */
-	public function registerUrl(int $referralId = 0, int $universeId = 0): string
+	public function registerUrl(int $referralId = 0, int $universeId = 0, ?string $signupSrc = null): string
 	{
-		if ($referralId <= 0) {
+		$signupSrc = self::sanitizeSource($signupSrc);
+		if ($referralId <= 0 && $signupSrc === null) {
 			return 'index.php?page=register';
 		}
 
 		$query = [
-			'page'       => 'register',
-			'referralID' => $referralId,
+			'page' => 'register',
 		];
+		if ($referralId > 0) {
+			$query['referralID'] = $referralId;
+		}
 		if ($universeId > 0) {
 			$query['uni'] = $universeId;
+		}
+		if ($signupSrc !== null) {
+			$query['src'] = $signupSrc;
 		}
 
 		return 'index.php?' . http_build_query($query);
@@ -235,6 +294,7 @@ class ReferralCaptureService
 
 	/**
 	 * Lobby capture: prefer query `ref`, else cookies, else `referralID`. Persist on success.
+	 * Also captures/persists channel source independently of referral resolution.
 	 *
 	 * @param array<string, mixed> $request
 	 * @param array<string, mixed> $cookies
@@ -242,11 +302,14 @@ class ReferralCaptureService
 	 */
 	public function capture(DatabaseInterface $db, array $request, array $cookies): array
 	{
+		$this->captureSignupSource($request, $cookies);
+
 		return $this->resolve($db, $request, $cookies, null);
 	}
 
 	/**
 	 * Register show/send. When $universeId is set, resolve for that universe only.
+	 * Refreshes the source cookie alongside referral resolution.
 	 *
 	 * @param array<string, mixed> $request
 	 * @param array<string, mixed> $cookies
@@ -258,7 +321,26 @@ class ReferralCaptureService
 		array $cookies,
 		?int $universeId = null,
 	): array {
+		$this->captureSignupSource($request, $cookies);
+
 		return $this->resolve($db, $request, $cookies, $universeId);
+	}
+
+	/**
+	 * Read channel source from request/cookie and persist the cookie when present.
+	 * Does not clear the source cookie when referral resolution fails.
+	 *
+	 * @param array<string, mixed> $request
+	 * @param array<string, mixed> $cookies
+	 */
+	public function captureSignupSource(array $request, array $cookies): ?string
+	{
+		$source = self::sourceFrom($request, $cookies);
+		if ($source !== null) {
+			$this->persistSourceCookie($source);
+		}
+
+		return $source;
 	}
 
 	/**
@@ -482,8 +564,15 @@ class ReferralCaptureService
 		($this->cookieWriter)(self::COOKIE_REF_UNI, (string) $universeId, $expire);
 	}
 
+	private function persistSourceCookie(string $source): void
+	{
+		$expire = TIMESTAMP + self::COOKIE_TTL_SECONDS;
+		($this->cookieWriter)(self::COOKIE_SRC, $source, $expire);
+	}
+
 	private function clearCookies(): void
 	{
+		// Only clear referral cookies. Channel source persists independently.
 		$expire = TIMESTAMP - 3600;
 		($this->cookieWriter)(self::COOKIE_REF, '', $expire);
 		($this->cookieWriter)(self::COOKIE_REF_UNI, '', $expire);

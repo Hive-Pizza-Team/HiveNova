@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\ReferralActivationService;
+use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\Session;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Mail;
@@ -57,7 +58,22 @@ class ShowVertifyPage extends AbstractLoginPage
 			':validationID'	=> $validationID
 		));
 
-		list($userID, $planetID) = PlayerUtil::createPlayer($userData['universe'], $userData['userName'], $userData['password'], $userData['email'], $userData['hive_account'], $userData['language']);
+		$signupSrc = ReferralCaptureService::sanitizeSource($userData['signup_src'] ?? null);
+		list($userID, $planetID) = PlayerUtil::createPlayer(
+			$userData['universe'],
+			$userData['userName'],
+			$userData['password'],
+			$userData['email'],
+			$userData['hive_account'],
+			$userData['language'],
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			0,
+			NULL,
+			$signupSrc
+		);
 
 		if($config->mail_active == 1)
 		{

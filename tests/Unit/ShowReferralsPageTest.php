@@ -23,4 +23,18 @@ class ShowReferralsPageTest extends TestCase
 		$this->assertStringNotContainsString('accounteditor', $tpl);
 		$this->assertStringNotContainsString('Hauptframe', $tpl);
 	}
+
+	public function test_recent_recruits_table_includes_source_column(): void
+	{
+		$game = file_get_contents(__DIR__ . '/../../styles/templates/game/page.referrals.default.tpl');
+		$adm = file_get_contents(__DIR__ . '/../../styles/templates/adm/ReferralStatsPage.tpl');
+
+		$this->assertIsString($game);
+		$this->assertIsString($adm);
+		$this->assertStringContainsString('ref_stats_source', $game);
+		$this->assertStringContainsString('signup_src|escape', $game);
+		$this->assertStringContainsString('colspan="6"', $game);
+		$this->assertStringContainsString('ref_stats_source', $adm);
+		$this->assertStringContainsString('signup_src|escape', $adm);
+	}
 }

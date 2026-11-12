@@ -403,6 +403,7 @@ class FakeDatabase implements DatabaseInterface
                 'username' => $params[':username'] ?? '',
                 'universe' => (int) ($params[':universe'] ?? 1),
                 'lang' => $params[':language'] ?? 'en',
+                'signup_src' => $params[':signupSrc'] ?? null,
             ];
 
             return true;

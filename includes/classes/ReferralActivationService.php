@@ -8,6 +8,9 @@ namespace HiveNova\Core;
  * Email verification and skip-verify signup (user_valid = 0) both create the
  * player in ShowVertifyPage. ReferralCronjob only pays when ref_bonus = 1
  * and ref_id points at the referrer, so both paths must write those columns.
+ *
+ * Channel source (signup_src) is independent of referralID — a visitor can
+ * arrive with ?src=discord and no ?ref=, and delayed email verify still stores it.
  */
 class ReferralActivationService
 {
@@ -16,7 +19,14 @@ class ReferralActivationService
 	 */
 	public function attachFromPending(DatabaseInterface $db, int $userId, array $pending): bool
 	{
-		return $this->attach($db, $userId, (int) ($pending['referralID'] ?? 0));
+		$referralAttached = $this->attach($db, $userId, (int) ($pending['referralID'] ?? 0));
+		$sourceAttached = $this->attachSignupSource(
+			$db,
+			$userId,
+			ReferralCaptureService::sanitizeSource($pending['signup_src'] ?? null)
+		);
+
+		return $referralAttached || $sourceAttached;
 	}
 
 	public function attach(DatabaseInterface $db, int $userId, int $referralId): bool
@@ -30,6 +40,24 @@ class ReferralActivationService
 			[
 				':referralId' => $referralId,
 				':userId'     => $userId,
+			]
+		);
+
+		return true;
+	}
+
+	public function attachSignupSource(DatabaseInterface $db, int $userId, ?string $signupSrc): bool
+	{
+		$signupSrc = ReferralCaptureService::sanitizeSource($signupSrc);
+		if ($userId <= 0 || $signupSrc === null) {
+			return false;
+		}
+
+		$db->update(
+			'UPDATE %%USERS%% SET `signup_src` = :signupSrc WHERE `id` = :userId;',
+			[
+				':signupSrc' => $signupSrc,
+				':userId'    => $userId,
 			]
 		);
 
