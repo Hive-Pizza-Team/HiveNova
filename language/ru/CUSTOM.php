@@ -44,3 +44,4 @@ $LNG['fb_error_screenshot_upload'] = 'Could not upload the screenshot. Try again
 $LNG['fb_error_csrf'] = 'Security token expired. Reload the page and try again.';
 $LNG['fb_error_rate'] = 'Please wait %d seconds before sending more feedback.';
 $LNG['fb_error_retry'] = 'Could not send feedback. Please try again.';
+$LNG['fb_success_no_screenshot'] = 'Thanks! Your report was sent without a screenshot. Reference: %s';

@@ -49,12 +49,94 @@ class FeedbackService
 		'image/webp',
 	];
 
+	/** Strict basename pattern for stored feedback screenshots. */
+	public const SCREENSHOT_FILENAME_PATTERN = '/^fb_[0-9]+_[a-f0-9]{16}\.(png|jpe?g|gif|webp)$/i';
+
+	/**
+	 * Escape ticket/context text the same way HTTP::_GP(..., true) does on write.
+	 */
+	public static function escapeTicketText(string $text): string
+	{
+		return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+	}
+
 	/**
 	 * @return list<string>
 	 */
 	public static function allowedTypes(): array
 	{
 		return [self::TYPE_BUG, self::TYPE_IDEA, self::TYPE_OTHER];
+	}
+
+	public static function isValidScreenshotFilename(string $filename): bool
+	{
+		$filename = basename(str_replace(["\0", '\\'], '', $filename));
+
+		return (bool) preg_match(self::SCREENSHOT_FILENAME_PATTERN, $filename);
+	}
+
+	/**
+	 * Absolute filesystem path for a validated feedback screenshot, or null.
+	 */
+	public static function screenshotAbsolutePath(string $filename): ?string
+	{
+		$filename = basename(str_replace(["\0", '\\'], '', $filename));
+		if (!self::isValidScreenshotFilename($filename)) {
+			return null;
+		}
+
+		$root = defined('ROOT_PATH') ? ROOT_PATH : (dirname(__DIR__, 2) . '/');
+		$path = $root . 'cache/feedback/' . $filename;
+		$realDir = realpath($root . 'cache/feedback');
+		$realFile = realpath($path);
+		if ($realDir === false || $realFile === false) {
+			return is_file($path) ? $path : null;
+		}
+		if (!str_starts_with($realFile, $realDir . DIRECTORY_SEPARATOR) && $realFile !== $realDir) {
+			return null;
+		}
+
+		return is_file($realFile) ? $realFile : null;
+	}
+
+	public static function screenshotAdminUrl(string $filename): string
+	{
+		$filename = basename(str_replace(["\0", '\\'], '', $filename));
+
+		return 'admin.php?page=support&mode=screenshot&file=' . rawurlencode($filename);
+	}
+
+	/**
+	 * Turn stored "Screenshot: cache/feedback/fb_…" lines into admin viewer links.
+	 */
+	public static function linkifyScreenshotReferences(string $message): string
+	{
+		return (string) preg_replace_callback(
+			'/Screenshot:\s*(?:cache\/feedback\/)?(fb_[0-9]+_[a-f0-9]{16}\.(?:png|jpe?g|gif|webp))/i',
+			static function (array $matches): string {
+				$file = $matches[1];
+				if (!self::isValidScreenshotFilename($file)) {
+					return $matches[0];
+				}
+				$url = self::screenshotAdminUrl($file);
+
+				return 'Screenshot: <a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8')
+					. '" target="_blank" rel="noopener">' . htmlspecialchars($file, ENT_QUOTES, 'UTF-8') . '</a>';
+			},
+			$message
+		);
+	}
+
+	public static function screenshotContentType(string $filename): string
+	{
+		$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+		return match ($ext) {
+			'jpg', 'jpeg' => 'image/jpeg',
+			'gif' => 'image/gif',
+			'webp' => 'image/webp',
+			default => 'image/png',
+		};
 	}
 
 	public static function normalizeType(?string $type): string
@@ -249,17 +331,20 @@ class FeedbackService
 	 */
 	public static function buildContext(array $input): array
 	{
-		$page = self::sanitizeUrl((string) ($input['pageUrl'] ?? ''));
+		// pageUrl/viewport may already be htmlspecialchars'd via HTTP::_GP; decode
+		// before sanitize so query parsing works, then escape once for ticket storage.
+		$pageRaw = html_entity_decode((string) ($input['pageUrl'] ?? ''), ENT_QUOTES, 'UTF-8');
+		$page = self::escapeTicketText(self::sanitizeUrl($pageRaw));
 		$universe = trim((string) ($input['universe'] ?? ''));
 		$userId = (int) ($input['userId'] ?? 0);
-		$username = trim((string) ($input['username'] ?? ''));
+		$username = self::escapeTicketText(trim((string) ($input['username'] ?? '')));
 		$account = $userId > 0
 			? ($username !== '' ? $username . ' (#' . $userId . ')' : '#' . $userId)
 			: 'guest';
 
 		$planetParts = [];
-		$planetName = trim((string) ($input['planetName'] ?? ''));
-		$planetCoords = trim((string) ($input['planetCoords'] ?? ''));
+		$planetName = self::escapeTicketText(trim((string) ($input['planetName'] ?? '')));
+		$planetCoords = self::escapeTicketText(trim((string) ($input['planetCoords'] ?? '')));
 		$planetId = (int) ($input['planetId'] ?? 0);
 		if ($planetName !== '') {
 			$planetParts[] = $planetName;
@@ -276,10 +361,12 @@ class FeedbackService
 		if (strlen($ua) > 512) {
 			$ua = substr($ua, 0, 512);
 		}
+		$ua = self::escapeTicketText($ua);
 
-		$viewport = trim((string) ($input['viewport'] ?? ''));
-		$language = trim((string) ($input['language'] ?? ''));
-		$version = trim((string) ($input['version'] ?? ''));
+		$viewportRaw = html_entity_decode(trim((string) ($input['viewport'] ?? '')), ENT_QUOTES, 'UTF-8');
+		$viewport = self::escapeTicketText($viewportRaw);
+		$language = self::escapeTicketText(trim((string) ($input['language'] ?? '')));
+		$version = self::escapeTicketText(trim((string) ($input['version'] ?? '')));
 		$timestamp = (int) ($input['timestamp'] ?? 0);
 		if ($timestamp <= 0) {
 			$timestamp = defined('TIMESTAMP') ? (int) TIMESTAMP : time();
@@ -550,13 +637,17 @@ class FeedbackService
 	 * @param array<string, mixed>|null $planet
 	 * @return array<string, mixed>
 	 */
+	/**
+	 * @param array<string, string> $messages
+	 */
 	public static function clientConfig(
 		string $submitUrl,
 		array $user,
 		?array $planet,
 		string $language,
 		string $version,
-		int $universe
+		int $universe,
+		array $messages = []
 	): array {
 		$userId = (int) ($user['id'] ?? 0);
 		$username = (string) ($user['username'] ?? '');
@@ -576,6 +667,7 @@ class FeedbackService
 			'submitUrl' => $submitUrl,
 			'csrf' => self::issueCsrfToken(),
 			'maxScreenshotBytes' => self::MAX_SCREENSHOT_BYTES,
+			'messages' => $messages,
 			'context' => [
 				'universe' => (string) $universe,
 				'userId' => $userId,

@@ -232,12 +232,16 @@ abstract class AbstractLoginPage
 			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
 			'jsonLd'			=> $jsonLd,
 			'feedbackConfig'		=> FeedbackService::clientConfig(
-				'index.php?page=feedback&mode=submit',
+				'index.php?page=feedback&mode=submit&ajax=1',
 				[],
 				null,
 				(string) $lang,
 				(string) $config->VERSION,
-				(int) Universe::current()
+				(int) Universe::current(),
+				[
+					'successNoScreenshot' => (string) ($LNG['fb_success_no_screenshot']
+						?? 'Thanks! Your report was sent without a screenshot. Reference: %s'),
+				]
 			),
 		));
 

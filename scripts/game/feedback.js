@@ -26,6 +26,7 @@
 	var fileInput = document.getElementById('feedback-screenshot');
 	var descriptionInput = document.getElementById('feedback-description');
 	var capturedBlob = null;
+	var captureFailed = false;
 
 	function sanitizeClientUrl(href) {
 		try {
@@ -105,6 +106,7 @@
 		refreshContext();
 		setStatus('', false);
 		capturedBlob = null;
+		captureFailed = false;
 		if (captureCheckbox) {
 			captureCheckbox.checked = false;
 		}
@@ -191,6 +193,7 @@
 	form.addEventListener('submit', function (event) {
 		event.preventDefault();
 		setStatus('', false);
+		captureFailed = false;
 		if (submitBtn) {
 			submitBtn.disabled = true;
 		}
@@ -199,10 +202,11 @@
 		if (captureCheckbox && captureCheckbox.checked && !(fileInput && fileInput.files && fileInput.files.length)) {
 			run = capturePageScreenshot().then(function (blob) {
 				capturedBlob = blob;
+				captureFailed = false;
 				return blob;
 			}).catch(function () {
 				capturedBlob = null;
-				setStatus('Could not capture a screenshot automatically. Attach an image or send without one.', true);
+				captureFailed = true;
 				return null;
 			});
 		}
@@ -222,7 +226,11 @@
 				}
 				return null;
 			}
-			return fetch(config.submitUrl || form.action, {
+			var submitUrl = config.submitUrl || form.action;
+			if (submitUrl.indexOf('ajax=1') === -1) {
+				submitUrl += (submitUrl.indexOf('?') >= 0 ? '&' : '?') + 'ajax=1';
+			}
+			return fetch(submitUrl, {
 				method: 'POST',
 				body: body,
 				credentials: 'same-origin',
@@ -243,12 +251,19 @@
 				config.csrf = result.data.csrf;
 			}
 			if (result.data && result.data.ok) {
-				setStatus(result.data.message || ('Thanks! Reference: ' + (result.data.reference || '')), false);
+				var successMsg = result.data.message || ('Thanks! Reference: ' + (result.data.reference || ''));
+				if (captureFailed) {
+					var tpl = (config.messages && config.messages.successNoScreenshot)
+						|| 'Thanks! Your report was sent without a screenshot. Reference: %s';
+					successMsg = tpl.replace('%s', result.data.reference || '');
+				}
+				setStatus(successMsg, false);
 				form.reset();
 				if (csrfInput && config.csrf) {
 					csrfInput.value = config.csrf;
 				}
 				capturedBlob = null;
+				captureFailed = false;
 				refreshContext();
 				return;
 			}

@@ -193,8 +193,7 @@
 	}
 }
 
-/* Lobby has no bottom nav */
-body.login .feedback-fab,
-.login-body .feedback-fab {
+/* Lobby body class is "normal" (no bottom nav); game uses "full" */
+body.normal .feedback-fab {
 	bottom: calc(16px + env(safe-area-inset-bottom, 0px));
 }

@@ -331,12 +331,16 @@ abstract class AbstractGamePage
 			'queryString'		=> $this->getQueryString(),
 			'themeSettings'		=> $THEME->getStyleSettings(),
 			'feedbackConfig'		=> FeedbackService::clientConfig(
-				'game.php?page=feedback&mode=submit',
+				'game.php?page=feedback&mode=submit&ajax=1',
 				$USER,
 				is_array($planet) ? $planet : null,
 				(string) ($LNG->getLanguage() ?? ''),
 				(string) $config->VERSION,
-				(int) Universe::current()
+				(int) Universe::current(),
+				[
+					'successNoScreenshot' => (string) ($LNG['fb_success_no_screenshot']
+						?? 'Thanks! Your report was sent without a screenshot. Reference: %s'),
+				]
 			),
 		));
 	}

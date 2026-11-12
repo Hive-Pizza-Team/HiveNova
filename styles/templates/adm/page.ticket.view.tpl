@@ -24,7 +24,7 @@
 			</p>
 			<hr>
 			<p>
-				{$answerRow.message|escape:'html'|nl2br}
+				{$answerRow.message}
 			</p>
 		</td>
 	</tr>

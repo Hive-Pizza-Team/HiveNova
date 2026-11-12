@@ -29,8 +29,7 @@
  
 // If you have custom lang vars, you can include them here. The file ll be not overwrite by updatemanager
 // Also you can overwrite exists var, too. You use the same key.
- 
-?>
+
 $LNG['fb_button'] = 'Feedback';
 $LNG['fb_title'] = 'Send feedback';
 $LNG['fb_intro'] = 'Describe the issue or idea. Context below is attached automatically.';
@@ -56,3 +55,4 @@ $LNG['fb_error_screenshot_upload'] = 'Could not upload the screenshot. Try again
 $LNG['fb_error_csrf'] = 'Security token expired. Reload the page and try again.';
 $LNG['fb_error_rate'] = 'Please wait %d seconds before sending more feedback.';
 $LNG['fb_error_retry'] = 'Could not send feedback. Please try again.';
+$LNG['fb_success_no_screenshot'] = 'Thanks! Your report was sent without a screenshot. Reference: %s';

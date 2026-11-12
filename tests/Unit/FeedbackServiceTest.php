@@ -71,6 +71,43 @@ class FeedbackServiceTest extends TestCase
 		$this->assertStringContainsString('UTC', $ctx['time']);
 	}
 
+	public function testBuildContextEscapesRawFieldsOnce(): void
+	{
+		$ctx = FeedbackService::buildContext([
+			'pageUrl' => 'game.php?page=overview&x=<script>',
+			'userId' => 1,
+			'username' => 'A&B',
+			'planetName' => 'X"Y',
+			'userAgent' => 'Mozilla/5.0 <Evil>',
+			'viewport' => '100x200',
+		]);
+
+		$this->assertStringContainsString('A&amp;B', $ctx['account']);
+		$this->assertStringContainsString('X&quot;Y', $ctx['planet']);
+		$this->assertSame('Mozilla/5.0 &lt;Evil&gt;', $ctx['browser']);
+		$this->assertStringNotContainsString('<script>', $ctx['page']);
+		$this->assertStringContainsString('%3Cscript%3E', $ctx['page']);
+	}
+
+	public function testScreenshotFilenameValidationAndLinkify(): void
+	{
+		$ok = 'fb_99_0123456789abcdef.png';
+		$this->assertTrue(FeedbackService::isValidScreenshotFilename($ok));
+		$this->assertTrue(FeedbackService::isValidScreenshotFilename('cache/feedback/' . $ok));
+		$this->assertFalse(FeedbackService::isValidScreenshotFilename('../etc/passwd'));
+		$this->assertFalse(FeedbackService::isValidScreenshotFilename('fb_99_short.png'));
+		$this->assertFalse(FeedbackService::isValidScreenshotFilename('fb_99_0123456789abcdef.php'));
+
+		$linked = FeedbackService::linkifyScreenshotReferences(
+			"Hello\nScreenshot: cache/feedback/{$ok}\nDone"
+		);
+		$this->assertStringContainsString('mode=screenshot', $linked);
+		$this->assertStringContainsString('file=' . $ok, $linked);
+		$this->assertStringContainsString('<a href=', $linked);
+		$this->assertSame('image/png', FeedbackService::screenshotContentType($ok));
+		$this->assertSame('image/jpeg', FeedbackService::screenshotContentType('fb_1_0123456789abcdef.jpg'));
+	}
+
 	public function testBuildContextGuestWhenLoggedOut(): void
 	{
 		$ctx = FeedbackService::buildContext([
