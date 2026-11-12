@@ -162,40 +162,8 @@ describe('HiveNovaHistoryNav dialog history', () => {
 	});
 });
 
-describe('HiveNovaHistoryNav messages history helpers', () => {
-	it('builds category/side URLs and records pushState after the first entry', () => {
-		const history = fakeHistory();
-		assert.equal(
-			historyNav.messagesHistoryUrl(100, 1),
-			'game.php?page=messages&category=100'
-		);
-		assert.equal(
-			historyNav.messagesHistoryUrl(3, 2),
-			'game.php?page=messages&category=3&side=2'
-		);
-
-		historyNav.recordMessagesHistory(history, 100, 1);
-		assert.equal(history._url(), 'game.php?page=messages&category=100');
-		assert.equal(history.state[historyNav.MESSAGE_STATE_KEY], true);
-
-		historyNav.recordMessagesHistory(history, 3, 2);
-		assert.equal(history._url(), 'game.php?page=messages&category=3&side=2');
-		assert.equal(history.length, 2);
-	});
-
-	it('reads message state from popstate events', () => {
-		assert.equal(historyNav.messagesStateFromPopstate({ state: null }), null);
-		assert.deepEqual(
-			historyNav.messagesStateFromPopstate({
-				state: historyNav.buildMessagesHistoryState(15, 4)
-			}),
-			{ messcat: 15, site: 4 }
-		);
-	});
-});
-
 describe('history-nav wiring', () => {
-	it('is loaded from the game header and used by Dialog/Message scripts', () => {
+	it('is loaded from the game header and used by Dialog; messages do not seed history', () => {
 		const header = fs.readFileSync(
 			path.join(__dirname, '../../styles/templates/game/main.header.tpl'),
 			'utf8'
@@ -217,12 +185,14 @@ describe('history-nav wiring', () => {
 			'utf8'
 		);
 		assert.match(header, /scripts\/game\/history-nav\.js[\s\S]*scripts\/game\/base\.js/);
-		assert.match(messageSrc, /HiveNovaHistoryNav\.recordMessagesHistory/);
-		assert.match(messageSrc, /seedMessagesHistoryFromLocation/);
+		assert.doesNotMatch(messageSrc, /HiveNovaHistoryNav/);
+		assert.doesNotMatch(messageSrc, /recordMessagesHistory/);
+		assert.doesNotMatch(messageSrc, /seedMessagesHistoryFromLocation/);
 		assert.match(baseSrc, /HiveNovaHistoryNav\.recordDialogOpen/);
 		assert.match(baseSrc, /HiveNovaHistoryNav\.recordDialogClose/);
 		assert.doesNotMatch(baseSrc, /HiveNovaHistoryNav\.handlePopstate/);
 		assert.match(galaxy, /method="get"/);
+		assert.match(galaxy, /name="galaxyNav"/);
 		assert.match(stats, /method="get"/);
 	});
 });

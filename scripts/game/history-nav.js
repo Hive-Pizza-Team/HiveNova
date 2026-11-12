@@ -8,14 +8,14 @@
  * 2) Fancybox iframe dialogs do not participate in history, so Back while a
  *    dialog is open can be a no-op. Push a stub entry on open; popstate closes
  *    the dialog first, then further Back navigates to the previous game page.
- * 3) Message AJAX pagination (legacy) can record category/side history so Back
- *    restores the prior inbox view.
+ *
+ * Message inbox pagination uses real category/side links (shared.messages.pagination.tpl);
+ * do not wire AJAX message history here — that path requested a non-existent mode.
  */
 (function (root) {
 	'use strict';
 
 	var DIALOG_STATE_KEY = 'hnDialog';
-	var MESSAGE_STATE_KEY = 'hnMessages';
 
 	var dialogOpen = false;
 	var ignoreNextPopstate = false;
@@ -169,82 +169,6 @@
 		return true;
 	}
 
-	function currentMessagesFilter(loc) {
-		loc = loc || (typeof location !== 'undefined' ? location : null);
-		if (!loc || !loc.search) {
-			return '';
-		}
-		try {
-			var filter = new URLSearchParams(loc.search).get('filter');
-			return filter ? String(filter) : '';
-		} catch (e) {
-			return '';
-		}
-	}
-
-	function messagesHistoryUrl(messcat, site, filter) {
-		var url = 'game.php?page=messages&category=' + encodeURIComponent(messcat);
-		var page = parseInt(site, 10);
-		if (!isNaN(page) && page > 1) {
-			url += '&side=' + encodeURIComponent(page);
-		}
-		if (filter) {
-			url += '&filter=' + encodeURIComponent(filter);
-		}
-		return url;
-	}
-
-	function buildMessagesHistoryState(messcat, site) {
-		var state = {};
-		state[MESSAGE_STATE_KEY] = true;
-		state.messcat = parseInt(messcat, 10) || 0;
-		state.site = parseInt(site, 10) || 1;
-		return state;
-	}
-
-	function recordMessagesHistory(historyObj, messcat, site, loc) {
-		if (!historyObj || typeof historyObj.pushState !== 'function') {
-			return false;
-		}
-		var state = buildMessagesHistoryState(messcat, site);
-		var url = messagesHistoryUrl(state.messcat, state.site, currentMessagesFilter(loc));
-		if (historyObj.state && historyObj.state[MESSAGE_STATE_KEY]) {
-			historyObj.pushState(state, '', url);
-		} else if (typeof historyObj.replaceState === 'function') {
-			historyObj.replaceState(state, '', url);
-		} else {
-			historyObj.pushState(state, '', url);
-		}
-		return true;
-	}
-
-	function messagesStateFromPopstate(event) {
-		var state = event && event.state;
-		if (!state || !state[MESSAGE_STATE_KEY]) {
-			return null;
-		}
-		return {
-			messcat: parseInt(state.messcat, 10) || 0,
-			site: parseInt(state.site, 10) || 1
-		};
-	}
-
-	function seedMessagesHistoryFromLocation(historyObj, loc, fallbackMesscat) {
-		loc = loc || (typeof location !== 'undefined' ? location : null);
-		if (!loc || !historyObj) {
-			return false;
-		}
-		var params;
-		try {
-			params = new URLSearchParams(loc.search || '');
-		} catch (e) {
-			return false;
-		}
-		var cat = parseInt(params.get('category') || params.get('messcat') || fallbackMesscat || 100, 10);
-		var site = parseInt(params.get('side') || params.get('site') || 1, 10);
-		return recordMessagesHistory(historyObj, cat, site, loc);
-	}
-
 	function _resetForTests() {
 		dialogOpen = false;
 		ignoreNextPopstate = false;
@@ -253,7 +177,6 @@
 
 	var api = {
 		DIALOG_STATE_KEY: DIALOG_STATE_KEY,
-		MESSAGE_STATE_KEY: MESSAGE_STATE_KEY,
 		isHashOnlyHref: isHashOnlyHref,
 		shouldStripEmptyHash: shouldStripEmptyHash,
 		stripEmptyHash: stripEmptyHash,
@@ -263,11 +186,6 @@
 		recordDialogClose: recordDialogClose,
 		handlePopstate: handlePopstate,
 		installPopstate: installPopstate,
-		messagesHistoryUrl: messagesHistoryUrl,
-		buildMessagesHistoryState: buildMessagesHistoryState,
-		recordMessagesHistory: recordMessagesHistory,
-		messagesStateFromPopstate: messagesStateFromPopstate,
-		seedMessagesHistoryFromLocation: seedMessagesHistoryFromLocation,
 		_resetForTests: _resetForTests,
 		_isDialogOpenForTests: function () { return dialogOpen; }
 	};

@@ -2,6 +2,7 @@
 {block name="content"}
 	<form action="game.php" method="get" id="galaxy_form" data-fuel-warning="{$LNG.gl_fuel_warning|escape:'html'}">
 	<input type="hidden" name="page" value="galaxy">
+	<input type="hidden" name="galaxyNav" value="1">
 	<input type="hidden" id="auto" value="dr">
 	<div class="galaxy-coords-picker">
 		<div class="galaxy-coords-group">
