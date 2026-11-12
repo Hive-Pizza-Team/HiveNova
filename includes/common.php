@@ -181,8 +181,11 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 			$session->delete();
 			HTTP::redirectTo('index.php');
 		}
-		// fullSide=false: closed-game path runs before $PLANET is loaded; full nav would crash getPlanet().
-		ShowErrorPage::printError($LNG['sys_closed_game'].'<br><br>'.$config->close_reason, null, null, false);
+		// Allow leaving a closed universe via linked-account switch without full re-login.
+		if ($gamePage !== 'universeswitch') {
+			// fullSide=false: closed-game path runs before $PLANET is loaded; full nav would crash getPlanet().
+			ShowErrorPage::printError($LNG['sys_closed_game'].'<br><br>'.$config->close_reason, null, null, false);
+		}
 	}
 
 	if($USER['bana'] == 1) {

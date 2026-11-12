@@ -33,6 +33,7 @@
     {if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="javascript:OpenPopup('?page=notes', 'notes', 720, 300);"{if $navPage == 'notes'} class="active"{/if}>{$LNG.lm_notes}</a></li>{/if}
     {if $smarty.const.MODULE_BUDDYLIST|isModuleAvailable}<li><a href="game.php?page=buddyList"{if $navPage == 'buddyList'} class="active"{/if}>{$LNG.lm_buddylist}</a></li>{/if}
     <li><a href="game.php?page=settings"{if $navPage == 'settings'} class="active"{/if}>{$LNG.lm_options}</a></li>
+    <li><a href="game.php?page=universeSwitch"{if $navPage == 'universeSwitch'} class="active"{/if}>{$LNG.lm_universe_switch}</a></li>
     {if $showReferralDashboard}<li><a href="game.php?page=referrals"{if $navPage == 'referrals'} class="active"{/if}>{$LNG.lm_referrals}</a></li>{/if}
     <li><a href="{$discordUrl}" target="copy">Discord</a></li>
     {if $smarty.const.MODULE_SUPPORT|isModuleAvailable}<li><a href="game.php?page=ticket"{if $navPage == 'ticket'} class="active"{/if}>{$LNG.lm_support}</a></li>{/if}
