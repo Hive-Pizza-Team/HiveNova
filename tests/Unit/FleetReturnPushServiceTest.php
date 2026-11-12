@@ -233,6 +233,24 @@ class FleetReturnPushServiceTest extends TestCase
 		$this->assertSame(0, $this->db->notified['3']['notified_at']);
 	}
 
+	public function testNotifyFleetsClaimIsExclusive(): void
+	{
+		$this->db->notified['3'] = [
+			'fleet_id' => 3, 'user_id' => 7, 'mission' => 3, 'galaxy' => 1, 'system' => 1,
+			'planet' => 1, 'planet_name' => 'Home', 'return_end' => 100, 'notified_at' => 50,
+			'has_subscription' => true, 'settings_push' => 1, 'lang' => 'en',
+		];
+
+		$sent = [];
+		$service = $this->serviceCollecting($sent);
+		$this->assertSame(0, $service->notifyFleets(7, [[
+			'fleetId' => 3, 'mission' => 3, 'galaxy' => 1, 'system' => 1, 'planet' => 1,
+			'planetName' => 'Home', 'returnEnd' => 100,
+		]], 'en'));
+		$this->assertSame([], $sent);
+		$this->assertSame(50, $this->db->notified['3']['notified_at']);
+	}
+
 	public function testRunRetriesPendingAfterFleetWasCleared(): void
 	{
 		$this->db->notified['3'] = [

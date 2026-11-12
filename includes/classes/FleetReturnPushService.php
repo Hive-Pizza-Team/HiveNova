@@ -171,19 +171,25 @@ class FleetReturnPushService
 			if ($pending === []) {
 				return 0;
 			}
-			$pending = array_values($pending);
 
+			$claimed = [];
 			foreach ($pending as $fleet) {
-				$this->claimPending($userId, $fleet);
+				if ($this->claimPending($userId, $fleet)) {
+					$claimed[] = $fleet;
+				}
 			}
-			$message = $this->buildMessage($pending, $lang);
+			if ($claimed === []) {
+				return 0;
+			}
+
+			$message = $this->buildMessage($claimed, $lang);
 			if (!$this->deliver($userId, $message)) {
+				foreach ($claimed as $fleet) {
+					$this->releaseClaim($fleet['fleetId']);
+				}
 				PushNotificationService::logFailure('FleetReturnPushService: delivery failed user=' . $userId);
 
 				return 0;
-			}
-			foreach ($pending as $fleet) {
-				$this->markSent($fleet['fleetId']);
 			}
 
 			return 1;
@@ -402,11 +408,16 @@ class FleetReturnPushService
 	}
 
 	/**
+	 * Atomically claim a fleet-return notification slot.
+	 * INSERT IGNORE ensures the row exists; UPDATE … WHERE notified_at = 0
+	 * succeeds for exactly one concurrent caller (rowCount === 1).
+	 *
 	 * @param array{fleetId: int, mission: int, galaxy: int, system: int, planet: int, planetName: string, returnEnd: int} $fleet
 	 */
-	private function claimPending(int $userId, array $fleet): void
+	private function claimPending(int $userId, array $fleet): bool
 	{
-		Database::get()->insert(
+		$db = Database::get();
+		$db->insert(
 			'INSERT IGNORE INTO %%PUSH_FLEET_RETURN_NOTIFIED%%
 			(fleet_id, user_id, mission, galaxy, system, planet, planet_name, return_end, notified_at)
 			VALUES (:fleetId, :userId, :mission, :galaxy, :system, :planet, :planetName, :returnEnd, :notifiedAt)',
@@ -422,17 +433,24 @@ class FleetReturnPushService
 				':notifiedAt' => 0,
 			]
 		);
-	}
-
-	private function markSent(int $fleetId): void
-	{
-		Database::get()->update(
+		$db->update(
 			'UPDATE %%PUSH_FLEET_RETURN_NOTIFIED%% SET notified_at = :notifiedAt
 			WHERE fleet_id = :fleetId AND notified_at = 0',
 			[
-				':fleetId'    => $fleetId,
+				':fleetId'    => $fleet['fleetId'],
 				':notifiedAt' => defined('TIMESTAMP') ? TIMESTAMP : time(),
 			]
+		);
+
+		return (int) $db->rowCount() === 1;
+	}
+
+	private function releaseClaim(int $fleetId): void
+	{
+		Database::get()->update(
+			'UPDATE %%PUSH_FLEET_RETURN_NOTIFIED%% SET notified_at = 0
+			WHERE fleet_id = :fleetId AND notified_at > 0',
+			[':fleetId' => $fleetId]
 		);
 	}
 

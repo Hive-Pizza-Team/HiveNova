@@ -25,6 +25,9 @@ class FleetReturnPushDatabaseStub implements DatabaseInterface
 	/** @var list<array{qry: string, params: array<string, mixed>}> */
 	public array $updates = [];
 
+	/** @var int|false */
+	public $lastRowCount = false;
+
 	public function select($qry, array $params = [])
 	{
 		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':userId'])) {
@@ -112,6 +115,7 @@ class FleetReturnPushDatabaseStub implements DatabaseInterface
 	public function insert($qry, array $params = [])
 	{
 		$this->inserts[] = ['qry' => $qry, 'params' => $params];
+		$this->lastRowCount = 0;
 		if (str_contains($qry, '%%PUSH_FLEET_RETURN_NOTIFIED%%')) {
 			$key = (string) (int) ($params[':fleetId'] ?? 0);
 			if (!isset($this->notified[$key])) {
@@ -129,6 +133,7 @@ class FleetReturnPushDatabaseStub implements DatabaseInterface
 					'settings_push'    => 1,
 					'lang'             => 'en',
 				];
+				$this->lastRowCount = 1;
 			}
 		}
 
@@ -138,6 +143,7 @@ class FleetReturnPushDatabaseStub implements DatabaseInterface
 	public function delete($qry, array $params = [])
 	{
 		$this->deletes[] = ['qry' => $qry, 'params' => $params];
+		$this->lastRowCount = 0;
 		if (str_contains($qry, '%%PUSH_FLEET_RETURN_NOTIFIED%%') && isset($params[':old'])) {
 			$old = (int) $params[':old'];
 			foreach ($this->notified as $key => $row) {
@@ -145,6 +151,7 @@ class FleetReturnPushDatabaseStub implements DatabaseInterface
 				$returnEnd = (int) ($row['return_end'] ?? 0);
 				if (($notifiedAt > 0 && $notifiedAt < $old) || ($notifiedAt === 0 && $returnEnd < $old)) {
 					unset($this->notified[$key]);
+					$this->lastRowCount = (int) $this->lastRowCount + 1;
 				}
 			}
 		}
@@ -155,10 +162,20 @@ class FleetReturnPushDatabaseStub implements DatabaseInterface
 	public function update($qry, array $params = [])
 	{
 		$this->updates[] = ['qry' => $qry, 'params' => $params];
+		$this->lastRowCount = 0;
 		if (str_contains($qry, '%%PUSH_FLEET_RETURN_NOTIFIED%%')) {
 			$key = (string) (int) ($params[':fleetId'] ?? 0);
-			if (isset($this->notified[$key]) && (int) ($this->notified[$key]['notified_at'] ?? 0) === 0) {
-				$this->notified[$key]['notified_at'] = (int) ($params[':notifiedAt'] ?? 0);
+			if (!isset($this->notified[$key])) {
+				return 1;
+			}
+			$current = (int) ($this->notified[$key]['notified_at'] ?? 0);
+			$next = (int) ($params[':notifiedAt'] ?? 0);
+			if (str_contains($qry, 'notified_at = 0') && $current === 0) {
+				$this->notified[$key]['notified_at'] = $next;
+				$this->lastRowCount = 1;
+			} elseif (str_contains($qry, 'notified_at > 0') && $current > 0) {
+				$this->notified[$key]['notified_at'] = $next;
+				$this->lastRowCount = 1;
 			}
 		}
 
@@ -169,7 +186,7 @@ class FleetReturnPushDatabaseStub implements DatabaseInterface
 	public function query($qry) { return 0; }
 	public function nativeQuery($qry) { return false; }
 	public function lastInsertId() { return false; }
-	public function rowCount() { return false; }
+	public function rowCount() { return $this->lastRowCount; }
 	public function getQueryCounter() { return 0; }
 	public function quote($str) { return "'" . addslashes((string) $str) . "'"; }
 	public function disconnect() {}

@@ -130,11 +130,45 @@ class BuildingCompletePushServiceTest extends TestCase
 			],
 		);
 
-		$this->assertTrue($service->notifyQueueEmptyForUser(9, 'Colony', 'en'));
+		$this->assertTrue($service->notifyQueueEmptyForUser(9, 'Colony', 'en', 3, 100));
 		$this->assertCount(1, $sent);
 		$this->assertSame(9, $sent[0]['userId']);
 		$this->assertSame('construction_queue_empty', $sent[0]['data']['type']);
 		$this->assertSame('No buildings left in the queue on Colony', $sent[0]['body']);
+		$this->assertGreaterThan(0, $this->db->notified['3:0:0:100']['notified_at']);
+	}
+
+	public function testNotifyQueueEmptyDedupIsExclusive(): void
+	{
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function () use (&$sent): bool {
+				$sent[] = 1;
+
+				return true;
+			},
+			configured: true,
+			languageLoader: static fn (): array => [
+				'push_queue_empty_title' => 'Construction queue empty',
+				'push_queue_empty_body'  => 'No buildings left in the queue on %s',
+			],
+		);
+
+		$this->assertTrue($service->notifyQueueEmptyForUser(9, 'Colony', 'en', 3, 100));
+		$this->assertFalse($service->notifyQueueEmptyForUser(9, 'Colony', 'en', 3, 100));
+		$this->assertCount(1, $sent);
+	}
+
+	public function testQueueWillBeEmptyDetectsSingleItemQueue(): void
+	{
+		$this->assertTrue(BuildingCompletePushService::queueWillBeEmpty([
+			[1, 10, 60, 100, 'build'],
+		]));
+		$this->assertFalse(BuildingCompletePushService::queueWillBeEmpty([
+			[1, 10, 60, 100, 'build'],
+			[2, 4, 60, 200, 'build'],
+		]));
+		$this->assertFalse(BuildingCompletePushService::queueWillBeEmpty(''));
 	}
 
 	public function testNotifyQueueEmptySkipsInvalidUserOrUnconfigured(): void
@@ -489,14 +523,88 @@ class BuildingCompletePushServiceTest extends TestCase
 			configured: true,
 			languageLoader: static fn (): array => [
 				'push_building_body_many' => '%s (level %d) on %s and %d more finished',
+				'push_queue_empty_title'  => 'Construction queue empty',
+				'push_queue_empty_body'   => 'No buildings left in the queue on %s',
 				'tech'                    => [1 => 'Ore Extractor', 2 => 'Silicon Synthesizer'],
 			],
 		);
 
 		$this->assertSame(1, $service->run($now));
-		$this->assertCount(1, $sent);
-		$this->assertSame(7, $sent[0]['userId']);
-		$this->assertSame(2, $sent[0]['data']['count']);
+		$building = array_values(array_filter(
+			$sent,
+			static fn (array $row): bool => ($row['data']['type'] ?? '') === 'building_complete'
+		));
+		$queueEmpty = array_values(array_filter(
+			$sent,
+			static fn (array $row): bool => ($row['data']['type'] ?? '') === 'construction_queue_empty'
+		));
+		$this->assertCount(1, $building);
+		$this->assertSame(7, $building[0]['userId']);
+		$this->assertSame(2, $building[0]['data']['count']);
+		$this->assertCount(2, $queueEmpty);
+	}
+
+	public function testRunNotifiesQueueEmptyForSingleDueJob(): void
+	{
+		$now = 1_700_000_200;
+		$this->db->planets[] = [
+			'planet_id'        => 3,
+			'planet_name'      => 'Homeworld',
+			'b_building_id'    => serialize([[1, 10, 60, $now - 50, 'build']]),
+			'b_building'       => $now - 50,
+			'user_id'          => 7,
+			'lang'             => 'en',
+			'has_subscription' => true,
+			'settings_push'    => 1,
+		];
+
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function (int $userId, string $title, string $body, array $data) use (&$sent): void {
+				$sent[] = compact('userId', 'title', 'body', 'data');
+			},
+			configured: true,
+			languageLoader: static fn (): array => [
+				'push_building_body'     => '%s (level %d) finished on %s',
+				'push_queue_empty_title' => 'Construction queue empty',
+				'push_queue_empty_body'  => 'No buildings left in the queue on %s',
+				'tech'                   => [1 => 'Ore Extractor'],
+			],
+		);
+
+		$this->assertSame(1, $service->run($now));
+		$types = array_map(static fn (array $row): string => (string) ($row['data']['type'] ?? ''), $sent);
+		$this->assertSame(['building_complete', 'construction_queue_empty'], $types);
+		$this->assertSame('No buildings left in the queue on Homeworld', $sent[1]['body']);
+		$this->assertGreaterThan(0, $this->db->notified['3:0:0:' . ($now - 50)]['notified_at']);
+	}
+
+	public function testNotifyJobsClaimIsExclusive(): void
+	{
+		$this->db->notified['3:1:10:100'] = [
+			'planet_id'   => 3,
+			'element_id'  => 1,
+			'level'       => 10,
+			'build_end'   => 100,
+			'notified_at' => 50,
+		];
+
+		$sent = [];
+		$service = new BuildingCompletePushService(
+			notifier: static function () use (&$sent): void {
+				$sent[] = 1;
+			},
+			configured: true,
+			languageLoader: static fn (): array => ['tech' => [1 => 'Ore Extractor']],
+		);
+		$this->assertSame(0, $service->notifyJobs(7, [[
+			'planetId'   => 3,
+			'planetName' => 'Home',
+			'elementId'  => 1,
+			'level'      => 10,
+			'buildEnd'   => 100,
+		]], 'en'));
+		$this->assertSame([], $sent);
 	}
 
 	public function testRunDoesNotResendWhenCompletionIsOlderThanCleanupWindow(): void
@@ -516,16 +624,20 @@ class BuildingCompletePushServiceTest extends TestCase
 
 		$sent = [];
 		$service = new BuildingCompletePushService(
-			notifier: static function (int $userId) use (&$sent): void {
-				$sent[] = $userId;
+			notifier: static function (int $userId, string $title, string $body, array $data) use (&$sent): void {
+				$sent[] = (string) ($data['type'] ?? '');
 			},
 			configured: true,
-			languageLoader: static fn (): array => ['tech' => [1 => 'Ore Extractor']],
+			languageLoader: static fn (): array => [
+				'tech'                   => [1 => 'Ore Extractor'],
+				'push_queue_empty_title' => 'Construction queue empty',
+				'push_queue_empty_body'  => 'No buildings left in the queue on %s',
+			],
 		);
 
 		$this->assertSame(1, $service->run($now));
 		$this->assertSame(0, $service->run($now));
-		$this->assertCount(1, $sent);
+		$this->assertSame(['building_complete', 'construction_queue_empty'], $sent);
 	}
 
 	public function testCurrentDueConstructionJobsIgnoresLaterQueuedBuilds(): void

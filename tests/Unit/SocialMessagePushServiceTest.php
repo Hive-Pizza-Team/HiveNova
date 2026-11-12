@@ -83,12 +83,58 @@ class SocialMessagePushServiceTest extends TestCase
 				$sent[] = compact('userId', 'title', 'body', 'data');
 			},
 			configured: true,
+			languageLoader: static fn (): array => [
+				'push_social_pm_title' => 'New message',
+				'push_social_body'     => '%s: %s',
+			],
+			langResolver: static fn (): string => 'en',
 		);
 
 		$this->assertTrue($service->notify(9, 3, SocialMessagePushService::TYPE_PLAYER, 'Bob', 'Hi'));
 		$this->assertCount(1, $sent);
 		$this->assertSame(9, $sent[0]['userId']);
 		$this->assertSame('social_message', $sent[0]['data']['type']);
+	}
+
+	public function testNotifyLoadsRecipientLanguage(): void
+	{
+		$langs = [];
+		$sent = [];
+		$service = new SocialMessagePushService(
+			notifier: static function (int $userId, string $title, string $body) use (&$sent): void {
+				$sent[] = compact('userId', 'title', 'body');
+			},
+			configured: true,
+			languageLoader: static function (string $lang) use (&$langs): array {
+				$langs[] = $lang;
+
+				return [
+					'push_social_pm_title' => 'Nachricht',
+					'push_social_body'     => '%s schrieb: %s',
+				];
+			},
+			langResolver: static fn (int $userId): string => $userId === 9 ? 'de' : 'en',
+		);
+
+		$this->assertTrue($service->notify(9, 3, SocialMessagePushService::TYPE_PLAYER, 'Bob', 'Hi'));
+		$this->assertSame(['de'], $langs);
+		$this->assertSame('Nachricht', $sent[0]['title']);
+		$this->assertSame('Bob schrieb: Hi', $sent[0]['body']);
+	}
+
+	public function testDeliverUsesOkFlagLikeSiblingPushServices(): void
+	{
+		\HiveNova\Core\PushNotificationService::setConfiguredOverride(false);
+		$service = new SocialMessagePushService(configured: true);
+		$ref = new ReflectionMethod(SocialMessagePushService::class, 'deliver');
+		$ref->setAccessible(true);
+
+		// Must not call missing shouldStopRetrying(); ok=false from skip path.
+		$this->assertFalse($ref->invoke($service, 1, [
+			'title' => 't',
+			'body'  => 'b',
+			'data'  => ['url' => 'game.php?page=messages'],
+		]));
 	}
 
 	public function testNotifySkippedWhenNotConfiguredOrNotEligible(): void
@@ -99,6 +145,7 @@ class SocialMessagePushServiceTest extends TestCase
 				$sent[] = 1;
 			},
 			configured: false,
+			langResolver: static fn (): string => 'en',
 		);
 		$this->assertFalse($service->notify(9, 3, SocialMessagePushService::TYPE_PLAYER, 'Bob', 'Hi'));
 
@@ -107,6 +154,7 @@ class SocialMessagePushServiceTest extends TestCase
 				$sent[] = 1;
 			},
 			configured: true,
+			langResolver: static fn (): string => 'en',
 		);
 		$this->assertFalse($service->notify(9, 0, SocialMessagePushService::TYPE_SYSTEM_SOCIAL, 'Sys', 'Fleet'));
 		$this->assertSame([], $sent);

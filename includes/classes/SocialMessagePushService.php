@@ -26,10 +26,14 @@ class SocialMessagePushService
 
 	/**
 	 * @param callable(int, string, string, array<string, mixed>): (bool|void)|null $notifier
+	 * @param callable(string): array<string, mixed>|null $languageLoader
+	 * @param callable(int): string|null $langResolver
 	 */
 	public function __construct(
 		private readonly mixed $notifier = null,
 		private readonly ?bool $configured = null,
+		private readonly mixed $languageLoader = null,
+		private readonly mixed $langResolver = null,
 	) {
 	}
 
@@ -119,7 +123,13 @@ class SocialMessagePushService
 		}
 
 		try {
-			$message = self::socialMessage($messageType, $senderName, $subject);
+			$lang = $this->resolveRecipientLang($receiverId);
+			$message = self::socialMessage(
+				$messageType,
+				$senderName,
+				$subject,
+				$this->loadLanguage($lang)
+			);
 
 			return $this->deliver($receiverId, $message);
 		} catch (Throwable $e) {
@@ -127,6 +137,52 @@ class SocialMessagePushService
 
 			return false;
 		}
+	}
+
+	private function resolveRecipientLang(int $userId): string
+	{
+		if (is_callable($this->langResolver)) {
+			$lang = ($this->langResolver)($userId);
+
+			return is_string($lang) && $lang !== '' ? $lang : 'en';
+		}
+
+		$row = Database::get()->selectSingle(
+			'SELECT lang FROM %%USERS%% WHERE id = :userId',
+			[':userId' => $userId],
+			'lang'
+		);
+
+		return is_string($row) && $row !== '' ? $row : 'en';
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function loadLanguage(string $lang): array
+	{
+		if (is_callable($this->languageLoader)) {
+			$loaded = ($this->languageLoader)($lang);
+
+			return is_array($loaded) ? $loaded : [];
+		}
+
+		$lang = preg_replace('/[^a-zA-Z0-9_-]/', '', $lang) ?: 'en';
+		$merged = [];
+
+		foreach (['en', $lang] as $code) {
+			$path = ROOT_PATH . 'language/' . $code . '/INGAME.php';
+			if (!is_file($path)) {
+				continue;
+			}
+			$LNG = [];
+			require $path;
+			if (is_array($LNG)) {
+				$merged = array_replace($merged, $LNG);
+			}
+		}
+
+		return $merged;
 	}
 
 	/**
@@ -140,6 +196,6 @@ class SocialMessagePushService
 
 		$result = PushNotificationService::notifyUser($userId, $message['title'], $message['body'], $message['data']);
 
-		return PushNotificationService::shouldStopRetrying($result);
+		return !empty($result['ok']);
 	}
 }
