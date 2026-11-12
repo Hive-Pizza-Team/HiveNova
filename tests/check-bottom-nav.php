@@ -66,12 +66,11 @@ $fullPages = [
     'imperium', 'marketplace', 'trader', 'officier', 'techtree',
     'battlesimulator', 'battlehall', 'records', 'changelog', 'chat',
     'buddylist', 'banlist', 'board', 'questions', 'ticket', 'viz', 'eventFirehose',
-    'raport',
+    'raport', 'notes',
 ];
 
 $popupPages = [
     ['page' => 'messages', 'mode' => 'write'],
-    ['page' => 'notes', 'mode' => 'show'],
     ['page' => 'information', 'mode' => 'show', 'id' => '1'],
     ['page' => 'playerCard', 'id' => '1'],
     ['page' => 'buddyList', 'mode' => 'request', 'id' => '1'],

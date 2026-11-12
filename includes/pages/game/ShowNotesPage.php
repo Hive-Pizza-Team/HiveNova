@@ -29,8 +29,6 @@ class ShowNotesPage extends AbstractGamePage
 	function __construct() 
 	{
 		parent::__construct();
-		$this->setWindow('popup');
-		$this->initTemplate();
 	}
 	
 	function show()
@@ -121,9 +119,10 @@ class ShowNotesPage extends AbstractGamePage
                 ':universe' => Universe::current()
             ));
         } else {
-			$sql	= "UPDATE %%NOTES%% SET time = :time, priority = :priority, title = :title, text = :text WHERE id = :noteID;";
+			$sql	= "UPDATE %%NOTES%% SET time = :time, priority = :priority, title = :title, text = :text WHERE id = :noteID AND owner = :userID;";
             $db->update($sql, array(
                 ':noteID'   => $id,
+                ':userID'   => $USER['id'],
                 ':time'     => TIMESTAMP,
                 ':priority' => $priority,
                 ':title'    => $title,
