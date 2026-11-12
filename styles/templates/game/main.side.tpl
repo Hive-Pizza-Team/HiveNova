@@ -1,5 +1,5 @@
 <div class="fold">
-	<a class="btn" href="#" onclick="toggleAside()">
+	<a class="btn" href="javascript:void(0)" onclick="toggleAside(); return false;">
 		<i class="fas fa-angle-double-right"></i>
 	</a>
 </div>
