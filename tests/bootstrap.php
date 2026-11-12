@@ -3,6 +3,7 @@
 $loader = require __DIR__ . '/../vendor/autoload.php';
 if ($loader instanceof \Composer\Autoload\ClassLoader) {
     $loader->setPsr4('HiveNova\\Core\\', [dirname(__DIR__) . '/includes/classes/']);
+    $loader->setPsr4('HiveNova\\Cronjob\\', [dirname(__DIR__) . '/includes/classes/cronjob/']);
     $loader->setPsr4('HiveNova\\Mission\\', [dirname(__DIR__) . '/includes/classes/missions/']);
     $loader->setPsr4('HiveNova\\Page\\Game\\', [dirname(__DIR__) . '/includes/pages/game/']);
     $loader->setPsr4('HiveNova\\Repository\\', [dirname(__DIR__) . '/includes/classes/repository/']);

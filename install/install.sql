@@ -1203,7 +1203,8 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'directive_period', 1, '0', '*', '*', '*', '*', 'HiveNova\\Cronjob\\DirectivePeriodCronjob', 0, NULL),
 (NULL, 'season', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SeasonCronjob', 0, NULL),
 (NULL, 'building_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\BuildingCompletePushCronjob', 0, NULL),
-(NULL, 'research_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\ResearchCompletePushCronjob', 0, NULL);
+(NULL, 'research_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\ResearchCompletePushCronjob', 0, NULL),
+(NULL, 'fleet_return_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\FleetReturnPushCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);
@@ -1679,6 +1680,22 @@ CREATE TABLE `%PREFIX%push_research_notified` (
   `notified_at` int(10) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`user_id`, `element_id`, `level`, `tech_end`),
   KEY `tech_end` (`tech_end`),
+  KEY `notified_at` (`notified_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%push_fleet_return_notified` (
+  `fleet_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `mission` tinyint(3) unsigned NOT NULL,
+  `galaxy` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `system` smallint(5) unsigned NOT NULL DEFAULT 0,
+  `planet` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `planet_name` varchar(50) NOT NULL DEFAULT '',
+  `return_end` int(10) unsigned NOT NULL,
+  `notified_at` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`fleet_id`),
+  KEY `user_id` (`user_id`),
+  KEY `return_end` (`return_end`),
   KEY `notified_at` (`notified_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

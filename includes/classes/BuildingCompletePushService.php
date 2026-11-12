@@ -19,6 +19,10 @@ class BuildingCompletePushService
 	public const NOTIFY_URL = 'game.php?page=buildings';
 	public const CLEANUP_AFTER = 7 * 86400;
 
+	/** Sentinel element_id/level in PUSH_BUILDING_NOTIFIED for queue-empty dedup */
+	public const QUEUE_EMPTY_ELEMENT_ID = 0;
+	public const QUEUE_EMPTY_LEVEL = 0;
+
 	/**
 	 * @param callable(int, string, string, array<string, mixed>): (bool|void)|null $notifier
 	 * @param callable(string): array<string, mixed>|null $languageLoader
@@ -142,6 +146,94 @@ class BuildingCompletePushService
 	}
 
 	/**
+	 * @param array<string, mixed>|null $lng
+	 * @return array{title: string, body: string, data: array<string, mixed>}
+	 */
+	public static function queueEmptyMessage(string $planetName, ?array $lng = null): array
+	{
+		$lng = $lng ?? (isset($GLOBALS['LNG']) && is_array($GLOBALS['LNG']) ? $GLOBALS['LNG'] : []);
+		$title = is_string($lng['push_queue_empty_title'] ?? null)
+			? $lng['push_queue_empty_title']
+			: 'Construction queue empty';
+		$template = is_string($lng['push_queue_empty_body'] ?? null)
+			? $lng['push_queue_empty_body']
+			: 'No buildings left in the queue on %s';
+		$planetName = $planetName !== '' ? $planetName : 'planet';
+
+		return [
+			'title' => $title,
+			'body'  => sprintf($template, $planetName),
+			'data'  => [
+				'url'  => self::NOTIFY_URL,
+				'type' => 'construction_queue_empty',
+			],
+		];
+	}
+
+	/**
+	 * True when the construction queue has a single entry (the current job),
+	 * so finishing it leaves the queue empty.
+	 */
+	public static function queueWillBeEmpty(mixed $serializedOrQueue): bool
+	{
+		$queue = is_string($serializedOrQueue)
+			? safe_unserialize($serializedOrQueue)
+			: $serializedOrQueue;
+
+		return is_array($queue) && count($queue) === 1;
+	}
+
+	public static function notifyQueueEmpty(
+		int $userId,
+		string $planetName,
+		string $lang = 'en',
+		int $planetId = 0,
+		int $buildEnd = 0
+	): bool {
+		return (new self())->notifyQueueEmptyForUser($userId, $planetName, $lang, $planetId, $buildEnd);
+	}
+
+	public function notifyQueueEmptyForUser(
+		int $userId,
+		string $planetName,
+		string $lang = 'en',
+		int $planetId = 0,
+		int $buildEnd = 0
+	): bool {
+		if ($userId <= 0 || !$this->isConfigured()) {
+			return false;
+		}
+
+		$claimed = false;
+		try {
+			if ($planetId > 0 && $buildEnd > 0) {
+				if (!$this->claimQueueEmpty($planetId, $buildEnd)) {
+					return false;
+				}
+				$claimed = true;
+			}
+
+			$message = self::queueEmptyMessage($planetName, $this->loadLanguage($lang));
+			if (!$this->deliver($userId, $message)) {
+				if ($claimed) {
+					$this->releaseQueueEmptyClaim($planetId, $buildEnd);
+				}
+
+				return false;
+			}
+
+			return true;
+		} catch (Throwable $e) {
+			if ($claimed) {
+				$this->releaseQueueEmptyClaim($planetId, $buildEnd);
+			}
+			PushNotificationService::logFailure('BuildingCompletePushService::notifyQueueEmpty: ' . $e->getMessage());
+
+			return false;
+		}
+	}
+
+	/**
 	 * @param list<array{planetId?: int, planetName?: string, elementId?: int, level?: int, buildEnd?: int}> $jobs
 	 */
 	public static function notifyCompletedJobs(int $userId, array $jobs, string $lang = 'en'): int
@@ -221,19 +313,25 @@ class BuildingCompletePushService
 			if ($pending === []) {
 				return 0;
 			}
-			$pending = array_values($pending);
 
+			$claimed = [];
 			foreach ($pending as $job) {
-				$this->claimPending($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
+				if ($this->claimPending($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd'])) {
+					$claimed[] = $job;
+				}
 			}
-			$message = $this->buildMessage($pending, $lang);
+			if ($claimed === []) {
+				return 0;
+			}
+
+			$message = $this->buildMessage($claimed, $lang);
 			if (!$this->deliver($userId, $message)) {
+				foreach ($claimed as $job) {
+					$this->releaseClaim($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
+				}
 				PushNotificationService::logFailure('BuildingCompletePushService: delivery failed user=' . $userId);
 
 				return 0;
-			}
-			foreach ($pending as $job) {
-				$this->markSent($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
 			}
 
 			return 1;
@@ -273,7 +371,9 @@ class BuildingCompletePushService
 					$planetId = (int) ($row['planet_id'] ?? 0);
 					$planetName = (string) ($row['planet_name'] ?? '');
 					$lang = (string) ($row['lang'] ?? 'en');
-					foreach (self::currentDueConstructionJobs($row['b_building_id'] ?? '', $now) as $job) {
+					$queueRaw = $row['b_building_id'] ?? '';
+					$dueJobs = self::currentDueConstructionJobs($queueRaw, $now);
+					foreach ($dueJobs as $job) {
 						$byUser[$userId]['lang'] = $lang;
 						$byUser[$userId]['jobs'][] = [
 							'planetId'   => $planetId,
@@ -281,6 +381,14 @@ class BuildingCompletePushService
 							'elementId'  => $job['elementId'],
 							'level'      => $job['level'],
 							'buildEnd'   => $job['buildEnd'],
+						];
+					}
+					if ($dueJobs !== [] && self::queueWillBeEmpty($queueRaw)) {
+						$byUser[$userId]['lang'] = $lang;
+						$byUser[$userId]['queueEmpty'][] = [
+							'planetId'   => $planetId,
+							'planetName' => $planetName,
+							'buildEnd'   => $dueJobs[0]['buildEnd'],
 						];
 					}
 				}
@@ -308,6 +416,15 @@ class BuildingCompletePushService
 					$payload['jobs'] ?? [],
 					(string) ($payload['lang'] ?? 'en')
 				);
+				foreach ($payload['queueEmpty'] ?? [] as $empty) {
+					$this->notifyQueueEmptyForUser(
+						(int) $userId,
+						(string) ($empty['planetName'] ?? ''),
+						(string) ($payload['lang'] ?? 'en'),
+						(int) ($empty['planetId'] ?? 0),
+						(int) ($empty['buildEnd'] ?? 0)
+					);
+				}
 			}
 
 			$this->cleanup($now);
@@ -475,9 +592,15 @@ class BuildingCompletePushService
 		return $row !== false && $row !== null && $row !== '';
 	}
 
-	private function claimPending(int $planetId, int $elementId, int $level, int $buildEnd): void
+	/**
+	 * Atomically claim a building-complete notification slot.
+	 * INSERT IGNORE ensures the row exists; UPDATE … WHERE notified_at = 0
+	 * succeeds for exactly one concurrent caller (rowCount === 1).
+	 */
+	private function claimPending(int $planetId, int $elementId, int $level, int $buildEnd): bool
 	{
-		Database::get()->insert(
+		$db = Database::get();
+		$db->insert(
 			'INSERT IGNORE INTO %%PUSH_BUILDING_NOTIFIED%% (planet_id, element_id, level, build_end, notified_at)
 			VALUES (:planetId, :elementId, :level, :buildEnd, :notifiedAt)',
 			[
@@ -488,11 +611,7 @@ class BuildingCompletePushService
 				':notifiedAt' => 0,
 			]
 		);
-	}
-
-	private function markSent(int $planetId, int $elementId, int $level, int $buildEnd): void
-	{
-		Database::get()->update(
+		$db->update(
 			'UPDATE %%PUSH_BUILDING_NOTIFIED%% SET notified_at = :notifiedAt
 			WHERE planet_id = :planetId AND element_id = :elementId AND level = :level AND build_end = :buildEnd
 			AND notified_at = 0',
@@ -503,6 +622,43 @@ class BuildingCompletePushService
 				':buildEnd'   => $buildEnd,
 				':notifiedAt' => defined('TIMESTAMP') ? TIMESTAMP : time(),
 			]
+		);
+
+		return (int) $db->rowCount() === 1;
+	}
+
+	private function releaseClaim(int $planetId, int $elementId, int $level, int $buildEnd): void
+	{
+		Database::get()->update(
+			'UPDATE %%PUSH_BUILDING_NOTIFIED%% SET notified_at = 0
+			WHERE planet_id = :planetId AND element_id = :elementId AND level = :level AND build_end = :buildEnd
+			AND notified_at > 0',
+			[
+				':planetId'   => $planetId,
+				':elementId'  => $elementId,
+				':level'      => $level,
+				':buildEnd'   => $buildEnd,
+			]
+		);
+	}
+
+	private function claimQueueEmpty(int $planetId, int $buildEnd): bool
+	{
+		return $this->claimPending(
+			$planetId,
+			self::QUEUE_EMPTY_ELEMENT_ID,
+			self::QUEUE_EMPTY_LEVEL,
+			$buildEnd
+		);
+	}
+
+	private function releaseQueueEmptyClaim(int $planetId, int $buildEnd): void
+	{
+		$this->releaseClaim(
+			$planetId,
+			self::QUEUE_EMPTY_ELEMENT_ID,
+			self::QUEUE_EMPTY_LEVEL,
+			$buildEnd
 		);
 	}
 
