@@ -65,14 +65,18 @@
 			</ol>
 			<p><small>{$LNG.op_hive_upgrade_keep_playing}</small></p>
 			{if $hiveCreatePending}
+			{if $hiveCreatePending.status == 'approved'}
+			<p><strong>{$LNG.op_hive_create_approved}</strong> (@{$hiveCreatePending.desired_name|escape:'html'})</p>
+			{else}
 			<p><strong>{$LNG.op_hive_create_pending}</strong> (@{$hiveCreatePending.desired_name|escape:'html'})</p>
+			{/if}
 			{elseif $hiveCreateAvailable}
-			<form action="game.php?page=settings&amp;mode=requestHiveCreate" method="post" style="margin-top:0.75em">
+			<div style="margin-top:0.75em">
 				<label for="desiredHiveName">{$LNG.op_hive_create_label}</label>
-				<input id="desiredHiveName" name="desiredHiveName" maxlength="16" size="16" type="text" autocomplete="off">
-				<button type="submit" class="login-button button_standard">{$LNG.op_hive_create_submit}</button>
+				<input id="desiredHiveName" name="desiredHiveName" form="hive-create-request" maxlength="16" size="16" type="text" autocomplete="off">
+				<button type="submit" form="hive-create-request" class="login-button button_standard">{$LNG.op_hive_create_submit}</button>
 				<br><small>{$LNG.op_hive_create_help}</small>
-			</form>
+			</div>
 			{/if}
 		</td>
 	</tr>
@@ -250,6 +254,9 @@
 		</tbody>
 	</table>
 	</form>
+	{if $hiveNeedsUpgrade && $hiveCreateAvailable}
+	<form id="hive-create-request" action="game.php?page=settings&amp;mode=requestHiveCreate" method="post"></form>
+	{/if}
 <script>
 (function () {
 	var banner = document.getElementById('userbanner-details');

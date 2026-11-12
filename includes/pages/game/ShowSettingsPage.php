@@ -61,7 +61,8 @@ class ShowSettingsPage extends AbstractGamePage
 
 		return match ($errorCode) {
 			HiveAccountUpgradeService::ERR_INVALID_SIGNATURE,
-			HiveAccountUpgradeService::ERR_INVALID_TOKEN => (string) ($LNG['op_hive_link_bad_proof'] ?? $LNG['op_user_name_no_alphanumeric']),
+			HiveAccountUpgradeService::ERR_INVALID_TOKEN,
+			HiveAccountUpgradeService::ERR_INVALID_STATE => (string) ($LNG['op_hive_link_bad_proof'] ?? $LNG['op_user_name_no_alphanumeric']),
 			HiveAccountUpgradeService::ERR_TAKEN => (string) ($LNG['op_hive_link_taken'] ?? $LNG['op_user_name_no_alphanumeric']),
 			HiveAccountUpgradeService::ERR_ALREADY_LINKED => (string) ($LNG['op_hive_link_already'] ?? $LNG['op_user_name_no_alphanumeric']),
 			HiveAccountUpgradeService::ERR_EMPTY => (string) ($LNG['op_hive_link_empty'] ?? $LNG['op_user_name_no_alphanumeric']),
@@ -85,7 +86,9 @@ class ShowSettingsPage extends AbstractGamePage
 		else
 		{
 			$depositWallet = (new SeasonService(new DatabaseSeasonStore()))->depositWallet(Config::get());
-			$upgrade = $this->hiveUpgradeService()->upgradePanel($USER, $this->hiveSignerCallbackUrl());
+			$oauthState = HiveAccountUpgradeService::createOAuthState();
+			Session::load()->hiveSignerState = $oauthState;
+			$upgrade = $this->hiveUpgradeService()->upgradePanel($USER, $this->hiveSignerCallbackUrl(), $oauthState);
 			$createService = new HiveAccountCreateRequestService();
 			$pendingCreate = $createService->findPendingForUser((int) $USER['id'], (int) Universe::current());
 			$createAvailable = $upgrade['needsUpgrade'] && $createService->isEligible($USER) && $pendingCreate === null;
@@ -178,6 +181,7 @@ class ShowSettingsPage extends AbstractGamePage
 				HiveAccountCreateRequestService::CODE_INVALID_NAME => (string) ($LNG['op_hive_create_invalid'] ?? $LNG['op_user_name_no_alphanumeric']),
 				HiveAccountCreateRequestService::CODE_NAME_EXISTS => (string) ($LNG['op_hive_create_exists'] ?? $LNG['op_user_name_no_alphanumeric']),
 				HiveAccountCreateRequestService::CODE_PENDING_EXISTS => (string) ($LNG['op_hive_create_pending'] ?? $LNG['op_options_changed']),
+				HiveAccountCreateRequestService::CODE_APPROVED_EXISTS => (string) ($LNG['op_hive_create_approved'] ?? $LNG['op_hive_create_pending'] ?? $LNG['op_options_changed']),
 				HiveAccountCreateRequestService::CODE_NOT_ELIGIBLE => (string) ($LNG['op_hive_create_not_eligible'] ?? $LNG['op_user_name_no_alphanumeric']),
 				default => (string) ($LNG['op_hive_create_invalid'] ?? $LNG['op_user_name_no_alphanumeric']),
 			};
@@ -220,6 +224,18 @@ class ShowSettingsPage extends AbstractGamePage
 		}
 
 		global $USER, $LNG;
+
+		$session = Session::load();
+		$expectedState = isset($session->hiveSignerState) ? (string) $session->hiveSignerState : '';
+		$session->hiveSignerState = '';
+		$providedState = (string) HTTP::_GP('state', '', true);
+		if (!HiveAccountUpgradeService::isValidOAuthState($expectedState, $providedState)) {
+			$this->printMessage($this->hiveLinkErrorMessage(HiveAccountUpgradeService::ERR_INVALID_STATE), [[
+				'label' => $LNG['sys_back'],
+				'url'   => 'game.php?page=settings',
+			]]);
+			return;
+		}
 
 		$accessToken = HTTP::_GP('access_token', '', true);
 		$result = $this->hiveUpgradeService()->linkWithHiveSignerToken(

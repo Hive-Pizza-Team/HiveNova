@@ -21,7 +21,10 @@ class HiveAccountCreateRequestServiceTest extends TestCase
 				foreach (array_reverse($this->rows) as $row) {
 					if ((int) $row['user_id'] === $userId
 						&& (int) $row['universe'] === $universeId
-						&& $row['status'] === HiveAccountCreateRequestService::STATUS_PENDING
+						&& in_array($row['status'], [
+							HiveAccountCreateRequestService::STATUS_PENDING,
+							HiveAccountCreateRequestService::STATUS_APPROVED,
+						], true)
 					) {
 						return $row;
 					}
@@ -137,6 +140,20 @@ class HiveAccountCreateRequestServiceTest extends TestCase
 		$this->assertSame(HiveAccountCreateRequestService::CODE_PENDING_EXISTS, $second['code']);
 	}
 
+	public function testSubmitRejectsWhenApprovedExists(): void
+	{
+		$service = $this->service();
+		$user = ['id' => 8, 'email' => 'p@example.com', 'hive_account' => ''];
+		$id = (int) $service->submit($user, 1, 'approved1', 1)['request_id'];
+		$this->assertTrue($service->approve($id, 1)['ok']);
+
+		$second = $service->submit($user, 1, 'approved2', 2);
+		$this->assertSame(HiveAccountCreateRequestService::CODE_APPROVED_EXISTS, $second['code']);
+		$found = $service->findPendingForUser(8, 1);
+		$this->assertNotNull($found);
+		$this->assertSame(HiveAccountCreateRequestService::STATUS_APPROVED, $found['status']);
+	}
+
 	public function testApproveAndReject(): void
 	{
 		$service = $this->service();
@@ -169,17 +186,45 @@ class HiveAccountCreateRequestServiceTest extends TestCase
 		$this->assertSame(HiveAccountCreateRequestService::CODE_EMPTY_REASON, $emptyReason['code']);
 	}
 
+	public function testApproveFailsWhenStatusUpdaterReturnsFalse(): void
+	{
+		$service = new HiveAccountCreateRequestService(
+			null,
+			static fn (string $name): bool => false,
+			static fn (int $userId, int $universeId): ?array => null,
+			static fn (array $row): int => 1,
+			static fn (int $requestId): ?array => [
+				'id' => $requestId,
+				'status' => HiveAccountCreateRequestService::STATUS_PENDING,
+				'desired_name' => 'race',
+			],
+			static fn (int $requestId, string $status, int $adminId, string $rejectReason): bool => false,
+			static fn (int $universeId): array => []
+		);
+
+		$result = $service->approve(1, 9);
+		$this->assertFalse($result['ok']);
+		$this->assertSame(HiveAccountCreateRequestService::CODE_NOT_PENDING, $result['code']);
+	}
+
 	public function testSettingsTemplateExposesCreateRequestForm(): void
 	{
 		$tpl = file_get_contents(__DIR__.'/../../styles/templates/game/page.settings.default.tpl');
 		$page = file_get_contents(__DIR__.'/../../includes/pages/game/ShowSettingsPage.php');
 		$admin = file_get_contents(__DIR__.'/../../includes/pages/adm/ShowHiveCreateRequestsPage.php');
+		$signerTpl = file_get_contents(__DIR__.'/../../styles/templates/game/page.settings.hivesigner.tpl');
 
 		$this->assertIsString($tpl);
 		$this->assertIsString($page);
 		$this->assertIsString($admin);
+		$this->assertIsString($signerTpl);
 		$this->assertStringContainsString('hiveCreateAvailable', $tpl);
+		$this->assertStringContainsString('form="hive-create-request"', $tpl);
+		$this->assertStringContainsString('id="hive-create-request"', $tpl);
+		$this->assertStringContainsString('op_hive_create_approved', $tpl);
+		$this->assertStringNotContainsString('window.location.search', $signerTpl);
 		$this->assertStringContainsString('requestHiveCreate', $page);
+		$this->assertStringContainsString('hiveSignerState', $page);
 		$this->assertStringContainsString('HiveAccountCreateRequestService', $admin);
 	}
 }

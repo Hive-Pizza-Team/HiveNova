@@ -21,6 +21,7 @@ class HiveAccountCreateRequestService
 	public const CODE_INVALID_NAME = 'invalid_name';
 	public const CODE_NAME_EXISTS = 'name_exists';
 	public const CODE_PENDING_EXISTS = 'pending_exists';
+	public const CODE_APPROVED_EXISTS = 'approved_exists';
 	public const CODE_NOT_FOUND = 'not_found';
 	public const CODE_NOT_PENDING = 'not_pending';
 	public const CODE_EMPTY_REASON = 'empty_reason';
@@ -73,12 +74,14 @@ class HiveAccountCreateRequestService
 		$this->pendingLookup = $pendingLookup ?? static function (int $userId, int $universeId): ?array {
 			$sql = 'SELECT id, user_id, universe, desired_name, status, reject_reason, created_at, reviewed_at, reviewed_by
 				FROM %%HIVE_ACCOUNT_CREATE_REQUESTS%%
-				WHERE user_id = :userId AND universe = :universe AND status = :status
+				WHERE user_id = :userId AND universe = :universe
+					AND status IN (:pending, :approved)
 				ORDER BY id DESC LIMIT 1;';
 			$row = Database::get()->selectSingle($sql, [
 				':userId' => $userId,
 				':universe' => $universeId,
-				':status' => self::STATUS_PENDING,
+				':pending' => self::STATUS_PENDING,
+				':approved' => self::STATUS_APPROVED,
 			]);
 
 			return is_array($row) ? $row : null;
@@ -123,7 +126,8 @@ class HiveAccountCreateRequestService
 					reviewed_at = :reviewedAt,
 					reviewed_by = :reviewedBy
 				WHERE id = :id AND status = :pending;';
-			Database::get()->update($sql, [
+			$db = Database::get();
+			$db->update($sql, [
 				':status' => $status,
 				':rejectReason' => $rejectReason,
 				':reviewedAt' => TIMESTAMP,
@@ -132,7 +136,7 @@ class HiveAccountCreateRequestService
 				':pending' => self::STATUS_PENDING,
 			]);
 
-			return true;
+			return $db->rowCount() > 0;
 		};
 		$this->pendingLister = $pendingLister ?? static function (int $universeId): array {
 			$sql = 'SELECT r.id, r.user_id, r.universe, r.desired_name, r.status, r.reject_reason, r.created_at,
@@ -194,7 +198,12 @@ class HiveAccountCreateRequestService
 			return $this->fail(self::CODE_NAME_EXISTS);
 		}
 
-		if (($this->pendingLookup)($userId, $universeId) !== null) {
+		$existing = ($this->pendingLookup)($userId, $universeId);
+		if ($existing !== null) {
+			if (($existing['status'] ?? '') === self::STATUS_APPROVED) {
+				return $this->fail(self::CODE_APPROVED_EXISTS);
+			}
+
 			return $this->fail(self::CODE_PENDING_EXISTS);
 		}
 
@@ -228,7 +237,9 @@ class HiveAccountCreateRequestService
 			return ['ok' => false, 'code' => self::CODE_NOT_PENDING, 'request' => $row];
 		}
 
-		($this->statusUpdater)($requestId, self::STATUS_APPROVED, $adminId, '');
+		if (!($this->statusUpdater)($requestId, self::STATUS_APPROVED, $adminId, '')) {
+			return ['ok' => false, 'code' => self::CODE_NOT_PENDING, 'request' => $row];
+		}
 		$row['status'] = self::STATUS_APPROVED;
 		$row['reviewed_by'] = $adminId;
 
@@ -253,7 +264,9 @@ class HiveAccountCreateRequestService
 			return ['ok' => false, 'code' => self::CODE_NOT_PENDING, 'request' => $row];
 		}
 
-		($this->statusUpdater)($requestId, self::STATUS_REJECTED, $adminId, $reason);
+		if (!($this->statusUpdater)($requestId, self::STATUS_REJECTED, $adminId, $reason)) {
+			return ['ok' => false, 'code' => self::CODE_NOT_PENDING, 'request' => $row];
+		}
 		$row['status'] = self::STATUS_REJECTED;
 		$row['reject_reason'] = $reason;
 		$row['reviewed_by'] = $adminId;

@@ -99,7 +99,8 @@ class HiveAccountUpgradeServiceTest extends TestCase
 	{
 		$panel = $this->service()->upgradePanel(
 			['email' => 'p@example.com', 'hive_account' => ''],
-			'https://moon.example/uni1/game.php?page=settings&mode=hiveSignerReturn'
+			'https://moon.example/uni1/game.php?page=settings&mode=hiveSignerReturn',
+			'state-abc'
 		);
 
 		$this->assertTrue($panel['needsUpgrade']);
@@ -108,7 +109,18 @@ class HiveAccountUpgradeServiceTest extends TestCase
 		$this->assertStringContainsString('client_id=moon.app', $panel['hiveSignerUrl']);
 		$this->assertStringContainsString('scope=login', $panel['hiveSignerUrl']);
 		$this->assertStringContainsString('response_type=token', $panel['hiveSignerUrl']);
+		$this->assertStringContainsString('state=state-abc', $panel['hiveSignerUrl']);
 		$this->assertStringContainsString(rawurlencode('https://moon.example/uni1/game.php?page=settings&mode=hiveSignerReturn'), $panel['hiveSignerUrl']);
+	}
+
+	public function test_oauth_state_helpers(): void
+	{
+		$state = HiveAccountUpgradeService::createOAuthState();
+		$this->assertMatchesRegularExpression('/^[a-f0-9]{32}$/', $state);
+		$this->assertTrue(HiveAccountUpgradeService::isValidOAuthState($state, $state));
+		$this->assertFalse(HiveAccountUpgradeService::isValidOAuthState($state, 'other'));
+		$this->assertFalse(HiveAccountUpgradeService::isValidOAuthState('', $state));
+		$this->assertFalse(HiveAccountUpgradeService::isValidOAuthState(null, $state));
 	}
 
 	public function test_hivesigner_disabled_without_client_id(): void

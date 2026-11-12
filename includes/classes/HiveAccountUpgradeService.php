@@ -13,6 +13,7 @@ class HiveAccountUpgradeService
 	public const ERR_INVALID_ACCOUNT = 'invalid_account';
 	public const ERR_INVALID_SIGNATURE = 'invalid_signature';
 	public const ERR_INVALID_TOKEN = 'invalid_token';
+	public const ERR_INVALID_STATE = 'invalid_state';
 	public const ERR_ALREADY_LINKED = 'already_linked';
 	public const ERR_TAKEN = 'taken';
 	public const ERR_EMPTY = 'empty';
@@ -183,7 +184,7 @@ class HiveAccountUpgradeService
 	 *     createAvailable: bool
 	 * }
 	 */
-	public function upgradePanel(array $user, string $callbackUrl): array
+	public function upgradePanel(array $user, string $callbackUrl, string $oauthState = ''): array
 	{
 		$linked = self::linkedHiveAccount($user);
 		$password = self::isPasswordPlayer($user);
@@ -193,13 +194,26 @@ class HiveAccountUpgradeService
 			'isPasswordPlayer' => $password,
 			'linkedAccount'    => $linked,
 			'canHiveSigner'    => $this->isHiveSignerConfigured(),
-			'hiveSignerUrl'    => $this->buildHiveSignerAuthorizeUrl($callbackUrl),
+			'hiveSignerUrl'    => $this->buildHiveSignerAuthorizeUrl($callbackUrl, $oauthState),
 			'createStatus'     => self::CREATE_STATUS_PENDING,
 			'createAvailable'  => false,
 		];
 	}
 
-	public function buildHiveSignerAuthorizeUrl(string $redirectUri): string
+	public static function createOAuthState(): string
+	{
+		return bin2hex(random_bytes(16));
+	}
+
+	public static function isValidOAuthState(?string $expected, string $provided): bool
+	{
+		return is_string($expected)
+			&& $expected !== ''
+			&& $provided !== ''
+			&& hash_equals($expected, $provided);
+	}
+
+	public function buildHiveSignerAuthorizeUrl(string $redirectUri, string $state = ''): string
 	{
 		if (!$this->isHiveSignerConfigured()) {
 			return '';
@@ -207,12 +221,16 @@ class HiveAccountUpgradeService
 
 		// Implicit token response so the browser receives access_token in the
 		// URL hash without requiring a HiveSigner client_secret exchange.
-		$query = http_build_query([
+		$params = [
 			'client_id'     => $this->hiveSigner['clientId'],
 			'redirect_uri'  => $redirectUri,
 			'response_type' => 'token',
 			'scope'         => $this->hiveSigner['scope'],
-		], '', '&', PHP_QUERY_RFC3986);
+		];
+		if ($state !== '') {
+			$params['state'] = $state;
+		}
+		$query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
 
 		$base = rtrim($this->hiveSigner['authorizeUrl'], '?&');
 
