@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Config;
 use HiveNova\Core\DatabaseSeasonStore;
+use HiveNova\Core\HiveAccountUpgradeService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\SeasonService;
 
@@ -28,6 +29,7 @@ class ShowSeasonPage extends AbstractGamePage
 
 		$hasHive = $service->hasHive($USER);
 		$hasEntry = $service->hasEntry($USER, $config);
+		$hiveSoftPrompt = (new HiveAccountUpgradeService())->softPrompt($USER, 'game.php?page=settings');
 		$message = '';
 		if (!$service->isSeasonal($config)) {
 			$message = $LNG['page_season_not_seasonal'] ?? 'This universe is not a short-lived season.';
@@ -67,6 +69,7 @@ class ShowSeasonPage extends AbstractGamePage
 			'seasonId'        => (int) ($config->season_id ?? 0),
 			'countdownLabel'  => $countdown > 0 ? pretty_time($countdown) : '',
 			'canPlay'         => $service->canPlay($USER, $config),
+			'hiveSoftPrompt'  => $hiveSoftPrompt,
 		]);
 		$this->display('page.season.default.tpl');
 	}

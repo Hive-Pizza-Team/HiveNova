@@ -55,6 +55,8 @@
 	var isPlayerCardActive	= "{$isPlayerCardActive|json}";
 	var numberFormat	= "{$USER.number_format|default:'auto'}";
 	var needHiveForDeposit = "{$LNG.js_need_hive_for_deposit|escape:'javascript'}";
+	var hiveNeedKeychain = "{$LNG.js_hive_need_keychain|escape:'javascript'}";
+	var hiveAskAccount = "{$LNG.js_hive_ask_account|escape:'javascript'}";
 	var relativeTime = Math.floor(Date.now() / 1000);
 
 	function syncGameClockToWall() {

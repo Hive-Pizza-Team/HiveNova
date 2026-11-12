@@ -46,8 +46,41 @@
 			<input id="hiveAccount" name="hiveAccount" maxlength="16" size="16" value="{$hiveAccount}" placeholder="⬇⬇⬇⬇⬇" readonly>
 			<input id="hivesign" name="hivesign" type="hidden">
 			<button type="button" onclick="HiveKeychainLogin()" class="login-button button_standard" title="{$LNG.op_link_hive_account}">{$LNG.op_link_hive_account}</button>
+			{if $hiveCanHiveSigner && $hiveSignerUrl}
+			<a class="login-button button_standard" href="{$hiveSignerUrl|escape:'html'}" title="{$LNG.op_hive_link_hivesigner}">{$LNG.op_hive_link_hivesigner}</a>
+			{/if}
 		</td>
 	</tr>
+	{if $hiveNeedsUpgrade}
+	<tr id="hive-upgrade">
+		<th colspan="2">{$LNG.op_hive_upgrade_title}</th>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<p>{$LNG.op_hive_upgrade_intro}</p>
+			<ol>
+				<li>{$LNG.op_hive_upgrade_step_keychain}</li>
+				<li>{$LNG.op_hive_upgrade_step_hivesigner}</li>
+				<li>{$LNG.op_hive_upgrade_step_create}</li>
+			</ol>
+			<p><small>{$LNG.op_hive_upgrade_keep_playing}</small></p>
+			{if $hiveCreatePending}
+			{if $hiveCreatePending.status == 'approved'}
+			<p><strong>{$LNG.op_hive_create_approved}</strong> (@{$hiveCreatePending.desired_name|escape:'html'})</p>
+			{else}
+			<p><strong>{$LNG.op_hive_create_pending}</strong> (@{$hiveCreatePending.desired_name|escape:'html'})</p>
+			{/if}
+			{elseif $hiveCreateAvailable}
+			<div style="margin-top:0.75em">
+				<label for="desiredHiveName">{$LNG.op_hive_create_label}</label>
+				<input id="desiredHiveName" name="desiredHiveName" form="hive-create-request" maxlength="16" size="16" type="text" autocomplete="off">
+				<button type="submit" form="hive-create-request" class="login-button button_standard">{$LNG.op_hive_create_submit}</button>
+				<br><small>{$LNG.op_hive_create_help}</small>
+			</div>
+			{/if}
+		</td>
+	</tr>
+	{/if}
 	<tr>
 		<td style="height:22px;">{$LNG.op_deposit_pizza}</td>
 		<td>
@@ -221,6 +254,9 @@
 		</tbody>
 	</table>
 	</form>
+	{if $hiveNeedsUpgrade && $hiveCreateAvailable}
+	<form id="hive-create-request" action="game.php?page=settings&amp;mode=requestHiveCreate" method="post"></form>
+	{/if}
 <script>
 (function () {
 	var banner = document.getElementById('userbanner-details');

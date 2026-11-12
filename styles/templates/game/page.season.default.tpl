@@ -11,7 +11,11 @@
 			<p>{$LNG.page_season_countdown}: {$countdownLabel}</p>
 			{/if}
 			{if !$hasHive}
-			<p><a href="game.php?page=settings">{$LNG.page_season_link_settings}</a></p>
+			<p><a href="{$hiveSoftPrompt.settingsUrl|default:'game.php?page=settings'|escape:'html'}">{$LNG.page_season_link_settings}</a></p>
+			{if $hiveSoftPrompt.show|default:false}
+			<p><small>{$LNG.op_hive_upgrade_keep_playing}</small></p>
+			<p><a href="game.php?page=overview">{$LNG.page_season_keep_playing}</a></p>
+			{/if}
 			{/if}
 			{if $hasHive && $canEnter && !$hasEntry}
 			<p>{$payInstruction|escape:'html'}</p>
