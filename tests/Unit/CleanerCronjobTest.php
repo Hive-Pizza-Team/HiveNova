@@ -82,6 +82,19 @@ class CleanerCronjobTest extends TestCase
         );
     }
 
+    public function testUniverseSwitchTokenSweepIsActive(): void
+    {
+        $this->assertStringContainsString(
+            'UniverseSwitchService',
+            $this->source,
+            'CleanerCronjob must sweep expired universe-switch token files'
+        );
+        $this->assertStringContainsString(
+            'sweepExpiredTokens',
+            $this->source
+        );
+    }
+
     public function testUniverseEventsCleanupIsActive(): void
     {
         $this->assertMatchesRegularExpression(

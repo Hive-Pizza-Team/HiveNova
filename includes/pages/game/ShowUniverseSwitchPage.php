@@ -59,6 +59,7 @@ class ShowUniverseSwitchPage extends AbstractGamePage
 			'accounts'   => $accounts,
 			'switchable' => $switchable,
 			'hasLinks'   => $switchable !== [],
+			'csrfToken'  => $this->switchService->issueCsrfToken(),
 		]);
 		$this->display('page.universeSwitch.default.tpl');
 	}
@@ -67,19 +68,39 @@ class ShowUniverseSwitchPage extends AbstractGamePage
 	{
 		global $USER, $LNG;
 
+		$invalidButtons = [[
+			'label' => $LNG['lm_universe_switch'],
+			'url'   => 'game.php?page=universeSwitch',
+		]];
+
+		if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST'
+			|| !$this->switchService->validateCsrfToken(HTTP::_GP('csrf', ''))
+		) {
+			$this->printMessage(
+				$LNG['cm_invalid_token'] ?? ($LNG['us_invalid'] ?? 'Invalid security token'),
+				$invalidButtons
+			);
+			return;
+		}
+
 		$targetUniverse = HTTP::_GP('universe', 0);
-		$target = $this->switchService->findLinkedTarget(
+		$targetOpen = false;
+		try {
+			$targetOpen = (int) Config::get($targetUniverse)->game_disable === 1;
+		} catch (\Throwable) {
+			$targetOpen = false;
+		}
+
+		$target = $this->switchService->validateSwitchTarget(
 			$USER,
 			$targetUniverse,
 			Database::get(),
-			Universe::availableUniverses()
+			Universe::availableUniverses(),
+			$targetOpen
 		);
 
 		if ($target === null) {
-			$this->printMessage($LNG['us_invalid'], [[
-				'label' => $LNG['lm_universe_switch'],
-				'url'   => 'game.php?page=universeSwitch',
-			]]);
+			$this->printMessage($LNG['us_invalid'], $invalidButtons);
 			return;
 		}
 

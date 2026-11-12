@@ -5,13 +5,15 @@ namespace HiveNova\Core;
 /**
  * Lists sibling player accounts across universes and issues one-time switch tokens.
  *
- * Accounts are linked when they share a valid Hive account or the same permanent email
- * (email_2). Sessions are cookie-scoped per /uniN/ path, so switching logs out the
- * current universe and redeems a short-lived token under the target universe URL.
+ * Accounts are linked when they share a valid Hive account, or (only when neither
+ * side has a Hive account) the same permanent email (email_2). Sessions are
+ * cookie-scoped per /uniN/ path, so switching logs out the current universe and
+ * redeems a short-lived token under the target universe URL.
  */
 class UniverseSwitchService
 {
 	public const TOKEN_TTL_SECONDS = 90;
+	public const CSRF_SESSION_KEY = 'universe_switch_csrf';
 
 	/**
 	 * @param array<string, mixed> $user Current player row (id, universe, hive_account, email_2)
@@ -49,7 +51,8 @@ class UniverseSwitchService
 			$clauses[] = 'LOWER(TRIM(hive_account)) = :hive';
 			$params[':hive'] = $hive;
 		}
-		if ($email !== '') {
+		if ($email !== '' && $hive === '') {
+			// Email matching only when the current account has no Hive identity.
 			$clauses[] = 'LOWER(TRIM(email_2)) = :email';
 			$params[':email'] = $email;
 		}
@@ -114,8 +117,11 @@ class UniverseSwitchService
 	{
 		$fromHive = $this->normalizedHive((string) ($fromUser['hive_account'] ?? ''));
 		$toHive = $this->normalizedHive((string) ($toUser['hive_account'] ?? ''));
-		if ($fromHive !== '' && $fromHive === $toHive) {
-			return true;
+
+		// Any Hive identity on either side: require an exact Hive match; never
+		// fall through to email (email_2 is not proof of the same owner).
+		if ($fromHive !== '' || $toHive !== '') {
+			return $fromHive !== '' && $fromHive === $toHive;
 		}
 
 		$fromEmail = $this->normalizedEmail((string) ($fromUser['email_2'] ?? ''));
@@ -159,6 +165,87 @@ class UniverseSwitchService
 		return null;
 	}
 
+	/**
+	 * Fully validate a switch target before dropping the source session.
+	 *
+	 * @param list<int> $availableUniverses
+	 * @return array{userId: int, universe: int}|null
+	 */
+	public function validateSwitchTarget(
+		array $fromUser,
+		int $targetUniverse,
+		DatabaseInterface $db,
+		array $availableUniverses,
+		bool $targetUniverseOpen,
+	): ?array {
+		if (!$targetUniverseOpen) {
+			return null;
+		}
+
+		$target = $this->findLinkedTarget($fromUser, $targetUniverse, $db, $availableUniverses);
+		if ($target === null) {
+			return null;
+		}
+
+		$row = $db->selectSingle(
+			'SELECT id, universe, username, hive_account, email_2, bana
+			FROM %%USERS%% WHERE id = :userId',
+			[':userId' => (int) $target['userId']]
+		);
+		if (!is_array($row) || empty($row)) {
+			return null;
+		}
+		if ((int) ($row['bana'] ?? 0) === 1) {
+			return null;
+		}
+		if ((int) ($row['universe'] ?? 0) !== (int) $target['universe']) {
+			return null;
+		}
+		if (!$this->accountsLinked($fromUser, $row)) {
+			return null;
+		}
+
+		return [
+			'userId'   => (int) $row['id'],
+			'universe' => (int) $row['universe'],
+		];
+	}
+
+	/**
+	 * Confirm token payload still refers to linked, allowed accounts at redeem time.
+	 *
+	 * @param array{fromUserId: int, toUserId: int, toUniverse: int} $payload
+	 * @param array<string, mixed>|null $fromUser
+	 * @param array<string, mixed>|null $toUser
+	 */
+	public function canRedeemPayload(
+		array $payload,
+		?array $fromUser,
+		?array $toUser,
+		bool $targetUniverseOpen,
+	): bool {
+		if (!$targetUniverseOpen) {
+			return false;
+		}
+		if (!is_array($fromUser) || !is_array($toUser) || empty($fromUser) || empty($toUser)) {
+			return false;
+		}
+		if ((int) ($toUser['bana'] ?? 0) === 1) {
+			return false;
+		}
+		if ((int) ($toUser['id'] ?? 0) !== (int) ($payload['toUserId'] ?? 0)) {
+			return false;
+		}
+		if ((int) ($toUser['universe'] ?? 0) !== (int) ($payload['toUniverse'] ?? 0)) {
+			return false;
+		}
+		if ((int) ($fromUser['id'] ?? 0) !== (int) ($payload['fromUserId'] ?? 0)) {
+			return false;
+		}
+
+		return $this->accountsLinked($fromUser, $toUser);
+	}
+
 	public function issueToken(int $fromUserId, int $toUserId, int $toUniverse, string $cacheDir): string
 	{
 		$token = bin2hex(random_bytes(16));
@@ -196,6 +283,39 @@ class UniverseSwitchService
 
 		$raw = file_get_contents($path);
 		if ($raw === false || $raw === '') {
+			@unlink($path);
+			return null;
+		}
+
+		$payload = $this->decodeTokenPayload($raw);
+		if ($payload === null) {
+			@unlink($path);
+			return null;
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * Atomically claim and consume a switch token.
+	 *
+	 * @return array{fromUserId: int, toUserId: int, toUniverse: int}|null
+	 */
+	public function consumeToken(string $token, string $cacheDir): ?array
+	{
+		if (!$this->isValidTokenFormat($token)) {
+			return null;
+		}
+
+		$path = $this->tokenPath($cacheDir, $token);
+		$claimPath = $path . '.claim.' . bin2hex(random_bytes(8));
+		if (!@rename($path, $claimPath)) {
+			return null;
+		}
+
+		$raw = file_get_contents($claimPath);
+		@unlink($claimPath);
+		if ($raw === false || $raw === '') {
 			return null;
 		}
 
@@ -203,21 +323,25 @@ class UniverseSwitchService
 	}
 
 	/**
-	 * @return array{fromUserId: int, toUserId: int, toUniverse: int}|null
+	 * Remove expired/invalid universe-switch token files from the cache directory.
 	 */
-	public function consumeToken(string $token, string $cacheDir): ?array
+	public function sweepExpiredTokens(string $cacheDir): int
 	{
-		$payload = $this->peekToken($token, $cacheDir);
-		if ($payload === null) {
-			return null;
+		$pattern = rtrim($cacheDir, '/\\') . '/universe_switch_*.json';
+		$removed = 0;
+		foreach (glob($pattern) ?: [] as $path) {
+			if (!is_file($path)) {
+				continue;
+			}
+			$raw = file_get_contents($path);
+			if ($raw === false || $raw === '' || $this->decodeTokenPayload($raw) === null) {
+				if (@unlink($path)) {
+					$removed++;
+				}
+			}
 		}
 
-		$path = $this->tokenPath($cacheDir, $token);
-		if (is_file($path)) {
-			@unlink($path);
-		}
-
-		return $payload;
+		return $removed;
 	}
 
 	/**
@@ -256,13 +380,48 @@ class UniverseSwitchService
 		$trimmed = rtrim($httpBase, '/');
 		if ($wildcast) {
 			if (preg_match('#^(https?://)([^/]+)(/.*)?$#', $trimmed, $m)) {
-				return $m[1] . 'uni' . $universe . '.' . $m[2] . ($m[3] ?? '') . '/' . $query;
+				$host = self::stripWildcastHost($m[2]);
+				return $m[1] . 'uni' . $universe . '.' . $host . ($m[3] ?? '') . '/' . $query;
 			}
 
 			return $trimmed . '/' . $query;
 		}
 
 		return $trimmed . '/uni' . $universe . '/' . $query;
+	}
+
+	/**
+	 * Strip a leading uniN label from a host (UNIS_WILDCAST), matching AbstractLoginPage.
+	 */
+	public static function stripWildcastHost(string $host): string
+	{
+		$hostParts = explode('.', $host);
+		if ($hostParts !== [] && preg_match('/uni[0-9]+/', $hostParts[0])) {
+			array_shift($hostParts);
+		}
+
+		return implode('.', $hostParts);
+	}
+
+	public function issueCsrfToken(): string
+	{
+		if (session_status() !== PHP_SESSION_ACTIVE && session_status() !== PHP_SESSION_DISABLED) {
+			@session_start();
+		}
+		$token = bin2hex(random_bytes(16));
+		$_SESSION[self::CSRF_SESSION_KEY] = $token;
+
+		return $token;
+	}
+
+	public function validateCsrfToken(?string $token): bool
+	{
+		$expected = $_SESSION[self::CSRF_SESSION_KEY] ?? '';
+		if (!is_string($expected) || $expected === '' || !is_string($token) || $token === '') {
+			return false;
+		}
+
+		return hash_equals($expected, $token);
 	}
 
 	public function isValidTokenFormat(string $token): bool

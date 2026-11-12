@@ -26,6 +26,7 @@
 					<form action="game.php?page=universeSwitch" method="post" style="margin:0" onsubmit="return confirm('{$account.confirmMessage|escape:'javascript'}');">
 						<input type="hidden" name="mode" value="switchUniverse">
 						<input type="hidden" name="universe" value="{$account.universeId}">
+						<input type="hidden" name="csrf" value="{$csrfToken}">
 						<button type="submit" class="button">{$LNG.us_switch}</button>
 					</form>
 				{/if}
