@@ -11,11 +11,13 @@ const overviewJs = fs.readFileSync(
 );
 
 describe('overview fleet timer reload (#455)', () => {
-	it('reloads overview when fleet countdowns expire after counting down', () => {
+	it('reloads overview when a timer on this page transitions from positive to expired', () => {
 		assert.match(overviewJs, /\$\('\.fleets'\)\.each/);
 		assert.match(overviewJs, /data\('fleet-time'\)/);
-		assert.match(overviewJs, /overviewTimersWereActive/);
+		assert.match(overviewJs, /overview-timer-was-positive/);
+		assert.match(overviewJs, /wasPositive === true/);
 		assert.match(overviewJs, /game\.php\?page=overview/);
+		assert.doesNotMatch(overviewJs, /overviewTimersWereActive/);
 		assert.doesNotMatch(
 			overviewJs,
 			/setInterval\(function\(\)\s*\{\s*\$\('\.fleets'\)/

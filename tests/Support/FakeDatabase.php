@@ -463,7 +463,10 @@ class FakeDatabase implements DatabaseInterface
 
     public function update($qry, array $params = [])
     {
-        if (str_contains($qry, '%%FLEETS_EVENT%%')) {
+        // Only intercept FLEETS_EVENT lock/unlock (and other event-only updates).
+        // Joins like UPDATE %%FLEETS%%, %%FLEETS_EVENT%% must fall through to fleetUpdates
+        // (e.g. FleetFunctions::setACSTime).
+        if (str_contains($qry, '%%FLEETS_EVENT%%') && !str_contains($qry, '%%FLEETS%%')) {
             $this->fleetEventUpdates[] = ['sql' => $qry, 'params' => $params];
             if (str_contains($qry, '`lock` = :token') && str_contains($qry, '`lock` IS NULL')) {
                 if ($this->fleetEvents !== []) {

@@ -81,6 +81,11 @@ class FlyingFleetHandler
 				// briefing/slots match after one reload instead of two.
 				$current = $fleetRow;
 				for ($step = 0; $step < 3 && is_array($current); $step++) {
+					$beforeMess = (int) $current['fleet_mess'];
+					$beforeStart = (int) ($current['fleet_start_time'] ?? 0);
+					$beforeStay = (int) ($current['fleet_end_stay'] ?? 0);
+					$beforeEnd = (int) ($current['fleet_end_time'] ?? 0);
+
 					/** @var \HiveNova\Mission\Mission $missionObj */
 					$missionObj	= new $missionName($current);
 
@@ -111,6 +116,17 @@ class FlyingFleetHandler
 							':time'		=> TIMESTAMP,
 						)
 					);
+
+					// Bail if the mission step did not advance mess/times — avoids
+					// re-running the same stage on a stuck/bad locked row.
+					if (is_array($current)
+						&& (int) $current['fleet_mess'] === $beforeMess
+						&& (int) ($current['fleet_start_time'] ?? 0) === $beforeStart
+						&& (int) ($current['fleet_end_stay'] ?? 0) === $beforeStay
+						&& (int) ($current['fleet_end_time'] ?? 0) === $beforeEnd
+					) {
+						break;
+					}
 				}
 			} catch (\Throwable $e) {
 				error_log(sprintf(

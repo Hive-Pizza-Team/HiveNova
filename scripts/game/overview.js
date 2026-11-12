@@ -1,5 +1,4 @@
 var overviewTimerReloadPending = false;
-var overviewTimersWereActive = false;
 
 function updateOverviewTimers() {
 	var needsReload = false;
@@ -13,16 +12,18 @@ function updateOverviewTimers() {
 		}
 
 		var remaining = Math.floor(secondsLeft - (serverTime.getTime() - startTime) / 1000);
+		var wasPositive = $(this).data('overview-timer-was-positive');
 		if (remaining <= 0) {
 			$(this).text(Ready);
-			// Only reload after a timer was actively counting down. Timers already
-			// at zero on first paint (e.g. shipyard queue with elapsed endtime)
-			// would otherwise reload the page in an infinite loop.
-			if (overviewTimersWereActive) {
+			// Reload only on a >0 → <=0 transition observed on this element.
+			// A shared flag across .timer / .fleets would reload every tick when one
+			// fleet row is already due on load while another timer is still running.
+			if (wasPositive === true) {
 				needsReload = true;
 			}
+			$(this).data('overview-timer-was-positive', false);
 		} else {
-			overviewTimersWereActive = true;
+			$(this).data('overview-timer-was-positive', true);
 			$(this).text(GetRestTimeFormat(remaining));
 		}
 	});
@@ -37,13 +38,15 @@ function updateOverviewTimers() {
 		}
 
 		var remaining = Math.floor(fleetTime - (serverTime.getTime() - startTime) / 1000);
+		var wasPositive = $(this).data('overview-timer-was-positive');
 		if (remaining <= 0) {
 			$(this).text('-');
-			if (overviewTimersWereActive) {
+			if (wasPositive === true) {
 				needsReload = true;
 			}
+			$(this).data('overview-timer-was-positive', false);
 		} else {
-			overviewTimersWereActive = true;
+			$(this).data('overview-timer-was-positive', true);
 			$(this).text(GetRestTimeFormat(remaining));
 		}
 	});

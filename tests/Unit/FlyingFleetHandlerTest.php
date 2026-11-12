@@ -85,4 +85,28 @@ class FlyingFleetHandlerTest extends TestCase
         $this->assertSame(1, FlyingFleetHandlerProbeMission::$returned);
         $this->assertSame(0, FlyingFleetHandlerProbeMission::$started);
     }
+
+    public function testRunBailsWhenStepDoesNotAdvanceFleetMessOrTimes(): void
+    {
+        $stuck = [
+            'fleet_id' => 8,
+            'fleet_mission' => 99,
+            'fleet_mess' => FLEET_HOLD,
+            'fleet_start_time' => 100,
+            'fleet_end_stay' => 200,
+            'fleet_end_time' => 300,
+        ];
+        $this->fake->eventFleets = [$stuck];
+        // Same mess/times after EndStay — without the guard this would re-run.
+        $this->fake->eventFleetFollowUps[8] = [$stuck, $stuck];
+
+        $handler = new FlyingFleetHandler();
+        $handler->setToken('tok');
+        $failedFleetIds = $handler->run();
+
+        $this->assertSame([], $failedFleetIds);
+        $this->assertSame(1, FlyingFleetHandlerProbeMission::$endStay);
+        $this->assertSame(0, FlyingFleetHandlerProbeMission::$returned);
+        $this->assertSame(0, FlyingFleetHandlerProbeMission::$started);
+    }
 }
