@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\FeedbackService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\SupportTickets;
@@ -45,11 +46,14 @@ class ShowSupportPage
 	{
 		global $USER, $LNG;
 				
-		$ticketResult	= $GLOBALS['DATABASE']->query("SELECT t.*, u.username, COUNT(a.ticketID) as answer FROM ".TICKETS." t INNER JOIN ".TICKETS_ANSWER." a USING (ticketID) INNER JOIN ".USERS." u ON u.id = t.ownerID WHERE t.universe = ".Universe::getEmulated()." GROUP BY a.ticketID ORDER BY t.ticketID DESC;");
+		$ticketResult	= $GLOBALS['DATABASE']->query("SELECT t.*, u.username, COUNT(a.ticketID) as answer FROM ".TICKETS." t INNER JOIN ".TICKETS_ANSWER." a USING (ticketID) LEFT JOIN ".USERS." u ON u.id = t.ownerID WHERE t.universe = ".Universe::getEmulated()." GROUP BY a.ticketID ORDER BY t.ticketID DESC;");
 		$ticketList		= array();
 		
 		while($ticketRow = $GLOBALS['DATABASE']->fetch_array($ticketResult)) {
 			$ticketRow['time']	= _date($LNG['php_tdformat'], $ticketRow['time'], $USER['timezone']);
+			if ($ticketRow['username'] === null || $ticketRow['username'] === '') {
+				$ticketRow['username'] = 'Guest';
+			}
 
 			$ticketList[$ticketRow['ticketID']]	= $ticketRow;
 		}
@@ -97,13 +101,43 @@ class ShowSupportPage
 		}
 
 
-		$subject	= sprintf($LNG['sp_answer_message_title'], $ticketID);
-		$text		= sprintf($LNG['sp_answer_message'], $ticketID);
+		$ownerId = (int) ($ticketDetail['ownerID'] ?? 0);
+		if ($ownerId > 0) {
+			$subject	= sprintf($LNG['sp_answer_message_title'], $ticketID);
+			$text		= sprintf($LNG['sp_answer_message'], $ticketID);
 
-		PlayerUtil::sendMessage($ticketDetail['ownerID'], $USER['id'], $USER['username'], 4,
-			$subject, $text, TIMESTAMP, NULL, 1, Universe::getEmulated());
+			PlayerUtil::sendMessage($ownerId, $USER['id'], $USER['username'], 4,
+				$subject, $text, TIMESTAMP, NULL, 1, Universe::getEmulated());
+		}
 
 		HTTP::redirectTo('admin.php?page=support');
+	}
+
+	/**
+	 * Stream a feedback screenshot from cache/feedback/ for ticket admins.
+	 */
+	function screenshot()
+	{
+		$file = HTTP::_GP('file', '');
+		$file = basename(str_replace(["\0", '\\'], '', (string) $file));
+		$path = FeedbackService::screenshotAbsolutePath($file);
+		if ($path === null) {
+			HTTP::sendHeader('HTTP/1.1 404 Not Found');
+			HTTP::sendHeader('X-Content-Type-Options: nosniff');
+			echo 'Not found';
+			exit;
+		}
+
+		$mime = FeedbackService::screenshotContentType($file);
+		$size = filesize($path);
+		HTTP::sendHeader('Content-Type: ' . $mime);
+		HTTP::sendHeader('X-Content-Type-Options: nosniff');
+		HTTP::sendHeader('Content-Disposition: inline; filename="' . $file . '"');
+		if ($size !== false) {
+			HTTP::sendHeader('Content-Length: ' . $size);
+		}
+		readfile($path);
+		exit;
 	}
 	
 	function view() 
@@ -123,7 +157,7 @@ class ShowSupportPage
 
 			$answerRow['time']	= _date($LNG['php_tdformat'], $answerRow['time'], $USER['timezone']);
 			
-			$answerRow['message']	= $answerRow['message'];
+			$answerRow['message']	= FeedbackService::linkifyScreenshotReferences((string) $answerRow['message']);
 			$answerList[$answerRow['answerID']]	= $answerRow;
 		}
 		

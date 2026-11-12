@@ -4,6 +4,7 @@ namespace HiveNova\Page\Login;
 
 use HiveNova\Core\AssetRevision;
 use HiveNova\Core\Config;
+use HiveNova\Core\FeedbackService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
 use HiveNova\Core\LoginUniverseDefaults;
@@ -230,6 +231,18 @@ abstract class AbstractLoginPage
 			'seoPage'			=> $seoPage,
 			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
 			'jsonLd'			=> $jsonLd,
+			'feedbackConfig'		=> FeedbackService::clientConfig(
+				'index.php?page=feedback&mode=submit&ajax=1',
+				[],
+				null,
+				(string) $lang,
+				(string) $config->VERSION,
+				(int) Universe::current(),
+				[
+					'successNoScreenshot' => (string) ($LNG['fb_success_no_screenshot']
+						?? 'Thanks! Your report was sent without a screenshot. Reference: %s'),
+				]
+			),
 		));
 
 		$this->assign(array(

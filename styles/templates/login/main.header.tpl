@@ -9,6 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="styles/theme/{$dpath|default:'nova'}/formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/main.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/hivekeychain_button.css?v={$REV}">
+	<link rel="stylesheet" type="text/css" href="styles/resource/css/feedback.css?v={$REV}">
 	<link rel="manifest" href="manifest.php?uni={$UNI}">
 	<meta name="theme-color" content="#1a1a2e">
 	<meta name="mobile-web-app-capable" content="yes">
