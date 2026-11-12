@@ -18,4 +18,11 @@ class ShowNotesPageChromeTest extends TestCase
 		$this->assertStringContainsString('href="game.php?page=notes"', $nav);
 		$this->assertStringNotContainsString("OpenPopup('?page=notes'", $nav);
 	}
+
+	public function testNoteUpdateIsScopedToOwner(): void
+	{
+		$src = file_get_contents(dirname(__DIR__, 2) . '/includes/pages/game/ShowNotesPage.php');
+		$this->assertNotFalse($src);
+		$this->assertMatchesRegularExpression('/UPDATE %%NOTES%%[^;]*WHERE id = :noteID AND owner = :userID/', $src);
+	}
 }
