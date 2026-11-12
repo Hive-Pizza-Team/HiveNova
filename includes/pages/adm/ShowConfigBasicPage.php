@@ -125,9 +125,6 @@ function ShowConfigBasicPage()
 
 		foreach($config_after as $key => $value)
 		{
-			if ($key === 'seo_canonical_origin' && !isset($config->seo_canonical_origin)) {
-				continue;
-			}
 			$config->$key	= $value;
 		}
 

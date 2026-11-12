@@ -117,7 +117,7 @@ class PublicSeo
 	 *
 	 * @param string|null $configuredOrigin Optional override (tests / callers with config in hand)
 	 */
-	public static function canonicalBasePath(?string $requestBasePath = null, ?string $configuredOrigin = null): string
+	public static function canonicalBasePath(?string $configuredOrigin = null): string
 	{
 		if ($configuredOrigin === null && Config::hasInstances()) {
 			try {
