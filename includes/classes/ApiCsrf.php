@@ -72,14 +72,6 @@ class ApiCsrf
 		return null;
 	}
 
-	public static function enforceMutate(): void
-	{
-		$fail = self::rejectMutate();
-		if ($fail !== null) {
-			ApiJsonResponse::sendError($fail['error'], $fail['status'], $fail['message']);
-		}
-	}
-
 	private static function ensureSession(): void
 	{
 		if (session_status() === PHP_SESSION_ACTIVE) {

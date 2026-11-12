@@ -61,6 +61,11 @@ class ApiFrontController
 			return $seasonFail;
 		}
 
+		$moduleFail = $this->enforceResourceModule($resourceName);
+		if ($moduleFail !== null) {
+			return $moduleFail;
+		}
+
 		if ($tick === ApiTickClass::Mutate) {
 			$csrfFail = ApiCsrf::rejectMutate();
 			if ($csrfFail !== null) {
@@ -147,6 +152,30 @@ class ApiFrontController
 		$season = new SeasonService(new DatabaseSeasonStore());
 		if ($season->mustRedirect($USER, $config, ApiRouteTable::seasonPageAlias($resourceName))) {
 			return self::fail('season', 403);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gate resources that map 1:1 to a classic Show*Page::$requireModule.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	private function enforceResourceModule(string $resourceName): ?array
+	{
+		$moduleId = match ($resourceName) {
+			'buildings' => defined('MODULE_BUILDING') ? MODULE_BUILDING : null,
+			'research' => defined('MODULE_RESEARCH') ? MODULE_RESEARCH : null,
+			'messages' => defined('MODULE_MESSAGES') ? MODULE_MESSAGES : null,
+			'fleet' => defined('MODULE_FLEET_TABLE') ? MODULE_FLEET_TABLE : null,
+			default => null,
+		};
+		if ($moduleId === null) {
+			return null;
+		}
+		if (!isModuleAvailable($moduleId)) {
+			return self::fail('module', 403);
 		}
 
 		return null;
@@ -417,16 +446,20 @@ class ApiFrontController
 					$target,
 					(int) HTTP::_GP('mission', FLEET_MISSION_ATTACK),
 					(int) HTTP::_GP('speed', 10),
-					$cargo
+					$cargo,
+					(int) HTTP::_GP('staytime', 0)
 				);
 				$this->persistPlanet();
 
 				return self::ok($result, $meta);
 			}
 			if ($action === 'recall') {
-				FleetPlayService::recall($USER, (int) HTTP::_GP('fleetId', 0));
+				$result = FleetPlayService::recall($USER, (int) HTTP::_GP('fleetId', 0));
+				if (empty($result['recalled'])) {
+					return self::fail('fleet', 422, 'Recall failed');
+				}
 
-				return self::ok(['recalled' => true], $meta);
+				return self::ok($result, $meta);
 			}
 		} catch (\RuntimeException $e) {
 			return self::fail('fleet', 422, $e->getMessage());

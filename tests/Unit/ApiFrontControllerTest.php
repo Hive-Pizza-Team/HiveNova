@@ -23,6 +23,7 @@ class ApiFrontControllerTest extends TestCase
 			'uni' => 1,
 			'game_name' => 'HiveNova',
 			'darkmatter_cost_trader' => 2500,
+			'moduls' => implode(';', array_fill(0, 51, '1')),
 		]), 1);
 		if (session_status() !== PHP_SESSION_ACTIVE) {
 			@session_start();

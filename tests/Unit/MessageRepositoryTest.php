@@ -190,6 +190,16 @@ class MessageRepositoryTest extends TestCase
         $this->assertSame(3, $this->lastUpdate['params'][':universe']);
     }
 
+    public function testMarkIdsAsReadUpdatesListedMessages(): void
+    {
+        $this->stubDatabase();
+        MessageRepository::markIdsAsRead(9, [3, 5, 5, 0, -1]);
+        $this->assertStringContainsString('message_id IN (3,5)', $this->lastUpdate['sql']);
+        $this->assertSame(9, $this->lastUpdate['params'][':userId']);
+        MessageRepository::markIdsAsRead(9, []);
+        $this->assertStringContainsString('message_id IN (3,5)', $this->lastUpdate['sql']);
+    }
+
     public function testCountMessagesOmitsUniverseWhenNotProvided(): void
     {
         $this->stubDatabase();

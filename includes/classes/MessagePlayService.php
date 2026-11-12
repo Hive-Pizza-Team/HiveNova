@@ -23,8 +23,14 @@ class MessagePlayService
 		$offset = ($page - 1) * $limit;
 		$rows = MessageRepository::getMessagesPaged($userId, $category, $offset, $limit, '', $universe);
 		$messages = [];
+		$ids = [];
 		foreach ($rows as $row) {
 			$messages[] = self::mapRow($row);
+			$ids[] = (int) ($row['message_id'] ?? 0);
+		}
+		// Mirror ShowMessagesPage: mark the displayed page as read (not outbox).
+		if ($ids !== [] && $category !== 999) {
+			MessageRepository::markIdsAsRead($userId, $ids);
 		}
 
 		return [

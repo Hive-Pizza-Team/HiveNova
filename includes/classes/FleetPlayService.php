@@ -59,13 +59,14 @@ class FleetPlayService
 	 */
 	public static function pickShips(array $planet, array $ships): array
 	{
-		global $resource;
+		global $resource, $reslist;
 
+		$allowed = array_flip($reslist['fleet'] ?? []);
 		$fleetArray = [];
 		foreach ($ships as $id => $count) {
 			$id = (int) $id;
 			$count = (int) $count;
-			if ($count <= 0 || $id === SHIP_SOLAR_SATELLITE) {
+			if ($count <= 0 || $id === SHIP_SOLAR_SATELLITE || !isset($allowed[$id])) {
 				continue;
 			}
 			$col = $resource[$id] ?? null;
@@ -135,7 +136,7 @@ class FleetPlayService
 	 * @param array{galaxy:int,system:int,planet:int,type?:int} $target
 	 * @return array<string, mixed>
 	 */
-	public static function send(array &$user, array &$planet, array $ships, array $target, int $mission, int $speed, array $cargo): array
+	public static function send(array &$user, array &$planet, array $ships, array $target, int $mission, int $speed, array $cargo, int $stayTime = 0): array
 	{
 		global $resource, $LNG;
 
@@ -158,6 +159,7 @@ class FleetPlayService
 		$duration = (int) $metrics['duration'];
 		$consumption = (float) $metrics['consumption'];
 		$storage = FleetFunctions::GetFleetRoom($fleetArray);
+		$fleetStorageAfterFuel = (int) floor($storage - $consumption);
 
 		$params = [
 			'targetMission' => $mission,
@@ -171,7 +173,7 @@ class FleetPlayService
 			'WantedResourceAmount' => 0,
 			'markettype' => 0,
 			'fleetArray' => $fleetArray,
-			'fleetStorage' => $storage,
+			'fleetStorage' => $fleetStorageAfterFuel,
 			'fleetSpeed' => $speed,
 			'distance' => $distance,
 			'consumption' => $consumption,
@@ -189,11 +191,20 @@ class FleetPlayService
 				':p' => $targetPlanet,
 				':t' => $targetType === 3 ? 3 : 1,
 			]
-		);
+		) ?: null;
 
-		if ($mission === FLEET_MISSION_COLONISE || $mission === FLEET_MISSION_EXPEDITION) {
-			$targetPlanetData = ['id' => 0, 'id_owner' => 0, 'planettype' => 1];
-			$targetPlayerData = [];
+		// Match ShowFleetStep3Page: keep the real (possibly empty) planet for validation;
+		// only swap in a synthetic row for dispatch on colonize/expedition/market/salvage.
+		if ($mission === FLEET_MISSION_COLONISE || $mission === FLEET_MISSION_EXPEDITION
+			|| $mission === FLEET_MISSION_TRADE || $mission === FLEET_MISSION_SALVAGE) {
+			$targetPlayerData = [
+				'id' => 0,
+				'onlinetime' => TIMESTAMP,
+				'ally_id' => 0,
+				'urlaubs_modus' => 0,
+				'authattack' => 0,
+				'total_points' => 0,
+			];
 		} elseif (is_array($targetPlanetData) && (int) ($targetPlanetData['id_owner'] ?? 0) === (int) $user['id']) {
 			$targetPlayerData = $user;
 		} elseif (is_array($targetPlanetData) && !empty($targetPlanetData['id_owner'])) {
@@ -210,6 +221,7 @@ class FleetPlayService
 			'planettype' => $targetType,
 			'IsAKS' => 0,
 			'Ship' => $fleetArray,
+			'startPlanetId' => (int) $planet['id'],
 		];
 		$available = FleetFunctions::GetFleetMissions($user, $misInfo, $targetPlanetData);
 		FleetDispatchService::validateMission(
@@ -221,11 +233,17 @@ class FleetPlayService
 				'fleetArray' => $fleetArray,
 				'fleetGroup' => 0,
 				'targetType' => $targetType,
-				'stayTime' => 0,
+				'stayTime' => $stayTime,
 				'availableMissions' => $available,
 			],
 			Config::get()
 		);
+
+		$stayDuration = 0;
+		if ($mission === FLEET_MISSION_ALLY_STATION || $mission === FLEET_MISSION_DARKMATTER
+			|| $mission === FLEET_MISSION_EXPEDITION || $mission === FLEET_MISSION_TRADE) {
+			$stayDuration = (int) round(($available['StayBlock'][$stayTime] ?? 0) * 3600, 0);
+		}
 
 		$eco = new ResourceUpdate();
 		$eco->setResourceData($GLOBALS['resource'], $GLOBALS['reslist']);
@@ -238,9 +256,11 @@ class FleetPlayService
 			903 => min((int) ($cargo[903] ?? 0), (int) floor((float) $planet[$resource[903]] - $consumption)),
 		];
 		$start = $duration + TIMESTAMP;
-		$end = $start + $duration;
+		$fleetStayTime = $start + $stayDuration;
+		$end = $fleetStayTime + $duration;
 		$forMission = $targetPlanetData;
-		if ($mission === FLEET_MISSION_COLONISE || $mission === FLEET_MISSION_EXPEDITION) {
+		if ($mission === FLEET_MISSION_COLONISE || $mission === FLEET_MISSION_EXPEDITION
+			|| $mission === FLEET_MISSION_TRADE || $mission === FLEET_MISSION_SALVAGE) {
 			$forMission = ['id' => 0, 'id_owner' => 0, 'planettype' => 1];
 		}
 
@@ -255,7 +275,7 @@ class FleetPlayService
 			'targetType' => $targetType,
 			'fleetResource' => $fleetResource,
 			'fleetStartTime' => $start,
-			'fleetStayTime' => $start,
+			'fleetStayTime' => $fleetStayTime,
 			'fleetEndTime' => $end,
 			'fleetGroup' => 0,
 			'consumption' => $consumption,
@@ -277,15 +297,15 @@ class FleetPlayService
 
 	/**
 	 * @param array<string, mixed> $user
+	 * @return array{recalled: bool}
 	 */
-	public static function recall(array $user, int $fleetId): bool
+	public static function recall(array $user, int $fleetId): array
 	{
 		if ($fleetId <= 0) {
-			return false;
+			return ['recalled' => false];
 		}
-		FleetFunctions::SendFleetBack($user, $fleetId);
 
-		return true;
+		return ['recalled' => (bool) FleetFunctions::SendFleetBack($user, $fleetId)];
 	}
 
 	/**
@@ -296,6 +316,16 @@ class FleetPlayService
 	public static function spy(array &$user, array &$planet, int $targetPlanetId): array
 	{
 		global $resource, $LNG;
+
+		if (!isModuleAvailable(MODULE_MISSION_SPY)) {
+			throw new \RuntimeException($LNG['sys_module_inactive'] ?? 'Inactive module');
+		}
+		if (IsVacationMode($user)) {
+			throw new \RuntimeException($LNG['fa_vacation_mode_current'] ?? 'Vacation mode');
+		}
+		if ($targetPlanetId <= 0) {
+			throw new \RuntimeException($LNG['fa_planet_not_exist'] ?? 'Unknown planet');
+		}
 
 		$ships = min((int) ($user['spio_anz'] ?? 1), (int) ($planet[$resource[SHIP_ESPIONAGE_PROBE]] ?? 0));
 		if ($ships <= 0) {
@@ -308,12 +338,30 @@ class FleetPlayService
 		$db = Database::get();
 		$targetData = $db->selectSingle(
 			'SELECT planet.id as id, planet.id_owner as id_owner, planet.galaxy as galaxy, planet.system as system,
-				planet.planet as planet, planet.planet_type as planet_type
-			FROM %%PLANETS%% planet WHERE planet.id = :planetID;',
+				planet.planet as planet, planet.planet_type as planet_type,
+				total_points, onlinetime, urlaubs_modus, banaday, authattack
+			FROM %%PLANETS%% planet
+			INNER JOIN %%USERS%% user ON planet.id_owner = user.id
+			LEFT JOIN %%STATPOINTS%% as stat ON stat.id_owner = user.id AND stat.stat_type = \'1\'
+			WHERE planet.id = :planetID;',
 			[':planetID' => $targetPlanetId]
 		);
 		if (!is_array($targetData)) {
 			throw new \RuntimeException($LNG['fa_planet_not_exist'] ?? 'Unknown planet');
+		}
+		if (Config::get()->adm_attack == 1 && (int) ($targetData['authattack'] ?? 0) > (int) ($user['authlevel'] ?? 0)) {
+			throw new \RuntimeException($LNG['fa_action_not_allowed'] ?? 'Action not allowed');
+		}
+		if (IsVacationMode($targetData)) {
+			throw new \RuntimeException($LNG['fa_vacation_mode'] ?? 'Target vacation');
+		}
+		mergeUserStatPoints($user);
+		$noob = CheckNoobProtec($user, $targetData, $targetData);
+		if (!empty($noob['NoobPlayer'])) {
+			throw new \RuntimeException($LNG['fa_week_player'] ?? 'Target too weak');
+		}
+		if (!empty($noob['StrongPlayer'])) {
+			throw new \RuntimeException($LNG['fa_strong_player'] ?? 'Target too strong');
 		}
 		if ((int) $targetData['id_owner'] === (int) $user['id']) {
 			throw new \RuntimeException($LNG['fa_not_spy_yourself'] ?? 'Cannot spy yourself');
@@ -330,6 +378,9 @@ class FleetPlayService
 		$consumption = FleetFunctions::GetFleetConsumption($fleetArray, $duration, $distance, $user, $speedFactor);
 		if ($planet['deuterium'] < $consumption) {
 			throw new \RuntimeException($LNG['fa_not_enough_fuel'] ?? 'Not enough fuel');
+		}
+		if ($consumption > FleetFunctions::GetFleetRoom($fleetArray)) {
+			throw new \RuntimeException($LNG['fa_no_fleetroom'] ?? 'Not enough cargo for fuel');
 		}
 		$planet['deuterium'] -= $consumption;
 		$start = $duration + TIMESTAMP;
@@ -370,6 +421,9 @@ class FleetPlayService
 	{
 		global $resource, $LNG, $pricelist;
 
+		if (!isModuleAvailable(MODULE_MISSION_RECYCLE)) {
+			throw new \RuntimeException($LNG['sys_module_inactive'] ?? 'Inactive module');
+		}
 		if ($targetPlanetId <= 0) {
 			throw new \RuntimeException($LNG['fa_planet_not_exist'] ?? 'Unknown planet');
 		}
@@ -423,6 +477,9 @@ class FleetPlayService
 		$consumption = FleetFunctions::GetFleetConsumption($fleetArray, $duration, $distance, $user, $speedFactor);
 		if ($planet['deuterium'] < $consumption) {
 			throw new \RuntimeException($LNG['fa_not_enough_fuel'] ?? 'Not enough fuel');
+		}
+		if ($consumption > FleetFunctions::GetFleetRoom($fleetArray)) {
+			throw new \RuntimeException($LNG['fa_no_fleetroom'] ?? 'Not enough cargo for fuel');
 		}
 		$planet['deuterium'] -= $consumption;
 		$start = $duration + TIMESTAMP;

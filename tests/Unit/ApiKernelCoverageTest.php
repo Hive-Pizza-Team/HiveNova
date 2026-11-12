@@ -32,6 +32,10 @@ if (!defined('HTTPS')) {
 }
 foreach ([
 	'MODULE_MISSION_ATTACK' => 1,
+	'MODULE_BUILDING' => 2,
+	'MODULE_RESEARCH' => 3,
+	'MODULE_FLEET_TABLE' => 9,
+	'MODULE_MESSAGES' => 16,
 	'MODULE_MISSION_SPY' => 24,
 	'MODULE_MISSION_DESTROY' => 29,
 	'MODULE_MISSION_EXPEDITION' => 30,
@@ -154,19 +158,30 @@ class ScriptedCoverageDatabase implements DatabaseInterface
 			];
 		} elseif (str_contains($qry, '%%PLANETS%%')) {
 			$id = (int) ($params[':planetId'] ?? $params[':planetID'] ?? $params[':id'] ?? 0);
-			$row = $this->planets[$id] ?? null;
-			if ($row === null && isset($params[':g'])) {
-				$row = [
-					'id' => 8,
-					'id_owner' => 2,
-					'galaxy' => (int) $params[':g'],
-					'system' => (int) $params[':s'],
-					'planet' => (int) $params[':p'],
-					'planet_type' => 1,
-					'der_metal' => 8000,
-					'der_crystal' => 2000,
-					'destruyed' => 0,
-				];
+			$row = $id > 0 ? ($this->planets[$id] ?? null) : null;
+			if ($row === null && isset($params[':g'], $params[':s'], $params[':p'])) {
+				$wantType = isset($params[':t']) ? (int) $params[':t'] : null;
+				foreach ($this->planets as $candidate) {
+					if ((int) ($candidate['galaxy'] ?? 0) !== (int) $params[':g']
+						|| (int) ($candidate['system'] ?? 0) !== (int) $params[':s']
+						|| (int) ($candidate['planet'] ?? 0) !== (int) $params[':p']) {
+						continue;
+					}
+					if ($wantType !== null && (int) ($candidate['planet_type'] ?? 1) !== $wantType) {
+						continue;
+					}
+					$row = $candidate;
+					break;
+				}
+			}
+			if (is_array($row) && (str_contains($qry, '%%USERS%%') || str_contains($qry, 'total_points'))) {
+				$row = array_merge([
+					'total_points' => 100,
+					'onlinetime' => TIMESTAMP,
+					'urlaubs_modus' => 0,
+					'banaday' => 0,
+					'authattack' => 0,
+				], $row);
 			}
 			if (is_array($row) && str_contains($qry, 'id_owner = :userId')
 				&& (int) ($row['id_owner'] ?? 0) !== (int) ($params[':userId'] ?? 0)) {
@@ -304,6 +319,20 @@ class ApiKernelCoverageTest extends TestCase
 
 		$this->db = new ScriptedCoverageDatabase();
 		$this->db->planets[4] = $this->planet();
+		$this->db->planets[8] = [
+			'id' => 8,
+			'id_owner' => 2,
+			'name' => 'Target',
+			'galaxy' => 1,
+			'system' => 1,
+			'planet' => 8,
+			'planet_type' => 1,
+			'destruyed' => 0,
+			'der_metal' => 8000,
+			'der_crystal' => 2000,
+			'ally_deposit' => 0,
+			'universe' => 1,
+		];
 		$this->db->planets[9] = [
 			'id' => 9,
 			'id_owner' => 2,
@@ -405,6 +434,9 @@ class ApiKernelCoverageTest extends TestCase
 		]);
 		$cancelPlanet['b_building'] = TIMESTAMP;
 		$this->assertTrue(EconomyPlayService::cancelBuilding($cancelUser, $cancelPlanet));
+		// Classic drops later same-element rows with the head cancel.
+		$this->assertSame('', $cancelPlanet['b_building_id']);
+		$this->assertSame(0, $cancelPlanet['b_building']);
 
 		$oneUser = $user;
 		$onePlanet = $planet;
@@ -494,8 +526,40 @@ class ApiKernelCoverageTest extends TestCase
 		);
 		$this->assertArrayHasKey('fleetId', $sent);
 
-		$this->assertTrue(FleetPlayService::recall($user, 8));
-		$this->assertFalse(FleetPlayService::recall($user, 0));
+		$this->assertTrue(FleetPlayService::recall($user, 8)['recalled']);
+		$this->assertFalse(FleetPlayService::recall($user, 0)['recalled']);
+
+		$expoUser = $user;
+		$expoUser['astrophysics_tech'] = 2;
+		$expoPlanet = $planet;
+		$GLOBALS['LNG']['fl_hold_time_not_exists'] = 'Bad stay';
+		try {
+			FleetPlayService::send(
+				$expoUser,
+				$expoPlanet,
+				[202 => 1],
+				['galaxy' => 1, 'system' => 1, 'planet' => 16, 'type' => 1],
+				FLEET_MISSION_EXPEDITION,
+				10,
+				[],
+				0
+			);
+			$this->fail('expedition without staytime should throw');
+		} catch (RuntimeException $e) {
+			$this->assertSame('Bad stay', $e->getMessage());
+		}
+		$expoOk = FleetPlayService::send(
+			$expoUser,
+			$expoPlanet,
+			[202 => 1],
+			['galaxy' => 1, 'system' => 1, 'planet' => 16, 'type' => 1],
+			FLEET_MISSION_EXPEDITION,
+			10,
+			[],
+			1
+		);
+		$this->assertArrayHasKey('fleetId', $expoOk);
+		$this->assertGreaterThan($expoOk['arrival'], $expoOk['return'] - 1);
 
 		$spyUser = $user;
 		$spyPlanet = $planet;
@@ -647,7 +711,8 @@ class ApiKernelCoverageTest extends TestCase
 		$this->assertTrue((new ApiFrontController())->handle()['ok']);
 		$this->request(['r' => 'galaxy', 'action' => 'colonize', 'galaxy' => 1, 'system' => 2, 'planet' => 6], 'POST');
 		$colonize = (new ApiFrontController())->handle();
-		$this->assertArrayHasKey('ok', $colonize);
+		$this->assertTrue($colonize['ok'], json_encode($colonize));
+		$this->assertArrayHasKey('fleetId', $colonize['data']);
 
 		$this->request(['r' => 'catalog', 'action' => 'prod', 'prod' => [1 => 8]], 'POST');
 		$this->assertArrayHasKey('sliders', (new ApiFrontController())->handle()['data']);
@@ -836,6 +901,9 @@ class ApiKernelCoverageTest extends TestCase
 			'deuterium_basic_income' => 0,
 			'energy_basic_income' => 0,
 			'adm_attack' => 0,
+			'noobprotection' => 0,
+			'noobprotectiontime' => 5000,
+			'noobprotectionmulti' => 5,
 			'debug' => 0,
 			'moduls' => implode(';', array_replace(array_fill(0, 51, '1'), [MODULE_FLEET_EVENTS => '0'])),
 			'silo_factor' => 1,
@@ -884,7 +952,14 @@ class ApiKernelCoverageTest extends TestCase
 			'tech' => 1,
 			'factor' => 0,
 		];
-		$GLOBALS['pricelist'][210]['capacity'] = 5;
+		$GLOBALS['pricelist'][210] = [
+			'cost' => [901 => 0, 902 => 1000, 903 => 0],
+			'capacity' => 5,
+			'consumption' => 1,
+			'speed' => 100000000,
+			'tech' => 1,
+			'factor' => 0,
+		];
 		$GLOBALS['requirements'][108] = [];
 	}
 

@@ -180,6 +180,28 @@ class MessageRepository
     }
 
     /**
+     * @param list<int> $messageIds
+     */
+    public static function markIdsAsRead(int $userId, array $messageIds): void
+    {
+        $ids = [];
+        foreach ($messageIds as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                $ids[$id] = $id;
+            }
+        }
+        if ($ids === []) {
+            return;
+        }
+
+        Database::get()->update(
+            'UPDATE %%MESSAGES%% SET message_unread = 0 WHERE message_id IN ('.implode(',', $ids).') AND message_owner = :userId;',
+            [':userId' => $userId]
+        );
+    }
+
+    /**
      * @return array{sql: string, params: array<string, int>}
      */
     public static function universeClause(int $universe): array

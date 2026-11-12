@@ -73,22 +73,38 @@ class FleetPlayServiceTest extends TestCase
 		$this->assertSame(10, $flight['restSeconds']);
 	}
 
-	public function testPickShipsIgnoresSatellitesAndEmptyCounts(): void
+	public function testPickShipsIgnoresSatellitesDefensesAndEmptyCounts(): void
 	{
-		$previous = $GLOBALS['resource'] ?? null;
+		$previousResource = $GLOBALS['resource'] ?? null;
+		$previousReslist = $GLOBALS['reslist'] ?? null;
 		$GLOBALS['resource'] = [
 			202 => 'small_ship',
+			203 => 'large_ship',
+			401 => 'rocket_launcher',
 			SHIP_SOLAR_SATELLITE => 'solar_sat',
 		];
+		$GLOBALS['reslist'] = array_replace($GLOBALS['reslist'] ?? [], [
+			'fleet' => [202, 203, SHIP_SOLAR_SATELLITE],
+		]);
 		try {
-			$planet = ['small_ship' => 10, 'solar_sat' => 4];
-			$this->assertSame([202 => 3], FleetPlayService::pickShips($planet, [202 => 3, SHIP_SOLAR_SATELLITE => 2, 203 => 9]));
+			$planet = ['small_ship' => 10, 'large_ship' => 4, 'solar_sat' => 4, 'rocket_launcher' => 9];
+			$this->assertSame(
+				[202 => 3],
+				FleetPlayService::pickShips($planet, [202 => 3, 401 => 5, SHIP_SOLAR_SATELLITE => 2])
+			);
+			$this->assertSame([203 => 4], FleetPlayService::pickShips($planet, [203 => 9]));
 			$this->assertSame([], FleetPlayService::pickShips($planet, [202 => 0]));
+			$this->assertSame([], FleetPlayService::pickShips($planet, [401 => 2]));
 		} finally {
-			if ($previous === null) {
+			if ($previousResource === null) {
 				unset($GLOBALS['resource']);
 			} else {
-				$GLOBALS['resource'] = $previous;
+				$GLOBALS['resource'] = $previousResource;
+			}
+			if ($previousReslist === null) {
+				unset($GLOBALS['reslist']);
+			} else {
+				$GLOBALS['reslist'] = $previousReslist;
 			}
 		}
 	}

@@ -247,8 +247,32 @@ class EconomyPlayService
 			$planet['b_building_id'] = '';
 			return true;
 		}
+
+		// Classic CancelBuildingFromQueue drops later same-element rows.
+		$buildEndTime = TIMESTAMP;
+		$newQueue = [];
+		foreach ($currentQueue as $listIdArray) {
+			if ($element === (int) $listIdArray[0]) {
+				continue;
+			}
+			$buildEndTime += BuildFunctions::getBuildingTime(
+				$user,
+				$planet,
+				$listIdArray[0],
+				$cost,
+				($listIdArray[4] ?? '') === 'destroy'
+			);
+			$listIdArray[3] = $buildEndTime;
+			$newQueue[] = $listIdArray;
+		}
+		if ($newQueue === []) {
+			$planet['b_building'] = 0;
+			$planet['b_building_id'] = '';
+			return true;
+		}
+
 		$planet['b_building'] = TIMESTAMP;
-		$planet['b_building_id'] = serialize(array_values($currentQueue));
+		$planet['b_building_id'] = serialize(array_values($newQueue));
 		$eco = new ResourceUpdate();
 		$eco->setResourceData($GLOBALS['resource'], $GLOBALS['reslist']);
 		$eco->setData($user, $planet);
