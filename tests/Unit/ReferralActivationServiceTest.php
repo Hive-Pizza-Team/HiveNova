@@ -29,6 +29,57 @@ class ReferralActivationServiceTest extends TestCase
 		$this->assertTrue($attached);
 	}
 
+	public function test_attach_from_pending_writes_signup_src_with_referral(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->exactly(2))
+			->method('update')
+			->willReturnCallback(function (string $sql, array $params): int {
+				static $call = 0;
+				$call++;
+				if ($call === 1) {
+					$this->assertStringContainsString('`ref_bonus` = 1', $sql);
+					$this->assertSame(68, $params[':referralId']);
+					$this->assertSame(74, $params[':userId']);
+				} else {
+					$this->assertStringContainsString('`signup_src`', $sql);
+					$this->assertSame('discord', $params[':signupSrc']);
+					$this->assertSame(74, $params[':userId']);
+				}
+
+				return 1;
+			});
+
+		$attached = (new ReferralActivationService())->attachFromPending($db, 74, [
+			'referralID'  => '68',
+			'signup_src'  => 'Discord',
+			'userName'    => 'TideFen98',
+		]);
+
+		$this->assertTrue($attached);
+	}
+
+	public function test_attach_from_pending_writes_signup_src_without_referral(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->once())
+			->method('update')
+			->with(
+				$this->stringContains('`signup_src`'),
+				[
+					':signupSrc' => 'peakd',
+					':userId'    => 74,
+				]
+			);
+
+		$attached = (new ReferralActivationService())->attachFromPending($db, 74, [
+			'referralID' => 0,
+			'signup_src' => 'PeakD',
+		]);
+
+		$this->assertTrue($attached);
+	}
+
 	public function test_attach_skips_when_referral_id_missing(): void
 	{
 		$db = $this->createMock(DatabaseInterface::class);
@@ -38,8 +89,14 @@ class ReferralActivationServiceTest extends TestCase
 
 		$this->assertFalse($service->attachFromPending($db, 74, []));
 		$this->assertFalse($service->attachFromPending($db, 74, ['referralID' => 0]));
+		$this->assertFalse($service->attachFromPending($db, 74, [
+			'referralID' => 0,
+			'signup_src' => '!!!',
+		]));
 		$this->assertFalse($service->attach($db, 0, 68));
 		$this->assertFalse($service->attach($db, 74, 0));
+		$this->assertFalse($service->attachSignupSource($db, 74, null));
+		$this->assertFalse($service->attachSignupSource($db, 0, 'x'));
 	}
 
 	public function test_skip_verify_redirects_to_vertify_which_attaches_referral(): void
@@ -51,6 +108,8 @@ class ReferralActivationServiceTest extends TestCase
 		$this->assertIsString($vertify);
 		$this->assertStringContainsString('user_valid == 0', $register);
 		$this->assertStringContainsString('page=vertify', $register);
+		$this->assertStringContainsString('signup_src', $register);
 		$this->assertStringContainsString('attachFromPending', $vertify);
+		$this->assertStringContainsString('signup_src', $vertify);
 	}
 }

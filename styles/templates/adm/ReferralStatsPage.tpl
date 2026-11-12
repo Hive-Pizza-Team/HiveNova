@@ -61,6 +61,7 @@
 <tr>
 	<th>{$LNG.ref_stats_recruit}</th>
 	<th>{$LNG.ref_stats_referrer}</th>
+	<th>{$LNG.ref_stats_source}</th>
 	<th>{$LNG.ref_stats_registered}</th>
 	<th>{$LNG.ref_stats_points}</th>
 	<th>{$LNG.ref_stats_bonus_status}</th>
@@ -69,12 +70,13 @@
 <tr>
 	<td><a href="?page=accounteditor&amp;edit=personal&amp;id={$row.recruit_id}" target="Hauptframe">{$row.recruit_username|escape}</a> <small>({$row.recruit_id})</small></td>
 	<td><a href="?page=accounteditor&amp;edit=personal&amp;id={$row.referrer_id}" target="Hauptframe">{$row.referrer_username|escape}</a> <small>({$row.referrer_id})</small></td>
+	<td>{$row.signup_src|escape}</td>
 	<td nowrap>{$row.register_time_fmt}</td>
 	<td>{$row.total_points|number}</td>
 	<td>{$row.bonus_status_label|escape}</td>
 </tr>
 {foreachelse}
-<tr><td colspan="5">{$LNG.ref_stats_no_recruits}</td></tr>
+<tr><td colspan="6">{$LNG.ref_stats_no_recruits}</td></tr>
 {/foreach}
 </table>
 

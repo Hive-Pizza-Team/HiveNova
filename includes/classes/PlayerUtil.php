@@ -334,7 +334,7 @@ class PlayerUtil
 		];
 	}
 
-	static public function createPlayer($universe, $userName, $userPassword, $userMail, $hiveAccount, $userLanguage = NULL, $galaxy = NULL, $system = NULL, $position = NULL, $name = NULL, $authlevel = 0, $userIpAddress = NULL)
+	static public function createPlayer($universe, $userName, $userPassword, $userMail, $hiveAccount, $userLanguage = NULL, $galaxy = NULL, $system = NULL, $position = NULL, $name = NULL, $authlevel = 0, $userIpAddress = NULL, $signupSrc = NULL)
 	{
 		$config	= Config::get($universe);
 		
@@ -356,6 +356,8 @@ class PlayerUtil
 			$position	= $coords['position'];
 		}
 
+		$signupSrc		= ReferralCaptureService::sanitizeSource($signupSrc);
+
 		$params			= array(
 			':username'				=> $userName,
 			':email'				=> $userMail,
@@ -372,6 +374,7 @@ class PlayerUtil
 			':timezone'				=> $config->timezone,
 			':nameLastChanged'		=> 0,
 			':darkmatter_start'		=> $config->darkmatter_start,
+			':signupSrc'			=> $signupSrc,
 		);
 
 		$sql = 'INSERT INTO %%USERS%% SET
@@ -389,7 +392,8 @@ class PlayerUtil
 		dpath			= :dpath,
 		timezone		= :timezone,
 		uctime			= :nameLastChanged,
-		darkmatter		= :darkmatter_start;';
+		darkmatter		= :darkmatter_start,
+		signup_src		= :signupSrc;';
 
 		$db = Database::get();
 

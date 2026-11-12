@@ -147,6 +147,7 @@ class ReferralStatsServiceTest extends TestCase
 				'recruit_username'  => 'recruit1',
 				'register_time'     => 1700000000,
 				'ref_bonus'         => 1,
+				'signup_src'        => 'Discord',
 				'referrer_id'       => 10,
 				'referrer_username' => 'alice',
 				'total_points'      => 500,
@@ -156,6 +157,7 @@ class ReferralStatsServiceTest extends TestCase
 				'recruit_username'  => 'recruit2',
 				'register_time'     => 1700000100,
 				'ref_bonus'         => 0,
+				'signup_src'        => null,
 				'referrer_id'       => 10,
 				'referrer_username' => 'alice',
 				'total_points'      => 2000,
@@ -169,6 +171,28 @@ class ReferralStatsServiceTest extends TestCase
 		$this->assertSame(ReferralStatsService::STATUS_PAID, $rows[1]['bonus_status']);
 		$this->assertSame('recruit1', $rows[0]['recruit_username']);
 		$this->assertSame(1700000000, $rows[0]['register_time']);
+		$this->assertSame('discord', $rows[0]['signup_src']);
+		$this->assertSame('', $rows[1]['signup_src']);
+	}
+
+	public function testGetRecentRecruitsBlankSourceWhenMissing(): void
+	{
+		$db = $this->createStub(DatabaseInterface::class);
+		$db->method('select')->willReturn([
+			[
+				'recruit_id'        => 20,
+				'recruit_username'  => 'recruit1',
+				'register_time'     => 1700000000,
+				'ref_bonus'         => 1,
+				'referrer_id'       => 10,
+				'referrer_username' => 'alice',
+				'total_points'      => 500,
+			],
+		]);
+
+		$rows = $this->service->getRecentRecruits($db, 1, 1000, 10, 0);
+
+		$this->assertSame('', $rows[0]['signup_src']);
 	}
 
 	public function testGetRecentRecruitsClampsHugeTotalPoints(): void
