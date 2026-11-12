@@ -25,6 +25,8 @@ class ShowUniverseSwitchPage extends AbstractLoginPage
 	{
 		global $LNG;
 
+		HTTP::sendHeader('Referrer-Policy', 'no-referrer');
+
 		$service = new UniverseSwitchService();
 		$token = HTTP::_GP('token', '');
 		$loginLabel = $LNG['loginButton'] ?? 'Login';
@@ -46,17 +48,24 @@ class ShowUniverseSwitchPage extends AbstractLoginPage
 		}
 
 		$db = Database::get();
+		$fromUser = $db->selectSingle(
+			'SELECT id, hive_account, email_2 FROM %%USERS%% WHERE id = :userId',
+			[':userId' => (int) $payload['fromUserId']]
+		);
 		$user = $db->selectSingle(
-			'SELECT id, username, id_planet, bana, universe FROM %%USERS%% WHERE id = :userId',
+			'SELECT id, username, id_planet, bana, universe, hive_account, email_2
+			FROM %%USERS%% WHERE id = :userId',
 			[':userId' => (int) $payload['toUserId']]
 		);
 
-		if (
-			empty($user)
-			|| !is_array($user)
-			|| (int) ($user['bana'] ?? 0) === 1
-			|| (int) ($user['universe'] ?? 0) !== (int) $payload['toUniverse']
-		) {
+		$targetOpen = false;
+		try {
+			$targetOpen = (int) Config::get((int) $payload['toUniverse'])->game_disable === 1;
+		} catch (\Throwable) {
+			$targetOpen = false;
+		}
+
+		if (!$service->canRedeemPayload($payload, is_array($fromUser) ? $fromUser : null, is_array($user) ? $user : null, $targetOpen)) {
 			$this->printMessage($LNG['us_invalid'] ?? 'Invalid universe switch link.', $invalidButtons);
 			return;
 		}

@@ -184,11 +184,7 @@ abstract class AbstractLoginPage
 		}
 
 		if (UNIS_WILDCAST) {
-			$hostParts = explode('.', HTTP_HOST);
-			if (preg_match('/uni[0-9]+/', $hostParts[0])) {
-				array_shift($hostParts);
-			}
-			$host = implode('.', $hostParts);
+			$host = \HiveNova\Core\UniverseSwitchService::stripWildcastHost(HTTP_HOST);
 			$basePath = PROTOCOL.$host.HTTP_BASE;
 		} else {
 			$basePath = PROTOCOL.HTTP_HOST.HTTP_BASE;
