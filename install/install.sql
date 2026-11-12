@@ -788,6 +788,33 @@ CREATE TABLE `%PREFIX%season_payouts` (
   KEY `universe_season_status` (`universe`,`season_id`,`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `%PREFIX%season_sbt_grants` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `hive_user` varchar(16) NOT NULL DEFAULT '',
+  `season_id` varchar(32) NOT NULL,
+  `tier` varchar(16) NOT NULL,
+  `rank` int(10) unsigned DEFAULT NULL,
+  `feat_id` varchar(32) NOT NULL DEFAULT '',
+  `nft_namespace` varchar(16) NOT NULL DEFAULT '',
+  `nft_symbol` varchar(10) NOT NULL DEFAULT '',
+  `instance_id` varchar(64) NOT NULL DEFAULT '',
+  `trx_id` varchar(64) NOT NULL DEFAULT '',
+  `recap_url` varchar(512) NOT NULL DEFAULT '',
+  `image_url` varchar(512) NOT NULL DEFAULT '',
+  `game_name` varchar(64) NOT NULL DEFAULT '',
+  `data_json` mediumtext,
+  `retroactive` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `issued_at` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_season_hive_tier_feat` (`season_id`, `hive_user`, `tier`, `feat_id`),
+  KEY `user_id` (`user_id`),
+  KEY `hive_user` (`hive_user`),
+  KEY `universe_user` (`universe`, `user_id`),
+  KEY `season_id` (`season_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `%PREFIX%raports` (
   `rid` varchar(32) NOT NULL,
   `raport` longtext NOT NULL,

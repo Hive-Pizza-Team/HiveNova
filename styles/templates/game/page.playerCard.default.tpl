@@ -18,6 +18,10 @@
 		<td colspan="2">{if $prestige.memberSinceDate}{$prestige.memberSinceDate|escape:'html'}{/if}{if $prestige.hiveLine} <span class="prestige-hive">{$prestige.hiveLine|escape:'html'}</span>{/if}</td>
 	</tr>
 	{/if}
+	<tr>
+		<td>{$LNG.pl_medals}</td>
+		<td colspan="2"><a href="game.php?page=medals&amp;id={$id}" target="_top">{$LNG.pl_medals_view}</a></td>
+	</tr>
 
 	<tr>
 		<td>{$LNG.pl_homeplanet}</td>
