@@ -98,11 +98,10 @@ class DirectiveServiceTest extends TestCase
 			}
 		}
 		$this->assertIsArray($defensive);
-		$this->assertSame(['defense_complete' => 6], $defensive['targets']);
-		$this->assertArrayNotHasKey('hold_success', $defensive['targets']);
+		$this->assertSame(['defense_complete' => 6, 'hold_success' => 1], $defensive['targets']);
 	}
 
-	public function testBriefingClaimsDefensiveWhenDefensesAlreadyMetWithoutHold(): void
+	public function testBriefingDoesNotCompleteDefensiveUntilHoldSucceeds(): void
 	{
 		DirectiveService::selectDirective(10, 1, DirectiveCatalog::DEFENSIVE, [], ['hangar' => 1]);
 		$this->db->userDirectives[0]['progress_json'] = json_encode([
@@ -112,10 +111,13 @@ class DirectiveServiceTest extends TestCase
 
 		$data = DirectiveService::getBriefingData(10, 1, [], ['hangar' => 1]);
 
-		$this->assertTrue($data['directive']['completed']);
-		$this->assertNotEmpty($this->db->userDirectives[0]['completed_at']);
+		$this->assertFalse($data['directive']['completed']);
+		$this->assertNull($this->db->userDirectives[0]['completed_at']);
 		$this->assertSame(
-			[['counter' => 'defense_complete', 'have' => 6, 'need' => 6, 'pct' => 100]],
+			[
+				['counter' => 'defense_complete', 'have' => 6, 'need' => 6, 'pct' => 100],
+				['counter' => 'hold_success', 'have' => 0, 'need' => 1, 'pct' => 0],
+			],
 			$data['directive']['bars']
 		);
 	}
@@ -341,11 +343,11 @@ class DirectiveServiceTest extends TestCase
 		$this->db->fleets[] = [
 			'fleet_id' => 44,
 			'fleet_owner' => 10,
-			'fleet_mission' => 15,
+			'fleet_mission' => FLEET_MISSION_EXPEDITION,
 			'fleet_meta' => '{"stance":"aggressive"}',
 			'fleet_end_stay' => TIMESTAMP + 10,
 			'fleet_end_time' => TIMESTAMP + 20,
-			'fleet_mess' => 2,
+			'fleet_mess' => FLEET_HOLD,
 		];
 		ExpeditionChoiceService::createPendingBranch(44, 10, 5, 'resource_find', 'aggressive', [
 			'metal' => 50,
@@ -364,6 +366,33 @@ class DirectiveServiceTest extends TestCase
 		$this->assertCount(1, $data['expeditions']);
 		$this->assertSame('aggressive', $data['expeditions'][0]['stance']);
 		$this->assertCount(1, $data['pending_choices']);
+	}
+
+	public function testActiveExpeditionsOmitFleetsAlreadyReturningHome(): void
+	{
+		$this->db->fleets[] = [
+			'fleet_id' => 1605,
+			'fleet_owner' => 10,
+			'fleet_mission' => FLEET_MISSION_EXPEDITION,
+			'fleet_meta' => '{"stance":"aggressive"}',
+			'fleet_end_stay' => TIMESTAMP - 30,
+			'fleet_end_time' => TIMESTAMP + 60,
+			'fleet_mess' => FLEET_RETURN,
+		];
+		$this->db->fleets[] = [
+			'fleet_id' => 1606,
+			'fleet_owner' => 10,
+			'fleet_mission' => FLEET_MISSION_EXPEDITION,
+			'fleet_meta' => '{"stance":"balanced"}',
+			'fleet_end_stay' => TIMESTAMP + 10,
+			'fleet_end_time' => TIMESTAMP + 40,
+			'fleet_mess' => FLEET_HOLD,
+		];
+
+		$active = DirectiveService::activeExpeditions(10);
+		$this->assertCount(1, $active);
+		$this->assertSame(1606, $active[0]['fleet_id']);
+		$this->assertSame('balanced', $active[0]['stance']);
 	}
 
 	public function testNotifyPeriodEndingMarksProgressOnce(): void
