@@ -85,10 +85,11 @@ class SeasonSbtIssuerService
 			$rank = isset($row['rank']) && $row['rank'] !== '' && $row['rank'] !== null
 				? (int) $row['rank']
 				: null;
+			$universe = (int) ($meta['universe'] ?? $row['universe'] ?? 0);
 			$tags = self::tagsFor($meta, $tier, !empty($meta['retroactive']));
 			$data = [
 				'season_id'    => $seasonId,
-				'uni'          => 3,
+				'uni'          => $universe,
 				'tier'         => $tier,
 				'rank'         => $rank,
 				'feat_id'      => $featId !== '' ? $featId : null,
@@ -113,7 +114,7 @@ class SeasonSbtIssuerService
 			];
 
 			$grant = [
-				'universe'      => (int) ($meta['universe'] ?? $row['universe'] ?? 0),
+				'universe'      => $universe,
 				'user_id'       => (int) ($row['user_id'] ?? 0),
 				'hive_user'     => $hive,
 				'season_id'     => $seasonId,

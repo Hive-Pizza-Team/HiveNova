@@ -9,6 +9,9 @@ use Throwable;
  */
 class DatabaseSeasonSbtGrantStore implements SeasonSbtGrantStore
 {
+	/** DB version that introduced season_sbt_grants (install/migrations/migration_54.sql). */
+	public const SCHEMA_DB_VERSION = 54;
+
 	/** @var bool|null */
 	private static $schemaReadyCache = null;
 
@@ -35,7 +38,7 @@ class DatabaseSeasonSbtGrantStore implements SeasonSbtGrantStore
 				[],
 				'dbVersion'
 			);
-			if ($version < 51) {
+			if ($version < self::SCHEMA_DB_VERSION) {
 				self::$schemaReadyCache = false;
 			} else {
 				$tables = $database->nativeQuery(

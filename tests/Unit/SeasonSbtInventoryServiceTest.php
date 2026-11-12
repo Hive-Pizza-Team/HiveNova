@@ -7,6 +7,7 @@ use HiveNova\Core\DatabaseSeasonGrantBadgeSource;
 use HiveNova\Core\NftTrackerClient;
 use HiveNova\Core\PrestigeBadgeService;
 use HiveNova\Core\SeasonSbtBadgeMapper;
+use HiveNova\Core\SeasonSbtGrantNormalizer;
 use HiveNova\Core\SeasonSbtGrantStore;
 use HiveNova\Core\SeasonSbtInventoryService;
 use HiveNova\Core\SeasonSbtIssuerService;
@@ -188,6 +189,70 @@ class SeasonSbtInventoryServiceTest extends TestCase
 		$this->assertTrue($view['medals'][0]['verified']);
 	}
 
+	public function testSoftVerifyReturnsFalseWhenInstanceIdDoesNotMatch(): void
+	{
+		NftTrackerClient::setFetcher(static function (): string {
+			return json_encode([['id' => 'other-inst', 'holder' => 'ga-sm']], JSON_THROW_ON_ERROR);
+		});
+
+		$store = new ArraySeasonSbtGrantStore([
+			[
+				'user_id' => 1,
+				'hive_user' => 'ga-sm',
+				'season_id' => 'u3-s1',
+				'tier' => SeasonSbtGrantStore::TIER_PARTICIPANT,
+				'nft_namespace' => 'sablephalanx',
+				'nft_symbol' => 'MOONU3S1',
+				'instance_id' => 'inst-1',
+			],
+		]);
+		$service = new SeasonSbtInventoryService(
+			$store,
+			new NftTrackerClient(),
+			static fn (): ?array => [
+				'id' => 1,
+				'username' => 'GA',
+				'hive_account' => 'ga-sm',
+				'register_time' => 10,
+			],
+			static fn (): ?array => null,
+			true
+		);
+
+		$view = $service->inventory(3, 1, 1, null);
+		$this->assertTrue($view['trackerChecked']);
+		$this->assertFalse($view['medals'][0]['verified']);
+	}
+
+	public function testNormalizerAllowlistsHttpUrlsOnly(): void
+	{
+		$ok = SeasonSbtGrantNormalizer::normalize([
+			'hive_user' => 'alice',
+			'season_id' => 'u3-s1',
+			'tier' => SeasonSbtGrantStore::TIER_PARTICIPANT,
+			'recap_url' => 'https://peakd.com/@moon/s1',
+			'image_url' => 'http://example.com/medal.png',
+		]);
+		$this->assertNotNull($ok);
+		$this->assertSame('https://peakd.com/@moon/s1', $ok['recap_url']);
+		$this->assertSame('http://example.com/medal.png', $ok['image_url']);
+
+		$xss = SeasonSbtGrantNormalizer::normalize([
+			'hive_user' => 'alice',
+			'season_id' => 'u3-s1',
+			'tier' => SeasonSbtGrantStore::TIER_PARTICIPANT,
+			'recap_url' => 'javascript:alert(1)',
+			'image_url' => 'data:text/html,<script>alert(1)</script>',
+		]);
+		$this->assertNotNull($xss);
+		$this->assertSame('', $xss['recap_url']);
+		$this->assertSame('', $xss['image_url']);
+
+		$this->assertSame('', SeasonSbtGrantNormalizer::sanitizeHttpUrl('//evil.example/x'));
+		$this->assertSame('', SeasonSbtGrantNormalizer::sanitizeHttpUrl('/relative/path'));
+		$this->assertSame('HTTPS://Example.COM/a', SeasonSbtGrantNormalizer::sanitizeHttpUrl('HTTPS://Example.COM/a'));
+	}
+
 	public function testBadgeMapperOrdersWinnerBeforeParticipant(): void
 	{
 		$badges = SeasonSbtBadgeMapper::badgesFromGrants([
@@ -245,6 +310,7 @@ CSV;
 			'season_id' => 'u3-s1',
 			'nft_namespace' => 'sablephalanx',
 			'nft_symbol' => 'MOONU3S1',
+			'universe' => 7,
 			'retroactive' => true,
 			'recap_url' => 'https://peakd.com/s1',
 		], false);
@@ -252,6 +318,8 @@ CSV;
 		$this->assertCount(2, $plan['payloads']);
 		$this->assertSame('issue', $plan['payloads'][0]['custom_json']['action']);
 		$this->assertTrue($plan['payloads'][0]['custom_json']['soulbound']);
+		$this->assertSame(7, $plan['payloads'][0]['custom_json']['data']['uni']);
+		$this->assertSame(7, $plan['payloads'][0]['grant']['universe']);
 		$this->assertContains('RETRO', $plan['payloads'][0]['custom_json']['tags']);
 		$this->assertContains('TOP', $plan['payloads'][0]['custom_json']['tags']);
 		$this->assertSame(0, $plan['recorded']);

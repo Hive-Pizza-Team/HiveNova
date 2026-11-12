@@ -84,7 +84,7 @@ if ($modeRecord) {
 	require 'includes/vars.php';
 	$store = new DatabaseSeasonSbtGrantStore();
 	if (!DatabaseSeasonSbtGrantStore::isSchemaReady()) {
-		fwrite(STDERR, "season_sbt_grants schema not ready (migrate to DB version 51).\n");
+		fwrite(STDERR, "season_sbt_grants schema not ready (migrate to DB version " . DatabaseSeasonSbtGrantStore::SCHEMA_DB_VERSION . ").\n");
 		exit(1);
 	}
 } else {

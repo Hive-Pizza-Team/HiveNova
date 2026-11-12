@@ -87,12 +87,28 @@ final class SeasonSbtGrantNormalizer
 			'nft_symbol'    => $symbol,
 			'instance_id'   => trim((string) ($grant['instance_id'] ?? '')),
 			'trx_id'        => trim((string) ($grant['trx_id'] ?? '')),
-			'recap_url'     => trim((string) ($grant['recap_url'] ?? '')),
-			'image_url'     => trim((string) ($grant['image_url'] ?? '')),
+			'recap_url'     => self::sanitizeHttpUrl((string) ($grant['recap_url'] ?? '')),
+			'image_url'     => self::sanitizeHttpUrl((string) ($grant['image_url'] ?? '')),
 			'game_name'     => trim((string) ($grant['game_name'] ?? '')),
 			'data_json'     => $dataJson,
 			'retroactive'   => !empty($grant['retroactive']) ? 1 : 0,
 			'issued_at'     => max(0, (int) ($grant['issued_at'] ?? 0)),
 		];
+	}
+
+	/**
+	 * Allowlist http(s) only; blank javascript:/data:/relative/etc. for href/src safety.
+	 */
+	public static function sanitizeHttpUrl(string $url): string
+	{
+		$url = trim($url);
+		if ($url === '') {
+			return '';
+		}
+		if (!preg_match('#^https?://#i', $url)) {
+			return '';
+		}
+
+		return $url;
 	}
 }

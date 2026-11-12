@@ -290,6 +290,6 @@ class SeasonSbtInventoryService
 			}
 		}
 
-		return true;
+		return false;
 	}
 }

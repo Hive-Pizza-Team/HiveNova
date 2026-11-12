@@ -5,7 +5,6 @@ namespace HiveNova\Page\Game;
 use HiveNova\Core\DatabaseSeasonGrantBadgeSource;
 use HiveNova\Core\DatabaseSeasonSbtGrantStore;
 use HiveNova\Core\HTTP;
-use HiveNova\Core\NftTrackerClient;
 use HiveNova\Core\PrestigeBadgeService;
 use HiveNova\Core\SeasonSbtInventoryService;
 use HiveNova\Core\Universe;
@@ -43,10 +42,10 @@ class ShowMedalsPage extends AbstractGamePage
 		];
 		$service = new SeasonSbtInventoryService(
 			$store,
-			new NftTrackerClient(),
 			null,
 			null,
-			true
+			null,
+			false
 		);
 
 		$months = $LNG['months'] ?? [];
