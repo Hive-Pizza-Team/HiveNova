@@ -80,7 +80,7 @@ class SteemconnectAuth implements externalAuth
 	{
 		$username = $this->getAccount();
 		
-		$sql = 'SELECT id, username, id_planet
+		$sql = 'SELECT id, username, id_planet, lang
 		FROM %%USERS%%
 		WHERE username = :username and universe = :universe;';
 		

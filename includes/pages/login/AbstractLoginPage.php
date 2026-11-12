@@ -11,6 +11,7 @@ use HiveNova\Core\PublicSeo;
 use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\Template as template;
 use HiveNova\Core\Universe;
+use HiveNova\Core\UserLanguageService;
 
 /**
  *  2Moons 
@@ -141,6 +142,7 @@ abstract class AbstractLoginPage
 			'analyticsEnable'		=> $config->ga_active,
 			'analyticsUID'			=> $config->ga_key,
 			'lang'					=> $LNG->getLanguage(),
+			'langExplicit'			=> UserLanguageService::hasExplicitLobbyLanguageChoice(),
 			'UNI'					=> Universe::current(),
 			'VERSION'				=> $config->VERSION,
 			'REV'					=> AssetRevision::fromFilesystem((string) $config->VERSION),
@@ -213,6 +215,7 @@ abstract class AbstractLoginPage
 		
 		$this->assign(array(
             'lang'    			=> $lang,
+			'langExplicit'		=> UserLanguageService::hasExplicitLobbyLanguageChoice(),
 			'bodyclass'			=> $this->getWindow(),
 			'basepath'			=> $basePath,
 			'isMultiUniverse'	=> count(Universe::availableUniverses()) > 1,

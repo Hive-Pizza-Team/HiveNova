@@ -70,7 +70,10 @@ class ShowExternalAuthPage extends AbstractLoginPage
 		$session->adminAccess	= 0;
 		Session::regenerateId();
 		$session->save();
-		UserLanguageService::syncFromLobbyOnLogin((int) $loginData['id']);
+		UserLanguageService::syncFromLobbyOnLogin(
+			(int) $loginData['id'],
+			isset($loginData['lang']) ? (string) $loginData['lang'] : null
+		);
 		$this->redirectTo("game.php");	
 	}
 }

@@ -77,6 +77,43 @@ class UserLanguageServiceTest extends TestCase
 		);
 	}
 
+	public function testHasExplicitLobbyLanguageChoiceDetectsGetLang(): void
+	{
+		$this->assertTrue(
+			UserLanguageService::hasExplicitLobbyLanguageChoice([], [], ['lang' => 'de'])
+		);
+	}
+
+	public function testHasExplicitLobbyLanguageChoiceDetectsMarker(): void
+	{
+		$this->assertTrue(
+			UserLanguageService::hasExplicitLobbyLanguageChoice(
+				['lang_explicit' => '1'],
+				[],
+				[]
+			)
+		);
+		// A cookie is never intent (would re-sync on every later login).
+		$this->assertFalse(
+			UserLanguageService::hasExplicitLobbyLanguageChoice(
+				[],
+				['lang_explicit' => '1', 'lang' => 'de'],
+				[]
+			)
+		);
+	}
+
+	public function testHasExplicitLobbyLanguageChoiceRejectsBareCookie(): void
+	{
+		$this->assertFalse(
+			UserLanguageService::hasExplicitLobbyLanguageChoice(
+				[],
+				['lang' => 'de'],
+				[]
+			)
+		);
+	}
+
 	public function testApplyToUserSkipsWhenUnchanged(): void
 	{
 		$db = $this->createMock(DatabaseInterface::class);
@@ -101,7 +138,24 @@ class UserLanguageServiceTest extends TestCase
 		$this->assertTrue(UserLanguageService::applyToUser(42, 'de', 'en', $db));
 	}
 
-	public function testSyncFromLobbyOnLoginCopiesCookieLanguage(): void
+	public function testSyncFromLobbyOnLoginRequiresExplicitChoice(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->never())->method('update');
+
+		$this->assertNull(
+			UserLanguageService::syncFromLobbyOnLogin(
+				7,
+				'en',
+				$db,
+				[],
+				['lang' => 'de'],
+				[]
+			)
+		);
+	}
+
+	public function testSyncFromLobbyOnLoginCopiesExplicitPostedLanguage(): void
 	{
 		$db = $this->createMock(DatabaseInterface::class);
 		$db->expects($this->once())->method('update');
@@ -112,8 +166,44 @@ class UserLanguageServiceTest extends TestCase
 				7,
 				'en',
 				$db,
+				['lang' => 'de', 'lang_explicit' => '1'],
 				[],
-				['lang' => 'de']
+				[]
+			)
+		);
+	}
+
+	public function testSyncFromLobbyOnLoginIgnoresCookieMarker(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->never())->method('update');
+
+		$this->assertNull(
+			UserLanguageService::syncFromLobbyOnLogin(
+				7,
+				'en',
+				$db,
+				[],
+				['lang' => 'de', 'lang_explicit' => '1'],
+				[]
+			)
+		);
+	}
+
+	public function testSyncFromLobbyOnLoginSkipsUnchangedWithCurrentLang(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->never())->method('update');
+
+		$this->assertSame(
+			'de',
+			UserLanguageService::syncFromLobbyOnLogin(
+				7,
+				'de',
+				$db,
+				['lang' => 'de', 'lang_explicit' => '1'],
+				[],
+				[]
 			)
 		);
 	}
@@ -124,14 +214,14 @@ class UserLanguageServiceTest extends TestCase
 		$db->expects($this->never())->method('update');
 
 		$this->assertNull(
-			UserLanguageService::syncFromLobbyOnLogin(7, 'en', $db, [], [])
+			UserLanguageService::syncFromLobbyOnLogin(7, 'en', $db, [], [], [])
 		);
 	}
 
-	public function testApplyExplicitRequestUpdatesLoadedUser(): void
+	public function testApplyExplicitRequestUpdatesLoadedUserWithoutPersisting(): void
 	{
 		$db = $this->createMock(DatabaseInterface::class);
-		$db->expects($this->once())->method('update');
+		$db->expects($this->never())->method('update');
 
 		$user = ['id' => 9, 'lang' => 'en'];
 		$this->assertTrue(
@@ -160,5 +250,21 @@ class UserLanguageServiceTest extends TestCase
 		} finally {
 			$_COOKIE = $savedCookie;
 		}
+	}
+
+	public function testApplyExplicitRequestNoopsWhenUnchanged(): void
+	{
+		$db = $this->createMock(DatabaseInterface::class);
+		$db->expects($this->never())->method('update');
+
+		$user = ['id' => 9, 'lang' => 'de'];
+		$this->assertFalse(
+			UserLanguageService::applyExplicitRequestToUser(
+				$user,
+				$db,
+				['lang' => 'de']
+			)
+		);
+		$this->assertSame('de', $user['lang']);
 	}
 }

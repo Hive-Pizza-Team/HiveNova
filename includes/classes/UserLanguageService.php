@@ -6,12 +6,46 @@ namespace HiveNova\Core;
  * Persist lobby / explicit language choice onto the user record used by in-game UI.
  *
  * In-game pages read `$USER['lang']`, while the lobby uses `?lang=` + the `lang`
- * cookie. This service bridges those on login/register and when `?lang=` is set
- * on game.php. Cookie alone is not applied while already in-game, so an existing
- * account preference is not overwritten by a stale lobby cookie mid-session.
+ * cookie. This service bridges those on login/register when the player made an
+ * intentional lobby choice. Cookie / Accept-Language alone is not treated as intent,
+ * so Account Options language is not overwritten on every login.
+ *
+ * In-game `?lang=` is a display-only override for the current request; persistence
+ * stays on the tokenised Settings POST.
  */
 class UserLanguageService
 {
+	/**
+	 * Whether the lobby language was chosen intentionally on this page view
+	 * (`?lang=` from a flag click, or the posted `lang_explicit=1` marker).
+	 *
+	 * Accept-Language and the lang cookie are never treated as intent, so a
+	 * later Account Options choice is not overwritten on every login.
+	 *
+	 * @param array<string, mixed>|null $request
+	 * @param array<string, mixed>|null $cookie
+	 * @param array<string, mixed>|null $get
+	 */
+	public static function hasExplicitLobbyLanguageChoice(
+		?array $request = null,
+		?array $cookie = null,
+		?array $get = null
+	): bool {
+		$request ??= $_REQUEST;
+		$cookie ??= $_COOKIE;
+		$get ??= $_GET;
+
+		if (isset($get['lang']) && (string) $get['lang'] !== '') {
+			return true;
+		}
+
+		if (isset($request['lang_explicit']) && (string) $request['lang_explicit'] === '1') {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Resolve an allowed language from request and/or cookie (lobby plumbing).
 	 *
@@ -107,18 +141,31 @@ class UserLanguageService
 	}
 
 	/**
-	 * After login: copy lobby language (`?lang=` / lang cookie) onto the account.
+	 * After login: copy intentional lobby language onto the account.
+	 *
+	 * Requires an explicit choice marker (`?lang=` or posted `lang_explicit=1`).
+	 * Never treats Accept-Language or the lang cookie as intent.
 	 *
 	 * @param array<string, mixed>|null $request
 	 * @param array<string, mixed>|null $cookie
+	 * @param array<string, mixed>|null $get
 	 */
 	public static function syncFromLobbyOnLogin(
 		int $userId,
 		?string $currentLang = null,
 		?DatabaseInterface $db = null,
 		?array $request = null,
-		?array $cookie = null
+		?array $cookie = null,
+		?array $get = null
 	): ?string {
+		$request ??= $_REQUEST;
+		$cookie ??= $_COOKIE;
+		$get ??= $_GET;
+
+		if (!self::hasExplicitLobbyLanguageChoice($request, $cookie, $get)) {
+			return null;
+		}
+
 		$lang = self::resolveFromRequest($request, $cookie, true);
 		if ($lang === null) {
 			return null;
@@ -130,8 +177,9 @@ class UserLanguageService
 	}
 
 	/**
-	 * In-game: honor explicit `?lang=` by updating the loaded user row and DB.
-	 * Does not use the lang cookie, so mid-session preference stays stable.
+	 * In-game: honor explicit `?lang=` as a display-only override for this request.
+	 * Does not write users.lang (Settings POST owns persistence) and ignores the
+	 * lang cookie so mid-session preference stays stable.
 	 *
 	 * @param array<string, mixed> $user
 	 * @param array<string, mixed>|null $request
@@ -147,10 +195,11 @@ class UserLanguageService
 		}
 
 		$current = isset($user['lang']) && is_string($user['lang']) ? $user['lang'] : null;
-		if (!self::applyToUser((int) $user['id'], $lang, $current, $db)) {
+		if ($current === $lang) {
 			return false;
 		}
 
+		// Display-only for this request; $db intentionally unused (Settings POST persists).
 		$user['lang'] = $lang;
 
 		return true;
