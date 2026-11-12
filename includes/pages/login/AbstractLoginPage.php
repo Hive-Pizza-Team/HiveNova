@@ -199,13 +199,17 @@ abstract class AbstractLoginPage
 		$seoPage		= PublicSeo::normalizePage(HTTP::_GP('page', ''));
 		$gameName		= (string) $config->game_name;
 		$languages		= Language::getAllowedLangs(false);
+		$seoBasePath		= PublicSeo::canonicalBasePath();
 		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
 		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
-		$hreflangUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
+		// SEO head tags only: canonical / alternate hreflang use the configured public origin.
+		$canonicalUrl		= PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang);
+		$hreflangUrls		= PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages);
+		// Clickable language flags + footer stay on the request host (dev/QA /uniN/).
+		$languageUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
-		$ogImageUrl			= $basePath.'styles/resource/images/login/HiveNova.png';
+		$ogImageUrl			= $seoBasePath.'styles/resource/images/login/HiveNova.png';
 		$jsonLd				= '';
 		if ($seoPage === 'index') {
 			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
@@ -221,6 +225,7 @@ abstract class AbstractLoginPage
 			'metaDescription'	=> $metaDescription,
 			'canonicalUrl'		=> $canonicalUrl,
 			'hreflangUrls'		=> $hreflangUrls,
+			'languageUrls'		=> $languageUrls,
 			'pageHeading'		=> $pageHeading,
 			'robotsContent'		=> $robotsContent,
 			'ogImageUrl'		=> $ogImageUrl,

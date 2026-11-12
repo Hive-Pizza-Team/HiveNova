@@ -1527,3 +1527,5 @@ $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
 $LNG['modul_43'] = 'Unused';
+$LNG['se_seo_canonical_origin'] = 'Public canonical origin';
+$LNG['se_seo_canonical_origin_info'] = 'Absolute https origin used for lobby canonical, hreflang, Open Graph, and sitemap locs. Alternate hosts (e.g. moon.hive.pizza) keep this value so SEO does not split across domains. Example: https://moonsiege.com/';

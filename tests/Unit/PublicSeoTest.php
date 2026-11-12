@@ -6,6 +6,43 @@ use PHPUnit\Framework\TestCase;
 
 class PublicSeoTest extends TestCase
 {
+
+	public function testNormalizeCanonicalOriginDefaultsAndCleans(): void
+	{
+		$this->assertSame('https://moonsiege.com/', PublicSeo::normalizeCanonicalOrigin(''));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::normalizeCanonicalOrigin('not a url'));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::normalizeCanonicalOrigin('https://moonsiege.com'));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::normalizeCanonicalOrigin('https://moonsiege.com/path?x=1'));
+		$this->assertSame('https://example.test/', PublicSeo::normalizeCanonicalOrigin('example.test'));
+		$this->assertSame('http://localhost:8080/', PublicSeo::normalizeCanonicalOrigin('http://localhost:8080/foo'));
+	}
+
+	public function testCanonicalBasePathUsesDefaultWithoutConfig(): void
+	{
+		$this->assertSame(PublicSeo::DEFAULT_CANONICAL_ORIGIN, PublicSeo::canonicalBasePath());
+		$this->assertSame('https://moonsiege.com/', PublicSeo::DEFAULT_CANONICAL_ORIGIN);
+	}
+
+	public function testCanonicalBasePathHonorsConfiguredOriginOverride(): void
+	{
+		$this->assertSame(
+			'https://canonical.example/',
+			PublicSeo::canonicalBasePath('https://Canonical.Example/')
+		);
+	}
+
+	public function testHreflangAndFooterLinksHonorCallerBasePath(): void
+	{
+		$requestBase = 'https://dev.example/uni1/';
+		$langs = ['en' => 'English', 'de' => 'Deutsch'];
+		$hreflang = PublicSeo::hreflangUrls($requestBase, 'rules', $langs);
+		$this->assertSame('https://dev.example/uni1/index.php?page=rules', $hreflang['en']);
+		$this->assertSame('https://dev.example/uni1/index.php?page=rules&lang=de', $hreflang['de']);
+
+		$footer = PublicSeo::footerLinks($requestBase, 'de', ['siteTitleRules' => 'Rules']);
+		$this->assertSame('https://dev.example/uni1/index.php?page=rules&lang=de', $footer[0]['url']);
+	}
+
 	public function testNormalizePageDefaultsEmptyToIndex(): void
 	{
 		$this->assertSame('index', PublicSeo::normalizePage(''));
