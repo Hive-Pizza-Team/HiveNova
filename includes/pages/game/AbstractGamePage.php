@@ -50,6 +50,8 @@ abstract class AbstractGamePage
 	protected $ecoObj;
 	protected $window;
 	protected $disableEcoSystem = false;
+	/** When true, menu/bottom-nav skip active highlight (error/info pages). */
+	protected $clearNavHighlight = false;
 	/** @var array<string, mixed>|null */
 	protected $user = null;
 	/** @var array<string, mixed>|null */
@@ -326,10 +328,16 @@ abstract class AbstractGamePage
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'queryString'		=> $this->getQueryString(),
 			'themeSettings'		=> $THEME->getStyleSettings(),
+			// Resolved slug (aliases applied). Nocache assign so Smarty page
+			// caches cannot freeze an unrelated menu highlight on error.default.
+			'navPage'			=> $this->clearNavHighlight
+				? ''
+				: \HiveNova\Core\GamePageRouter::resolve(HTTP::_GP('page', 'overview')),
 		));
 	}
 	protected function printMessage($message, $redirectButtons = NULL, $redirect = NULL, $fullSide = true)
 	{
+		$this->clearNavHighlight = true;
 		$this->assign(array(
 			'message'			=> $message,
 			'redirectButtons'	=> $redirectButtons,

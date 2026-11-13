@@ -72,8 +72,8 @@ class ShowEventFirehosePageTest extends TestCase
 
 	public function test_feed_ignores_client_universe_param(): void
 	{
-		$_REQUEST['universe'] = 2;
-		$_REQUEST['sinceId'] = 0;
+		$_GET['universe'] = 2;
+		$_GET['sinceId'] = 0;
 
 		Database::get()->insert(
 			'INSERT INTO %%UNIVERSE_EVENTS%% SET universe = :universe, time = :time, event_type = :eventType, size_bucket = :sizeBucket, outcome = :outcome;',

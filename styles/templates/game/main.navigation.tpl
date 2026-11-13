@@ -1,4 +1,5 @@
-{assign var=navPage value=$smarty.get.page|default:'overview'}
+{* $navPage is assigned from PHP (resolved aliases). Empty = no highlight (errors). *}
+{if !isset($navPage)}{assign var=navPage value=$smarty.get.page|default:'overview'}{/if}
 <ul id="menu">
     <li class="menu-separator menu-section">{$LNG.lm_menu_section_overview}</li>
     <li><a href="game.php?page=overview"{if $navPage == 'overview'} class="active"{/if}>{$LNG.lm_overview}</a></li>

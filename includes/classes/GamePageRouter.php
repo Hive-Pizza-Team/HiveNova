@@ -9,7 +9,10 @@ class GamePageRouter
 {
 	/** @var array<string, string> */
 	private const ALIASES = [
-		'empire' => 'imperium',
+		'empire'   => 'imperium',
+		'faq'      => 'questions',
+		'officers' => 'officier',
+		'officer'  => 'officier',
 	];
 
 	public static function resolve(string $page): string
