@@ -905,7 +905,8 @@ th a,
   padding: 10px;
   text-align: center;
   background: rgba(33, 37, 41, 0.95);
-  height: 140px
+  min-height: 140px;
+  box-sizing: border-box;
 }
 
 .buildn {
