@@ -759,7 +759,8 @@ height: 133px;
 	padding: 10px;
 	text-align: center;
 	background: #303463c9;
-	height:140px
+	min-height: 140px;
+	box-sizing: border-box;
 }
 
 .buildn {

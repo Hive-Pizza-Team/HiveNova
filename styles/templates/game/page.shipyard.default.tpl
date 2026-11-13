@@ -61,8 +61,8 @@
 					<a href='#' onclick='return Dialog.info({$RessID})'>{$LNG.tech.{$RessID}}</a>: <b><span style="color:{if $Element.costOverflow[$RessID] == 0}lime{else}red{/if}">{$RessAmount|number}</span></b>
 					{/foreach}</span></br>
 					{if $ID==212} +<span id="SolarEnergy">{$SolarEnergy}</span> {$LNG.tech.911}<br><script>$('#SolarEnergy').text(number_format({$SolarEnergy},0))</script>{/if}
-					<span>{if $Element.AlreadyBuild}<span style="color:red">{$LNG.bd_protection_shield_only_one}</span>{elseif !$Element.techAccessible}&nbsp;{elseif $NotBuilding && $Element.buyable}<input type="text" inputmode="numeric" name="fmenge[{$ID}]" id="input_{$ID}" size="3" maxlength="{$maxlength}" placeholder="0" tabindex="{$smarty.foreach.FleetList.iteration}" >
-					<input type="button" class="b" value="{$LNG.bd_max_ships}" onclick="$('#input_{$ID}').val($('#max_{$ID}').attr('data-n'))"> <input class="b" type="submit" value="{$LNG.bd_build_ships}">
+					<span>{if $Element.AlreadyBuild}<span style="color:red">{$LNG.bd_protection_shield_only_one}</span>{elseif !$Element.techAccessible}&nbsp;{elseif $NotBuilding && $Element.buyable}<span class="shipyard-build-actions"><input type="text" inputmode="numeric" name="fmenge[{$ID}]" id="input_{$ID}" size="3" maxlength="{$maxlength}" placeholder="0" tabindex="{$smarty.foreach.FleetList.iteration}" >
+					<input type="button" class="b" value="{$LNG.bd_max_ships}" onclick="$('#input_{$ID}').val($('#max_{$ID}').attr('data-n'))"> <input class="b" type="submit" value="{$LNG.bd_build_ships}"></span>
 					{/if}
 					
 					</p>{$LNG.fgf_time}
