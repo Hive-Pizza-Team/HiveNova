@@ -1780,7 +1780,7 @@ table.tablesorter thead tr .headerSortDown {
         align-self: start;
         justify-content: flex-start;
         gap: 0;
-        padding: 0 12px 0 0;
+        padding: 0 8px 0 4px;
         overflow-x: auto;
         scroll-padding-inline: 8px;
         overflow-y: hidden;
@@ -1791,18 +1791,29 @@ table.tablesorter thead tr .headerSortDown {
 
     #resource_mobile,
     .resource-cell {
-        flex: 1 1 0;
+        /* Content-sized cells: long amounts stay fully readable; strip scrolls. */
+        flex: 0 0 auto;
+        width: max-content;
         min-width: 56px;
         min-height: 44px;
-        padding: 4px 8px;
-        font-size: 12px;
+        padding: 4px 6px;
+        font-size: 11px;
         line-height: 1.2;
         scroll-snap-align: start;
+        box-sizing: border-box;
     }
 
     .resource-cell a {
         min-height: 44px;
         justify-content: center;
+    }
+
+    #resources_mobile .mobile .res_current {
+        /* Global .res_current min-width:90px is for desktop columns; drop it here. */
+        display: inline-block;
+        min-width: 0;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
     }
 
     #resource_mobile img,
