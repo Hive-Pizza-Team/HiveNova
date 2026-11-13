@@ -2188,7 +2188,8 @@ table.tablesorter thead tr .headerSortDown {
 
     .galaxy-planet-row td:nth-child(2) {
         order: 1;
-        flex: 0 0 22px;
+        /* Match the 32px planet-icon hit area so the thumb does not cover the name. */
+        flex: 0 0 32px;
         align-self: center;
         padding-top: 0;
     }
@@ -2229,12 +2230,13 @@ table.tablesorter thead tr .headerSortDown {
         min-width: 0;
         max-width: 38%;
         padding-left: 0;
-        font-size: 10px;
+        /* Match other mobile galaxy body text (was 10px / faded). */
+        font-size: 12px;
         line-height: 1.1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        opacity: 0.85;
+        opacity: 1;
     }
 
     .galaxy-planet-row td:nth-child(4),
