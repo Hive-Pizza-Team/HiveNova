@@ -46,6 +46,20 @@ class GameAssetPrefetchServiceTest extends TestCase
 		], $urls);
 	}
 
+	public function testListsHdStillsWhenPresent(): void
+	{
+		$hd = $this->fixtureRoot . '/styles/theme/hive/gebaeude-hd';
+		mkdir($hd, 0777, true);
+		file_put_contents($hd . '/1.png', 'png');
+		file_put_contents($hd . '/notes.txt', 'skip');
+
+		$service = new GameAssetPrefetchService($this->fixtureRoot, 'hive');
+		$urls = $service->listUrls();
+
+		$this->assertContains('styles/theme/hive/gebaeude-hd/1.png', $urls);
+		$this->assertNotContains('styles/theme/hive/gebaeude-hd/notes.txt', $urls);
+	}
+
 	public function testMissingThemeReturnsEmptyList(): void
 	{
 		$service = new GameAssetPrefetchService($this->fixtureRoot, 'missing-skin');

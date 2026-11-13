@@ -48,7 +48,10 @@
 		img.width = 89;
 		img.alt = '';
 		img.loading = 'lazy';
-		img.setAttribute('data-src', cfg.dpath + 'gebaeude/' + elementId + '.' + (cfg.ext[elementId] || 'gif'));
+		var hdExt = cfg.hd && cfg.hd[elementId];
+		img.setAttribute('data-src', hdExt
+			? (cfg.dpath + 'gebaeude-hd/' + elementId + '.' + hdExt)
+			: (cfg.dpath + 'gebaeude/' + elementId + '.' + (cfg.ext[elementId] || 'gif')));
 		imgLink.appendChild(img);
 		wrap.appendChild(imgLink);
 		wrap.appendChild(document.createElement('br'));
