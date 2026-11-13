@@ -135,12 +135,12 @@ class GameElementImageTest extends TestCase
 		$this->assertFalse($resolver->hasHd('./styles/theme/hive/', -3));
 	}
 
-	public function testRepoHdAssetsResolveAndUniversityStaysGif(): void
+	public function testRepoBuildingHdAssetsResolveIncludingUniversity(): void
 	{
 		$resolver = new GameElementImage();
 		$dpath = './styles/theme/hive/';
 
-		$hdIds = [1, 2, 3, 4, 12, 14, 15, 21, 22, 23, 24, 31, 33, 34, 41, 42, 43, 44];
+		$hdIds = [1, 2, 3, 4, 6, 12, 14, 15, 21, 22, 23, 24, 31, 33, 34, 41, 42, 43, 44];
 		foreach ($hdIds as $id) {
 			$this->assertTrue($resolver->hasHd($dpath, $id), 'expected HD still for building ' . $id);
 			$this->assertSame(
@@ -148,9 +148,6 @@ class GameElementImageTest extends TestCase
 				$resolver->url($dpath, $id)
 			);
 		}
-
-		$this->assertFalse($resolver->hasHd($dpath, 6), 'University still has no still; keep the GIF');
-		$this->assertSame('./styles/theme/hive/gebaeude/6.gif', $resolver->url($dpath, 6));
 	}
 
 	private function removeTree(string $dir): void
