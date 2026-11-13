@@ -24,6 +24,8 @@ class ShowQuestionsPage extends AbstractGamePage
 {
 	public static $requireModule = 0;
 
+	public static $defaultController = 'show';
+
 	function __construct() 
 	{
 		parent::__construct();

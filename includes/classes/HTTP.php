@@ -58,29 +58,35 @@ class HTTP {
 	
 	static public function _GP($name, $default, $multibyte = false, $highnum = false)
 	{
-		if(!isset($_REQUEST[$name]))
-		{
+		// Prefer POST over GET (PHP request_order "GP"). Never read cookies:
+		// with empty request_order + variables_order=EGPCS, $_REQUEST lets
+		// cookies override query/body and break routing (e.g. a stray "mode").
+		if (array_key_exists($name, $_POST)) {
+			$value = $_POST[$name];
+		} elseif (array_key_exists($name, $_GET)) {
+			$value = $_GET[$name];
+		} else {
 			return $default;
 		}
 
 		if(is_float($default) || $highnum)
 		{
-			return (float) $_REQUEST[$name];
+			return (float) $value;
 		}
 		
 		if(is_int($default))
 		{
-			return (int) $_REQUEST[$name];			
+			return (int) $value;
 		}
 
 		if(is_string($default))
 		{
-			return self::_quote($_REQUEST[$name], $multibyte);
+			return self::_quote($value, $multibyte);
 		}
 		
-		if(is_array($default) && is_array($_REQUEST[$name]))
+		if(is_array($default) && is_array($value))
 		{
-			return self::_quoteArray($_REQUEST[$name], $multibyte, !empty($default) && $default[0] === 0);
+			return self::_quoteArray($value, $multibyte, !empty($default) && $default[0] === 0);
 		}
 		
 		return $default;
