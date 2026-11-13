@@ -725,6 +725,16 @@ div#disclamer a {
     height: 84px;
 }
 
+/* HD stills in gebaeude-hd/ are transparent cutouts. Give them a plate so
+   they read clearly in the existing 120px (desktop) / 48–89px slots. */
+img[src*="gebaeude-hd"],
+img[data-src*="gebaeude-hd"] {
+    background-color: #1a1f2e;
+    background-image: radial-gradient(ellipse at 50% 70%, #2c3548 0%, #1a1f2e 62%, #12151f 100%);
+    object-fit: contain;
+    object-position: center;
+}
+
 .trader_col {
     margin: 0 5px;
     float: left;
