@@ -3340,6 +3340,11 @@ table.tablesorter thead tr .headerSortDown {
 	pointer-events: none;
 }
 
+/* Author display:flex would otherwise override the hidden attribute. */
+.achievement-celebration[hidden] {
+	display: none !important;
+}
+
 .achievement-celebration.is-active {
 	pointer-events: auto;
 }
