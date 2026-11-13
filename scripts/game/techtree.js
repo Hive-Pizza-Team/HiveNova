@@ -48,7 +48,16 @@
 		img.width = 89;
 		img.alt = '';
 		img.loading = 'lazy';
-		img.setAttribute('data-src', cfg.dpath + 'gebaeude/' + elementId + '.' + (cfg.ext[elementId] || 'gif'));
+		var hdExt = cfg.hd && (cfg.hd[elementId] || cfg.hd[String(elementId)]);
+		img.setAttribute('data-src', hdExt
+			? (cfg.dpath + 'gebaeude-hd/' + elementId + '.' + hdExt)
+			: (cfg.dpath + 'gebaeude/' + elementId + '.' + (cfg.ext[elementId] || 'gif')));
+		if (hdExt) {
+			var idNum = parseInt(elementId, 10);
+			if ((idNum >= 600 && idNum <= 799) || (idNum >= 900 && idNum <= 999)) {
+				img.className = 'element-art--plate';
+			}
+		}
 		imgLink.appendChild(img);
 		wrap.appendChild(imgLink);
 		wrap.appendChild(document.createElement('br'));
