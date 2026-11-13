@@ -32,6 +32,7 @@ class AssetRevision
 			'scripts/game/element-focus.js',
 			'scripts/game/techtree.js',
 			'scripts/game/techtree-nudge.js',
+			'styles/resource/css/login/main.css',
 		];
 	}
 

@@ -52,6 +52,23 @@ body {
     line-height: 14px;
 }
 
+/*
+ * Login/lobby (body.light): height:100% on body lets the short body box scroll
+ * away and reveals the theme's html background (bands/seams on tall pages and
+ * full-page captures). Grow with content and keep html on the page fallback.
+ */
+body.light {
+    height: auto;
+    min-height: 100%;
+}
+
+html:has(body.light) {
+    background-image: none;
+    background-color: var(--color-bg-page, #0d0d0d);
+    background-size: auto;
+    background-attachment: scroll;
+}
+
 input,
 textarea,
 select,
@@ -103,6 +120,11 @@ img {
 
 h1 {
     color: #E31337;
+}
+
+/* Register (and other light-layout page titles): brand red fails WCAG AA on dark bg. */
+body.light #page > h1 {
+    color: var(--color-text-bright, #FFF);
 }
 
 footer,
@@ -218,6 +240,21 @@ body.light #language .flags {
     margin: 0;
     height: 11px;
     width: 16px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 11px;
+}
+
+/* Unselected flags at 0.55 opacity read as blank on small/mobile captures. */
+@media screen and (max-width: 699px) {
+    body.light #language a {
+        opacity: 0.85;
+    }
+
+    body.light #language a[aria-current="true"] {
+        opacity: 1;
+    }
 }
 
 ul#language,
@@ -656,47 +693,52 @@ ul#rules {
     display: block;
     float: right;
     margin-right: 4px;
-    text-indent: -9999em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-indent: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 11px;
 }
 
 .de {
-    background: url(../../images/login/flags/de.png);
+    background-image: url(../../images/login/flags/de.png);
 }
 
 .en {
-    background: url(../../images/login/flags/us.png);
+    background-image: url(../../images/login/flags/us.png);
 }
 
 .es {
-    background: url(../../images/login/flags/es.png);
+    background-image: url(../../images/login/flags/es.png);
 }
 
 .fr {
-    background: url(../../images/login/flags/fr.png);
+    background-image: url(../../images/login/flags/fr.png);
 }
 
 .it {
-    background: url(../../images/login/flags/it.png);
+    background-image: url(../../images/login/flags/it.png);
 }
 
 .pt {
-    background: url(../../images/login/flags/pt.png);
+    background-image: url(../../images/login/flags/pt.png);
 }
 
 .ru {
-    background: url(../../images/login/flags/ru.png);
+    background-image: url(../../images/login/flags/ru.png);
 }
 
 .si {
-    background: url(../../images/login/flags/si.png);
+    background-image: url(../../images/login/flags/si.png);
 }
 
 .pl {
-    background: url(../../images/login/flags/pl.png);
+    background-image: url(../../images/login/flags/pl.png);
 }
 
 .tr {
-    background: url(../../images/login/flags/tr.png);
+    background-image: url(../../images/login/flags/tr.png);
 }
 
 /** FOOTER **/
