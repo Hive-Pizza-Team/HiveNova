@@ -96,6 +96,11 @@ class AssetRevisionTest extends TestCase
 		$this->assertContains('scripts/game/techtree-nudge.js', $paths);
 	}
 
+	public function testFingerprintPathsIncludeRegisterStylesheet(): void
+	{
+		$this->assertContains('styles/resource/css/login/register.css', AssetRevision::fingerprintPaths());
+	}
+
 	public function testFingerprintPathsExistOnDisk(): void
 	{
 		foreach (AssetRevision::fingerprintPaths() as $relative) {
