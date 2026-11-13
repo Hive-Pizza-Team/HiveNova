@@ -7,8 +7,67 @@ use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\RegisterValidation;
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/../Support/RecordingDatabase.php';
+require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+
 class NicknameSuggestionServiceTest extends TestCase
 {
+	use SwapDatabaseInstance;
+
+	protected function tearDown(): void
+	{
+		$this->restoreDatabaseInstance();
+		parent::tearDown();
+	}
+
+	public function testDefaultConstructorUsesRandomIntAndGlobalDatabase(): void
+	{
+		$db = new RecordingDatabase();
+		$db->selectSingleResult = ['count' => 0];
+		$this->swapDatabaseInstance($db);
+
+		$name = (new NicknameSuggestionService())->suggest(1);
+
+		$this->assertTrue(NicknameSuggestionService::isValidCandidate($name));
+		$this->assertCount(1, $db->selects);
+		$this->assertSame($name, $db->selects[0][1][':userName']);
+	}
+
+	public function testFromDefaultsChecksUsersAndPendingRegistrations(): void
+	{
+		$db = new RecordingDatabase();
+		$db->selectSingleResult = ['count' => 1];
+		$service = NicknameSuggestionService::fromDefaults($db, static fn (int $min, int $max): int => $min);
+
+		$name = $service->suggest(3);
+
+		$this->assertTrue(NicknameSuggestionService::isValidCandidate($name));
+		$this->assertGreaterThan(1, count($db->selects));
+		$this->assertStringContainsString('%%USERS%%', $db->selects[0][0]);
+		$this->assertStringContainsString('%%USERS_VALID%%', $db->selects[0][0]);
+		$this->assertSame(3, $db->selects[0][1][':universe']);
+	}
+
+	public function testIsUsernameTakenShortCircuitsEmptyInput(): void
+	{
+		$db = new RecordingDatabase();
+		$this->assertFalse(NicknameSuggestionService::isUsernameTaken($db, '', 1));
+		$this->assertFalse(NicknameSuggestionService::isUsernameTaken($db, 'NovaPilot01', 0));
+		$this->assertSame([], $db->selects);
+	}
+
+	public function testSuggestUsesFallbackWhenEveryCandidateIsInvalid(): void
+	{
+		$service = new class (static fn (int $min, int $max): int => 7, static fn (): bool => false) extends NicknameSuggestionService {
+			public function generateCandidate(): string
+			{
+				return 'bad name!';
+			}
+		};
+
+		$this->assertSame('NovaPilot07', $service->suggest(1));
+	}
+
 	public function testGenerateCandidateUsesAdjectiveNounAndTwoDigits(): void
 	{
 		$calls = [0, 1, 7]; // adj index, noun index, digit 0-99
