@@ -135,12 +135,13 @@ class GameElementImageTest extends TestCase
 		$this->assertFalse($resolver->hasHd('./styles/theme/hive/', -3));
 	}
 
-	public function testRepoBatch1AssetsResolveAndShipyardIsOmitted(): void
+	public function testRepoHdAssetsResolveAndUniversityStaysGif(): void
 	{
 		$resolver = new GameElementImage();
 		$dpath = './styles/theme/hive/';
 
-		foreach ([1, 2, 3, 4, 14, 22, 31] as $id) {
+		$hdIds = [1, 2, 3, 4, 12, 14, 15, 21, 22, 23, 24, 31, 33, 34, 41, 42, 43, 44];
+		foreach ($hdIds as $id) {
 			$this->assertTrue($resolver->hasHd($dpath, $id), 'expected HD still for building ' . $id);
 			$this->assertSame(
 				'./styles/theme/hive/gebaeude-hd/' . $id . '.png',
@@ -148,8 +149,8 @@ class GameElementImageTest extends TestCase
 			);
 		}
 
-		$this->assertFalse($resolver->hasHd($dpath, 21), 'shipyard v1 was left out (no v2 still)');
-		$this->assertSame('./styles/theme/hive/gebaeude/21.gif', $resolver->url($dpath, 21));
+		$this->assertFalse($resolver->hasHd($dpath, 6), 'University still has no still; keep the GIF');
+		$this->assertSame('./styles/theme/hive/gebaeude/6.gif', $resolver->url($dpath, 6));
 	}
 
 	private function removeTree(string $dir): void
