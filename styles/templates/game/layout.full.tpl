@@ -77,7 +77,7 @@
 	</div>
 </div>
 
-<div id="achievement-celebration-root" class="achievement-celebration" aria-hidden="true">
+<div id="achievement-celebration-root" class="achievement-celebration" hidden aria-hidden="true">
 	<div class="achievement-celebration__backdrop"></div>
 	<canvas class="achievement-celebration__canvas"></canvas>
 	<div class="achievement-celebration__sparkles"></div>
