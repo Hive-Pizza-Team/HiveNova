@@ -46,7 +46,7 @@
 			<div class="rowForm">
 				<label for="reg-email-username">{$LNG.registerUsername}</label>
 				<div class="reg-username-wrap">
-					<input type="text" class="input" name="username" id="reg-email-username" maxlength="25" spellcheck="false" autocomplete="username" value="{$rememberedEmailUsername|default:''|escape:'html'}" data-username-check="email" data-remember-username="email" aria-describedby="reg-email-username-msg">
+					<input type="text" class="input" name="username" id="reg-email-username" maxlength="25" spellcheck="false" autocomplete="username" value="{$suggestedEmailUsername|default:''|escape:'html'}" data-username-check="email" aria-describedby="reg-email-username-msg">
 					<span class="reg-username-mark" aria-hidden="true"></span>
 				</div>
 				{if !empty($error.username)}<span class="error errorUsername"></span>{/if}
