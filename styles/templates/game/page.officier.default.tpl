@@ -9,7 +9,7 @@
 	<tr>
 		<td rowspan="2" style="width:120px;">
 			<a href="#" onclick="return Dialog.info({$ID});">
-				<img src="{element_image id=$ID}" alt="{$LNG.tech.{$ID}}" width="120" height="120">
+				<img class="{element_image_class id=$ID}" src="{element_image id=$ID}" alt="{$LNG.tech.{$ID}}" width="120" height="120">
 			</a>
 		</td>
 		<th>
@@ -65,7 +65,7 @@
 	<tr>
 		<td rowspan="2" style="width:120px;">
 			<a href="#" onclick="return Dialog.info({$ID})">
-				<img src="{element_image id=$ID}" alt="{$LNG.tech.{$ID}}" width="120" height="120">
+				<img class="{element_image_class id=$ID}" src="{element_image id=$ID}" alt="{$LNG.tech.{$ID}}" width="120" height="120">
 			</a>
 		</td>
 		<th>

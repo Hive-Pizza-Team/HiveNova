@@ -7,13 +7,16 @@ namespace HiveNova\Core;
  *
  * Classic art lives in styles/theme/{skin}/gebaeude/{id}.gif (officers: .jpg).
  * Optional HD stills live in styles/theme/nova/gebaeude-hd/{id}.png (transparent
- * cutouts). Drop a PNG named {id}.png in that folder to enable it; the GIF is
- * kept as the fallback when no HD file is present.
+ * cutouts) or {id}.jpg (full-bleed plates: officers and resource types).
+ * Drop a file named {id}.png or {id}.jpg in that folder to enable it; the
+ * classic GIF/JPG is kept as the fallback when no HD file is present.
  */
 class GameElementImage
 {
 	public const HD_DIR = 'gebaeude-hd';
 	public const HD_EXT = 'png';
+	/** @var list<string> */
+	public const HD_EXTS = ['png', 'jpg', 'jpeg'];
 	public const SHARED_THEME = 'nova';
 
 	private string $rootPath;
@@ -41,6 +44,24 @@ class GameElementImage
 	public function hasHd(string $dpath, int $elementId): bool
 	{
 		return $this->hdUrl($dpath, $elementId) !== null;
+	}
+
+	/**
+	 * Officers (601–615, 701–707) and resource-type plates (901–921) are
+	 * full-bleed paintings, not transparent cutouts.
+	 */
+	public static function isPlate(int $elementId): bool
+	{
+		return ($elementId >= 600 && $elementId <= 799) || ($elementId >= 900 && $elementId <= 999);
+	}
+
+	public function cssClass(string $dpath, int $elementId): string
+	{
+		if (!$this->hasHd($dpath, $elementId)) {
+			return '';
+		}
+
+		return self::isPlate($elementId) ? 'element-art--plate' : 'element-art--hd';
 	}
 
 	/**
@@ -73,14 +94,22 @@ class GameElementImage
 			}
 
 			foreach ($entries as $file) {
-				if (preg_match('/^(\d+)\.' . preg_quote(self::HD_EXT, '/') . '$/i', $file, $match) !== 1) {
+				if (preg_match('/^(\d+)\.(png|jpe?g)$/i', $file, $match) !== 1) {
 					continue;
 				}
 				$path = $dir . '/' . $file;
 				if (!is_file($path) && !is_link($path)) {
 					continue;
 				}
-				$out[$match[1]] = self::HD_EXT;
+				$id = $match[1];
+				$ext = strtolower($match[2]);
+				if ($ext === 'jpeg') {
+					$ext = 'jpg';
+				}
+				// Prefer PNG when both exist (cutouts).
+				if (!isset($out[$id]) || $ext === 'png') {
+					$out[$id] = $ext;
+				}
 			}
 		}
 
@@ -109,11 +138,12 @@ class GameElementImage
 			$candidates[] = self::SHARED_THEME;
 		}
 
-		$file = $elementId . '.' . self::HD_EXT;
 		foreach (array_unique($candidates) as $skin) {
-			$rel = 'styles/theme/' . $skin . '/' . self::HD_DIR . '/' . $file;
-			if (is_file($this->rootPath . '/' . $rel)) {
-				return $this->webPrefix($dpath) . $rel;
+			foreach (self::HD_EXTS as $ext) {
+				$rel = 'styles/theme/' . $skin . '/' . self::HD_DIR . '/' . $elementId . '.' . $ext;
+				if (is_file($this->rootPath . '/' . $rel)) {
+					return $this->webPrefix($dpath) . $rel;
+				}
 			}
 		}
 

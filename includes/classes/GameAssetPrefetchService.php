@@ -10,7 +10,7 @@ class GameAssetPrefetchService
 	private const IMAGE_EXTENSIONS = ['gif', 'jpg', 'jpeg', 'png', 'webp', 'svg'];
 
 	/** Subdirs under styles/theme/{skin}/ that power common in-game lazy images. */
-	private const SUBDIRS = ['gebaeude', 'gebaeude-hd', 'planeten'];
+	private const SUBDIRS = ['gebaeude', 'gebaeude-hd', 'planeten', 'planeten-hd', 'images-hd'];
 
 	private string $rootPath;
 	private string $theme;

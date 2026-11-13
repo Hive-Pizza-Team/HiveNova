@@ -7,7 +7,7 @@
 	<div class="spyRaportContainerHead spyRaportContainerHeadClass{$Class}">{$LNG.tech.$Class}</div>
 	{foreach $elementIDs as $elementID => $amount}
 	{if ($amount@iteration % 2) === 1}<div class="spyRaportContainerRow clearfix">{/if}
-		<div class="spyRaportContainerCell"><a href='#' onclick='return Dialog.info({$elementID})' class='tooltip' data-tooltip-content="<table><tr><th>{$LNG.tech.{$elementID}}</th></tr><tr><table class='hoverinfo'><tr><td><img src='{element_image id=$elementID}'></td><td>{$LNG.shortDescription.$elementID}</td></tr></table></tr></table>">{$LNG.tech.$elementID}</a></div>
+		<div class="spyRaportContainerCell"><a href='#' onclick='return Dialog.info({$elementID})' class='tooltip' data-tooltip-content="<table><tr><th>{$LNG.tech.{$elementID}}</th></tr><tr><table class='hoverinfo'><tr><td><img class='{element_image_class id=$elementID}' src='{element_image id=$elementID}'></td><td>{$LNG.shortDescription.$elementID}</td></tr></table></tr></table>">{$LNG.tech.$elementID}</a></div>
 		<div class="spyRaportContainerCell">{$amount|number}</div>
 	{if ($amount@iteration % 2) === 0}</div>{/if}
 	{/foreach}

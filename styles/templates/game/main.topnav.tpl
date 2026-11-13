@@ -26,7 +26,7 @@
 	{foreach $resourceTable as $resourceID => $resourceData}
 	<div id="resource_mobile" class="resource-cell{if $resourceID == $smarty.const.RESOURCE_ENERGY} resource-cell--energy{elseif $resourceID == $smarty.const.RESOURCE_DARKMATTER} resource-cell--pizzabits{/if}" data-resource-id="{$resourceID}">
 		<a href="#" onclick="return Dialog.info({$resourceID});">
-			<span class="resource-cell__icon"><img src="{$dpath}images/{$resourceData.name}.gif" alt=""></span>
+			<span class="resource-cell__icon"><img src="{resource_image name=$resourceData.name}" alt=""></span>
 			<div class="resource_name no-mobile">{$LNG.tech.$resourceID}</div>
 			
 			<div class="no-mobile">
@@ -132,7 +132,7 @@
 							{foreach $resourceTable as $resourceID => $resourceData}
 							<td>
 								<a href="#" onclick="return Dialog.info({$resourceID});">
-									<img src="{$dpath}images/{$resourceData.name}.gif" alt="">
+									<img src="{resource_image name=$resourceData.name}" alt="">
 								</a>
 							</td>
 							{/foreach}

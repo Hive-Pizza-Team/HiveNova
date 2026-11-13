@@ -67,7 +67,7 @@
 {/if}
 <div class="buildl">
 			<a href="#" onclick="return Dialog.info({$ID})">
-				<img style="float: left;" src="{element_image id=$ID}" width="120" height="120">
+				<img class="{element_image_class id=$ID}" style="float: left;" src="{element_image id=$ID}" width="120" height="120">
 			</a>
 		{$LNG.bd_remaining}:<br>
 						{foreach $Element.costOverflow as $ResType => $ResCount}

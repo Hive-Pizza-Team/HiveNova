@@ -150,7 +150,64 @@ class GameElementImageTest extends TestCase
 		}
 	}
 
-	private function removeTree(string $dir): void
+	public function testJpgPlatePreferredAndCssClass(): void
+	{
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/601.jpg', 'jpg');
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/701.jpg', 'jpg');
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/901.jpg', 'jpg');
+
+		$resolver = new GameElementImage($this->fixtureRoot);
+
+		$this->assertSame('./styles/theme/hive/gebaeude-hd/601.jpg', $resolver->url('./styles/theme/hive/', 601));
+		$this->assertSame('./styles/theme/hive/gebaeude-hd/701.jpg', $resolver->url('./styles/theme/hive/', 701));
+		$this->assertSame('./styles/theme/hive/gebaeude-hd/901.jpg', $resolver->url('./styles/theme/hive/', 901));
+		$this->assertSame('element-art--plate', $resolver->cssClass('./styles/theme/hive/', 601));
+		$this->assertSame('element-art--plate', $resolver->cssClass('./styles/theme/hive/', 701));
+		$this->assertSame('element-art--plate', $resolver->cssClass('./styles/theme/hive/', 901));
+		$this->assertSame('element-art--hd', $resolver->cssClass('./styles/theme/hive/', 1));
+		$this->assertSame('', $resolver->cssClass('./styles/theme/hive/', 21));
+		$this->assertTrue(GameElementImage::isPlate(615));
+		$this->assertTrue(GameElementImage::isPlate(707));
+		$this->assertTrue(GameElementImage::isPlate(921));
+		$this->assertFalse(GameElementImage::isPlate(401));
+
+		$map = $resolver->hdExtensions('./styles/theme/hive/');
+		$this->assertSame('jpg', $map['601']);
+		$this->assertSame('png', $map['1']);
+	}
+
+	public function testPngWinsWhenJpgAlsoPresent(): void
+	{
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/1.jpg', 'jpg');
+		$resolver = new GameElementImage($this->fixtureRoot);
+		$this->assertSame('./styles/theme/hive/gebaeude-hd/1.png', $resolver->url('./styles/theme/hive/', 1));
+		$this->assertSame('png', $resolver->hdExtensions('./styles/theme/hive/')['1']);
+	}
+
+	public function testRepoAssetsIncludeNewBatchAndLeaveShipSpritesUntouched(): void
+	{
+		$resolver = new GameElementImage();
+		$dpath = './styles/theme/hive/';
+
+		foreach ([401, 411, 106, 108, 117, 199, 202, 203, 206, 220, 502, 503] as $id) {
+			$this->assertTrue($resolver->hasHd($dpath, $id), 'expected HD still for ' . $id);
+			$this->assertSame($dpath . 'gebaeude-hd/' . $id . '.png', $resolver->url($dpath, $id));
+			$this->assertSame('element-art--hd', $resolver->cssClass($dpath, $id));
+		}
+
+		foreach ([601, 615, 701, 707, 901, 902, 903, 911, 921] as $id) {
+			$this->assertTrue($resolver->hasHd($dpath, $id), 'expected HD plate for ' . $id);
+			$this->assertSame($dpath . 'gebaeude-hd/' . $id . '.jpg', $resolver->url($dpath, $id));
+			$this->assertSame('element-art--plate', $resolver->cssClass($dpath, $id));
+		}
+
+		foreach ([204, 205, 208, 219] as $id) {
+			$this->assertFalse($resolver->hasHd($dpath, $id), 'ship sprite ' . $id . ' must stay classic');
+			$this->assertSame($dpath . 'gebaeude/' . $id . '.gif', $resolver->url($dpath, $id));
+		}
+	}
+
+		private function removeTree(string $dir): void
 	{
 		if (is_link($dir)) {
 			unlink($dir);
