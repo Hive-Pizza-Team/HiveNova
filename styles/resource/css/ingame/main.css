@@ -1376,10 +1376,12 @@ table.tablesorter thead tr .headerSortDown {
     z-index: 1;
 }
 
+/* Keep the static JPG visible while WebGL boots so a failed/slow canvas
+   never leaves an empty black square in the planet slot. */
 .overview-planet-visual--loading .overview-planet-fallback {
-    opacity: 0;
-    visibility: hidden;
-    z-index: 0;
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
     pointer-events: none;
 }
 

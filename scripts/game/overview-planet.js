@@ -8,9 +8,9 @@
  * lights into the base material emissive map, and add a fresnel atmosphere,
  * clouds, a solar-satellite ring, ship traffic and construction activity.
  *
- * Production behaviour: static JPG fallback only when WebGL fails or is unavailable;
- * while WebGL boots the frame stays on the dark background. Pauses when the canvas
- * leaves the viewport or the tab is hidden; respects prefers-reduced-motion.
+ * Production behaviour: static JPG stays visible while WebGL boots; if WebGL fails,
+ * the first paint is blank, or boot stalls, the static JPG remains. Pauses when the
+ * canvas leaves the viewport or the tab is hidden; respects prefers-reduced-motion.
  */
 (function () {
 	'use strict';
@@ -57,6 +57,7 @@
 	var bootGeneration = 0;
 	var pendingBuildCancel = null;
 	var pendingBootOptions = null;
+	var bootWatchdogId = null;
 
 	function getCanvas2d(canvasEl, opts) {
 		opts = opts || {};
@@ -175,8 +176,14 @@
 		}
 		var wrap = canvas.parentElement;
 		if (isLoading) {
-			wrap.classList.add('overview-planet-visual--loading');
-			wrap.classList.remove('overview-planet-visual--ready', 'overview-planet-visual--fallback');
+			if (typeof OverviewPlanetLoaderUtils !== 'undefined'
+				&& typeof OverviewPlanetLoaderUtils.applyLoadingVisual === 'function') {
+				OverviewPlanetLoaderUtils.applyLoadingVisual(wrap, fallbackImg);
+			} else {
+				wrap.classList.add('overview-planet-visual--loading');
+				wrap.classList.remove('overview-planet-visual--ready', 'overview-planet-visual--fallback');
+				ensureFallbackSrc();
+			}
 		} else {
 			wrap.classList.remove('overview-planet-visual--loading');
 		}
@@ -207,11 +214,46 @@
 		}
 	}
 
+	function clearBootWatchdog() {
+		if (bootWatchdogId !== null) {
+			clearTimeout(bootWatchdogId);
+			bootWatchdogId = null;
+		}
+	}
+
+	function armBootWatchdog() {
+		clearBootWatchdog();
+		if (viewerOptions.preview) {
+			return;
+		}
+		var timeoutMs = 5000;
+		if (typeof OverviewPlanetLoaderUtils !== 'undefined'
+			&& OverviewPlanetLoaderUtils.BOOT_WATCHDOG_MS) {
+			timeoutMs = OverviewPlanetLoaderUtils.BOOT_WATCHDOG_MS;
+		}
+		bootWatchdogId = setTimeout(function () {
+			bootWatchdogId = null;
+			if (!canvas || !canvas.parentElement) {
+				return;
+			}
+			if (canvas.parentElement.classList.contains('overview-planet-visual--ready')) {
+				return;
+			}
+			showFallback();
+		}, timeoutMs);
+	}
+
 	function showFallback() {
+		clearBootWatchdog();
 		if (!canvas || !canvas.parentElement) {
 			return;
 		}
 		var wrap = canvas.parentElement;
+		if (typeof OverviewPlanetLoaderUtils !== 'undefined'
+			&& typeof OverviewPlanetLoaderUtils.applyFallbackVisual === 'function') {
+			OverviewPlanetLoaderUtils.applyFallbackVisual(wrap, fallbackImg);
+			return;
+		}
 		wrap.classList.remove('overview-planet-visual--loading', 'overview-planet-visual--ready');
 		wrap.classList.add('overview-planet-visual--fallback');
 		ensureFallbackSrc();
@@ -224,11 +266,64 @@
 		}
 	}
 
+	function sampleRendererPixels() {
+		if (!renderer) {
+			return null;
+		}
+		try {
+			var gl = renderer.getContext();
+			if (!gl || !gl.drawingBufferWidth || !gl.drawingBufferHeight) {
+				return null;
+			}
+			var w = gl.drawingBufferWidth;
+			var h = gl.drawingBufferHeight;
+			var pts = [
+				[0.5, 0.5], [0.38, 0.5], [0.62, 0.5],
+				[0.5, 0.38], [0.5, 0.62], [0.42, 0.42], [0.58, 0.58]
+			];
+			var out = [];
+			var px = new Uint8Array(4);
+			for (var i = 0; i < pts.length; i++) {
+				var x = Math.min(w - 1, Math.max(0, Math.floor(pts[i][0] * w)));
+				var y = Math.min(h - 1, Math.max(0, Math.floor(pts[i][1] * h)));
+				gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+				out.push([px[0], px[1], px[2], px[3]]);
+			}
+			return out;
+		} catch (err) {
+			return null;
+		}
+	}
+
+	function firstPaintLooksBlank() {
+		var samples = sampleRendererPixels();
+		if (!samples) {
+			return false;
+		}
+		if (typeof OverviewPlanetLoaderUtils !== 'undefined'
+			&& typeof OverviewPlanetLoaderUtils.canvasSamplesLookBlank === 'function') {
+			return OverviewPlanetLoaderUtils.canvasSamplesLookBlank(samples);
+		}
+		var lit = 0;
+		for (var i = 0; i < samples.length; i++) {
+			var rgba = samples[i];
+			if (rgba && rgba[3] > 8 && (rgba[0] + rgba[1] + rgba[2]) > 40) {
+				lit += 1;
+			}
+		}
+		return lit < 1;
+	}
+
 	function markReady() {
 		requestAnimationFrame(function () {
 			if (renderer && scene && camera) {
 				renderer.render(scene, camera);
 			}
+			if (!viewerOptions.preview && firstPaintLooksBlank()) {
+				showFallback();
+				return;
+			}
+			clearBootWatchdog();
 			if (canvas && canvas.parentElement) {
 				var wrap = canvas.parentElement;
 				wrap.classList.remove('overview-planet-visual--loading', 'overview-planet-visual--fallback');
@@ -2220,6 +2315,14 @@
 			completeBoot(options, true);
 		} else {
 			scheduleBuildScene(function (success) {
+				var shouldFallback = !success;
+				if (typeof OverviewPlanetLoaderUtils !== 'undefined'
+					&& typeof OverviewPlanetLoaderUtils.shouldFallbackAfterBoot === 'function') {
+					shouldFallback = OverviewPlanetLoaderUtils.shouldFallbackAfterBoot(success);
+				}
+				if (shouldFallback && !viewerOptions.preview) {
+					showFallback();
+				}
 				completeBoot(options, success);
 			}, options);
 		}
@@ -2369,6 +2472,7 @@
 		markLoading(true);
 		overviewMounted = true;
 		reserveCanvasSlot();
+		armBootWatchdog();
 
 		window.addEventListener('resize', onResize);
 
@@ -2484,6 +2588,7 @@
 		if (!overviewMounted) {
 			return;
 		}
+		clearBootWatchdog();
 		stopAnimationLoop();
 		window.removeEventListener('resize', onResize);
 		if (intersectionObserver) {
