@@ -77,9 +77,9 @@
 			</td>
 		</tr>
 		<tr id="pwa-install-settings" hidden>
-			<td colspan="2">
-				<strong>{$LNG.op_install_app_title}</strong>
-				<p>{$LNG.op_install_app_desc|sprintf:$game_name|escape:'html'}</p>
+			<td>{$LNG.op_install_app_title}</td>
+			<td>
+				{$LNG.op_install_app_desc|sprintf:$game_name|escape:'html'}
 				<p data-pwa-settings-instructions hidden></p>
 				<button type="button" id="pwa-install-settings-btn" class="button" hidden>{$LNG.pwa_install_button}</button>
 			</td>
@@ -273,6 +273,7 @@
 			.then(function (r) { return r.json(); })
 			.then(function (groups) {
 				tzSelect.innerHTML = '';
+				var found = false;
 				Object.keys(groups).forEach(function (continent) {
 					var optgroup = document.createElement('optgroup');
 					optgroup.label = continent;
@@ -281,11 +282,24 @@
 						var opt = document.createElement('option');
 						opt.value = value;
 						opt.textContent = cities[value];
-						if (value === selected) opt.selected = true;
+						if (value === selected) {
+							opt.selected = true;
+							found = true;
+						}
 						optgroup.appendChild(opt);
 					});
 					tzSelect.appendChild(optgroup);
 				});
+				// Keep the stored zone if it is missing from the continent list
+				// (e.g. older values) so opening the picker does not silently
+				// change the selection to the first America/* option.
+				if (!found && selected) {
+					var keep = document.createElement('option');
+					keep.value = selected;
+					keep.textContent = selected;
+					keep.selected = true;
+					tzSelect.insertBefore(keep, tzSelect.firstChild);
+				}
 			})
 			.catch(function () {
 				tzDetails.dataset.loaded = '0';

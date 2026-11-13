@@ -253,7 +253,12 @@ class ShowSettingsPage extends AbstractGamePage
 		$hivesign           = HTTP::_GP('hivesign', '');
 		$publicMessage		= PlayerUtil::publicMessageFromRequest();
 		
-		$timezone			= HTTP::_GP('timezone', '');	
+		$timezone			= HTTP::_GP('timezone', '');
+		try {
+			new \DateTimeZone($timezone);
+		} catch (\Exception) {
+			$timezone = !empty($USER['timezone']) ? $USER['timezone'] : Config::get()->timezone;
+		}
 		$language			= HTTP::_GP('language', '');	
 		
 		$planetSort			= HTTP::_GP('planetSort', 0);	
