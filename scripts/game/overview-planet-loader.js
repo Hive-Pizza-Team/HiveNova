@@ -1,6 +1,7 @@
 /**
  * Lazy-loads Three.js and overview-planet.js on the hive-theme overview page only.
- * Keeps ~600KB three.min.js off the critical path; shows a dark panel until WebGL is ready.
+ * Keeps ~600KB three.min.js off the critical path; shows the static planet JPG while
+ * WebGL boots (and permanently if boot/paint fails) so the slot is never an empty black square.
  */
 (function () {
 	'use strict';
@@ -111,12 +112,26 @@
 			});
 	}
 
+	function promoteFallbackDuringBoot() {
+		var canvas = document.getElementById('overview-planet-canvas');
+		var wrap = canvas && canvas.parentElement;
+		var img = wrap && wrap.querySelector('.overview-planet-fallback');
+		if (utils && typeof utils.applyLoadingVisual === 'function') {
+			utils.applyLoadingVisual(wrap, img);
+			return;
+		}
+		if (utils && typeof utils.resolveFallbackSrc === 'function') {
+			utils.resolveFallbackSrc(img);
+		}
+	}
+
 	function scheduleBoot() {
 		// Mobile: static lite thumb is enough — skip ~670KB Three.js + WebGL boot.
 		if (window.matchMedia('(max-width: 699px)').matches) {
 			showFallback();
 			return;
 		}
+		promoteFallbackDuringBoot();
 		if (utils && typeof utils.reserveOverviewCanvasSlot === 'function') {
 			utils.reserveOverviewCanvasSlot();
 		}

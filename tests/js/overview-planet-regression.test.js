@@ -19,4 +19,15 @@ describe('overview-planet regression guard', () => {
 			result.forbidden.length ? 'forbidden: ' + result.forbidden.join(', ') : ''
 		].filter(Boolean).join('; '));
 	});
+
+	it('falls back to the static planet image when WebGL boot or first paint fails', () => {
+		const source = fs.readFileSync(
+			path.join(__dirname, '../../scripts/game/overview-planet.js'),
+			'utf8'
+		);
+		assert.match(source, /shouldFallbackAfterBoot/);
+		assert.match(source, /firstPaintLooksBlank/);
+		assert.match(source, /armBootWatchdog/);
+		assert.match(source, /showFallback\(\)/);
+	});
 });
