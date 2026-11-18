@@ -11,7 +11,6 @@
     {if $smarty.const.MODULE_IMPERIUM|isModuleAvailable}<li><a href="game.php?page=imperium"{if $navPage == 'imperium'} class="active"{/if}>{$LNG.lm_empire}</a></li>{/if}
     {if $smarty.const.MODULE_MESSAGES|isModuleAvailable}<li><a href="game.php?page=messages"{if $navPage == 'messages'} class="active"{/if}>{$LNG.lm_messages}{nocache}{if $new_message > 0}<span id="newmes"> (<span id="newmesnum">{$new_message}</span>)</span>{/if}{/nocache}</a></li>{/if}
     <li><a href="game.php?page=questions"{if $navPage == 'questions'} class="active"{/if}>{$LNG.lm_faq}</a></li>
-    <li><a href="game.php?page=whatsNew"{if $navPage == 'whatsNew'} class="active"{/if}>{$LNG.lm_whats_new}{if isset($whatsNewUnseen) && $whatsNewUnseen > 0}<span class="menu-badge whatsnew-badge" aria-label="{$LNG.whats_new_badge_aria|sprintf:$whatsNewUnseen}">{$whatsNewUnseen}</span>{/if}</a></li>
     {if $smarty.const.MODULE_OFFICIER|isModuleAvailable || $smarty.const.MODULE_DMEXTRAS|isModuleAvailable}<li><a href="game.php?page=officier"{if $navPage == 'officier'} class="active"{/if}>{$LNG.lm_officiers}</a></li>{/if}
 
     {* Advanced product order applied: Resources, Simulator, Statistics, Records, Hall of Fame, Achievements, then remaining Advanced items. *}
@@ -43,5 +42,5 @@
     {if $showAdminLink}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
 </ul>
 <div id="disclamer" class="no-mobile">
-    {if $commit != ''}<a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
+    <a href="game.php?page=whatsNew" class="disclamer-whats-new">{$LNG.whats_new_link}</a>{if $commit != ''} &middot; <a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
 </div>
