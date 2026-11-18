@@ -95,6 +95,44 @@ if ! awk '
     ERRORS=$((ERRORS + 1))
 fi
 
+# Element cards (#736): Requires row spans full card width below both .buildl columns.
+if ! awk '
+    BEGIN { in_rule = 0; opened = 0; brace = 0; seen = 0; ok = 0 }
+    /^\.infos > \.element-requirements[[:space:]]*,/ { in_rule = 1; opened = 0; brace = 0; seen = 1 }
+    in_rule {
+        if ($0 ~ /flex:[[:space:]]*0[[:space:]]+0[[:space:]]+100%/) ok = 1
+        if ($0 ~ /\{/) opened = 1
+        brace += gsub(/\{/, "{")
+        brace -= gsub(/\}/, "}")
+        if (opened && brace <= 0) in_rule = 0
+    }
+    END { exit (seen && ok) ? 0 : 1 }
+' "$INGAME"; then
+    echo "FAIL: the element-card Requires row (.infos > .element-requirements) in main.css must include flex: 0 0 100%."
+    ERRORS=$((ERRORS + 1))
+fi
+
+# Element cards (#736): requirements include must sit after both .buildl columns.
+for tpl in \
+    "$ROOT/styles/templates/game/page.buildings.default.tpl" \
+    "$ROOT/styles/templates/game/page.research.default.tpl" \
+    "$ROOT/styles/templates/game/page.shipyard.default.tpl"
+do
+    rel="${tpl#$ROOT/}"
+    if ! awk '
+        BEGIN { buildl = 0; bad = 0 }
+        /class="infos/ { buildl = 0 }
+        /class="buildl"/ { buildl++ }
+        /shared\.element\.requirements\.tpl/ {
+            if (buildl < 2) bad = 1
+        }
+        END { exit bad ? 1 : 0 }
+    ' "$tpl"; then
+        echo "FAIL: $rel requirements include must appear after the second .buildl of its card."
+        ERRORS=$((ERRORS + 1))
+    fi
+done
+
 if [[ $ERRORS -eq 0 ]]; then
     echo "CSS check passed."
     exit 0

@@ -3610,7 +3610,15 @@ table.tablesorter thead tr .headerSortDown {
 .element-requirements {
 	margin: 0.4em 0;
 	text-align: left;
-	clear: both;
+}
+
+/* One requirement per line; the first sits beside the "Requires:" label. */
+.element-requirement {
+	display: block;
+}
+
+.element-requirements__list > .element-requirement:first-child {
+	display: inline;
 }
 
 .requirement-link {
@@ -3640,10 +3648,55 @@ table.tablesorter thead tr .headerSortDown {
 	align-items: stretch;
 }
 
-.infos:has(> .buildl) > .buildn,
-.infoso:has(> .buildl) > .buildn,
-.infos > form:has(> .buildl) > .buildn {
+.infos:has(> .buildl) > :not(.buildl),
+.infoso:has(> .buildl) > :not(.buildl),
+.infos > form:has(> .buildl) > :not(.buildl) {
+	flex: 1 1 100%;
+}
+
+/* Element cards (#736): Requires is a full-width row under both columns.
+   Phones keep one requirement per line; wider screens flow them in a row. */
+.infos > .element-requirements,
+.infoso > .element-requirements,
+.infos > form > .element-requirements {
+	clear: both;
 	flex: 0 0 100%;
+	margin: 0;
+	padding: 5px 10px 7px;
+	border-top: 1px solid #3a4048;
+	line-height: 1.4;
+}
+
+@media screen and (min-width: 700px) {
+	.infos > .element-requirements,
+	.infoso > .element-requirements,
+	.infos > form > .element-requirements {
+		display: flex;
+		align-items: baseline;
+		padding: 5px 12px 6px;
+	}
+
+	.infos > .element-requirements .element-requirements__label,
+	.infoso > .element-requirements .element-requirements__label,
+	.infos > form > .element-requirements .element-requirements__label {
+		flex: none;
+		margin-right: 10px;
+	}
+
+	.infos > .element-requirements .element-requirements__list,
+	.infoso > .element-requirements .element-requirements__list,
+	.infos > form > .element-requirements .element-requirements__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2px 20px;
+		min-width: 0;
+	}
+
+	.infos > .element-requirements .element-requirement,
+	.infoso > .element-requirements .element-requirement,
+	.infos > form > .element-requirements .element-requirement {
+		max-width: 100%;
+	}
 }
 
 .element-locked {
