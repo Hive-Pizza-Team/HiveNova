@@ -91,7 +91,7 @@ $LNG['buttonScreenshot']			= 'Screenshots';
 $LNG['buttonLostPassword']			= 'Passwort vergessen?';
 
 // Start
-$LNG['gameInformations']			= "Ein Weltraum-Strategiespiel in Echtzeit.\nSpiele zusammen mit hunderten Usern.\nKein Download, es wird nur ein Standardbrowser benötigt.\nKostenlose Registrierung";
+$LNG['gameInformations']			= "Mobilfreundlich\nIn jedem Browser spielbar\nKein Download nötig\nVerbünde dich mit Freunden & Feinden\nBeherrsche das Universum\nHole dir Dopamin, sammle Schädel\n";
 
 // Login
 $LNG['loginHeader']					= 'Login';
@@ -100,7 +100,7 @@ $LNG['loginPassword']				= 'Passwort';
 $LNG['loginButton']					= 'Login';
 $LNG['loginInfo']					= 'Mit dem Login akzeptiere ich die %s.';
 $LNG['loginWelcome']				= 'Willkommen bei %s';
-$LNG['loginServerDesc']				= '%s ist ein Weltraum-Strategiespiel mit hunderten Spielern die erdumgreifend <strong>gleichzeitig</strong> versuchen der/die Beste zu werden. Alles was ihr zum spielen braucht ist ein Standardwebbrowser.';
+$LNG['loginServerDesc']				= 'Baue Flotten im Browser. Kein Download. Uni 1 wird nicht zurückgesetzt.';
 
 // Register
 $LNG['registerFacebookAccount']		= 'Facebook-Account';
@@ -209,23 +209,23 @@ $LNG['loginHiveAccount'] = 'Hive-Konto';
 $LNG['loginKeychainButton'] = 'Mit Keychain anmelden';
 
 $LNG['registerErrorHiveRequiredSeason'] = 'Dieses Universum erfordert ein verknüpftes Hive-Konto.';
-$LNG['lobby_kicker'] = 'Free browser space strategy';
-$LNG['lobby_hero_alt'] = 'In-game view of Moon — build, fight, and expand across the galaxy';
-$LNG['lobby_hero_caption'] = 'Built on Hive';
-$LNG['lobby_feed_title_one'] = '%s universe is live';
-$LNG['lobby_feed_title_other'] = '%s universes are live';
-$LNG['lobby_feed_sub'] = 'Recent battles and moons across every open universe.';
+$LNG['lobby_kicker'] = 'Kostenlose Browser-Weltraumstrategie';
+$LNG['lobby_hero_alt'] = 'Spielansicht von Moon — baue, kämpfe und expandiere durch die Galaxie';
+$LNG['lobby_hero_caption'] = 'Gebaut auf Hive';
+$LNG['lobby_feed_title_one'] = '%s Universum ist live';
+$LNG['lobby_feed_title_other'] = '%s Universen sind live';
+$LNG['lobby_feed_sub'] = 'Aktuelle Schlachten und Monde aus allen offenen Universen.';
 $LNG['lobby_feed_live'] = 'Live';
-$LNG['lobby_feed_empty'] = 'Waiting for the next strike…';
-$LNG['lobby_hook'] = 'Come get';
-$LNG['lobby_hook_em'] = 'MOONed';
-$LNG['lobby_viz_label'] = 'Live fleets across open universes';
-$LNG['lobby_viz_caption_title'] = 'Live fleet map';
-$LNG['lobby_viz_caption_body'] = 'Each marker is a galaxy. Curved lines are fleets flying between them right now. Orange targets mark where attacks start and land.';
-$LNG['lobby_viz_legend_galaxy'] = 'Galaxy';
-$LNG['lobby_viz_legend_fleet'] = 'Fleet in flight';
-$LNG['lobby_viz_legend_attack'] = 'Source / destination';
-$LNG['lobby_viz_caption_title_uni'] = 'Live fleet map · %s';
+$LNG['lobby_feed_empty'] = 'Warte auf den nächsten Angriff…';
+$LNG['lobby_hook'] = 'Hol dir dein';
+$LNG['lobby_hook_em'] = 'MOON';
+$LNG['lobby_viz_label'] = 'Live-Flottenkarte über offene Universen';
+$LNG['lobby_viz_caption_title'] = 'Live-Flottenkarte';
+$LNG['lobby_viz_caption_body'] = 'Jeder Marker ist eine Galaxie. Gebogene Linien sind Flotten, die gerade dazwischen unterwegs sind. Orange Ziele markieren, wo Angriffe starten und landen.';
+$LNG['lobby_viz_legend_galaxy'] = 'Galaxie';
+$LNG['lobby_viz_legend_fleet'] = 'Flotte unterwegs';
+$LNG['lobby_viz_legend_attack'] = 'Start / Ziel';
+$LNG['lobby_viz_caption_title_uni'] = 'Live-Flottenkarte · %s';
 $LNG['disclamerLabelDiscord'] = 'Discord:';
 $LNG['disclamerNoticeFallback'] = 'Community support is available on Discord.';
 $LNG['screenAltGalaxy'] = 'Galaxy map';
@@ -241,9 +241,9 @@ $LNG['registerUsernameCheckSuggestions'] = 'Available similar names:';
 $LNG['registerUsernameCheckHiveOwn'] = 'This Hive account exists. Continue with Keychain to register as this identity.';
 $LNG['registerUsernameCheckMissingHive'] = 'No Hive account exists with this name.';
 $LNG['registerUsernameCheckAvailable'] = 'Username is available.';
-$LNG['lobby_tagline'] = 'Build fleets in your browser. No download. Uni 1 does not wipe.';
-$LNG['lobby_cta_primary'] = 'Play free — Uni 1';
-$LNG['lobby_cta_season'] = 'Want a one-week season with Hive ranks? That\'s Uni 3 — needs Hive Keychain.';
+$LNG['lobby_tagline'] = 'Baue Flotten im Browser. Kein Download. Uni 1 wird nicht zurückgesetzt.';
+$LNG['lobby_cta_primary'] = 'Kostenlos spielen — Uni 1';
+$LNG['lobby_cta_season'] = 'Willst du eine einwöchige Saison mit Hive-Rängen? Das ist Uni 3 — braucht Hive Keychain.';
 $LNG['uni_option_keychain_pizza'] = 'Needs Hive Keychain + PIZZA entry';
 $LNG['registerReferralInactive'] = 'Referral invites are turned off in this universe, so this signup will not credit a referrer.';
 $LNG['lobby_about_intro'] = 'MOON ist ein kostenloses Weltraum-Imperium-Spiel in der Tradition von OGame. Baue Rohstoffe ab, erforsche Technologien, errichte Flotten und kämpfe um Koordinaten in der Galaxie – alles im Browser, ohne Download. Melde dich mit einer E-Mail-Adresse an oder mit Hive Keychain, wenn du mit einer verbundenen Krypto-Wallet spielen möchtest.';
