@@ -58,6 +58,43 @@ if ! awk '
     ERRORS=$((ERRORS + 1))
 fi
 
+# Element cards (#736): .buildl must grow with content (min-height OK; fixed height clips Requires).
+for f in $THEME_FILES; do
+    rel="${f#$ROOT/}"
+    if awk '
+        BEGIN { in_rule = 0; brace = 0; bad = 0 }
+        /^\.buildl[[:space:]]*\{/ { in_rule = 1; brace = 0 }
+        in_rule {
+            if ($0 ~ /(^|[[:space:];{])height:[[:space:]]*/ && $0 !~ /min-height:/) bad = 1
+            brace += gsub(/\{/, "{")
+            brace -= gsub(/\}/, "}")
+            if (brace <= 0 && in_rule) in_rule = 0
+        }
+        END { exit bad ? 1 : 0 }
+    ' "$f"; then
+        :
+    else
+        echo "FAIL: $rel .buildl must not use fixed height: (use min-height so Requires lists are not clipped)."
+        ERRORS=$((ERRORS + 1))
+    fi
+done
+
+# Element cards (#736): keep "(Level x/y)" on one token in narrow columns.
+if ! awk '
+    BEGIN { in_rule = 0; brace = 0; seen = 0; ok = 0 }
+    /^\.requirement-level[[:space:]]*\{/ { in_rule = 1; brace = 0; seen = 1 }
+    in_rule {
+        if ($0 ~ /white-space:[[:space:]]*nowrap/) ok = 1
+        brace += gsub(/\{/, "{")
+        brace -= gsub(/\}/, "}")
+        if (brace <= 0 && in_rule) in_rule = 0
+    }
+    END { exit (seen && ok) ? 0 : 1 }
+' "$INGAME"; then
+    echo "FAIL: .requirement-level in main.css must include white-space: nowrap."
+    ERRORS=$((ERRORS + 1))
+fi
+
 if [[ $ERRORS -eq 0 ]]; then
     echo "CSS check passed."
     exit 0

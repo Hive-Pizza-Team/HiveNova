@@ -3610,6 +3610,7 @@ table.tablesorter thead tr .headerSortDown {
 .element-requirements {
 	margin: 0.4em 0;
 	text-align: left;
+	clear: both;
 }
 
 .requirement-link {
@@ -3627,6 +3628,22 @@ table.tablesorter thead tr .headerSortDown {
 
 .requirement-level {
 	margin-left: 0.25em;
+	white-space: nowrap;
+}
+
+/* Element cards (#736): stretch both .buildl columns to equal height when :has is supported */
+.infos:has(> .buildl),
+.infoso:has(> .buildl),
+.infos > form:has(> .buildl) {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+}
+
+.infos:has(> .buildl) > .buildn,
+.infoso:has(> .buildl) > .buildn,
+.infos > form:has(> .buildl) > .buildn {
+	flex: 0 0 100%;
 }
 
 .element-locked {
