@@ -221,4 +221,17 @@ class HTTPTest extends TestCase
         $_REQUEST['mode'] = 'bogus';
         $this->assertSame('show', HTTP::_GP('mode', 'show'));
     }
+
+    public function testGPAcceptsRequestWhenNotBackedByACookie(): void
+    {
+        $_REQUEST['admin_pw'] = "a&b'c d";
+        $this->assertSame("a&amp;b&#039;c d", HTTP::_GP('admin_pw', '', true));
+    }
+
+    public function testGPIgnoresCookieOnlyRequestValue(): void
+    {
+        $_COOKIE['token'] = 'from-cookie';
+        $_REQUEST['token'] = 'from-cookie';
+        $this->assertSame('', HTTP::_GP('token', ''));
+    }
 }

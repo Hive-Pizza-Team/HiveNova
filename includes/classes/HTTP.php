@@ -65,6 +65,10 @@ class HTTP {
 			$value = $_POST[$name];
 		} elseif (array_key_exists($name, $_GET)) {
 			$value = $_GET[$name];
+		} elseif (array_key_exists($name, $_REQUEST) && !array_key_exists($name, $_COOKIE)) {
+			// Allow callers/tests that assign $_REQUEST directly, but still
+			// ignore cookie-backed $_REQUEST keys (the original routing bug).
+			$value = $_REQUEST[$name];
 		} else {
 			return $default;
 		}
