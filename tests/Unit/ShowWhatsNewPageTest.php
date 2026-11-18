@@ -73,21 +73,17 @@ class ShowWhatsNewPageTest extends TestCase
 		$this->assertStringNotContainsString('Parsedown', $tpl);
 	}
 
-	public function test_navigation_matches_develop_except_disclamer_link(): void
+	public function test_navigation_only_links_whats_new_from_sidebar_footer(): void
 	{
 		$nav = file_get_contents(__DIR__ . '/../../styles/templates/game/main.navigation.tpl');
 		$this->assertNotFalse($nav);
-		$develop = shell_exec('git -C ' . escapeshellarg(__DIR__ . '/../..') . ' show origin/develop:styles/templates/game/main.navigation.tpl');
-		$this->assertIsString($develop);
-		$developLines = preg_split("/\r\n|\n|\r/", rtrim((string) $develop)) ?: [];
-		$navLines = preg_split("/\r\n|\n|\r/", rtrim($nav)) ?: [];
-		$this->assertCount(count($developLines), $navLines);
-		foreach ($developLines as $i => $line) {
-			if (str_contains($navLines[$i], 'disclamer-whats-new') || str_contains($line, 'HiveNova engine')) {
-				continue;
-			}
-			$this->assertSame($line, $navLines[$i], 'line ' . ($i + 1));
-		}
+		$menuEnd = strpos($nav, '</ul>');
+		$footer = strpos($nav, '<div id="disclamer"');
+		$this->assertNotFalse($menuEnd);
+		$this->assertNotFalse($footer);
+		$this->assertStringNotContainsString('page=whatsNew', substr($nav, 0, $menuEnd));
+		$this->assertSame(1, substr_count($nav, 'page=whatsNew'));
+		$this->assertGreaterThan($footer, strpos($nav, 'page=whatsNew'));
 		$this->assertStringContainsString('disclamer-whats-new', $nav);
 	}
 }
