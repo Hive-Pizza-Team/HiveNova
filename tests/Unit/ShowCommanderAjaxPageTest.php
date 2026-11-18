@@ -46,6 +46,9 @@ class ShowCommanderAjaxPageTest extends TestCase
 		$PLANET = array_replace(['id' => 9], $this->directiveUnlockedPlanet());
 		$LNG = [];
 		$_SESSION = [];
+		$_GET = [];
+		$_POST = [];
+		$_COOKIE = [];
 		$_REQUEST = [];
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$_SERVER['HTTP_HOST'] = 'moon.hive.pizza';
@@ -64,6 +67,10 @@ class ShowCommanderAjaxPageTest extends TestCase
 
 	protected function tearDown(): void
 	{
+		$_GET = [];
+		$_POST = [];
+		$_COOKIE = [];
+		$_REQUEST = [];
 		$this->restoreGameGlobals();
 		$this->restoreDatabaseInstance();
 		parent::tearDown();

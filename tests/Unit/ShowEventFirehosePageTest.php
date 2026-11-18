@@ -55,6 +55,8 @@ class ShowEventFirehosePageTest extends TestCase
 	{
 		global $USER, $LNG;
 		unset($USER, $LNG);
+		$_GET = [];
+		$_POST = [];
 		$_REQUEST = [];
 		$this->restoreDatabaseInstance();
 		parent::tearDown();
