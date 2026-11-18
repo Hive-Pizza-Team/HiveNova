@@ -15,7 +15,7 @@ class GameResourceIconTest extends TestCase
 		$hiveClassic = $this->fixtureRoot . '/styles/theme/hive/images';
 		mkdir($hiveHd, 0777, true);
 		mkdir($hiveClassic, 0777, true);
-		file_put_contents($hiveHd . '/metal.png', 'png');
+		file_put_contents($hiveHd . '/metal.webp', 'webp');
 		file_put_contents($hiveClassic . '/metal.gif', 'gif');
 		file_put_contents($hiveClassic . '/noradium.gif', 'gif');
 		mkdir($this->fixtureRoot . '/styles/theme/nova', 0777, true);
@@ -28,10 +28,10 @@ class GameResourceIconTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function testPrefersNativeHdPng(): void
+	public function testPrefersNativeHdWebp(): void
 	{
 		$resolver = new GameResourceIcon($this->fixtureRoot);
-		$this->assertSame('./styles/theme/hive/images-hd/metal.png', $resolver->url('./styles/theme/hive/', 'metal'));
+		$this->assertSame('./styles/theme/hive/images-hd/metal.webp', $resolver->url('./styles/theme/hive/', 'metal'));
 		$this->assertTrue($resolver->hasHd('./styles/theme/hive/', 'metal'));
 	}
 
@@ -45,7 +45,7 @@ class GameResourceIconTest extends TestCase
 	public function testNovaThemeFollowsHiveSymlink(): void
 	{
 		$resolver = new GameResourceIcon($this->fixtureRoot);
-		$this->assertSame('./styles/theme/nova/images-hd/metal.png', $resolver->url('./styles/theme/nova/', 'metal'));
+		$this->assertSame('./styles/theme/nova/images-hd/metal.webp', $resolver->url('./styles/theme/nova/', 'metal'));
 	}
 
 	public function testRejectsUnsafeNames(): void
@@ -60,11 +60,11 @@ class GameResourceIconTest extends TestCase
 		$dpath = './styles/theme/hive/';
 		foreach (['metal', 'crystal', 'deuterium', 'energy', 'darkmatter'] as $name) {
 			$this->assertTrue($resolver->hasHd($dpath, $name), $name);
-			$path = (defined('ROOT_PATH') ? ROOT_PATH : '') . 'styles/theme/hive/images-hd/' . $name . '.png';
+			$path = (defined('ROOT_PATH') ? ROOT_PATH : '') . 'styles/theme/hive/images-hd/' . $name . '.webp';
 			$this->assertFileExists($path);
 			$info = getimagesize($path);
 			$this->assertSame([42, 22], [$info[0], $info[1]], $name . ' must stay 42x22');
-			$this->assertSame($dpath . 'images-hd/' . $name . '.png', $resolver->url($dpath, $name));
+			$this->assertSame($dpath . 'images-hd/' . $name . '.webp', $resolver->url($dpath, $name));
 		}
 	}
 

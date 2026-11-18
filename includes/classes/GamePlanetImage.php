@@ -7,12 +7,13 @@ namespace HiveNova\Core;
  *
  * Classic art: styles/theme/{skin}/planeten/{texture}.jpg plus optional {texture}_hq.jpg.
  * Optional HD stills live in styles/theme/hive/planeten-hd/ (Hive globes are the
- * source of truth). Drop {stem}.jpg and, for 512 globes, {stem}_hq.jpg; the
+ * source of truth). Drop {stem}.webp and, for 512 globes, {stem}_hq.webp; the
  * classic files stay as the fallback.
  */
 class GamePlanetImage
 {
 	public const HD_DIR = 'planeten-hd';
+	public const HD_EXT = 'webp';
 	public const SHARED_THEME = 'hive';
 
 	private string $rootPath;
@@ -52,7 +53,7 @@ class GamePlanetImage
 	private function sanitize(string $texture): string
 	{
 		$texture = str_replace('\\', '/', trim($texture));
-		$texture = preg_replace('/\.(jpe?g|png|gif)$/i', '', $texture) ?? $texture;
+		$texture = preg_replace('/\.(jpe?g|png|gif|webp)$/i', '', $texture) ?? $texture;
 		if (preg_match('/^[A-Za-z0-9_-]+$/', $texture) !== 1) {
 			return '';
 		}
@@ -71,7 +72,9 @@ class GamePlanetImage
 			$skins[] = self::SHARED_THEME;
 		}
 
-		$names = $hq ? [$stem . '_hq.jpg', $stem . '.jpg'] : [$stem . '.jpg'];
+		$names = $hq
+			? [$stem . '_hq.' . self::HD_EXT, $stem . '.' . self::HD_EXT]
+			: [$stem . '.' . self::HD_EXT];
 		foreach (array_unique($skins) as $skin) {
 			foreach ($names as $file) {
 				$rel = 'styles/theme/' . $skin . '/' . self::HD_DIR . '/' . $file;

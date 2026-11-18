@@ -21,8 +21,8 @@ class GameElementImageTest extends TestCase
 		mkdir($hiveGif, 0777, true);
 		mkdir($gowGif, 0777, true);
 
-		file_put_contents($novaHd . '/1.png', 'png');
-		file_put_contents($novaHd . '/2.png', 'png');
+		file_put_contents($novaHd . '/1.webp', 'webp');
+		file_put_contents($novaHd . '/2.webp', 'webp');
 		file_put_contents($novaHd . '/readme.txt', 'skip');
 		file_put_contents($novaGif . '/1.gif', 'gif');
 		file_put_contents($novaGif . '/21.gif', 'gif');
@@ -40,12 +40,12 @@ class GameElementImageTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function testPrefersHdPngOnHiveViaSymlink(): void
+	public function testPrefersHdWebpOnHiveViaSymlink(): void
 	{
 		$resolver = new GameElementImage($this->fixtureRoot);
 
 		$this->assertSame(
-			'./styles/theme/hive/gebaeude-hd/1.png',
+			'./styles/theme/hive/gebaeude-hd/1.webp',
 			$resolver->url('./styles/theme/hive/', 1)
 		);
 		$this->assertTrue($resolver->hasHd('./styles/theme/hive/', 1));
@@ -81,7 +81,7 @@ class GameElementImageTest extends TestCase
 		$resolver = new GameElementImage($this->fixtureRoot);
 
 		$this->assertSame(
-			'styles/theme/nova/gebaeude-hd/2.png',
+			'styles/theme/nova/gebaeude-hd/2.webp',
 			$resolver->url('styles/theme/gow/', 2)
 		);
 		$this->assertTrue($resolver->hasHd('styles/theme/gow/', 2));
@@ -92,7 +92,7 @@ class GameElementImageTest extends TestCase
 		$resolver = new GameElementImage($this->fixtureRoot);
 
 		$this->assertSame(
-			'styles/theme/nova/gebaeude-hd/1.png',
+			'styles/theme/nova/gebaeude-hd/1.webp',
 			$resolver->url('styles/theme/nova/', 1)
 		);
 		$this->assertSame(
@@ -110,7 +110,7 @@ class GameElementImageTest extends TestCase
 		$resolver = new GameElementImage($this->fixtureRoot);
 
 		$this->assertSame(
-			'./styles/theme/hive/gebaeude-hd/1.png',
+			'./styles/theme/hive/gebaeude-hd/1.webp',
 			$resolver->url('', 1)
 		);
 		$this->assertSame(
@@ -119,12 +119,12 @@ class GameElementImageTest extends TestCase
 		);
 	}
 
-	public function testHdExtensionsListsNumericPngsOnly(): void
+	public function testHdExtensionsListsNumericWebpsOnly(): void
 	{
 		$resolver = new GameElementImage($this->fixtureRoot);
 		$map = $resolver->hdExtensions('./styles/theme/hive/');
 
-		$this->assertSame(['1' => 'png', '2' => 'png'], $map);
+		$this->assertSame(['1' => 'webp', '2' => 'webp'], $map);
 	}
 
 	public function testNonPositiveIdsNeverResolveHd(): void
@@ -144,23 +144,23 @@ class GameElementImageTest extends TestCase
 		foreach ($hdIds as $id) {
 			$this->assertTrue($resolver->hasHd($dpath, $id), 'expected HD still for building ' . $id);
 			$this->assertSame(
-				'./styles/theme/hive/gebaeude-hd/' . $id . '.png',
+				'./styles/theme/hive/gebaeude-hd/' . $id . '.webp',
 				$resolver->url($dpath, $id)
 			);
 		}
 	}
 
-	public function testJpgPlatePreferredAndCssClass(): void
+	public function testWebpPlatePreferredAndCssClass(): void
 	{
-		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/601.jpg', 'jpg');
-		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/701.jpg', 'jpg');
-		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/901.jpg', 'jpg');
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/601.webp', 'webp');
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/701.webp', 'webp');
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/901.webp', 'webp');
 
 		$resolver = new GameElementImage($this->fixtureRoot);
 
-		$this->assertSame('./styles/theme/hive/gebaeude-hd/601.jpg', $resolver->url('./styles/theme/hive/', 601));
-		$this->assertSame('./styles/theme/hive/gebaeude-hd/701.jpg', $resolver->url('./styles/theme/hive/', 701));
-		$this->assertSame('./styles/theme/hive/gebaeude-hd/901.jpg', $resolver->url('./styles/theme/hive/', 901));
+		$this->assertSame('./styles/theme/hive/gebaeude-hd/601.webp', $resolver->url('./styles/theme/hive/', 601));
+		$this->assertSame('./styles/theme/hive/gebaeude-hd/701.webp', $resolver->url('./styles/theme/hive/', 701));
+		$this->assertSame('./styles/theme/hive/gebaeude-hd/901.webp', $resolver->url('./styles/theme/hive/', 901));
 		$this->assertSame('element-art--plate', $resolver->cssClass('./styles/theme/hive/', 601));
 		$this->assertSame('element-art--plate', $resolver->cssClass('./styles/theme/hive/', 701));
 		$this->assertSame('element-art--plate', $resolver->cssClass('./styles/theme/hive/', 901));
@@ -172,16 +172,20 @@ class GameElementImageTest extends TestCase
 		$this->assertFalse(GameElementImage::isPlate(401));
 
 		$map = $resolver->hdExtensions('./styles/theme/hive/');
-		$this->assertSame('jpg', $map['601']);
-		$this->assertSame('png', $map['1']);
+		$this->assertSame('webp', $map['601']);
+		$this->assertSame('webp', $map['1']);
 	}
 
-	public function testPngWinsWhenJpgAlsoPresent(): void
+	public function testIgnoresLegacyPngAndJpgInHdDir(): void
 	{
-		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/1.jpg', 'jpg');
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/3.png', 'png');
+		file_put_contents($this->fixtureRoot . '/styles/theme/nova/gebaeude-hd/4.jpg', 'jpg');
 		$resolver = new GameElementImage($this->fixtureRoot);
-		$this->assertSame('./styles/theme/hive/gebaeude-hd/1.png', $resolver->url('./styles/theme/hive/', 1));
-		$this->assertSame('png', $resolver->hdExtensions('./styles/theme/hive/')['1']);
+		$this->assertFalse($resolver->hasHd('./styles/theme/hive/', 3));
+		$this->assertFalse($resolver->hasHd('./styles/theme/hive/', 4));
+		$map = $resolver->hdExtensions('./styles/theme/hive/');
+		$this->assertArrayNotHasKey('3', $map);
+		$this->assertArrayNotHasKey('4', $map);
 	}
 
 	public function testRepoAssetsIncludeNewBatchAndLeaveShipSpritesUntouched(): void
@@ -191,13 +195,13 @@ class GameElementImageTest extends TestCase
 
 		foreach ([401, 411, 106, 108, 117, 199, 202, 203, 206, 220, 502, 503] as $id) {
 			$this->assertTrue($resolver->hasHd($dpath, $id), 'expected HD still for ' . $id);
-			$this->assertSame($dpath . 'gebaeude-hd/' . $id . '.png', $resolver->url($dpath, $id));
+			$this->assertSame($dpath . 'gebaeude-hd/' . $id . '.webp', $resolver->url($dpath, $id));
 			$this->assertSame('element-art--hd', $resolver->cssClass($dpath, $id));
 		}
 
 		foreach ([601, 615, 701, 707, 901, 902, 903, 911, 921] as $id) {
 			$this->assertTrue($resolver->hasHd($dpath, $id), 'expected HD plate for ' . $id);
-			$this->assertSame($dpath . 'gebaeude-hd/' . $id . '.jpg', $resolver->url($dpath, $id));
+			$this->assertSame($dpath . 'gebaeude-hd/' . $id . '.webp', $resolver->url($dpath, $id));
 			$this->assertSame('element-art--plate', $resolver->cssClass($dpath, $id));
 		}
 
@@ -207,7 +211,7 @@ class GameElementImageTest extends TestCase
 		}
 	}
 
-		private function removeTree(string $dir): void
+	private function removeTree(string $dir): void
 	{
 		if (is_link($dir)) {
 			unlink($dir);

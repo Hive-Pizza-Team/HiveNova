@@ -6,17 +6,16 @@ namespace HiveNova\Core;
  * Resolves the in-game image URL for a tech/building/ship/defense ID.
  *
  * Classic art lives in styles/theme/{skin}/gebaeude/{id}.gif (officers: .jpg).
- * Optional HD stills live in styles/theme/nova/gebaeude-hd/{id}.png (transparent
- * cutouts) or {id}.jpg (full-bleed plates: officers and resource types).
- * Drop a file named {id}.png or {id}.jpg in that folder to enable it; the
- * classic GIF/JPG is kept as the fallback when no HD file is present.
+ * Optional HD stills live in styles/theme/nova/gebaeude-hd/{id}.webp (cutouts and
+ * full-bleed plates). Drop a file named {id}.webp in that folder to enable it;
+ * the classic GIF/JPG is kept as the fallback when no HD file is present.
  */
 class GameElementImage
 {
 	public const HD_DIR = 'gebaeude-hd';
-	public const HD_EXT = 'png';
+	public const HD_EXT = 'webp';
 	/** @var list<string> */
-	public const HD_EXTS = ['png', 'jpg', 'jpeg'];
+	public const HD_EXTS = ['webp'];
 	public const SHARED_THEME = 'nova';
 
 	private string $rootPath;
@@ -65,8 +64,8 @@ class GameElementImage
 	}
 
 	/**
-	 * Map of element-id strings to HD file extensions, for JS (techtree).
-	 * Batch 2+ is drop-in: add the PNG and it appears here automatically.
+	 * Map of element-id strings to HD file extensions, for JS (techtree /
+	 * fleettrader). Values are 'webp' for every HD still.
 	 *
 	 * @return array<string, string>
 	 */
@@ -94,7 +93,7 @@ class GameElementImage
 			}
 
 			foreach ($entries as $file) {
-				if (preg_match('/^(\d+)\.(png|jpe?g)$/i', $file, $match) !== 1) {
+				if (preg_match('/^(\d+)\.webp$/i', $file, $match) !== 1) {
 					continue;
 				}
 				$path = $dir . '/' . $file;
@@ -102,13 +101,8 @@ class GameElementImage
 					continue;
 				}
 				$id = $match[1];
-				$ext = strtolower($match[2]);
-				if ($ext === 'jpeg') {
-					$ext = 'jpg';
-				}
-				// Prefer PNG when both exist (cutouts).
-				if (!isset($out[$id]) || $ext === 'png') {
-					$out[$id] = $ext;
+				if (!isset($out[$id])) {
+					$out[$id] = self::HD_EXT;
 				}
 			}
 		}

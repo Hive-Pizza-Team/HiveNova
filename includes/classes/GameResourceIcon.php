@@ -6,12 +6,13 @@ namespace HiveNova\Core;
  * Resolves the 42×22 resource-bar icon URL (metal, crystal, deuterium, energy, darkmatter).
  *
  * Classic art: styles/theme/{skin}/images/{name}.gif.
- * Optional HD icons live in styles/theme/hive/images-hd/{name}.png at native 42×22.
+ * Optional HD icons live in styles/theme/hive/images-hd/{name}.webp at native 42×22.
  * Do not upscale them; the GIF stays as the fallback.
  */
 class GameResourceIcon
 {
 	public const HD_DIR = 'images-hd';
+	public const HD_EXT = 'webp';
 	public const SHARED_THEME = 'hive';
 
 	private string $rootPath;
@@ -47,7 +48,7 @@ class GameResourceIcon
 	private function sanitize(string $name): string
 	{
 		$name = strtolower(str_replace('\\', '/', trim($name)));
-		$name = preg_replace('/\.(png|gif|jpe?g)$/i', '', $name) ?? $name;
+		$name = preg_replace('/\.(png|gif|jpe?g|webp)$/i', '', $name) ?? $name;
 		if (preg_match('/^[a-z]+$/', $name) !== 1) {
 			return '';
 		}
@@ -67,7 +68,7 @@ class GameResourceIcon
 		}
 
 		foreach (array_unique($skins) as $skin) {
-			$rel = 'styles/theme/' . $skin . '/' . self::HD_DIR . '/' . $stem . '.png';
+			$rel = 'styles/theme/' . $skin . '/' . self::HD_DIR . '/' . $stem . '.' . self::HD_EXT;
 			if (is_file($this->rootPath . '/' . $rel)) {
 				return $this->webPrefix($dpath) . $rel;
 			}

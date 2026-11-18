@@ -18,9 +18,9 @@ class GamePlanetImageTest extends TestCase
 		mkdir($hiveClassic, 0777, true);
 		mkdir($this->fixtureRoot . '/styles/theme/nova/planeten', 0777, true);
 
-		file_put_contents($hiveHd . '/dschjungelplanet01.jpg', 'lite');
-		file_put_contents($hiveHd . '/dschjungelplanet01_hq.jpg', 'hq');
-		file_put_contents($hiveHd . '/gasplanet01.jpg', 'gas');
+		file_put_contents($hiveHd . '/dschjungelplanet01.webp', 'lite');
+		file_put_contents($hiveHd . '/dschjungelplanet01_hq.webp', 'hq');
+		file_put_contents($hiveHd . '/gasplanet01.webp', 'gas');
 		file_put_contents($hiveClassic . '/dschjungelplanet01.jpg', 'classic-lite');
 		file_put_contents($hiveClassic . '/dschjungelplanet01_hq.jpg', 'classic-hq');
 		file_put_contents($hiveClassic . '/wuestenplanet01.jpg', 'classic-only');
@@ -32,11 +32,11 @@ class GamePlanetImageTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function testLitePrefersStandardHdJpg(): void
+	public function testLitePrefersStandardHdWebp(): void
 	{
 		$resolver = new GamePlanetImage($this->fixtureRoot);
 		$this->assertSame(
-			'./styles/theme/hive/planeten-hd/dschjungelplanet01.jpg',
+			'./styles/theme/hive/planeten-hd/dschjungelplanet01.webp',
 			$resolver->url('./styles/theme/hive/', 'dschjungelplanet01', false)
 		);
 		$this->assertTrue($resolver->hasHd('./styles/theme/hive/', 'dschjungelplanet01', false));
@@ -46,11 +46,11 @@ class GamePlanetImageTest extends TestCase
 	{
 		$resolver = new GamePlanetImage($this->fixtureRoot);
 		$this->assertSame(
-			'./styles/theme/hive/planeten-hd/dschjungelplanet01_hq.jpg',
+			'./styles/theme/hive/planeten-hd/dschjungelplanet01_hq.webp',
 			$resolver->url('./styles/theme/hive/', 'dschjungelplanet01', true)
 		);
 		$this->assertSame(
-			'./styles/theme/hive/planeten-hd/gasplanet01.jpg',
+			'./styles/theme/hive/planeten-hd/gasplanet01.webp',
 			$resolver->url('./styles/theme/hive/', 'gasplanet01', true)
 		);
 	}
@@ -84,13 +84,13 @@ class GamePlanetImageTest extends TestCase
 		$dpath = './styles/theme/hive/';
 		$this->assertTrue($resolver->hasHd($dpath, 'dschjungelplanet01', false));
 		$this->assertTrue($resolver->hasHd($dpath, 'dschjungelplanet01', true));
-		$this->assertSame($dpath . 'planeten-hd/dschjungelplanet01.jpg', $resolver->url($dpath, 'dschjungelplanet01', false));
-		$this->assertSame($dpath . 'planeten-hd/dschjungelplanet01_hq.jpg', $resolver->url($dpath, 'dschjungelplanet01', true));
-		$this->assertSame($dpath . 'planeten-hd/gasplanet01.jpg', $resolver->url($dpath, 'gasplanet01', true));
-		$this->assertSame($dpath . 'planeten-hd/debris.jpg', $resolver->url($dpath, 'debris', false));
-		$this->assertFalse(is_file((defined('ROOT_PATH') ? ROOT_PATH : '') . 'styles/theme/hive/planeten-hd/debris_hq.jpg'));
-		$this->assertSame($dpath . 'planeten-hd/mond_hq.jpg', $resolver->url($dpath, 'mond', true));
-		$this->assertSame($dpath . 'planeten-hd/mond.jpg', $resolver->url($dpath, 'mond', false));
+		$this->assertSame($dpath . 'planeten-hd/dschjungelplanet01.webp', $resolver->url($dpath, 'dschjungelplanet01', false));
+		$this->assertSame($dpath . 'planeten-hd/dschjungelplanet01_hq.webp', $resolver->url($dpath, 'dschjungelplanet01', true));
+		$this->assertSame($dpath . 'planeten-hd/gasplanet01.webp', $resolver->url($dpath, 'gasplanet01', true));
+		$this->assertSame($dpath . 'planeten-hd/debris.webp', $resolver->url($dpath, 'debris', false));
+		$this->assertFalse(is_file((defined('ROOT_PATH') ? ROOT_PATH : '') . 'styles/theme/hive/planeten-hd/debris_hq.webp'));
+		$this->assertSame($dpath . 'planeten-hd/mond_hq.webp', $resolver->url($dpath, 'mond', true));
+		$this->assertSame($dpath . 'planeten-hd/mond.webp', $resolver->url($dpath, 'mond', false));
 	}
 
 	private function removeTree(string $dir): void
