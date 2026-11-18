@@ -42,5 +42,5 @@
     {if $showAdminLink}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
 </ul>
 <div id="disclamer" class="no-mobile">
-    {if $commit != ''}<a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
+    <a href="game.php?page=whatsNew" class="disclamer-whats-new">{$LNG.whats_new_link}</a>{if $commit != ''} &middot; <a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
 </div>

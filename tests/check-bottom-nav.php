@@ -64,7 +64,7 @@ $fullPages = [
     'fleet', 'fleettable', 'fleetTable', 'fleetdealer', 'galaxy',
     'alliance', 'messages', 'statistics', 'search', 'settings',
     'imperium', 'marketplace', 'trader', 'officier', 'techtree',
-    'battlesimulator', 'battlehall', 'records', 'changelog', 'chat',
+    'battlesimulator', 'battlehall', 'records', 'changelog', 'whatsNew', 'chat',
     'buddylist', 'banlist', 'board', 'questions', 'ticket', 'viz', 'eventFirehose',
     'raport',
 ];
