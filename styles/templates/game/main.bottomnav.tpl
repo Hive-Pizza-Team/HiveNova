@@ -27,8 +27,9 @@
 		<span>{$LNG.lm_galaxy}</span>
 	</a>
 	{/if}
-	<label for="toggle-menu" class="bottom-nav-more">
+	<label for="toggle-menu" class="bottom-nav-more{if isset($whatsNewUnseen) && $whatsNewUnseen > 0} bottom-nav-more--notify{/if}">
 		<i class="fas fa-ellipsis-h" aria-hidden="true"></i>
 		<span>Menu</span>
+		{if isset($whatsNewUnseen) && $whatsNewUnseen > 0}<span class="menu-notify-dot" aria-hidden="true"></span>{/if}
 	</label>
 </nav>

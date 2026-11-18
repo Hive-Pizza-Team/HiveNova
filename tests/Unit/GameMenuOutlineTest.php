@@ -144,4 +144,21 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertStringContainsString('role="status"', $nudge);
 		$this->assertStringContainsString('page=techtree', $nudge);
 	}
+
+	public function test_whats_new_link_sits_in_overview_after_faq(): void
+	{
+		$basics = strpos($this->nav, 'lm_menu_section_overview');
+		$advanced = strpos($this->nav, 'lm_menu_section_empire');
+		$faq = strpos($this->nav, 'page=questions');
+		$whatsNew = strpos($this->nav, 'page=whatsNew');
+
+		$this->assertNotFalse($basics);
+		$this->assertNotFalse($advanced);
+		$this->assertNotFalse($faq);
+		$this->assertNotFalse($whatsNew);
+		$this->assertGreaterThan($basics, $whatsNew);
+		$this->assertGreaterThan($faq, $whatsNew);
+		$this->assertLessThan($advanced, $whatsNew);
+		$this->assertStringContainsString('lm_whats_new', $this->nav);
+	}
 }

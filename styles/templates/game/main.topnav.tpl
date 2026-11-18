@@ -1,4 +1,4 @@
-<label class="hamburger" for="toggle-menu" class="toggle-menu"><i class="fas fa-bars"></i></label>
+<label class="hamburger{if isset($whatsNewUnseen) && $whatsNewUnseen > 0} hamburger--notify{/if}" for="toggle-menu" class="toggle-menu"{if isset($whatsNewUnseen) && $whatsNewUnseen > 0} aria-label="{$LNG.whats_new_badge_aria|sprintf:$whatsNewUnseen}"{/if}><i class="fas fa-bars" aria-hidden="true"></i>{if isset($whatsNewUnseen) && $whatsNewUnseen > 0}<span class="menu-notify-dot" aria-hidden="true"></span>{/if}</label>
 
 <div class="planetImage no-mobile">
    {if $isPlayerCardActive}

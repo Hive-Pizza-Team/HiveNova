@@ -1029,6 +1029,7 @@ CREATE TABLE `%PREFIX%users` (
   `ref_bonus` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `inactive_mail` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `inactive_hive_memo_onlinetime` int(11) DEFAULT NULL,
+  `last_seen_release` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `authlevel` (`authlevel`),
   KEY `ref_bonus` (`ref_bonus`),

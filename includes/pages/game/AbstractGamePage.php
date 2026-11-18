@@ -11,6 +11,7 @@ use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\ReleaseNotesService;
 use HiveNova\Core\TechTreeNudgeService;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
@@ -191,6 +192,14 @@ abstract class AbstractGamePage
 
 		$themeSettings	= $THEME->getStyleSettings();
 
+		$whatsNewUnseen = 0;
+		if (array_key_exists('last_seen_release', $USER)) {
+			$lastSeenRelease = $USER['last_seen_release'];
+			$whatsNewUnseen = count((new ReleaseNotesService())->unseenVersions(
+				$lastSeenRelease !== null ? (string) $lastSeenRelease : null
+			));
+		}
+
 		$commit = '';
 		$commitShort = '';
 		if(file_exists('.git/FETCH_HEAD'))
@@ -202,6 +211,7 @@ abstract class AbstractGamePage
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
 			'new_message' 		=> $USER['messages'],
+			'whatsNewUnseen'	=> $whatsNewUnseen,
 			'commit'			=> $commit,
 			'commitShort'		=> $commitShort,
 			'vacation'			=> $USER['urlaubs_modus'] ? _date($LNG['php_tdformat'], $USER['urlaubs_until'], $USER['timezone']) : false,
