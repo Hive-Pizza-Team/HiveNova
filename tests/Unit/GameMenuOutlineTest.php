@@ -144,4 +144,14 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertStringContainsString('role="status"', $nudge);
 		$this->assertStringContainsString('page=techtree', $nudge);
 	}
+
+	public function test_whats_new_is_not_a_main_menu_item(): void
+	{
+		$this->assertDoesNotMatchRegularExpression(
+			'/<li>\s*<a href="game\.php\?page=whatsNew"/',
+			$this->nav
+		);
+		$this->assertStringNotContainsString('lm_whats_new', $this->nav);
+		$this->assertStringContainsString('disclamer-whats-new', $this->nav);
+	}
 }

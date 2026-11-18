@@ -105,6 +105,10 @@ class PlayerUtilCreatePlayerTest extends TestCase
         $this->assertSame(2, $this->fake->planetRowsById[200]['galaxy']);
         $this->assertSame(100, $this->fake->planetRowsById[200]['system']);
         $this->assertSame(8, $this->fake->planetRowsById[200]['planet']);
+        $this->assertSame(
+            (new \HiveNova\Core\ReleaseNotesService())->latestVersion(),
+            $this->fake->achievement->users[100]['last_seen_release']
+        );
     }
 
     public function testCreatePlayerThrowsWhenCheckPositionInvalid(): void

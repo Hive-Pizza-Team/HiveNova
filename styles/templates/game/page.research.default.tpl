@@ -73,7 +73,6 @@
 						{foreach $Element.costOverflow as $ResType => $ResCount}
                         <a href='#' onclick='return Dialog.info({$ResType})'>{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
-						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 			
 					
 				
@@ -101,6 +100,7 @@
 						{$LNG.fgf_time}
 						{$Element.elementTime|time}
 					</div>
+						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 </div>
 	{/foreach}
 </table>

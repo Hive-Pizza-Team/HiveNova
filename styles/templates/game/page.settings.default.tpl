@@ -85,6 +85,10 @@
 			</td>
 		</tr>
 		<tr>
+			<td>{$LNG.whats_new_settings_label}</td>
+			<td><a href="game.php?page=whatsNew">{$LNG.whats_new_settings_link}</a></td>
+		</tr>
+		<tr>
 			<td>{$LNG.op_timezone}</td>
 			<td>
 				<details id="timezone-details">

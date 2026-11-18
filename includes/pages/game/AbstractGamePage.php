@@ -11,7 +11,10 @@ use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
 use HiveNova\Core\HTTP;
+use HiveNova\Core\ReleaseNotesService;
 use HiveNova\Core\TechTreeNudgeService;
+use HiveNova\Core\WhatsNewCsrf;
+use HiveNova\Core\WhatsNewModalService;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
 use HiveNova\Core\Session;
@@ -201,6 +204,13 @@ abstract class AbstractGamePage
 			$commitShort = substr($commit, 0, 7);
 		}
 
+		$celebrationPending = false;
+		$pendingCelebrations = [];
+		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {
+			$pendingCelebrations = AchievementService::get()->getPendingCelebrations((int) $USER['id']);
+			$celebrationPending = !empty($pendingCelebrations);
+		}
+
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
 			'new_message' 		=> $USER['messages'],
@@ -230,40 +240,54 @@ abstract class AbstractGamePage
 			'showTechTreeNudge'	=> TechTreeNudgeService::shouldShow($_COOKIE, HTTP::_GP('page', '')),
 		));
 
-		if (isModuleAvailable(MODULE_ACHIEVEMENTS) && AchievementService::isSchemaReady()) {
+		if ($celebrationPending) {
 			global $LNG;
-			$pending = AchievementService::get()->getPendingCelebrations((int) $USER['id']);
-			if (!empty($pending)) {
-				$loadAchievementsCss = true;
-				$this->assign(array('loadAchievementsCss' => true));
-				$queue = [];
-				foreach ($pending as $row) {
-					$queue[] = [
-						'id'                => (int) $row['id'],
-						'name'              => $LNG[$row['name_key']] ?? $row['name_key'],
-						'description'       => $LNG[$row['desc_key']] ?? $row['desc_key'],
-						'celebration_tier'  => $row['celebration_tier'],
-						'reward_type'       => $row['reward_type'],
-						'reward_amount'     => (float) $row['reward_amount'],
-						'reward_label'      => $LNG['tech'][921] ?? '',
-					];
-				}
-				$payload = json_encode([
-					'queue'   => $queue,
-					'strings' => [
-						'tierNormal'    => $LNG['ach_celebration_tier_normal'],
-						'tierEpic'      => $LNG['ach_celebration_tier_epic'],
-						'tierLegendary' => $LNG['ach_celebration_tier_legendary'],
-						'more'          => $LNG['ach_celebration_more'],
-						'rewardPrefix'  => $LNG['ach_reward'],
-					],
-				], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
-				$this->tplObj->loadscript('achievement-celebration.js');
-				$this->tplObj->execscript(
-					'jQuery(function(){if(window.HiveNovaAchievementCelebration){HiveNovaAchievementCelebration.init('
-					. $payload
-					. ');}});'
-				);
+			$loadAchievementsCss = true;
+			$this->assign(array('loadAchievementsCss' => true));
+			$queue = [];
+			foreach ($pendingCelebrations as $row) {
+				$queue[] = [
+					'id'                => (int) $row['id'],
+					'name'              => $LNG[$row['name_key']] ?? $row['name_key'],
+					'description'       => $LNG[$row['desc_key']] ?? $row['desc_key'],
+					'celebration_tier'  => $row['celebration_tier'],
+					'reward_type'       => $row['reward_type'],
+					'reward_amount'     => (float) $row['reward_amount'],
+					'reward_label'      => $LNG['tech'][921] ?? '',
+				];
+			}
+			$payload = json_encode([
+				'queue'   => $queue,
+				'strings' => [
+					'tierNormal'    => $LNG['ach_celebration_tier_normal'],
+					'tierEpic'      => $LNG['ach_celebration_tier_epic'],
+					'tierLegendary' => $LNG['ach_celebration_tier_legendary'],
+					'more'          => $LNG['ach_celebration_more'],
+					'rewardPrefix'  => $LNG['ach_reward'],
+				],
+			], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+			$this->tplObj->loadscript('achievement-celebration.js');
+			$this->tplObj->execscript(
+				'jQuery(function(){if(window.HiveNovaAchievementCelebration){HiveNovaAchievementCelebration.init('
+				. $payload
+				. ');}});'
+			);
+		}
+
+		if (array_key_exists('last_seen_release', $USER)) {
+			$lastSeenRelease = $USER['last_seen_release'] !== null ? (string) $USER['last_seen_release'] : null;
+			$modalService = new WhatsNewModalService();
+			$whatsNewModal = $modalService->modalReleases(
+				$lastSeenRelease,
+				HTTP::_GP('page', ''),
+				$celebrationPending
+			);
+			if ($whatsNewModal !== []) {
+				$this->assign([
+					'whatsNewModal'  => $whatsNewModal,
+					'whatsNewLatest' => (new ReleaseNotesService())->latestVersion(),
+					'whatsNewCsrf'   => WhatsNewCsrf::issueCsrfToken(),
+				]);
 			}
 		}
 	}
