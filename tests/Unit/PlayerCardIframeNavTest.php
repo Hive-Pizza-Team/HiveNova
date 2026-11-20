@@ -12,11 +12,11 @@ class PlayerCardIframeNavTest extends TestCase
 
 		$this->assertStringNotContainsString('parent.location', $tpl);
 		$this->assertMatchesRegularExpression(
-			'/<a href="game\.php\?page=galaxy&amp;galaxy=\{\$galaxy\}&amp;system=\{\$system\}" target="_top">/',
+			'/<a href="game\.php\?page=galaxy&amp;galaxy=\{\$galaxy\}&amp;system=\{\$system\}" target="_top" onclick="if\(window\.top!=window\)\{window\.top\.location\.href=this\.href;return false;\}">/',
 			$tpl
 		);
 		$this->assertMatchesRegularExpression(
-			'/<a href="game\.php\?page=alliance&amp;mode=info&amp;id=\{\$allyid\}" target="_top">/',
+			'/<a href="game\.php\?page=alliance&amp;mode=info&amp;id=\{\$allyid\}" target="_top" onclick="if\(window\.top!=window\)\{window\.top\.location\.href=this\.href;return false;\}">/',
 			$tpl
 		);
 	}
@@ -27,7 +27,7 @@ class PlayerCardIframeNavTest extends TestCase
 
 		$this->assertStringNotContainsString('parent.location', $tpl);
 		$this->assertMatchesRegularExpression(
-			'/<a href="game\.php\?page=galaxy&amp;galaxy=\{\$applyDetail\.galaxy\}&amp;system=\{\$applyDetail\.system\}" target="_top">/',
+			'/<a href="game\.php\?page=galaxy&amp;galaxy=\{\$applyDetail\.galaxy\}&amp;system=\{\$applyDetail\.system\}" target="_top" onclick="if\(window\.top!=window\)\{window\.top\.location\.href=this\.href;return false;\}">/',
 			$tpl
 		);
 	}
