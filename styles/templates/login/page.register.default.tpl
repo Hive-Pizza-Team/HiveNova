@@ -23,6 +23,7 @@
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
 		<input type="hidden" value="{$referralData.id}" name="referralID" class="reg-referral-id">
+		<input type="hidden" value="{$signupSrc|default:''|escape:'html'}" name="src" class="reg-signup-src">
 			<div class="rowForm">
 				<label for="universe">{$LNG.universe}</label>
 				<select name="uni" id="universe" class="changeAction">{html_options options=$universeSelect selected=$defaultEmailUniverse}</select>
@@ -121,6 +122,7 @@
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
 		<input type="hidden" value="{$referralData.id}" name="referralID" class="reg-referral-id">
+		<input type="hidden" value="{$signupSrc|default:''|escape:'html'}" name="src" class="reg-signup-src">
 			<div class="rowForm reg-hive-info">
 				<p>{$registerHiveKeychainInfo}</p>
 				<p class="reg-season-hive-notice" hidden>{$LNG.registerErrorHiveRequiredSeason}</p>
