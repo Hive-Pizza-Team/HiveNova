@@ -30,7 +30,7 @@
     <li><a href="index.php?page=rules" target="rules">{$LNG.lm_rules}</a></li>{/if}
 
     <li class="menu-separator menu-section">{$LNG.lm_menu_section_account}</li>
-    {if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="javascript:OpenPopup('?page=notes', 'notes', 720, 300);"{if $navPage == 'notes'} class="active"{/if}>{$LNG.lm_notes}</a></li>{/if}
+    {if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="game.php?page=notes"{if $navPage == 'notes'} class="active"{/if}>{$LNG.lm_notes}</a></li>{/if}
     {if $smarty.const.MODULE_BUDDYLIST|isModuleAvailable}<li><a href="game.php?page=buddyList"{if $navPage == 'buddyList'} class="active"{/if}>{$LNG.lm_buddylist}</a></li>{/if}
     <li><a href="game.php?page=settings"{if $navPage == 'settings'} class="active"{/if}>{$LNG.lm_options}</a></li>
     {if $showReferralDashboard}<li><a href="game.php?page=referrals"{if $navPage == 'referrals'} class="active"{/if}>{$LNG.lm_referrals}</a></li>{/if}
