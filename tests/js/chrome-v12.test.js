@@ -190,8 +190,13 @@ describe('chrome-v1.2 sidebar', () => {
 describe('chrome-v1.2 mobile', () => {
 	it('snap-scrolls the top strip instead of shrinking type unreadably', () => {
 		assert.match(mobileCss, /#resources_mobile \{[\s\S]*?scroll-snap-type:\s*x mandatory/);
+		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?flex:\s*0 0 auto/);
+		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?width:\s*max-content/);
 		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-height:\s*44px/);
 		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-width:\s*56px/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?min-width:\s*0/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?white-space:\s*nowrap/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?font-variant-numeric:\s*tabular-nums/);
 	});
 
 	it('reuses desktop sidebar tokens in the hamburger drawer', () => {
