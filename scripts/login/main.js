@@ -26,12 +26,19 @@
 		var basePath = LoginConfig.basePath || '';
 		var form = select.closest('form');
 		if (form) {
-			var action = form.getAttribute('data-action') || form.getAttribute('action') || '';
-			if (LoginConfig.unisWildcast) {
-				var wildBase = basePath.replace('://', '://uni' + universe + '.');
-				form.setAttribute('action', wildBase + action);
+			// Register keeps a relative action so validation errors stay on the public
+			// lobby URL; universe is already posted as name=uni (#377).
+			if (form.getAttribute('data-uni-in-body') === '1') {
+				var relative = form.getAttribute('data-action') || 'index.php?page=register';
+				form.setAttribute('action', relative);
 			} else {
-				form.setAttribute('action', basePath + 'uni' + universe + '/' + action);
+				var action = form.getAttribute('data-action') || form.getAttribute('action') || '';
+				if (LoginConfig.unisWildcast) {
+					var wildBase = basePath.replace('://', '://uni' + universe + '.');
+					form.setAttribute('action', wildBase + action);
+				} else {
+					form.setAttribute('action', basePath + 'uni' + universe + '/' + action);
+				}
 			}
 		}
 		document.querySelectorAll('.fb_login').forEach(function (el) {
