@@ -39,6 +39,14 @@ abstract class AbstractLoginPage
 	public $defaultWindow = 'normal';
 	/** @var bool When false, public pages emit noindex (e.g. empty news). */
 	protected $seoAllowIndex = true;
+	/** @var array<string, mixed> Page-level SEO overrides applied in display(). */
+	protected array $seoOverrides = [];
+	/** @var string|null Override for document <title> (public battle reports). */
+	protected $seoDocumentTitle = null;
+	/** @var string|null Override for meta description. */
+	protected $seoMetaDescription = null;
+	/** @var string|null Override for canonical URL (must be absolute). */
+	protected $seoCanonicalUrl = null;
 	
 	protected function __construct() {
 		
@@ -174,6 +182,14 @@ abstract class AbstractLoginPage
 		$this->tplObj->assign_vars($array, $nocache);
 	}
 	
+	/**
+	 * @param array<string, mixed> $overrides
+	 */
+	protected function setSeoMeta(array $overrides): void
+	{
+		$this->seoOverrides = array_merge($this->seoOverrides, $overrides);
+	}
+
 	protected function display($file) {
 		global $LNG;
 		
@@ -199,16 +215,43 @@ abstract class AbstractLoginPage
 		$seoPage		= PublicSeo::normalizePage(HTTP::_GP('page', ''));
 		$gameName		= (string) $config->game_name;
 		$languages		= Language::getAllowedLangs(false);
-		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
-		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
-		$hreflangUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
+		$seoBase			= PublicSeo::canonicalBasePath($basePath);
+		$documentTitle		= $this->seoDocumentTitle ?? PublicSeo::documentTitle($seoPage, $gameName, $LNG);
+		$metaDescription	= $this->seoMetaDescription ?? PublicSeo::metaDescription($seoPage, $gameName, $LNG);
+		$canonicalUrl		= $this->seoCanonicalUrl ?? PublicSeo::canonicalUrl($seoBase, $seoPage, $lang);
+		$hreflangUrls		= PublicSeo::hreflangUrls($seoBase, $seoPage, $languages);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
-		$ogImageUrl			= $basePath.'styles/resource/images/login/HiveNova.png';
+		if (PublicSeo::usesBattleShareImage($seoPage)) {
+			$ogImageUrl = PublicSeo::shareImageUrl($seoBase);
+			$ogImageWidth = PublicSeo::SHARE_IMAGE_WIDTH;
+			$ogImageHeight = PublicSeo::SHARE_IMAGE_HEIGHT;
+		} else {
+			$ogImageUrl = $seoBase.'styles/resource/images/login/HiveNova.png';
+			$ogImageWidth = 1024;
+			$ogImageHeight = 768;
+		}
 		$jsonLd				= '';
 		if ($seoPage === 'index') {
 			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
+		}
+
+		$seoVars = [
+			'documentTitle' => $documentTitle,
+			'metaDescription' => $metaDescription,
+			'canonicalUrl' => $canonicalUrl,
+			'hreflangUrls' => $hreflangUrls,
+			'pageHeading' => $pageHeading,
+			'robotsContent' => $robotsContent,
+			'ogImageUrl' => $ogImageUrl,
+			'ogImageWidth' => $ogImageWidth,
+			'ogImageHeight' => $ogImageHeight,
+			'jsonLd' => $jsonLd,
+		];
+		foreach ($this->seoOverrides as $key => $value) {
+			if (array_key_exists($key, $seoVars)) {
+				$seoVars[$key] = $value;
+			}
 		}
 		
 		$this->assign(array(
@@ -217,19 +260,19 @@ abstract class AbstractLoginPage
 			'basepath'			=> $basePath,
 			'isMultiUniverse'	=> count(Universe::availableUniverses()) > 1,
 			'unisWildcast'		=> UNIS_WILDCAST,
-			'documentTitle'		=> $documentTitle,
-			'metaDescription'	=> $metaDescription,
-			'canonicalUrl'		=> $canonicalUrl,
-			'hreflangUrls'		=> $hreflangUrls,
-			'pageHeading'		=> $pageHeading,
-			'robotsContent'		=> $robotsContent,
-			'ogImageUrl'		=> $ogImageUrl,
-			'ogImageWidth'		=> 1024,
-			'ogImageHeight'		=> 768,
+			'documentTitle'		=> $seoVars['documentTitle'],
+			'metaDescription'	=> $seoVars['metaDescription'],
+			'canonicalUrl'		=> $seoVars['canonicalUrl'],
+			'hreflangUrls'		=> $seoVars['hreflangUrls'],
+			'pageHeading'		=> $seoVars['pageHeading'],
+			'robotsContent'		=> $seoVars['robotsContent'],
+			'ogImageUrl'		=> $seoVars['ogImageUrl'],
+			'ogImageWidth'		=> $seoVars['ogImageWidth'],
+			'ogImageHeight'		=> $seoVars['ogImageHeight'],
 			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
-			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
-			'jsonLd'			=> $jsonLd,
+			'footerLinks'		=> PublicSeo::footerLinks($seoBase, $lang, $LNG),
+			'jsonLd'			=> $seoVars['jsonLd'],
 		));
 
 		$this->assign(array(

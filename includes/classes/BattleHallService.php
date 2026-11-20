@@ -59,6 +59,44 @@ class BattleHallService
 		return $out;
 	}
 
+
+	/**
+	 * Single TOPKB hall row by rid (any universe), with side names.
+	 *
+	 * @return array{result: string, time: int, units: float|int|string, rid: string, universe: int, attacker: string, defender: string}|null
+	 */
+	public function findByRid(string $rid): ?array
+	{
+		$rid = trim($rid);
+		if ($rid === '') {
+			return null;
+		}
+
+		$row = $this->db()->selectSingle(
+			'SELECT rid, units, result, time, universe
+			FROM %%TOPKB%%
+			WHERE rid = :rid
+			LIMIT 1',
+			[':rid' => $rid]
+		);
+		if ($row === false || $row === null || $row === []) {
+			return null;
+		}
+
+		$names = $this->loadSideNames([(string) $row['rid']]);
+		$sides = $names[(string) $row['rid']] ?? ['attacker' => '', 'defender' => ''];
+
+		return [
+			'result'   => (string) $row['result'],
+			'time'     => (int) $row['time'],
+			'units'    => $row['units'],
+			'rid'      => (string) $row['rid'],
+			'universe' => (int) $row['universe'],
+			'attacker' => $sides['attacker'],
+			'defender' => $sides['defender'],
+		];
+	}
+
 	/**
 	 * @param list<string> $rids
 	 * @return array<string, array{attacker: string, defender: string}>

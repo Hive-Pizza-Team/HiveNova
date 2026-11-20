@@ -23,7 +23,7 @@ class PublicSitemapFilesTest extends TestCase
 		$expected = [];
 		foreach (PublicSeo::SITEMAP_PAGES as $page) {
 			foreach (self::languageKeys() as $lang) {
-				$expected[] = PublicSeo::canonicalUrl('https://moon.hive.pizza/', $page, $lang);
+				$expected[] = PublicSeo::canonicalUrl('https://moonsiege.com/', $page, $lang);
 			}
 		}
 
@@ -31,11 +31,11 @@ class PublicSitemapFilesTest extends TestCase
 		sort($expected);
 
 		$this->assertSame($expected, $locs);
-		$this->assertNotContains('https://moon.hive.pizza/index.php?page=news', $locs);
-		$this->assertNotContains('https://moon.hive.pizza/index.php?page=banList', $locs);
-		$this->assertContains('https://moon.hive.pizza/', $locs);
-		$this->assertContains('https://moon.hive.pizza/index.php?page=disclamer', $locs);
-		$this->assertContains('https://moon.hive.pizza/index.php?page=rules&lang=de', $locs);
+		$this->assertNotContains('https://moonsiege.com/index.php?page=news', $locs);
+		$this->assertNotContains('https://moonsiege.com/index.php?page=banList', $locs);
+		$this->assertContains('https://moonsiege.com/', $locs);
+		$this->assertContains('https://moonsiege.com/index.php?page=disclamer', $locs);
+		$this->assertContains('https://moonsiege.com/index.php?page=rules&lang=de', $locs);
 	}
 
 	public function testSitemapXmlIsInSyncWithGenerator(): void
@@ -46,7 +46,7 @@ class PublicSitemapFilesTest extends TestCase
 		$this->assertSame(1, preg_match('#<lastmod>(\d{4}-\d{2}-\d{2})</lastmod>#', $raw, $m));
 
 		$this->assertSame(
-			PublicSeo::sitemapXml('https://moon.hive.pizza/', self::languageKeys(), $m[1]),
+			PublicSeo::sitemapXml('https://moonsiege.com/', self::languageKeys(), $m[1]),
 			$raw,
 			'sitemap.xml is stale; run: php scripts/generate-sitemap.php --lastmod='.$m[1]
 		);
@@ -54,7 +54,7 @@ class PublicSitemapFilesTest extends TestCase
 
 	public function testSitemapXmlCarriesHreflangAlternatesAndLastmod(): void
 	{
-		$xml = PublicSeo::sitemapXml('https://moon.hive.pizza/', ['en', 'de'], '2026-01-02');
+		$xml = PublicSeo::sitemapXml('https://moonsiege.com/', ['en', 'de'], '2026-01-02');
 		$doc = simplexml_load_string($xml);
 		$this->assertNotFalse($doc);
 
@@ -71,8 +71,8 @@ class PublicSitemapFilesTest extends TestCase
 			$hreflangs[(string) $attrs['hreflang']] = (string) $attrs['href'];
 		}
 		$this->assertSame(['en', 'de', 'x-default'], array_keys($hreflangs));
-		$this->assertSame('https://moon.hive.pizza/', $hreflangs['x-default']);
-		$this->assertSame('https://moon.hive.pizza/index.php?lang=de', $hreflangs['de']);
+		$this->assertSame('https://moonsiege.com/', $hreflangs['x-default']);
+		$this->assertSame('https://moonsiege.com/index.php?lang=de', $hreflangs['de']);
 	}
 
 	/** @return list<string> */
@@ -97,6 +97,6 @@ class PublicSitemapFilesTest extends TestCase
 		$xml = simplexml_load_string($raw);
 		$this->assertNotFalse($xml);
 		$this->assertSame('sitemapindex', $xml->getName());
-		$this->assertSame('https://moon.hive.pizza/sitemap.xml', (string) $xml->sitemap->loc);
+		$this->assertSame('https://moonsiege.com/sitemap.xml', (string) $xml->sitemap->loc);
 	}
 }

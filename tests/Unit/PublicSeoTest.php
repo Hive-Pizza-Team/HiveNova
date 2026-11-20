@@ -6,6 +6,14 @@ use PHPUnit\Framework\TestCase;
 
 class PublicSeoTest extends TestCase
 {
+
+	public function testCanonicalBasePathIgnoresRequestHost(): void
+	{
+		$this->assertSame(PublicSeo::CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://moon.hive.pizza/'));
+		$this->assertSame(PublicSeo::CANONICAL_ORIGIN, PublicSeo::canonicalBasePath('https://www.moonsiege.com/'));
+		$this->assertSame('https://moonsiege.com/', PublicSeo::CANONICAL_ORIGIN);
+	}
+
 	public function testNormalizePageDefaultsEmptyToIndex(): void
 	{
 		$this->assertSame('index', PublicSeo::normalizePage(''));
@@ -235,5 +243,54 @@ class PublicSeoTest extends TestCase
 		$this->assertArrayNotHasKey('aggregateRating', $data);
 		$this->assertArrayNotHasKey('reviewCount', $data);
 		$this->assertStringNotContainsString('\\/', $json);
+	}
+
+	public function testBattleReportUrlIncludesRidAndStripsRef(): void
+	{
+		$url = PublicSeo::battleReportUrl(PublicSeo::CANONICAL_ORIGIN, 'abc123', 'en');
+		$this->assertSame('https://moonsiege.com/index.php?page=battle&rid=abc123', $url);
+		$urlDe = PublicSeo::battleReportUrl(PublicSeo::CANONICAL_ORIGIN, 'abc123', 'de');
+		$this->assertSame('https://moonsiege.com/index.php?page=battle&rid=abc123&lang=de', $urlDe);
+		$stripped = PublicSeo::canonicalUrl(PublicSeo::CANONICAL_ORIGIN, 'battle', 'en', 'en', [
+			'rid' => 'x',
+			'ref' => 1,
+			'src' => 'battlehall',
+		]);
+		$this->assertSame('https://moonsiege.com/index.php?page=battle&rid=x', $stripped);
+	}
+
+	public function testSignupCtaUrlAndShareImage(): void
+	{
+		$this->assertSame('https://moonsiege.com/?ref=1&src=battlehall', PublicSeo::signupCtaUrl('battlehall'));
+		$this->assertSame('https://moonsiege.com/?ref=1&src=battlereport', PublicSeo::signupCtaUrl('battlereport'));
+		$this->assertStringEndsWith(PublicSeo::SHARE_IMAGE_PATH, PublicSeo::shareImageUrl());
+		$this->assertTrue(PublicSeo::usesBattleShareImage('battleHall'));
+		$this->assertTrue(PublicSeo::usesBattleShareImage('battle'));
+		$this->assertFalse(PublicSeo::usesBattleShareImage('rules'));
+	}
+
+	public function testBattleHallAndReportMeta(): void
+	{
+		$lng = [
+			'metaTitleBattleHallUni' => 'Battle Hall — %s | %s',
+			'metaDescriptionBattleHallUni' => 'Hall in %s on %s.',
+			'metaTitleBattleReport' => '%s vs %s: %s units destroyed | %s Battle Hall',
+			'metaDescriptionBattleReport' => '%s vs %s — %s units destroyed on %s. Play %s free.',
+		];
+		$this->assertSame(
+			'Battle Hall — Uni 1 | Moon',
+			PublicSeo::battleHallDocumentTitle('Uni 1', 'Moon', $lng)
+		);
+		$this->assertSame(
+			'alice vs bob: 488.7M units destroyed | Moon Battle Hall',
+			PublicSeo::battleReportDocumentTitle('alice', 'bob', '488.7M', 'Moon', $lng)
+		);
+		$this->assertStringContainsString('488.7M', PublicSeo::battleReportMetaDescription('alice', 'bob', '488.7M', '2026-01-01', 'Moon', $lng));
+	}
+
+	public function testBattleIsIndexable(): void
+	{
+		$this->assertSame('index, follow', PublicSeo::robotsContent('battle'));
+		$this->assertContains('battle', PublicSeo::INDEXABLE_PAGES);
 	}
 }
