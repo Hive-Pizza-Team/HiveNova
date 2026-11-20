@@ -12,7 +12,6 @@ At the start of every session in this workspace, read these in order before doin
 ## Git and branches
 
 - **Never push directly to `master` or `develop`.** Use a feature branch and open a **pull request** to request merging into those branches instead.
-- PRs that change `styles/`, `scripts/`, `chat/`, `includes/pages/**`, or any `*.tpl` must include a **screenshot in the PR body** (CI `screenshot-check`). Upload the image in the PR body or comments (GitHub-hosted) or attach it as a CI workflow artifact with a short retention (e.g. `retention-days: 7`). Never commit screenshots under `.pr-shots/` or `docs/review/` (those paths are gitignored).
 
 ## Code Intelligence
 
