@@ -57,6 +57,11 @@
     color: #8aa8be;
 }
 
+/* Beat .rowForm { display: block } so [hidden] actually hides the notice */
+.reg-season-hive-notice[hidden] {
+    display: none;
+}
+
 .reg-season-hive-notice p {
     margin: 0 0 10px;
     color: #e8b0ba;
