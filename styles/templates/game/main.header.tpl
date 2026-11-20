@@ -65,8 +65,21 @@
 			relativeTime = nowSec;
 		}
 	}
+	// Expose for topnav / countdown scripts after background tab freezes.
+	window.syncGameClockToWall = syncGameClockToWall;
 
 	setInterval(syncGameClockToWall, 1000);
+
+	function onGameClockResume() {
+		syncGameClockToWall();
+	}
+	document.addEventListener('visibilitychange', function () {
+		if (!document.hidden) {
+			onGameClockResume();
+		}
+	});
+	window.addEventListener('pageshow', onGameClockResume);
+	window.addEventListener('focus', onGameClockResume);
 	</script>
 	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
