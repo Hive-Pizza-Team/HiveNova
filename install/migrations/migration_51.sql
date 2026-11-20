@@ -1,6 +1,3 @@
--- Signup channel-source tracking (?src= / utm_source).
+-- Track which release notes a player has already viewed (What's New page).
 ALTER TABLE `%PREFIX%users`
-	ADD `signup_src` varchar(32) DEFAULT NULL AFTER `ref_bonus`;
-
-ALTER TABLE `%PREFIX%users_valid`
-	ADD `signup_src` varchar(32) DEFAULT NULL AFTER `referralID`;
+	ADD COLUMN `last_seen_release` VARCHAR(16) NULL DEFAULT NULL;

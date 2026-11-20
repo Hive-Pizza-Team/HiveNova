@@ -375,6 +375,7 @@ class PlayerUtil
 			':nameLastChanged'		=> 0,
 			':darkmatter_start'		=> $config->darkmatter_start,
 			':signupSrc'			=> $signupSrc,
+			':lastSeenRelease'		=> (new ReleaseNotesService())->latestVersion(),
 		);
 
 		$sql = 'INSERT INTO %%USERS%% SET
@@ -393,7 +394,8 @@ class PlayerUtil
 		timezone		= :timezone,
 		uctime			= :nameLastChanged,
 		darkmatter		= :darkmatter_start,
-		signup_src		= :signupSrc;';
+		signup_src		= :signupSrc,
+		last_seen_release	= :lastSeenRelease;';
 
 		$db = Database::get();
 

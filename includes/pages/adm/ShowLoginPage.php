@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminReloginPassword;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Session;
@@ -28,7 +29,7 @@ if (!AuthLevel::canEnterAdmin((int) $USER['authlevel']))
 
 function ShowLoginPage()
 {
-	global $USER;
+	global $USER, $LNG;
 
 	$session	= Session::create();
 	if($session->adminAccess == 1)
@@ -48,14 +49,15 @@ function ShowLoginPage()
 		}
 	}
 
+	$loginError	= '';
 	if(isset($_REQUEST['admin_pw']))
 	{
-
-		if(password_verify((string) $_REQUEST['admin_pw'], (string) $USER['password'])) {
+		if(AdminReloginPassword::matches((string) $USER['password'])) {
 			$session->adminAccess	= 1;
 			HTTP::redirectTo('admin.php');
 		}
 
+		$loginError	= $LNG['adm_bad_password'];
 	}
 
 	$template	= new Template();
@@ -66,7 +68,8 @@ function ShowLoginPage()
 	$template->assign_vars(array(	
 		'bodyclass'	=> 'standalone',
 		'username'	=> $USER['username'],
-		'steemconnectUrl' => $steemconnectUrl
+		'steemconnectUrl' => $steemconnectUrl,
+		'loginError'	=> $loginError,
 	));
 	$template->show('LoginPage.tpl');
 }

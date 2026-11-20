@@ -74,7 +74,7 @@ Trajectory: carve god-objects (`FleetFunctions`, `ResourceUpdate`, `ShowAlliance
 - Shared Smarty templates: `styles/templates/game|adm|login/`.
 - Skins: `styles/theme/{hive,nova,gow,EpicBlueXIII}/`. Default is `hive` (`DEFAULT_THEME`).
 - Prefer fixing `hive` (and shared templates) first; treat other themes as best-effort unless the bug is theme-specific.
-- PRs that change `styles/`, `scripts/`, `chat/`, `includes/pages/**`, or any `*.tpl` must include a screenshot in the PR body (CI `screenshot-check`; see `.cursor/rules/pr-screenshot-for-rendering.mdc`).
+- PRs that change `styles/`, `scripts/`, `chat/`, `includes/pages/**`, or any `*.tpl` must include a screenshot in the PR body (CI `screenshot-check`; see `AGENTS.md`). Upload the image in the PR body or comments (GitHub-hosted) or attach it as a CI workflow artifact with a short retention (e.g. `retention-days: 7`). Never commit screenshots under `.pr-shots/` or `docs/review/` (those paths are gitignored).
 
 ## Language
 

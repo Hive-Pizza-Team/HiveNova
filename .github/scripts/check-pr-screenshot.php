@@ -118,5 +118,5 @@ if ($result['ok']) {
 
 fwrite(STDERR, "\nAdd a screenshot to the PR description (markdown image / <img> / user-attachments URL),\n");
 fwrite(STDERR, "or set label 'skip-screenshot' / include [skip-screenshot] with a reason.\n");
-fwrite(STDERR, "See .cursor/rules/pr-screenshot-for-rendering.mdc\n");
+fwrite(STDERR, "See AGENTS.md\n");
 exit(1);

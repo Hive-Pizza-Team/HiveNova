@@ -51,7 +51,6 @@
 						{foreach $Element.costOverflow as $ResType => $ResCount}
 						<a href='#' onclick='return Dialog.info({$ResType})'>{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
-						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 						<p>{$LNG.bd_max_ships_long}:<span style="font-weight:700"><br><span id="max_{$ID}" data-n="{$Element.maxBuildable}">{$Element.maxBuildable|number}</span></p>
 
 		</div>
@@ -69,6 +68,7 @@
 					{$Element.elementTime|time}
 					
 					</div>
+						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 				
 	</form>
 </div>

@@ -106,6 +106,10 @@ class PlayerUtilCreatePlayerTest extends TestCase
         $this->assertSame(100, $this->fake->planetRowsById[200]['system']);
         $this->assertSame(8, $this->fake->planetRowsById[200]['planet']);
         $this->assertNull($this->fake->achievement->users[100]['signup_src']);
+        $this->assertSame(
+            (new \HiveNova\Core\ReleaseNotesService())->latestVersion(),
+            $this->fake->achievement->users[100]['last_seen_release']
+        );
     }
 
     public function testCreatePlayerPersistsSanitizedSignupSrc(): void
