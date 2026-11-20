@@ -123,12 +123,12 @@ $("#tn3").hide();
 	<div class="overview-planet-main">
 		{if $planetVizEnabled}
 		<div class="planeth overview-planet-visual overview-planet-visual--loading">
-			<img class="overview-planet-fallback" data-src="{$dpath}planeten/{$planetimage}.jpg" data-src-hq="{$dpath}planeten/{$planetimage}_hq.jpg" data-alt="{$planetname|escape:'html'}" alt="" aria-hidden="true">
+			<img class="overview-planet-fallback" data-src="{planet_image texture=$planetimage lite=true}" data-src-hq="{planet_image texture=$planetimage}" data-alt="{$planetname|escape:'html'}" alt="" aria-hidden="true">
 			<canvas id="overview-planet-canvas" class="overview-planet-canvas" width="280" height="280" aria-label="{$planetname|escape:'html'} — animated planet view"></canvas>
 		</div>
 		{else}
 		<div class="planeth overview-planet-visual overview-planet-visual--fallback">
-			<img class="overview-planet-fallback" src="{$dpath}planeten/{$planetimage}.jpg" onerror="this.onerror=null;this.src='{$dpath}planeten/{$planetimage}_hq.jpg'" alt="{$planetname}">
+			<img class="overview-planet-fallback" src="{planet_image texture=$planetimage lite=true}" onerror="this.onerror=null;this.src='{planet_image texture=$planetimage}'" alt="{$planetname}">
 		</div>
 		{/if}
 		<div class="planeth overview-planet-details">

@@ -67,9 +67,9 @@
 		<tr class="no-background no-border center">
 			<td></th>
 			<th></th>
-			<th><img src="./styles/theme/nova/images/metal.gif"/></th>
-			<th><img src="./styles/theme/nova/images/crystal.gif"/></th>
-			<th><img src="./styles/theme/nova/images/deuterium.gif"/></th>
+			<th><img src="{resource_image name="metal" dpath="./styles/theme/nova/"}"/></th>
+			<th><img src="{resource_image name="crystal" dpath="./styles/theme/nova/"}"/></th>
+			<th><img src="{resource_image name="deuterium" dpath="./styles/theme/nova/"}"/></th>
 			<th></th>
 			<th></th>
 			<th></th>
@@ -118,11 +118,11 @@
 		<td data-time="{$FlyingFleetRow.end}">{$FlyingFleetRow.end|pretty_fly_time}</td>
 		<td class="no-background no-border">
 			{if $FlyingFleetRow.fleet_wanted_resource_id == 1}
-			<img src="./styles/theme/nova/images/metal.gif"/>
+			<img src="{resource_image name="metal" dpath="./styles/theme/nova/"}"/>
 			{elseif $FlyingFleetRow.fleet_wanted_resource_id == 2}
-			<img src="./styles/theme/nova/images/crystal.gif"/>
+			<img src="{resource_image name="crystal" dpath="./styles/theme/nova/"}"/>
 			{elseif $FlyingFleetRow.fleet_wanted_resource_id == 3}
-			<img src="./styles/theme/nova/images/deuterium.gif"/>
+			<img src="{resource_image name="deuterium" dpath="./styles/theme/nova/"}"/>
 			{/if}
 		</td>
 		<td class="wanted-resource-{$FlyingFleetRow.fleet_wanted_resource_id}">{$FlyingFleetRow.fleet_wanted_resource}</td>
@@ -169,9 +169,9 @@
 			<td>{$row.crystal}</td>
 			<td>{$row.deuterium}</td>
 			<td class="no-background no-border center">
-				{if $row.res_type == 1}<img src="./styles/theme/nova/images/metal.gif"/>
-				{elseif $row.res_type == 2}<img src="./styles/theme/nova/images/crystal.gif"/>
-				{elseif $row.res_type == 3}<img src="./styles/theme/nova/images/deuterium.gif"/>{/if}</td>
+				{if $row.res_type == 1}<img src="{resource_image name="metal" dpath="./styles/theme/nova/"}"/>
+				{elseif $row.res_type == 2}<img src="{resource_image name="crystal" dpath="./styles/theme/nova/"}"/>
+				{elseif $row.res_type == 3}<img src="{resource_image name="deuterium" dpath="./styles/theme/nova/"}"/>{/if}</td>
 			<td>{$row.amount}</td>
 		</tr>
 		{/foreach}
@@ -212,11 +212,11 @@
 		<td data-time="{$FlyingFleetRow.end}">{$FlyingFleetRow.end|pretty_fly_time}</td>
 		<td class="no-background no-border">
 			{if $FlyingFleetRow.fleet_wanted_resource_id == 1}
-			<img src="./styles/theme/nova/images/metal.gif"/>
+			<img src="{resource_image name="metal" dpath="./styles/theme/nova/"}"/>
 			{elseif $FlyingFleetRow.fleet_wanted_resource_id == 2}
-			<img src="./styles/theme/nova/images/crystal.gif"/>
+			<img src="{resource_image name="crystal" dpath="./styles/theme/nova/"}"/>
 			{elseif $FlyingFleetRow.fleet_wanted_resource_id == 3}
-			<img src="./styles/theme/nova/images/deuterium.gif"/>
+			<img src="{resource_image name="deuterium" dpath="./styles/theme/nova/"}"/>
 			{/if}
 		</td>
 		<td class="wanted-resource-{$FlyingFleetRow.fleet_wanted_resource_id}">{$FlyingFleetRow.fleet_wanted_resource}</td>
@@ -259,9 +259,9 @@
 			<td>{$row.time}</td>
 			<td>{$row.fleet_str}</td>
 			<td class="no-background no-border center">
-				{if $row.res_type == 1}<img src="./styles/theme/nova/images/metal.gif"/>
-				{elseif $row.res_type == 2}<img src="./styles/theme/nova/images/crystal.gif"/>
-				{elseif $row.res_type == 3}<img src="./styles/theme/nova/images/deuterium.gif"/>{/if}</td>
+				{if $row.res_type == 1}<img src="{resource_image name="metal" dpath="./styles/theme/nova/"}"/>
+				{elseif $row.res_type == 2}<img src="{resource_image name="crystal" dpath="./styles/theme/nova/"}"/>
+				{elseif $row.res_type == 3}<img src="{resource_image name="deuterium" dpath="./styles/theme/nova/"}"/>{/if}</td>
 			<td>{$row.amount}</td>
 		</tr>
 		{/foreach}
