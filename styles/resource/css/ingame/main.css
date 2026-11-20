@@ -3612,6 +3612,15 @@ table.tablesorter thead tr .headerSortDown {
 	text-align: left;
 }
 
+/* One requirement per line; the first sits beside the "Requires:" label. */
+.element-requirement {
+	display: block;
+}
+
+.element-requirements__list > .element-requirement:first-child {
+	display: inline;
+}
+
 .requirement-link {
 	text-decoration: underline;
 	cursor: pointer;
@@ -3627,6 +3636,67 @@ table.tablesorter thead tr .headerSortDown {
 
 .requirement-level {
 	margin-left: 0.25em;
+	white-space: nowrap;
+}
+
+/* Element cards (#736): stretch both .buildl columns to equal height when :has is supported */
+.infos:has(> .buildl),
+.infoso:has(> .buildl),
+.infos > form:has(> .buildl) {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+}
+
+.infos:has(> .buildl) > :not(.buildl),
+.infoso:has(> .buildl) > :not(.buildl),
+.infos > form:has(> .buildl) > :not(.buildl) {
+	flex: 1 1 100%;
+}
+
+/* Element cards (#736): Requires is a full-width row under both columns.
+   Phones keep one requirement per line; wider screens flow them in a row. */
+.infos > .element-requirements,
+.infoso > .element-requirements,
+.infos > form > .element-requirements {
+	clear: both;
+	flex: 0 0 100%;
+	margin: 0;
+	padding: 5px 10px 7px;
+	border-top: 1px solid #3a4048;
+	line-height: 1.4;
+}
+
+@media screen and (min-width: 700px) {
+	.infos > .element-requirements,
+	.infoso > .element-requirements,
+	.infos > form > .element-requirements {
+		display: flex;
+		align-items: baseline;
+		padding: 5px 12px 6px;
+	}
+
+	.infos > .element-requirements .element-requirements__label,
+	.infoso > .element-requirements .element-requirements__label,
+	.infos > form > .element-requirements .element-requirements__label {
+		flex: none;
+		margin-right: 10px;
+	}
+
+	.infos > .element-requirements .element-requirements__list,
+	.infoso > .element-requirements .element-requirements__list,
+	.infos > form > .element-requirements .element-requirements__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2px 20px;
+		min-width: 0;
+	}
+
+	.infos > .element-requirements .element-requirement,
+	.infoso > .element-requirements .element-requirement,
+	.infos > form > .element-requirements .element-requirement {
+		max-width: 100%;
+	}
 }
 
 .element-locked {
@@ -3640,4 +3710,212 @@ table.tablesorter thead tr .headerSortDown {
 .infoso:target {
 	outline: 2px solid var(--color-accent, #9b6dff);
 	box-shadow: 0 0 0 2px rgba(155, 109, 255, 0.35);
+}
+
+/* What's New (#734) */
+
+.whats-new {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 720px;
+	margin: 0 auto;
+	padding: 0 8px 24px;
+	overflow-wrap: anywhere;
+}
+
+.whats-new__title {
+	margin: 0 0 0.35em;
+	color: var(--color-text-bright);
+	font-size: 1.35em;
+}
+
+.whats-new__intro {
+	margin: 0 0 1.1em;
+	color: var(--color-chrome-res-label);
+	font-size: 0.95em;
+	line-height: 1.45;
+}
+
+.whats-new__empty {
+	margin: 0.75em 0;
+	color: var(--color-chrome-res-label);
+}
+
+.whats-new__release {
+	box-sizing: border-box;
+	margin: 0 0 0.9em;
+	padding: 0.75em 0.85em;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-radius: 4px;
+	background: var(--color-bg-surface);
+}
+
+.whats-new__release--unseen {
+	border-color: var(--color-accent);
+	box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.whats-new__release-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.45em 0.7em;
+	margin: 0 0 0.55em;
+}
+
+.whats-new__version {
+	margin: 0;
+	color: var(--color-text-bright);
+	font-size: 1.05em;
+}
+
+.whats-new__new-label {
+	display: inline-block;
+	padding: 0.1em 0.5em;
+	border-radius: 0.35em;
+	background: var(--color-accent);
+	color: var(--color-text-bright);
+	font-size: 0.75em;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.whats-new__items {
+	margin: 0;
+	padding: 0 0 0 1.15em;
+	color: var(--color-text);
+	line-height: 1.5;
+}
+
+.whats-new__items li {
+	margin: 0 0 0.4em;
+}
+
+.whats-new__items li:last-child {
+	margin-bottom: 0;
+}
+
+@media screen and (max-width: 699px) {
+	.whats-new {
+		padding: 0 4px 16px;
+	}
+
+	.whats-new__release {
+		padding: 0.65em 0.7em;
+	}
+}
+
+/* What's New one-time release dialog */
+.whats-new-dialog {
+	box-sizing: border-box;
+	width: min(560px, 94vw);
+	max-width: 94vw;
+	padding: 0;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-radius: 8px;
+	background: var(--color-bg-surface-dark);
+	color: var(--color-text);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+	overflow: hidden;
+}
+.whats-new-dialog::backdrop {
+	background: rgba(0, 0, 0, 0.72);
+}
+.whats-new-dialog__panel {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	max-width: 100%;
+}
+.whats-new-dialog__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.9rem 1rem 0.55rem;
+	border-bottom: 1px solid var(--color-chrome-res-divider);
+}
+.whats-new-dialog__heading {
+	min-width: 0;
+}
+.whats-new-dialog__title {
+	margin: 0;
+	color: var(--color-text-bright);
+	font-size: 1.2em;
+}
+.whats-new-dialog__subtitle {
+	margin: 0.25em 0 0;
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+.whats-new-dialog__close {
+	flex: 0 0 auto;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font-size: 1.4rem;
+	line-height: 1;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0.35rem 0.6rem;
+	cursor: pointer;
+}
+.whats-new-dialog__body {
+	box-sizing: border-box;
+	max-height: 60vh;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding: 0.75rem 1rem;
+}
+.whats-new-dialog__release {
+	margin: 0 0 0.85em;
+}
+.whats-new-dialog__release:last-child {
+	margin-bottom: 0;
+}
+.whats-new-dialog__version {
+	margin: 0 0 0.35em;
+	color: var(--color-text-bright);
+	font-size: 1em;
+}
+.whats-new-dialog__items {
+	margin: 0;
+	padding: 0 0 0 1.15em;
+	color: var(--color-text);
+	line-height: 1.45;
+	overflow-wrap: anywhere;
+}
+.whats-new-dialog__items li {
+	margin: 0 0 0.3em;
+}
+.whats-new-dialog__footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.65rem 1rem;
+	padding: 0.75rem 1rem 1rem;
+	border-top: 1px solid var(--color-chrome-res-divider);
+}
+.whats-new-dialog__see-all {
+	color: var(--color-text-bright);
+	text-decoration: underline;
+}
+.whats-new-dialog__got-it {
+	min-height: 44px;
+	min-width: 7em;
+}
+@media screen and (max-width: 699px) {
+	.whats-new-dialog__footer {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.whats-new-dialog__got-it,
+	.whats-new-dialog__see-all {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
 }

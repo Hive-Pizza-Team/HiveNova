@@ -72,7 +72,6 @@
 						{foreach $Element.costOverflow as $ResType => $ResCount}
 						<a href='#' onclick="return Dialog.info({$ResType});">{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
-						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 						<br>
 {if !empty($Element.infoEnergy)}
 							{$LNG.bd_next_level}<br>
@@ -150,6 +149,7 @@
 							&nbsp;
 						{/if}
 					</div>
+						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 </div>
  {else} <div class="infoso{if !$Element.techAccessible} element-locked{/if}" id="g{$ID}">
 <div class="buildn">
@@ -163,7 +163,6 @@
 						{foreach $Element.costOverflow as $ResType => $ResCount}
 						<a href='#' onclick="return Dialog.info({$ResType});">{$LNG.tech.{$ResType}}</a>: <span style="font-weight:700">{$ResCount|number}</span><br>
 						{/foreach}
-						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 						<br>
 {if !empty($Element.infoEnergy)}
 							{$LNG.bd_next_level}<br>
@@ -241,6 +240,7 @@
 							&nbsp;
 						{/if}
 					</div>
+						{include file="shared.element.requirements.tpl" requirementRows=$Element.requirements}
 </div>
 {/if}
 

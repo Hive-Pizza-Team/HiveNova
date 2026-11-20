@@ -1,4 +1,5 @@
-{assign var=navPage value=$smarty.get.page|default:'overview'}
+{* $navPage is assigned from PHP (resolved aliases). Empty = no highlight (errors). *}
+{if !isset($navPage)}{assign var=navPage value=$smarty.get.page|default:'overview'}{/if}
 <ul id="menu">
     <li class="menu-separator menu-section">{$LNG.lm_menu_section_overview}</li>
     <li><a href="game.php?page=overview"{if $navPage == 'overview'} class="active"{/if}>{$LNG.lm_overview}</a></li>
@@ -42,5 +43,5 @@
     {if $showAdminLink}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
 </ul>
 <div id="disclamer" class="no-mobile">
-    {if $commit != ''}<a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
+    <a href="game.php?page=whatsNew" class="disclamer-whats-new">{$LNG.whats_new_link}</a>{if $commit != ''} &middot; <a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
 </div>

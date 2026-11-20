@@ -46,6 +46,9 @@ class ShowCommanderAjaxPageTest extends TestCase
 		$PLANET = array_replace(['id' => 9], $this->directiveUnlockedPlanet());
 		$LNG = [];
 		$_SESSION = [];
+		$_GET = [];
+		$_POST = [];
+		$_COOKIE = [];
 		$_REQUEST = [];
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$_SERVER['HTTP_HOST'] = 'moon.hive.pizza';
@@ -64,6 +67,10 @@ class ShowCommanderAjaxPageTest extends TestCase
 
 	protected function tearDown(): void
 	{
+		$_GET = [];
+		$_POST = [];
+		$_COOKIE = [];
+		$_REQUEST = [];
 		$this->restoreGameGlobals();
 		$this->restoreDatabaseInstance();
 		parent::tearDown();
@@ -86,8 +93,8 @@ class ShowCommanderAjaxPageTest extends TestCase
 	public function testSelectDirectiveSucceedsWithCsrf(): void
 	{
 		$token = DirectiveService::issueCsrfToken();
-		$_REQUEST['token'] = $token;
-		$_REQUEST['directive_key'] = DirectiveCatalog::INDUSTRIAL;
+		$_POST['token'] = $token;
+		$_POST['directive_key'] = DirectiveCatalog::INDUSTRIAL;
 		$page = $this->page();
 		$page->selectDirective();
 		$this->assertTrue($page->jsonResponse['ok']);
@@ -96,8 +103,8 @@ class ShowCommanderAjaxPageTest extends TestCase
 
 	public function testSelectDirectiveRejectsUnknownKey(): void
 	{
-		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
-		$_REQUEST['directive_key'] = 'nope';
+		$_POST['token'] = DirectiveService::issueCsrfToken();
+		$_POST['directive_key'] = 'nope';
 		$page = $this->page();
 		$page->selectDirective();
 		$this->assertFalse($page->jsonResponse['ok']);
@@ -107,8 +114,8 @@ class ShowCommanderAjaxPageTest extends TestCase
 	public function testSelectDirectiveRejectsReselect(): void
 	{
 		DirectiveService::selectDirective(4, 1, DirectiveCatalog::TRADE, $this->directiveUnlockedUser(), $this->directiveUnlockedPlanet());
-		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
-		$_REQUEST['directive_key'] = DirectiveCatalog::INDUSTRIAL;
+		$_POST['token'] = DirectiveService::issueCsrfToken();
+		$_POST['directive_key'] = DirectiveCatalog::INDUSTRIAL;
 		$page = $this->page();
 		$page->selectDirective();
 		$this->assertFalse($page->jsonResponse['ok']);
@@ -118,8 +125,8 @@ class ShowCommanderAjaxPageTest extends TestCase
 	public function testSelectDirectiveRejectsCrossOrigin(): void
 	{
 		$_SERVER['HTTP_ORIGIN'] = 'https://evil.example';
-		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
-		$_REQUEST['directive_key'] = DirectiveCatalog::INDUSTRIAL;
+		$_POST['token'] = DirectiveService::issueCsrfToken();
+		$_POST['directive_key'] = DirectiveCatalog::INDUSTRIAL;
 		$page = $this->page();
 		$page->selectDirective();
 		$this->assertFalse($page->jsonResponse['ok']);
@@ -132,7 +139,7 @@ class ShowCommanderAjaxPageTest extends TestCase
 		$this->db->userDirectives[0]['completed_at'] = TIMESTAMP;
 		$this->db->planets[9] = ['id' => 9, 'metal' => 100, 'crystal' => 50, 'deuterium' => 25];
 		$GLOBALS['PLANET'] = ['id' => 9, 'metal' => 100, 'crystal' => 50, 'deuterium' => 25];
-		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
+		$_POST['token'] = DirectiveService::issueCsrfToken();
 
 		$page = $this->page();
 		$page->claimReward();
@@ -153,14 +160,14 @@ class ShowCommanderAjaxPageTest extends TestCase
 			'crystal' => 0,
 			'deuterium' => 0,
 		], []);
-		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
-		$_REQUEST['fleet_id'] = 22;
-		$_REQUEST['branch_key'] = 'balanced';
+		$_POST['token'] = DirectiveService::issueCsrfToken();
+		$_POST['fleet_id'] = 22;
+		$_POST['branch_key'] = 'balanced';
 		$page = $this->page();
 		$page->resolveBranch();
 		$this->assertTrue($page->jsonResponse['ok']);
 
-		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
+		$_POST['token'] = DirectiveService::issueCsrfToken();
 		$page = $this->page();
 		$page->resolveBranch();
 		$this->assertFalse($page->jsonResponse['ok']);
@@ -174,9 +181,9 @@ class ShowCommanderAjaxPageTest extends TestCase
 			'crystal' => 0,
 			'deuterium' => 0,
 		], []);
-		$_REQUEST['token'] = DirectiveService::issueCsrfToken();
-		$_REQUEST['fleet_id'] = 23;
-		$_REQUEST['branch_key'] = 'balanced';
+		$_POST['token'] = DirectiveService::issueCsrfToken();
+		$_POST['fleet_id'] = 23;
+		$_POST['branch_key'] = 'balanced';
 		$page = $this->page();
 		$page->resolveBranch();
 		$this->assertFalse($page->jsonResponse['ok']);
