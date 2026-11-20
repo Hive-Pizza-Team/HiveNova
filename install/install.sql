@@ -1027,8 +1027,10 @@ CREATE TABLE `%PREFIX%users` (
   `dm_fleettime` int(11) NOT NULL DEFAULT '0',
   `ref_id` int(11) NOT NULL DEFAULT '0',
   `ref_bonus` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `signup_src` varchar(32) DEFAULT NULL,
   `inactive_mail` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `inactive_hive_memo_onlinetime` int(11) DEFAULT NULL,
+  `last_seen_release` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `authlevel` (`authlevel`),
   KEY `ref_bonus` (`ref_bonus`),
@@ -1087,6 +1089,7 @@ CREATE TABLE `%PREFIX%users_valid` (
  `language` varchar(3) NOT NULL,
  `universe` tinyint(3) unsigned NOT NULL,
  `referralID` int(11) DEFAULT NULL,
+ `signup_src` varchar(32) DEFAULT NULL,
  `externalAuthUID` varchar(128) DEFAULT NULL,
  `externalAuthMethod` varchar(32) DEFAULT NULL,
  PRIMARY KEY (`validationID`,`validationKey`)

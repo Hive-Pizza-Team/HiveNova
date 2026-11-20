@@ -402,7 +402,9 @@ class FakeDatabase implements DatabaseInterface
                 'id' => $this->lastUserInsertId,
                 'username' => $params[':username'] ?? '',
                 'universe' => (int) ($params[':universe'] ?? 1),
-                'lang' => $params[':language'] ?? 'en',
+				'lang' => $params[':language'] ?? 'en',
+                'signup_src' => $params[':signupSrc'] ?? null,
+                'last_seen_release' => $params[':lastSeenRelease'] ?? null,
             ];
 
             return true;
