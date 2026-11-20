@@ -41,7 +41,7 @@
 			<td><a href='#' onclick='return Dialog.info({$elementID});'>{$LNG.tech.$elementID}</a></td>
 			<td>
 				{if $elementID == $energyElementId}
-					{$planetList.energyAvailable|array_sum|number} / {$resourceArray|array_sum|number}
+					<span{if ($planetList.energyAvailable|array_sum) < 0} class="is-energy-deficit"{/if}>{$planetList.energyConsumed|array_sum|number}</span> / {$resourceArray|array_sum|number}
 				{else}
 					{$resourceArray|array_sum|number} <span style="color:lime">{$planetList.resourcePerHour[$elementID]|array_sum|number}/h</span>
 				{/if}
@@ -49,7 +49,7 @@
 			{foreach $resourceArray as $planetID => $resource}
 				<td>
 					{if $elementID == $energyElementId}
-						{$planetList.energyAvailable[$planetID]|number} / {$resource|number}
+						<span{if $planetList.energyAvailable[$planetID] < 0} class="is-energy-deficit"{/if}>{$planetList.energyConsumed[$planetID]|number}</span> / {$resource|number}
 					{else}
 						{$resource|number}{if $planetList.planet_type[$planetID] == 1} <span style="color:lime">{$planetList.resourcePerHour[$elementID][$planetID]|number}/h</span>{/if}
 					{/if}

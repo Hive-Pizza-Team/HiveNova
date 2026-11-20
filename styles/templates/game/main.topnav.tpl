@@ -31,9 +31,9 @@
 			
 			<div class="no-mobile">
 				{if !isset($resourceData.current)}
-					{$resourceData.currentt = $resourceData.max + $resourceData.used}
-					<div class="res_current tooltip" data-tooltip-content="{$resourceData.currentt|number_plain}">
-						<span class="res_current_value{if $resourceData.currentt < 0} is-energy-deficit{/if}">{$resourceData.currentt|number}</span>
+					{* Energy: consumed / produced (EnergyBalanceService); red when available < 0 *}
+					<div class="res_current tooltip" data-tooltip-content="{$resourceData.available|number_plain}">
+						<span class="res_current_value{if $resourceData.inDeficit} is-energy-deficit{/if}">{$resourceData.consumed|number}</span>
 						{if isset($resourceData.max)}&nbsp;/&nbsp;<span class="res_max">{$resourceData.max|number}</span>{/if}
 					</div>
 				{else}
@@ -48,8 +48,7 @@
 			
 			<div class="mobile">
 				{if !isset($resourceData.current)}
-					{$resourceData.currentt = $resourceData.max + $resourceData.used}
-					<span class="res_current{if $resourceData.currentt < 0} is-energy-deficit{/if}" data-tooltip-content="{$resourceData.currentt|number_plain}">{$resourceData.currentt|shortly_number}</span>
+					<span class="res_current{if $resourceData.inDeficit} is-energy-deficit{/if}" data-tooltip-content="{$resourceData.available|number_plain}">{$resourceData.consumed|shortly_number}</span>
 				{elseif !isset($resourceData.max)}
 					<span class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|shortly_number}</span>
 				{else}
