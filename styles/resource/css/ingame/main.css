@@ -2393,6 +2393,59 @@ table.tablesorter thead tr .headerSortDown {
         width: 100% !important;
     }
 
+    /* Keep ship rows within the viewport: name/count + (- input + +10 max)
+       otherwise force ~419px min content and horizontal scroll at 390px.
+       colgroup sizes columns (first body row is colspan, so fixed layout
+       alone cannot infer widths). */
+    .fleet-select-table {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+
+    .fleet-select-table .fleet-select-col-type {
+        width: 22%;
+    }
+
+    .fleet-select-table .fleet-select-col-avail {
+        width: 16%;
+    }
+
+    .fleet-select-table .fleet-select-col-amount {
+        width: 62%;
+    }
+
+    .fleet-select-table th,
+    .fleet-select-table td {
+        box-sizing: border-box;
+        overflow-wrap: break-word;
+    }
+
+    .fleet-select-table tr:nth-child(2) th {
+        font-size: 11px;
+        line-height: 1.25;
+        padding-left: 2px;
+        padding-right: 2px;
+        overflow-wrap: normal;
+    }
+
+    .fleet-ship-stepper {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 3px;
+        max-width: 100%;
+        min-width: 0;
+        vertical-align: middle;
+    }
+
+    .fleet-select-table #fleetContinueRow input[type="submit"] {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
     .fleet-mobile-list {
         display: block;
     }
@@ -2454,20 +2507,29 @@ table.tablesorter thead tr .headerSortDown {
 
     .fleet-ship-stepper .fleet-ship-input {
         width: 2.75rem;
+        min-width: 2.5rem;
+        max-width: 4rem;
         min-height: 36px;
     }
 
-    .fleet-ship-bulk-actions {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
+    /* Flex on the td itself breaks colspan under table-layout:fixed; wrap
+       the buttons with inline-flex sizing instead. */
+    .fleet-select-table td.fleet-ship-bulk-actions {
+        text-align: center;
     }
 
-    .fleet-ship-bulk-actions button.fleet-ship-btn {
-        flex: 1 1 calc(50% - 8px);
-        max-width: calc(50% - 8px);
+    .fleet-ship-bulk-actions {
+        display: table-cell;
+    }
+
+    .fleet-select-table .fleet-ship-bulk-actions button.fleet-ship-btn {
+        display: inline-flex;
+        width: calc(50% - 10px);
+        max-width: calc(50% - 10px);
         min-height: 44px;
-        margin: 0;
+        margin: 0 4px;
+        box-sizing: border-box;
+        vertical-align: middle;
     }
 
     .overview-mobile-shortcuts {
