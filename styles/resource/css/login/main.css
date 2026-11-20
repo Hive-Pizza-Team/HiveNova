@@ -168,6 +168,9 @@ body.light header {
 body.light header nav {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 body.light ul#language {
@@ -218,6 +221,68 @@ body.light #language .flags {
     margin: 0;
     height: 11px;
     width: 16px;
+}
+
+/* Labeled language picker — all widths (PR #669 used mobile-only; we keep it everywhere). */
+.language-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    max-width: 100%;
+    font-size: 13px;
+    color: var(--color-chrome-res-amount, #e8eef5);
+}
+
+.language-compact-label {
+    flex: 0 0 auto;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-chrome-res-label, #8aa4b8);
+}
+
+.language-compact-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 4px;
+    background: rgba(5, 14, 24, 0.85);
+    color: var(--color-text, #f0f0f8);
+    font-size: 14px;
+    font-family: verdana, sans-serif;
+}
+
+body.light .language-compact {
+    padding: 4px 6px;
+    background: rgba(5, 14, 24, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+@media screen and (max-width: 699px) {
+    body.light header {
+        padding: 8px 12px 0;
+    }
+
+    body.light header nav {
+        justify-content: stretch;
+    }
+
+    /* Hide the icon-only flag strip so it no longer owns the top band. */
+    body.light ul#language {
+        display: none;
+    }
+
+    body.light .language-compact {
+        width: 100%;
+    }
 }
 
 ul#language,
