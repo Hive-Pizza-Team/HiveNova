@@ -21,7 +21,7 @@
 {if $lostFilter}<input type="hidden" name="filter" value="lost">{/if}
 <table id="messagestable" class="msg-table">
 	<tr>
-		<th colspan="4">{$LNG.mg_message_title}{if $canFilterLost} — {if $lostFilter}<a href="game.php?page=messages&amp;category={$MessID}">{$LNG.mg_filter_all}</a>{else}<a href="game.php?page=messages&amp;category={$MessID}&amp;filter=lost">{$LNG.mg_filter_lost}</a>{/if}{/if}</th>
+		<th colspan="4">{$LNG.mg_type.{$MessID}}{if $canFilterLost} — {if $lostFilter}<a href="game.php?page=messages&amp;category={$MessID}">{$LNG.mg_filter_all}</a>{else}<a href="game.php?page=messages&amp;category={$MessID}&amp;filter=lost">{$LNG.mg_filter_lost}</a>{/if}{/if}</th>
 	</tr>
 	{if $MessID != 999 && $MessageCount > 0}
 	<tr>
