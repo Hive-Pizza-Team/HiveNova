@@ -12,10 +12,15 @@ const {
 	getVisualSlotSide,
 	reserveOverviewCanvasSlot,
 	resolveFallbackSrc,
+	shouldFallbackAfterBoot,
+	isRgbaSampleLit,
+	countLitRgbaSamples,
+	canvasSamplesLookBlank,
 	FALLBACK,
 	LOADING,
 	READY,
-	VISUAL_SIZE_CAP
+	VISUAL_SIZE_CAP,
+	BOOT_WATCHDOG_MS
 } = require('../../scripts/game/overview-planet-loader-utils.js');
 
 function createClassList() {
@@ -114,11 +119,44 @@ describe('overview-planet-loader fallback helpers', () => {
 		);
 	});
 
-	it('applyLoadingVisual marks boot state without promoting fallback image', () => {
+	it('applyLoadingVisual marks boot state and promotes fallback image for first paint', () => {
 		const { wrap, fallbackImg } = createOverviewDom();
 		applyLoadingVisual(wrap, fallbackImg);
 		assert.equal(wrap.classList.has(LOADING), true);
-		assert.equal(fallbackImg.getAttribute('src'), null);
+		assert.equal(wrap.classList.has(READY), false);
+		assert.equal(wrap.classList.has(FALLBACK), false);
+		assert.equal(
+			fallbackImg.getAttribute('src'),
+			'./styles/theme/hive/planeten/normaltempplanet03_hq.jpg'
+		);
+	});
+
+	it('shouldFallbackAfterBoot is true only when boot reports failure', () => {
+		assert.equal(shouldFallbackAfterBoot(true), false);
+		assert.equal(shouldFallbackAfterBoot(false), true);
+		assert.equal(shouldFallbackAfterBoot(0), true);
+	});
+
+	it('canvasSamplesLookBlank detects empty near-black WebGL readbacks', () => {
+		assert.equal(typeof BOOT_WATCHDOG_MS, 'number');
+		assert.equal(BOOT_WATCHDOG_MS > 0, true);
+		assert.equal(isRgbaSampleLit([5, 5, 5, 255]), false);
+		assert.equal(isRgbaSampleLit([80, 120, 40, 255]), true);
+		assert.equal(countLitRgbaSamples([
+			[0, 0, 0, 0],
+			[4, 6, 8, 255],
+			[2, 2, 2, 255]
+		]), 0);
+		assert.equal(canvasSamplesLookBlank([
+			[0, 0, 0, 0],
+			[5, 6, 7, 255],
+			[1, 1, 1, 255]
+		]), true);
+		assert.equal(canvasSamplesLookBlank([
+			[0, 0, 0, 0],
+			[5, 6, 7, 255],
+			[90, 110, 70, 255]
+		]), false);
 	});
 
 	it('getVisualSlotSide caps width at the visual maximum', () => {
