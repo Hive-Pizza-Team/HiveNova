@@ -220,6 +220,22 @@ body.light #language .flags {
     width: 16px;
 }
 
+/* Mobile: enlarge language-flag hit areas to ~44×44 without stretching the sprite. */
+@media screen and (max-width: 699px) {
+    body.light ul#language {
+        gap: 4px;
+        padding: 6px;
+    }
+
+    body.light #language a {
+        box-sizing: border-box;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
 ul#language,
 #menu {
     margin: 0;
