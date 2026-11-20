@@ -142,6 +142,63 @@ class LoginUniverseDefaults
 	}
 
 	/**
+	 * Keep an active Uni N referral on first paint of the email form.
+	 *
+	 * Password defaults (forEmail) may land on a universe with no entry in
+	 * $referralByUniverse. Seeding referralID from that empty slot zeroes a
+	 * Uni 1 ?ref= / referralID on load (#459). Prefer an open non-seasonal
+	 * universe that still carries an active referral, using the same
+	 * Universe-1-first order as forEmail.
+	 *
+	 * @param array<int|string, array{id?: int|string, status?: string}> $referralByUniverse
+	 */
+	public static function preferReferralUniverse(
+		int $emailDefault,
+		array $referralByUniverse,
+		bool $forRegistration = false
+	): int {
+		if (self::hasActiveReferral($referralByUniverse, $emailDefault)) {
+			return $emailDefault;
+		}
+
+		foreach (self::emailCandidateOrder() as $uniId) {
+			if (!self::hasActiveReferral($referralByUniverse, $uniId)) {
+				continue;
+			}
+			$config = Config::get($uniId);
+			if ((int) $config->game_disable === 0) {
+				continue;
+			}
+			if ($forRegistration && (int) $config->reg_closed === 1) {
+				continue;
+			}
+			if (self::isSeasonal($config)) {
+				continue;
+			}
+
+			return (int) $uniId;
+		}
+
+		return $emailDefault;
+	}
+
+	/**
+	 * @param array<int|string, array{id?: int|string, status?: string}> $referralByUniverse
+	 */
+	private static function hasActiveReferral(array $referralByUniverse, int $uniId): bool
+	{
+		$entry = $referralByUniverse[$uniId] ?? $referralByUniverse[(string) $uniId] ?? null;
+		if (!is_array($entry)) {
+			return false;
+		}
+		if ((string) ($entry['status'] ?? '') === 'inactive') {
+			return false;
+		}
+
+		return (int) ($entry['id'] ?? 0) > 0;
+	}
+
+	/**
 	 * Whether $universeId may be used for registration lookups/sign-up.
 	 *
 	 * Same gate as ShowRegisterPage::send(): universe must exist, the game
