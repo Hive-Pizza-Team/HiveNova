@@ -90,6 +90,7 @@ class AssetRevisionTest extends TestCase
 		$this->assertContains('scripts/game/search.js', $paths);
 		$this->assertContains('scripts/game/flotten.js', $paths);
 		$this->assertContains('scripts/game/galaxy.js', $paths);
+		$this->assertContains('scripts/game/top-nav.js', $paths);
 		$this->assertContains('scripts/game/overview.js', $paths);
 		$this->assertContains('scripts/game/overview-planet-loader-utils.js', $paths);
 		$this->assertContains('scripts/game/overview-planet-loader.js', $paths);
