@@ -4,6 +4,7 @@ namespace HiveNova\Page\Game;
 
 use HiveNova\Core\Database;
 use HiveNova\Core\Config;
+use HiveNova\Core\GameElementImage;
 use HiveNova\Core\HTTP;
 
 /**
@@ -72,7 +73,7 @@ class ShowFleetDealerPage extends AbstractGamePage
 	
 	function show()
 	{
-		global $PLANET, $LNG, $pricelist, $resource, $reslist;
+		global $PLANET, $LNG, $pricelist, $resource, $reslist, $THEME;
 		
 		$Cost		= array();
 		
@@ -93,10 +94,12 @@ class ShowFleetDealerPage extends AbstractGamePage
 			)));
 		}
 
+		$dpath = (isset($THEME) && is_object($THEME)) ? $THEME->getTheme() : '';
 		$this->assign(array(
 			'shipIDs'	=> $allowedShipIDs,
 			'CostInfos'	=> $Cost,
 			'Charge'	=> Config::get()->trade_charge,
+			'hdExtensions' => (new GameElementImage())->hdExtensions($dpath),
 		));
 		
 		$this->display('page.fleetDealer.default.tpl');

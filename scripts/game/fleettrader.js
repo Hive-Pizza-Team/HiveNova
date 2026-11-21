@@ -1,7 +1,12 @@
 function updateVars()
 {	
 	var shipID 	= $('#shipID').val();
-	$('#img').attr('src', $('#img').data('src')+shipID+'.gif');
+	var dpath = $('#img').data('dpath') || '';
+	var hd = (typeof FleetDealerHd !== 'undefined' && FleetDealerHd) ? FleetDealerHd : {};
+	var ext = hd[shipID] || hd[String(shipID)];
+	$('#img').attr('src', ext
+		? (dpath + 'gebaeude-hd/' + shipID + '.' + ext)
+		: (dpath + 'gebaeude/' + shipID + '.gif'));
 	$('#metal').text(NumberGetHumanReadable(CostInfo[shipID][2][901] * (1 - Charge / 100)));
 	$('#crystal').text(NumberGetHumanReadable(CostInfo[shipID][2][902] * (1 - Charge / 100)));
 	$('#deuterium').text(NumberGetHumanReadable(CostInfo[shipID][2][903] * (1 - Charge / 100)));

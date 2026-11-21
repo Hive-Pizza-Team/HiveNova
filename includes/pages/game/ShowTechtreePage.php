@@ -3,6 +3,7 @@
 namespace HiveNova\Page\Game;
 
 use HiveNova\Core\ElementRequirementService;
+use HiveNova\Core\GameElementImage;
 use HiveNova\Core\TechTreeGuideService;
 use HiveNova\Core\TechTreeNudgeService;
 use HiveNova\Core\TechTreeOrderService;
@@ -112,6 +113,7 @@ class ShowTechtreePage extends AbstractGamePage
             'ttLvl' => $LNG['tt_lvl'],
             'names' => $names,
             'ext' => $ext,
+            'hd' => (new GameElementImage())->hdExtensions($dpath),
             'items' => $items,
             'order' => $order,
             'starterIds' => $guide->startHereIds(),

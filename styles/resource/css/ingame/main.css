@@ -725,6 +725,22 @@ div#disclamer a {
     height: 84px;
 }
 
+/* HD stills in gebaeude-hd/ are transparent cutouts. Give them a plate so
+   they read clearly in the existing 120px (desktop) / 48–89px slots. */
+img[src*="gebaeude-hd"]:not(.element-art--plate),
+img[data-src*="gebaeude-hd"]:not(.element-art--plate) {
+    background-color: #1a1f2e;
+    background-image: radial-gradient(ellipse at 50% 70%, #2c3548 0%, #1a1f2e 62%, #12151f 100%);
+    object-fit: contain;
+    object-position: center;
+}
+
+/* Officer portraits and resource-type plates are full-bleed, not cutouts. */
+img.element-art--plate {
+    object-fit: cover;
+    object-position: center;
+}
+
 .trader_col {
     margin: 0 5px;
     float: left;
