@@ -57,6 +57,14 @@
     color: #8aa8be;
 }
 
+/* Beat .rowForm { display: block } so [hidden] actually hides these notices/rows.
+   Same-specificity [hidden] { display: none } loses to .rowForm and the referral
+   warning (also a .rowForm) stayed visible even when PHP/JS set hidden. */
+.rowForm[hidden],
+.reg-season-hive-notice[hidden] {
+    display: none;
+}
+
 .reg-season-hive-notice p {
     margin: 0 0 10px;
     color: #e8b0ba;

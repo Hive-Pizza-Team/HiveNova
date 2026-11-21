@@ -1027,6 +1027,7 @@ CREATE TABLE `%PREFIX%users` (
   `dm_fleettime` int(11) NOT NULL DEFAULT '0',
   `ref_id` int(11) NOT NULL DEFAULT '0',
   `ref_bonus` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `signup_src` varchar(32) DEFAULT NULL,
   `inactive_mail` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `inactive_hive_memo_onlinetime` int(11) DEFAULT NULL,
   `last_seen_release` varchar(16) DEFAULT NULL,
@@ -1088,6 +1089,7 @@ CREATE TABLE `%PREFIX%users_valid` (
  `language` varchar(3) NOT NULL,
  `universe` tinyint(3) unsigned NOT NULL,
  `referralID` int(11) DEFAULT NULL,
+ `signup_src` varchar(32) DEFAULT NULL,
  `externalAuthUID` varchar(128) DEFAULT NULL,
  `externalAuthMethod` varchar(32) DEFAULT NULL,
  PRIMARY KEY (`validationID`,`validationKey`)
@@ -1659,6 +1661,19 @@ CREATE TABLE `%PREFIX%bot_detection_state` (
   `last_digest_hash` char(64) NOT NULL DEFAULT '',
   `updated_at` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`universe`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%push_subscriptions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `endpoint` varchar(2048) NOT NULL,
+  `p256dh` varchar(255) NOT NULL,
+  `auth` varchar(255) NOT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `created_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `endpoint` (`endpoint`(768)),
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%push_building_notified` (

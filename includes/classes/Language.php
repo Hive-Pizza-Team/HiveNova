@@ -48,40 +48,45 @@ class Language implements ArrayAccess {
 	}
 
 	/**
-	 * Resolve login/install UI language.
+	 * Resolve login/install UI language via LoginLanguageResolver.
 	 *
-	 * Priority: explicit ?lang= (override) → lang cookie (prior override) →
-	 * Accept-Language → leave existing/default language (no sticky cookie).
+	 * Explicit ?lang= persists lang_choice; Accept-Language never writes a cookie.
+	 * Legacy auto-set `lang` cookies are ignored (and cleared on explicit choice).
+	 *
+	 * @return string Resolved language code
 	 */
 	public function getUserAgentLanguage()
 	{
-   		if (isset($_REQUEST['lang']) && in_array($_REQUEST['lang'], self::getAllowedLangs()))
-		{
-			HTTP::sendCookie('lang', $_REQUEST['lang'], 2147483647);
-			$this->setLanguage($_REQUEST['lang']);
-			return true;
-		}
+		$allowed = self::getAllowedLangs();
+		$fallback = MODE !== 'INSTALL' ? (string) Config::get()->lang : DEFAULT_LANG;
+		$honorCookie = (MODE === 'LOGIN' || MODE === 'INSTALL');
 
-   		if ((MODE === 'LOGIN' || MODE === 'INSTALL') && isset($_COOKIE['lang']) && in_array($_COOKIE['lang'], self::getAllowedLangs()))
-		{
-			$this->setLanguage($_COOKIE['lang']);
-			return true;
-		}
-
-		$detected = self::preferredFromAcceptLanguage(
+		// Use $_GET only — $_REQUEST includes cookies, so a legacy `lang`
+		// cookie must not be treated as an explicit ?lang= choice.
+		$decision = LoginLanguageResolver::resolve(
+			isset($_GET['lang']) ? (string) $_GET['lang'] : null,
+			$_COOKIE,
 			(string) ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? ''),
-			self::getAllowedLangs()
+			$allowed,
+			$fallback,
+			$honorCookie
 		);
 
-		if ($detected === null)
-		{
-			return false;
+		if ($decision['persistExplicit'] !== null) {
+			HTTP::sendCookie(
+				LoginLanguageResolver::EXPLICIT_COOKIE,
+				$decision['persistExplicit'],
+				LoginLanguageResolver::COOKIE_EXPIRES
+			);
 		}
 
-		HTTP::sendCookie('lang', $detected, 2147483647);
-		$this->setLanguage($detected);
+		if ($decision['clearLegacy']) {
+			HTTP::sendCookie(LoginLanguageResolver::LEGACY_COOKIE, '', time() - 3600);
+		}
 
-		return $detected;
+		$this->setLanguage($decision['language']);
+
+		return $decision['language'];
 	}
 
 	/**

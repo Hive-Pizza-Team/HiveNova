@@ -52,6 +52,23 @@ body {
     line-height: 14px;
 }
 
+/*
+ * Login/lobby (body.light): height:100% on body lets the short body box scroll
+ * away and reveals the theme's html background (bands/seams on tall pages and
+ * full-page captures). Grow with content and keep html on the page fallback.
+ */
+body.light {
+    height: auto;
+    min-height: 100%;
+}
+
+html:has(body.light) {
+    background-image: none;
+    background-color: var(--color-bg-page, #0d0d0d);
+    background-size: auto;
+    background-attachment: scroll;
+}
+
 input,
 textarea,
 select,
@@ -103,6 +120,11 @@ img {
 
 h1 {
     color: #E31337;
+}
+
+/* Register (and other light-layout page titles): brand red fails WCAG AA on dark bg. */
+body.light #page > h1 {
+    color: var(--color-text-bright, #FFF);
 }
 
 footer,
@@ -168,6 +190,9 @@ body.light header {
 body.light header nav {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 body.light ul#language {
@@ -218,6 +243,83 @@ body.light #language .flags {
     margin: 0;
     height: 11px;
     width: 16px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 11px;
+}
+
+/* Unselected flags at 0.55 opacity read as blank on small/mobile captures. */
+@media screen and (max-width: 699px) {
+    body.light #language a {
+        opacity: 0.85;
+    }
+
+    body.light #language a[aria-current="true"] {
+        opacity: 1;
+    }
+}
+
+/* Labeled language picker — all widths (PR #669 used mobile-only; we keep it everywhere). */
+.language-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    max-width: 100%;
+    font-size: 13px;
+    color: var(--color-chrome-res-amount, #e8eef5);
+}
+
+.language-compact-label {
+    flex: 0 0 auto;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-chrome-res-label, #8aa4b8);
+}
+
+.language-compact-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 4px;
+    background: rgba(5, 14, 24, 0.85);
+    color: var(--color-text, #f0f0f8);
+    font-size: 14px;
+    font-family: verdana, sans-serif;
+}
+
+body.light .language-compact {
+    padding: 4px 6px;
+    background: rgba(5, 14, 24, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+@media screen and (max-width: 699px) {
+    body.light header {
+        padding: 8px 12px 0;
+    }
+
+    body.light header nav {
+        justify-content: stretch;
+    }
+
+    /* Hide the icon-only flag strip so it no longer owns the top band. */
+    body.light ul#language {
+        display: none;
+    }
+
+    body.light .language-compact {
+        width: 100%;
+    }
 }
 
 ul#language,
@@ -656,47 +758,52 @@ ul#rules {
     display: block;
     float: right;
     margin-right: 4px;
-    text-indent: -9999em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-indent: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 11px;
 }
 
 .de {
-    background: url(../../images/login/flags/de.png);
+    background-image: url(../../images/login/flags/de.png);
 }
 
 .en {
-    background: url(../../images/login/flags/us.png);
+    background-image: url(../../images/login/flags/us.png);
 }
 
 .es {
-    background: url(../../images/login/flags/es.png);
+    background-image: url(../../images/login/flags/es.png);
 }
 
 .fr {
-    background: url(../../images/login/flags/fr.png);
+    background-image: url(../../images/login/flags/fr.png);
 }
 
 .it {
-    background: url(../../images/login/flags/it.png);
+    background-image: url(../../images/login/flags/it.png);
 }
 
 .pt {
-    background: url(../../images/login/flags/pt.png);
+    background-image: url(../../images/login/flags/pt.png);
 }
 
 .ru {
-    background: url(../../images/login/flags/ru.png);
+    background-image: url(../../images/login/flags/ru.png);
 }
 
 .si {
-    background: url(../../images/login/flags/si.png);
+    background-image: url(../../images/login/flags/si.png);
 }
 
 .pl {
-    background: url(../../images/login/flags/pl.png);
+    background-image: url(../../images/login/flags/pl.png);
 }
 
 .tr {
-    background: url(../../images/login/flags/tr.png);
+    background-image: url(../../images/login/flags/tr.png);
 }
 
 /** FOOTER **/

@@ -1376,10 +1376,12 @@ table.tablesorter thead tr .headerSortDown {
     z-index: 1;
 }
 
+/* Keep the static JPG visible while WebGL boots so a failed/slow canvas
+   never leaves an empty black square in the planet slot. */
 .overview-planet-visual--loading .overview-planet-fallback {
-    opacity: 0;
-    visibility: hidden;
-    z-index: 0;
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
     pointer-events: none;
 }
 
@@ -1581,6 +1583,16 @@ table.tablesorter thead tr .headerSortDown {
     flex-direction: column;
 }
 
+/* Opaque plate so planet art cannot wash out rows/footer (border-spacing gaps
+   otherwise show the page background through translucent --color-bg-surface). */
+.galaxy-system-table {
+    background: var(--color-bg-surface-dark);
+}
+
+.galaxy-system-table > tbody > tr > td {
+    background: var(--color-bg-surface-dark);
+}
+
 .galaxy-coords-picker {
     width: 324px;
     min-width: 324px;
@@ -1780,7 +1792,7 @@ table.tablesorter thead tr .headerSortDown {
         align-self: start;
         justify-content: flex-start;
         gap: 0;
-        padding: 0 12px 0 0;
+        padding: 0 8px 0 4px;
         overflow-x: auto;
         scroll-padding-inline: 8px;
         overflow-y: hidden;
@@ -1791,18 +1803,29 @@ table.tablesorter thead tr .headerSortDown {
 
     #resource_mobile,
     .resource-cell {
-        flex: 1 1 0;
+        /* Content-sized cells: long amounts stay fully readable; strip scrolls. */
+        flex: 0 0 auto;
+        width: max-content;
         min-width: 56px;
         min-height: 44px;
-        padding: 4px 8px;
-        font-size: 12px;
+        padding: 4px 6px;
+        font-size: 11px;
         line-height: 1.2;
         scroll-snap-align: start;
+        box-sizing: border-box;
     }
 
     .resource-cell a {
         min-height: 44px;
         justify-content: center;
+    }
+
+    #resources_mobile .mobile .res_current {
+        /* Global .res_current min-width:90px is for desktop columns; drop it here. */
+        display: inline-block;
+        min-width: 0;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
     }
 
     #resource_mobile img,
@@ -1848,9 +1871,11 @@ table.tablesorter thead tr .headerSortDown {
         top: 0;
         left: 0;
         right: 0;
+        width: 100%;
         bottom: calc(56px + env(safe-area-inset-bottom, 0px));
         z-index: 200;
         overflow-y: auto;
+        overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         background: var(--color-bg-surface);
         border-top: none;
@@ -1866,8 +1891,8 @@ table.tablesorter thead tr .headerSortDown {
         top: auto;
         bottom: auto;
         width: 100%;
-        max-width: 480px;
-        margin: 0 auto;
+        max-width: none;
+        margin: 0;
         overflow: visible;
         max-height: none;
         padding-bottom: 0;
@@ -1901,6 +1926,11 @@ table.tablesorter thead tr .headerSortDown {
         border-left: 3px solid transparent;
     }
 
+    /* Flex blockifies #newmes; preserve the leading space before "(N)". */
+    #menu a #newmes {
+        white-space: pre;
+    }
+
     #menu a:hover,
     #menu a.active {
         background: var(--color-chrome-menu-active-bg);
@@ -1924,6 +1954,12 @@ table.tablesorter thead tr .headerSortDown {
 
     #toggle-menu:checked ~ menu {
         display: block !important;
+    }
+
+    /* Lock page scroll while the drawer is open (avoids double scrollbars). */
+    html:has(#toggle-menu:checked),
+    body:has(#toggle-menu:checked) {
+        overflow: hidden;
     }
 
     .buildl img {
@@ -2132,7 +2168,7 @@ table.tablesorter thead tr .headerSortDown {
         border: 1px solid var(--color-border);
         border-radius: 4px;
         padding: 3px 5px;
-        background: var(--color-bg-surface);
+        background: var(--color-bg-surface-dark);
     }
 
     .galaxy-system-table tr:not(.galaxy-planet-row) {
@@ -2188,7 +2224,8 @@ table.tablesorter thead tr .headerSortDown {
 
     .galaxy-planet-row td:nth-child(2) {
         order: 1;
-        flex: 0 0 22px;
+        /* Match the 32px planet-icon hit area so the thumb does not cover the name. */
+        flex: 0 0 32px;
         align-self: center;
         padding-top: 0;
     }
@@ -2229,12 +2266,13 @@ table.tablesorter thead tr .headerSortDown {
         min-width: 0;
         max-width: 38%;
         padding-left: 0;
-        font-size: 10px;
+        /* Match other mobile galaxy body text (was 10px / faded). */
+        font-size: 12px;
         line-height: 1.1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        opacity: 0.85;
+        opacity: 1;
     }
 
     .galaxy-planet-row td:nth-child(4),
@@ -2393,6 +2431,59 @@ table.tablesorter thead tr .headerSortDown {
         width: 100% !important;
     }
 
+    /* Keep ship rows within the viewport: name/count + (- input + +10 max)
+       otherwise force ~419px min content and horizontal scroll at 390px.
+       colgroup sizes columns (first body row is colspan, so fixed layout
+       alone cannot infer widths). */
+    .fleet-select-table {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+
+    .fleet-select-table .fleet-select-col-type {
+        width: 22%;
+    }
+
+    .fleet-select-table .fleet-select-col-avail {
+        width: 16%;
+    }
+
+    .fleet-select-table .fleet-select-col-amount {
+        width: 62%;
+    }
+
+    .fleet-select-table th,
+    .fleet-select-table td {
+        box-sizing: border-box;
+        overflow-wrap: break-word;
+    }
+
+    .fleet-select-table tr:nth-child(2) th {
+        font-size: 11px;
+        line-height: 1.25;
+        padding-left: 2px;
+        padding-right: 2px;
+        overflow-wrap: normal;
+    }
+
+    .fleet-ship-stepper {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 3px;
+        max-width: 100%;
+        min-width: 0;
+        vertical-align: middle;
+    }
+
+    .fleet-select-table #fleetContinueRow input[type="submit"] {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
     .fleet-mobile-list {
         display: block;
     }
@@ -2454,20 +2545,29 @@ table.tablesorter thead tr .headerSortDown {
 
     .fleet-ship-stepper .fleet-ship-input {
         width: 2.75rem;
+        min-width: 2.5rem;
+        max-width: 4rem;
         min-height: 36px;
     }
 
-    .fleet-ship-bulk-actions {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
+    /* Flex on the td itself breaks colspan under table-layout:fixed; wrap
+       the buttons with inline-flex sizing instead. */
+    .fleet-select-table td.fleet-ship-bulk-actions {
+        text-align: center;
     }
 
-    .fleet-ship-bulk-actions button.fleet-ship-btn {
-        flex: 1 1 calc(50% - 8px);
-        max-width: calc(50% - 8px);
+    .fleet-ship-bulk-actions {
+        display: table-cell;
+    }
+
+    .fleet-select-table .fleet-ship-bulk-actions button.fleet-ship-btn {
+        display: inline-flex;
+        width: calc(50% - 10px);
+        max-width: calc(50% - 10px);
         min-height: 44px;
-        margin: 0;
+        margin: 0 4px;
+        box-sizing: border-box;
+        vertical-align: middle;
     }
 
     .overview-mobile-shortcuts {
@@ -3338,6 +3438,11 @@ table.tablesorter thead tr .headerSortDown {
 	padding: 1rem;
 	box-sizing: border-box;
 	pointer-events: none;
+}
+
+/* Author display:flex would otherwise override the hidden attribute. */
+.achievement-celebration[hidden] {
+	display: none !important;
 }
 
 .achievement-celebration.is-active {

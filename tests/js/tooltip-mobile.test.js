@@ -40,6 +40,75 @@ describe('mobile tooltip helpers', () => {
 		assert.equal(tooltip.isStationaryTooltipTouch(start, { x: 40, y: 80 }), false);
 		assert.equal(tooltip.isStationaryTooltipTouch(null, { x: 0, y: 0 }), true);
 	});
+
+	it('reads tooltip HTML from the data attribute and skips empty tips', () => {
+		const el = {
+			getAttribute(name) {
+				return name === 'data-tooltip-content' ? '<table><tr><td>ok</td></tr></table>' : null;
+			}
+		};
+		assert.equal(
+			tooltip.tooltipContentFromTrigger(el),
+			'<table><tr><td>ok</td></tr></table>'
+		);
+		assert.equal(tooltip.tooltipContentFromTrigger({ getAttribute() { return null; } }), '');
+		assert.equal(tooltip.tooltipContentFromTrigger(null), '');
+	});
+
+	it('resets toast chrome before filling a hover tip and rejects blank content', () => {
+		const calls = [];
+		const tip = {
+			length: 1,
+			html(value) {
+				calls.push(['html', value]);
+				return tip;
+			},
+			hide() {
+				calls.push(['hide']);
+				return tip;
+			},
+			removeData() {
+				calls.push(['removeData']);
+				return tip;
+			},
+			stop() {
+				calls.push(['stop']);
+				return tip;
+			},
+			removeClass() {
+				calls.push(['removeClass']);
+				return tip;
+			},
+			css() {
+				calls.push(['css']);
+				return tip;
+			}
+		};
+
+		assert.equal(tooltip.prepareHoverTooltip(tip, ''), false);
+		assert.ok(calls.some((c) => c[0] === 'hide'));
+
+		calls.length = 0;
+		assert.equal(tooltip.prepareHoverTooltip(tip, '<b>hi</b>'), true);
+		assert.deepEqual(
+			calls.filter((c) => c[0] === 'html'),
+			[['html', '<b>hi</b>']]
+		);
+		assert.ok(calls.some((c) => c[0] === 'removeClass'));
+		assert.ok(calls.some((c) => c[0] === 'css'));
+	});
+});
+
+describe('tooltip.js hover cleanup bindings', () => {
+	const src = fs.readFileSync(
+		path.join(__dirname, '../../scripts/base/tooltip.js'),
+		'utf8'
+	);
+
+	it('resets overlay chrome before desktop hover/sticky tips', () => {
+		assert.match(src, /prepareHoverTooltip\(tip, tooltipContentFromTrigger\(this\)\)/);
+		assert.match(src, /clearFancyboxChrome/);
+	});
 });
 
 describe('tooltip.js mobile bindings', () => {

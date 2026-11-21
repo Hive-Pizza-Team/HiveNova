@@ -178,7 +178,7 @@ $LNG['ov_reflink']							= 'Recruits';
 $LNG['ov_noreflink']						= 'You have not recruited any players yet';
 $LNG['ov_chat_online']						= 'Players in chat:';
 $LNG['ov_players']							= 'Players';
-$LNG['ov_moving_fleets']					= 'Moving fleets';
+$LNG['ov_moving_fleets']					= 'Fleets in flight (universe)';
 
 //----------------------------------------------------------------------------//
 // Galaxy
@@ -1533,6 +1533,7 @@ $LNG['ref_stats_recruits'] = 'Recruits';
 $LNG['ref_stats_qualified'] = 'Qualified';
 $LNG['ref_stats_link'] = 'Referral link';
 $LNG['ref_stats_registered'] = 'Registered';
+$LNG['ref_stats_source'] = 'Source';
 $LNG['ref_stats_points'] = 'Points';
 $LNG['ref_stats_bonus_status'] = 'Bonus status';
 $LNG['ref_stats_status_pending'] = 'Pending (below threshold)';

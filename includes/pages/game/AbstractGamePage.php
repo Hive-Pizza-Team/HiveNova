@@ -7,6 +7,7 @@ use HiveNova\Core\AssetRevision;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
+use HiveNova\Core\EnergyBalanceService;
 use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
@@ -53,6 +54,8 @@ abstract class AbstractGamePage
 	protected $ecoObj;
 	protected $window;
 	protected $disableEcoSystem = false;
+	/** When true, menu/bottom-nav skip active highlight (error/info pages). */
+	protected $clearNavHighlight = false;
 	/** @var array<string, mixed>|null */
 	protected $user = null;
 	/** @var array<string, mixed>|null */
@@ -181,9 +184,11 @@ abstract class AbstractGamePage
 
 		foreach($reslist['resstype'][2] as $resourceID)
 		{
-			$resourceTable[$resourceID]['name']			= $resource[$resourceID];
-			$resourceTable[$resourceID]['used']			= $PLANET[$resource[$resourceID].'_used'];
-			$resourceTable[$resourceID]['max']			= $PLANET[$resource[$resourceID]];
+			$resourceTable[$resourceID] = EnergyBalanceService::headerResourceFields(
+				$PLANET[$resource[$resourceID]] ?? 0,
+				$PLANET[$resource[$resourceID].'_used'] ?? 0,
+				$resource[$resourceID]
+			);
 		}
 
 		foreach($reslist['resstype'][3] as $resourceID)
@@ -350,10 +355,16 @@ abstract class AbstractGamePage
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'queryString'		=> $this->getQueryString(),
 			'themeSettings'		=> $THEME->getStyleSettings(),
+			// Resolved slug (aliases applied). Nocache assign so Smarty page
+			// caches cannot freeze an unrelated menu highlight on error.default.
+			'navPage'			=> $this->clearNavHighlight
+				? ''
+				: \HiveNova\Core\GamePageRouter::resolve(HTTP::_GP('page', 'overview')),
 		));
 	}
 	protected function printMessage($message, $redirectButtons = NULL, $redirect = NULL, $fullSide = true)
 	{
+		$this->clearNavHighlight = true;
 		$this->assign(array(
 			'message'			=> $message,
 			'redirectButtons'	=> $redirectButtons,
