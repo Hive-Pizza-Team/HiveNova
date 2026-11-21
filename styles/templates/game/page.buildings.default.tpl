@@ -66,7 +66,7 @@
 	</div>
 		<div class="buildl">
 			<a href="#" onclick="return Dialog.info({$ID})">
-				<img style="float: left;" src="{$dpath}gebaeude/{$ID}.gif" alt="{$LNG.tech.{$ID}}" width="120" height="120" loading="lazy" loading="lazy">
+				<img style="float: left;" src="{$dpath}gebaeude/{$ID}.gif" alt="{$LNG.tech.{$ID}}" width="120" height="120" loading="lazy" decoding="async">
 			</a>
 		{$LNG.bd_remaining}
 						{foreach $Element.costOverflow as $ResType => $ResCount}
@@ -157,7 +157,7 @@
 	</div>
 		<div class="buildl">
 			<a href="#" onclick="return Dialog.info({$ID})">
-				<img style="float: left;" src="{$dpath}gebaeude/{$ID}.gif" alt="{$LNG.tech.{$ID}}" width="120" height="120" loading="lazy" loading="lazy">
+				<img style="float: left;" src="{$dpath}gebaeude/{$ID}.gif" alt="{$LNG.tech.{$ID}}" width="120" height="120" loading="lazy" decoding="async">
 			</a>
 		{$LNG.bd_remaining}
 						{foreach $Element.costOverflow as $ResType => $ResCount}
