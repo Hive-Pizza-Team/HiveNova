@@ -202,8 +202,9 @@ abstract class AbstractLoginPage
 		$languages		= Language::getAllowedLangs(false);
 		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
 		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
-		$hreflangUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
+		$seoBasePath		= PublicSeo::seoBasePath();
+		$canonicalUrl		= PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang);
+		$hreflangUrls		= PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages);
 		$languageSwitchUrls	= LoginLanguageResolver::switchUrls($languages, $_GET);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
