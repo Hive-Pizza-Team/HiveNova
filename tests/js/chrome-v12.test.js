@@ -75,7 +75,12 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?overflow-y:\s*auto/);
 		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?overscroll-behavior:\s*contain/);
 		assert.match(mobileCss, /menu \{[\s\S]*?overflow-y:\s*auto/);
+		assert.match(mobileCss, /menu \{[\s\S]*?overscroll-behavior:\s*contain/);
+		assert.match(mobileCss, /menu \{[\s\S]*?width:\s*100%/);
 		assert.match(mobileCss, /menu \.fixed \{[\s\S]*?overflow:\s*visible/);
+		assert.match(mobileCss, /menu \.fixed \{[\s\S]*?max-width:\s*none/);
+		assert.match(mobileCss, /#menu a #newmes \{[\s\S]*?white-space:\s*pre/);
+		assert.match(mobileCss, /html:has\(#toggle-menu:checked\),\s*body:has\(#toggle-menu:checked\) \{[\s\S]*?overflow:\s*hidden/);
 	});
 
 	it('left-aligns items with 8–10px pad, section headers, and active bar', () => {
