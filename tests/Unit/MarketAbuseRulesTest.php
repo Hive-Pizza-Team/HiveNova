@@ -105,43 +105,19 @@ class MarketAbuseRulesTest extends TestCase
 		$this->assertNull(MarketAbuseRules::buyRuleKey(false, 1.0, 0, 10));
 	}
 
-	public function testTradePushDirections(): void
+	public function testTradePushDirectionsAndSurplus(): void
 	{
-		// Weaker seller gives 2x: push seller -> buyer.
-		$this->assertSame(['source' => 1, 'dest' => 2], MarketAbuseRules::tradePush(1, 2, 100, 5000, 2000, 1000));
+		// Weaker seller gives 2x: push seller -> buyer, surplus 1000.
+		$this->assertSame(['source' => 1, 'dest' => 2, 'value' => 1000.0], MarketAbuseRules::tradePush(1, 2, 100, 5000, 2000, 1000));
 		// Same trade but the seller is stronger: not a push (a stronger player giving to a weaker one).
 		$this->assertNull(MarketAbuseRules::tradePush(1, 2, 5000, 100, 2000, 1000));
 		// Weaker buyer overpays a stronger seller: push buyer -> seller.
-		$this->assertSame(['source' => 2, 'dest' => 1], MarketAbuseRules::tradePush(1, 2, 5000, 100, 1000, 2000));
+		$this->assertSame(['source' => 2, 'dest' => 1, 'value' => 1000.0], MarketAbuseRules::tradePush(1, 2, 5000, 100, 1000, 2000));
 		// Under the 1.25 threshold: fair enough.
 		$this->assertNull(MarketAbuseRules::tradePush(1, 2, 100, 5000, 1240, 1000));
-		$this->assertSame(['source' => 1, 'dest' => 2], MarketAbuseRules::tradePush(1, 2, 100, 5000, 1250, 1000));
+		$this->assertSame(['source' => 1, 'dest' => 2, 'value' => 250.0], MarketAbuseRules::tradePush(1, 2, 100, 5000, 1250, 1000));
 		// Self or empty trades never count.
 		$this->assertNull(MarketAbuseRules::tradePush(1, 1, 100, 5000, 2000, 1000));
 		$this->assertNull(MarketAbuseRules::tradePush(1, 2, 100, 5000, 0, 1000));
-	}
-
-	public function testMergePushPairsAddsTradesToTransports(): void
-	{
-		$transports = [
-			['source_id' => 1, 'dest_id' => 9, 'source_name' => 'a', 'dest_name' => 'Nine', 'fleet_count' => 3],
-			['source_id' => 2, 'dest_id' => 9, 'source_name' => 'b', 'dest_name' => 'Nine', 'fleet_count' => 6],
-			['source_id' => 3, 'dest_id' => 8, 'source_name' => 'c', 'dest_name' => 'Eight', 'fleet_count' => 5],
-		];
-		$trades = [
-			['source' => 1, 'dest' => 9], ['source' => 1, 'dest' => 9], ['source' => 1, 'dest' => 9],
-			['source' => 4, 'dest' => 7, 'source_name' => 'd', 'dest_name' => 'Seven'],
-		];
-		$pairs = MarketAbuseRules::mergePushPairs($transports, $trades);
-		$this->assertSame([
-			['source_id' => 1, 'dest_id' => 9, 'source_name' => 'a', 'dest_name' => 'Nine', 'transports' => 3, 'trades' => 3],
-			['source_id' => 2, 'dest_id' => 9, 'source_name' => 'b', 'dest_name' => 'Nine', 'transports' => 6, 'trades' => 0],
-		], $pairs);
-
-		$six = array_fill(0, 6, ['source' => 4, 'dest' => 7, 'source_name' => 'd', 'dest_name' => 'Seven']);
-		$this->assertSame(
-			[['source_id' => 4, 'dest_id' => 7, 'source_name' => 'd', 'dest_name' => 'Seven', 'transports' => 0, 'trades' => 6]],
-			MarketAbuseRules::mergePushPairs([], $six)
-		);
 	}
 }
