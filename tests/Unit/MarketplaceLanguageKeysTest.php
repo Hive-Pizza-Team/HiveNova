@@ -95,6 +95,17 @@ class MarketplaceLanguageKeysTest extends TestCase
 			'market_p_msg_bought',
 			'market_p_msg_paid_with',
 			'market_fuel_cargo_hint',
+			'market_band_error',
+			'market_fee_not_enough',
+			'market_listing_fee',
+			'market_band_hint',
+			'market_band_hint_empty',
+			'market_fee_hint',
+			'market_hold_hint',
+			'market_reason_flagged',
+			'market_reason_band',
+			'market_reason_daily_cap',
+			'market_how_rules',
 		];
 	}
 
@@ -125,6 +136,42 @@ class MarketplaceLanguageKeysTest extends TestCase
 			$value = $lng[$key];
 			$this->assertNotSame($key, $value, "Missing or unresolved language key: {$key} ({$lang})");
 			$this->assertNotSame('', trim((string) $value), "Empty language string for key: {$key} ({$lang})");
+		}
+	}
+
+	/**
+	 * Anti-abuse strings are filled with sprintf (PHP) or fillTemplate (JS): every
+	 * language must keep the same placeholders as English and format cleanly.
+	 *
+	 * @dataProvider languageProvider
+	 */
+	public function testAntiAbusePlaceholdersMatchEnglish(string $lang): void
+	{
+		$en = new Language('en');
+		$en->includeData(['INGAME']);
+		$lng = new Language($lang);
+		$lng->includeData(['INGAME']);
+
+		$sprintfArgs = [
+			'market_band_error' => ['2.000', '8.000', 'Metal'],
+			'market_fee_not_enough' => ['23'],
+			'market_hold_hint' => ['24'],
+			'market_reason_band' => ['0.5', '2'],
+			'market_reason_daily_cap' => ['10', '1.000.000'],
+			'market_how_rules' => ['0.5', '2', '1', '24', '1.000.000'],
+		];
+		foreach ($sprintfArgs as $key => $args) {
+			$out = vsprintf((string) $lng[$key], $args);
+			foreach ($args as $arg) {
+				$this->assertStringContainsString($arg, $out, "{$key} ({$lang}) must show {$arg}");
+			}
+		}
+		foreach (['market_band_hint', 'market_fee_hint'] as $key) {
+			preg_match_all('/%\d\$s/', (string) $en[$key], $want);
+			preg_match_all('/%\d\$s/', (string) $lng[$key], $got);
+			sort($want[0]);
+			sort($got[0]);
+			$this->assertSame($want[0], $got[0], "{$key} ({$lang}) placeholders");
 		}
 	}
 

@@ -52,6 +52,7 @@ class MarketplaceTemplateTest extends TestCase
 			'resourceHistory' => [],
 			'fleetHistory' => [],
 			'refRatio' => [4, 2, 1],
+			'rulesText' => 'Fair-play rules: sample',
 			'resImages' => [901 => 'metal', 902 => 'crystal', 903 => 'deuterium'],
 			'tradeZone' => ['galaxy' => 1, 'system' => 2, 'planet' => 17],
 			'sellUrl' => 'game.php?page=fleetTable&galaxy=1&system=2&planet=17&planettype=1&target_mission=16',
@@ -204,6 +205,20 @@ class MarketplaceTemplateTest extends TestCase
 		$this->assertStringContainsString('.market-table thead {', $block);
 		$this->assertStringContainsString('content: attr(data-label);', $block);
 		$this->assertMatchesRegularExpression('/\.market \{\s*padding: 0 4px calc\(56px \+ env\(safe-area-inset-bottom/', $block);
+	}
+
+	public function testHowItWorksShowsTheFairPlayRules(): void
+	{
+		$html = $this->render(['rulesText' => 'Fair-play rules: asking prices must be between 0.5x and 2x']);
+		$this->assertStringContainsString('class="market__rules">Fair-play rules: asking prices must be between 0.5x and 2x', $html);
+	}
+
+	public function testRuleBlockReasonIsShownOnDisabledBuy(): void
+	{
+		$html = $this->render(['resourceOffers' => [$this->offer(6, false, '24-hour limit with this seller reached (0 of 1.000.000 left, valued in deuterium)')]]);
+		[$row] = $this->rowsHtml($html);
+		$this->assertMatchesRegularExpression('/market-buy__btn"\s+disabled/', $row);
+		$this->assertStringContainsString('24-hour limit with this seller reached', $row);
 	}
 
 	public function testFuelHintShownOnPageAndTradeForm(): void

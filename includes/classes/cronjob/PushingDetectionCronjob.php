@@ -3,6 +3,7 @@
 namespace HiveNova\Cronjob;
 
 use HiveNova\Core\Database;
+use HiveNova\Core\PushingAccusationQuery;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Universe;
 use HiveNova\Cronjob\CronjobTask;
@@ -31,33 +32,7 @@ class PushingDetectionCronjob implements CronjobTask
 
 		foreach ($unis as $uni)
 		{
-			$cutoff = TIMESTAMP - (14 * 24 * 60 * 60);
-
-			$sql = 'SELECT destination, dest_id, COUNT(DISTINCT source) AS source_count
-			FROM (
-				SELECT u1.username AS source, u2.username AS destination, u2.id AS dest_id,
-				       COUNT(DISTINCT fl.fleet_id) AS fleet_count
-				FROM %%LOG_FLEETS%% fl
-				JOIN %%PLANETS%% p ON fl.fleet_end_id = p.id
-				JOIN %%USERS%% u1 ON u1.id = fl.fleet_owner
-				JOIN %%USERS%% u2 ON u2.id = p.id_owner
-				JOIN %%STATPOINTS%% sp1 ON sp1.id_owner = u1.id AND sp1.universe = :universe
-				JOIN %%STATPOINTS%% sp2 ON sp2.id_owner = u2.id AND sp2.universe = :universe
-				WHERE fl.fleet_mission = 3
-				  AND fl.fleet_owner != p.id_owner
-				  AND sp1.total_points < sp2.total_points
-				  AND fl.start_time > :cutoff
-				  AND p.universe = :universe
-				GROUP BY u1.id, u2.id, u1.username, u2.username
-				HAVING COUNT(DISTINCT fl.fleet_id) > 5
-			) pushers
-			GROUP BY destination, dest_id
-			ORDER BY source_count DESC, destination DESC;';
-
-			$pushers = Database::get()->select($sql, array(
-				':universe' => $uni,
-				':cutoff'   => $cutoff,
-			));
+			$pushers = self::byDestination(PushingAccusationQuery::pushPairs((int) $uni, TIMESTAMP));
 
 			if (empty($pushers))
 			{
@@ -103,5 +78,33 @@ class PushingDetectionCronjob implements CronjobTask
 				);
 			}
 		}
+	}
+
+	/**
+	 * Group flagged pairs by receiver: one line per destination with how many
+	 * players push to it (same output as the old SQL GROUP BY destination).
+	 *
+	 * @param list<array{dest_id: int, dest_name: string, source_id: int}> $pairs
+	 * @return list<array{destination: string, dest_id: int, source_count: int}>
+	 */
+	public static function byDestination(array $pairs): array
+	{
+		$byDest = array();
+		foreach ($pairs as $pair) {
+			$id = (int) $pair['dest_id'];
+			if (!isset($byDest[$id])) {
+				$byDest[$id] = array('destination' => (string) $pair['dest_name'], 'dest_id' => $id, 'sources' => array());
+			}
+			$byDest[$id]['sources'][(int) $pair['source_id']] = true;
+		}
+		$rows = array();
+		foreach ($byDest as $row) {
+			$rows[] = array('destination' => $row['destination'], 'dest_id' => $row['dest_id'], 'source_count' => count($row['sources']));
+		}
+		usort($rows, static function (array $a, array $b): int {
+			$cmp = $b['source_count'] <=> $a['source_count'];
+			return $cmp !== 0 ? $cmp : strcmp($b['destination'], $a['destination']);
+		});
+		return $rows;
 	}
 }

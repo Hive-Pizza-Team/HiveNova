@@ -103,6 +103,22 @@
 					</td>
 				</tr>
 			</table>
+			<div class="market-offer" id="marketOffer"
+				data-ratio="{$marketOffer.ratio}"
+				data-ship-value="{$marketOffer.shipValue}"
+				data-band-min="{$marketOffer.bandMin}"
+				data-band-max="{$marketOffer.bandMax}"
+				data-fee-rate="{$marketOffer.feeRate}"
+				data-name-1="{$LNG.tech.901|escape:'html'}"
+				data-name-2="{$LNG.tech.902|escape:'html'}"
+				data-name-3="{$LNG.tech.903|escape:'html'}"
+				data-range-text="{$LNG.market_band_hint|escape:'html'}"
+				data-range-empty="{$LNG.market_band_hint_empty|escape:'html'}"
+				data-fee-text="{$LNG.market_fee_hint|escape:'html'}">
+				<p class="market-offer__range" id="marketOfferRange">{$LNG.market_band_hint_empty}</p>
+				<p class="market-offer__fee" id="marketOfferFee"></p>
+				<p class="market-offer__hold">{$LNG.market_hold_hint|sprintf:$marketOffer.maxHold}</p>
+			</div>
 			<p class="market__fuel-hint">{$LNG.market_fuel_cargo_hint}</p>
 			</td>
 		</tr>
