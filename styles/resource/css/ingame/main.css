@@ -4024,3 +4024,372 @@ table.tablesorter thead tr .headerSortDown {
 		justify-content: center;
 	}
 }
+
+/* Marketplace (game.php?page=marketPlace) */
+
+.market {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 0 8px 24px;
+	text-align: left;
+}
+
+.market [hidden] {
+	display: none !important;
+}
+
+.market__title {
+	margin: 0 0 0.35em;
+	color: var(--color-text-bright);
+	font-size: 1.35em;
+}
+
+.market__intro,
+.market__pay-help,
+.market__ratio p {
+	margin: 0 0 0.8em;
+	color: var(--color-chrome-res-label);
+	line-height: 1.45;
+}
+
+.market__cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5em 0.9em;
+	margin: 0 0 0.8em;
+}
+
+.market__cta-hint {
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
+.market__how,
+.market__ratio {
+	box-sizing: border-box;
+	margin: 0 0 0.9em;
+	padding: 0.5em 0.8em;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-radius: 4px;
+	background: var(--color-bg-surface);
+}
+
+.market__how summary,
+.market__ratio summary {
+	cursor: pointer;
+	color: var(--color-text-bright);
+	font-weight: 600;
+}
+
+.market__steps {
+	margin: 0.6em 0 0.2em;
+	padding: 0 0 0 1.3em;
+	line-height: 1.5;
+}
+
+.market__steps li {
+	margin: 0 0 0.35em;
+}
+
+.market__notice {
+	margin: 0 0 0.9em;
+	padding: 0.65em 0.85em;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-left-width: 4px;
+	border-radius: 4px;
+	background: var(--color-bg-surface);
+	color: var(--color-text-bright);
+}
+
+.market__notice--ok {
+	border-left-color: var(--color-chrome-res-max);
+}
+
+.market__notice--error {
+	border-left-color: var(--color-danger);
+}
+
+.market__mine {
+	margin: 0 0 0.8em;
+	color: var(--color-ally-trade);
+}
+
+.market__tabs {
+	margin-top: 0.4em;
+}
+
+.market__count {
+	display: inline-block;
+	min-width: 1.4em;
+	margin-left: 0.3em;
+	padding: 0 0.35em;
+	border-radius: 0.7em;
+	background: var(--color-chrome-res-divider);
+	color: var(--color-text-bright);
+	font-size: 0.8em;
+	text-align: center;
+}
+
+.market__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 0.6em 1em;
+	margin: 0 0 0.4em;
+}
+
+.market__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2em;
+	font-size: 0.9em;
+	color: var(--color-chrome-res-label);
+}
+
+.market__field select {
+	min-width: 9em;
+	text-align: left;
+}
+
+.market__check {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding-bottom: 0.2em;
+	font-size: 0.9em;
+}
+
+.market__pay-help {
+	font-size: 0.85em;
+}
+
+.market__ratio-inputs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6em 1em;
+}
+
+.market__ratio-inputs label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2em;
+	font-size: 0.9em;
+}
+
+.market__ratio-inputs input {
+	width: 6em;
+}
+
+.market__subtitle {
+	margin: 1.4em 0 0.5em;
+	color: var(--color-text-bright);
+	font-size: 1.05em;
+}
+
+.market-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.market-table th,
+.market-table td {
+	padding: 0.45em 0.55em;
+	vertical-align: middle;
+	text-align: left;
+}
+
+.market-table td {
+	border-top: 1px solid var(--color-chrome-res-divider);
+}
+
+.market-goods {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.market-goods li,
+.market-price {
+	display: flex;
+	align-items: center;
+	gap: 0.35em;
+	white-space: nowrap;
+}
+
+.market-goods img,
+.market-price img {
+	flex: 0 0 auto;
+	width: 20px;
+	height: 20px;
+}
+
+.market-goods__name {
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
+.market-deal {
+	white-space: nowrap;
+}
+
+.market-deal--good {
+	color: var(--color-chrome-res-max);
+}
+
+.market-deal--fair {
+	color: var(--color-ally-trade);
+}
+
+.market-deal--bad {
+	color: var(--color-chrome-res-over);
+}
+
+.market-cost small,
+.market-offer__reason {
+	color: var(--color-chrome-res-label);
+}
+
+.market-action {
+	min-width: 8.5em;
+	text-align: right;
+}
+
+.market-action form {
+	margin: 0;
+}
+
+.market-offer__reason {
+	display: block;
+	margin-top: 0.25em;
+	font-size: 0.85em;
+	white-space: normal;
+}
+
+.market-offer__reason:empty {
+	display: none;
+}
+
+.market-offer--own > td {
+	background: var(--color-chrome-menu-active-bg);
+}
+
+.market-offer--expired {
+	opacity: 0.55;
+}
+
+.market-badge {
+	display: inline-block;
+	margin: 0 0 0.35em;
+	padding: 0.1em 0.5em;
+	border-radius: 0.35em;
+	background: var(--color-chrome-menu-active-bar);
+	color: var(--color-bg-page);
+	font-size: 0.8em;
+	font-weight: 700;
+}
+
+.market-empty {
+	margin: 0.5em 0 0;
+	padding: 1em;
+	border: 1px dashed var(--color-chrome-res-divider);
+	border-radius: 4px;
+	color: var(--color-chrome-res-label);
+	text-align: center;
+}
+
+.market-empty__title {
+	margin: 0 0 0.3em;
+	color: var(--color-text-bright);
+	font-weight: 600;
+}
+
+.market-empty p {
+	margin: 0 0 0.6em;
+}
+
+.market-sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+@media screen and (max-width: 699px) {
+	.market {
+		padding: 0 4px 16px;
+	}
+
+	.market__toolbar {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.market__field select {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.market__check {
+		grid-column: 1 / -1;
+	}
+
+	/* Offer rows become cards; each cell shows its column label. */
+	.market-table thead {
+		display: none;
+	}
+
+	.market-table,
+	.market-table tbody,
+	.market-table tr,
+	.market-table td {
+		display: block;
+		width: auto;
+	}
+
+	.market-table tr {
+		margin: 0 0 0.7em;
+		border: 1px solid var(--color-chrome-res-divider);
+		border-radius: 4px;
+		background: var(--color-bg-surface);
+	}
+
+	.market-table td {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 0.8em;
+		border-top: 1px solid var(--color-chrome-res-divider);
+		text-align: right;
+	}
+
+	.market-table tr > td:first-child {
+		border-top: 0;
+	}
+
+	.market-table td[data-label]::before {
+		content: attr(data-label);
+		flex: 0 0 auto;
+		color: var(--color-chrome-res-label);
+		font-size: 0.85em;
+		text-align: left;
+	}
+
+	.market-goods li,
+	.market-price {
+		justify-content: flex-end;
+	}
+
+	.market-action {
+		display: block !important;
+		text-align: center;
+	}
+
+	.market-action .btn {
+		width: 100%;
+	}
+}
