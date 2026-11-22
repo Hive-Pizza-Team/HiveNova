@@ -112,6 +112,9 @@ class FakeDatabase implements DatabaseInterface
                 'source_name' => 'src' . $id,
                 'dest_name' => 'dst' . $id,
                 'fleet_count' => 6,
+                'metal' => 4000000, // 1M units: over the per-pair value threshold
+                'crystal' => 0,
+                'deuterium' => 0,
             ], $this->accusedDestIds);
         }
         if ($this->isFlyingFleetsTableQuery($qry)) {

@@ -75,29 +75,31 @@ class MarketTradeLedgerTest extends TestCase
 			$this->trade(1, 2, 100000, 100000, 9000, 100),   // seller stronger: not a push
 		];
 		$this->assertSame(
-			[['source' => 1, 'dest' => 2, 'source_name' => 'S1', 'dest_name' => 'B2']],
+			[['source' => 1, 'dest' => 2, 'source_name' => 'S1', 'dest_name' => 'B2', 'value' => 25000.0]],
 			MarketTradeLedger::pushesFromRows($rows, $this->pricelist(), MarketPlaceService::REFERENCE_RATIO)
 		);
 	}
 
-	public function testAccusationCountsLopsidedTradesWithoutAnyTransports(): void
+	public function testAccusationCountsTradeSurplusWithoutAnyTransports(): void
 	{
-		$this->fake->marketTrades = array_fill(0, 5, $this->trade(1, 2, 100000, 100000));
+		// Each trade: 200k crystal (100k units) for 100k metal (25k units) = 75k surplus.
+		$this->fake->marketTrades = array_fill(0, 3, $this->trade(1, 2, 200000, 100000));
 		$this->assertSame([], PushingAccusationQuery::accusedReceiverIds(1, TIMESTAMP));
 
-		$this->fake->marketTrades[] = $this->trade(1, 2, 100000, 100000);
+		PushingAccusationQuery::resetCache();
+		$this->fake->marketTrades[] = $this->trade(1, 2, 200000, 100000); // 300k >= 250k
 		$this->assertSame([2], PushingAccusationQuery::accusedReceiverIds(1, TIMESTAMP));
 		$this->assertTrue(PushingAccusationQuery::isAccusedReceiver(2, 1, TIMESTAMP));
 		$this->assertFalse(PushingAccusationQuery::isAccusedReceiver(1, 1, TIMESTAMP));
 	}
 
-	public function testAccusationMergesTransportsAndTradesForTheSamePair(): void
+	public function testReportMergesTransportsAndTrades(): void
 	{
 		$this->fake->accusedDestIds = [55];
-		$pairs = PushingAccusationQuery::pushPairs(1, TIMESTAMP);
-		$this->assertCount(1, $pairs);
-		$this->assertSame(55, $pairs[0]['dest_id']);
-		$this->assertSame(6, $pairs[0]['transports']);
-		$this->assertSame(0, $pairs[0]['trades']);
+		$report = PushingAccusationQuery::report(1, TIMESTAMP);
+		$this->assertCount(1, $report);
+		$this->assertSame(55, $report[0]['dest_id']);
+		$this->assertSame(6, $report[0]['sources'][0]['transports']);
+		$this->assertSame(1000000.0, $report[0]['total_value']);
 	}
 }

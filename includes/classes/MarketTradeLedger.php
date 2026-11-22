@@ -74,7 +74,7 @@ class MarketTradeLedger
 	 * @param list<array<string, mixed>> $rows from completedSince()
 	 * @param array<int, array<string, mixed>> $pricelist
 	 * @param array{0: float|int, 1: float|int, 2: float|int} $ratio
-	 * @return list<array{source: int, dest: int, source_name: string, dest_name: string}>
+	 * @return list<array{source: int, dest: int, source_name: string, dest_name: string, value: float}>
 	 */
 	public static function pushesFromRows(array $rows, array $pricelist, array $ratio): array
 	{
@@ -102,6 +102,7 @@ class MarketTradeLedger
 				'dest' => $push['dest'],
 				'source_name' => $names[$push['source']],
 				'dest_name' => $names[$push['dest']],
+				'value' => $push['value'],
 			);
 		}
 		return $pushes;

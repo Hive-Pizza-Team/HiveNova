@@ -3,73 +3,43 @@
 namespace HiveNova\Cronjob;
 
 use HiveNova\Core\Database;
-use HiveNova\Core\PushingAccusationQuery;
 use HiveNova\Core\PlayerUtil;
+use HiveNova\Core\PushingAccusationQuery;
+use HiveNova\Core\PushingRules;
 use HiveNova\Core\Universe;
 use HiveNova\Cronjob\CronjobTask;
 
 /**
- *  2Moons
- *   by Jan-Otto Kröpke 2009-2016
+ * Weekly pushing review (cron row 'pushing': Sunday 00:00 server time).
  *
- * For the full copyright and license information, please view the LICENSE
- *
- * @package 2Moons
- * @author Jan-Otto Kröpke <slaver7@gmail.com>
- * @copyright 2009 Lucky
- * @copyright 2016 Jan-Otto Kröpke <slaver7@gmail.com>
- * @licence MIT
- * @version 1.8.0
- * @link https://github.com/jkroepke/2Moons
+ * Sends the flagged receivers, their sources, counts and value moved to game
+ * operators and admins only (authlevel >= AUTH_OPS) so they can review them.
+ * Players are never mailed: an automatic public accusation could be wrong.
  */
-
-
 class PushingDetectionCronjob implements CronjobTask
 {
 	function run()
 	{
-		$unis = Universe::availableUniverses();
-
-		foreach ($unis as $uni)
-		{
-			$pushers = self::byDestination(PushingAccusationQuery::pushPairs((int) $uni, TIMESTAMP));
-
-			if (empty($pushers))
-			{
+		foreach (Universe::availableUniverses() as $uni) {
+			$uni = (int) $uni;
+			$report = PushingAccusationQuery::report($uni, TIMESTAMP);
+			if ($report === array()) {
 				continue;
 			}
 
-			$lines = array();
-			foreach ($pushers as $row)
-			{
-				$count = (int) $row['source_count'];
-				$name  = $row['destination'];
-				if ($count === 1)
-				{
-					$lines[] = '- 1 player is pushing to ' . $name;
-				}
-				else
-				{
-					$lines[] = '- ' . $count . ' player(s) are pushing to ' . $name;
-				}
+			$recipients = self::reviewerIds($uni);
+			if ($recipients === array()) {
+				continue;
 			}
 
-			$text = "Suspicious attack patterns have been detected in this universe:\n"
-				. implode("\n", $lines) . "\n";
-
-			$playerSql = 'SELECT id FROM %%USERS%% WHERE universe = :universe;';
-			$players   = Database::get()->select($playerSql, array(
-				':universe'  => $uni,
-			));
-
-			foreach ($players as $player)
-			{
+			$text = PushingRules::reportText($report, TIMESTAMP - PushingRules::WINDOW_SECONDS, TIMESTAMP);
+			foreach ($recipients as $userId) {
 				PlayerUtil::sendMessage(
-					$player['id'],
+					$userId,
 					0,
 					'Game Master',
 					4,
-					'Pushing Warning',
+					'Pushing review',
 					$text,
 					TIMESTAMP,
 					NULL,
@@ -81,30 +51,19 @@ class PushingDetectionCronjob implements CronjobTask
 	}
 
 	/**
-	 * Group flagged pairs by receiver: one line per destination with how many
-	 * players push to it (same output as the old SQL GROUP BY destination).
+	 * Same recipient pattern as BotDetectionService::adminRecipientIds, widened to operators.
 	 *
-	 * @param list<array{dest_id: int, dest_name: string, source_id: int}> $pairs
-	 * @return list<array{destination: string, dest_id: int, source_count: int}>
+	 * @return list<int>
 	 */
-	public static function byDestination(array $pairs): array
+	public static function reviewerIds(int $universe): array
 	{
-		$byDest = array();
-		foreach ($pairs as $pair) {
-			$id = (int) $pair['dest_id'];
-			if (!isset($byDest[$id])) {
-				$byDest[$id] = array('destination' => (string) $pair['dest_name'], 'dest_id' => $id, 'sources' => array());
-			}
-			$byDest[$id]['sources'][(int) $pair['source_id']] = true;
-		}
-		$rows = array();
-		foreach ($byDest as $row) {
-			$rows[] = array('destination' => $row['destination'], 'dest_id' => $row['dest_id'], 'source_count' => count($row['sources']));
-		}
-		usort($rows, static function (array $a, array $b): int {
-			$cmp = $b['source_count'] <=> $a['source_count'];
-			return $cmp !== 0 ? $cmp : strcmp($b['destination'], $a['destination']);
-		});
-		return $rows;
+		$rows = Database::get()->select(
+			'SELECT id FROM %%USERS%% WHERE universe = :universe AND authlevel >= :authlevel;',
+			array(
+				':universe'  => $universe,
+				':authlevel' => AUTH_OPS,
+			)
+		);
+		return array_map(static fn(array $row): int => (int) $row['id'], $rows);
 	}
 }

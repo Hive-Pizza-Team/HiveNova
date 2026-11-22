@@ -31,10 +31,6 @@ class MarketAbuseRules
 	 */
 	public const PUSH_DEAL_RATIO = 1.25;
 
-	/** Pushing accusation: more than this many pushes per pair in the window. */
-	public const PUSH_MIN_EVENTS_EXCLUSIVE = 5;
-	public const PUSH_WINDOW_SECONDS = 14 * 24 * 3600;
-
 	/**
 	 * Daily cap: total goods value one seller may sell to the same buyer in a
 	 * rolling 24 hours (1,000,000 units = 4M metal, 2M crystal or 1M deuterium).
@@ -201,10 +197,11 @@ class MarketAbuseRules
 	}
 
 	/**
-	 * Push direction of a completed trade, or null when it is fair enough or the
-	 * side giving more is not the weaker player.
+	 * Push direction and surplus of a completed trade, or null when it is fair
+	 * enough or the side giving more is not the weaker player. The surplus (what
+	 * the weaker side gave beyond what it got back) is the value pushed.
 	 *
-	 * @return array{source: int, dest: int}|null
+	 * @return array{source: int, dest: int, value: float}|null
 	 */
 	public static function tradePush(int $sellerId, int $buyerId, float $sellerPoints, float $buyerPoints, float $goodsValue, float $priceValue): ?array
 	{
@@ -213,58 +210,12 @@ class MarketAbuseRules
 		}
 		// Seller gave clearly more than it got, and the seller is weaker.
 		if ($goodsValue >= $priceValue * self::PUSH_DEAL_RATIO && $sellerPoints < $buyerPoints) {
-			return array('source' => $sellerId, 'dest' => $buyerId);
+			return array('source' => $sellerId, 'dest' => $buyerId, 'value' => $goodsValue - $priceValue);
 		}
 		// Buyer overpaid a stronger seller.
 		if ($priceValue >= $goodsValue * self::PUSH_DEAL_RATIO && $buyerPoints < $sellerPoints) {
-			return array('source' => $buyerId, 'dest' => $sellerId);
+			return array('source' => $buyerId, 'dest' => $sellerId, 'value' => $priceValue - $goodsValue);
 		}
 		return null;
-	}
-
-	/**
-	 * Merge per-pair transport counts with marketplace pushes and keep pairs over
-	 * the threshold. One shared rule for the cron mail and every consumer of
-	 * PushingAccusationQuery.
-	 *
-	 * @param list<array{source_id: int|string, dest_id: int|string, source_name?: string, dest_name?: string, fleet_count: int|string}> $transportPairs
-	 * @param list<array{source: int, dest: int, source_name?: string, dest_name?: string}> $tradePushes
-	 * @return list<array{source_id: int, dest_id: int, source_name: string, dest_name: string, transports: int, trades: int}>
-	 */
-	public static function mergePushPairs(array $transportPairs, array $tradePushes, int $threshold = self::PUSH_MIN_EVENTS_EXCLUSIVE): array
-	{
-		$pairs = array();
-		foreach ($transportPairs as $row) {
-			$key = (int) $row['source_id'] . ':' . (int) $row['dest_id'];
-			$pairs[$key] = array(
-				'source_id' => (int) $row['source_id'],
-				'dest_id' => (int) $row['dest_id'],
-				'source_name' => (string) ($row['source_name'] ?? ''),
-				'dest_name' => (string) ($row['dest_name'] ?? ''),
-				'transports' => (int) $row['fleet_count'],
-				'trades' => 0,
-			);
-		}
-		foreach ($tradePushes as $push) {
-			$key = $push['source'] . ':' . $push['dest'];
-			if (!isset($pairs[$key])) {
-				$pairs[$key] = array(
-					'source_id' => $push['source'],
-					'dest_id' => $push['dest'],
-					'source_name' => (string) ($push['source_name'] ?? ''),
-					'dest_name' => (string) ($push['dest_name'] ?? ''),
-					'transports' => 0,
-					'trades' => 0,
-				);
-			}
-			$pairs[$key]['trades']++;
-		}
-		$out = array();
-		foreach ($pairs as $pair) {
-			if ($pair['transports'] + $pair['trades'] > $threshold) {
-				$out[] = $pair;
-			}
-		}
-		return $out;
 	}
 }

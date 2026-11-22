@@ -5,27 +5,41 @@ namespace HiveNova\Core;
 use HiveNova\Core\Database;
 
 /**
- * Who is pushing to whom: one rule shared by PushingDetectionCronjob, PvE raids,
- * salvage packages and the marketplace buy guard.
+ * Who is pushing to whom: one shared report used by PushingDetectionCronjob,
+ * PvE raids, salvage, PvE packages and the marketplace buy guard.
  *
- * A pair (weaker source -> stronger destination, current total points) is
- * flagged when, inside 14 days, it has more than 5 pushes:
- *  - transport fleets (mission 3) from source to destination, excluding the two
- *    legs of a marketplace trade (the buy path logs them as transports), plus
- *  - completed marketplace trades where the weaker side gave at least
- *    MarketAbuseRules::PUSH_DEAL_RATIO times what it got back.
+ * Value moved in the last 14 days from weaker accounts to stronger ones
+ * (current total points; see PushingRules) =
+ *  - resources carried by transports (mission 3) that were not recalled,
+ *    excluding the two legs of a marketplace trade, plus
+ *  - the surplus of lopsided marketplace trades (MarketAbuseRules::tradePush).
+ * A receiver is flagged by PushingRules::buildReport (per-pair value or funnel).
+ *
+ * The report is computed once per universe and time per request and cached,
+ * so salvage / PvE callers that ask per fleet do not rerun the universe-wide query.
  */
 class PushingAccusationQuery
 {
+	/** @var array<string, list<array<string, mixed>>> */
+	private static array $cache = array();
+
+	public static function resetCache(): void
+	{
+		self::$cache = array();
+	}
+
 	/**
-	 * Per-pair transport counts, weaker sender -> stronger owner of the target planet.
+	 * Per-pair transport totals, weaker sender -> stronger owner of the target planet.
 	 *
-	 * @return list<array{source_id: int|string, dest_id: int|string, source_name: string, dest_name: string, fleet_count: int|string}>
+	 * @return list<array{source_id: int|string, dest_id: int|string, source_name: string, dest_name: string, fleet_count: int|string, value: float}>
 	 */
 	public static function transportPairs(int $universe, int $cutoff): array
 	{
 		$sql = 'SELECT u1.id AS source_id, u2.id AS dest_id, u1.username AS source_name, u2.username AS dest_name,
-			COUNT(DISTINCT fl.fleet_id) AS fleet_count
+			COUNT(DISTINCT fl.fleet_id) AS fleet_count,
+			SUM(fl.fleet_resource_metal) AS metal,
+			SUM(fl.fleet_resource_crystal) AS crystal,
+			SUM(fl.fleet_resource_deuterium) AS deuterium
 		FROM %%LOG_FLEETS%% fl
 		JOIN %%PLANETS%% p ON fl.fleet_end_id = p.id
 		JOIN %%USERS%% u1 ON u1.id = fl.fleet_owner
@@ -33,6 +47,7 @@ class PushingAccusationQuery
 		JOIN %%STATPOINTS%% sp1 ON sp1.id_owner = u1.id AND sp1.stat_type = 1 AND sp1.universe = :universe
 		JOIN %%STATPOINTS%% sp2 ON sp2.id_owner = u2.id AND sp2.stat_type = 1 AND sp2.universe = :universe
 		WHERE fl.fleet_mission = 3
+		  AND fl.fleet_state != 2
 		  AND fl.fleet_owner != p.id_owner
 		  AND sp1.total_points < sp2.total_points
 		  AND fl.start_time > :cutoff
@@ -43,44 +58,56 @@ class PushingAccusationQuery
 		  )
 		GROUP BY u1.id, u2.id, u1.username, u2.username;';
 
-		return Database::get()->select($sql, [
+		$rows = Database::get()->select($sql, [
 			':universe' => $universe,
 			':cutoff'   => $cutoff,
 		]);
+
+		$pairs = [];
+		foreach ($rows as $row) {
+			$row['value'] = PushingRules::resourceValue(
+				(float) ($row['metal'] ?? 0),
+				(float) ($row['crystal'] ?? 0),
+				(float) ($row['deuterium'] ?? 0),
+				MarketPlaceService::REFERENCE_RATIO
+			);
+			$pairs[] = $row;
+		}
+
+		return $pairs;
 	}
 
 	/**
-	 * Flagged pairs with names and how many transports / trades each has.
+	 * Flagged receivers with their sources, counts and value moved (cached per universe + time).
 	 *
-	 * @return list<array{source_id: int, dest_id: int, source_name: string, dest_name: string, transports: int, trades: int}>
+	 * @return list<array{dest_id: int, dest_name: string, total_value: float, reasons: list<string>, sources: list<array<string, mixed>>}>
 	 */
-	public static function pushPairs(int $universe, ?int $now = null): array
+	public static function report(int $universe, ?int $now = null): array
 	{
-		$cutoff = ($now ?? TIMESTAMP) - MarketAbuseRules::PUSH_WINDOW_SECONDS;
+		$now ??= TIMESTAMP;
+		$key = $universe . ':' . $now;
+		if (isset(self::$cache[$key])) {
+			return self::$cache[$key];
+		}
 
-		$tradeRows = MarketTradeLedger::completedSince(Database::get(), $universe, $cutoff);
+		$cutoff = $now - PushingRules::WINDOW_SECONDS;
 		$tradePushes = MarketTradeLedger::pushesFromRows(
-			$tradeRows,
+			MarketTradeLedger::completedSince(Database::get(), $universe, $cutoff),
 			is_array($GLOBALS['pricelist'] ?? null) ? $GLOBALS['pricelist'] : array(),
 			MarketPlaceService::REFERENCE_RATIO
 		);
 
-		return MarketAbuseRules::mergePushPairs(self::transportPairs($universe, $cutoff), $tradePushes);
+		return self::$cache[$key] = PushingRules::buildReport(self::transportPairs($universe, $cutoff), $tradePushes);
 	}
 
 	/**
-	 * User IDs that GM mail names as push destinations (stronger receivers).
+	 * User IDs flagged as push receivers (stronger accounts).
 	 *
 	 * @return list<int>
 	 */
 	public static function accusedReceiverIds(int $universe, ?int $now = null): array
 	{
-		$ids = [];
-		foreach (self::pushPairs($universe, $now) as $pair) {
-			$ids[$pair['dest_id']] = true;
-		}
-
-		return array_keys($ids);
+		return array_map(static fn(array $row): int => (int) $row['dest_id'], self::report($universe, $now));
 	}
 
 	public static function isAccusedReceiver(int $userId, int $universe, ?int $now = null): bool
