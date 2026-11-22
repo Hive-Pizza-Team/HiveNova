@@ -40,7 +40,7 @@
 	<tr class="ratio">
 		<td>Reference ratio:</td>
 		<td>
-			<input type="number" name="ratio-metal" value="4" style="width: 30%"/>:<input type="number" name="ratio-cristal" value="2" style="width: 30%"/>:<input type="number"name="ratio-deuterium" value="1" style="width: 30%"/>
+			<input type="number" name="ratio-metal" value="4" style="width: 30%"/>:<input type="number" name="ratio-crystal" value="2" style="width: 30%"/>:<input type="number" name="ratio-deuterium" value="1" style="width: 30%"/>
 		</td>
 	</tr>
 </table>
@@ -65,7 +65,7 @@
 <table id="tradeList" style="width:80%;white-space: nowrap;" class="tablesorter">
 	<thead>
 		<tr class="no-background no-border center">
-			<td></th>
+			<th></th>
 			<th></th>
 			<th><img src="./styles/theme/nova/images/metal.gif"/></th>
 			<th><img src="./styles/theme/nova/images/crystal.gif"/></th>

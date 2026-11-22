@@ -1289,6 +1289,7 @@ $LNG['market_fleet'] = 'Frota';
 $LNG['market_p_msg_not_found'] = 'Oferta não encontrada.';
 $LNG['market_p_msg_more_ships_is_needed'] = 'Mais navios necessários.';
 $LNG['market_p_msg_resources_error'] = 'Recursos insuficientes.';
+$LNG['market_p_msg_wrong_resource_type'] = 'Tipo de recurso incorreto.';
 $LNG['market_p_msg_sent'] = 'Enviado %s Cargueiros Leves, %s Cargueiros Pesados';
 $LNG['market_msg_trade_topic'] = 'Status do comércio';
 $LNG['market_msg_trade_from'] = 'Zona de comércio';

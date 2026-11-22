@@ -25,6 +25,7 @@
     <li><a href="game.php?page=viz"{if $navPage == 'viz'} class="active"{/if}>{$LNG.lm_viz}</a></li>
     <li><a href="game.php?page=eventFirehose"{if $navPage == 'eventFirehose'} class="active"{/if}>{$LNG.ef_title}</a></li>
     {if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=trader"{if $navPage == 'trader'} class="active"{/if}>{$LNG.lm_trader}</a></li>{/if}
+    {if $smarty.const.MODULE_MISSION_TRADE|isModuleAvailable}<li><a href="game.php?page=marketPlace"{if $navPage == 'marketPlace'} class="active"{/if}>{$LNG.lm_marketplace}</a></li>{/if}
     {if $smarty.const.MODULE_FLEET_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetDealer"{if $navPage == 'fleetDealer'} class="active"{/if}>{$LNG.lm_fleettrader}</a></li>{/if}
     {if $smarty.const.MODULE_ALLIANCE|isModuleAvailable}<li><a href="game.php?page=alliance"{if $navPage == 'alliance'} class="active"{/if}>{$LNG.lm_alliance}</a></li>{/if}
     {if false}

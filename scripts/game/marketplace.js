@@ -16,28 +16,28 @@ function calculateRatios(){
 	 */
 	var referenceRatios = {
 			'metal': $('input[name=ratio-metal]').val(),
-			'cristal': $('input[name=ratio-cristal]').val(),
+			'crystal': $('input[name=ratio-crystal]').val(),
 			'deuterium': $('input[name=ratio-deuterium]').val()
 	};
 	$('table#tradeList tbody tr').not('.no-background.no-border.center').each(function() {
 			var tradeOffer = $(this);
 			var offer = {
 				'metal': parseInt(tradeOffer.find('.resource_metal').html().replace(/\./g,'')),
-				'cristal': parseInt(tradeOffer.find('.resource_crystal').html().replace(/\./g,'')),
+				'crystal': parseInt(tradeOffer.find('.resource_crystal').html().replace(/\./g,'')),
 				'deuterium': parseInt(tradeOffer.find('.resource_deuterium').html().replace(/\./g,'')),
 				'getReference': function() {
-					return this.metal / referenceRatios.metal + this.cristal / referenceRatios.cristal + this.deuterium / referenceRatios.deuterium;
+					return this.metal / referenceRatios.metal + this.crystal / referenceRatios.crystal + this.deuterium / referenceRatios.deuterium;
 				}
 			};
 
 			var cost = {
 				'isMetal': (tradeOffer.find('.wanted-resource-1').length > 0),
-				'isCristal': (tradeOffer.find('.wanted-resource-2').length > 0),
+				'isCrystal': (tradeOffer.find('.wanted-resource-2').length > 0),
 				'isDeuterium': (tradeOffer.find('.wanted-resource-3').length > 0),
 				'wantedAmount': parseInt(tradeOffer.find('.wanted-resource-amount').html().replace(/\./g,'')),
 				'getReference': function() {
 					if(this.isMetal) return this.wantedAmount / referenceRatios.metal;
-					if(this.isCristal) return this.wantedAmount / referenceRatios.cristal;
+					if(this.isCrystal) return this.wantedAmount / referenceRatios.crystal;
 					if(this.isDeuterium) return this.wantedAmount / referenceRatios.deuterium;
 				}
 			};

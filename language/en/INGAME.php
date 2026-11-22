@@ -1112,6 +1112,7 @@ $LNG['market_fleet']  = 'Fleet';
 $LNG['market_p_msg_not_found']  = 'Offer not found.';
 $LNG['market_p_msg_more_ships_is_needed']  = 'More ships required.';
 $LNG['market_p_msg_resources_error']  = 'Not enough resources.';
+$LNG['market_p_msg_wrong_resource_type']  = 'Wrong resource type.';
 $LNG['market_p_msg_sent']  = 'Sent %s Light Cargos, %s Heavy Cargos';
 
 $LNG['market_msg_trade_topic'] = "Trading status";
