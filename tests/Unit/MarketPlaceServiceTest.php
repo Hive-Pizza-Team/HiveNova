@@ -136,6 +136,10 @@ class MarketPlaceServiceTest extends TestCase
 		$this->assertSame('market_buyable_no_tech', S::buyBlockKey(false, null, 'market_buyable_no_tech', true, 0, $res, $price, 0));
 		$this->assertSame('market_reason_no_slots', S::buyBlockKey(false, null, null, false, 0, $res, $price, 0));
 		$this->assertSame('market_reason_ships', S::buyBlockKey(false, null, null, true, 1, $res, $price, 0));
+		// Anti-abuse rule key comes after own/diplo/tech and before slots, ships and resources.
+		$this->assertSame('market_buyable_no_tech', S::buyBlockKey(false, null, 'market_buyable_no_tech', true, 0, $res, $price, 0, 'market_reason_band'));
+		$this->assertSame('market_reason_daily_cap', S::buyBlockKey(false, null, null, false, 1, $res, $price, 0, 'market_reason_daily_cap'));
+		$this->assertSame('market_your_offer', S::buyBlockKey(true, null, null, true, 0, $res, $price, 0, 'market_reason_flagged'));
 		// Deuterium price + fuel must both fit.
 		$this->assertNull(S::buyBlockKey(false, null, null, true, 0, $res, $price, 100));
 		$this->assertSame('market_reason_resources', S::buyBlockKey(false, null, null, true, 0, $res, $price, 101));

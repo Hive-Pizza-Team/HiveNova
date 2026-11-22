@@ -26,6 +26,9 @@ class MarketPlaceService
 	public const CSRF_SESSION_KEY = 'marketplace_csrf';
 	public const FLASH_SESSION_KEY = 'marketplace_flash';
 
+	/** Reference ratio (metal : crystal : deuterium) for deal ratings and the anti-abuse rules. */
+	public const REFERENCE_RATIO = array(4, 2, 1);
+
 	/** Deal rating thresholds around 1.0 (offer value / price value at the reference ratio). */
 	public const DEAL_GOOD_AT = 1.05;
 	public const DEAL_BAD_BELOW = 0.95;
@@ -179,6 +182,7 @@ class MarketPlaceService
 
 	/**
 	 * First reason the current planet cannot buy, as a language key, or null.
+	 * $ruleKey is MarketAbuseRules::buyRuleKey() (flagged buyer, price band, daily cap).
 	 *
 	 * @param array{901: float|int, 902: float|int, 903: float|int} $planetResources
 	 * @param array{901: float|int, 902: float|int, 903: float|int} $price
@@ -191,7 +195,8 @@ class MarketPlaceService
 		float $missingCargo,
 		array $planetResources,
 		array $price,
-		float $fuel
+		float $fuel,
+		?string $ruleKey = null
 	): ?string {
 		if ($isOwn) {
 			return 'market_your_offer';
@@ -201,6 +206,9 @@ class MarketPlaceService
 		}
 		if ($techKey !== null) {
 			return $techKey;
+		}
+		if ($ruleKey !== null) {
+			return $ruleKey;
 		}
 		if (!$hasFreeSlot) {
 			return 'market_reason_no_slots';

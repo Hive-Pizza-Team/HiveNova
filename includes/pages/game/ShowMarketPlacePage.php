@@ -9,6 +9,9 @@ use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\MarketPlaceResource;
 use HiveNova\Core\MarketPlaceService;
+use HiveNova\Core\MarketAbuseRules;
+use HiveNova\Core\MarketTradeLedger;
+use HiveNova\Core\PushingAccusationQuery;
 
 /**
  *  Steemnova
@@ -23,7 +26,7 @@ class ShowMarketPlacePage extends AbstractGamePage
 	public static $requireModule = MODULE_MISSION_TRADE;
 
 	/** Default deal-rating ratio (metal : crystal : deuterium); players can change it on the page. */
-	private const DEFAULT_RATIO = array(4, 2, 1);
+	private const DEFAULT_RATIO = MarketPlaceService::REFERENCE_RATIO;
 
 	function __construct()
 	{
@@ -33,6 +36,47 @@ class ShowMarketPlacePage extends AbstractGamePage
 	private function hasFreeSlot(array $USER): bool
 	{
 		return FleetFunctions::GetMaxFleetSlots($USER) > FleetFunctions::GetCurrentFleets($USER['id']);
+	}
+
+	/** @return array<int, array<string, mixed>> */
+	private function pricelist(): array
+	{
+		return is_array($GLOBALS['pricelist'] ?? null) ? $GLOBALS['pricelist'] : array();
+	}
+
+	/**
+	 * Pushing flag for the offer list, cached in the session for 10 minutes: the
+	 * accusation query scans 14 days of fleet logs for the whole universe. The buy
+	 * path always re-checks without the cache.
+	 */
+	private function listFlagged(array $USER): bool
+	{
+		$cache = $_SESSION['market_flagged'] ?? null;
+		if (is_array($cache) && (int) ($cache['user'] ?? 0) === (int) $USER['id'] && TIMESTAMP - (int) ($cache['at'] ?? 0) < 600) {
+			return (bool) ($cache['flagged'] ?? false);
+		}
+		$flagged = PushingAccusationQuery::isAccusedReceiver((int) $USER['id'], (int) $USER['universe']);
+		$_SESSION['market_flagged'] = array('user' => (int) $USER['id'], 'at' => TIMESTAMP, 'flagged' => $flagged);
+		return $flagged;
+	}
+
+	/**
+	 * Player-facing text for a MarketAbuseRules::buyRuleKey() result.
+	 */
+	private function ruleMessage(string $key, float $pairTraded): string
+	{
+		global $LNG;
+		if ($key === 'market_reason_daily_cap') {
+			return sprintf(
+				$LNG[$key],
+				pretty_number_plain(MarketAbuseRules::dailyCapLeft($pairTraded)),
+				pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE)
+			);
+		}
+		if ($key === 'market_reason_band') {
+			return sprintf($LNG[$key], MarketAbuseRules::BAND_MIN, MarketAbuseRules::BAND_MAX);
+		}
+		return $LNG[$key] ?? $key;
 	}
 
 	/**
@@ -234,6 +278,21 @@ class ShowMarketPlacePage extends AbstractGamePage
 
 		if (MarketPlaceResource::techId((int) $fleetResult['ex_resource_type']) === null) {
 			return $fail($LNG['market_p_msg_wrong_resource_type']);
+		}
+
+		// Anti-abuse: flagged pushing receivers, out-of-band (legacy) prices, daily cap per seller.
+		$goodsValue = MarketTradeLedger::goodsValue($fleetResult, $this->pricelist(), self::DEFAULT_RATIO);
+		$priceValue = MarketAbuseRules::priceValue((int) $fleetResult['ex_resource_type'], (float) $fleetResult['ex_resource_amount'], self::DEFAULT_RATIO);
+		$sold = MarketTradeLedger::soldToBuyer($db, (int) $USER['id'], $this->pricelist(), self::DEFAULT_RATIO);
+		$pairTraded = $sold[(int) $fleetResult['fleet_owner']] ?? 0.0;
+		$ruleKey = MarketAbuseRules::buyRuleKey(
+			PushingAccusationQuery::isAccusedReceiver((int) $USER['id'], (int) $fleetResult['fleet_universe']),
+			MarketAbuseRules::dealRatio($goodsValue, $priceValue),
+			$pairTraded,
+			$goodsValue
+		);
+		if ($ruleKey !== null) {
+			return $fail($this->ruleMessage($ruleKey, $pairTraded));
 		}
 
 		//-------------FLEET SIZE CALCULATION---------------
@@ -446,6 +505,9 @@ class ShowMarketPlacePage extends AbstractGamePage
 		));
 
 		$hasFreeSlot = $this->hasFreeSlot($USER);
+		$pricelist = $this->pricelist();
+		$flagged = $this->listFlagged($USER);
+		$soldToMe = MarketTradeLedger::soldToBuyer($db, (int) $USER['id'], $pricelist, self::DEFAULT_RATIO);
 		$capacity = $this->cargoCapacity($USER);
 		$onPlanet = $this->cargoOnPlanet($PLANET);
 		$planetRes = $this->planetResources($PLANET);
@@ -486,15 +548,24 @@ class ShowMarketPlacePage extends AbstractGamePage
 				? (int) FleetFunctions::GetMissionDuration(10, $sellerSpeed, $deliveryDistance, $speedFactor, $row)
 				: 0;
 
+			$goodsValue = MarketTradeLedger::goodsValue($row, $pricelist, self::DEFAULT_RATIO);
+			$pairTraded = $soldToMe[(int) $row['fleet_owner']] ?? 0.0;
+			$ruleKey = $isOwn ? null : MarketAbuseRules::buyRuleKey(
+				$flagged,
+				MarketAbuseRules::dealRatio($goodsValue, MarketAbuseRules::priceValue($wantedType, $wantedAmount, self::DEFAULT_RATIO)),
+				$pairTraded,
+				$goodsValue
+			);
+
 			$pay = array();
 			foreach (array(MarketPlaceService::PAY_LIGHT_FIRST => 'lc', MarketPlaceService::PAY_HEAVY_FIRST => 'hc') as $payWith => $code) {
 				$plan = MarketPlaceService::planPickupWithFuel($wantedAmount, $payWith, $capacity, $onPlanet,
 					fn(array $fleet): float => $this->paymentFlight($fleet, $row, $USER, $PLANET)['fuel']);
-				$blockKey = MarketPlaceService::buyBlockKey($isOwn, $diploKey, $techKey, $hasFreeSlot, $plan['missing'], $planetRes, $price, $plan['fuel']);
+				$blockKey = MarketPlaceService::buyBlockKey($isOwn, $diploKey, $techKey, $hasFreeSlot, $plan['missing'], $planetRes, $price, $plan['fuel'], $ruleKey);
 				$pay[$code] = array(
 					'ships' => MarketPlaceService::fleetSummary($plan['fleet'], $LNG['shortNames']),
 					'fuel' => $plan['fuel'],
-					'block' => $blockKey === null ? '' : ($LNG[$blockKey] ?? $blockKey),
+					'block' => $blockKey === null ? '' : ($blockKey === $ruleKey ? $this->ruleMessage($blockKey, $pairTraded) : ($LNG[$blockKey] ?? $blockKey)),
 				);
 			}
 
@@ -586,6 +657,14 @@ class ShowMarketPlacePage extends AbstractGamePage
 			'resourceHistory' => $this->getResourceTradeHistory(),
 			'fleetHistory'    => $this->getFleetTradeHistory(),
 			'refRatio'        => self::DEFAULT_RATIO,
+			'rulesText'       => sprintf(
+				$LNG['market_how_rules'],
+				MarketAbuseRules::BAND_MIN,
+				MarketAbuseRules::BAND_MAX,
+				(string) (MarketAbuseRules::LISTING_FEE_RATE * 100),
+				MarketAbuseRules::maxHoldHours(),
+				pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE)
+			),
 			'tradeZone'       => array(
 				'galaxy' => (int) $PLANET['galaxy'],
 				'system' => (int) $PLANET['system'],

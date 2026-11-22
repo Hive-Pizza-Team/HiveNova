@@ -4100,6 +4100,16 @@ table.tablesorter thead tr .headerSortDown {
 	font-size: 0.9em;
 }
 
+.market-offer p {
+	margin: 0.3em 0;
+	font-size: 0.9em;
+}
+
+.market-offer__range--out {
+	color: var(--color-danger);
+	font-weight: bold;
+}
+
 .market__notice {
 	margin: 0 0 0.9em;
 	padding: 0.65em 0.85em;

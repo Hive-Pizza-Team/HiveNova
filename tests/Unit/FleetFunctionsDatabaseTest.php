@@ -441,6 +441,10 @@ class FleetFunctionsDatabaseTest extends TestCase
 
         $this->assertContains(16, $result['MissionSelector']);
         $this->assertTrue($result['Exchange']);
-        $this->assertArrayHasKey(168, $result['StayBlock']);
+        // Anti-abuse: Trade offers hold for at most 24 h (was up to 168 h).
+        $this->assertArrayHasKey(24, $result['StayBlock']);
+        $this->assertArrayNotHasKey(48, $result['StayBlock']);
+        $this->assertArrayNotHasKey(168, $result['StayBlock']);
+        $this->assertSame(24, max(array_keys($result['StayBlock'])));
     }
 }

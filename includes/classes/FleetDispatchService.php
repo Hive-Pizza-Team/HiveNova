@@ -23,7 +23,7 @@ class FleetDispatchService
      *
      * @param array $params  Keys: targetMission, targetGalaxy, targetSystem, targetPlanet,
      *                       targetType, TransportMetal, TransportCrystal, TransportDeuterium,
-     *                       WantedResourceAmount, markettype, fleetArray, fleetStorage,
+     *                       WantedResourceAmount, WantedResourceType, markettype, fleetArray, fleetStorage,
      *                       fleetSpeed, distance, consumption (pre-calculated)
      * @param array $USER
      * @param array $PLANET
@@ -135,6 +135,78 @@ class FleetDispatchService
         if ($storageNeeded > $fleetStorage) {
             throw new \RuntimeException($LNG['fl_not_enough_space']);
         }
+
+        if ($targetMission == FLEET_MISSION_TRADE) {
+            self::validateTradeOffer(
+                (int) $markettype,
+                (int) ($params['WantedResourceType'] ?? 0),
+                (float) $WantedResourceAmount,
+                $fleetArray,
+                $fleetResource,
+                (float) $PLANET[$resource[903]] - (float) $consumption
+            );
+        }
+    }
+
+    /**
+     * Marketplace rules for a new Trade offer: the asking price must sit inside
+     * the price band around the reference ratio, and the planet must cover the
+     * listing fee (deuterium) on top of fuel and any deuterium sent as cargo.
+     *
+     * @param array<int, int|float> $fleetArray
+     * @param array{901: int|float, 902: int|float, 903: int|float} $fleetResource
+     * @throws \RuntimeException
+     */
+    public static function validateTradeOffer(
+        int $marketType,
+        int $wantedType,
+        float $wantedAmount,
+        array $fleetArray,
+        array $fleetResource,
+        float $deuteriumAfterFuel
+    ): void {
+        global $LNG;
+        $pricelist = $GLOBALS['pricelist'] ?? array();
+        $ratio = MarketPlaceService::REFERENCE_RATIO;
+
+        $techId = MarketPlaceResource::techId($wantedType);
+        if ($techId === null) {
+            throw new \RuntimeException($LNG['market_p_msg_wrong_resource_type']);
+        }
+
+        $goods = MarketAbuseRules::goodsValue($marketType, $fleetResource, $fleetArray, $pricelist, $ratio);
+        $price = MarketAbuseRules::priceValue($wantedType, $wantedAmount, $ratio);
+        if (!MarketAbuseRules::inBand(MarketAbuseRules::dealRatio($goods, $price))) {
+            $range = MarketAbuseRules::allowedPriceRange($goods, $wantedType, $ratio);
+            if ($range === null) {
+                throw new \RuntimeException($LNG['market_reason_band']);
+            }
+            throw new \RuntimeException(sprintf(
+                $LNG['market_band_error'],
+                pretty_number_plain($range['min']),
+                pretty_number_plain($range['max']),
+                $LNG['tech'][$techId] ?? ''
+            ));
+        }
+
+        $fee = MarketAbuseRules::listingFee($fleetArray, $fleetResource, $pricelist, $ratio);
+        if ($deuteriumAfterFuel < $fee + (float) $fleetResource[903]) {
+            throw new \RuntimeException(sprintf($LNG['market_fee_not_enough'], pretty_number_plain($fee)));
+        }
+    }
+
+    /**
+     * Listing fee (deuterium) a Trade fleet pays at send time; 0 for every other mission.
+     *
+     * @param array<int, int|float> $fleetArray
+     * @param array{901: int|float, 902: int|float, 903: int|float} $fleetResource
+     */
+    public static function listingFee(int $mission, array $fleetArray, array $fleetResource): float
+    {
+        if ($mission !== FLEET_MISSION_TRADE) {
+            return 0.0;
+        }
+        return MarketAbuseRules::listingFee($fleetArray, $fleetResource, $GLOBALS['pricelist'] ?? array(), MarketPlaceService::REFERENCE_RATIO);
     }
 
     /**
@@ -379,6 +451,10 @@ class FleetDispatchService
                 [':id' => $PLANET['id']]
             );
             $deutNeeded = $fleetResource[903] + $consumption;
+            if ($targetMission == FLEET_MISSION_TRADE) {
+                // Trade offers also pay a non-refundable listing fee in deuterium.
+                $deutNeeded += self::listingFee(FLEET_MISSION_TRADE, $fleetArray, $fleetResource);
+            }
             if (!is_array($lockedPlanet)) {
                 $db->rollback();
                 throw new \RuntimeException($LNG['fl_not_enough_resource']);

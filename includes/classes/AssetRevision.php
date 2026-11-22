@@ -40,6 +40,7 @@ class AssetRevision
 			'scripts/game/techtree.js',
 			'scripts/game/techtree-nudge.js',
 			'scripts/game/marketplace.js',
+			'scripts/game/market-offer.js',
 			'styles/resource/css/login/main.css',
 		];
 	}
