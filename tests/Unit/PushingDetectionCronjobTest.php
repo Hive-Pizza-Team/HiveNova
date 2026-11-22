@@ -209,13 +209,14 @@ class PushingDetectionCronjobTest extends TestCase
         $this->player(1, 'Admin', 10, AUTH_ADM);
         $this->player(2, 'Operator', 10, AUTH_OPS);
         $this->player(3, 'Moderator', 10, AUTH_MOD);
+        $this->player(4, 'Promo', 10, AUTH_PROMO);
         $this->player(42, 'AltOne', 1000);
         $this->player(200, 'MainAcc', 50000);
         $this->transports(42, 200, 1, 1200000); // 300k units >= 250k
 
         (new PushingDetectionCronjob())->run();
 
-        $this->assertSame([1, 2], $this->recipients());
+        $this->assertSame([1, 2, 3], $this->recipients());
         $message = $this->fake->achievement->messages[0];
         $this->assertSame('Pushing review', $message[':subject']);
         $this->assertSame('Game Master', $message[':from']);

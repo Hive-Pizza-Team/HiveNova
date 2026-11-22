@@ -13,7 +13,7 @@ use HiveNova\Cronjob\CronjobTask;
  * Weekly pushing review (cron row 'pushing': Sunday 00:00 server time).
  *
  * Sends the flagged receivers, their sources, counts and value moved to game
- * operators and admins only (authlevel >= AUTH_OPS) so they can review them.
+ * moderators, operators and admins only (authlevel >= AUTH_MOD) so they can review them.
  * Players are never mailed: an automatic public accusation could be wrong.
  */
 class PushingDetectionCronjob implements CronjobTask
@@ -61,7 +61,7 @@ class PushingDetectionCronjob implements CronjobTask
 			'SELECT id FROM %%USERS%% WHERE universe = :universe AND authlevel >= :authlevel;',
 			array(
 				':universe'  => $universe,
-				':authlevel' => AUTH_OPS,
+				':authlevel' => AUTH_MOD,
 			)
 		);
 		return array_map(static fn(array $row): int => (int) $row['id'], $rows);
