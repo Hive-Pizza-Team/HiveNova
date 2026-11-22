@@ -1290,6 +1290,7 @@ $LNG['market_fleet'] = 'Filo';
 $LNG['market_p_msg_not_found'] = 'Teklif bulunamadı.';
 $LNG['market_p_msg_more_ships_is_needed'] = 'Daha fazla gemi gerekli.';
 $LNG['market_p_msg_resources_error'] = 'Yeterli kaynak yok.';
+$LNG['market_p_msg_wrong_resource_type'] = 'Yanlış kaynak türü.';
 $LNG['market_p_msg_sent'] = '%s Hafif Kargo, %s Ağır Kargo gönderildi';
 $LNG['market_msg_trade_topic'] = 'Ticaret durumu';
 $LNG['market_msg_trade_from'] = 'Ticaret bölgesi';

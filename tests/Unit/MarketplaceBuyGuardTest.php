@@ -12,4 +12,18 @@ class MarketplaceBuyGuardTest extends TestCase
 		$this->assertStringContainsString('FOR UPDATE', $source);
 		$this->assertStringContainsString('beginTransaction', $source);
 	}
+
+	public function testRequireModuleIsMissionTrade(): void
+	{
+		$source = file_get_contents(__DIR__ . '/../../includes/pages/game/ShowMarketPlacePage.php');
+		$this->assertIsString($source);
+		$this->assertMatchesRegularExpression(
+			'/public static \$requireModule = MODULE_MISSION_TRADE;/',
+			$source
+		);
+		$this->assertStringNotContainsString(
+			'public static $requireModule = MODULE_BATTLEHALL;',
+			$source
+		);
+	}
 }

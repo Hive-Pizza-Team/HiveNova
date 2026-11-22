@@ -1236,6 +1236,7 @@ $LNG['market_fleet'] = 'Флот';
 $LNG['market_p_msg_not_found'] = 'Предложение не найдено.';
 $LNG['market_p_msg_more_ships_is_needed'] = 'Требуется больше кораблей.';
 $LNG['market_p_msg_resources_error'] = 'Недостаточно ресурсов.';
+$LNG['market_p_msg_wrong_resource_type'] = 'Неверный тип ресурса.';
 $LNG['market_p_msg_sent'] = 'Отправлено %s лёгких грузовых, %s тяжёлых грузовых';
 $LNG['market_msg_trade_topic'] = 'Статус торговли';
 $LNG['market_msg_trade_from'] = 'Торговая зона';
