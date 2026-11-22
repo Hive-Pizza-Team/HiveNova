@@ -126,6 +126,58 @@ class MarketPlaceService
 	}
 
 	/**
+	 * Pickup fleet sized for the payment plus its own fuel. Fuel rides in the cargo
+	 * hold (same rule as every fleet send), so sizing for the payment alone could
+	 * show a ship count that is one short. Iterates because more ships burn more fuel.
+	 *
+	 * @param array<int, float|int> $capacity
+	 * @param array<int, float|int> $available
+	 * @param callable(array<int, int>): float $fuelFor fuel for a given fleet
+	 * @return array{fleet: array<int, int>, missing: float, fuel: float}
+	 */
+	public static function planPickupWithFuel(float $amount, int $payWith, array $capacity, array $available, callable $fuelFor): array
+	{
+		$fuel = 0.0;
+		$plan = self::planPickup($amount, $payWith, $capacity, $available);
+		for ($i = 0; $i < 8; $i++) {
+			if ($plan['fleet'] === array()) {
+				break;
+			}
+			$fuel = (float) $fuelFor($plan['fleet']);
+			$next = self::planPickup($amount + $fuel, $payWith, $capacity, $available);
+			if ($next['fleet'] === $plan['fleet']) {
+				$plan = $next;
+				break;
+			}
+			$plan = $next;
+		}
+		if ($plan['fleet'] !== array()) {
+			$fuel = (float) $fuelFor($plan['fleet']);
+			$room = 0.0;
+			foreach ($plan['fleet'] as $shipId => $count) {
+				$room += $count * (float) ($capacity[$shipId] ?? 0);
+			}
+			$plan['missing'] = max($plan['missing'], $amount + $fuel - $room);
+		}
+		$plan['fuel'] = $fuel;
+		return $plan;
+	}
+
+	/**
+	 * Row colour class: war = enemy; same alliance (never "no alliance" = 0) or pact <= 3 = ally.
+	 */
+	public static function diploClass(?int $level, int $sellerAllyId, int $buyerAllyId): string
+	{
+		if ($level === self::DIPLO_WAR) {
+			return 'trade-enemy';
+		}
+		if (($level !== null && $level <= 3) || ($sellerAllyId !== 0 && $sellerAllyId === $buyerAllyId)) {
+			return 'trade-ally';
+		}
+		return '';
+	}
+
+	/**
 	 * First reason the current planet cannot buy, as a language key, or null.
 	 *
 	 * @param array{901: float|int, 902: float|int, 903: float|int} $planetResources

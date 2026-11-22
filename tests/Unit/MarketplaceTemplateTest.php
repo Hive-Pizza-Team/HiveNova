@@ -160,4 +160,56 @@ class MarketplaceTemplateTest extends TestCase
 		$tpl = (string) file_get_contents(self::tplPath('page.fleetStep2.default.tpl'));
 		$this->assertStringNotContainsString('maxFlightTime', $tpl);
 	}
+	public function testDataAttributesStayRawWithNonEuNumberFormat(): void
+	{
+		// pretty_number() wraps values in <span class='ln'> for non-EU formats; the old JS
+		// parsed that HTML and showed NaN. Ratio inputs must come from raw data attributes.
+		$prev = $GLOBALS['userNumberFormat'] ?? null;
+		$GLOBALS['userNumberFormat'] = 'us';
+		try {
+			$offer = $this->offer(6, false);
+			$offer['get'][902] = 1234567.0;
+			$html = $this->render(['resourceOffers' => [$offer]]);
+		} finally {
+			if ($prev === null) {
+				unset($GLOBALS['userNumberFormat']);
+			} else {
+				$GLOBALS['userNumberFormat'] = $prev;
+			}
+		}
+		[$row] = $this->rowsHtml($html);
+		$this->assertStringContainsString("class='ln'", $row, 'fixture should exercise the non-EU span');
+		$this->assertStringContainsString('data-get-902="1234567"', $row);
+		$this->assertStringContainsString('data-pay-amount="100000"', $row);
+		$this->assertMatchesRegularExpression('/data-get-901="0(\.0+)?"/', $row);
+
+		$js = (string) file_get_contents(ROOT_PATH . 'scripts/game/marketplace.js');
+		$this->assertStringNotContainsString('.html().replace', $js);
+		$this->assertStringContainsString("attr('data-get-'", $js);
+	}
+
+	public function testGermanTypoFixed(): void
+	{
+		$de = (string) file_get_contents(ROOT_PATH . 'language/de/INGAME.php');
+		$this->assertStringNotContainsString('Martplatz', $de);
+	}
+
+	public function testMobileLayoutStacksRowsAndClearsBottomNav(): void
+	{
+		$css = (string) file_get_contents(ROOT_PATH . 'styles/resource/css/ingame/main.css');
+		$start = strpos($css, '/* Marketplace (game.php?page=marketPlace) */');
+		$this->assertNotFalse($start);
+		$block = substr($css, (int) $start);
+		$this->assertMatchesRegularExpression('/@media screen and \(max-width: 699px\)/', $block);
+		$this->assertStringContainsString('.market-table thead {', $block);
+		$this->assertStringContainsString('content: attr(data-label);', $block);
+		$this->assertMatchesRegularExpression('/\.market \{\s*padding: 0 4px calc\(56px \+ env\(safe-area-inset-bottom/', $block);
+	}
+
+	public function testFuelHintShownOnPageAndTradeForm(): void
+	{
+		$this->assertStringContainsString('market_fuel_cargo_hint', (string) file_get_contents(self::tplPath('page.fleetStep2.default.tpl')));
+		$html = $this->render([]);
+		$this->assertStringContainsString('Fuel for the flight is carried in the cargo hold', $html);
+	}
 }

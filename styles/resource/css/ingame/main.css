@@ -4094,6 +4094,12 @@ table.tablesorter thead tr .headerSortDown {
 	margin: 0 0 0.35em;
 }
 
+.market__fuel-hint {
+	margin: 0.4em 0 0.2em;
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
 .market__notice {
 	margin: 0 0 0.9em;
 	padding: 0.65em 0.85em;
@@ -4320,8 +4326,9 @@ table.tablesorter thead tr .headerSortDown {
 }
 
 @media screen and (max-width: 699px) {
+	/* Keep the last rows (history) clear of the fixed #bottom-nav. */
 	.market {
-		padding: 0 4px 16px;
+		padding: 0 4px calc(56px + env(safe-area-inset-bottom, 0px) + 16px);
 	}
 
 	.market__toolbar {

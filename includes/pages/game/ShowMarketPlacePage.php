@@ -238,7 +238,8 @@ class ShowMarketPlacePage extends AbstractGamePage
 
 		//-------------FLEET SIZE CALCULATION---------------
 		$amount = (float) $fleetResult['ex_resource_amount'];
-		$plan = MarketPlaceService::planPickup($amount, $payWith, $this->cargoCapacity($USER), $this->cargoOnPlanet($PLANET));
+		$plan = MarketPlaceService::planPickupWithFuel($amount, $payWith, $this->cargoCapacity($USER), $this->cargoOnPlanet($PLANET),
+			fn(array $fleet): float => $this->paymentFlight($fleet, $fleetResult, $USER, $PLANET)['fuel']);
 		if ($plan['missing'] > 0) {
 			return $fail($LNG['market_p_msg_more_ships_is_needed']);
 		}
@@ -487,13 +488,12 @@ class ShowMarketPlacePage extends AbstractGamePage
 
 			$pay = array();
 			foreach (array(MarketPlaceService::PAY_LIGHT_FIRST => 'lc', MarketPlaceService::PAY_HEAVY_FIRST => 'hc') as $payWith => $code) {
-				$plan = MarketPlaceService::planPickup($wantedAmount, $payWith, $capacity, $onPlanet);
-				$flight = $plan['missing'] > 0 ? array('duration' => 0, 'fuel' => 0.0) : $this->paymentFlight($plan['fleet'], $row, $USER, $PLANET);
-				$blockKey = MarketPlaceService::buyBlockKey($isOwn, $diploKey, $techKey, $hasFreeSlot, $plan['missing'], $planetRes, $price, $flight['fuel']);
+				$plan = MarketPlaceService::planPickupWithFuel($wantedAmount, $payWith, $capacity, $onPlanet,
+					fn(array $fleet): float => $this->paymentFlight($fleet, $row, $USER, $PLANET)['fuel']);
+				$blockKey = MarketPlaceService::buyBlockKey($isOwn, $diploKey, $techKey, $hasFreeSlot, $plan['missing'], $planetRes, $price, $plan['fuel']);
 				$pay[$code] = array(
 					'ships' => MarketPlaceService::fleetSummary($plan['fleet'], $LNG['shortNames']),
-					'fuel' => $flight['fuel'],
-					'duration' => $flight['duration'],
+					'fuel' => $plan['fuel'],
 					'block' => $blockKey === null ? '' : ($LNG[$blockKey] ?? $blockKey),
 				);
 			}
@@ -505,12 +505,7 @@ class ShowMarketPlacePage extends AbstractGamePage
 			);
 			$ratio = $type === 0 ? MarketPlaceService::dealRatio($get, $wantedType, $wantedAmount, self::DEFAULT_RATIO) : null;
 
-			$diploClass = '';
-			if ($level === MarketPlaceService::DIPLO_WAR) {
-				$diploClass = 'trade-enemy';
-			} elseif (($level !== null && $level <= 3) || ($sellerAlly !== 0 && $sellerAlly === (int) $USER['ally_id'])) {
-				$diploClass = 'trade-ally';
-			}
+			$diploClass = MarketPlaceService::diploClass($level, $sellerAlly, (int) $USER['ally_id']);
 
 			$getParts = array();
 			if ($type === 0) {

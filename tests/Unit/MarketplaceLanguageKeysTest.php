@@ -94,6 +94,7 @@ class MarketplaceLanguageKeysTest extends TestCase
 			'market_p_msg_bad_token',
 			'market_p_msg_bought',
 			'market_p_msg_paid_with',
+			'market_fuel_cargo_hint',
 		];
 	}
 

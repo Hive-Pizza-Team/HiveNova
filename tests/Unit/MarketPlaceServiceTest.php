@@ -289,4 +289,47 @@ class MarketPlaceServiceTest extends TestCase
 		$this->assertSame('1.200 LC + 3 HC', S::fleetSummary([202 => 1200, 203 => 3, 204 => 0], [202 => 'LC', 203 => 'HC']));
 		$this->assertSame('2 205', S::fleetSummary([205 => 2], []));
 	}
+	public function testPickupCountsFuelInTheCargoHold(): void
+	{
+		// QA case: 10 small cargo (5000 each) for exactly 50,000 leaves no room for 13 fuel.
+		$cap = [202 => 5000.0, 203 => 25000.0];
+		$fuel = static fn(array $fleet): float => 13.0 + array_sum($fleet);
+		$plan = S::planPickupWithFuel(50000, S::PAY_LIGHT_FIRST, $cap, [202 => 100, 203 => 0], $fuel);
+		$this->assertSame([202 => 11], $plan['fleet']);
+		$this->assertSame(24.0, $plan['fuel']);
+		$this->assertSame(0.0, $plan['missing']);
+		$room = 11 * 5000;
+		$this->assertGreaterThanOrEqual(50000 + $plan['fuel'], $room);
+
+		// With exactly 10 ships on the planet the buy is short and must say so.
+		$plan = S::planPickupWithFuel(50000, S::PAY_LIGHT_FIRST, $cap, [202 => 10, 203 => 0], $fuel);
+		$this->assertSame([202 => 10], $plan['fleet']);
+		$this->assertSame(23.0, $plan['missing']);
+		$this->assertSame('market_reason_ships', S::buyBlockKey(false, null, null, true, $plan['missing'], [901 => 1e9, 902 => 1e9, 903 => 1e9], [901 => 50000, 902 => 0, 903 => 0], $plan['fuel']));
+
+		// No ships: no fuel callback, everything missing.
+		$plan = S::planPickupWithFuel(100, S::PAY_HEAVY_FIRST, $cap, [], function (): float {
+			$this->fail('no fleet, no fuel');
+		});
+		$this->assertSame([], $plan['fleet']);
+		$this->assertSame(0.0, $plan['fuel']);
+		$this->assertSame(100.0, $plan['missing']);
+	}
+
+	public function testPickupWithFuelKeepsTypePreference(): void
+	{
+		$cap = [202 => 5000.0, 203 => 25000.0];
+		$plan = S::planPickupWithFuel(50000, S::PAY_HEAVY_FIRST, $cap, [202 => 5, 203 => 5], static fn(): float => 10.0);
+		$this->assertSame([203 => 3], $plan['fleet']);
+		$this->assertSame(10.0, $plan['fuel']);
+	}
+
+	public function testDiploClassTreatsNoAllianceAsNoAlliance(): void
+	{
+		$this->assertSame('', S::diploClass(null, 0, 0));
+		$this->assertSame('trade-ally', S::diploClass(null, 4, 4));
+		$this->assertSame('trade-ally', S::diploClass(2, 4, 9));
+		$this->assertSame('', S::diploClass(4, 4, 9));
+		$this->assertSame('trade-enemy', S::diploClass(5, 4, 9));
+	}
 }

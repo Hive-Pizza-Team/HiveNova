@@ -1133,6 +1133,7 @@ $LNG['market_how_step_1'] = 'Load cargo ships (or the ships you want to sell) an
 $LNG['market_how_step_2'] = 'Pick the resource and amount you want in return and who may buy. While your fleet waits there, the offer is listed here.';
 $LNG['market_how_step_3'] = 'A buyer\'s cargo ships fly the payment to your planet, and your fleet flies the goods to the buyer. Each side pays its own fuel.';
 $LNG['market_how_step_4'] = 'You can cancel until someone buys. Unsold fleets fly home when their waiting time runs out. Bought offers cannot be cancelled.';
+$LNG['market_fuel_cargo_hint'] = 'Fuel for the flight is carried in the cargo hold, so leave a little room: check the remaining capacity on the fleet screen before you send.';
 $LNG['market_my_offers'] = 'You have %s active offer(s). They are marked "Your offer" and can be cancelled from the list.';
 $LNG['market_tab_resources'] = 'Resources';
 $LNG['market_tab_fleet'] = 'Ships';

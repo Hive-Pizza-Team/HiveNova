@@ -103,6 +103,7 @@
 					</td>
 				</tr>
 			</table>
+			<p class="market__fuel-hint">{$LNG.market_fuel_cargo_hint}</p>
 			</td>
 		</tr>
 		{/if}

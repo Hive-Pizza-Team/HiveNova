@@ -1309,6 +1309,7 @@ $LNG['market_how_step_1'] = 'Kargo gemilerini (ya da satmak istediğin gemileri)
 $LNG['market_how_step_2'] = 'Karşılığında istediğin kaynağı, miktarı ve kimlerin alabileceğini seç. Filon orada beklediği sürece teklif burada listelenir.';
 $LNG['market_how_step_3'] = 'Alıcının kargo gemileri ödemeyi gezegenine getirir, senin filon da malları alıcıya götürür. Her taraf kendi yakıtını öder.';
 $LNG['market_how_step_4'] = 'Biri satın alana kadar iptal edebilirsin. Satılmayan filolar bekleme süresi bitince geri döner. Satın alınan teklifler iptal edilemez.';
+$LNG['market_fuel_cargo_hint'] = 'Uçuş yakıtı kargo alanında taşınır, biraz boşluk bırak: göndermeden önce filo ekranında kalan kapasiteyi kontrol et.';
 $LNG['market_my_offers'] = '%s aktif teklifin var. "Senin teklifin" olarak işaretlidir ve listeden iptal edilebilir.';
 $LNG['market_tab_resources'] = 'Kaynaklar';
 $LNG['market_tab_fleet'] = 'Gemiler';

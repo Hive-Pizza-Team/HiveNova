@@ -25,6 +25,7 @@
 				<li>{$LNG.market_how_step_3}</li>
 				<li>{$LNG.market_how_step_4}</li>
 			</ol>
+			<p class="market__fuel-hint">{$LNG.market_fuel_cargo_hint}</p>
 		</details>
 	</header>
 

@@ -1301,6 +1301,7 @@ $LNG['market_how_step_1'] = 'Carga naves de carga (o las naves que quieras vende
 $LNG['market_how_step_2'] = 'Elige el recurso y la cantidad que quieres a cambio y quién puede comprar. Mientras tu flota espera allí, la oferta aparece aquí.';
 $LNG['market_how_step_3'] = 'Las naves de carga del comprador llevan el pago a tu planeta y tu flota lleva la mercancía al comprador. Cada parte paga su combustible.';
 $LNG['market_how_step_4'] = 'Puedes cancelar hasta que alguien compre. Las flotas no vendidas vuelven cuando acaba su tiempo de espera. Las ofertas compradas no se pueden cancelar.';
+$LNG['market_fuel_cargo_hint'] = 'El combustible del vuelo ocupa espacio de carga, así que deja algo de margen: revisa la capacidad restante en la pantalla de flota antes de enviar.';
 $LNG['market_my_offers'] = 'Tienes %s oferta(s) activa(s). Están marcadas como «Tu oferta» y se pueden cancelar desde la lista.';
 $LNG['market_tab_resources'] = 'Recursos';
 $LNG['market_tab_fleet'] = 'Naves';

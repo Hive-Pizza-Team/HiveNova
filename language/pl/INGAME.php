@@ -1306,6 +1306,7 @@ $LNG['market_how_step_1'] = 'Załaduj transportowce (lub statki na sprzedaż) i 
 $LNG['market_how_step_2'] = 'Wybierz surowiec i ilość, jaką chcesz w zamian, oraz kto może kupić. Dopóki flota czeka, oferta jest widoczna tutaj.';
 $LNG['market_how_step_3'] = 'Transportowce kupującego lecą z zapłatą na twoją planetę, a twoja flota leci z towarem do kupującego. Każda strona płaci za własne paliwo.';
 $LNG['market_how_step_4'] = 'Możesz anulować, dopóki nikt nie kupi. Niesprzedane floty wracają po upływie czasu oczekiwania. Kupionych ofert nie można anulować.';
+$LNG['market_fuel_cargo_hint'] = 'Paliwo na lot zajmuje ładownię, więc zostaw trochę miejsca: przed wysłaniem sprawdź pozostałą pojemność na ekranie floty.';
 $LNG['market_my_offers'] = 'Masz aktywne oferty: %s. Są oznaczone jako „Twoja oferta” i można je anulować z listy.';
 $LNG['market_tab_resources'] = 'Surowce';
 $LNG['market_tab_fleet'] = 'Statki';

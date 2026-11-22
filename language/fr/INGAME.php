@@ -1290,6 +1290,7 @@ $LNG['market_how_step_1'] = 'Chargez des transporteurs (ou les vaisseaux à vend
 $LNG['market_how_step_2'] = 'Choisissez la ressource et la quantité voulues en échange, et qui peut acheter. Tant que votre flotte attend, l\'offre est listée ici.';
 $LNG['market_how_step_3'] = 'Les transporteurs de l\'acheteur livrent le paiement sur votre planète et votre flotte livre la marchandise à l\'acheteur. Chacun paie son carburant.';
 $LNG['market_how_step_4'] = 'Vous pouvez annuler tant que personne n\'a acheté. Les flottes invendues rentrent à la fin de leur attente. Une offre achetée ne peut pas être annulée.';
+$LNG['market_fuel_cargo_hint'] = 'Le carburant du vol occupe de la place en soute, gardez donc un peu de marge : vérifiez la capacité restante sur l\'écran de flotte avant l\'envoi.';
 $LNG['market_my_offers'] = 'Vous avez %s offre(s) active(s). Elles sont marquées « Votre offre » et peuvent être annulées depuis la liste.';
 $LNG['market_tab_resources'] = 'Ressources';
 $LNG['market_tab_fleet'] = 'Vaisseaux';
