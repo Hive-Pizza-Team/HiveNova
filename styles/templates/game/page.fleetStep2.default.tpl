@@ -103,10 +103,7 @@
 					</td>
 				</tr>
 			</table>
-			<!--
-			Max flight time (0 = unlimited):
-			<input name="maxFlightTime" size="10" type="text" value="0"> hours<br/>
-			-->
+			<p class="market__fuel-hint">{$LNG.market_fuel_cargo_hint}</p>
 			</td>
 		</tr>
 		{/if}
