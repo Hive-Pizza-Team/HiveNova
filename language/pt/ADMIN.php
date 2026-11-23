@@ -1402,6 +1402,7 @@ $LNG['cronjob_is_unlock']			= 'Não';
 
 $LNG['cronjob_inactive']			= 'Yes';
 $LNG['cronjob_active']				= 'No';
+$LNG['cronjob_make_due'] = 'Tornar devido agora';
 
 // SQL-Dumper
 $LNG['du_header']					= 'Backup de Base de Dados';

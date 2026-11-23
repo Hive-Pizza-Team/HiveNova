@@ -623,6 +623,7 @@ $LNG['cronjob_is_unlock']			= 'Hayir';
 
 $LNG['cronjob_inactive']			= 'Evet';
 $LNG['cronjob_active']				= 'Hayir';
+$LNG['cronjob_make_due'] = 'Simdi vadesi gelsin';
 
 //----------------------------------------------------------------------------//
 //---------------	Sil/Olustur	------------------------//
