@@ -128,7 +128,7 @@
 			<div id="uni-stats" class="uni-stats">
 				{foreach $universeStats as $uniId => $stats}
 				<div class="contentbox uni-stats-row{if $uniId == $defaultEmailUniverse} active{/if}{if $stats.seasonal} uni-stats-row--season{/if}" data-uni="{$uniId}">
-					<h2>{$stats.name|escape}</h2>
+					<h2 lang="en">{$stats.name|escape}</h2>
 					{if $stats.seasonal || !$stats.open || !$stats.reg_open}
 					<ul class="uni-stats-badges">
 						{if $stats.seasonal}
