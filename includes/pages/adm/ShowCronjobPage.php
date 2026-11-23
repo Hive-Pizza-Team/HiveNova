@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Cronjob;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Template;
 
@@ -98,10 +99,10 @@ function ShowCronjobEdit($post_id)
 		$error_msg[] = $LNG['cronjob_error_dow'];
 	if ($post_dom === false)
 		$error_msg[] = $LNG['cronjob_error_dom'];
-	if ($post_class == '')
+	if ($post_class == '' || !Cronjob::isCronjobClassName($post_class))
 		$error_msg[] = $LNG['cronjob_error_class'];
-	elseif (!file_exists('includes/classes/cronjob/'.$post_class.'.class.php')) 
-		$error_msg[] = $LNG['cronjob_error_filenotfound'].'includes/classes/cronjobs/'.$post_class.'.class.php';
+	elseif (!Cronjob::classFileExists($post_class, 'includes/classes/cronjob'))
+		$error_msg[] = $LNG['cronjob_error_filenotfound'].Cronjob::classFilePath($post_class, 'includes/classes/cronjob');
 	
 	if ($_POST && count($error_msg) == 0)
 	{
@@ -132,7 +133,7 @@ function ShowCronjobDelete($cronjobId) {
 
 function ShowCronjobLock($cronjobId) {
     cronjobRequirePost();
-    $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = MD5(UNIX_TIMESTAMP()) WHERE cronjobID = ".$cronjobId.";");
+    $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = '".$GLOBALS['DATABASE']->sql_escape(Cronjob::LOCK_MANUAL)."' WHERE cronjobID = ".$cronjobId.";");
     HTTP::redirectTo('admin.php?page=cronjob');
 }
 
@@ -185,14 +186,7 @@ function ShowCronjobDetail($detail,$error_msg=NULL)
 	$template	= new Template();
 	
 	
-	$avalibleCrons	= array();
-	
-	$dir = new DirectoryIterator('includes/classes/cronjob/');
-	foreach ($dir as $fileinfo) {
-		if ($fileinfo->isFile() && $fileinfo->getBasename('.class.php') != $fileinfo->getFilename()) {
-			$avalibleCrons[]	= $fileinfo->getBasename('.class.php');
-		}
-	}
+	$avalibleCrons	= Cronjob::listAvailableClasses('includes/classes/cronjob');
 	
 	$template->assign_vars(array(	
 		'avalibleCrons' => $avalibleCrons
