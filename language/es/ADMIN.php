@@ -1337,6 +1337,7 @@ $LNG['cronjob_is_unlock'] = 'No';
 
 $LNG['cronjob_inactive'] = 'Sí';
 $LNG['cronjob_active'] = 'No';
+$LNG['cronjob_make_due'] = 'Marcar como pendiente';
 
 // Obsequio
 $LNG['ga_success'] = '¡Éxito!';

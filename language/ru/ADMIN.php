@@ -1285,6 +1285,7 @@ $LNG['cronjob_is_unlock']              = 'Нет';
 
 $LNG['cronjob_inactive']               = 'Да';
 $LNG['cronjob_active']                 = 'Нет';
+$LNG['cronjob_make_due'] = 'Сделать текущим';
 
 // Подарки
 $LNG['ga_success']                     = 'Подарок выдан.';

@@ -1396,6 +1396,7 @@ $LNG['cronjob_is_unlock'] = 'No';
 
 $LNG['cronjob_inactive'] = 'Yes';
 $LNG['cronjob_active'] = 'No';
+$LNG['cronjob_make_due'] = 'Make due now';
 
 // Giveaway
 $LNG['ga_success'] = 'Success!';

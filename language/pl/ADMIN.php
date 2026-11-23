@@ -1364,6 +1364,7 @@ $LNG['cronjob_is_unlock']			= 'Nie';
 
 $LNG['cronjob_inactive']			= 'Tak';
 $LNG['cronjob_active']				= 'Nie';
+$LNG['cronjob_make_due'] = 'Ustaw jako zaległe';
 
 // Giveaway
 $LNG['ga_success']						= 'Udane!';

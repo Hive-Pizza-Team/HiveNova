@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/FakeDatabase.php';
 require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
+require_once __DIR__ . '/../Support/NormalizeExecuteStubCronjob.php';
 
 class CronjobExecuteTest extends TestCase
 {
@@ -235,11 +236,16 @@ class CronjobExecuteTest extends TestCase
             $this->assertFalse(Cronjob::isValidClassName('Foo/Bar'));
             $this->assertFalse(Cronjob::isValidClassName('Foo.php'));
             $this->assertFalse(Cronjob::isValidClassName('HiveNova\\Cronjob\\DailyCronjob'));
+            $this->assertTrue(Cronjob::isCronjobClassName('HiveNova\\Cronjob\\DailyCronjob'));
             $this->assertFalse(Cronjob::isValidClassName(''));
             $this->assertFalse(Cronjob::classFileExists('../Evil', $dir));
             $this->assertFalse(Cronjob::classFileExists('CronjobTask', $dir));
             $this->assertFalse(Cronjob::isCronjobClassName('CronjobTask'));
             $this->assertFalse(Cronjob::classFileExists('MissingCronjob', $dir));
+            $this->assertSame(
+                $dir . '/PushingDetectionCronjob.php',
+                Cronjob::classFilePath('HiveNova\\Cronjob\\PushingDetectionCronjob', $dir)
+            );
 
             $this->assertSame(
                 $dir . '/PushingDetectionCronjob.php',
@@ -252,6 +258,100 @@ class CronjobExecuteTest extends TestCase
             }
             rmdir($dir);
         }
+    }
+
+    public function test_editor_options_preselect_and_save_use_declared_fqcn(): void
+    {
+        $dir = sys_get_temp_dir() . '/hivenova-cron-fqcn-' . uniqid('', true);
+        $this->assertTrue(mkdir($dir, 0777, true));
+
+        try {
+            file_put_contents(
+                $dir . '/PushingDetectionCronjob.php',
+                "<?php\nnamespace HiveNova\\Cronjob;\nclass PushingDetectionCronjob {}\n"
+            );
+            file_put_contents(
+                $dir . '/DailyCronjob.php',
+                "<?php\nnamespace HiveNova\\Cronjob;\nclass DailyCronjob {}\n"
+            );
+            file_put_contents($dir . '/CronjobTask.php', "<?php\nnamespace HiveNova\\Cronjob;\n");
+            file_put_contents($dir . '/notes.txt', 'ignore');
+
+            $fqcnPushing = 'HiveNova\\Cronjob\\PushingDetectionCronjob';
+            $fqcnDaily = 'HiveNova\\Cronjob\\DailyCronjob';
+
+            $this->assertSame(
+                [
+                    $fqcnDaily => 'DailyCronjob',
+                    $fqcnPushing => 'PushingDetectionCronjob',
+                ],
+                Cronjob::listAvailableClassOptions($dir)
+            );
+            $this->assertSame(
+                ['DailyCronjob', 'PushingDetectionCronjob'],
+                Cronjob::listAvailableClasses($dir)
+            );
+
+            $this->assertSame($fqcnPushing, Cronjob::resolveClassName('PushingDetectionCronjob', $dir));
+            $this->assertSame($fqcnPushing, Cronjob::resolveClassName($fqcnPushing, $dir));
+            $this->assertSame($fqcnDaily, Cronjob::resolveClassName('DailyCronjob', $dir));
+
+            $this->assertNull(Cronjob::resolveClassName('HiveNova\\Other\\PushingDetectionCronjob', $dir));
+            $this->assertNull(Cronjob::resolveClassName('../Evil', $dir));
+            $this->assertNull(Cronjob::resolveClassName('Foo/BarCronjob', $dir));
+            $this->assertNull(Cronjob::resolveClassName('MissingCronjob', $dir));
+            $this->assertNull(Cronjob::resolveClassName('CronjobTask', $dir));
+            $this->assertNull(Cronjob::resolveClassName('', $dir));
+
+            $this->assertSame($fqcnPushing, Cronjob::declaredClassName($dir . '/PushingDetectionCronjob.php', 'PushingDetectionCronjob'));
+        } finally {
+            foreach (glob($dir . '/*') ?: [] as $file) {
+                unlink($file);
+            }
+            rmdir($dir);
+        }
+    }
+
+    public function test_normalize_class_name_expands_short_name_when_fqcn_exists(): void
+    {
+        $fqcn = \HiveNova\Cronjob\NormalizeExecuteStubCronjob::class;
+        $this->assertSame($fqcn, Cronjob::normalizeClassName('NormalizeExecuteStubCronjob'));
+        $this->assertSame($fqcn, Cronjob::normalizeClassName($fqcn));
+        $this->assertSame(
+            'UnknownShortCronjob',
+            Cronjob::normalizeClassName('UnknownShortCronjob')
+        );
+        $this->assertSame('', Cronjob::normalizeClassName(''));
+    }
+
+    public function test_execute_normalizes_short_class_name_to_fqcn(): void
+    {
+        $fake = Database::get();
+        $this->assertInstanceOf(FakeDatabase::class, $fake);
+        $fake->achievement->cronjobClass = 'NormalizeExecuteStubCronjob';
+        \HiveNova\Cronjob\NormalizeExecuteStubCronjob::$ran = false;
+
+        Cronjob::execute(12);
+
+        $this->assertTrue(\HiveNova\Cronjob\NormalizeExecuteStubCronjob::$ran);
+        $this->assertTrue($fake->achievement->cronjobLockCleared);
+    }
+
+    public function test_calculate_next_time_matches_recalculate_formula(): void
+    {
+        $from = 1_700_000_000;
+        $expected = \tdCron::getNextOccurrence('0 0 * * 0', $from + 60);
+
+        $this->assertSame(
+            $expected,
+            Cronjob::calculateNextTime('0', '0', '*', '*', '0', $from)
+        );
+    }
+
+    public function test_due_immediately_helper_uses_provided_timestamp(): void
+    {
+        $this->assertSame(1_700_000_123, Cronjob::dueImmediatelyAt(1_700_000_123));
+        $this->assertSame(TIMESTAMP, Cronjob::dueImmediatelyAt());
     }
 }
 

@@ -75,6 +75,13 @@ class Cronjob
 			OR (`lock` NOT REGEXP \'^[0-9]+$\' AND `lock` <> :manualLock))';
 	}
 
+	public static function shortClassName(string $class): string
+	{
+		$pos = strrpos($class, '\\');
+
+		return $pos === false ? $class : substr($class, $pos + 1);
+	}
+
 	public static function isValidClassName(string $class): bool
 	{
 		return (bool) preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $class);
@@ -82,7 +89,7 @@ class Cronjob
 
 	public static function classFilePath(string $class, string $directory = 'includes/classes/cronjob'): string
 	{
-		return rtrim($directory, '/\\') . '/' . $class . '.php';
+		return rtrim($directory, '/\\') . '/' . self::shortClassName($class) . '.php';
 	}
 
 	public static function classFileExists(string $class, string $directory = 'includes/classes/cronjob'): bool
@@ -92,7 +99,31 @@ class Cronjob
 
 	public static function isCronjobClassName(string $class): bool
 	{
-		return self::isValidClassName($class) && str_ends_with($class, 'Cronjob');
+		$short = self::shortClassName($class);
+
+		return self::isValidClassName($short) && str_ends_with($short, 'Cronjob');
+	}
+
+	/**
+	 * Declared class name in a cron job file: FQCN when a namespace is present,
+	 * otherwise the short class name.
+	 */
+	public static function declaredClassName(string $filePath, string $shortClass): ?string
+	{
+		if (!self::isCronjobClassName($shortClass) || !is_file($filePath)) {
+			return null;
+		}
+
+		$contents = file_get_contents($filePath);
+		if ($contents === false) {
+			return null;
+		}
+
+		if (preg_match('/(?:^|\R)\s*namespace\s+([A-Za-z_][A-Za-z0-9_\\\\]*)\s*;/', $contents, $match)) {
+			return $match[1] . '\\' . $shortClass;
+		}
+
+		return $shortClass;
 	}
 
 	/**
@@ -100,11 +131,22 @@ class Cronjob
 	 */
 	public static function listAvailableClasses(string $directory = 'includes/classes/cronjob'): array
 	{
+		return array_values(self::listAvailableClassOptions($directory));
+	}
+
+	/**
+	 * Known cron classes in $directory. Keys are the names to store and use as
+	 * option values (the declared FQCN when the file has a namespace).
+	 *
+	 * @return array<string, string> declared name => short label, sorted by label
+	 */
+	public static function listAvailableClassOptions(string $directory = 'includes/classes/cronjob'): array
+	{
 		if (!is_dir($directory)) {
 			return [];
 		}
 
-		$classes = [];
+		$options = [];
 		$dir = new DirectoryIterator($directory);
 		foreach ($dir as $fileinfo) {
 			if (!$fileinfo->isFile()) {
@@ -114,15 +156,85 @@ class Cronjob
 			if (!str_ends_with($filename, 'Cronjob.php')) {
 				continue;
 			}
-			$class = $fileinfo->getBasename('.php');
-			if (!self::isCronjobClassName($class)) {
+			$short = $fileinfo->getBasename('.php');
+			if (!self::isCronjobClassName($short)) {
 				continue;
 			}
-			$classes[] = $class;
+			$declared = self::declaredClassName($fileinfo->getPathname(), $short);
+			if ($declared === null) {
+				continue;
+			}
+			$options[$declared] = $short;
 		}
-		sort($classes);
+		asort($options, SORT_STRING);
 
-		return $classes;
+		return $options;
+	}
+
+	/**
+	 * Resolve a posted or stored class name (short or FQCN) to the declared
+	 * name of a known cron class. Returns null when the class is not in the
+	 * directory allowlist, or when a supplied FQCN does not match the file.
+	 */
+	public static function resolveClassName(string $class, string $directory = 'includes/classes/cronjob'): ?string
+	{
+		$options = self::listAvailableClassOptions($directory);
+		if (isset($options[$class])) {
+			return $class;
+		}
+
+		if (!self::isCronjobClassName($class)) {
+			return null;
+		}
+
+		$short = self::shortClassName($class);
+		foreach ($options as $declared => $label) {
+			if ($label !== $short) {
+				continue;
+			}
+			if (str_contains($class, '\\') && $class !== $declared) {
+				return null;
+			}
+
+			return $declared;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Normalize a class stored in the DB for instantiation. A short name is
+	 * expanded to HiveNova\Cronjob\<short> when that class exists, so rows
+	 * saved with a short name keep working without a database edit.
+	 */
+	public static function normalizeClassName(string $class): string
+	{
+		if ($class === '' || str_contains($class, '\\')) {
+			return $class;
+		}
+
+		$fqcn = 'HiveNova\\Cronjob\\' . $class;
+		if (class_exists($fqcn)) {
+			return $fqcn;
+		}
+
+		return $class;
+	}
+
+	public static function calculateNextTime(string $min, string $hours, string $dom, string $month, string $dow, ?int $from = null): int
+	{
+		$from ??= TIMESTAMP;
+		$cronTabString = implode(' ', array($min, $hours, $dom, $month, $dow));
+
+		return \tdCron::getNextOccurrence($cronTabString, $from + 60);
+	}
+
+	/**
+	 * nextTime value that makes a job due for the next cron tick.
+	 */
+	public static function dueImmediatelyAt(?int $now = null): int
+	{
+		return $now ?? TIMESTAMP;
 	}
 	
 	static function execute($cronjobID)
@@ -167,6 +279,8 @@ class Cronjob
 		}
 		
 		try {
+			$cronjobClassName	= self::normalizeClassName($cronjobClassName);
+
 			/** @var \HiveNova\Cronjob\CronjobTask $cronjobObj */
 			$cronjobObj			= new $cronjobClassName;
 			$cronjobObj->run();
@@ -257,8 +371,13 @@ class Cronjob
 
 		foreach($cronjobResult as $cronjobRow)
 		{
-			$cronTabString	= implode(' ', array($cronjobRow['min'], $cronjobRow['hours'], $cronjobRow['dom'], $cronjobRow['month'], $cronjobRow['dow']));
-			$nextTime		= \tdCron::getNextOccurrence($cronTabString, TIMESTAMP + 60);
+			$nextTime		= self::calculateNextTime(
+				$cronjobRow['min'],
+				$cronjobRow['hours'],
+				$cronjobRow['dom'],
+				$cronjobRow['month'],
+				$cronjobRow['dow']
+			);
 
 			$db->update($sql, array(
 				':nextTime'		=> $nextTime,
