@@ -1661,3 +1661,5 @@ $LNG['whats_new_see_all'] = 'See all release notes';
 $LNG['whats_new_link'] = 'What\'s new';
 $LNG['whats_new_settings_label'] = 'Release notes';
 $LNG['whats_new_settings_link'] = 'See what\'s new';
+$LNG['mg_unread'] = 'Unread';
+$LNG['mg_compose_recipient'] = 'Recipient';
