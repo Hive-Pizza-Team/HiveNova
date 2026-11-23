@@ -379,6 +379,17 @@
     margin-bottom: 4px;
 }
 
+/* iOS Safari auto-zooms focused controls under 16px (UA default ~13.33px).
+   The #650 rule in lobby.css does not apply here: register does not load
+   lobby.css and has no .lobby wrapper. */
+.rowForm select,
+.rowForm input[type="text"],
+.rowForm input[type="password"],
+.rowForm input[type="email"],
+.rowForm textarea {
+    font-size: 16px;
+}
+
 .rowForm input[type="submit"] {
     width: 100%;
     padding: 10px;

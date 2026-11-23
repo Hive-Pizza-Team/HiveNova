@@ -929,3 +929,16 @@ footer {
     margin-left: auto;
     margin-right: auto;
 }
+
+
+/* iOS Safari auto-zooms focused controls under 16px (UA default ~13.33px).
+   Lobby login fields are covered by lobby.css (#650). Register, lost password,
+   the language picker, and other login-side form pages do not load lobby.css. */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+textarea,
+.language-compact-select {
+    font-size: 16px;
+}
