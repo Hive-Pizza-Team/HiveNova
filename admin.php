@@ -220,6 +220,10 @@ switch($page)
 		include_once('includes/pages/adm/ShowReferralStatsPage.php');
 		ShowReferralStatsPage();
 	break;
+	case 'hivecreaterequests':
+		include_once('includes/pages/adm/ShowHiveCreateRequestsPage.php');
+		ShowHiveCreateRequestsPage();
+	break;
 	case 'buildlog':
 		include_once('includes/pages/adm/ShowBuildLogPage.php');
 		ShowBuildLogPage();

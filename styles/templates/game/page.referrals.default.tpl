@@ -66,11 +66,12 @@
 
 <table class="table519">
 	<tr>
-		<th colspan="5">{$LNG.ref_stats_recent_heading}</th>
+		<th colspan="6">{$LNG.ref_stats_recent_heading}</th>
 	</tr>
 	<tr>
 		<th>{$LNG.ref_stats_recruit}</th>
 		<th>{$LNG.ref_stats_referrer}</th>
+		<th>{$LNG.ref_stats_source}</th>
 		<th>{$LNG.ref_stats_registered}</th>
 		<th>{$LNG.ref_stats_points}</th>
 		<th>{$LNG.ref_stats_bonus_status}</th>
@@ -79,12 +80,13 @@
 	<tr>
 		<td>{$row.recruit_username|escape} <small>({$row.recruit_id})</small></td>
 		<td>{$row.referrer_username|escape} <small>({$row.referrer_id})</small></td>
+		<td>{$row.signup_src|escape}</td>
 		<td>{$row.register_time_fmt}</td>
 		<td>{$row.total_points|number}</td>
 		<td>{$row.bonus_status_label|escape}</td>
 	</tr>
 	{foreachelse}
-	<tr><td colspan="5">{$LNG.ref_stats_no_recruits}</td></tr>
+	<tr><td colspan="6">{$LNG.ref_stats_no_recruits}</td></tr>
 	{/foreach}
 </table>
 

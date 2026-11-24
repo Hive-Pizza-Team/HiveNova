@@ -77,7 +77,7 @@
 	</div>
 </div>
 
-<div id="achievement-celebration-root" class="achievement-celebration" aria-hidden="true">
+<div id="achievement-celebration-root" class="achievement-celebration" hidden aria-hidden="true">
 	<div class="achievement-celebration__backdrop"></div>
 	<canvas class="achievement-celebration__canvas"></canvas>
 	<div class="achievement-celebration__sparkles"></div>
@@ -91,7 +91,42 @@
 		<button type="button" class="achievement-celebration__btn">{$LNG.ach_celebration_continue}</button>
 	</div>
 </div>
+{if !empty($whatsNewModal)}
+<dialog id="whats-new-dialog" class="whats-new-dialog" role="dialog" aria-modal="true" aria-labelledby="whats-new-dialog-title"
+	data-dismiss-url="game.php?page=whatsNew&amp;mode=dismiss&amp;ajax=1"
+	data-token="{$whatsNewCsrf|escape:'html'}">
+	<div class="whats-new-dialog__panel">
+		<header class="whats-new-dialog__header">
+			<div class="whats-new-dialog__heading">
+				<h2 id="whats-new-dialog-title" class="whats-new-dialog__title">{$LNG.whats_new_dialog_title}</h2>
+				<p class="whats-new-dialog__subtitle">{$LNG.whats_new_dialog_subtitle}</p>
+			</div>
+			<button type="button" class="whats-new-dialog__close" data-whats-new-close aria-label="{$LNG.whats_new_dialog_close}">×</button>
+		</header>
+		<div class="whats-new-dialog__body">
+			{foreach $whatsNewModal as $release}
+			<section class="whats-new-dialog__release">
+				<h3 class="whats-new-dialog__version">{$release.version|escape:'html'}</h3>
+				{if $release.items|@count > 0}
+				<ul class="whats-new-dialog__items">
+					{foreach $release.items as $item}
+					<li>{$item|escape:'html'}</li>
+					{/foreach}
+				</ul>
+				{/if}
+			</section>
+			{/foreach}
+		</div>
+		<footer class="whats-new-dialog__footer">
+			<a href="game.php?page=whatsNew" class="whats-new-dialog__see-all">{$LNG.whats_new_see_all}</a>
+			<button type="button" class="button whats-new-dialog__got-it" data-whats-new-got-it>{$LNG.whats_new_dialog_got_it}</button>
+		</footer>
+	</div>
+</dialog>
+<script src="scripts/game/whats-new-modal.js?v={$REV}"></script>
+{/if}
 {include file="main.bottomnav.tpl"}
+{include file="shared.feedback.tpl"}
 <script src="scripts/game/attack-alert.js?v={$REV}"></script>
 
 </body>

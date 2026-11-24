@@ -55,6 +55,7 @@ $pages = [
     'battleHall',
     'records',
     'changelog',
+    'whatsNew',
     'chat',
     'buddyList',
     'banList',

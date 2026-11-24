@@ -185,12 +185,18 @@
 			this.fw.destroy();
 			this.fw = null;
 		}
-		this.$root.removeClass('is-active').attr('aria-hidden', 'true');
+		this.$root
+			.removeClass('is-active')
+			.attr({'aria-hidden': 'true', hidden: 'hidden'});
+		$(document).off('keydown.ach');
 	};
 
 	Celebration.prototype.start = function () {
 		var self = this;
-		this.$root.addClass('is-active').attr('aria-hidden', 'false');
+		this.$root
+			.removeAttr('hidden')
+			.addClass('is-active')
+			.attr('aria-hidden', 'false');
 		this.showCurrent();
 		this.$root.find('.achievement-celebration__btn').off('click.ach').on('click.ach', function () {
 			self.advance();
