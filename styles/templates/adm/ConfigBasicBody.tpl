@@ -11,6 +11,10 @@
 	<td><input name="game_name" value="{$game_name}" type="text" maxlength="60"></td>
 	<td>&nbsp;</td>
 </tr><tr>
+	<td>{$LNG.se_seo_canonical_origin}</td>
+	<td><input name="seo_canonical_origin" size="40" value="{$seo_canonical_origin}" type="text" maxlength="255" placeholder="https://moonsiege.com/"></td>
+	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_seo_canonical_origin_info}"></td>
+</tr><tr>
     <td>{$LNG.se_ttf_file}</td>
     <td><input name="ttf_file" size="40" value="{$ttf_file}" type="text"></td>
 	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.se_ttf_file_info}"></td>

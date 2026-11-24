@@ -46,7 +46,7 @@ class ShowVizPage extends AbstractGamePage
 		global $USER;
 
 		$config = Config::get($USER['universe']);
-		$version = (string) ($config->VERSION ?? '');
+		$version = \HiveNova\Core\ProductVersion::displayed((string) ($config->VERSION ?? ''));
 
 		// Dimensions only on first paint — fleets arrive via mode=fleets.
 		$vizConfigJson = json_encode([

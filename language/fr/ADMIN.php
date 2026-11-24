@@ -1393,6 +1393,7 @@ $LNG['cronjob_is_unlock']			= 'Non';
 
 $LNG['cronjob_inactive']			= 'Oui';
 $LNG['cronjob_active']				= 'Non';
+$LNG['cronjob_make_due'] = 'Rendre dû maintenant';
 
 // Giveaway
 $LNG['ga_success']						= 'Succés!';
@@ -1638,3 +1639,20 @@ $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
 $LNG['modul_43'] = 'Unused';
+$LNG['se_seo_canonical_origin'] = 'Public canonical origin';
+$LNG['se_seo_canonical_origin_info'] = 'Absolute https origin used for lobby canonical, hreflang, Open Graph, and sitemap locs. Alternate hosts (e.g. moon.hive.pizza) keep this value so SEO does not split across domains. Example: https://moonsiege.com/';
+$LNG['mip_missing_user'] = 'Deleted / unknown (#%s)';
+$LNG['mu_hive_create_requests'] = 'Hive create requests';
+$LNG['hive_create_admin_title'] = 'Hive account create requests';
+$LNG['hive_create_admin_help'] = 'Approve records ops intent only in this release — claim-ticket broadcast is a follow-up. Reject stores your reason on the request.';
+$LNG['hive_create_admin_player'] = 'Player';
+$LNG['hive_create_admin_desired'] = 'Desired @name';
+$LNG['hive_create_admin_requested'] = 'Requested';
+$LNG['hive_create_admin_approve'] = 'Approve';
+$LNG['hive_create_admin_reject'] = 'Reject';
+$LNG['hive_create_admin_reason_ph'] = 'Reject reason';
+$LNG['hive_create_admin_empty'] = 'No pending create requests.';
+$LNG['hive_create_admin_approved'] = 'Request approved (claim-ticket broadcast is a follow-up).';
+$LNG['hive_create_admin_rejected'] = 'Request rejected.';
+$LNG['hive_create_admin_need_reason'] = 'A reject reason is required.';
+$LNG['hive_create_admin_failed'] = 'Could not update that request.';

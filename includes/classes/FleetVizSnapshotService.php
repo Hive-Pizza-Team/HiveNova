@@ -74,7 +74,7 @@ class FleetVizSnapshotService
 			$universes[] = $this->forUniverse($uniId, $perUniLimit, true);
 		}
 
-		$version = (string) (Config::get()->VERSION ?? '');
+		$version = ProductVersion::displayed((string) (Config::get()->VERSION ?? ''));
 
 		return [
 			'threeSrc'  => './scripts/threejs/three.min.js?v=' . substr($version, -4),

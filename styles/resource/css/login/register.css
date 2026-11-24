@@ -20,6 +20,11 @@
     margin-bottom: 10px;
 }
 
+/*
+ * #420 — reg-tab labels that are still English (e.g. "Hive Keychain") set
+ * lang="en" in the template so uppercase under html[lang=tr] stays HIVE not HİVE.
+ * Translated tabs (e.g. "Şifre", "E-posta") omit lang="en" and keep Turkish casing.
+ */
 .reg-tab-btn {
     flex: 1;
     max-width: 220px;
@@ -372,6 +377,17 @@
     border-radius: 8px;
     box-sizing: border-box;
     margin-bottom: 4px;
+}
+
+/* iOS Safari auto-zooms focused controls under 16px (UA default ~13.33px).
+   The #650 rule in lobby.css does not apply here: register does not load
+   lobby.css and has no .lobby wrapper. */
+.rowForm select,
+.rowForm input[type="text"],
+.rowForm input[type="password"],
+.rowForm input[type="email"],
+.rowForm textarea {
+    font-size: 16px;
 }
 
 .rowForm input[type="submit"] {

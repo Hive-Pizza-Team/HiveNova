@@ -13,6 +13,8 @@ class GamePageRouter
 		'faq'      => 'questions',
 		'officers' => 'officier',
 		'officer'  => 'officier',
+		'nfts'     => 'medals',
+		'nft'      => 'medals',
 	];
 
 	public static function resolve(string $page): string

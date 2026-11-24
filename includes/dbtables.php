@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 56);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 63);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -73,8 +73,10 @@ $dbTableNames	= array(
 	'LOG_SHIPYARD'		=> DB_PREFIX.'log_shipyard',
 	'BOT_DETECTION_STATE'	=> DB_PREFIX.'bot_detection_state',
 	'PUSH_SUBSCRIPTIONS'	=> DB_PREFIX.'push_subscriptions',
+	'PUSH_EXPIRED_ENDPOINTS'	=> DB_PREFIX.'push_expired_endpoints',
 	'PUSH_BUILDING_NOTIFIED'	=> DB_PREFIX.'push_building_notified',
 	'PUSH_RESEARCH_NOTIFIED'	=> DB_PREFIX.'push_research_notified',
+	'PUSH_FLEET_RETURN_NOTIFIED'	=> DB_PREFIX.'push_fleet_return_notified',
 	'ACHIEVEMENTS'			=> DB_PREFIX.'achievements',
 	'USER_ACHIEVEMENT_PROGRESS'	=> DB_PREFIX.'user_achievement_progress',
 	'USER_ACHIEVEMENTS'		=> DB_PREFIX.'user_achievements',
@@ -83,6 +85,7 @@ $dbTableNames	= array(
 	'FEAT_CLAIMS'			=> DB_PREFIX.'feat_claims',
 	'SALVAGE_PACKAGES'		=> DB_PREFIX.'salvage_packages',
 	'HIVE_SOCIAL_MEMO_QUEUE'	=> DB_PREFIX.'hive_social_memo_queue',
+	'HIVE_ACCOUNT_CREATE_REQUESTS'	=> DB_PREFIX.'hive_account_create_requests',
 	'DIRECTIVE_PERIODS'		=> DB_PREFIX.'directive_periods',
 	'USER_DIRECTIVES'		=> DB_PREFIX.'user_directives',
 	'EXPEDITION_PENDING_CHOICES'	=> DB_PREFIX.'expedition_pending_choices',
@@ -90,5 +93,6 @@ $dbTableNames	= array(
 	'SEASON_ENTRIES'		=> DB_PREFIX.'season_entries',
 	'SEASON_SNAPSHOTS'		=> DB_PREFIX.'season_snapshots',
 	'SEASON_PAYOUTS'		=> DB_PREFIX.'season_payouts',
+	'SEASON_SBT_GRANTS'		=> DB_PREFIX.'season_sbt_grants',
 );
 // MOD-TABLES

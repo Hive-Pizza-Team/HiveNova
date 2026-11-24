@@ -23,6 +23,23 @@ Season boundaries may use the normal SemVer bump (often MAJOR or MINOR). Optiona
 - Note any pending `install/migrations/` / `migrate.php` steps in the release body
 - `gh` authenticated with repo access
 
+## Product version
+
+The release tag is the product version players and admins see. The commit you tag must already contain:
+
+- `install/VERSION` set to that tag (`v1.0.1`, not the old `2.0` identifier)
+- `changelog/vX.Y.Z.md` with the player-facing notes (What’s New reads these files)
+
+`DB_VERSION_REQUIRED` in `includes/dbtables.php` is the schema counter. Do not bump `install/VERSION` for a migration.
+
+Prepare those two files on a branch (does not tag):
+
+```bash
+./scripts/release.sh v1.0.1 --prepare
+```
+
+`--prepare` writes `install/VERSION` and creates `changelog/vX.Y.Z.md` only when that file is missing. Replace the placeholder bullet, commit, and merge to `master`. Migration 63 widens `config.VERSION` and sets existing rows to `v1.6.0`. Later releases are copied into the database by admin Clear Cache (the daily cron calls it too).
+
 ## One-command release
 
 From the repo root on an up-to-date `master`:
@@ -39,14 +56,17 @@ Dry run (no tag push / no GitHub Release):
 
 What the script does:
 
-1. Verifies you are on `master`, clean, and in sync with `origin/master`
-2. Creates annotated tag `vX.Y.Z`
-3. Pushes the tag
-4. Creates a GitHub Release with auto-generated notes from merged PRs
+1. Refuses to tag unless `install/VERSION` and `changelog/vX.Y.Z.md` match the tag
+2. Verifies you are on `master`, clean, and in sync with `origin/master`
+3. Creates annotated tag `vX.Y.Z`
+4. Pushes the tag
+5. Creates a GitHub Release with auto-generated notes from merged PRs
 
-Edit the release notes in the GitHub UI afterward: group **Features / Fixes / Admin / Migrations**, and call out wipe or migration impact.
+Edit the release notes in the GitHub UI afterward: group **Features / Fixes / Admin / Migrations**, and call out wipe or migration impact. The in-game What’s New text is `changelog/vX.Y.Z.md`, not the GitHub Release body.
 
 ## Manual equivalent
+
+Use this only when `install/VERSION` and `changelog/vX.Y.Z.md` already match the tag.
 
 ```bash
 git checkout master && git pull

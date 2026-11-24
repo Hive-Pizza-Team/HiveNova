@@ -1396,6 +1396,7 @@ $LNG['cronjob_is_unlock'] = 'No';
 
 $LNG['cronjob_inactive'] = 'Yes';
 $LNG['cronjob_active'] = 'No';
+$LNG['cronjob_make_due'] = 'Make due now';
 
 // Giveaway
 $LNG['ga_success'] = 'Success!';
@@ -1566,4 +1567,21 @@ $LNG['se_season_blog'] = 'Season blog Hive account';
 $LNG['se_season_blog_key'] = 'Season blog posting key';
 $LNG['se_season_blog_key_info'] = 'Leave blank to keep the stored key. Used to publish the end-of-season Hive post. The key is never shown again.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
+$LNG['se_seo_canonical_origin'] = 'Public canonical origin';
+$LNG['se_seo_canonical_origin_info'] = 'Absolute https origin used for lobby canonical, hreflang, Open Graph, and sitemap locs. Alternate hosts (e.g. moon.hive.pizza) keep this value so SEO does not split across domains. Example: https://moonsiege.com/';
+$LNG['mip_missing_user'] = 'Deleted / unknown (#%s)';
+$LNG['mu_hive_create_requests'] = 'Hive create requests';
+$LNG['hive_create_admin_title'] = 'Hive account create requests';
+$LNG['hive_create_admin_help'] = 'Approve records ops intent only in this release — claim-ticket broadcast is a follow-up. Reject stores your reason on the request.';
+$LNG['hive_create_admin_player'] = 'Player';
+$LNG['hive_create_admin_desired'] = 'Desired @name';
+$LNG['hive_create_admin_requested'] = 'Requested';
+$LNG['hive_create_admin_approve'] = 'Approve';
+$LNG['hive_create_admin_reject'] = 'Reject';
+$LNG['hive_create_admin_reason_ph'] = 'Reject reason';
+$LNG['hive_create_admin_empty'] = 'No pending create requests.';
+$LNG['hive_create_admin_approved'] = 'Request approved (claim-ticket broadcast is a follow-up).';
+$LNG['hive_create_admin_rejected'] = 'Request rejected.';
+$LNG['hive_create_admin_need_reason'] = 'A reject reason is required.';
+$LNG['hive_create_admin_failed'] = 'Could not update that request.';
 $LNG['modul_43'] = 'Unused slot';

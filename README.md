@@ -92,7 +92,7 @@ Create `includes/pages/adm/{Name}.php`.
 Create a class in `includes/classes/cronjob/` implementing `CronjobTask`, then register it in the `uni1_cronjobs` DB table.
 
 **DB migrations:**
-Add `install/migrations/migration_N.sql` and bump `install/VERSION`.
+Add `install/migrations/migration_N.sql` and bump `DB_VERSION_REQUIRED` in `includes/dbtables.php`. `install/VERSION` is the product release (`vX.Y.Z`), not the schema counter.
 
 ## Local Installation
 

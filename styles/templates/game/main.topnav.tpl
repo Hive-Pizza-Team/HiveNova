@@ -5,10 +5,12 @@
    <a href="#" onclick="return Dialog.Playercard({$userID});"><img src="{$avatar}" width="50" height="50"></a>
    <div>{$LNG.tech.615}</div>
    <div><a href="#" onclick="return Dialog.Playercard({$userID});"><b>{$username}</b></a></div>
+   <div><a href="game.php?page=universeSwitch" title="{$LNG.lm_universe_switch}">{$uni_name}</a></div>
    {else}
    <img src="{$avatar}" width="50" height="50">
    <div>{$LNG.tech.615}</div>
    <div><a href="game.php?page=settings"><b>{$username}</b></a></div>
+   <div><a href="game.php?page=universeSwitch" title="{$LNG.lm_universe_switch}">{$uni_name}</a></div>
    {/if}
 </div>
 
@@ -31,9 +33,11 @@
 			
 			<div class="no-mobile">
 				{if !isset($resourceData.current)}
-					{* Energy: consumed / produced (EnergyBalanceService); red when available < 0 *}
-					<div class="res_current tooltip" data-tooltip-content="{$resourceData.available|number_plain}">
-						<span class="res_current_value{if $resourceData.inDeficit} is-energy-deficit{/if}">{$resourceData.consumed|number}</span>
+					{* Energy: leftover / produced (EnergyBalanceService.available); red on deficit.
+					   Leftover is produced − consumed. Negative first number means a true deficit
+					   (e.g. −1,100 / 0), not the pre-#682 sign-flipped consumed mix. Tooltip = consumed. *}
+					<div class="res_current tooltip" data-tooltip-content="{$resourceData.consumed|number_plain}">
+						<span class="res_current_value{if $resourceData.inDeficit} is-energy-deficit{/if}">{$resourceData.available|number}</span>
 						{if isset($resourceData.max)}&nbsp;/&nbsp;<span class="res_max">{$resourceData.max|number}</span>{/if}
 					</div>
 				{else}
@@ -48,7 +52,8 @@
 			
 			<div class="mobile">
 				{if !isset($resourceData.current)}
-					<span class="res_current{if $resourceData.inDeficit} is-energy-deficit{/if}" data-tooltip-content="{$resourceData.available|number_plain}">{$resourceData.consumed|shortly_number}</span>
+					{* Leftover only; tooltip holds full leftover for shortly_number truncation *}
+					<span class="res_current{if $resourceData.inDeficit} is-energy-deficit{/if}" data-tooltip-content="{$resourceData.available|number_plain}">{$resourceData.available|shortly_number}</span>
 				{elseif !isset($resourceData.max)}
 					<span class="res_current" id="current_{$resourceData.name}" data-real="{$resourceData.current}">{$resourceData.current|shortly_number}</span>
 				{else}

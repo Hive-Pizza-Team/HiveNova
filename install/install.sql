@@ -155,7 +155,7 @@ CREATE TABLE `%PREFIX%chat_online` (
 
 CREATE TABLE `%PREFIX%config` (
   `uni` int(11) NOT NULL AUTO_INCREMENT,
-  `VERSION` varchar(8) NOT NULL,
+  `VERSION` varchar(32) NOT NULL,
   `sql_revision` INT NOT NULL DEFAULT  '0',
   `users_amount` int(11) unsigned NOT NULL DEFAULT '1',
   `game_speed` bigint(20) unsigned NOT NULL DEFAULT '2500',
@@ -170,6 +170,7 @@ CREATE TABLE `%PREFIX%config` (
   `initial_fields` smallint(5) unsigned NOT NULL DEFAULT '163',
   `uni_name` varchar(30) NOT NULL,
   `game_name` varchar(30) NOT NULL,
+  `seo_canonical_origin` varchar(255) NOT NULL DEFAULT 'https://moonsiege.com/',
   `game_disable` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `close_reason` text NOT NULL,
   `metal_basic_income` int(11) NOT NULL DEFAULT '20',
@@ -788,6 +789,33 @@ CREATE TABLE `%PREFIX%season_payouts` (
   KEY `universe_season_status` (`universe`,`season_id`,`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `%PREFIX%season_sbt_grants` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `hive_user` varchar(16) NOT NULL DEFAULT '',
+  `season_id` varchar(32) NOT NULL,
+  `tier` varchar(16) NOT NULL,
+  `rank` int(10) unsigned DEFAULT NULL,
+  `feat_id` varchar(32) NOT NULL DEFAULT '',
+  `nft_namespace` varchar(16) NOT NULL DEFAULT '',
+  `nft_symbol` varchar(10) NOT NULL DEFAULT '',
+  `instance_id` varchar(64) NOT NULL DEFAULT '',
+  `trx_id` varchar(64) NOT NULL DEFAULT '',
+  `recap_url` varchar(512) NOT NULL DEFAULT '',
+  `image_url` varchar(512) NOT NULL DEFAULT '',
+  `game_name` varchar(64) NOT NULL DEFAULT '',
+  `data_json` mediumtext,
+  `retroactive` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `issued_at` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_season_hive_tier_feat` (`season_id`, `hive_user`, `tier`, `feat_id`),
+  KEY `user_id` (`user_id`),
+  KEY `hive_user` (`hive_user`),
+  KEY `universe_user` (`universe`, `user_id`),
+  KEY `season_id` (`season_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `%PREFIX%raports` (
   `rid` varchar(32) NOT NULL,
   `raport` longtext NOT NULL,
@@ -1053,6 +1081,21 @@ CREATE TABLE `%PREFIX%hive_social_memo_queue` (
   KEY `user_kind` (`user_id`, `kind`, `sent_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `%PREFIX%hive_account_create_requests` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `universe` tinyint(3) unsigned NOT NULL,
+  `desired_name` varchar(16) NOT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'pending',
+  `reject_reason` varchar(255) NOT NULL DEFAULT '',
+  `created_at` int(10) unsigned NOT NULL,
+  `reviewed_at` int(10) unsigned NOT NULL DEFAULT 0,
+  `reviewed_by` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `status_created` (`status`, `created_at`),
+  KEY `user_universe_status` (`user_id`, `universe`, `status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `%PREFIX%users_to_acs` (
   `userID` int(10) unsigned NOT NULL,
   `acsID` int(10) unsigned NOT NULL,
@@ -1206,13 +1249,15 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'directive_period', 1, '0', '*', '*', '*', '*', 'HiveNova\\Cronjob\\DirectivePeriodCronjob', 0, NULL),
 (NULL, 'season', 1, '*/15', '*', '*', '*', '*', 'HiveNova\\Cronjob\\SeasonCronjob', 0, NULL),
 (NULL, 'building_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\BuildingCompletePushCronjob', 0, NULL),
-(NULL, 'research_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\ResearchCompletePushCronjob', 0, NULL);
+(NULL, 'research_complete_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\ResearchCompletePushCronjob', 0, NULL),
+(NULL, 'fleet_return_push', 1, '*', '*', '*', '*', '*', 'HiveNova\\Cronjob\\FleetReturnPushCronjob', 0, NULL);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);
 
 INSERT INTO `%PREFIX%ticket_category` (`categoryID`, `name`) VALUES
-(1, 'Support');
+(1, 'Support'),
+(2, 'Feedback');
 
 INSERT INTO `%PREFIX%vars` (`elementID`, `name`, `class`, `onPlanetType`, `onePerPlanet`, `factor`, `maxLevel`, `cost901`, `cost902`, `cost903`, `cost911`, `cost921`, `consumption1`, `consumption2`, `speedTech`, `speed1`, `speed2`, `speed2Tech`, `speed2onLevel`, `speed3Tech`, `speed3onLevel`, `capacity`, `attack`, `defend`, `timeBonus`, `bonusAttack`, `bonusDefensive`, `bonusShield`, `bonusBuildTime`, `bonusResearchTime`, `bonusShipTime`, `bonusDefensiveTime`, `bonusResource`, `bonusEnergy`, `bonusResourceStorage`, `bonusShipStorage`, `bonusFlyTime`, `bonusFleetSlots`, `bonusPlanets`, `bonusSpyPower`, `bonusExpedition`, `bonusGateCoolTime`, `bonusMoreFound`, `bonusAttackUnit`, `bonusDefensiveUnit`, `bonusShieldUnit`, `bonusBuildTimeUnit`, `bonusResearchTimeUnit`, `bonusShipTimeUnit`, `bonusDefensiveTimeUnit`, `bonusResourceUnit`, `bonusEnergyUnit`, `bonusResourceStorageUnit`, `bonusShipStorageUnit`, `bonusFlyTimeUnit`, `bonusFleetSlotsUnit`, `bonusPlanetsUnit`, `bonusSpyPowerUnit`, `bonusExpeditionUnit`, `bonusGateCoolTimeUnit`, `bonusMoreFoundUnit`, `speedFleetFactor`, `production901`, `production902`, `production903`, `production911`, `production921`, `storage901`, `storage902`, `storage903`) VALUES
 (1, 'metal_mine', 0, '1', 0, 1.50, 255, 60, 15, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, '(30 * $BuildLevel * pow((1.1), $BuildLevel)) * (0.1 * $BuildLevelFactor)', NULL, NULL, '-(10 * $BuildLevel * pow((1.1), $BuildLevel)) * (0.1 * $BuildLevelFactor)', NULL, NULL, NULL, NULL),
@@ -1696,6 +1741,30 @@ CREATE TABLE `%PREFIX%push_research_notified` (
   PRIMARY KEY (`user_id`, `element_id`, `level`, `tech_end`),
   KEY `tech_end` (`tech_end`),
   KEY `notified_at` (`notified_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%push_fleet_return_notified` (
+  `fleet_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `mission` tinyint(3) unsigned NOT NULL,
+  `galaxy` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `system` smallint(5) unsigned NOT NULL DEFAULT 0,
+  `planet` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `planet_name` varchar(50) NOT NULL DEFAULT '',
+  `return_end` int(10) unsigned NOT NULL,
+  `notified_at` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`fleet_id`),
+  KEY `user_id` (`user_id`),
+  KEY `return_end` (`return_end`),
+  KEY `notified_at` (`notified_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%push_expired_endpoints` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `endpoint` varchar(2048) NOT NULL,
+  `expired_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `endpoint` (`endpoint`(768))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%achievements` (

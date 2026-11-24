@@ -4,6 +4,7 @@
 # Usage:
 #   ./scripts/release.sh v1.2.3
 #   ./scripts/release.sh v1.2.3 --dry-run
+#   ./scripts/release.sh v1.2.3 --prepare
 #   ./scripts/release.sh v1.2.3 --message "v1.2.3: short summary"
 #
 # See docs/releasing.md for process and SemVer rules.
@@ -15,13 +16,17 @@ cd "$ROOT"
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/release.sh vX.Y.Z [--dry-run] [--message "tag message"]
+Usage: ./scripts/release.sh vX.Y.Z [--dry-run] [--prepare] [--message "tag message"]
 
 Creates an annotated tag on the current master tip, pushes it, and opens a
 GitHub Release with auto-generated notes.
 
+The tag must match install/VERSION and changelog/vX.Y.Z.md already on master.
+--prepare writes those files on the current branch and does not tag.
+
 Options:
   --dry-run              Validate only; do not tag, push, or create a release
+  --prepare              Write install/VERSION and create a missing changelog file
   --message <text>       Annotated tag message (default: "<version>: release")
   -h, --help             Show this help
 EOF
@@ -29,6 +34,7 @@ EOF
 
 VERSION=""
 DRY_RUN=0
+PREPARE=0
 TAG_MESSAGE=""
 
 while [[ $# -gt 0 ]]; do
@@ -39,6 +45,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --dry-run)
       DRY_RUN=1
+      shift
+      ;;
+    --prepare)
+      PREPARE=1
       shift
       ;;
     --message)
@@ -76,6 +86,31 @@ fi
 
 if [[ -z "$TAG_MESSAGE" ]]; then
   TAG_MESSAGE="${VERSION}: release"
+fi
+
+NOTES="changelog/${VERSION}.md"
+if [[ "$PREPARE" -eq 1 ]]; then
+  printf '%s\n' "$VERSION" > install/VERSION
+  if [[ ! -f "$NOTES" ]]; then
+    printf '%s\n' "- " > "$NOTES"
+  fi
+  echo "Prepared $VERSION"
+  echo "  install/VERSION"
+  echo "  $NOTES"
+  echo "Commit both on a branch and merge to master before tagging."
+  exit 0
+fi
+
+FILE_VERSION="$(tr -d '[:space:]' < install/VERSION 2>/dev/null || true)"
+if [[ "$FILE_VERSION" != "$VERSION" ]]; then
+  echo "error: install/VERSION is '${FILE_VERSION:-missing}' but the release is $VERSION" >&2
+  echo "run ./scripts/release.sh $VERSION --prepare, commit it, and merge to master first" >&2
+  exit 1
+fi
+if [[ ! -s "$NOTES" ]]; then
+  echo "error: $NOTES is missing or empty" >&2
+  echo "run ./scripts/release.sh $VERSION --prepare, commit it, and merge to master first" >&2
+  exit 1
 fi
 
 if ! command -v gh >/dev/null 2>&1; then

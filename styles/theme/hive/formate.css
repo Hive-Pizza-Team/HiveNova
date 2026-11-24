@@ -418,9 +418,27 @@ header .fixed {
 /** MENU **/
 
 .menu-separator,
-#menu .menu-section {
+#menu .menu-section,
+#menu .menu-section__toggle {
   background-image: none;
   background: var(--color-chrome-menu-section-bg);
+  color: var(--color-chrome-menu-section);
+}
+
+#menu .menu-section__toggle:hover,
+#menu .menu-section__toggle:focus-visible {
+  color: var(--color-chrome-menu-hover-text);
+  background: var(--color-chrome-menu-hover-bg);
+  outline: none;
+}
+
+#menu .menu-section__chevron {
+  border-right-color: var(--color-chrome-menu-section);
+  border-bottom-color: var(--color-chrome-menu-section);
+}
+
+#menu .menu-group.is-collapsed .menu-group__list {
+  display: none;
 }
 
 menu a,
@@ -502,6 +520,28 @@ header td,
 .msg-cat-counts {
   font-size: 11px;
   opacity: 0.75;
+}
+
+.msg-counts-legend {
+  font-size: 11px;
+  opacity: 0.8;
+  text-align: center !important;
+  padding: 4px 8px !important;
+}
+
+.msg-compose-row td {
+  text-align: center !important;
+  padding: 8px 10px !important;
+}
+
+.msg-compose-link {
+  font-weight: 700;
+}
+
+.msg-compose-error {
+  color: #e74c3c;
+  font-weight: 700;
+  text-align: center !important;
 }
 
 .msg-cat-current {

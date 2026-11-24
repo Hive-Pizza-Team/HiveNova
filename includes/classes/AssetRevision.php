@@ -3,8 +3,8 @@
 namespace HiveNova\Core;
 
 /**
- * Cache-buster for CSS/JS query strings. VERSION stays at 2.0 across deploys,
- * so {$REV} also tracks mtime of assets loaded as ?v={$REV}.
+ * Cache-buster for CSS/JS query strings. The product version changes only
+ * when a release is cut, so {$REV} also tracks mtime of assets loaded as ?v={$REV}.
  */
 class AssetRevision
 {
@@ -20,11 +20,15 @@ class AssetRevision
 	{
 		return [
 			'styles/resource/css/ingame/main.css',
+			'styles/resource/css/feedback.css',
+			'scripts/game/feedback.js',
 			'styles/resource/css/login/main.css',
 			'styles/resource/css/login/register.css',
 			'scripts/login/main.js',
 			'scripts/game/push-subscribe.js',
+			'scripts/game/hive-keychain.js',
 			'scripts/game/base.js',
+			'scripts/game/menu-sections.js',
 			'scripts/game/top-nav.js',
 			'scripts/game/pwa-install.js',
 			'scripts/game/message.js',
@@ -39,6 +43,8 @@ class AssetRevision
 			'scripts/game/element-focus.js',
 			'scripts/game/techtree.js',
 			'scripts/game/techtree-nudge.js',
+			'scripts/game/marketplace.js',
+			'scripts/game/market-offer.js',
 			'styles/resource/css/login/main.css',
 		];
 	}

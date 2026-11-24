@@ -25,6 +25,8 @@ class Session
 	static private $obj = NULL;
 	static private $iniSet	= false;
 	private $data = NULL;
+	/** Logout must not be undone by the shutdown save() registered in load(). */
+	private $loggedOut = false;
 
 	/**
 	 * Set PHP session settings
@@ -273,6 +275,10 @@ class Session
 
 	public function save()
 	{
+		if ($this->loggedOut) {
+			return;
+		}
+
 	    // do not save an empty session
 	    $sessionId = session_id();
 	    if(empty($sessionId)) {
@@ -377,14 +383,99 @@ class Session
 
 	public function delete()
 	{
-		$sql	= 'DELETE FROM %%SESSION%% WHERE sessionID = :sessionId;';
-		$db		= Database::get();
+		// load() registers save() for shutdown. Without this flag that save
+		// writes the session row and cookie back after logout (#761).
+		$this->loggedOut = true;
 
-		$db->delete($sql, array(
-			':sessionId'	=> session_id(),
-		));
+		$sessionId = (string) session_id();
+		$userId = (int) ($this->data['userId'] ?? 0);
+		$db = Database::get();
 
-		@session_destroy();
+		if ($sessionId !== '') {
+			$db->delete('DELETE FROM %%SESSION%% WHERE sessionID = :sessionId;', array(
+				':sessionId'	=> $sessionId,
+			));
+		}
+
+		// A second 2Moons cookie (path / vs /uniN/) can carry another session
+		// id for this account. Drop every row so that cookie cannot restore it.
+		if ($userId > 0) {
+			$db->delete('DELETE FROM %%SESSION%% WHERE userID = :userId;', array(
+				':userId'	=> $userId,
+			));
+		}
+
+		$this->data = null;
+		$_SESSION = array();
+		self::expireAuthCookies();
+
+		if (session_status() === PHP_SESSION_ACTIVE) {
+			@session_destroy();
+		}
+	}
+
+	/**
+	 * Paths that may hold a 2Moons or PHPSESSID cookie for this request.
+	 *
+	 * @return list<string>
+	 */
+	private static function logoutCookiePaths(): array
+	{
+		$params = session_get_cookie_params();
+		$paths = array('/', (string) ($params['path'] ?? '/'));
+
+		foreach (array('HTTP_ROOT', 'HTTP_BASE') as $constant) {
+			if (!defined($constant)) {
+				continue;
+			}
+			$value = constant($constant);
+			if (is_string($value) && $value !== '') {
+				$paths[] = $value;
+			}
+		}
+
+		$normalized = array();
+		foreach ($paths as $path) {
+			$path = '/'.ltrim(str_replace('\\', '/', $path), '/');
+			$normalized[$path] = true;
+			$trimmed = rtrim($path, '/');
+			if ($trimmed !== '' && $trimmed !== '/') {
+				$normalized[$trimmed] = true;
+				$normalized[$trimmed.'/'] = true;
+			}
+		}
+
+		return array_keys($normalized);
+	}
+
+	private static function expireAuthCookies(): void
+	{
+		if (headers_sent()) {
+			return;
+		}
+
+		$params = session_get_cookie_params();
+		$secure = (bool) ($params['secure'] ?? false);
+		if (defined('HTTPS')) {
+			$secure = $secure || (bool) HTTPS;
+		}
+
+		$names = array(session_name() ?: '2Moons', '2Moons', 'PHPSESSID');
+		$names = array_values(array_unique($names));
+		$expires = time() - 42000;
+
+		foreach ($names as $name) {
+			foreach (self::logoutCookiePaths() as $path) {
+				setcookie($name, '', array(
+					'expires'  => $expires,
+					'path'     => $path,
+					'domain'   => (string) ($params['domain'] ?? ''),
+					'secure'   => $secure,
+					'httponly' => true,
+					'samesite' => $params['samesite'] ?? 'Lax',
+				));
+			}
+		}
 	}
 
 	public function isValidSession()

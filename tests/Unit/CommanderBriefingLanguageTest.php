@@ -39,7 +39,7 @@ class CommanderBriefingLanguageTest extends TestCase
 		$this->assertStringNotContainsString('window.location.reload()', $js);
 	}
 
-	public function testDefensiveCopyIsShipyardDefensesOnly(): void
+	public function testDefensiveCopyStatesShipyardRulesAndHold(): void
 	{
 		$lng = new Language('en');
 		$lng->includeData(['INGAME']);
@@ -49,9 +49,20 @@ class CommanderBriefingLanguageTest extends TestCase
 		$need = (string) DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']['defense_complete'];
 
 		$this->assertStringContainsString($need, $desc);
-		$this->assertDoesNotMatchRegularExpression('/hold/i', $desc);
-		$this->assertDoesNotMatchRegularExpression('/hold/i', $suggest);
-		$this->assertSame(['defense_complete' => 6], DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']);
+		$this->assertMatchesRegularExpression('/Missile Launchers/i', $desc);
+		$this->assertMatchesRegularExpression('/finish(?:es)? building/i', $desc);
+		$this->assertMatchesRegularExpression('/Hold \(mission 5/i', $desc);
+		$this->assertMatchesRegularExpression('/buddy or ally/i', $desc);
+		$this->assertMatchesRegularExpression('/1 hour/i', $desc);
+		$this->assertDoesNotMatchRegularExpression('/does not score/i', $desc);
+		$this->assertStringContainsString($need, $suggest);
+		$this->assertDoesNotMatchRegularExpression('/\bqueue\b/i', $suggest);
+		$this->assertMatchesRegularExpression('/\bfinish\b/i', $suggest);
+		$this->assertMatchesRegularExpression('/Hold \(A\)/i', $suggest);
+		$this->assertSame(
+			['defense_complete' => 6, 'hold_success' => 1],
+			DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']
+		);
 	}
 
 	public function testTradeCopyStatesThresholdForeignAndQuota(): void

@@ -25,6 +25,7 @@ use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\Session;
 use HiveNova\Core\Theme;
 use HiveNova\Core\Universe;
+use HiveNova\Core\UserLanguageService;
 use HiveNova\Page\Game\ShowErrorPage;
 
 if (isset($_POST['GLOBALS']) || isset($_GET['GLOBALS'])) {
@@ -170,6 +171,10 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 		HTTP::redirectTo('index.php?code=3');
 	}
 
+	if (MODE === 'INGAME' && !empty($USER['id'])) {
+		UserLanguageService::applyExplicitRequestToUser($USER);
+	}
+
 	$LNG	= new Language($USER['lang']);
 	$LNG->includeData(array('L18N', 'INGAME', 'TECH', 'CUSTOM', 'ACHIEVEMENTS'));
 	if(!empty($USER['dpath'])) { $THEME->setUserTheme($USER['dpath']); }
@@ -181,8 +186,11 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 			$session->delete();
 			HTTP::redirectTo('index.php');
 		}
-		// fullSide=false: closed-game path runs before $PLANET is loaded; full nav would crash getPlanet().
-		ShowErrorPage::printError($LNG['sys_closed_game'].'<br><br>'.$config->close_reason, null, null, false);
+		// Allow leaving a closed universe via linked-account switch without full re-login.
+		if ($gamePage !== 'universeswitch') {
+			// fullSide=false: closed-game path runs before $PLANET is loaded; full nav would crash getPlanet().
+			ShowErrorPage::printError($LNG['sys_closed_game'].'<br><br>'.$config->close_reason, null, null, false);
+		}
 	}
 
 	if($USER['bana'] == 1) {

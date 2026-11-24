@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\Universe;
+use HiveNova\Core\UniverseSwitchService;
 use HiveNova\Cronjob\CronjobTask;
 
 /**
@@ -143,5 +144,9 @@ class CleanerCronjob implements CronjobTask
 		Database::get()->delete($sql, array(
 			':time'	=> $del_messages
 		));
+
+		if (defined('CACHE_PATH') && is_dir(CACHE_PATH)) {
+			(new UniverseSwitchService())->sweepExpiredTokens(CACHE_PATH);
+		}
 	}
 }

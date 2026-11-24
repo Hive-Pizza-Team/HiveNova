@@ -9,13 +9,13 @@
 		<button class="reg-tab-btn active" data-tab="reg-email" role="tab" aria-selected="true" aria-controls="reg-email">
 			&#9993;&nbsp; {$registerTabEmail}
 		</button>
-		<button class="reg-tab-btn" data-tab="reg-hive" role="tab" aria-selected="false" aria-controls="reg-hive">
+		<button class="reg-tab-btn" data-tab="reg-hive" role="tab" aria-selected="false" aria-controls="reg-hive" lang="en">
 			<img src="styles/resource/images/login/keychain-round-logo.svg" alt="" class="reg-tab-icon reg-tab-icon--keychain"> {$registerTabHive}
 		</button>
 	</div>
 
 	<div class="reg-tab-panel active" id="reg-email" role="tabpanel">
-		<form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register">
+		<form id="registerForm" method="post" action="index.php?page=register" data-action="index.php?page=register" data-uni-in-body="1">
 		<input type="hidden" value="send" name="mode">
 		<div class="rowForm reg-season-hive-notice" hidden>
 			<p>{$LNG.registerErrorHiveRequiredSeason}</p>
@@ -117,7 +117,7 @@
 	</div>
 
 	<div class="reg-tab-panel" id="reg-hive" role="tabpanel">
-		<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" onsubmit="return false;">
+		<form id="registerFormHive" method="post" action="index.php?page=register" data-action="index.php?page=register" data-uni-in-body="1" onsubmit="return false;">
 		<input type="hidden" value="send" name="mode">
 		<input type="hidden" value="{$externalAuth.account}" name="externalAuth[account]">
 		<input type="hidden" value="{$externalAuth.method}" name="externalAuth[method]">
