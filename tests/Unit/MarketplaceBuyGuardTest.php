@@ -47,4 +47,14 @@ class MarketplaceBuyGuardTest extends TestCase
 		$this->assertStringContainsString('MarketPlaceService::cancelOffer(', $source);
 		$this->assertStringContainsString('$this->redirectTo(', $source);
 	}
+
+	public function testOffersBuyAndHistoryAreScopedToPlayerUniverse(): void
+	{
+		$source = (string) file_get_contents(__DIR__ . '/../../includes/pages/game/ShowMarketPlacePage.php');
+		$this->assertStringContainsString('MarketPlaceService::listActiveOffers(', $source);
+		$this->assertStringContainsString('MarketPlaceService::findBuyableOffer(', $source);
+		$this->assertStringContainsString('MarketPlaceService::lockBuyableOffer(', $source);
+		$this->assertStringContainsString('MarketPlaceService::resourceTradeHistory(', $source);
+		$this->assertStringContainsString('MarketPlaceService::fleetTradeHistory(', $source);
+	}
 }
