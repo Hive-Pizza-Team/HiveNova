@@ -18,14 +18,18 @@
 		<td colspan="2">{if $prestige.memberSinceDate}{$prestige.memberSinceDate|escape:'html'}{/if}{if $prestige.hiveLine} <span class="prestige-hive">{$prestige.hiveLine|escape:'html'}</span>{/if}</td>
 	</tr>
 	{/if}
+	<tr>
+		<td>{$LNG.pl_medals}</td>
+		<td colspan="2"><a href="game.php?page=medals&amp;id={$id}" target="_top">{$LNG.pl_medals_view}</a></td>
+	</tr>
 
 	<tr>
 		<td>{$LNG.pl_homeplanet}</td>
-		<td colspan="2">{$homeplanet} <a href="game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}" target="_top">[{$galaxy}:{$system}:{$planet}]</a></td>
+		<td colspan="2">{$homeplanet} <a href="game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}" target="_top" data-top-nav>[{$galaxy}:{$system}:{$planet}]</a></td>
 	</tr>
 	<tr>
 		<td>{$LNG.pl_ally}</td>
-		<td colspan="2">{if $allyname}<a href="game.php?page=alliance&amp;mode=info&amp;id={$allyid}" target="_top">{$allyname}</a>{else}-{/if}</td>
+		<td colspan="2">{if $allyname}<a href="game.php?page=alliance&amp;mode=info&amp;id={$allyid}" target="_top" data-top-nav>{$allyname}</a>{else}-{/if}</td>
 	</tr>
 	{if $publicMessage}
 	<tr>

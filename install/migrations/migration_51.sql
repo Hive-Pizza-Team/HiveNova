@@ -1,4 +1,3 @@
--- Public marketing host for canonical / hreflang / og:url (#644).
--- Editable under Admin → Server configuration.
-ALTER TABLE `%PREFIX%config`
-  ADD `seo_canonical_origin` varchar(255) NOT NULL DEFAULT 'https://moonsiege.com/' AFTER `game_name`;
+-- Track which release notes a player has already viewed (What's New page).
+ALTER TABLE `%PREFIX%users`
+	ADD COLUMN `last_seen_release` VARCHAR(16) NULL DEFAULT NULL;

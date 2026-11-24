@@ -273,4 +273,143 @@ class PublicSeoTest extends TestCase
 		$this->assertArrayNotHasKey('reviewCount', $data);
 		$this->assertStringNotContainsString('\\/', $json);
 	}
+
+	public function testBattleReportUrlIncludesRidAndStripsRef(): void
+	{
+		$url = PublicSeo::battleReportUrl(PublicSeo::CANONICAL_ORIGIN, 'abc123', 'en');
+		$this->assertSame('https://moonsiege.com/index.php?page=battle&rid=abc123', $url);
+		$urlDe = PublicSeo::battleReportUrl(PublicSeo::CANONICAL_ORIGIN, 'abc123', 'de');
+		$this->assertSame('https://moonsiege.com/index.php?page=battle&rid=abc123&lang=de', $urlDe);
+		$stripped = PublicSeo::canonicalUrl(PublicSeo::CANONICAL_ORIGIN, 'battle', 'en', 'en', [
+			'rid' => 'x',
+			'ref' => 1,
+			'src' => 'battlehall',
+		]);
+		$this->assertSame('https://moonsiege.com/index.php?page=battle&rid=x', $stripped);
+	}
+
+	public function testSignupCtaUrlAndShareImage(): void
+	{
+		$this->assertSame('https://moonsiege.com/?ref=1&src=battlehall', PublicSeo::signupCtaUrl('battlehall'));
+		$this->assertSame('https://moonsiege.com/?ref=1&src=battlereport', PublicSeo::signupCtaUrl('battlereport'));
+		$this->assertStringEndsWith(PublicSeo::SHARE_IMAGE_PATH, PublicSeo::shareImageUrl());
+		$this->assertTrue(PublicSeo::usesBattleShareImage('battleHall'));
+		$this->assertTrue(PublicSeo::usesBattleShareImage('battle'));
+		$this->assertFalse(PublicSeo::usesBattleShareImage('rules'));
+	}
+
+	public function testBattleHallAndReportMeta(): void
+	{
+		$lng = [
+			'metaTitleBattleHallUni' => 'Battle Hall — %s | %s',
+			'metaDescriptionBattleHallUni' => 'Hall in %s on %s.',
+			'metaTitleBattleReport' => '%s vs %s: %s units destroyed | %s Battle Hall',
+			'metaDescriptionBattleReport' => '%s vs %s — %s units destroyed on %s. Play %s free.',
+		];
+		$this->assertSame(
+			'Battle Hall — Uni 1 | Moon',
+			PublicSeo::battleHallDocumentTitle('Uni 1', 'Moon', $lng)
+		);
+		$this->assertSame(
+			'alice vs bob: 488.7M units destroyed | Moon Battle Hall',
+			PublicSeo::battleReportDocumentTitle('alice', 'bob', '488.7M', 'Moon', $lng)
+		);
+		$this->assertStringContainsString('488.7M', PublicSeo::battleReportMetaDescription('alice', 'bob', '488.7M', '2026-01-01', 'Moon', $lng));
+	}
+
+	public function testSignupCtaRejectsEmptySourceAndNegativeRef(): void
+	{
+		$url = PublicSeo::signupCtaUrl('!!!', -4);
+		$this->assertStringContainsString('src=battlehall', $url);
+		$this->assertStringContainsString('ref=0', $url);
+	}
+
+	public function testBattleMetaFallsBackWhenLanguageAndNamesAreEmpty(): void
+	{
+		$this->assertSame(
+			'Battle Hall — Universe | Moon',
+			PublicSeo::battleHallDocumentTitle('', 'Moon', [])
+		);
+		$this->assertStringContainsString(
+			'Universe',
+			PublicSeo::battleHallMetaDescription('', 'Moon', [])
+		);
+		$this->assertSame(
+			'Attacker vs Defender: 0 units destroyed | Moon Battle Hall',
+			PublicSeo::battleReportDocumentTitle('', '', '', 'Moon', [])
+		);
+		$this->assertStringContainsString(
+			'unknown date',
+			PublicSeo::battleReportMetaDescription('', '', '', '', 'Moon', [])
+		);
+		$this->assertSame(
+			'Hall in Universe',
+			PublicSeo::battleHallMetaDescription('Universe', 'Moon', [
+				'metaDescriptionBattleHallUni' => 'Hall in %s',
+			])
+		);
+	}
+
+	public function testBattleIsIndexable(): void
+	{
+		$this->assertSame('index, follow', PublicSeo::robotsContent('battle'));
+		$this->assertContains('battle', PublicSeo::INDEXABLE_PAGES);
+	}
+	public function testCanonicalBaseIsMoonsiege(): void
+	{
+		$this->assertSame('https://moonsiege.com/', PublicSeo::CANONICAL_BASE);
+		$this->assertSame(PublicSeo::CANONICAL_BASE, PublicSeo::seoBasePath());
+	}
+
+	public function testSeoTagsOnCanonicalHostIgnoreRequestHostAndStripRef(): void
+	{
+		// AbstractLoginPage always passes seoBasePath() into canonical/hreflang,
+		// so a request on moon.hive.pizza still canonicalizes to moonsiege.com.
+		// Extra query params such as ?ref=1 and ?src= are never part of the URL.
+		$base = PublicSeo::seoBasePath();
+		$this->assertSame('https://moonsiege.com/', PublicSeo::canonicalUrl($base, 'index', 'en'));
+		$this->assertSame('https://moonsiege.com/index.php?lang=de', PublicSeo::canonicalUrl($base, 'index', 'de'));
+		$this->assertSame('https://moonsiege.com/index.php?page=battleHall', PublicSeo::canonicalUrl($base, 'battleHall', 'en'));
+		$this->assertSame(
+			'https://moonsiege.com/index.php?page=battleHall&lang=de',
+			PublicSeo::canonicalUrl($base, 'battleHall', 'de')
+		);
+
+		$urls = PublicSeo::hreflangUrls($base, 'index', ['en' => 'English', 'de' => 'Deutsch']);
+		$this->assertSame('https://moonsiege.com/', $urls['en']);
+		$this->assertSame('https://moonsiege.com/', $urls['x-default']);
+		$this->assertSame('https://moonsiege.com/index.php?lang=de', $urls['de']);
+		foreach ($urls as $href) {
+			$this->assertStringNotContainsString('ref=', $href);
+			$this->assertStringNotContainsString('src=', $href);
+			$this->assertStringNotContainsString('moon.hive.pizza', $href);
+		}
+	}
+
+	public function testLoginPageSeoTagsUseCanonicalBaseNotRequestHost(): void
+	{
+		$src = file_get_contents(ROOT_PATH.'includes/pages/login/AbstractLoginPage.php');
+		$this->assertIsString($src);
+		$this->assertStringContainsString("\$seoBasePath\t\t= PublicSeo::seoBasePath();", $src);
+		$this->assertStringContainsString('PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang)', $src);
+		$this->assertStringContainsString('PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages)', $src);
+		$this->assertStringContainsString('$basePath = PROTOCOL.HTTP_HOST.HTTP_BASE', $src);
+		$this->assertStringContainsString("'basepath'\t\t\t=> \$basePath", $src);
+		$this->assertStringNotContainsString('PublicSeo::canonicalUrl($basePath', $src);
+		$this->assertStringNotContainsString('PublicSeo::hreflangUrls($basePath', $src);
+	}
+
+	public function testSitemapIndexXmlUsesCanonicalHost(): void
+	{
+		$xml = PublicSeo::sitemapIndexXml('https://moonsiege.com');
+		$this->assertSame(
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			."<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n"
+			."\t<sitemap>\n"
+			."\t\t<loc>https://moonsiege.com/sitemap.xml</loc>\n"
+			."\t</sitemap>\n"
+			."</sitemapindex>\n",
+			$xml
+		);
+	}
 }

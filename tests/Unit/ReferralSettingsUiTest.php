@@ -54,6 +54,25 @@ class ReferralSettingsUiTest extends TestCase
 		$this->assertIsString($tpl);
 		$this->assertStringContainsString('reg-referral-inactive', $tpl);
 		$this->assertStringContainsString('{$LNG.registerReferralInactive}', $tpl);
+		$this->assertStringContainsString('{if !$referralInactive} hidden{/if}', $tpl);
 		$this->assertStringContainsString('name="referralID"', $tpl);
+	}
+
+	public function test_register_css_hides_inactive_referral_row_when_hidden(): void
+	{
+		$css = file_get_contents(__DIR__ . '/../../styles/resource/css/login/register.css');
+
+		$this->assertIsString($css);
+		$this->assertMatchesRegularExpression(
+			'/\.rowForm\s*\{[^}]*display:\s*block/s',
+			$css,
+			'.rowForm { display: block } must still exist so this test stays meaningful'
+		);
+		// Class + attribute beats .rowForm, so [hidden] actually hides the warning
+		// when referrals are enabled for the selected universe.
+		$this->assertMatchesRegularExpression(
+			'/\.rowForm\[hidden\][^}]*display:\s*none/s',
+			$css
+		);
 	}
 }

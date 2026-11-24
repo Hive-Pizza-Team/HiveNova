@@ -23,6 +23,8 @@ class ResearchCompletePushServiceTest extends TestCase
 	protected function tearDown(): void
 	{
 		\HiveNova\Core\PushNotificationService::setErrorLogger(null);
+		\HiveNova\Core\PushNotificationService::setWebPushFactory(null);
+		\HiveNova\Core\PushNotificationService::setConfiguredOverride(null);
 		$this->restoreDatabaseInstance();
 		parent::tearDown();
 	}
@@ -303,6 +305,57 @@ class ResearchCompletePushServiceTest extends TestCase
 			'techEnd'   => 100,
 		]], 'en'));
 		$this->assertSame(0, $this->db->notified['1:113:5:100']['notified_at'] ?? 1);
+	}
+
+	public function testNotifyJobsMarksSentWhenEndpointIsExpired(): void
+	{
+		$endpoint = 'https://fcm.googleapis.com/fcm/send/dead';
+		$this->db->subscriptions[] = [
+			'user_id'  => 7,
+			'endpoint' => $endpoint,
+			'p256dh'   => 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpY',
+			'auth'     => 'tBHItJI5svbpez7KI4CCXg',
+		];
+		\HiveNova\Core\PushNotificationService::setConfiguredOverride(true);
+		\HiveNova\Core\PushNotificationService::setWebPushFactory(static function () use ($endpoint) {
+			return [new class($endpoint) {
+				public function __construct(private string $endpoint)
+				{
+				}
+
+				public function isSuccess(): bool
+				{
+					return false;
+				}
+
+				public function isSubscriptionExpired(): bool
+				{
+					return true;
+				}
+
+				public function getEndpoint(): string
+				{
+					return $this->endpoint;
+				}
+
+				public function getReason(): string
+				{
+					return '410 Gone';
+				}
+			}];
+		});
+
+		$service = new ResearchCompletePushService(
+			configured: true,
+			languageLoader: static fn (): array => ['tech' => [113 => 'Energy Technology']],
+		);
+		$this->assertSame(1, $service->notifyJobs(7, [[
+			'elementId' => 113,
+			'level'     => 8,
+			'techEnd'   => 100,
+		]], 'en'));
+		$this->assertGreaterThan(0, $this->db->notified['7:113:8:100']['notified_at'] ?? 0);
+		$this->assertSame([], $this->db->subscriptions);
 	}
 
 	public function testNotifyJobsDoesNotMarkSentWhenDeliveryFailsAndRetries(): void

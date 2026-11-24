@@ -15,36 +15,4 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-$token	= getRandomString();
-$db		= \HiveNova\Core\Database::get();
-
-$fleetResult	= $db->update("UPDATE %%FLEETS_EVENT%% SET `lock` = :token WHERE `lock` IS NULL AND `time` <= :time;", array(
-	':time'		=> TIMESTAMP,
-	':token'	=> $token
-));
-
-if($db->rowCount() !== 0) {
-	
-	
-	$fleetObj	= new \HiveNova\Core\FlyingFleetHandler();
-	$fleetObj->setToken($token);
-	$failedFleetIds = $fleetObj->run();
-
-	if ($failedFleetIds === []) {
-		$db->update("UPDATE %%FLEETS_EVENT%% SET `lock` = NULL WHERE `lock` = :token;", array(
-			':token' => $token
-		));
-	} else {
-		$placeholders = array();
-		$params = array(':token' => $token);
-		foreach ($failedFleetIds as $index => $fleetId) {
-			$key = ':failed'.$index;
-			$placeholders[] = $key;
-			$params[$key] = $fleetId;
-		}
-		$db->update(
-			'UPDATE %%FLEETS_EVENT%% SET `lock` = NULL WHERE `lock` = :token AND fleetID NOT IN ('.implode(', ', $placeholders).')',
-			$params
-		);
-	}
-}
+\HiveNova\Core\FleetEventDrainService::drainDueEvents();

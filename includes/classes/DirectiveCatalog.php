@@ -52,12 +52,10 @@ class DirectiveCatalog
 				'title_key' => 'cm_dir_defensive',
 				'desc_key' => 'cm_dir_defensive_desc',
 				'suggestion_key' => 'cm_suggest_defensive',
-				'recommended_stance' => 'balanced',
-				// Hold (mission 5) needs an alliance or buddy and fails noob protection
-				// against established Uni 1 targets, so a new commander cannot finish it.
-				// Shipyard defenses are the completable early action.
+				'recommended_stance' => 'cautious',
 				'targets' => [
 					'defense_complete' => 6,
+					'hold_success' => 1,
 				],
 				'reward' => [
 					'metal' => 40000,
@@ -322,7 +320,11 @@ class DirectiveCatalog
 		return match ($directiveKey) {
 			self::INDUSTRIAL => in_array($eventType, ['building_complete', 'research_complete', 'build_complete'], true)
 				? 'build_complete' : null,
-			self::DEFENSIVE => $eventType === 'defense_complete' ? 'defense_complete' : null,
+			self::DEFENSIVE => match ($eventType) {
+				'defense_complete' => 'defense_complete',
+				'hold_success' => 'hold_success',
+				default => null,
+			},
 			self::EXPLORATION => $eventType === 'expedition_dispatch' ? 'expedition_dispatch' : null,
 			self::TRADE => in_array($eventType, ['transport_delivery', 'recycle_success', 'trade_run'], true)
 				? 'trade_run' : null,

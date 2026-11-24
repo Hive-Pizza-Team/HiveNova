@@ -4,13 +4,16 @@ namespace HiveNova\Page\Login;
 
 use HiveNova\Core\AssetRevision;
 use HiveNova\Core\Config;
+use HiveNova\Core\FeedbackService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
+use HiveNova\Core\LoginLanguageResolver;
 use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\PublicSeo;
 use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\Template as template;
 use HiveNova\Core\Universe;
+use HiveNova\Core\UserLanguageService;
 
 /**
  *  2Moons 
@@ -39,6 +42,14 @@ abstract class AbstractLoginPage
 	public $defaultWindow = 'normal';
 	/** @var bool When false, public pages emit noindex (e.g. empty news). */
 	protected $seoAllowIndex = true;
+	/** @var array<string, mixed> Page-level SEO overrides applied in display(). */
+	protected array $seoOverrides = [];
+	/** @var string|null Override for document <title> (public battle reports). */
+	protected $seoDocumentTitle = null;
+	/** @var string|null Override for meta description. */
+	protected $seoMetaDescription = null;
+	/** @var string|null Override for canonical URL (must be absolute). */
+	protected $seoCanonicalUrl = null;
 	
 	protected function __construct() {
 		
@@ -141,6 +152,7 @@ abstract class AbstractLoginPage
 			'analyticsEnable'		=> $config->ga_active,
 			'analyticsUID'			=> $config->ga_key,
 			'lang'					=> $LNG->getLanguage(),
+			'langExplicit'			=> UserLanguageService::hasExplicitLobbyLanguageChoice(),
 			'UNI'					=> Universe::current(),
 			'VERSION'				=> $config->VERSION,
 			'REV'					=> AssetRevision::fromFilesystem((string) $config->VERSION),
@@ -174,6 +186,14 @@ abstract class AbstractLoginPage
 		$this->tplObj->assign_vars($array, $nocache);
 	}
 	
+	/**
+	 * @param array<string, mixed> $overrides
+	 */
+	protected function setSeoMeta(array $overrides): void
+	{
+		$this->seoOverrides = array_merge($this->seoOverrides, $overrides);
+	}
+
 	protected function display($file) {
 		global $LNG;
 		
@@ -199,42 +219,79 @@ abstract class AbstractLoginPage
 		$seoPage		= PublicSeo::normalizePage(HTTP::_GP('page', ''));
 		$gameName		= (string) $config->game_name;
 		$languages		= Language::getAllowedLangs(false);
-		$seoBasePath		= PublicSeo::canonicalBasePath();
-		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
-		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		// SEO head tags only: canonical / alternate hreflang use the configured public origin.
-		$canonicalUrl		= PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang);
+		$seoBasePath		= PublicSeo::seoBasePath();
+		$documentTitle		= $this->seoDocumentTitle ?? PublicSeo::documentTitle($seoPage, $gameName, $LNG);
+		$metaDescription	= $this->seoMetaDescription ?? PublicSeo::metaDescription($seoPage, $gameName, $LNG);
+		$canonicalUrl		= $this->seoCanonicalUrl ?? PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang);
 		$hreflangUrls		= PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages);
-		// Clickable language flags + footer stay on the request host (dev/QA /uniN/).
-		$languageUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
+		$languageSwitchUrls	= LoginLanguageResolver::switchUrls($languages, $_GET);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
-		$ogImageUrl			= $seoBasePath.'styles/resource/images/login/HiveNova.png';
+		if (PublicSeo::usesBattleShareImage($seoPage)) {
+			$ogImageUrl = PublicSeo::shareImageUrl($seoBasePath);
+			$ogImageWidth = PublicSeo::SHARE_IMAGE_WIDTH;
+			$ogImageHeight = PublicSeo::SHARE_IMAGE_HEIGHT;
+		} else {
+			$ogImageUrl = $seoBasePath.'styles/resource/images/login/HiveNova.png';
+			$ogImageWidth = 1024;
+			$ogImageHeight = 768;
+		}
 		$jsonLd				= '';
 		if ($seoPage === 'index') {
 			$jsonLd = PublicSeo::indexJsonLd($gameName, $canonicalUrl, $metaDescription, $ogImageUrl);
 		}
+
+		$seoVars = [
+			'documentTitle' => $documentTitle,
+			'metaDescription' => $metaDescription,
+			'canonicalUrl' => $canonicalUrl,
+			'hreflangUrls' => $hreflangUrls,
+			'pageHeading' => $pageHeading,
+			'robotsContent' => $robotsContent,
+			'ogImageUrl' => $ogImageUrl,
+			'ogImageWidth' => $ogImageWidth,
+			'ogImageHeight' => $ogImageHeight,
+			'jsonLd' => $jsonLd,
+		];
+		foreach ($this->seoOverrides as $key => $value) {
+			if (array_key_exists($key, $seoVars)) {
+				$seoVars[$key] = $value;
+			}
+		}
 		
 		$this->assign(array(
             'lang'    			=> $lang,
+			'langExplicit'		=> UserLanguageService::hasExplicitLobbyLanguageChoice(),
 			'bodyclass'			=> $this->getWindow(),
 			'basepath'			=> $basePath,
 			'isMultiUniverse'	=> count(Universe::availableUniverses()) > 1,
 			'unisWildcast'		=> UNIS_WILDCAST,
-			'documentTitle'		=> $documentTitle,
-			'metaDescription'	=> $metaDescription,
-			'canonicalUrl'		=> $canonicalUrl,
-			'hreflangUrls'		=> $hreflangUrls,
-			'languageUrls'		=> $languageUrls,
-			'pageHeading'		=> $pageHeading,
-			'robotsContent'		=> $robotsContent,
-			'ogImageUrl'		=> $ogImageUrl,
-			'ogImageWidth'		=> 1024,
-			'ogImageHeight'		=> 768,
+			'documentTitle'		=> $seoVars['documentTitle'],
+			'metaDescription'	=> $seoVars['metaDescription'],
+			'canonicalUrl'		=> $seoVars['canonicalUrl'],
+			'hreflangUrls'		=> $seoVars['hreflangUrls'],
+			'languageSwitchUrls'	=> $languageSwitchUrls,
+			'pageHeading'		=> $seoVars['pageHeading'],
+			'robotsContent'		=> $seoVars['robotsContent'],
+			'ogImageUrl'		=> $seoVars['ogImageUrl'],
+			'ogImageWidth'		=> $seoVars['ogImageWidth'],
+			'ogImageHeight'		=> $seoVars['ogImageHeight'],
 			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
 			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
-			'jsonLd'			=> $jsonLd,
+			'jsonLd'			=> $seoVars['jsonLd'],
+			'feedbackConfig'		=> FeedbackService::clientConfig(
+				'index.php?page=feedback&mode=submit&ajax=1',
+				[],
+				null,
+				(string) $lang,
+				(string) $config->VERSION,
+				(int) Universe::current(),
+				[
+					'successNoScreenshot' => (string) ($LNG['fb_success_no_screenshot']
+						?? 'Thanks! Your report was sent without a screenshot. Reference: %s'),
+				]
+			),
 		));
 
 		$this->assign(array(

@@ -8,6 +8,10 @@ class FlyingFleetHandlerProbeMission implements Mission
 
     public static int $finished = 0;
 
+    public static int $endStay = 0;
+
+    public static int $returned = 0;
+
     public static ?int $throwOnFleetId = null;
 
     /**
@@ -28,16 +32,20 @@ class FlyingFleetHandlerProbeMission implements Mission
 
     public function EndStayEvent()
     {
+        self::$endStay++;
     }
 
     public function ReturnEvent()
     {
+        self::$returned++;
     }
 
     public static function reset(): void
     {
         self::$started = 0;
         self::$finished = 0;
+        self::$endStay = 0;
+        self::$returned = 0;
         self::$throwOnFleetId = null;
     }
 }

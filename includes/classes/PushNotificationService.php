@@ -22,6 +22,8 @@ class PushNotificationService
 	public const SKIP_NO_SUBSCRIPTION = 'no_subscription';
 	public const SKIP_EXCEPTION = 'exception';
 	public const SKIP_VAPID_MISMATCH = 'vapid_mismatch';
+	/** How long a 410 endpoint stays rejected so the browser cannot resurrect it. */
+	public const EXPIRED_BLOCK_TTL = 30 * 86400;
 
 	/** @var callable|null fn(list<array{endpoint: string, p256dh: string, auth: string}>, string): iterable */
 	private static $webPushFactory = null;
@@ -200,6 +202,9 @@ class PushNotificationService
 		if (!self::isValidSubscription($subscription)) {
 			return false;
 		}
+		if (self::isEndpointBlocked($subscription['endpoint'])) {
+			return false;
+		}
 
 		$db = Database::get();
 		$existingUserId = $db->selectSingle(
@@ -281,6 +286,67 @@ class PushNotificationService
 				':endpoint' => $endpoint,
 				':userId'   => $userId,
 			]
+		);
+	}
+
+	/**
+	 * True when FCM/Web Push recently returned 410 for this endpoint.
+	 * A page reload must not insert it again.
+	 */
+	public static function isEndpointBlocked(string $endpoint, ?int $now = null): bool
+	{
+		if ($endpoint === '') {
+			return false;
+		}
+
+		$now = $now ?? (defined('TIMESTAMP') ? (int) TIMESTAMP : time());
+		$expiredAt = Database::get()->selectSingle(
+			'SELECT expired_at FROM %%PUSH_EXPIRED_ENDPOINTS%% WHERE endpoint = :endpoint',
+			[':endpoint' => $endpoint],
+			'expired_at'
+		);
+		if ($expiredAt === false || $expiredAt === null || $expiredAt === '') {
+			return false;
+		}
+		if ((int) $expiredAt < $now - self::EXPIRED_BLOCK_TTL) {
+			self::forgetExpiredEndpoint($endpoint);
+
+			return false;
+		}
+
+		return true;
+	}
+
+	public static function rememberExpiredEndpoint(string $endpoint, ?int $now = null): void
+	{
+		if ($endpoint === '') {
+			return;
+		}
+
+		$now = $now ?? (defined('TIMESTAMP') ? (int) TIMESTAMP : time());
+		$db = Database::get();
+		$db->delete(
+			'DELETE FROM %%PUSH_EXPIRED_ENDPOINTS%% WHERE expired_at < :cutoff',
+			[':cutoff' => $now - self::EXPIRED_BLOCK_TTL]
+		);
+		$db->replace(
+			'REPLACE INTO %%PUSH_EXPIRED_ENDPOINTS%% (endpoint, expired_at) VALUES (:endpoint, :expiredAt)',
+			[
+				':endpoint'  => $endpoint,
+				':expiredAt' => $now,
+			]
+		);
+	}
+
+	public static function forgetExpiredEndpoint(string $endpoint): void
+	{
+		if ($endpoint === '') {
+			return;
+		}
+
+		Database::get()->delete(
+			'DELETE FROM %%PUSH_EXPIRED_ENDPOINTS%% WHERE endpoint = :endpoint',
+			[':endpoint' => $endpoint]
 		);
 	}
 
@@ -395,6 +461,9 @@ class PushNotificationService
 					? (string) $report->getReason()
 					: '';
 				$status = self::reportStatus($report);
+				if ($status === 410) {
+					$expired = true;
+				}
 
 				if ($success) {
 					$delivered++;
@@ -404,11 +473,19 @@ class PushNotificationService
 				$failed++;
 				$entry = self::failureEntry($endpoint, $status, $expired);
 				$failures[] = $entry;
-				$lastError = self::formatDeliveryFailure($endpoint, $expired, $reason, $status);
-				self::logFailure($lastError);
 				if ($expired && $endpoint !== '') {
 					self::removeSubscription($endpoint);
+					self::rememberExpiredEndpoint($endpoint);
+					$lastError = sprintf(
+						'PushNotificationService: removed expired subscription host=%s',
+						self::endpointHost($endpoint)
+					);
+					self::logFailure($lastError);
+					continue;
 				}
+
+				$lastError = self::formatDeliveryFailure($endpoint, $expired, $reason, $status);
+				self::logFailure($lastError);
 			}
 		} catch (\Throwable $e) {
 			$lastError = self::sanitizeClientError('PushNotificationService::notifyUser: ' . $e->getMessage());
@@ -434,6 +511,43 @@ class PushNotificationService
 			'lastError' => $lastError,
 			'failures'  => $failures,
 		];
+	}
+
+	/**
+	 * Callers that retry until delivery should stop when every failure was a 410 we already removed.
+	 *
+	 * @param array<string, mixed> $result
+	 */
+	public static function shouldStopRetrying(array $result): bool
+	{
+		if (!empty($result['ok'])) {
+			return true;
+		}
+
+		return self::failuresAreExpiredOnly($result);
+	}
+
+	/**
+	 * @param array<string, mixed> $result
+	 */
+	public static function failuresAreExpiredOnly(array $result): bool
+	{
+		if ((int) ($result['failed'] ?? 0) < 1) {
+			return false;
+		}
+
+		$failures = $result['failures'] ?? null;
+		if (!is_array($failures) || $failures === []) {
+			return false;
+		}
+
+		foreach ($failures as $row) {
+			if (!is_array($row) || empty($row['expired'])) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public static function endpointHost(string $endpoint): string
