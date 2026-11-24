@@ -75,18 +75,30 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?overflow-y:\s*auto/);
 		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?overscroll-behavior:\s*contain/);
 		assert.match(mobileCss, /menu \{[\s\S]*?overflow-y:\s*auto/);
+		assert.match(mobileCss, /menu \{[\s\S]*?overscroll-behavior:\s*contain/);
+		assert.match(mobileCss, /menu \{[\s\S]*?width:\s*100%/);
 		assert.match(mobileCss, /menu \.fixed \{[\s\S]*?overflow:\s*visible/);
+		assert.match(mobileCss, /menu \.fixed \{[\s\S]*?max-width:\s*none/);
+		assert.match(mobileCss, /#menu a #newmes \{[\s\S]*?white-space:\s*pre/);
+		assert.match(mobileCss, /html:has\(#toggle-menu:checked\),\s*body:has\(#toggle-menu:checked\) \{[\s\S]*?overflow:\s*hidden/);
 	});
 
 	it('left-aligns items with 8–10px pad, section headers, and active bar', () => {
 		assert.match(desktopCss, /#menu a \{[\s\S]*?padding:\s*8px 10px/);
 		assert.match(desktopCss, /#menu a \{[\s\S]*?text-align:\s*left/);
 		assert.match(desktopCss, /#menu \.menu-section/);
+		assert.match(desktopCss, /#menu \.menu-section__toggle/);
+		assert.match(desktopCss, /#menu \.menu-group\.is-collapsed \.menu-group__list/);
 		assert.match(desktopCss, /#menu a\.active/);
 		assert.match(desktopCss, /var\(--color-chrome-menu-active-bar\)/);
 		assert.match(desktopCss, /var\(--color-chrome-menu-footer\)/);
-		assert.equal(desktopCss.includes('accordion'), false);
-		assert.equal(nav.includes('details') && nav.includes('accordion'), false);
+		assert.match(hiveCss, /#menu \.menu-section__toggle:hover/);
+		assert.match(nav, /menu-section__toggle/);
+		assert.match(nav, /data-menu-group="basics"/);
+		assert.match(nav, /data-menu-group="empire"/);
+		assert.match(nav, /data-menu-group="account"/);
+		assert.match(nav, /class="menu-pin"/);
+		assert.equal(nav.includes('<details'), false);
 	});
 
 	it('labels Basics / Advanced / Administration splits and marks the active page', () => {
@@ -94,11 +106,22 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.match(nav, /lm_menu_section_empire/);
 		assert.match(nav, /lm_menu_section_account/);
 		assert.match(nav, /class="active"/);
-		assert.equal((nav.match(/menu-section/g) || []).length >= 3, true);
+		assert.equal((nav.match(/menu-section__toggle/g) || []).length >= 3, true);
 		const ingameEn = fs.readFileSync(path.join(root, 'language/en/INGAME.php'), 'utf8');
 		assert.match(ingameEn, /lm_menu_section_overview'\]\s*=\s*'Basics'/);
 		assert.match(ingameEn, /lm_menu_section_empire'\]\s*=\s*'Advanced'/);
 		assert.match(ingameEn, /lm_menu_section_account'\]\s*=\s*'Administration'/);
+	});
+
+	it('pins Logout outside collapsible Administration and loads menu-sections.js', () => {
+		const account = nav.indexOf('data-menu-group="account"');
+		const accountItemsEnd = nav.indexOf('</ul>', nav.indexOf('id="menu-group-account"'));
+		const logout = nav.indexOf('page=logout');
+		assert.ok(account !== -1 && accountItemsEnd !== -1 && logout !== -1);
+		assert.ok(logout > accountItemsEnd);
+		assert.match(nav, /class="menu-pin"><a href="game\.php\?page=logout"/);
+		const layout = fs.readFileSync(path.join(root, 'styles/templates/game/layout.full.tpl'), 'utf8');
+		assert.match(layout, /scripts\/game\/menu-sections\.js/);
 	});
 
 	it('uses one Shipyard item and keeps Map plus Universe Feed under Advanced', () => {
@@ -190,8 +213,13 @@ describe('chrome-v1.2 sidebar', () => {
 describe('chrome-v1.2 mobile', () => {
 	it('snap-scrolls the top strip instead of shrinking type unreadably', () => {
 		assert.match(mobileCss, /#resources_mobile \{[\s\S]*?scroll-snap-type:\s*x mandatory/);
+		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?flex:\s*0 0 auto/);
+		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?width:\s*max-content/);
 		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-height:\s*44px/);
 		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-width:\s*56px/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?min-width:\s*0/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?white-space:\s*nowrap/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?font-variant-numeric:\s*tabular-nums/);
 	});
 
 	it('reuses desktop sidebar tokens in the hamburger drawer', () => {

@@ -395,11 +395,19 @@ class DirectiveService
 	public static function activeExpeditions(int $userId): array
 	{
 		$db = Database::get();
+		// Exclude FLEET_RETURN: EndStay already completed the expedition for
+		// briefing purposes; the row should not linger while ships fly home.
 		$rows = $db->select(
 			'SELECT fleet_id, fleet_mission, fleet_meta, fleet_end_stay, fleet_end_time, fleet_mess
 			FROM %%FLEETS%%
-			WHERE fleet_owner = :userId AND fleet_mission = 15',
-			[':userId' => $userId]
+			WHERE fleet_owner = :userId
+				AND fleet_mission = :mission
+				AND fleet_mess != :returnState',
+			[
+				':userId' => $userId,
+				':mission' => FLEET_MISSION_EXPEDITION,
+				':returnState' => FLEET_RETURN,
+			]
 		);
 		$out = [];
 		foreach ($rows as $row) {

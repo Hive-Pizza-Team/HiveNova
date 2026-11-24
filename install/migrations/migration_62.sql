@@ -1,3 +1,4 @@
+-- Fleet-return push dedup. migration 62 (61 is the public canonical origin).
 CREATE TABLE IF NOT EXISTS `%PREFIX%push_fleet_return_notified` (
   `fleet_id` int(10) unsigned NOT NULL,
   `user_id` int(10) unsigned NOT NULL,

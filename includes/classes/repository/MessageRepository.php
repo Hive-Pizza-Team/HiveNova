@@ -180,6 +180,31 @@ class MessageRepository
     }
 
     /**
+     * Mark specific owned inbox rows as read (used after bodies hydrate).
+     *
+     * @param list<int> $messageIds
+     */
+    public static function markIdsAsRead(int $userId, array $messageIds, int $universe = 0): void
+    {
+        $messageIds = array_values(array_unique(array_filter(
+            array_map(static fn($id) => (int) $id, $messageIds),
+            static fn(int $id) => $id > 0
+        )));
+        if ($messageIds === []) {
+            return;
+        }
+
+        $db = Database::get();
+        $uni = self::universeClause($universe);
+        $inList = implode(',', $messageIds);
+        $db->update(
+            'UPDATE %%MESSAGES%% SET message_unread = 0
+             WHERE message_owner = :userId AND message_id IN (' . $inList . ')' . $uni['sql'] . ';',
+            [':userId' => $userId] + $uni['params']
+        );
+    }
+
+    /**
      * @return array{sql: string, params: array<string, int>}
      */
     public static function universeClause(int $universe): array

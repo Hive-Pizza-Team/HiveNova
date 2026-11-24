@@ -113,4 +113,36 @@ describe('sw.js push handler', () => {
 		assert.equal(api.safeGameUrl('/uni1/game.php?page=buildings'), '/uni1/game.php?page=buildings');
 		assert.equal(api.safeGameUrl('https://evil.example/'), api.DEFAULT_GAME_URL);
 	});
+
+	it('pushsubscriptionchange posts the new endpoint to an open game tab', async () => {
+		const { api, listeners } = loadSw();
+		assert.equal(api.subscribeUrlForClient('https://novadev.hive.pizza/uni1/game.php?page=overview'), '/uni1/game.php?page=push&mode=subscribe');
+		assert.equal(api.subscribeUrlForClient('https://novadev.hive.pizza/'), null);
+
+		const posted = [];
+		const previousFetch = global.fetch;
+		global.fetch = async (url, opts) => {
+			posted.push({ url, body: opts && opts.body });
+			return { ok: true };
+		};
+		global.self.registration.pushManager.subscribe = async () => ({
+			toJSON() {
+				return { endpoint: 'https://fcm.googleapis.com/fcm/send/new', keys: { p256dh: 'p', auth: 'a' } };
+			}
+		});
+		global.self.clients.matchAll = async () => ([
+			{ url: 'https://novadev.hive.pizza/uni1/game.php?page=overview' },
+			{ url: 'https://novadev.hive.pizza/' }
+		]);
+		let waited;
+		listeners.pushsubscriptionchange({
+			oldSubscription: { options: { applicationServerKey: new Uint8Array([1, 2, 3]) } },
+			waitUntil(promise) { waited = promise; }
+		});
+		await waited;
+		global.fetch = previousFetch;
+		assert.equal(posted.length, 1);
+		assert.equal(posted[0].url, '/uni1/game.php?page=push&mode=subscribe');
+		assert.match(posted[0].body, /fcm\/send\/new/);
+	});
 });

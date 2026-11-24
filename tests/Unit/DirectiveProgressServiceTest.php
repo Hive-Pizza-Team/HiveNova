@@ -83,14 +83,14 @@ class DirectiveProgressServiceTest extends TestCase
 		$this->assertFalse(DirectiveProgressService::targetsMet([], []));
 	}
 
-	public function testHoldEventDoesNotAdvanceDefensive(): void
+	public function testHoldEventAdvancesDefensiveHoldCounter(): void
 	{
 		DirectiveService::selectDirective(3, 1, DirectiveCatalog::DEFENSIVE, [], ['hangar' => 1]);
 		DirectiveProgressService::record(3, 'hold_success', ['universe' => 1]);
 		$row = $this->db->userDirectives[0];
 		$progress = json_decode((string) $row['progress_json'], true);
 		$this->assertSame(0, $progress['defense_complete']);
-		$this->assertArrayNotHasKey('hold_success', $progress);
+		$this->assertSame(1, $progress['hold_success']);
 		$this->assertNull($row['completed_at']);
 	}
 

@@ -499,4 +499,14 @@ class GeneralFunctionsTest extends TestCase
         $this->assertSame('warn', universe_vacancy_level(25, 100));
         $this->assertSame('full', universe_vacancy_level(5, 100));
     }
+
+    public function testTimezoneSelectorIncludesUtcAndContinentZones(): void
+    {
+        $zones = get_timezone_selector();
+        $this->assertArrayHasKey('UTC', $zones);
+        $this->assertSame('UTC', $zones['UTC']['UTC']);
+        $this->assertArrayHasKey('Europe', $zones);
+        $this->assertArrayHasKey('Europe/London', $zones['Europe']);
+        $this->assertArrayNotHasKey('Europe/Isle_of_Man', $zones['UTC']);
+    }
 }

@@ -18,6 +18,7 @@
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\InactiveHiveMemoAdminConfig;
+use HiveNova\Core\PublicSeo;
 use HiveNova\Core\SocialHiveMemoAdminConfig;
 use HiveNova\Core\Log;
 use HiveNova\Core\Universe;
@@ -36,6 +37,7 @@ function ShowConfigBasicPage()
 		$config_before = array(
 			'ttf_file'				=> $config->ttf_file,
 			'game_name'				=> $config->game_name,
+			'seo_canonical_origin'	=> isset($config->seo_canonical_origin) ? $config->seo_canonical_origin : PublicSeo::DEFAULT_CANONICAL_ORIGIN,
 			'mail_active'			=> $config->mail_active,
 			'mail_use'				=> $config->mail_use,
 			'smail_path'			=> $config->smail_path,
@@ -70,6 +72,7 @@ function ShowConfigBasicPage()
 		$ttf_file				= HTTP::_GP('ttf_file', '');
 		$close_reason			= HTTP::_GP('close_reason', '', true);
 		$game_name				= HTTP::_GP('game_name', '', true);
+		$seo_canonical_origin	= PublicSeo::normalizeCanonicalOrigin(HTTP::_GP('seo_canonical_origin', ''));
 		$capprivate				= HTTP::_GP('capprivate', '');
 		$cappublic				= HTTP::_GP('cappublic', '');
 		$ga_key					= HTTP::_GP('ga_key', '', true);
@@ -93,6 +96,7 @@ function ShowConfigBasicPage()
 		$config_after = array(
 			'ttf_file'				=> $ttf_file,
 			'game_name'				=> $game_name,
+			'seo_canonical_origin'	=> $seo_canonical_origin,
 			'mail_active'			=> $mail_active,
 			'mail_use'				=> $mail_use,
 			'smail_path'			=> $smail_path,
@@ -185,6 +189,7 @@ function ShowConfigBasicPage()
 		'sendmail_inactive'				=> $config->sendmail_inactive,
 		'ttf_file'						=> $config->ttf_file,
 		'game_name'						=> $config->game_name,
+		'seo_canonical_origin'			=> isset($config->seo_canonical_origin) ? $config->seo_canonical_origin : PublicSeo::DEFAULT_CANONICAL_ORIGIN,
 		'mail_active'					=> $config->mail_active,
 		'mail_use'						=> $config->mail_use,
 		'smail_path'					=> $config->smail_path,

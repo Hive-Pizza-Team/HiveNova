@@ -26,12 +26,19 @@
 		var basePath = LoginConfig.basePath || '';
 		var form = select.closest('form');
 		if (form) {
-			var action = form.getAttribute('data-action') || form.getAttribute('action') || '';
-			if (LoginConfig.unisWildcast) {
-				var wildBase = basePath.replace('://', '://uni' + universe + '.');
-				form.setAttribute('action', wildBase + action);
+			// Register keeps a relative action so validation errors stay on the public
+			// lobby URL; universe is already posted as name=uni (#377).
+			if (form.getAttribute('data-uni-in-body') === '1') {
+				var relative = form.getAttribute('data-action') || 'index.php?page=register';
+				form.setAttribute('action', relative);
 			} else {
-				form.setAttribute('action', basePath + 'uni' + universe + '/' + action);
+				var action = form.getAttribute('data-action') || form.getAttribute('action') || '';
+				if (LoginConfig.unisWildcast) {
+					var wildBase = basePath.replace('://', '://uni' + universe + '.');
+					form.setAttribute('action', wildBase + action);
+				} else {
+					form.setAttribute('action', basePath + 'uni' + universe + '/' + action);
+				}
 			}
 		}
 		document.querySelectorAll('.fb_login').forEach(function (el) {
@@ -48,8 +55,12 @@
 	}
 
 	window.Login = {
+		/** Explicit UI choice cookie (matches LoginLanguageResolver::EXPLICIT_COOKIE). */
+		LANG_COOKIE: 'lang_choice',
 		setLanguage: function (lang, query) {
-			setCookie('lang', lang, 365);
+			setCookie(Login.LANG_COOKIE, lang, 365);
+			// Drop legacy auto-detection cookie so it cannot override Accept-Language.
+			document.cookie = 'lang=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax';
 			if (typeof query === 'undefined') {
 				window.location.href = window.location.href;
 			} else {
@@ -59,17 +70,8 @@
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
-		document.querySelectorAll('#language .flags').forEach(function (flag) {
-			flag.addEventListener('click', function (e) {
-				e.preventDefault();
-				var link = flag.closest('a');
-				var href = link ? link.getAttribute('href') || '' : '';
-				var match = href.match(/[?&]lang=([^&]+)/);
-				if (match && match[1]) {
-					Login.setLanguage(match[1]);
-				}
-			});
-		});
+		// Flag links navigate with ?lang= (server persists lang_choice). Do not
+		// intercept — a client-only legacy `lang` cookie used to stick forever.
 
 		if (typeof LoginConfig !== 'undefined' && LoginConfig.isMultiUniverse) {
 			document.querySelectorAll('.changeAction').forEach(function (select) {

@@ -7,7 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
-use HiveNova\Core\Cronjob;
+use HiveNova\Core\StatBuilder;
 use HiveNova\Core\AllianceNameDisplay;
 
 /**
@@ -219,7 +219,7 @@ class ShowStatisticsPage extends AbstractGamePage
             'RangeList'                => $RangeList,
             'CUser_ally'            => $USER['ally_id'],
             'CUser_id'                => $USER['id'],
-            'stat_date'                => _date($LNG['php_tdformat'], Cronjob::getLastExecutionTime('statistic'), $USER['timezone']),
+            'stat_date'                => _date($LNG['php_tdformat'], StatBuilder::getLastUpdateTime(), $USER['timezone']),
 			'ShortStatus'				=> array(
 				'vacation'					=> $LNG['gl_short_vacation'],
 				'banned'					=> $LNG['gl_short_ban'],
