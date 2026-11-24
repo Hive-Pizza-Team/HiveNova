@@ -2,23 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
-use Parsedown;
-
-/**
- *  2Moons 
- *   by Jan-Otto Kröpke 2009-2016
- *
- * For the full copyright and license information, please view the LICENSE
- *
- * @package 2Moons
- * @author Jan-Otto Kröpke <slaver7@gmail.com>
- * @copyright 2009 Lucky
- * @copyright 2016 Jan-Otto Kröpke <slaver7@gmail.com>
- * @licence MIT
- * @version 1.8.0
- * @link https://github.com/jkroepke/2Moons
- */
-
+use HiveNova\Core\ReleaseNotesService;
 
 class ShowChangelogPage extends AbstractGamePage
 {
@@ -31,11 +15,17 @@ class ShowChangelogPage extends AbstractGamePage
 	
 	function show() 
 	{
-        $parsedown = new Parsedown();
+		$html = '';
+		foreach ((new ReleaseNotesService())->listReleases() as $release) {
+			$html .= '<h3>' . htmlspecialchars($release['version'], ENT_QUOTES, 'UTF-8') . '</h3><ul>';
+			foreach ($release['items'] as $item) {
+				$html .= '<li>' . htmlspecialchars($item, ENT_QUOTES, 'UTF-8') . '</li>';
+			}
+			$html .= '</ul>';
+		}
 
-		$changelogFile = ROOT_PATH . 'CHANGES.md';
 		$this->assign(array(
-			'ChangelogList'	=> file_exists($changelogFile) ? $parsedown->text(file_get_contents($changelogFile)) : '',
+			'ChangelogList'	=> $html,
 		));
 		
 		$this->display('page.changelog.default.tpl');

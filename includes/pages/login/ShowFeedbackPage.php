@@ -85,7 +85,7 @@ class ShowFeedbackPage extends AbstractLoginPage
 			'userAgent' => (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''),
 			'viewport' => HTTP::_GP('viewport', '', true),
 			'language' => (string) ($LNG->getLanguage() ?? ''),
-			'version' => (string) ($config->VERSION ?? ''),
+			'version' => \HiveNova\Core\ProductVersion::displayed((string) ($config->VERSION ?? '')),
 			'timestamp' => $now,
 		]);
 

@@ -243,7 +243,7 @@ class SQLDumper
 		$integerTypes	= array('tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'decimal', 'float', 'double', 'real');
 		$gameVersion	= Config::get()->VERSION;
 		$fp	= fopen($filePath, 'w');
-		fwrite($fp, "-- MySQL dump | 2Moons dumper v{$gameVersion}
+		fwrite($fp, "-- MySQL dump | HiveNova dumper {$gameVersion}
 --
 -- Host: {$database['host']}    Database: {$database['databasename']}
 -- ------------------------------------------------------

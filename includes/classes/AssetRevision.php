@@ -3,8 +3,8 @@
 namespace HiveNova\Core;
 
 /**
- * Cache-buster for CSS/JS query strings. VERSION stays at 2.0 across deploys,
- * so {$REV} also tracks mtime of assets loaded as ?v={$REV}.
+ * Cache-buster for CSS/JS query strings. The product version changes only
+ * when a release is cut, so {$REV} also tracks mtime of assets loaded as ?v={$REV}.
  */
 class AssetRevision
 {

@@ -265,7 +265,7 @@ PHP;
             $contents = file_get_contents($file);
             $this->assertStringContainsString('CREATE TABLE `uni1_config`', $contents);
             $this->assertStringContainsString('No data for table `uni1_config`', $contents);
-            $this->assertStringContainsString('2Moons dumper v1.8.test', $contents);
+            $this->assertStringContainsString('HiveNova dumper 1.8.test', $contents);
         } finally {
             if (is_file($file)) {
                 unlink($file);

@@ -696,22 +696,24 @@ function exceptionHandler($exception)
 		E_USER_DEPRECATED	=> 'USER DEPRECATED',
 	);
 
-	if (file_exists(ROOT_PATH . 'install/VERSION')) {
-		$VERSION	= file_get_contents(ROOT_PATH . 'install/VERSION') . ' (FILE)';
-	} else {
-		$VERSION	= 'UNKNOWN';
-	}
+	$VERSION	= \HiveNova\Core\ProductVersion::current();
 	$gameName	= '-';
 
 	if (MODE !== 'INSTALL') {
 		try {
 			$config		= \HiveNova\Core\Config::get();
 			$gameName	= $config->game_name;
-			$VERSION	= $config->VERSION;
+			if ($VERSION === '') {
+				$VERSION = (string) $config->VERSION;
+			}
 		} catch (\Throwable) {
 			// Config needs DB; if the original fault is PDO/connection, calling Config again would recurse.
 			// Keep $gameName / $VERSION fallbacks from above.
 		}
+	}
+
+	if ($VERSION === '') {
+		$VERSION = 'UNKNOWN';
 	}
 
 
@@ -777,7 +779,7 @@ function exceptionHandler($exception)
 			<b>URL: </b>' . PROTOCOL . HTTP_HOST . ($_SERVER['REQUEST_URI'] ?? '(cli)') . '<br>
 			<b>PHP-Version: </b>' . PHP_VERSION . '<br>
 			<b>PHP-API: </b>' . php_sapi_name() . '<br>
-			<b>2Moons Version: </b>' . $VERSION . '<br>
+			<b>HiveNova Version: </b>' . $VERSION . '<br>
 			<b>Debug Backtrace:</b><br>' . makebr(htmlspecialchars((string) $exception->getTraceAsString())) . '
 		</td>
 	</tr>

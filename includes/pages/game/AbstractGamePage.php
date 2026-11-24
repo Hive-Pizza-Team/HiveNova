@@ -338,6 +338,7 @@ abstract class AbstractGamePage
 
 		global $LNG, $PLANET;
 		$config	= Config::get();
+		$productVersion = \HiveNova\Core\ProductVersion::displayed((string) $config->VERSION);
 		$planet = $this->planet ?? $PLANET ?? null;
 
 		$this->assign(array(
@@ -352,10 +353,10 @@ abstract class AbstractGamePage
 			'ga_active'			=> $config->ga_active,
 			'ga_key'			=> $config->ga_key,
 			'debug'				=> $config->debug,
-			'VERSION'			=> $config->VERSION,
+			'VERSION'			=> $productVersion,
 			'date'				=> explode("|", date('Y\|n\|j\|G\|i\|s\|Z', TIMESTAMP)),
 			'isPlayerCardActive' => isModuleAvailable(MODULE_PLAYERCARD),
-			'REV'				=> AssetRevision::fromFilesystem((string) $config->VERSION),
+			'REV'				=> AssetRevision::fromFilesystem($productVersion),
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'queryString'		=> $this->getQueryString(),
 			'themeSettings'		=> $THEME->getStyleSettings(),
@@ -364,7 +365,7 @@ abstract class AbstractGamePage
 				$USER,
 				is_array($planet) ? $planet : null,
 				(string) ($LNG->getLanguage() ?? ''),
-				(string) $config->VERSION,
+				$productVersion,
 				(int) Universe::current(),
 				[
 					'successNoScreenshot' => (string) ($LNG['fb_success_no_screenshot']
