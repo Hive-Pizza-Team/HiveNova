@@ -52,6 +52,23 @@ body {
     line-height: 14px;
 }
 
+/*
+ * Login/lobby (body.light): height:100% on body lets the short body box scroll
+ * away and reveals the theme's html background (bands/seams on tall pages and
+ * full-page captures). Grow with content and keep html on the page fallback.
+ */
+body.light {
+    height: auto;
+    min-height: 100%;
+}
+
+html:has(body.light) {
+    background-image: none;
+    background-color: var(--color-bg-page, #0d0d0d);
+    background-size: auto;
+    background-attachment: scroll;
+}
+
 input,
 textarea,
 select,
@@ -103,6 +120,11 @@ img {
 
 h1 {
     color: #E31337;
+}
+
+/* Register (and other light-layout page titles): brand red fails WCAG AA on dark bg. */
+body.light #page > h1 {
+    color: var(--color-text-bright, #FFF);
 }
 
 footer,
@@ -168,6 +190,9 @@ body.light header {
 body.light header nav {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 body.light ul#language {
@@ -218,6 +243,99 @@ body.light #language .flags {
     margin: 0;
     height: 11px;
     width: 16px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 11px;
+}
+
+/* Unselected flags at 0.55 opacity read as blank on small/mobile captures. */
+@media screen and (max-width: 699px) {
+    body.light #language a {
+        opacity: 0.85;
+    }
+
+    body.light #language a[aria-current="true"] {
+        opacity: 1;
+    }
+}
+
+/* Labeled language picker — all widths (PR #669 used mobile-only; we keep it everywhere). */
+.language-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    max-width: 100%;
+    font-size: 13px;
+    color: var(--color-chrome-res-amount, #e8eef5);
+}
+
+.language-compact-label {
+    flex: 0 0 auto;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-chrome-res-label, #8aa4b8);
+}
+
+.language-compact-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 4px;
+    background: rgba(5, 14, 24, 0.85);
+    color: var(--color-text, #f0f0f8);
+    font-size: 14px;
+    font-family: verdana, sans-serif;
+}
+
+body.light .language-compact {
+    padding: 4px 6px;
+    background: rgba(5, 14, 24, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+@media screen and (max-width: 699px) {
+    body.light header {
+        padding: 8px 12px 0;
+    }
+
+    body.light header nav {
+        justify-content: stretch;
+    }
+
+    /* Hide the icon-only flag strip so it no longer owns the top band. */
+    body.light ul#language {
+        display: none;
+    }
+
+    body.light .language-compact {
+        width: 100%;
+    }
+}
+
+/* Mobile: enlarge language-flag hit areas to ~44×44 without stretching the sprite. */
+@media screen and (max-width: 699px) {
+    body.light ul#language {
+        gap: 4px;
+        padding: 6px;
+    }
+
+    body.light #language a {
+        box-sizing: border-box;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+    }
 }
 
 ul#language,
@@ -656,47 +774,52 @@ ul#rules {
     display: block;
     float: right;
     margin-right: 4px;
-    text-indent: -9999em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-indent: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 11px;
 }
 
 .de {
-    background: url(../../images/login/flags/de.png);
+    background-image: url(../../images/login/flags/de.png);
 }
 
 .en {
-    background: url(../../images/login/flags/us.png);
+    background-image: url(../../images/login/flags/us.png);
 }
 
 .es {
-    background: url(../../images/login/flags/es.png);
+    background-image: url(../../images/login/flags/es.png);
 }
 
 .fr {
-    background: url(../../images/login/flags/fr.png);
+    background-image: url(../../images/login/flags/fr.png);
 }
 
 .it {
-    background: url(../../images/login/flags/it.png);
+    background-image: url(../../images/login/flags/it.png);
 }
 
 .pt {
-    background: url(../../images/login/flags/pt.png);
+    background-image: url(../../images/login/flags/pt.png);
 }
 
 .ru {
-    background: url(../../images/login/flags/ru.png);
+    background-image: url(../../images/login/flags/ru.png);
 }
 
 .si {
-    background: url(../../images/login/flags/si.png);
+    background-image: url(../../images/login/flags/si.png);
 }
 
 .pl {
-    background: url(../../images/login/flags/pl.png);
+    background-image: url(../../images/login/flags/pl.png);
 }
 
 .tr {
-    background: url(../../images/login/flags/tr.png);
+    background-image: url(../../images/login/flags/tr.png);
 }
 
 /** FOOTER **/
@@ -805,4 +928,189 @@ footer {
     max-width: 519px !important;
     margin-left: auto;
     margin-right: auto;
+}
+/* Public Battle Hall / report signup surface (#645) — matches lobby CTA language */
+.public-battle {
+	margin: 0 auto;
+	max-width: 36rem;
+	text-align: center;
+}
+
+.public-battle--hall {
+	margin: 0 0 1.25rem;
+	padding: 0 0 0.25rem;
+}
+
+.public-battle-match {
+	margin: 0 0 1rem;
+	padding: 0;
+	height: auto;
+	background: none;
+	border: 0;
+}
+
+.public-battle-vs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: center;
+	gap: 0.45rem 0.7rem;
+	margin: 0;
+	font-size: clamp(1.15rem, 3.2vw, 1.55rem);
+	font-weight: 900;
+	letter-spacing: 0.02em;
+	line-height: 1.25;
+	color: #f0f0f8;
+}
+
+.public-battle-vs-sep {
+	font-size: 0.72em;
+	font-weight: 800;
+	letter-spacing: 0.12em;
+	color: #8eabc0;
+}
+
+.public-battle-side--attacker,
+.public-battle-side--win {
+	color: #6dff9a;
+}
+
+.public-battle-side--defender,
+.public-battle-side--lose {
+	color: #ff6b7f;
+}
+
+.public-battle-match--attacker .public-battle-side--attacker,
+.public-battle-match--defender .public-battle-side--defender {
+	text-shadow: 0 0 18px rgba(109, 255, 154, 0.28);
+}
+
+.public-battle-match--attacker .public-battle-side--defender,
+.public-battle-match--defender .public-battle-side--attacker {
+	opacity: 0.88;
+}
+
+.public-battle-meta {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.35rem 1rem;
+	margin: 0.7rem 0 0;
+	font-size: 13px;
+	line-height: 1.4;
+	color: #b7cfe0;
+}
+
+.public-battle-meta strong {
+	color: #f0f0f8;
+	font-weight: 800;
+}
+
+.public-battle-note {
+	margin: 0 0 0.85rem;
+	font-size: 13px;
+	line-height: 1.45;
+	color: #8eabc0;
+}
+
+.public-battle-hook {
+	margin: 0 0 0.85rem;
+	font-size: 14px;
+	line-height: 1.45;
+	font-style: italic;
+	color: #b7cfe0;
+}
+
+.public-battle-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 10px;
+	margin: 0;
+}
+
+.public-battle-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 42px;
+	padding: 0 22px;
+	border: 1px solid #E31337;
+	font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+	font-size: 13px;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	text-decoration: none !important;
+	transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.public-battle-btn--primary,
+.public-battle-btn--primary:visited {
+	background: #E31337;
+	color: #fff !important;
+}
+
+.public-battle-btn--primary:hover {
+	background: #ff2a4d;
+	color: #fff !important;
+	transform: translateY(-1px);
+}
+
+.public-battle-back {
+	margin: 0.85rem 0 0;
+	font-size: 13px;
+}
+
+.public-battle-back a {
+	color: #b7cfe0 !important;
+	text-decoration: none !important;
+}
+
+.public-battle-back a:hover {
+	color: #fff !important;
+	text-decoration: underline !important;
+}
+
+.public-battle-table {
+	width: 100%;
+}
+
+.public-battle-table th {
+	color: #E31337;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	font-size: 11px;
+}
+
+.public-battle-rowlink {
+	text-decoration: none;
+	color: inherit;
+}
+
+.public-battle-rowlink:hover .public-battle-vs-sep {
+	color: #f0f0f8;
+}
+
+.public-battle-legend {
+	margin: 0.5rem 0 0;
+	font-size: 12px;
+	color: #8eabc0;
+}
+
+.public-battle-legend .public-battle-side {
+	margin-left: 0.4rem;
+}
+
+/* iOS Safari auto-zooms focused controls under 16px (UA default ~13.33px).
+   Lobby login fields are covered by lobby.css (#650). Register, lost password,
+   the language picker, and other login-side form pages do not load lobby.css. */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+textarea,
+.language-compact-select {
+    font-size: 16px;
 }

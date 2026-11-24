@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminPageSidAuth;
 use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Database;
 use HiveNova\Core\HTTP;
@@ -22,7 +23,13 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
 
 
-if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__)) || ($_GET['sid'] ?? '') != session_id()) exit;
+if (!AdminPageSidAuth::canAccessAllowed(
+	allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__)),
+	(string) HTTP::_GP('sid', ''),
+	(string) session_id()
+)) {
+	AdminPageSidAuth::deny();
+}
 function ShowRightsPage()
 {
 	global $LNG, $USER;

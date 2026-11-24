@@ -14,7 +14,10 @@
 					{if $elementID == 921}
 					<p><strong>{$LNG.op_pizza_pizzabits_ratio}</strong></p>
 					<p>{$LNG.in_pizzabits_deposit_help}</p>
-					<p><a href="game.php?page=settings" target="_parent">{$LNG.in_pizzabits_open_settings}</a></p>
+					<p><a href="{$hiveSoftPrompt.settingsUrl|default:'game.php?page=settings'|escape:'html'}" target="_parent">{$LNG.in_pizzabits_open_settings}</a></p>
+					{if !$hasHiveAccount && $hiveSoftPrompt.show|default:false}
+					<p><small>{$LNG.op_hive_upgrade_keep_playing}</small></p>
+					{/if}
 					<p>
 						<button type="button" onclick="DepositPizzaTokens('{$hiveAccount}', '{$universe}', '{$depositWallet}')" class="button" title="{$LNG.op_deposit_pizza}"{if $disableDepositButton} disabled{/if}>{$LNG.op_deposit_pizza}</button>
 					</p>

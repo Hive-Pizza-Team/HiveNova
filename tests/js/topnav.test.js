@@ -267,6 +267,29 @@ describe('HiveNovaTopnav', () => {
 		assert.equal(calls, 2);
 	});
 
+	it('creditResources bumps ticker available and data-real', () => {
+		var node = makeElement('0');
+		global.$ = function (arg) {
+			if (typeof arg === 'string') {
+				assert.equal(arg, '[id="current_metal"]');
+				return mockJQueryCollection([node]);
+			}
+			return mockJQueryCollection([arg]);
+		};
+
+		var config = {
+			available: 1000,
+			production: 0,
+			limit: [0, 100000],
+			valueElem: 'current_metal'
+		};
+		topnav._registerTickerForTests(config);
+		topnav.creditResources({ metal: 2500, crystal: 0, deuterium: 0 });
+		assert.equal(config.available, 3500);
+		assert.equal(node.attrs['data-real'], 3500);
+		assert.equal(node._html, 'S3500');
+	});
+
 	it('onResume syncs clock then resyncs tickers', () => {
 		var clockCalls = 0;
 		var updateCalls = 0;
@@ -281,7 +304,7 @@ describe('HiveNovaTopnav', () => {
 		assert.equal(updateCalls, 1);
 	});
 
-	it('initVisibilityResync triggers onResume when tab becomes visible', () => {
+	it('initVisibilityResync triggers onResume when tab becomes visible', async () => {
 		var clockCalls = 0;
 		var updateCalls = 0;
 		var syncFn = function () { clockCalls += 1; };
@@ -299,7 +322,9 @@ describe('HiveNovaTopnav', () => {
 			}
 		};
 		global.window = {
-			addEventListener() {},
+			addEventListener(name, fn) {
+				listeners[name] = fn;
+			},
 			syncGameClockToWall: syncFn
 		};
 
@@ -312,23 +337,65 @@ describe('HiveNovaTopnav', () => {
 
 		global.document.hidden = false;
 		listeners.visibilitychange();
+		await new Promise(function (resolve) { setTimeout(resolve, 5); });
 		assert.equal(clockCalls, 1);
 		assert.equal(updateCalls, 1);
 	});
 
-	it('auto-binds visibility resync when document exists at load', () => {
+	it('coalesces visibility/focus/pageshow into one resume', async () => {
+		var clockCalls = 0;
+		var syncFn = function () { clockCalls += 1; };
+		global.syncGameClockToWall = syncFn;
+		global.$ = function () {
+			return mockJQueryCollection([]);
+		};
+
 		var listeners = {};
 		global.document = {
-			hidden: true,
+			hidden: false,
 			addEventListener(name, fn) {
 				listeners[name] = fn;
 			}
 		};
-		global.window = { addEventListener() {} };
+		global.window = {
+			addEventListener(name, fn) {
+				listeners[name] = fn;
+			},
+			syncGameClockToWall: syncFn
+		};
 
 		delete require.cache[require.resolve('../../scripts/game/topnav.js')];
 		topnav = require('../../scripts/game/topnav.js');
-		assert.equal(typeof listeners.visibilitychange, 'function');
+		topnav._registerTickerForTests({ valueElem: 'current_metal' });
+		topnav.initVisibilityResync();
+
+		listeners.visibilitychange();
+		listeners.focus();
+		listeners.pageshow();
+		await new Promise(function (resolve) { setTimeout(resolve, 5); });
+		assert.equal(clockCalls, 1);
+	});
+
+	it('auto-binds visibility, pageshow, and focus resync when document exists at load', () => {
+		var docListeners = {};
+		var winListeners = {};
+		global.document = {
+			hidden: true,
+			addEventListener(name, fn) {
+				docListeners[name] = fn;
+			}
+		};
+		global.window = {
+			addEventListener(name, fn) {
+				winListeners[name] = fn;
+			}
+		};
+
+		delete require.cache[require.resolve('../../scripts/game/topnav.js')];
+		topnav = require('../../scripts/game/topnav.js');
+		assert.equal(typeof docListeners.visibilitychange, 'function');
+		assert.equal(typeof winListeners.pageshow, 'function');
+		assert.equal(typeof winListeners.focus, 'function');
 	});
 });
 

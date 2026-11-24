@@ -504,6 +504,28 @@ header td,
   opacity: 0.75;
 }
 
+.msg-counts-legend {
+  font-size: 11px;
+  opacity: 0.8;
+  text-align: center !important;
+  padding: 4px 8px !important;
+}
+
+.msg-compose-row td {
+  text-align: center !important;
+  padding: 8px 10px !important;
+}
+
+.msg-compose-link {
+  font-weight: 700;
+}
+
+.msg-compose-error {
+  color: #e74c3c;
+  font-weight: 700;
+  text-align: center !important;
+}
+
 .msg-cat-current {
   font-weight: 700;
   text-decoration: underline;
@@ -905,7 +927,7 @@ th a,
   padding: 10px;
   text-align: center;
   background: rgba(33, 37, 41, 0.95);
-  height: 140px
+  min-height: 140px
 }
 
 .buildn {

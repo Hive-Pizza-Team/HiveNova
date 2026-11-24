@@ -31,4 +31,21 @@ class PushingAccusationQueryTest extends TestCase
         $this->assertTrue(PushingAccusationQuery::isAccusedReceiver(42, 1, TIMESTAMP));
         $this->assertFalse(PushingAccusationQuery::isAccusedReceiver(99, 1, TIMESTAMP));
     }
+
+    public function testReportIsComputedOncePerUniverseAndTime(): void
+    {
+        $this->fake->accusedDestIds = [42];
+        $this->assertSame([42], PushingAccusationQuery::accusedReceiverIds(1, TIMESTAMP));
+
+        // Same request: callers asking per fleet get the cached answer.
+        $this->fake->accusedDestIds = [99];
+        $this->assertSame([42], PushingAccusationQuery::accusedReceiverIds(1, TIMESTAMP));
+        $this->assertTrue(PushingAccusationQuery::isAccusedReceiver(42, 1, TIMESTAMP));
+
+        // Another universe or time is computed separately; reset clears it.
+        $this->assertSame([99], PushingAccusationQuery::accusedReceiverIds(2, TIMESTAMP));
+        $this->assertSame([99], PushingAccusationQuery::accusedReceiverIds(1, TIMESTAMP + 1));
+        PushingAccusationQuery::resetCache();
+        $this->assertSame([99], PushingAccusationQuery::accusedReceiverIds(1, TIMESTAMP));
+    }
 }

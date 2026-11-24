@@ -9,6 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="styles/theme/{$dpath|default:'nova'}/formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/main.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/hivekeychain_button.css?v={$REV}">
+	<link rel="stylesheet" type="text/css" href="styles/resource/css/feedback.css?v={$REV}">
 	<link rel="manifest" href="manifest.php?uni={$UNI}">
 	<meta name="theme-color" content="#1a1a2e">
 	<meta name="mobile-web-app-capable" content="yes">
@@ -46,7 +47,7 @@
 	{if $seoPage == 'index' && !empty($faqJsonLd)}
 	<script type="application/ld+json">{$faqJsonLd nofilter}</script>
 	{/if}
-	<script src="scripts/login/main.js" defer></script>
+	<script src="scripts/login/main.js?v={$REV}" defer></script>
 	<script src="scripts/login/remember-username.js?v={$REV}" defer></script>
 	<script>{if isset($code)}var loginError = {$code|json};{/if}</script>
 	{block name="script"}{/block}
