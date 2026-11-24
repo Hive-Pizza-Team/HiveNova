@@ -1,4 +1,5 @@
-{assign var=navPage value=$smarty.get.page|default:'overview'}
+{* $navPage is assigned from PHP (resolved aliases). Empty = no highlight (errors). *}
+{if !isset($navPage)}{assign var=navPage value=$smarty.get.page|default:'overview'}{/if}
 <ul id="menu" class="menu--sections" data-menu-sections>
 	<li class="menu-group" data-menu-group="basics">
 		<button type="button" class="menu-section menu-section__toggle" aria-expanded="true" aria-controls="menu-group-basics" data-menu-toggle>
@@ -33,9 +34,11 @@
 			{if $smarty.const.MODULE_RECORDS|isModuleAvailable}<li><a href="game.php?page=records"{if $navPage == 'records'} class="active"{/if}>{$LNG.lm_records}</a></li>{/if}
 			{if $smarty.const.MODULE_BATTLEHALL|isModuleAvailable}<li><a href="game.php?page=battleHall"{if $navPage == 'battleHall'} class="active"{/if}>{$LNG.lm_topkb}</a></li>{/if}
 			{if $smarty.const.MODULE_ACHIEVEMENTS|isModuleAvailable}<li><a href="game.php?page=achievements"{if $navPage == 'achievements'} class="active"{/if}>{$LNG.lm_achievements}</a></li>{/if}
+			<li><a href="game.php?page=medals"{if $navPage == 'medals' || $navPage == 'nfts'} class="active"{/if}>{$LNG.lm_medals}</a></li>
 			<li><a href="game.php?page=viz"{if $navPage == 'viz'} class="active"{/if}>{$LNG.lm_viz}</a></li>
 			<li><a href="game.php?page=eventFirehose"{if $navPage == 'eventFirehose'} class="active"{/if}>{$LNG.ef_title}</a></li>
 			{if $smarty.const.MODULE_TRADER|isModuleAvailable}<li><a href="game.php?page=trader"{if $navPage == 'trader'} class="active"{/if}>{$LNG.lm_trader}</a></li>{/if}
+			{if $smarty.const.MODULE_MISSION_TRADE|isModuleAvailable}<li><a href="game.php?page=marketPlace"{if $navPage == 'marketPlace'} class="active"{/if}>{$LNG.lm_marketplace}</a></li>{/if}
 			{if $smarty.const.MODULE_FLEET_TRADER|isModuleAvailable}<li><a href="game.php?page=fleetDealer"{if $navPage == 'fleetDealer'} class="active"{/if}>{$LNG.lm_fleettrader}</a></li>{/if}
 			{if $smarty.const.MODULE_ALLIANCE|isModuleAvailable}<li><a href="game.php?page=alliance"{if $navPage == 'alliance'} class="active"{/if}>{$LNG.lm_alliance}</a></li>{/if}
 			{if false}
@@ -49,7 +52,7 @@
 			<span class="menu-section__chevron" aria-hidden="true"></span>
 		</button>
 		<ul id="menu-group-account" class="menu-group__list">
-			{if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="javascript:OpenPopup('?page=notes', 'notes', 720, 300);"{if $navPage == 'notes'} class="active"{/if}>{$LNG.lm_notes}</a></li>{/if}
+			{if $smarty.const.MODULE_NOTICE|isModuleAvailable}<li><a href="game.php?page=notes"{if $navPage == 'notes'} class="active"{/if}>{$LNG.lm_notes}</a></li>{/if}
 			{if $smarty.const.MODULE_BUDDYLIST|isModuleAvailable}<li><a href="game.php?page=buddyList"{if $navPage == 'buddyList'} class="active"{/if}>{$LNG.lm_buddylist}</a></li>{/if}
 			<li><a href="game.php?page=settings"{if $navPage == 'settings'} class="active"{/if}>{$LNG.lm_options}</a></li>
 			{if $showReferralDashboard}<li><a href="game.php?page=referrals"{if $navPage == 'referrals'} class="active"{/if}>{$LNG.lm_referrals}</a></li>{/if}
@@ -63,5 +66,5 @@
 	<li class="menu-pin"><a href="game.php?page=logout"{if $navPage == 'logout'} class="active"{/if}>{$LNG.lm_logout}</a></li>
 </ul>
 <div id="disclamer" class="no-mobile">
-	{if $commit != ''}<a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
+	<a href="game.php?page=whatsNew" class="disclamer-whats-new">{$LNG.whats_new_link}</a>{if $commit != ''} &middot; <a href="https://github.com/Hive-Pizza-Team/HiveNova/tree/{$commit}" target="copy">HiveNova engine {$commitShort}</a>{/if}
 </div>

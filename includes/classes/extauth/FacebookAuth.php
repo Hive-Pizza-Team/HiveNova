@@ -107,7 +107,7 @@ class FacebookAuth implements externalAuth
 	{
 		$uid	= $this->getAccount();
 
-		$sql	= 'SELECT user.id, id_planet
+		$sql	= 'SELECT user.id, id_planet, user.lang
 		FROM %%USERS_AUTH%% auth
 		INNER JOIN %%USERS%% user ON auth.id = user.id AND user.universe = :universe
 		WHERE auth.account = :accountId AND mode = :mode;';

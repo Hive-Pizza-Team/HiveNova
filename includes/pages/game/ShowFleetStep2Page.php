@@ -8,6 +8,8 @@ use HiveNova\Core\Universe;
 use HiveNova\Core\AcsJoinService;
 use HiveNova\Core\FleetFunctions;
 use HiveNova\Core\FleetTargetInfoService;
+use HiveNova\Core\MarketAbuseRules;
+use HiveNova\Core\MarketPlaceService;
 
 /**
  *  2Moons
@@ -172,6 +174,20 @@ class ShowFleetStep2Page extends AbstractGamePage
 		);
 		$targetInfo['label'] = FleetTargetInfoService::formatLabel($targetInfo);
 
+		$marketOffer = null;
+		if (!empty($MissionOutput['Exchange'])) {
+			// Trade form: live allowed price range + listing fee (market-offer.js mirrors MarketAbuseRules).
+			$this->tplObj->loadscript('market-offer.js');
+			$marketOffer = array(
+				'ratio'     => implode(',', MarketPlaceService::REFERENCE_RATIO),
+				'shipValue' => floatToString(MarketAbuseRules::fleetValue($fleetArray, $GLOBALS['pricelist'] ?? array(), MarketPlaceService::REFERENCE_RATIO)),
+				'bandMin'   => MarketAbuseRules::BAND_MIN,
+				'bandMax'   => MarketAbuseRules::BAND_MAX,
+				'feeRate'   => MarketAbuseRules::LISTING_FEE_RATE,
+				'maxHold'   => MarketAbuseRules::maxHoldHours(),
+			);
+		}
+
 		$this->tplObj->execscript('calculateTransportCapacity();');
 		$this->assign(array(
 			'fleetdata'						=> $fleetData,
@@ -189,6 +205,7 @@ class ShowFleetStep2Page extends AbstractGamePage
 			'MissionSelector' 				=> $MissionOutput['MissionSelector'],
 			'StaySelector' 					=> $MissionOutput['StayBlock'],
 			'Exchange' 					=> $MissionOutput['Exchange'],
+			'marketOffer'				=> $marketOffer,
 			'fl_dm_alert_message'			=> sprintf($LNG['fl_dm_alert_message'], $LNG['type_mission_11'], $LNG['tech'][921]),
 			'fl_continue'					=> $LNG['fl_continue'],
 			'token' 						=> $token,

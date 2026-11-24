@@ -980,6 +980,142 @@ class FleetDispatchServiceTest extends TestCase
     // helpers
     // -------------------------------------------------------------------------
 
+    // -------------------------------------------------------------------------
+    // Marketplace anti-abuse: price band + listing fee on Trade offers
+    // -------------------------------------------------------------------------
+
+    private function withMarketLanguage(): void
+    {
+        $GLOBALS['LNG']['market_p_msg_wrong_resource_type'] = 'Wrong resource type';
+        $GLOBALS['LNG']['market_band_error'] = 'Ask %1$s to %2$s %3$s';
+        $GLOBALS['LNG']['market_reason_band'] = 'Out of band';
+        $GLOBALS['LNG']['market_fee_not_enough'] = 'Fee %s';
+        $GLOBALS['LNG']['tech'] = [901 => 'Metal', 902 => 'Crystal', 903 => 'Deuterium'];
+        $GLOBALS['pricelist'][202]['cost'] = [901 => 3000, 902 => 1000, 903 => 0];
+    }
+
+    private function tradeParams(array $overrides = []): array
+    {
+        return $this->baseValidateTargetParams(array_merge([
+            'targetMission'        => 16,
+            'targetPlanet'         => 17,
+            'TransportMetal'       => 4000,
+            'WantedResourceType'   => 1,
+            'WantedResourceAmount' => 4000,
+            'fleetStorage'         => 10000,
+            'consumption'          => 10,
+        ], $overrides));
+    }
+
+    public function testTradeOfferOutsidePriceBandIsRejectedWithTheAllowedRange(): void
+    {
+        $this->withMarketLanguage();
+        $this->expectException(\RuntimeException::class);
+        // 4000 metal = 1000 units -> 2,000 .. 8,000 metal.
+        $this->expectExceptionMessage('Ask 2.000 to 8.000 Metal');
+
+        FleetDispatchService::validateTarget($this->tradeParams(['WantedResourceAmount' => 1]), ['id' => 1], $this->basePlanet(['galaxy' => 2]));
+    }
+
+    public function testTradeOfferAboveThePriceBandIsRejected(): void
+    {
+        $this->withMarketLanguage();
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Ask 2.000 to 8.000 Metal');
+
+        FleetDispatchService::validateTarget($this->tradeParams(['WantedResourceAmount' => 8001]), ['id' => 1], $this->basePlanet(['galaxy' => 2]));
+    }
+
+    public function testTradeOfferInsideThePriceBandPasses(): void
+    {
+        $this->withMarketLanguage();
+        foreach ([2000, 4000, 8000] as $ask) {
+            FleetDispatchService::validateTarget($this->tradeParams(['WantedResourceAmount' => $ask]), ['id' => 1], $this->basePlanet(['galaxy' => 2]));
+        }
+        $this->addToAssertionCount(3);
+    }
+
+    public function testTradeOfferNeedsDeuteriumForTheListingFee(): void
+    {
+        $this->withMarketLanguage();
+        $this->expectException(\RuntimeException::class);
+        // 1 LC (1250 units) + 4000 metal (1000 units) => 1% = 22.5 -> 23 deuterium.
+        $this->expectExceptionMessage('Fee 23');
+
+        FleetDispatchService::validateTarget($this->tradeParams(), ['id' => 1], $this->basePlanet(['galaxy' => 2, 'deuterium' => 30]));
+    }
+
+    public function testTradeOfferRejectsUnknownWantedResource(): void
+    {
+        $this->withMarketLanguage();
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Wrong resource type');
+
+        FleetDispatchService::validateTarget($this->tradeParams(['WantedResourceType' => 0]), ['id' => 1], $this->basePlanet(['galaxy' => 2]));
+    }
+
+    public function testFleetOfferIsPricedAgainstTheShipsBuildValue(): void
+    {
+        $this->withMarketLanguage();
+        // 1 LC = 1250 units -> crystal 1,250 .. 5,000.
+        FleetDispatchService::validateTradeOffer(1, 2, 2500, [202 => 1], [901 => 0, 902 => 0, 903 => 0], 1000);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Ask 1.250 to 5.000 Crystal');
+        FleetDispatchService::validateTradeOffer(1, 2, 1, [202 => 1], [901 => 0, 902 => 0, 903 => 0], 1000);
+    }
+
+    public function testListingFeeOnlyForTradeMission(): void
+    {
+        $this->withMarketLanguage();
+        $this->assertSame(0.0, FleetDispatchService::listingFee(3, [202 => 1], [901 => 4000, 902 => 0, 903 => 0]));
+        $this->assertSame(23.0, FleetDispatchService::listingFee(16, [202 => 1], [901 => 4000, 902 => 0, 903 => 0]));
+    }
+
+    public function testDispatchOfTradeOfferChargesTheListingFee(): void
+    {
+        $this->withMarketLanguage();
+        $planet = [
+            'id' => 42, 'galaxy' => 1, 'system' => 5, 'planet' => 8, 'planet_type' => 1,
+            'metal' => 10000, 'crystal' => 5000, 'deuterium' => 3000, 'light_fighter' => 10,
+        ];
+        $this->fake->planetRowsById[42] = ['metal' => 10000, 'crystal' => 5000, 'deuterium' => 3000, 'light_fighter' => 10];
+
+        FleetDispatchService::dispatch($this->baseDispatchData([
+            'targetMission'        => 16,
+            'targetPlanetData'     => ['id' => 0, 'id_owner' => 0],
+            'WantedResourceType'   => 1,
+            'WantedResourceAmount' => 400,
+        ]), $planet);
+
+        // 1 LC (1250) + cargo 25 + 25 + 25 = 1325 units -> fee 14. 3000 - 25 cargo - 75 fuel - 14 fee.
+        $this->assertEquals(2886, $planet['deuterium']);
+    }
+
+    private function baseDispatchData(array $overrides = []): array
+    {
+        return array_merge([
+            'fleetArray'         => [202 => 1],
+            'targetMission'      => 3,
+            'USER'               => ['id' => 1, 'universe' => 1],
+            'targetPlanetData'   => ['id' => 99, 'id_owner' => 2],
+            'targetGalaxy'       => 1,
+            'targetSystem'       => 6,
+            'targetPlanet'       => 17,
+            'targetType'         => 1,
+            'fleetResource'      => [901 => 100, 902 => 50, 903 => 25],
+            'fleetStartTime'     => TIMESTAMP + 3600,
+            'fleetStayTime'      => TIMESTAMP + 7200,
+            'fleetEndTime'       => TIMESTAMP + 10800,
+            'fleetGroup'         => 0,
+            'consumption'        => 75,
+            'markettype'         => 0,
+            'WantedResourceType' => 0,
+            'WantedResourceAmount' => 0,
+            'maxFlightTime'      => 0,
+            'visibility'         => 0,
+        ], $overrides);
+    }
+
     private function baseValidateTargetParams(array $overrides = []): array
     {
         return array_merge([
