@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hivenova-static-v4';
+const CACHE_NAME = 'hivenova-static-v5';
 const DEFAULT_GAME_URL = 'game.php?page=overview';
 const PING_TYPE = 'hivenova-ping';
 const PONG_TYPE = 'hivenova-pong';
@@ -167,6 +167,59 @@ self.addEventListener('message', function (event) {
   );
 });
 
+function subscribeUrlForClient(clientUrl) {
+  try {
+    var url = new URL(clientUrl);
+    if (!/\/game\.php$/.test(url.pathname)) {
+      return null;
+    }
+    return url.pathname + '?page=push&mode=subscribe';
+  } catch (e) {
+    return null;
+  }
+}
+
+function handlePushSubscriptionChange(event) {
+  var oldSub = event && event.oldSubscription;
+  var options = { userVisibleOnly: true };
+  if (oldSub && oldSub.options && oldSub.options.applicationServerKey) {
+    options.applicationServerKey = oldSub.options.applicationServerKey;
+  }
+  if (!self.registration || !self.registration.pushManager || typeof self.registration.pushManager.subscribe !== 'function') {
+    return Promise.resolve();
+  }
+  return self.registration.pushManager.subscribe(options).then(function (subscription) {
+    var body = JSON.stringify(subscription && typeof subscription.toJSON === 'function'
+      ? subscription.toJSON()
+      : {});
+    if (!self.clients || typeof self.clients.matchAll !== 'function') {
+      return null;
+    }
+    return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+      var jobs = [];
+      var i;
+      var target;
+      for (i = 0; i < clientList.length; i++) {
+        target = subscribeUrlForClient(clientList[i] && clientList[i].url);
+        if (!target) {
+          continue;
+        }
+        jobs.push(fetch(target, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: body
+        }).catch(function () {}));
+      }
+      return Promise.all(jobs);
+    });
+  }).catch(function () {});
+}
+
+self.addEventListener('pushsubscriptionchange', function (event) {
+  event.waitUntil(handlePushSubscriptionChange(event));
+});
+
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
   var target = safeGameUrl(event.notification.data && event.notification.data.url);
@@ -195,6 +248,8 @@ if (typeof module !== 'undefined' && module.exports) {
     notificationIconUrl: notificationIconUrl,
     parsePushPayload: parsePushPayload,
     notificationOptions: notificationOptions,
-    handlePushEvent: handlePushEvent
+    handlePushEvent: handlePushEvent,
+    subscribeUrlForClient: subscribeUrlForClient,
+    handlePushSubscriptionChange: handlePushSubscriptionChange
   };
 }

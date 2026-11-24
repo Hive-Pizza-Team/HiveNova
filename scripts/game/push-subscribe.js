@@ -15,7 +15,8 @@
 		'invalid_subscription',
 		'empty_body',
 		'invalid_json',
-		'method_not_allowed'
+		'method_not_allowed',
+		'subscription_expired'
 	];
 
 	function isSubscribeFatalError(err) {
@@ -497,6 +498,29 @@
 		}).catch(function () {});
 	}
 
+	function subscribePushManager(reg, publicKey) {
+		return reg.pushManager.subscribe({
+			userVisibleOnly: true,
+			applicationServerKey: urlBase64ToUint8Array(publicKey)
+		});
+	}
+
+	function postSubscribeOrRotate(reg, publicKey, subscription) {
+		return postSubscribe(subscription).catch(function (err) {
+			if (!err || err.message !== 'subscription_expired') {
+				throw err;
+			}
+			var drop = subscription && typeof subscription.unsubscribe === 'function'
+				? subscription.unsubscribe()
+				: Promise.resolve();
+			return drop.then(function () {
+				return subscribePushManager(reg, publicKey);
+			}).then(function (fresh) {
+				return postSubscribe(fresh);
+			});
+		});
+	}
+
 	function subscribeWithRegistration(reg, publicKey) {
 		return reg.pushManager.getSubscription().then(function (existing) {
 			if (existing) {
@@ -507,19 +531,13 @@
 					return existing;
 				}
 				return existing.unsubscribe().then(function () {
-					return reg.pushManager.subscribe({
-						userVisibleOnly: true,
-						applicationServerKey: urlBase64ToUint8Array(publicKey)
-					});
+					return subscribePushManager(reg, publicKey);
 				});
 			}
-			return reg.pushManager.subscribe({
-				userVisibleOnly: true,
-				applicationServerKey: urlBase64ToUint8Array(publicKey)
-			});
+			return subscribePushManager(reg, publicKey);
 		}).then(function (subscription) {
 			return unsubscribeOtherPushRegistrations(reg).then(function () {
-				return postSubscribe(subscription);
+				return postSubscribeOrRotate(reg, publicKey, subscription);
 			});
 		});
 	}

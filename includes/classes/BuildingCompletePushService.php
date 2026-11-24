@@ -412,7 +412,7 @@ class BuildingCompletePushService
 
 		$result = PushNotificationService::notifyUser($userId, $message['title'], $message['body'], $message['data']);
 
-		return !empty($result['ok']);
+		return PushNotificationService::shouldStopRetrying($result);
 	}
 
 	/**
