@@ -98,18 +98,24 @@
 	{block name="script"}{/block}
 	<script type="text/javascript">
 	$(window).scroll(function(){
-		// affix
-		windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-		lastScroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-		
-		// menu
-		elementHeight = document.getElementsByTagName("menu")[0].getElementsByClassName("fixed")[0].clientHeight;
-		element = document.getElementsByTagName("menu")[0].getElementsByClassName("fixed")[0];
+		// menu affix
+		var menus = document.getElementsByTagName("menu");
+		if (!menus.length) {
+			return;
+		}
+		var fixed = menus[0].getElementsByClassName("fixed");
+		if (!fixed.length) {
+			return;
+		}
+		var windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+		var lastScroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+		var element = fixed[0];
+		var elementHeight = element.clientHeight;
 		if (elementHeight > windowHeight - 100){
-			a = 100 - lastScroll;
-			b = windowHeight - elementHeight;
-			scrollTo = Math.max(a, b);
-			element.style.top = scrollTo + 'px';
+			var a = 100 - lastScroll;
+			var b = windowHeight - elementHeight;
+			var topOffset = Math.max(a, b);
+			element.style.top = topOffset + 'px';
 		}
 	});
 	$(function() {
