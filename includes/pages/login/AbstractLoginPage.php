@@ -6,6 +6,7 @@ use HiveNova\Core\AssetRevision;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
+use HiveNova\Core\LoginLanguageResolver;
 use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\PublicSeo;
 use HiveNova\Core\ReferralCaptureService;
@@ -215,19 +216,20 @@ abstract class AbstractLoginPage
 		$seoPage		= PublicSeo::normalizePage(HTTP::_GP('page', ''));
 		$gameName		= (string) $config->game_name;
 		$languages		= Language::getAllowedLangs(false);
-		$seoBase			= PublicSeo::canonicalBasePath($basePath);
+		$seoBasePath		= PublicSeo::seoBasePath();
 		$documentTitle		= $this->seoDocumentTitle ?? PublicSeo::documentTitle($seoPage, $gameName, $LNG);
 		$metaDescription	= $this->seoMetaDescription ?? PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= $this->seoCanonicalUrl ?? PublicSeo::canonicalUrl($seoBase, $seoPage, $lang);
-		$hreflangUrls		= PublicSeo::hreflangUrls($seoBase, $seoPage, $languages);
+		$canonicalUrl		= $this->seoCanonicalUrl ?? PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang);
+		$hreflangUrls		= PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages);
+		$languageSwitchUrls	= LoginLanguageResolver::switchUrls($languages, $_GET);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
 		if (PublicSeo::usesBattleShareImage($seoPage)) {
-			$ogImageUrl = PublicSeo::shareImageUrl($seoBase);
+			$ogImageUrl = PublicSeo::shareImageUrl($seoBasePath);
 			$ogImageWidth = PublicSeo::SHARE_IMAGE_WIDTH;
 			$ogImageHeight = PublicSeo::SHARE_IMAGE_HEIGHT;
 		} else {
-			$ogImageUrl = $seoBase.'styles/resource/images/login/HiveNova.png';
+			$ogImageUrl = $seoBasePath.'styles/resource/images/login/HiveNova.png';
 			$ogImageWidth = 1024;
 			$ogImageHeight = 768;
 		}
@@ -264,6 +266,7 @@ abstract class AbstractLoginPage
 			'metaDescription'	=> $seoVars['metaDescription'],
 			'canonicalUrl'		=> $seoVars['canonicalUrl'],
 			'hreflangUrls'		=> $seoVars['hreflangUrls'],
+			'languageSwitchUrls'	=> $languageSwitchUrls,
 			'pageHeading'		=> $seoVars['pageHeading'],
 			'robotsContent'		=> $seoVars['robotsContent'],
 			'ogImageUrl'		=> $seoVars['ogImageUrl'],
@@ -271,7 +274,7 @@ abstract class AbstractLoginPage
 			'ogImageHeight'		=> $seoVars['ogImageHeight'],
 			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
-			'footerLinks'		=> PublicSeo::footerLinks($seoBase, $lang, $LNG),
+			'footerLinks'		=> PublicSeo::footerLinks($seoBasePath, $lang, $LNG),
 			'jsonLd'			=> $seoVars['jsonLd'],
 		));
 

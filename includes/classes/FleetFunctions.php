@@ -228,7 +228,8 @@ class FleetFunctions
 		}
 		elseif(in_array(16, $Missions))
 		{
-			$stayBlock = array(1 => 1, 2 => 2, 4 => 4, 8 => 8, 12 => 12, 24 => 24, 48 => 48,48 => 48, 168 => 168);
+			// Max 24 h so the trading zone is not a week-long safe spot (was up to 168 h).
+			$stayBlock = MarketAbuseRules::tradeStayBlock();
 			$exchange = true;
 		}
 

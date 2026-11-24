@@ -36,6 +36,8 @@ class TrackingFakeAchievementDatabase extends FakeAchievementDatabase
 
 class StatBuilderFakeDatabase extends FakeDatabase
 {
+    public ?string $statisticCronLastExecution = null;
+
     public function select($qry, array $params = [])
     {
         if (str_contains($qry, 'fleet_array') && str_contains($qry, '%%FLEETS%%')) {
@@ -55,6 +57,19 @@ class StatBuilderFakeDatabase extends FakeDatabase
         }
 
         return parent::select($qry, $params);
+    }
+
+    public function selectSingle($qry, array $params = [], $field = false)
+    {
+        if (str_contains($qry, '%%CRONJOBS_LOG%%') && str_contains($qry, 'executionTime')) {
+            $value = $this->statisticCronLastExecution;
+            if ($value === null) {
+                return $field === false ? null : false;
+            }
+            return $field === false ? ['executionTime' => $value] : $value;
+        }
+
+        return parent::selectSingle($qry, $params, $field);
     }
 }
 
@@ -77,6 +92,7 @@ class StatBuilderTest extends TestCase
             'stat' => 0,
             'stat_level' => 2,
             'stat_settings' => 1000,
+            'stat_last_update' => 0,
             'users_amount' => 0,
         ]), 1);
         Config::setInstance(new Config([
@@ -84,6 +100,7 @@ class StatBuilderTest extends TestCase
             'stat' => 0,
             'stat_level' => 2,
             'stat_settings' => 1000,
+            'stat_last_update' => 0,
             'users_amount' => 0,
         ]), 2);
     }
@@ -540,12 +557,33 @@ class StatBuilderTest extends TestCase
         $info = $builder->MakeStats();
 
         $this->assertSame(TIMESTAMP, $info['stats_time']);
+        $this->assertSame(TIMESTAMP, (int) Config::get(1)->stat_last_update);
+        $this->assertSame(TIMESTAMP, StatBuilder::getLastUpdateTime());
         $this->assertArrayHasKey('totaltime', $info);
         $this->assertNotEmpty($this->fakeDb->achievement->nativeQueries);
         $this->assertStringContainsString(
             'TRUNCATE TABLE %%STATPOINTS%%',
             $this->fakeDb->achievement->nativeQueries[0]
         );
+    }
+
+    public function testGetLastUpdateTimeFallsBackToStatisticCronLog(): void
+    {
+        Config::get(1)->stat_last_update = 0;
+        $this->fakeDb->statisticCronLastExecution = '2026-08-28 12:00:00';
+
+        $this->assertSame(
+            strtotime('2026-08-28 12:00:00'),
+            StatBuilder::getLastUpdateTime()
+        );
+    }
+
+    public function testGetLastUpdateTimePrefersConfigOverCronLog(): void
+    {
+        Config::get(1)->stat_last_update = 1_700_000_000;
+        $this->fakeDb->statisticCronLastExecution = '2026-03-12 23:59:49';
+
+        $this->assertSame(1_700_000_000, StatBuilder::getLastUpdateTime());
     }
 
     public function testMakeStatsMergesFlyingFleetShipsIntoUserTotals(): void
@@ -597,11 +635,12 @@ class StatBuilderTest extends TestCase
     public function testMakeStatsZerosStaffWhenStatModeExcludesThem(): void
     {
         Config::setInstance(new Config([
-            'uni'           => 1,
-            'stat'          => 1,
-            'stat_level'    => 2,
-            'stat_settings' => 1000,
-            'users_amount'  => 0,
+            'uni'               => 1,
+            'stat'              => 1,
+            'stat_level'        => 2,
+            'stat_settings'     => 1000,
+            'stat_last_update'  => 0,
+            'users_amount'      => 0,
         ]), 1);
 
         $this->seedMakeStatsData([

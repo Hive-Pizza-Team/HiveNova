@@ -57,6 +57,13 @@ class PublicSeo
 
 
 	/**
+	 * Canonical public-site origin for sitemap, robots.txt, canonical,
+	 * hreflang, and og:url. Used regardless of the request host so
+	 * moonsiege.com and moon.hive.pizza do not compete in search results.
+	 */
+	public const CANONICAL_BASE = 'https://moonsiege.com/';
+
+	/**
 	 * Pages listed in sitemap.xml (public marketing surface).
 	 * Omit empty/noindex URLs (news) until they have indexable content.
 	 * `disclamer` stays once Contact Admin has Discord fallback content.
@@ -210,6 +217,31 @@ class PublicSeo
 			'ref' => max(0, $ref),
 			'src' => $src,
 		], '', '&', PHP_QUERY_RFC3986);
+	}
+
+	/**
+	 * Absolute site root for canonical, hreflang, og:url, and the sitemap.
+	 * Always the canonical host, regardless of the request host.
+	 */
+	public static function seoBasePath(): string
+	{
+		return self::CANONICAL_BASE;
+	}
+
+	/**
+	 * sitemap_index.xml body pointing at sitemap.xml on the given base.
+	 */
+	public static function sitemapIndexXml(string $basePath): string
+	{
+		$esc = static fn (string $s): string => htmlspecialchars($s, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+		$basePath = rtrim($basePath, '/').'/';
+
+		return '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+			.'<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n"
+			."\t<sitemap>\n"
+			."\t\t<loc>".$esc($basePath.'sitemap.xml')."</loc>\n"
+			."\t</sitemap>\n"
+			.'</sitemapindex>'."\n";
 	}
 
 	/**
