@@ -15,7 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
-defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 61);
+defined('DB_VERSION_REQUIRED') || define('DB_VERSION_REQUIRED', 62);
 defined('DB_NAME')             || define('DB_NAME',   $database['databasename']);
 defined('DB_PREFIX')           || define('DB_PREFIX', $database['tableprefix']);
 
@@ -76,6 +76,7 @@ $dbTableNames	= array(
 	'PUSH_EXPIRED_ENDPOINTS'	=> DB_PREFIX.'push_expired_endpoints',
 	'PUSH_BUILDING_NOTIFIED'	=> DB_PREFIX.'push_building_notified',
 	'PUSH_RESEARCH_NOTIFIED'	=> DB_PREFIX.'push_research_notified',
+	'PUSH_FLEET_RETURN_NOTIFIED'	=> DB_PREFIX.'push_fleet_return_notified',
 	'ACHIEVEMENTS'			=> DB_PREFIX.'achievements',
 	'USER_ACHIEVEMENT_PROGRESS'	=> DB_PREFIX.'user_achievement_progress',
 	'USER_ACHIEVEMENTS'		=> DB_PREFIX.'user_achievements',

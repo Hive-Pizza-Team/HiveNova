@@ -10,7 +10,7 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	/** @var list<array<string, mixed>> */
 	public array $planets = [];
 
-	/** @var array<string, array{planet_id: int, element_id: int, level: int, build_end: int}> */
+	/** @var array<string, array{planet_id: int, element_id: int, level: int, build_end: int, notified_at?: int}> */
 	public array $notified = [];
 
 	/** @var list<array{user_id: int, endpoint: string, p256dh: string, auth: string}> */
@@ -24,6 +24,9 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 
 	/** @var list<array{qry: string, params: array<string, mixed>}> */
 	public array $updates = [];
+
+	/** @var int|false */
+	public $lastRowCount = false;
 
 	public function select($qry, array $params = [])
 	{
@@ -110,6 +113,7 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	public function insert($qry, array $params = [])
 	{
 		$this->inserts[] = ['qry' => $qry, 'params' => $params];
+		$this->lastRowCount = 0;
 		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%')) {
 			$key = $this->key(
 				(int) ($params[':planetId'] ?? 0),
@@ -117,13 +121,16 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 				(int) ($params[':level'] ?? 0),
 				(int) ($params[':buildEnd'] ?? 0)
 			);
-			$this->notified[$key] = [
-				'planet_id'   => (int) ($params[':planetId'] ?? 0),
-				'element_id'  => (int) ($params[':elementId'] ?? 0),
-				'level'       => (int) ($params[':level'] ?? 0),
-				'build_end'   => (int) ($params[':buildEnd'] ?? 0),
-				'notified_at' => (int) ($params[':notifiedAt'] ?? 0),
-			];
+			if (!isset($this->notified[$key])) {
+				$this->notified[$key] = [
+					'planet_id'   => (int) ($params[':planetId'] ?? 0),
+					'element_id'  => (int) ($params[':elementId'] ?? 0),
+					'level'       => (int) ($params[':level'] ?? 0),
+					'build_end'   => (int) ($params[':buildEnd'] ?? 0),
+					'notified_at' => (int) ($params[':notifiedAt'] ?? 0),
+				];
+				$this->lastRowCount = 1;
+			}
 		}
 
 		return 1;
@@ -132,6 +139,7 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	public function delete($qry, array $params = [])
 	{
 		$this->deletes[] = ['qry' => $qry, 'params' => $params];
+		$this->lastRowCount = 0;
 		if (str_contains($qry, '%%PUSH_SUBSCRIPTIONS%%') && isset($params[':endpoint'])) {
 			$endpoint = (string) $params[':endpoint'];
 			$this->subscriptions = array_values(array_filter(
@@ -148,6 +156,7 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 				$buildEnd = (int) ($row['build_end'] ?? 0);
 				if (($notifiedAt > 0 && $notifiedAt < $old) || ($notifiedAt === 0 && $buildEnd < $old)) {
 					unset($this->notified[$key]);
+					$this->lastRowCount = (int) $this->lastRowCount + 1;
 				}
 			}
 		}
@@ -158,6 +167,7 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	public function update($qry, array $params = [])
 	{
 		$this->updates[] = ['qry' => $qry, 'params' => $params];
+		$this->lastRowCount = 0;
 		if (str_contains($qry, '%%PUSH_BUILDING_NOTIFIED%%')) {
 			$key = $this->key(
 				(int) ($params[':planetId'] ?? 0),
@@ -165,8 +175,17 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 				(int) ($params[':level'] ?? 0),
 				(int) ($params[':buildEnd'] ?? 0)
 			);
-			if (isset($this->notified[$key])) {
-				$this->notified[$key]['notified_at'] = (int) ($params[':notifiedAt'] ?? 0);
+			if (!isset($this->notified[$key])) {
+				return 1;
+			}
+			$current = (int) ($this->notified[$key]['notified_at'] ?? 0);
+			$next = (int) ($params[':notifiedAt'] ?? 0);
+			if (str_contains($qry, 'notified_at = 0') && $current === 0) {
+				$this->notified[$key]['notified_at'] = $next;
+				$this->lastRowCount = 1;
+			} elseif (str_contains($qry, 'notified_at > 0') && $current > 0) {
+				$this->notified[$key]['notified_at'] = $next;
+				$this->lastRowCount = 1;
 			}
 		}
 
@@ -176,7 +195,7 @@ class BuildingCompletePushDatabaseStub implements DatabaseInterface
 	public function query($qry) { return 0; }
 	public function nativeQuery($qry) { return false; }
 	public function lastInsertId() { return false; }
-	public function rowCount() { return false; }
+	public function rowCount() { return $this->lastRowCount; }
 	public function getQueryCounter() { return 0; }
 	public function quote($str) { return "'" . addslashes((string) $str) . "'"; }
 	public function disconnect() {}

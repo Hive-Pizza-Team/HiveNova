@@ -175,19 +175,25 @@ class ResearchCompletePushService
 			if ($pending === []) {
 				return 0;
 			}
-			$pending = array_values($pending);
 
+			$claimed = [];
 			foreach ($pending as $job) {
-				$this->claimPending($userId, $job['elementId'], $job['level'], $job['techEnd']);
+				if ($this->claimPending($userId, $job['elementId'], $job['level'], $job['techEnd'])) {
+					$claimed[] = $job;
+				}
 			}
-			$message = $this->buildMessage($pending, $lang);
+			if ($claimed === []) {
+				return 0;
+			}
+
+			$message = $this->buildMessage($claimed, $lang);
 			if (!$this->deliver($userId, $message)) {
+				foreach ($claimed as $job) {
+					$this->releaseClaim($userId, $job['elementId'], $job['level'], $job['techEnd']);
+				}
 				PushNotificationService::logFailure('ResearchCompletePushService: delivery failed user=' . $userId);
 
 				return 0;
-			}
-			foreach ($pending as $job) {
-				$this->markSent($userId, $job['elementId'], $job['level'], $job['techEnd']);
 			}
 
 			return 1;
@@ -413,9 +419,15 @@ class ResearchCompletePushService
 		return $row !== false && $row !== null && $row !== '';
 	}
 
-	private function claimPending(int $userId, int $elementId, int $level, int $techEnd): void
+	/**
+	 * Atomically claim a research-complete notification slot.
+	 * INSERT IGNORE ensures the row exists; UPDATE … WHERE notified_at = 0
+	 * succeeds for exactly one concurrent caller (rowCount === 1).
+	 */
+	private function claimPending(int $userId, int $elementId, int $level, int $techEnd): bool
 	{
-		Database::get()->insert(
+		$db = Database::get();
+		$db->insert(
 			'INSERT IGNORE INTO %%PUSH_RESEARCH_NOTIFIED%% (user_id, element_id, level, tech_end, notified_at)
 			VALUES (:userId, :elementId, :level, :techEnd, :notifiedAt)',
 			[
@@ -426,11 +438,7 @@ class ResearchCompletePushService
 				':notifiedAt' => 0,
 			]
 		);
-	}
-
-	private function markSent(int $userId, int $elementId, int $level, int $techEnd): void
-	{
-		Database::get()->update(
+		$db->update(
 			'UPDATE %%PUSH_RESEARCH_NOTIFIED%% SET notified_at = :notifiedAt
 			WHERE user_id = :userId AND element_id = :elementId AND level = :level AND tech_end = :techEnd
 			AND notified_at = 0',
@@ -440,6 +448,23 @@ class ResearchCompletePushService
 				':level'      => $level,
 				':techEnd'    => $techEnd,
 				':notifiedAt' => defined('TIMESTAMP') ? TIMESTAMP : time(),
+			]
+		);
+
+		return (int) $db->rowCount() === 1;
+	}
+
+	private function releaseClaim(int $userId, int $elementId, int $level, int $techEnd): void
+	{
+		Database::get()->update(
+			'UPDATE %%PUSH_RESEARCH_NOTIFIED%% SET notified_at = 0
+			WHERE user_id = :userId AND element_id = :elementId AND level = :level AND tech_end = :techEnd
+			AND notified_at > 0',
+			[
+				':userId'     => $userId,
+				':elementId'  => $elementId,
+				':level'      => $level,
+				':techEnd'    => $techEnd,
 			]
 		);
 	}
