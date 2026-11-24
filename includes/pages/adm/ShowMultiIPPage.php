@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminCsrf;
 use HiveNova\Core\AdminMultiIpList;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
@@ -26,18 +27,17 @@ if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FI
 function ShowMultiIPPage()
 {
 	global $LNG;
-	
-	if(!isset($_POST['action'])) { $_POST['action'] = ''; }
-	switch($_POST['action'])
-	{
-		case 'known':
-			$GLOBALS['DATABASE']->query("INSERT INTO ".MULTI." SET userID = ".((int) $_POST['id']).";");
-			HTTP::redirectTo("admin.php?page=multiips");
-		break;
-		case 'unknown':
-			$GLOBALS['DATABASE']->query("DELETE FROM ".MULTI." WHERE userID = ".((int) $_POST['id']).";");
-			HTTP::redirectTo("admin.php?page=multiips");
-		break;
+
+	$toggle = AdminMultiIpList::parseToggleAction($_POST);
+	if ($toggle !== null) {
+		$userId = $toggle['userId'];
+		if ($toggle['action'] === 'known') {
+			$GLOBALS['DATABASE']->query("DELETE FROM ".MULTI." WHERE userID = ".$userId.";");
+			$GLOBALS['DATABASE']->query("INSERT INTO ".MULTI." SET userID = ".$userId.";");
+		} else {
+			$GLOBALS['DATABASE']->query("DELETE FROM ".MULTI." WHERE userID = ".$userId.";");
+		}
+		HTTP::redirectTo("admin.php?page=multiips");
 	}
 
 	$universe = Universe::getEmulated();
@@ -72,6 +72,7 @@ function ShowMultiIPPage()
 	$template	= new Template();
 	$template->assign_vars(array(
 		'multiGroups'	=> $IPs,
+		'admin_csrf'	=> AdminCsrf::token(),
 	));
 	$template->show('MultiIPs.tpl');
 }
