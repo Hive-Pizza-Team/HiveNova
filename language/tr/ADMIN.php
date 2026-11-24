@@ -623,6 +623,7 @@ $LNG['cronjob_is_unlock']			= 'Hayir';
 
 $LNG['cronjob_inactive']			= 'Evet';
 $LNG['cronjob_active']				= 'Hayir';
+$LNG['cronjob_make_due'] = 'Simdi vadesi gelsin';
 
 //----------------------------------------------------------------------------//
 //---------------	Sil/Olustur	------------------------//
@@ -1618,6 +1619,7 @@ $LNG['ref_stats_recruits']            = 'Recruits';
 $LNG['ref_stats_qualified']           = 'Qualified';
 $LNG['ref_stats_link']                = 'Referral link';
 $LNG['ref_stats_registered']          = 'Registered';
+$LNG['ref_stats_source']              = 'Source';
 $LNG['ref_stats_points']              = 'Points';
 $LNG['ref_stats_bonus_status']        = 'Bonus status';
 $LNG['ref_stats_status_pending']      = 'Pending (below threshold)';

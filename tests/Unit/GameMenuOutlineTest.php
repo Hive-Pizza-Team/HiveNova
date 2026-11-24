@@ -48,6 +48,7 @@ class GameMenuOutlineTest extends TestCase
 		$admin = strpos($this->nav, 'lm_menu_section_account');
 		$resources = strpos($this->nav, 'page=resources');
 		$market = strpos($this->nav, 'page=trader');
+		$marketplace = strpos($this->nav, 'page=marketPlace');
 		$shipMerchant = strpos($this->nav, 'page=fleetDealer');
 
 		$this->assertNotFalse($basics);
@@ -55,15 +56,19 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertNotFalse($admin);
 		$this->assertNotFalse($resources);
 		$this->assertNotFalse($market);
+		$this->assertNotFalse($marketplace);
 		$this->assertNotFalse($shipMerchant);
 		$this->assertGreaterThan($advanced, $resources);
 		$this->assertGreaterThan($advanced, $market);
+		$this->assertGreaterThan($advanced, $marketplace);
 		$this->assertGreaterThan($advanced, $shipMerchant);
 		$this->assertLessThan($admin, $resources);
 		$this->assertLessThan($admin, $market);
+		$this->assertLessThan($admin, $marketplace);
 		$this->assertLessThan($admin, $shipMerchant);
 		$this->assertGreaterThan($resources, $market);
-		$this->assertGreaterThan($market, $shipMerchant);
+		$this->assertGreaterThan($market, $marketplace);
+		$this->assertGreaterThan($marketplace, $shipMerchant);
 	}
 
 	public function test_advanced_section_follows_product_order(): void
@@ -80,6 +85,7 @@ class GameMenuOutlineTest extends TestCase
 			'page=viz',
 			'page=eventFirehose',
 			'page=trader',
+			'page=marketPlace',
 			'page=fleetDealer',
 			'page=alliance',
 		];
@@ -143,5 +149,26 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertStringContainsString('data-techtree-nudge-dismiss', $nudge);
 		$this->assertStringContainsString('role="status"', $nudge);
 		$this->assertStringContainsString('page=techtree', $nudge);
+	}
+
+	public function test_whats_new_is_not_a_main_menu_item(): void
+	{
+		$this->assertDoesNotMatchRegularExpression(
+			'/<li>\s*<a href="game\.php\?page=whatsNew"/',
+			$this->nav
+		);
+		$this->assertStringNotContainsString('lm_whats_new', $this->nav);
+		$this->assertStringContainsString('disclamer-whats-new', $this->nav);
+	}
+
+	public function test_marketplace_link_is_gated_like_the_page(): void
+	{
+		$this->assertMatchesRegularExpression(
+			'/MODULE_MISSION_TRADE\|isModuleAvailable[^\n]*page=marketPlace/',
+			$this->nav
+		);
+		$this->assertStringContainsString("navPage == 'marketPlace'", $this->nav);
+		$this->assertStringContainsString('lm_marketplace', $this->nav);
+		$this->assertSame(1, preg_match_all('/page=marketPlace/', $this->nav));
 	}
 }

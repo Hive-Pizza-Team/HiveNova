@@ -194,8 +194,9 @@
 		var ringR = clusterR * (0.42 + 0.08 * Math.min(maxGalaxyHint, 9)) * 1.05;
 		var arcClear = Math.min(14, Math.max(5, ringR * 0.55));
 
-		/* Tight AABB around clusters + arcs (uni name lives in the caption). */
+		/* Tight AABB around clusters + arcs + room for uni labels under clusters. */
 		var bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+		var labelClear = 7;
 		function expandBounds(x, y, pad) {
 			bounds.minX = Math.min(bounds.minX, x - pad);
 			bounds.maxX = Math.max(bounds.maxX, x + pad);
@@ -204,6 +205,7 @@
 		}
 		for (var oi = 0; oi < origins.length; oi++) {
 			expandBounds(origins[oi].x, origins[oi].y, ringR + arcClear + 5);
+			expandBounds(origins[oi].x, origins[oi].y - (ringR + labelClear), 2);
 		}
 		var contentCX = (bounds.minX + bounds.maxX) * 0.5;
 		var contentCY = (bounds.minY + bounds.maxY) * 0.5;
@@ -460,7 +462,6 @@
 
 		var movingBolts = [];
 		var pulses = [];
-		var galaxyNodes = [];
 		var markerIdle = [];
 
 		function galaxyPosition(origin, galaxyIndex, maxGalaxy) {
@@ -586,14 +587,6 @@
 					phase: gi * 0.73 + uniIndex,
 					reticle: isRoute,
 				});
-				galaxyNodes.push({
-					x: pos.x,
-					y: pos.y,
-					label: 'G' + (gi + 1),
-					uniName: String(uni.name || ('Uni ' + uni.id)),
-					uniIndex: uniIndex,
-					galaxy: gi + 1,
-				});
 			}
 
 			/* fleet arcs galaxy → galaxy */
@@ -629,7 +622,7 @@
 					new THREE.LineBasicMaterial({
 						color: color,
 						transparent: true,
-						opacity: 0.55,
+						opacity: 0.82,
 						depthWrite: false,
 					})
 				));
@@ -639,7 +632,7 @@
 					new THREE.LineBasicMaterial({
 						color: 0xffffff,
 						transparent: true,
-						opacity: 0.22,
+						opacity: 0.4,
 						depthWrite: false,
 					})
 				));
@@ -691,7 +684,7 @@
 			pulses.push({ sprite: sprite, mat: mat, born: Date.now(), life: 900 });
 		}
 
-		/* optional galaxy tags when few enough to read */
+		/* Per-universe labels under each cluster (PR 374 intent). */
 		var labelCanvas = document.createElement('canvas');
 		labelCanvas.className = 'lobby-viz-labels';
 		container.appendChild(labelCanvas);
@@ -707,18 +700,23 @@
 			labelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 			labelCtx.clearRect(0, 0, w, h);
 
-			if (!isNarrow && galaxyNodes.length <= 24) {
-				labelCtx.font = '10px "Trebuchet MS", "Segoe UI", sans-serif';
-				labelCtx.textAlign = 'center';
-				labelCtx.textBaseline = 'middle';
-				labelCtx.fillStyle = 'rgba(160, 210, 230, 0.7)';
-				for (var ni = 0; ni < galaxyNodes.length; ni++) {
-					var node = galaxyNodes[ni];
-					tmpVec.set(node.x, node.y - 2.2, 0).project(camera);
-					var nx = (tmpVec.x + 1) / 2 * w;
-					var ny = (1 - tmpVec.y) / 2 * h;
-					labelCtx.fillText(node.label, nx, ny);
+			labelCtx.font = 'bold 12px "Trebuchet MS", "Segoe UI", sans-serif';
+			labelCtx.textAlign = 'center';
+			labelCtx.textBaseline = 'top';
+			labelCtx.lineWidth = 3;
+			labelCtx.strokeStyle = 'rgba(0, 4, 12, 0.9)';
+			labelCtx.fillStyle = 'rgba(210, 235, 255, 0.95)';
+			for (var li = 0; li < universes.length; li++) {
+				var origin = origins[li];
+				var uniLabel = String(universes[li].name || ('Uni ' + universes[li].id));
+				tmpVec.set(origin.x, origin.y - (ringR + labelClear * 0.55), 0).project(camera);
+				var lx = (tmpVec.x + 1) / 2 * w;
+				var ly = (1 - tmpVec.y) / 2 * h;
+				if (lx < -40 || lx > w + 40 || ly < -20 || ly > h + 20) {
+					continue;
 				}
+				labelCtx.strokeText(uniLabel, lx, ly);
+				labelCtx.fillText(uniLabel, lx, ly);
 			}
 		}
 

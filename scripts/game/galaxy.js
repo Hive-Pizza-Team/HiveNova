@@ -37,7 +37,25 @@ function galaxy_submit(value) {
 	$('#galaxy_form').submit();
 }
 
+function breakGalaxyOutOfIframe(win) {
+	win = win || window;
+	if (!win.top || win.top === win) {
+		return false;
+	}
+	try {
+		win.top.location.replace(win.location.href);
+		return true;
+	} catch (err) {
+		return false;
+	}
+}
+
 $(function () {
+	// Stats → playercard Fancybox → homeplanet can leave Galaxy painted inside the
+	// iframe. Break out immediately; form target=_top remains as a fallback.
+	if (breakGalaxyOutOfIframe(window)) {
+		return;
+	}
 	if (window.top && window.top !== window) {
 		$('#galaxy_form').attr('target', '_top');
 	}
@@ -57,3 +75,9 @@ $(function () {
 		form.submit();
 	});
 });
+
+if (typeof module !== 'undefined' && module.exports) {
+	module.exports = {
+		breakGalaxyOutOfIframe: breakGalaxyOutOfIframe
+	};
+}

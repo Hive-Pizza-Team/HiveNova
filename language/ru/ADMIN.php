@@ -1285,6 +1285,7 @@ $LNG['cronjob_is_unlock']              = 'Нет';
 
 $LNG['cronjob_inactive']               = 'Да';
 $LNG['cronjob_active']                 = 'Нет';
+$LNG['cronjob_make_due'] = 'Сделать текущим';
 
 // Подарки
 $LNG['ga_success']                     = 'Подарок выдан.';
@@ -1517,6 +1518,7 @@ $LNG['ref_stats_recruits']            = 'Recruits';
 $LNG['ref_stats_qualified']           = 'Qualified';
 $LNG['ref_stats_link']                = 'Referral link';
 $LNG['ref_stats_registered']          = 'Registered';
+$LNG['ref_stats_source']              = 'Source';
 $LNG['ref_stats_points']              = 'Points';
 $LNG['ref_stats_bonus_status']        = 'Bonus status';
 $LNG['ref_stats_status_pending']      = 'Pending (below threshold)';
