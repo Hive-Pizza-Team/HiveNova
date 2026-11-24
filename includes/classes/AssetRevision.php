@@ -20,6 +20,8 @@ class AssetRevision
 	{
 		return [
 			'styles/resource/css/ingame/main.css',
+			'styles/resource/css/feedback.css',
+			'scripts/game/feedback.js',
 			'styles/resource/css/login/main.css',
 			'styles/resource/css/login/register.css',
 			'scripts/login/main.js',

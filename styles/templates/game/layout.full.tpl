@@ -126,6 +126,7 @@
 <script src="scripts/game/whats-new-modal.js?v={$REV}"></script>
 {/if}
 {include file="main.bottomnav.tpl"}
+{include file="shared.feedback.tpl"}
 <script src="scripts/game/attack-alert.js?v={$REV}"></script>
 
 </body>

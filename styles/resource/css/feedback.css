@@ -1,0 +1,199 @@
+.feedback-fab {
+	position: fixed;
+	z-index: 520;
+	right: 16px;
+	bottom: 16px;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	min-width: 44px;
+	padding: 10px 14px;
+	border: 1px solid var(--color-border, #3a3a4a);
+	border-radius: 999px;
+	background: var(--color-bg-surface, #1a1a2e);
+	color: var(--color-text, #f2f2f2);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+	cursor: pointer;
+	font: inherit;
+	line-height: 1.2;
+}
+
+.feedback-fab:hover,
+.feedback-fab:focus-visible {
+	outline: 2px solid var(--color-accent, #c9a227);
+	outline-offset: 2px;
+}
+
+.feedback-fab__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.4em;
+	height: 1.4em;
+	border-radius: 50%;
+	background: var(--color-accent, #c9a227);
+	color: #111;
+	font-weight: 700;
+}
+
+.feedback-fab__label {
+	font-size: 0.9rem;
+	white-space: nowrap;
+}
+
+.feedback-modal {
+	border: 1px solid var(--color-border, #3a3a4a);
+	border-radius: 10px;
+	padding: 0;
+	max-width: min(520px, calc(100vw - 24px));
+	width: 100%;
+	background: var(--color-bg-surface, #1a1a2e);
+	color: var(--color-text, #f2f2f2);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.feedback-modal::backdrop {
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.feedback-modal__form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px;
+}
+
+.feedback-modal__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.feedback-modal__header h2 {
+	margin: 0;
+	font-size: 1.15rem;
+}
+
+.feedback-modal__close {
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font-size: 1.5rem;
+	line-height: 1;
+	cursor: pointer;
+	min-width: 44px;
+	min-height: 44px;
+}
+
+.feedback-modal__intro {
+	margin: 0;
+	font-size: 0.92rem;
+	opacity: 0.9;
+}
+
+.feedback-modal__field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	font-size: 0.92rem;
+}
+
+.feedback-modal__field select,
+.feedback-modal__field textarea,
+.feedback-modal__field input[type="file"] {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.feedback-modal__field textarea,
+.feedback-modal__field select {
+	padding: 8px;
+	border-radius: 6px;
+	border: 1px solid var(--color-border, #3a3a4a);
+	background: var(--color-bg-page, #0d0d0d);
+	color: inherit;
+	font: inherit;
+}
+
+.feedback-modal__checkbox {
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+}
+
+.feedback-modal__context {
+	border: 1px solid var(--color-border, #3a3a4a);
+	border-radius: 6px;
+	padding: 8px 10px;
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.feedback-modal__context summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.feedback-modal__context-body {
+	margin: 8px 0 0;
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-size: 0.8rem;
+	line-height: 1.35;
+	opacity: 0.9;
+}
+
+.feedback-modal__status {
+	margin: 0;
+	padding: 8px 10px;
+	border-radius: 6px;
+	font-size: 0.9rem;
+}
+
+.feedback-modal__status.is-error {
+	background: rgba(220, 50, 50, 0.18);
+	border: 1px solid rgba(220, 50, 50, 0.45);
+}
+
+.feedback-modal__status.is-success {
+	background: rgba(40, 160, 80, 0.18);
+	border: 1px solid rgba(40, 160, 80, 0.45);
+}
+
+.feedback-modal__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+	.feedback-fab {
+		right: 12px;
+		/* Sit above the 56px bottom nav + safe area without covering core controls */
+		bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 12px);
+	}
+
+	.feedback-fab__label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	.feedback-fab {
+		padding: 12px;
+		border-radius: 50%;
+	}
+}
+
+/* Lobby body class is "normal" (no bottom nav); game uses "full" */
+body.normal .feedback-fab {
+	bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}

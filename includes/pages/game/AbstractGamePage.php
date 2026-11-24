@@ -8,6 +8,7 @@ use HiveNova\Core\AuthLevel;
 use HiveNova\Core\Cronjob;
 use HiveNova\Core\Config;
 use HiveNova\Core\EnergyBalanceService;
+use HiveNova\Core\FeedbackService;
 use HiveNova\Core\GamePageState;
 use HiveNova\Core\IncomingHostileFleetQuery;
 use HiveNova\Core\PushNotificationService;
@@ -20,6 +21,7 @@ use HiveNova\Core\PlayerUtil;
 use HiveNova\Core\ResourceUpdate;
 use HiveNova\Core\Session;
 use HiveNova\Core\Template as template;
+use HiveNova\Core\Universe;
 use DateTime;
 use DateTimeZone;
 use Exception;
@@ -334,7 +336,9 @@ abstract class AbstractGamePage
 			$dateTimeUser	= $dateTimeServer;
 		}
 
+		global $LNG, $PLANET;
 		$config	= Config::get();
+		$planet = $this->planet ?? $PLANET ?? null;
 
 		$this->assign(array(
 			'vmode'				=> $USER['urlaubs_modus'],
@@ -355,6 +359,18 @@ abstract class AbstractGamePage
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
 			'queryString'		=> $this->getQueryString(),
 			'themeSettings'		=> $THEME->getStyleSettings(),
+			'feedbackConfig'		=> FeedbackService::clientConfig(
+				'game.php?page=feedback&mode=submit&ajax=1',
+				$USER,
+				is_array($planet) ? $planet : null,
+				(string) ($LNG->getLanguage() ?? ''),
+				(string) $config->VERSION,
+				(int) Universe::current(),
+				[
+					'successNoScreenshot' => (string) ($LNG['fb_success_no_screenshot']
+						?? 'Thanks! Your report was sent without a screenshot. Reference: %s'),
+				]
+			),
 			// Resolved slug (aliases applied). Nocache assign so Smarty page
 			// caches cannot freeze an unrelated menu highlight on error.default.
 			'navPage'			=> $this->clearNavHighlight
