@@ -21,7 +21,8 @@ class ProductVersionTest extends TestCase
 
 	public function testDisplayedPrefersTheFileOverAStaleConfigValue(): void
 	{
-		$this->assertSame('v1.6.0', ProductVersion::displayed('2.0', ROOT_PATH));
+		$this->assertSame(ProductVersion::current(ROOT_PATH), ProductVersion::displayed('2.0', ROOT_PATH));
+		$this->assertNotSame('2.0', ProductVersion::displayed('2.0', ROOT_PATH));
 	}
 
 	public function testDisplayedFallsBackWhenTheFileIsMissing(): void
