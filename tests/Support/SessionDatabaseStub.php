@@ -17,6 +17,9 @@ class SessionDatabaseStub implements DatabaseInterface
 
     public int $replaceCalls = 0;
 
+    /** @var list<array{qry: string, params: array<string, mixed>}> */
+    public array $deletes = [];
+
     public function selectSingle($qry, array $params = [], $field = false)
     {
         if (str_contains($qry, '%%SESSION%%') && str_contains($qry, 'lastonline')) {
@@ -62,6 +65,22 @@ class SessionDatabaseStub implements DatabaseInterface
 
     public function delete($qry, array $params = [])
     {
+        $this->deletes[] = ['qry' => $qry, 'params' => $params];
+
+        if (str_contains($qry, '%%SESSION%%')) {
+            if (isset($params[':sessionId'])) {
+                unset($this->sessionRows[(string) $params[':sessionId']]);
+            }
+            if (isset($params[':userId'])) {
+                $userId = (int) $params[':userId'];
+                foreach ($this->sessionRows as $id => $row) {
+                    if ((int) ($row['userID'] ?? 0) === $userId) {
+                        unset($this->sessionRows[$id]);
+                    }
+                }
+            }
+        }
+
         return 0;
     }
 
