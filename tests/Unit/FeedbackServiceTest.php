@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use HiveNova\Core\AssetRevision;
 use HiveNova\Core\FeedbackService;
 use PHPUnit\Framework\TestCase;
 
@@ -236,5 +237,170 @@ class FeedbackServiceTest extends TestCase
 	{
 		$this->assertStringStartsWith('[Idea]', FeedbackService::subjectForType('idea', 'Add dark mode'));
 		$this->assertStringStartsWith('[Feedback]', FeedbackService::subjectForType('other', 'Hello'));
+		$long = str_repeat('word ', 30);
+		$this->assertStringContainsString('...', FeedbackService::subjectForType('bug', $long));
+		$this->assertSame('[Bug] Player feedback', FeedbackService::subjectForType('bug', '   '));
+	}
+
+	public function testScreenshotHelpersAndCsrf(): void
+	{
+		$this->assertFalse(FeedbackService::isValidScreenshotFilename('../etc/passwd'));
+		$this->assertNull(FeedbackService::screenshotAbsolutePath('../nope.png'));
+		$this->assertSame('image/jpeg', FeedbackService::screenshotContentType('shot.jpg'));
+		$this->assertSame('image/gif', FeedbackService::screenshotContentType('shot.gif'));
+		$this->assertSame('image/webp', FeedbackService::screenshotContentType('shot.webp'));
+		$this->assertSame('image/png', FeedbackService::screenshotContentType('shot.png'));
+
+		$file = 'fb_12_0123456789abcdef.png';
+		$linked = FeedbackService::linkifyScreenshotReferences('Screenshot: cache/feedback/'.$file);
+		$this->assertStringContainsString('admin.php?page=support', $linked);
+		$this->assertStringContainsString($file, $linked);
+		$this->assertSame('plain', FeedbackService::linkifyScreenshotReferences('plain'));
+
+		$token = FeedbackService::issueCsrfToken();
+		$this->assertTrue(FeedbackService::validateCsrfToken($token));
+		$this->assertFalse(FeedbackService::validateCsrfToken('nope'));
+		$this->assertFalse(FeedbackService::validateCsrfToken(null));
+		unset($_SESSION[FeedbackService::CSRF_SESSION_KEY]);
+		$this->assertFalse(FeedbackService::validateCsrfToken($token));
+
+		$this->assertSame(0, FeedbackService::lastSubmitAtFromSession());
+		FeedbackService::rememberSubmitAt(100);
+		$this->assertSame(100, FeedbackService::lastSubmitAtFromSession());
+		$this->assertSame(0, FeedbackService::rateLimitRemaining(0, 200));
+		$this->assertGreaterThan(0, FeedbackService::rateLimitRemaining(100, 100));
+	}
+
+	public function testOriginChecksAndScreenshotValidation(): void
+	{
+		$_SERVER['HTTP_HOST'] = 'moon.hive.pizza';
+		unset($_SERVER['HTTP_ORIGIN'], $_SERVER['HTTP_REFERER']);
+		$this->assertTrue(FeedbackService::isSameOriginRequest());
+
+		$_SERVER['HTTP_ORIGIN'] = 'https://evil.example';
+		$this->assertFalse(FeedbackService::isSameOriginRequest());
+		$_SERVER['HTTP_ORIGIN'] = 'https://moon.hive.pizza';
+		$this->assertTrue(FeedbackService::isSameOriginRequest());
+		unset($_SERVER['HTTP_ORIGIN']);
+		$_SERVER['HTTP_REFERER'] = 'https://moon.hive.pizza/game.php';
+		$this->assertTrue(FeedbackService::isSameOriginRequest());
+		$_SERVER['HTTP_REFERER'] = 'https://evil.example/';
+		$this->assertFalse(FeedbackService::isSameOriginRequest());
+
+		$this->assertNull(FeedbackService::validateDescription('ok'));
+		$this->assertSame('empty_description', FeedbackService::validateDescription('  '));
+		$this->assertSame('description_too_long', FeedbackService::validateDescription(str_repeat('a', FeedbackService::MAX_DESCRIPTION_LENGTH + 1)));
+		$this->assertNull(FeedbackService::validateScreenshot(null));
+		$this->assertNull(FeedbackService::validateScreenshot([]));
+		$this->assertSame('screenshot_upload_failed', FeedbackService::validateScreenshot([
+			'error' => UPLOAD_ERR_INI_SIZE,
+		]));
+		$this->assertSame('screenshot_upload_failed', FeedbackService::validateScreenshot([
+			'error' => UPLOAD_ERR_OK,
+			'size' => 0,
+		]));
+		$this->assertSame('screenshot_too_large', FeedbackService::validateScreenshot([
+			'error' => UPLOAD_ERR_OK,
+			'size' => FeedbackService::MAX_SCREENSHOT_BYTES + 1,
+			'type' => 'image/png',
+		]));
+		$this->assertSame('screenshot_invalid_type', FeedbackService::validateScreenshot([
+			'error' => UPLOAD_ERR_OK,
+			'size' => 10,
+			'type' => 'text/plain',
+		]));
+		$this->assertNull(FeedbackService::validateScreenshot([
+			'error' => UPLOAD_ERR_OK,
+			'size' => 10,
+			'type' => 'image/png',
+		]));
+
+		$this->assertSame('#9', FeedbackService::referenceId(9));
+		$text = FeedbackService::formatContextText(['language' => 'en', 'version' => '2', 'time' => 'now']);
+		$this->assertStringContainsString('Language: en', $text);
+		$this->assertSame('game.php', FeedbackService::stripSensitiveQueryString('game.php'));
+		$this->assertSame('game.php', FeedbackService::stripSensitiveQueryString('game.php?password=x'));
+		$this->assertSame(['page' => 'a'], FeedbackService::stripSensitiveQueryParams(['password' => 'x', 'page' => 'a']));
+		$this->assertSame(
+			['keep' => ['page' => 'overview']],
+			FeedbackService::stripSensitiveQueryParams(['keep' => ['page' => 'overview', 'token' => 'x']])
+		);
+		$this->assertSame('', FeedbackService::sanitizeUrl(''));
+		$this->assertSame('game.php?page=overview', FeedbackService::stripSensitiveQueryString('game.php?page=overview'));
+
+		$context = FeedbackService::buildContext([
+			'userAgent' => str_repeat('A', 600),
+			'planetName' => 'Home',
+			'planetCoords' => '1:2:3',
+			'userId' => 4,
+			'username' => 'Ann',
+		]);
+		$this->assertSame(512, strlen($context['browser']));
+		$this->assertStringContainsString('Home', $context['planet']);
+	}
+
+	public function testStoresScreenshotAndSubmitsTicket(): void
+	{
+		$paths = AssetRevision::fingerprintPaths();
+		$this->assertContains('styles/resource/css/feedback.css', $paths);
+
+		$png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+		$tmp = tempnam(sys_get_temp_dir(), 'fb');
+		$this->assertNotFalse($tmp);
+		file_put_contents($tmp, $png);
+		$file = [
+			'error' => UPLOAD_ERR_OK,
+			'size' => strlen($png),
+			'type' => 'image/png',
+			'tmp_name' => $tmp,
+		];
+		$this->assertNull(FeedbackService::validateScreenshot($file));
+
+		$stored = FeedbackService::storeScreenshot($file, 7);
+		$this->assertNotNull($stored);
+		$this->assertStringStartsWith('cache/feedback/fb_7_', $stored);
+		$basename = basename($stored);
+		$this->assertNotNull(FeedbackService::screenshotAbsolutePath($basename));
+		$this->assertNull(FeedbackService::screenshotAbsolutePath('fb_1_0123456789abcdef.png'));
+
+		$this->assertNull(FeedbackService::storeScreenshot(null, 1));
+		$this->assertNull(FeedbackService::storeScreenshot(['error' => UPLOAD_ERR_NO_FILE], 1));
+		$this->assertNull(FeedbackService::storeScreenshot([
+			'error' => UPLOAD_ERR_OK,
+			'size' => 10,
+			'type' => 'image/png',
+			'tmp_name' => '',
+		], 1));
+
+		$failed = FeedbackService::submit('Hello', 'bug', [], 0, '', null, static fn (): int => 0);
+		$this->assertSame('submit_failed', $failed['error']);
+
+		$ok = FeedbackService::submit(
+			'Hello',
+			'bug',
+			['language' => 'en'],
+			3,
+			'',
+			null,
+			static fn (): int => 15,
+			static fn (): int => 1
+		);
+		$this->assertTrue($ok['ok']);
+		$this->assertSame('#15', $ok['reference']);
+
+		$config = FeedbackService::clientConfig(
+			'game.php?page=feedback',
+			['id' => 3, 'username' => 'Ann'],
+			['id' => 9, 'name' => 'Home', 'galaxy' => 1, 'system' => 2, 'planet' => 3],
+			'en',
+			'2',
+			1,
+			['title' => 'Feedback']
+		);
+		$this->assertSame('1:2:3', $config['context']['planetCoords']);
+		$this->assertSame('Ann', $config['context']['username']);
+
+		$root = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__, 2).'/';
+		@unlink($root.$stored);
 	}
 }
