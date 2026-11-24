@@ -1614,6 +1614,7 @@ $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
 $LNG['modul_43'] = 'Unused';
+$LNG['mip_missing_user'] = 'Deleted / unknown (#%s)';
 $LNG['mu_hive_create_requests'] = 'Hive create requests';
 $LNG['hive_create_admin_title'] = 'Hive account create requests';
 $LNG['hive_create_admin_help'] = 'Approve records ops intent only in this release — claim-ticket broadcast is a follow-up. Reject stores your reason on the request.';

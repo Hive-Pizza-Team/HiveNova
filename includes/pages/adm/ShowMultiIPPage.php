@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\AdminMultiIpList;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Universe;
 use HiveNova\Core\Template;
@@ -38,17 +39,35 @@ function ShowMultiIPPage()
 			HTTP::redirectTo("admin.php?page=multiips");
 		break;
 	}
-	$Query	= $GLOBALS['DATABASE']->query("SELECT id, username, email, register_time, onlinetime, user_lastip, IFNULL(multiID, 0) as isKnown FROM ".USERS." LEFT JOIN ".MULTI." ON userID = id WHERE `universe` = '".Universe::getEmulated()."' AND user_lastip IN (SELECT user_lastip FROM ".USERS." WHERE `universe` = '".Universe::getEmulated()."' GROUP BY user_lastip HAVING COUNT(*)>1) ORDER BY user_lastip, id ASC;");
-	$IPs	= array();
-	while($Data = $GLOBALS['DATABASE']->fetch_array($Query)) {
-		if(!isset($IPs[$Data['user_lastip']]))
-			$IPs[$Data['user_lastip']]	= array();
-		
-		$Data['register_time']	= _date($LNG['php_tdformat'], $Data['register_time']);
-		$Data['onlinetime']		= _date($LNG['php_tdformat'], $Data['onlinetime']);
-		
-		$IPs[$Data['user_lastip']][$Data['id']]	= $Data;
+
+	$universe = Universe::getEmulated();
+	$query = $GLOBALS['DATABASE']->query(
+		"SELECT u.id, u.username, u.email, u.register_time, u.onlinetime, u.user_lastip,"
+		." IFNULL(m.multiID, 0) as isKnown"
+		." FROM ".USERS." u"
+		." LEFT JOIN ".MULTI." m ON m.userID = u.id"
+		." WHERE u.`universe` = '".$universe."'"
+		." AND u.user_lastip IN ("
+		."   SELECT user_lastip FROM ".USERS
+		."   WHERE `universe` = '".$universe."'"
+		."   GROUP BY user_lastip HAVING COUNT(*) > 1"
+		." )"
+		." ORDER BY u.user_lastip, u.id ASC;"
+	);
+
+	$rows = [];
+	while ($data = $GLOBALS['DATABASE']->fetch_array($query)) {
+		$rows[] = $data;
 	}
+
+	$missingFormat = $LNG['mip_missing_user'] ?? 'Deleted / unknown (#%s)';
+	$IPs = AdminMultiIpList::groupByIp(
+		$rows,
+		static function (int $timestamp) use ($LNG): string {
+			return _date($LNG['php_tdformat'], $timestamp);
+		},
+		$missingFormat
+	);
 	
 	$template	= new Template();
 	$template->assign_vars(array(
@@ -56,4 +75,3 @@ function ShowMultiIPPage()
 	));
 	$template->show('MultiIPs.tpl');
 }
-

@@ -14,7 +14,7 @@
 		<td rowspan="{$Users|count}">{$IP}</td>
 		{foreach $Users as $ID => $User}
 		<td class="left" style="padding:3px;">{$ID}</td>
-		<td class="left" style="padding:3px;"><a href="admin.php?page=accountdata&id_u={$ID}">{$User.username} (?)</a></td>
+		<td class="left" style="padding:3px;"><a href="admin.php?page=accountdata&id_u={$ID}">{$User.username}</a></td>
 		<td class="left" style="padding:3px;">{$User.email}</td>
 		<td class="left" style="padding:3px;">{$User.register_time}</td>
 		<td class="left" style="padding:3px;">{$User.onlinetime}</td>
