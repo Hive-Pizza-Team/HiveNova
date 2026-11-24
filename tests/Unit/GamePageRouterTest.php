@@ -16,6 +16,13 @@ class GamePageRouterTest extends TestCase
 		$this->assertSame('imperium', GamePageRouter::resolve('EMPIRE'));
 	}
 
+	public function test_resolves_nfts_alias_to_medals(): void
+	{
+		$this->assertSame('medals', GamePageRouter::resolve('nfts'));
+		$this->assertSame('medals', GamePageRouter::resolve('nft'));
+		$this->assertSame('medals', GamePageRouter::resolve('NFTs'));
+	}
+
 	public function test_resolves_faq_alias_to_questions(): void
 	{
 		$this->assertSame('questions', GamePageRouter::resolve('faq'));
