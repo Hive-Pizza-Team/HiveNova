@@ -77,7 +77,7 @@
 	</div>
 </div>
 
-<div id="achievement-celebration-root" class="achievement-celebration" aria-hidden="true">
+<div id="achievement-celebration-root" class="achievement-celebration" hidden aria-hidden="true">
 	<div class="achievement-celebration__backdrop"></div>
 	<canvas class="achievement-celebration__canvas"></canvas>
 	<div class="achievement-celebration__sparkles"></div>
@@ -126,6 +126,8 @@
 <script src="scripts/game/whats-new-modal.js?v={$REV}"></script>
 {/if}
 {include file="main.bottomnav.tpl"}
+{include file="shared.feedback.tpl"}
+<script src="scripts/game/menu-sections.js?v={$REV}"></script>
 <script src="scripts/game/attack-alert.js?v={$REV}"></script>
 
 </body>

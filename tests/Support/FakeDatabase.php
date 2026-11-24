@@ -33,10 +33,43 @@ class FakeDatabase implements DatabaseInterface
     /** @var list<int> */
     public array $accusedDestIds = [];
 
+    /** @var list<array<string, mixed>> completed marketplace trades (MarketTradeLedger::completedSince) */
+    public array $marketTrades = [];
+
+    /** @var list<array<string, mixed>> MarketTradeLedger::soldToBuyer rows */
+    public array $soldToBuyerRows = [];
+
     public int $lastFleetInsertId = 0;
 
     /** @var list<array<string, mixed>> */
     public array $eventFleets = [];
+
+    /**
+     * Optional next fleet rows for FlyingFleetHandler due-event chaining.
+     * Keyed by fleet_id; each value is a list of rows returned by successive
+     * selectSingle follow-ups (empty/missing => stop chaining).
+     *
+     * @var array<int, list<array<string, mixed>>>
+     */
+    public array $eventFleetFollowUps = [];
+
+    /**
+     * Due fleet_event rows for FleetEventDrainService lock/unlock passes.
+     *
+     * @var list<array{fleetID: int, time: int, lock: ?string}>
+     */
+    public array $fleetEvents = [];
+
+    /**
+     * Queued rowCounts for successive FLEETS_EVENT lock UPDATEs when fleetEvents
+     * is empty (simple drain-loop tests).
+     *
+     * @var list<int>
+     */
+    public array $fleetEventLockCounts = [];
+
+    /** @var list<array{sql: string, params: array<string, mixed>}> */
+    public array $fleetEventUpdates = [];
 
     public ?int $lastRowCount = null;
 
@@ -92,8 +125,24 @@ class FakeDatabase implements DatabaseInterface
         if (str_contains($qry, '%%SALVAGE_PACKAGES%%')) {
             return $this->salvageSelect($qry, $params);
         }
+        if (str_contains($qry, '%%TRADES%%') && str_contains($qry, 'seller_points')) {
+            return $this->marketTrades;
+        }
+        if (str_contains($qry, '%%TRADES%%') && str_contains($qry, 'buyer.fleet_owner = :buyerId')) {
+            return $this->soldToBuyerRows;
+        }
         if (str_contains($qry, '%%LOG_FLEETS%%') && str_contains($qry, 'dest_id')) {
-            return array_map(static fn (int $id): array => ['dest_id' => $id], $this->accusedDestIds);
+            // PushingAccusationQuery::transportPairs(): one over-threshold pair per accused id.
+            return array_map(static fn (int $id): array => [
+                'source_id' => 1000000 + $id,
+                'dest_id' => $id,
+                'source_name' => 'src' . $id,
+                'dest_name' => 'dst' . $id,
+                'fleet_count' => 6,
+                'metal' => 4000000, // 1M units: over the per-pair value threshold
+                'crystal' => 0,
+                'deuterium' => 0,
+            ], $this->accusedDestIds);
         }
         if ($this->isFlyingFleetsTableQuery($qry)) {
             return $this->flyingFleetsTableSelect($qry, $params);
@@ -266,6 +315,23 @@ class FakeDatabase implements DatabaseInterface
             }
             return $field === false ? $row : ($row[$field] ?? false);
         }
+        // FlyingFleetHandler due-event chaining follow-up (lock + time still due).
+        if (
+            str_contains($qry, '%%FLEETS%%')
+            && str_contains($qry, '%%FLEETS_EVENT%%')
+            && isset($params[':fleetId'])
+        ) {
+            $fleetId = (int) $params[':fleetId'];
+            $queue = $this->eventFleetFollowUps[$fleetId] ?? [];
+            if ($queue === []) {
+                return $field === false ? false : false;
+            }
+            $row = array_shift($this->eventFleetFollowUps[$fleetId]);
+            if (!is_array($row)) {
+                return $field === false ? false : false;
+            }
+            return $field === false ? $row : ($row[$field] ?? false);
+        }
         if ($this->isPlanetQuery($qry) && str_contains($qry, 'INNER JOIN %%USERS%%')) {
             return $this->planetUserJoinSelectSingle($qry, $params, $field);
         }
@@ -402,7 +468,8 @@ class FakeDatabase implements DatabaseInterface
                 'id' => $this->lastUserInsertId,
                 'username' => $params[':username'] ?? '',
                 'universe' => (int) ($params[':universe'] ?? 1),
-                'lang' => $params[':language'] ?? 'en',
+				'lang' => $params[':language'] ?? 'en',
+                'signup_src' => $params[':signupSrc'] ?? null,
                 'last_seen_release' => $params[':lastSeenRelease'] ?? null,
             ];
 
@@ -420,6 +487,59 @@ class FakeDatabase implements DatabaseInterface
 
     public function update($qry, array $params = [])
     {
+        // Only intercept FLEETS_EVENT lock/unlock (and other event-only updates).
+        // Joins like UPDATE %%FLEETS%%, %%FLEETS_EVENT%% must fall through to fleetUpdates
+        // (e.g. FleetFunctions::setACSTime).
+        if (str_contains($qry, '%%FLEETS_EVENT%%') && !str_contains($qry, '%%FLEETS%%')) {
+            $this->fleetEventUpdates[] = ['sql' => $qry, 'params' => $params];
+            if (str_contains($qry, '`lock` = :token') && str_contains($qry, '`lock` IS NULL')) {
+                if ($this->fleetEvents !== []) {
+                    $locked = 0;
+                    $now = (int) ($params[':time'] ?? 0);
+                    $token = (string) ($params[':token'] ?? '');
+                    foreach ($this->fleetEvents as &$event) {
+                        if (($event['lock'] ?? null) !== null) {
+                            continue;
+                        }
+                        if ((int) ($event['time'] ?? 0) > $now) {
+                            continue;
+                        }
+                        $event['lock'] = $token;
+                        $locked++;
+                    }
+                    unset($event);
+                    $this->lastRowCount = $locked;
+                } else {
+                    $this->lastRowCount = (int) array_shift($this->fleetEventLockCounts);
+                }
+                return true;
+            }
+            if (str_contains($qry, '`lock` = NULL') && str_contains($qry, '`lock` = :token')) {
+                $token = (string) ($params[':token'] ?? '');
+                $failed = [];
+                foreach ($params as $key => $value) {
+                    if (str_starts_with((string) $key, ':failed')) {
+                        $failed[] = (int) $value;
+                    }
+                }
+                $cleared = 0;
+                foreach ($this->fleetEvents as &$event) {
+                    if (($event['lock'] ?? null) !== $token) {
+                        continue;
+                    }
+                    if ($failed !== [] && in_array((int) $event['fleetID'], $failed, true)) {
+                        continue;
+                    }
+                    $event['lock'] = null;
+                    $cleared++;
+                }
+                unset($event);
+                $this->lastRowCount = $cleared;
+                return true;
+            }
+            $this->lastRowCount = 0;
+            return true;
+        }
         if (str_contains($qry, '%%SALVAGE_PACKAGES%%')) {
             $this->lastRowCount = 0;
             foreach ($this->salvagePackages as &$row) {

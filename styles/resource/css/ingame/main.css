@@ -637,19 +637,64 @@ div#disclamer a {
     min-height: 8px;
 }
 
-#menu .menu-section {
+#menu .menu-group,
+#menu .menu-group__list,
+#menu .menu-pin {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#menu .menu-group__list {
     display: block;
+}
+
+#menu .menu-group.is-collapsed .menu-group__list {
+    display: none;
+}
+
+#menu .menu-section,
+#menu .menu-section__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
     min-height: 0;
+    margin: 0;
     padding: 8px 10px;
     color: var(--color-chrome-menu-section);
     background: var(--color-chrome-menu-section-bg);
     background-image: none;
+    border: 0;
+    font: inherit;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     text-align: left;
     box-sizing: border-box;
+    cursor: pointer;
+}
+
+#menu .menu-section__label {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+#menu .menu-section__chevron {
+    flex: 0 0 auto;
+    width: 0.65em;
+    height: 0.65em;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    opacity: 0.85;
+    transition: transform 0.15s ease;
+}
+
+#menu .menu-group.is-collapsed .menu-section__chevron {
+    transform: rotate(-45deg);
 }
 
 #options select {
@@ -761,6 +806,32 @@ div#disclamer a {
     position: absolute;
     z-index: 1000;
     max-width: 500px;
+}
+
+/* Tap menus (Galaxy fleet actions, etc.) use this class at any viewport width.
+   Landscape phones are often ≥700px, so these rules must not live in the
+   max-width: 699px block or the overlay is position:absolute and scrolls away. */
+#tooltip.tooltip-mobile-active {
+    position: fixed;
+    width: max-content;
+    height: auto;
+    bottom: auto;
+    max-width: calc(100vw - 24px);
+    max-height: 70vh;
+    overflow: auto;
+    z-index: 300;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    text-align: left;
+}
+
+#tooltip.tooltip-mobile-active table {
+    width: auto;
+    max-width: 100%;
 }
 
 .tip.notify {
@@ -1376,10 +1447,12 @@ table.tablesorter thead tr .headerSortDown {
     z-index: 1;
 }
 
+/* Keep the static JPG visible while WebGL boots so a failed/slow canvas
+   never leaves an empty black square in the planet slot. */
 .overview-planet-visual--loading .overview-planet-fallback {
-    opacity: 0;
-    visibility: hidden;
-    z-index: 0;
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
     pointer-events: none;
 }
 
@@ -1581,6 +1654,16 @@ table.tablesorter thead tr .headerSortDown {
     flex-direction: column;
 }
 
+/* Opaque plate so planet art cannot wash out rows/footer (border-spacing gaps
+   otherwise show the page background through translucent --color-bg-surface). */
+.galaxy-system-table {
+    background: var(--color-bg-surface-dark);
+}
+
+.galaxy-system-table > tbody > tr > td {
+    background: var(--color-bg-surface-dark);
+}
+
 .galaxy-coords-picker {
     width: 324px;
     min-width: 324px;
@@ -1780,7 +1863,7 @@ table.tablesorter thead tr .headerSortDown {
         align-self: start;
         justify-content: flex-start;
         gap: 0;
-        padding: 0 12px 0 0;
+        padding: 0 8px 0 4px;
         overflow-x: auto;
         scroll-padding-inline: 8px;
         overflow-y: hidden;
@@ -1791,18 +1874,29 @@ table.tablesorter thead tr .headerSortDown {
 
     #resource_mobile,
     .resource-cell {
-        flex: 1 1 0;
+        /* Content-sized cells: long amounts stay fully readable; strip scrolls. */
+        flex: 0 0 auto;
+        width: max-content;
         min-width: 56px;
         min-height: 44px;
-        padding: 4px 8px;
-        font-size: 12px;
+        padding: 4px 6px;
+        font-size: 11px;
         line-height: 1.2;
         scroll-snap-align: start;
+        box-sizing: border-box;
     }
 
     .resource-cell a {
         min-height: 44px;
         justify-content: center;
+    }
+
+    #resources_mobile .mobile .res_current {
+        /* Global .res_current min-width:90px is for desktop columns; drop it here. */
+        display: inline-block;
+        min-width: 0;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
     }
 
     #resource_mobile img,
@@ -1848,9 +1942,11 @@ table.tablesorter thead tr .headerSortDown {
         top: 0;
         left: 0;
         right: 0;
+        width: 100%;
         bottom: calc(56px + env(safe-area-inset-bottom, 0px));
         z-index: 200;
         overflow-y: auto;
+        overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         background: var(--color-bg-surface);
         border-top: none;
@@ -1866,8 +1962,8 @@ table.tablesorter thead tr .headerSortDown {
         top: auto;
         bottom: auto;
         width: 100%;
-        max-width: 480px;
-        margin: 0 auto;
+        max-width: none;
+        margin: 0;
         overflow: visible;
         max-height: none;
         padding-bottom: 0;
@@ -1901,6 +1997,11 @@ table.tablesorter thead tr .headerSortDown {
         border-left: 3px solid transparent;
     }
 
+    /* Flex blockifies #newmes; preserve the leading space before "(N)". */
+    #menu a #newmes {
+        white-space: pre;
+    }
+
     #menu a:hover,
     #menu a.active {
         background: var(--color-chrome-menu-active-bg);
@@ -1911,8 +2012,10 @@ table.tablesorter thead tr .headerSortDown {
         border-left-color: var(--color-chrome-menu-active-bar);
     }
 
-    #menu .menu-section {
+    #menu .menu-section,
+    #menu .menu-section__toggle {
         padding: 10px 12px;
+        min-height: 44px;
         color: var(--color-chrome-menu-section);
         background: var(--color-chrome-menu-section-bg);
         font-size: 12px;
@@ -1924,6 +2027,12 @@ table.tablesorter thead tr .headerSortDown {
 
     #toggle-menu:checked ~ menu {
         display: block !important;
+    }
+
+    /* Lock page scroll while the drawer is open (avoids double scrollbars). */
+    html:has(#toggle-menu:checked),
+    body:has(#toggle-menu:checked) {
+        overflow: hidden;
     }
 
     .buildl img {
@@ -1962,29 +2071,6 @@ table.tablesorter thead tr .headerSortDown {
         background-repeat: no-repeat;
         background-origin: content-box;
         background-clip: content-box;
-    }
-
-    #tooltip.tooltip-mobile-active {
-        position: fixed;
-        width: max-content;
-        height: auto;
-        bottom: auto;
-        max-width: calc(100vw - 24px);
-        max-height: 70vh;
-        overflow: auto;
-        z-index: 300;
-        box-sizing: border-box;
-        padding: 10px 12px;
-        background: var(--color-bg-surface);
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-        text-align: left;
-    }
-
-    #tooltip.tooltip-mobile-active table {
-        width: auto;
-        max-width: 100%;
     }
 
     .galaxy-system-table a.tooltip {
@@ -2132,7 +2218,7 @@ table.tablesorter thead tr .headerSortDown {
         border: 1px solid var(--color-border);
         border-radius: 4px;
         padding: 3px 5px;
-        background: var(--color-bg-surface);
+        background: var(--color-bg-surface-dark);
     }
 
     .galaxy-system-table tr:not(.galaxy-planet-row) {
@@ -2188,7 +2274,8 @@ table.tablesorter thead tr .headerSortDown {
 
     .galaxy-planet-row td:nth-child(2) {
         order: 1;
-        flex: 0 0 22px;
+        /* Match the 32px planet-icon hit area so the thumb does not cover the name. */
+        flex: 0 0 32px;
         align-self: center;
         padding-top: 0;
     }
@@ -2229,12 +2316,13 @@ table.tablesorter thead tr .headerSortDown {
         min-width: 0;
         max-width: 38%;
         padding-left: 0;
-        font-size: 10px;
+        /* Match other mobile galaxy body text (was 10px / faded). */
+        font-size: 12px;
         line-height: 1.1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        opacity: 0.85;
+        opacity: 1;
     }
 
     .galaxy-planet-row td:nth-child(4),
@@ -2272,7 +2360,18 @@ table.tablesorter thead tr .headerSortDown {
         display: inline-flex;
         flex-wrap: nowrap;
         align-items: center;
-        gap: 0;
+        gap: 4px;
+    }
+
+    /* ~44×44 tap targets; keep Spy/Message/Buddy artwork at native size. */
+    .galaxy-planet-row .galaxy-card-actions-cell a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 12px;
     }
 
     .galaxy-planet-row .galaxy-card-actions-cell img {
@@ -2280,7 +2379,7 @@ table.tablesorter thead tr .headerSortDown {
         min-height: 20px;
         width: 20px;
         height: 20px;
-        padding: 1px;
+        padding: 0;
     }
 
     .galaxy-coords-picker {
@@ -2393,6 +2492,59 @@ table.tablesorter thead tr .headerSortDown {
         width: 100% !important;
     }
 
+    /* Keep ship rows within the viewport: name/count + (- input + +10 max)
+       otherwise force ~419px min content and horizontal scroll at 390px.
+       colgroup sizes columns (first body row is colspan, so fixed layout
+       alone cannot infer widths). */
+    .fleet-select-table {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+
+    .fleet-select-table .fleet-select-col-type {
+        width: 22%;
+    }
+
+    .fleet-select-table .fleet-select-col-avail {
+        width: 16%;
+    }
+
+    .fleet-select-table .fleet-select-col-amount {
+        width: 62%;
+    }
+
+    .fleet-select-table th,
+    .fleet-select-table td {
+        box-sizing: border-box;
+        overflow-wrap: break-word;
+    }
+
+    .fleet-select-table tr:nth-child(2) th {
+        font-size: 11px;
+        line-height: 1.25;
+        padding-left: 2px;
+        padding-right: 2px;
+        overflow-wrap: normal;
+    }
+
+    .fleet-ship-stepper {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 3px;
+        max-width: 100%;
+        min-width: 0;
+        vertical-align: middle;
+    }
+
+    .fleet-select-table #fleetContinueRow input[type="submit"] {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
     .fleet-mobile-list {
         display: block;
     }
@@ -2454,20 +2606,29 @@ table.tablesorter thead tr .headerSortDown {
 
     .fleet-ship-stepper .fleet-ship-input {
         width: 2.75rem;
+        min-width: 2.5rem;
+        max-width: 4rem;
         min-height: 36px;
     }
 
-    .fleet-ship-bulk-actions {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
+    /* Flex on the td itself breaks colspan under table-layout:fixed; wrap
+       the buttons with inline-flex sizing instead. */
+    .fleet-select-table td.fleet-ship-bulk-actions {
+        text-align: center;
     }
 
-    .fleet-ship-bulk-actions button.fleet-ship-btn {
-        flex: 1 1 calc(50% - 8px);
-        max-width: calc(50% - 8px);
+    .fleet-ship-bulk-actions {
+        display: table-cell;
+    }
+
+    .fleet-select-table .fleet-ship-bulk-actions button.fleet-ship-btn {
+        display: inline-flex;
+        width: calc(50% - 10px);
+        max-width: calc(50% - 10px);
         min-height: 44px;
-        margin: 0;
+        margin: 0 4px;
+        box-sizing: border-box;
+        vertical-align: middle;
     }
 
     .overview-mobile-shortcuts {
@@ -3340,6 +3501,11 @@ table.tablesorter thead tr .headerSortDown {
 	pointer-events: none;
 }
 
+/* Author display:flex would otherwise override the hidden attribute. */
+.achievement-celebration[hidden] {
+	display: none !important;
+}
+
 .achievement-celebration.is-active {
 	pointer-events: auto;
 }
@@ -3917,5 +4083,391 @@ table.tablesorter thead tr .headerSortDown {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+	}
+}
+
+/* Marketplace (game.php?page=marketPlace) */
+
+.market {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 0 8px 24px;
+	text-align: left;
+}
+
+.market [hidden] {
+	display: none !important;
+}
+
+.market__title {
+	margin: 0 0 0.35em;
+	color: var(--color-text-bright);
+	font-size: 1.35em;
+}
+
+.market__intro,
+.market__pay-help,
+.market__ratio p {
+	margin: 0 0 0.8em;
+	color: var(--color-chrome-res-label);
+	line-height: 1.45;
+}
+
+.market__cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5em 0.9em;
+	margin: 0 0 0.8em;
+}
+
+.market__cta-hint {
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
+.market__how,
+.market__ratio {
+	box-sizing: border-box;
+	margin: 0 0 0.9em;
+	padding: 0.5em 0.8em;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-radius: 4px;
+	background: var(--color-bg-surface);
+}
+
+.market__how summary,
+.market__ratio summary {
+	cursor: pointer;
+	color: var(--color-text-bright);
+	font-weight: 600;
+}
+
+.market__steps {
+	margin: 0.6em 0 0.2em;
+	padding: 0 0 0 1.3em;
+	line-height: 1.5;
+}
+
+.market__steps li {
+	margin: 0 0 0.35em;
+}
+
+.market__fuel-hint {
+	margin: 0.4em 0 0.2em;
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
+.market-offer p {
+	margin: 0.3em 0;
+	font-size: 0.9em;
+}
+
+.market-offer__range--out {
+	color: var(--color-danger);
+	font-weight: bold;
+}
+
+.market__notice {
+	margin: 0 0 0.9em;
+	padding: 0.65em 0.85em;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-left-width: 4px;
+	border-radius: 4px;
+	background: var(--color-bg-surface);
+	color: var(--color-text-bright);
+}
+
+.market__notice--ok {
+	border-left-color: var(--color-chrome-res-max);
+}
+
+.market__notice--error {
+	border-left-color: var(--color-danger);
+}
+
+.market__mine {
+	margin: 0 0 0.8em;
+	color: var(--color-ally-trade);
+}
+
+.market__tabs {
+	margin-top: 0.4em;
+}
+
+.market__count {
+	display: inline-block;
+	min-width: 1.4em;
+	margin-left: 0.3em;
+	padding: 0 0.35em;
+	border-radius: 0.7em;
+	background: var(--color-chrome-res-divider);
+	color: var(--color-text-bright);
+	font-size: 0.8em;
+	text-align: center;
+}
+
+.market__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 0.6em 1em;
+	margin: 0 0 0.4em;
+}
+
+.market__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2em;
+	font-size: 0.9em;
+	color: var(--color-chrome-res-label);
+}
+
+.market__field select {
+	min-width: 9em;
+	text-align: left;
+}
+
+.market__check {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding-bottom: 0.2em;
+	font-size: 0.9em;
+}
+
+.market__pay-help {
+	font-size: 0.85em;
+}
+
+.market__ratio-inputs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6em 1em;
+}
+
+.market__ratio-inputs label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2em;
+	font-size: 0.9em;
+}
+
+.market__ratio-inputs input {
+	width: 6em;
+}
+
+.market__subtitle {
+	margin: 1.4em 0 0.5em;
+	color: var(--color-text-bright);
+	font-size: 1.05em;
+}
+
+.market-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.market-table th,
+.market-table td {
+	padding: 0.45em 0.55em;
+	vertical-align: middle;
+	text-align: left;
+}
+
+.market-table td {
+	border-top: 1px solid var(--color-chrome-res-divider);
+}
+
+.market-goods {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.market-goods li,
+.market-price {
+	display: flex;
+	align-items: center;
+	gap: 0.35em;
+	white-space: nowrap;
+}
+
+.market-goods img,
+.market-price img {
+	flex: 0 0 auto;
+	width: 20px;
+	height: 20px;
+}
+
+.market-goods__name {
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
+.market-deal {
+	white-space: nowrap;
+}
+
+.market-deal--good {
+	color: var(--color-chrome-res-max);
+}
+
+.market-deal--fair {
+	color: var(--color-ally-trade);
+}
+
+.market-deal--bad {
+	color: var(--color-chrome-res-over);
+}
+
+.market-cost small,
+.market-offer__reason {
+	color: var(--color-chrome-res-label);
+}
+
+.market-action {
+	min-width: 8.5em;
+	text-align: right;
+}
+
+.market-action form {
+	margin: 0;
+}
+
+.market-offer__reason {
+	display: block;
+	margin-top: 0.25em;
+	font-size: 0.85em;
+	white-space: normal;
+}
+
+.market-offer__reason:empty {
+	display: none;
+}
+
+.market-offer--own > td {
+	background: var(--color-chrome-menu-active-bg);
+}
+
+.market-offer--expired {
+	opacity: 0.55;
+}
+
+.market-badge {
+	display: inline-block;
+	margin: 0 0 0.35em;
+	padding: 0.1em 0.5em;
+	border-radius: 0.35em;
+	background: var(--color-chrome-menu-active-bar);
+	color: var(--color-bg-page);
+	font-size: 0.8em;
+	font-weight: 700;
+}
+
+.market-empty {
+	margin: 0.5em 0 0;
+	padding: 1em;
+	border: 1px dashed var(--color-chrome-res-divider);
+	border-radius: 4px;
+	color: var(--color-chrome-res-label);
+	text-align: center;
+}
+
+.market-empty__title {
+	margin: 0 0 0.3em;
+	color: var(--color-text-bright);
+	font-weight: 600;
+}
+
+.market-empty p {
+	margin: 0 0 0.6em;
+}
+
+.market-sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+@media screen and (max-width: 699px) {
+	/* Keep the last rows (history) clear of the fixed #bottom-nav. */
+	.market {
+		padding: 0 4px calc(56px + env(safe-area-inset-bottom, 0px) + 16px);
+	}
+
+	.market__toolbar {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.market__field select {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.market__check {
+		grid-column: 1 / -1;
+	}
+
+	/* Offer rows become cards; each cell shows its column label. */
+	.market-table thead {
+		display: none;
+	}
+
+	.market-table,
+	.market-table tbody,
+	.market-table tr,
+	.market-table td {
+		display: block;
+		width: auto;
+	}
+
+	.market-table tr {
+		margin: 0 0 0.7em;
+		border: 1px solid var(--color-chrome-res-divider);
+		border-radius: 4px;
+		background: var(--color-bg-surface);
+	}
+
+	.market-table td {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 0.8em;
+		border-top: 1px solid var(--color-chrome-res-divider);
+		text-align: right;
+	}
+
+	.market-table tr > td:first-child {
+		border-top: 0;
+	}
+
+	.market-table td[data-label]::before {
+		content: attr(data-label);
+		flex: 0 0 auto;
+		color: var(--color-chrome-res-label);
+		font-size: 0.85em;
+		text-align: left;
+	}
+
+	.market-goods li,
+	.market-price {
+		justify-content: flex-end;
+	}
+
+	.market-action {
+		display: block !important;
+		text-align: center;
+	}
+
+	.market-action .btn {
+		width: 100%;
 	}
 }

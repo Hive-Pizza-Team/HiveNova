@@ -115,6 +115,11 @@
 <input type="hidden" name="target_mission" value="{$targetMission}">
 <input type="hidden" name="fleet_group" value="{$joinFleetGroup}">
 <table class="table519 fleet-select-table">
+	<colgroup>
+		<col class="fleet-select-col-type">
+		<col class="fleet-select-col-avail">
+		<col class="fleet-select-col-amount">
+	</colgroup>
 	<tr>
 		<th colspan="3">{$LNG.fl_new_mission_title}</th>
 	</tr>

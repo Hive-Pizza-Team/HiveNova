@@ -20,6 +20,12 @@
         <td>{$LNG.fl_fuel_consumption}</td>
         <td>{$consumption|number}</td>
     </tr>
+    {if $listingFee > 0}
+    <tr style="height:20px">
+        <td>{$LNG.market_listing_fee}</td>
+        <td>{$listingFee|number} {$LNG.tech.903}</td>
+    </tr>
+    {/if}
     <tr style="height:20px">
         <td>{$LNG.fl_from}</td>
         <td>{$from}</td>

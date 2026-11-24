@@ -282,6 +282,16 @@ class ResourceUpdate
 			$this->completedBuildingJobs,
 			(string) ($this->USER['lang'] ?? 'en')
 		);
+		if ($this->completedBuildingJobs !== [] && empty($this->PLANET['b_building_id'])) {
+			$lastJob = $this->completedBuildingJobs[array_key_last($this->completedBuildingJobs)];
+			BuildingCompletePushService::notifyQueueEmpty(
+				(int) ($this->USER['id'] ?? 0),
+				(string) ($this->PLANET['name'] ?? ''),
+				(string) ($this->USER['lang'] ?? 'en'),
+				(int) ($lastJob['planetId'] ?? $this->PLANET['id'] ?? 0),
+				(int) ($lastJob['buildEnd'] ?? 0)
+			);
+		}
 	}
 	
 	private function CheckPlanetBuildingQueue()

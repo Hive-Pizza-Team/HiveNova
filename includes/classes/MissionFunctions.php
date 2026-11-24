@@ -89,6 +89,37 @@ class MissionFunctions
 	{
 		global $resource;
 
+		if ($onStart === true) {
+			try {
+				$userId = (int) ($this->_fleet['fleet_owner'] ?? 0);
+				$fleetId = (int) ($this->_fleet['fleet_id'] ?? 0);
+				if ($userId > 0 && $fleetId > 0) {
+					$lang = 'en';
+					$user = $this->getUser($userId);
+					if (isset($user['lang']) && is_string($user['lang']) && $user['lang'] !== '') {
+						$lang = $user['lang'];
+					}
+					$returnEnd = (int) ($this->_fleet['fleet_end_time'] ?? 0);
+					if ($returnEnd <= 0) {
+						$returnEnd = defined('TIMESTAMP') ? (int) TIMESTAMP : time();
+					}
+					FleetReturnPushService::notifyReturnedFleet(
+						$userId,
+						$fleetId,
+						(int) ($this->_fleet['fleet_mission'] ?? 0),
+						(int) ($this->_fleet['fleet_start_galaxy'] ?? 0),
+						(int) ($this->_fleet['fleet_start_system'] ?? 0),
+						(int) ($this->_fleet['fleet_start_planet'] ?? 0),
+						$this->getPlanetName((int) ($this->_fleet['fleet_start_id'] ?? 0)),
+						$returnEnd,
+						$lang
+					);
+				}
+			} catch (\Throwable $e) {
+				PushNotificationService::logFailure('MissionFunctions::RestoreFleet push: ' . $e->getMessage());
+			}
+		}
+
 		$fleetData		= FleetFunctions::unserialize($this->_fleet['fleet_array']);
 
 		$updateQuery	= array();

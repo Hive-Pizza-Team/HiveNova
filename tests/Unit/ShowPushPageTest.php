@@ -163,6 +163,23 @@ class ShowPushPageTest extends TestCase
 		$this->assertSame(['error' => 'invalid_subscription'], $page->jsonResponse);
 	}
 
+	public function testSubscribeRejectsRecentlyExpiredEndpoint(): void
+	{
+		$stub = new PushSubscriptionDatabaseStub();
+		$endpoint = 'https://fcm.googleapis.com/fcm/send/example-endpoint';
+		$stub->expiredEndpoints[$endpoint] = TIMESTAMP;
+		Database::setInstance($stub);
+
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$page = new TestableShowPushPage();
+		$page->testBody = $this->validSubscriptionJson();
+
+		$this->invokeSubscribe($page);
+
+		$this->assertSame(['error' => 'subscription_expired'], $page->jsonResponse);
+		$this->assertSame([], $stub->inserts);
+	}
+
 	public function testSubscribeAcceptsValidSubscription(): void
 	{
 		$stub = new PushSubscriptionDatabaseStub();

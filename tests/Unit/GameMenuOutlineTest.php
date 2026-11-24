@@ -48,6 +48,7 @@ class GameMenuOutlineTest extends TestCase
 		$admin = strpos($this->nav, 'lm_menu_section_account');
 		$resources = strpos($this->nav, 'page=resources');
 		$market = strpos($this->nav, 'page=trader');
+		$marketplace = strpos($this->nav, 'page=marketPlace');
 		$shipMerchant = strpos($this->nav, 'page=fleetDealer');
 
 		$this->assertNotFalse($basics);
@@ -55,15 +56,19 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertNotFalse($admin);
 		$this->assertNotFalse($resources);
 		$this->assertNotFalse($market);
+		$this->assertNotFalse($marketplace);
 		$this->assertNotFalse($shipMerchant);
 		$this->assertGreaterThan($advanced, $resources);
 		$this->assertGreaterThan($advanced, $market);
+		$this->assertGreaterThan($advanced, $marketplace);
 		$this->assertGreaterThan($advanced, $shipMerchant);
 		$this->assertLessThan($admin, $resources);
 		$this->assertLessThan($admin, $market);
+		$this->assertLessThan($admin, $marketplace);
 		$this->assertLessThan($admin, $shipMerchant);
 		$this->assertGreaterThan($resources, $market);
-		$this->assertGreaterThan($market, $shipMerchant);
+		$this->assertGreaterThan($market, $marketplace);
+		$this->assertGreaterThan($marketplace, $shipMerchant);
 	}
 
 	public function test_advanced_section_follows_product_order(): void
@@ -80,6 +85,7 @@ class GameMenuOutlineTest extends TestCase
 			'page=viz',
 			'page=eventFirehose',
 			'page=trader',
+			'page=marketPlace',
 			'page=fleetDealer',
 			'page=alliance',
 		];
@@ -145,6 +151,26 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertStringContainsString('page=techtree', $nudge);
 	}
 
+	public function test_sidebar_sections_are_collapsible_and_pin_logout(): void
+	{
+		$layout = file_get_contents(__DIR__ . '/../../styles/templates/game/layout.full.tpl');
+		$this->assertNotFalse($layout);
+		$this->assertStringContainsString('menu-section__toggle', $this->nav);
+		$this->assertStringContainsString('data-menu-group="basics"', $this->nav);
+		$this->assertStringContainsString('data-menu-group="empire"', $this->nav);
+		$this->assertStringContainsString('data-menu-group="account"', $this->nav);
+		$this->assertStringContainsString('class="menu-pin"', $this->nav);
+
+		$accountItems = strpos($this->nav, 'id="menu-group-account"');
+		$accountItemsEnd = strpos($this->nav, '</ul>', $accountItems);
+		$logout = strpos($this->nav, 'page=logout');
+		$this->assertNotFalse($accountItems);
+		$this->assertNotFalse($accountItemsEnd);
+		$this->assertNotFalse($logout);
+		$this->assertGreaterThan($accountItemsEnd, $logout);
+		$this->assertStringContainsString('scripts/game/menu-sections.js', $layout);
+	}
+
 	public function test_whats_new_is_not_a_main_menu_item(): void
 	{
 		$this->assertDoesNotMatchRegularExpression(
@@ -170,5 +196,16 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertGreaterThan($settings, $switch);
 		$this->assertLessThan($logout, $switch);
 		$this->assertStringContainsString('lm_universe_switch', $this->nav);
+	}
+
+	public function test_marketplace_link_is_gated_like_the_page(): void
+	{
+		$this->assertMatchesRegularExpression(
+			'/MODULE_MISSION_TRADE\|isModuleAvailable[^\n]*page=marketPlace/',
+			$this->nav
+		);
+		$this->assertStringContainsString("navPage == 'marketPlace'", $this->nav);
+		$this->assertStringContainsString('lm_marketplace', $this->nav);
+		$this->assertSame(1, preg_match_all('/page=marketPlace/', $this->nav));
 	}
 }
