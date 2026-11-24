@@ -241,6 +241,10 @@ describe('chrome-v1.2 mobile', () => {
 		assert.match(resourcesTpl, /resources-apply-bar/);
 		assert.match(resourcesTpl, /data-label="\{\$LNG\.tech\.901\}"/);
 		assert.match(resourcesTpl, /\{\$LNG\.rs_prod_factor\}/);
+		assert.match(resourcesTpl, /resources-table__zero/);
+		assert.match(mobileCss, /body#resources \.resources-table__row td\.resources-table__zero \{[\s\S]*?display:\s*none/);
+		assert.match(mobileCss, /body#resources \.resources-table__row\.resources-table__prod \{[\s\S]*?flex-wrap:\s*wrap/);
+		assert.match(mobileCss, /body#resources \.resources-table__factor select \{[\s\S]*?border:\s*1px solid var\(--color-accent\)/);
 	});
 
 	it('collapses extra Buildings queue rows on mobile so the list can scroll', () => {

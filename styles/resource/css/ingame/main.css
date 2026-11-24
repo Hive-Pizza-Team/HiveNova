@@ -2837,6 +2837,89 @@ table.tablesorter thead tr .headerSortDown {
         box-sizing: border-box;
     }
 
+    /* #771: one short row per source. Zero cells drop out. The percent select stays a control. */
+    body#resources .resources-table__row {
+        margin-bottom: 6px;
+        padding: 8px 10px;
+    }
+
+    body#resources .resources-table__row td.resources-table__zero {
+        display: none;
+    }
+
+    body#resources .resources-table__row:not(.resources-table__prod) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 10px;
+        row-gap: 0;
+    }
+
+    body#resources .resources-table__row:not(.resources-table__prod) .resources-table__label {
+        grid-column: 1 / -1;
+        margin-bottom: 2px;
+        padding-bottom: 2px;
+    }
+
+    body#resources .resources-table__row:not(.resources-table__prod) td {
+        padding: 2px 0;
+    }
+
+    body#resources .resources-table__row.resources-table__prod {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        column-gap: 8px;
+        row-gap: 4px;
+    }
+
+    body#resources .resources-table__prod .resources-table__label {
+        flex: 1 1 12rem;
+        width: auto;
+        margin: 0;
+        padding: 0;
+        border-bottom: 0;
+    }
+
+    body#resources .resources-table__prod .resources-table__factor {
+        flex: 0 0 6.75rem;
+        order: 2;
+        width: auto;
+        padding: 0;
+    }
+
+    body#resources .resources-table__prod .resources-table__factor::before {
+        content: none;
+    }
+
+    body#resources .resources-table__prod td[data-label]:not(.resources-table__factor) {
+        flex: 0 1 auto;
+        order: 3;
+        width: auto;
+        padding: 0;
+        gap: 4px;
+    }
+
+    body#resources .resources-table__prod td[data-label]:not(.resources-table__factor)::before {
+        flex: 0 0 auto;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    body#resources .resources-table__factor select {
+        appearance: none;
+        -webkit-appearance: none;
+        border: 1px solid var(--color-accent);
+        border-radius: 4px;
+        background-color: rgba(0, 0, 0, 0.45);
+        color: var(--color-text-bright);
+        font-weight: 700;
+        padding: 0 1.6rem 0 0.55rem;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23dddddd' stroke-width='1.6' d='M1 1.2l5 5 5-5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 12px 8px;
+    }
+
     body#resources .resources-apply-inline {
         display: none;
     }
