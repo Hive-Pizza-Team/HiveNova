@@ -352,14 +352,16 @@ class TemplateTest extends TestCase
         $template = new Template();
         $this->invokePrivate($template, 'adm_main');
 
+        $productVersion = \HiveNova\Core\ProductVersion::current();
         $this->assertSame('HiveNova - Administration Panel', $template->getTemplateVars('title'));
         $this->assertSame('Info', $template->getTemplateVars('fcm_info'));
         $this->assertSame('en', $template->getTemplateVars('lang'));
         $this->assertSame(
-            \HiveNova\Core\AssetRevision::fromFilesystem('1.0.0.0'),
+            \HiveNova\Core\AssetRevision::fromFilesystem($productVersion),
             $template->getTemplateVars('REV')
         );
-        $this->assertSame('1.0.0.0', $template->getTemplateVars('VERSION'));
+        $this->assertSame($productVersion, $template->getTemplateVars('VERSION'));
+        $this->assertNotSame('1.0.0.0', $template->getTemplateVars('VERSION'));
         $this->assertSame('styles/theme/hive/', $template->getTemplateVars('dpath'));
         $this->assertSame('full', $template->getTemplateVars('bodyclass'));
         $this->assertIsArray($template->getTemplateVars('date'));
