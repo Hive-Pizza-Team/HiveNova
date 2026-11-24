@@ -19,6 +19,7 @@ use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\Mail;
+use HiveNova\Core\UserLanguageService;
 
 /**
  *  2Moons 
@@ -278,7 +279,10 @@ class ShowRegisterPage extends AbstractLoginPage
 		$mailAddress 	= HTTP::_GP('email', '');
 		$mailAddress2	= HTTP::_GP('emailReplay', '');
 		$rulesChecked	= HTTP::_GP('rules', 0);
-		$language 		= HTTP::_GP('lang', '');
+		$language 		= UserLanguageService::resolveForRegister(
+			HTTP::_GP('lang', ''),
+			$LNG->getLanguage()
+		);
 		
 		$referralRequest	= ReferralCaptureService::requestBag();
 		$referralResolved	= (new ReferralCaptureService())->resolveForRegister(
