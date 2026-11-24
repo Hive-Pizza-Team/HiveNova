@@ -8,6 +8,7 @@
 
 	var tickerConfigs = [];
 	var visibilityBound = false;
+	var resumeTimer = null;
 
 	function resourceElements(valueElem) {
 		return $('[id="' + valueElem + '"]');
@@ -77,6 +78,23 @@
 		return parseInt(resourceElements('current_' + name).first().data('real'), 10);
 	}
 
+	function creditResources(deltas) {
+		if (!deltas || typeof deltas !== 'object') {
+			return;
+		}
+		for (var i = 0; i < tickerConfigs.length; i++) {
+			var config = tickerConfigs[i];
+			var name = String(config.valueElem || '').replace(/^current_/, '');
+			var add = parseFloat(deltas[name]);
+			if (!name || !isFinite(add) || !add) {
+				continue;
+			}
+			config.available = parseFloat(config.available) + add;
+			resourceElements(config.valueElem).attr('data-real', config.available);
+			updateElements(config);
+		}
+	}
+
 	function resyncAll() {
 		for (var i = 0; i < tickerConfigs.length; i++) {
 			updateElements(tickerConfigs[i]);
@@ -90,6 +108,18 @@
 		resyncAll();
 	}
 
+	// visibilitychange + pageshow + focus can all fire on the same app switch;
+	// coalesce so we only sync/paint once per resume burst.
+	function scheduleResume() {
+		if (resumeTimer !== null) {
+			return;
+		}
+		resumeTimer = setTimeout(function () {
+			resumeTimer = null;
+			onResume();
+		}, 0);
+	}
+
 	function initVisibilityResync() {
 		if (visibilityBound || typeof document === 'undefined') {
 			return;
@@ -97,32 +127,38 @@
 		visibilityBound = true;
 		document.addEventListener('visibilitychange', function () {
 			if (!document.hidden) {
-				onResume();
+				scheduleResume();
 			}
 		});
 		if (typeof window !== 'undefined') {
-			window.addEventListener('pageshow', function (event) {
-				if (event.persisted) {
-					onResume();
-				}
-			});
+			// pageshow: bfcache restores and some iOS app-switch returns.
+			window.addEventListener('pageshow', scheduleResume);
+			// focus: iOS Safari sometimes skips a reliable visibilitychange.
+			window.addEventListener('focus', scheduleResume);
 		}
 	}
 
 	root.resourceTicker = resourceTicker;
 	root.getRessource = getRessource;
+	root.creditResources = creditResources;
 
 	var api = {
 		resourceTicker: resourceTicker,
 		getRessource: getRessource,
+		creditResources: creditResources,
 		computeResource: computeResource,
 		updateElements: updateElements,
 		resyncAll: resyncAll,
 		onResume: onResume,
+		scheduleResume: scheduleResume,
 		initVisibilityResync: initVisibilityResync,
 		_resetForTests: function () {
 			tickerConfigs = [];
 			visibilityBound = false;
+			if (resumeTimer !== null) {
+				clearTimeout(resumeTimer);
+				resumeTimer = null;
+			}
 		},
 		_registerTickerForTests: function (config) {
 			tickerConfigs.push(config);

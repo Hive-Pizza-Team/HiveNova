@@ -17,7 +17,7 @@ class MessagesPaginationTemplateTest extends TestCase
 				'lm_messages' => 'Messages',
 				'mg_overview' => 'Overview',
 				'loading' => 'Loading',
-				'mg_type' => [1 => 'Players', 100 => 'All'],
+				'mg_type' => [1 => 'Players', 3 => 'Combat messages', 100 => 'All'],
 				'mg_message_title' => 'Inbox',
 				'mg_filter_all' => 'All',
 				'mg_filter_lost' => 'Lost',
@@ -37,6 +37,9 @@ class MessagesPaginationTemplateTest extends TestCase
 				'mg_page' => 'Page',
 				'mg_no_messages' => 'No messages',
 				'mg_answer_to' => 'Reply to',
+				'mg_unread' => 'Unread',
+				'mg_total' => 'Total',
+				'mg_send_new' => 'Write a message',
 			],
 			'CategoryList' => [
 				1 => ['color' => '#fff', 'unread' => 0, 'total' => 12],
@@ -60,6 +63,7 @@ class MessagesPaginationTemplateTest extends TestCase
 					'text' => 'Report body',
 				],
 			],
+			'messageBodyIds' => [],
 		], $overrides));
 
 		return $template->fetch('extends:layout.ajax.tpl|page.messages.default.tpl');
@@ -114,6 +118,24 @@ class MessagesPaginationTemplateTest extends TestCase
 		$this->assertStringContainsString('game.php?page=messages&category=1&filter=lost&side=3', $rows[0][0]);
 	}
 
+	public function testInboxHeadingUsesSelectedCategoryNameNotFilterLabel(): void
+	{
+		$html = $this->renderMessagesPage([
+			'MessID' => 3,
+			'canFilterLost' => true,
+			'lostFilter' => false,
+		]);
+
+		$this->assertMatchesRegularExpression(
+			'/<table id="messagestable"[^>]*>\s*<tr>\s*<th[^>]*>Combat messages — <a href="game\.php\?page=messages&amp;category=3&amp;filter=lost">Lost<\/a><\/th>/',
+			$html
+		);
+		$this->assertDoesNotMatchRegularExpression(
+			'/<table id="messagestable"[^>]*>\s*<tr>\s*<th[^>]*>Inbox —/',
+			$html
+		);
+	}
+
 	public function testMessageBodyIdsRenderHydrationFallbackWhenLoadBodiesIsMissing(): void
 	{
 		$html = $this->renderMessagesPage([
@@ -125,5 +147,28 @@ class MessagesPaginationTemplateTest extends TestCase
 		$this->assertStringContainsString('typeof Message.loadBodies === \'function\'', $html);
 		$this->assertStringContainsString('mode=bodies', $html);
 		$this->assertStringContainsString('data-message-body', $html);
+		$this->assertStringContainsString('Message.applyMarkedRead', $html);
+	}
+
+	public function testEmptyInboxShowsCopyComposeAndUnreadLegend(): void
+	{
+		$html = $this->renderMessagesPage([
+			'MessageCount' => 0,
+			'MessageList' => [],
+			'maxPage' => 1,
+			'page' => 1,
+			'CategoryList' => [
+				1 => ['color' => '#fff', 'unread' => 1, 'total' => 1],
+			],
+		]);
+
+		$this->assertStringContainsString('Unread / Total', $html);
+		$this->assertStringContainsString('id="unread_1">1</span>/<span id="total_1">1</span>', $html);
+		$this->assertStringContainsString('msg-empty-row', $html);
+		$this->assertStringContainsString('No messages', $html);
+		$this->assertStringContainsString('mode=compose', $html);
+		$this->assertStringContainsString('Write a message', $html);
+		$this->assertStringNotContainsString('msg-action-bar', $html);
+		$this->assertStringNotContainsString('msg-col-header', $html);
 	}
 }

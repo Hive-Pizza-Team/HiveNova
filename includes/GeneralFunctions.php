@@ -150,6 +150,9 @@ function get_timezone_selector()
 	// http://www.php.net/manual/en/datetimezone.listidentifiers.php
 
 	$timezones = array();
+	// Installer default is date_default_timezone_get() (often "UTC"), which is
+	// not under a continent prefix — include it so settings/admin do not drop it.
+	$timezones['UTC']['UTC'] = 'UTC';
 	$timezone_identifiers = DateTimeZone::listIdentifiers();
 
 	foreach ($timezone_identifiers as $value) {

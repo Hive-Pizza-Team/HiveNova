@@ -112,6 +112,46 @@ function resetTooltipOverlay(tip) {
 	});
 }
 
+function tooltipContentFromTrigger(el) {
+	if (!el) {
+		return '';
+	}
+	var content = el.getAttribute ? el.getAttribute('data-tooltip-content') : null;
+	if (content == null && typeof jQuery !== 'undefined') {
+		content = jQuery(el).attr('data-tooltip-content');
+	}
+	return content == null ? '' : String(content);
+}
+
+function prepareHoverTooltip(tip, content) {
+	tip = tip || (typeof jQuery !== 'undefined' ? jQuery('#tooltip') : null);
+	if (!tip || !tip.length) {
+		return false;
+	}
+	var html = content == null ? '' : String(content);
+	if (!html) {
+		resetTooltipOverlay(tip);
+		tip.hide().removeData('mobile-source');
+		return false;
+	}
+	resetTooltipOverlay(tip);
+	tip.html(html);
+	return true;
+}
+
+function clearFancyboxChrome() {
+	if (typeof jQuery === 'undefined') {
+		return;
+	}
+	var overlay = jQuery('#fancybox-overlay');
+	var wrap = jQuery('#fancybox-wrap');
+	if (jQuery.fancybox && typeof jQuery.fancybox.close === 'function') {
+		jQuery.fancybox.close();
+	}
+	overlay.hide();
+	wrap.hide();
+}
+
 function positionMobileTooltip(tip) {
 	tip.css({
 		position: 'fixed',
@@ -227,7 +267,9 @@ $(document).ready(function () {
 				return;
 			}
 			var tip = $('#tooltip');
-			tip.html($(this).attr('data-tooltip-content'));
+			if (!prepareHoverTooltip(tip, tooltipContentFromTrigger(this))) {
+				return;
+			}
 			tip.show();
 		},
 		mouseleave : function () {
@@ -265,7 +307,9 @@ $(document).ready(function () {
 			return;
 		}
 		var tip = $('#tooltip');
-		tip.html($(this).attr('data-tooltip-content'));
+		if (!prepareHoverTooltip(tip, tooltipContentFromTrigger(this))) {
+			return;
+		}
 		tip.addClass('tooltip_sticky_div');
 		tip.css({
 			top : e.pageY - tip.outerHeight() / 2,
@@ -283,20 +327,18 @@ $(document).ready(function () {
 		tip.hide();
 	});
 
+	// Fancybox iframe → top navigation (and bfcache restores) can leave overlay /
+	// toast chrome on #tooltip, which shows up as a blank galaxy player tip.
 	$(window).on('pageshow', function (e) {
 		var persisted = !!(e.originalEvent && e.originalEvent.persisted);
+		resetTooltipOverlay($('#tooltip'));
+		$('#tooltip').hide().removeData('mobile-source');
 		var overlay = $('#fancybox-overlay');
 		var wrap = $('#fancybox-wrap');
 		if (!persisted && !overlay.is(':visible') && !wrap.is(':visible')) {
 			return;
 		}
-		if ($.fancybox && typeof $.fancybox.close === 'function') {
-			$.fancybox.close();
-		}
-		overlay.hide();
-		wrap.hide();
-		resetTooltipOverlay($('#tooltip'));
-		$('#tooltip').hide().removeData('mobile-source');
+		clearFancyboxChrome();
 	});
 });
 }
@@ -315,6 +357,8 @@ if (typeof module !== 'undefined' && module.exports) {
 		shouldDismissMobileTooltip: shouldDismissMobileTooltip,
 		isRecentTooltipTouch: isRecentTooltipTouch,
 		shouldUseHoverTooltip: shouldUseHoverTooltip,
-		tooltipClickAction: tooltipClickAction
+		tooltipClickAction: tooltipClickAction,
+		tooltipContentFromTrigger: tooltipContentFromTrigger,
+		prepareHoverTooltip: prepareHoverTooltip
 	};
 }

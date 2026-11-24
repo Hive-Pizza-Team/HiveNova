@@ -19,6 +19,7 @@ trait SwapDatabaseInstance
             $this->savedDatabaseInstance = $prop->getValue();
         }
         Database::setInstance($fake);
+        \HiveNova\Core\PushingAccusationQuery::resetCache();
     }
 
     protected function restoreDatabaseInstance(): void
@@ -28,5 +29,6 @@ trait SwapDatabaseInstance
         $prop->setAccessible(true);
         $prop->setValue(null, $this->savedDatabaseInstance);
         $this->savedDatabaseInstance = null;
+        \HiveNova\Core\PushingAccusationQuery::resetCache();
     }
 }

@@ -90,10 +90,26 @@ class AssetRevisionTest extends TestCase
 		$this->assertContains('scripts/game/search.js', $paths);
 		$this->assertContains('scripts/game/flotten.js', $paths);
 		$this->assertContains('scripts/game/galaxy.js', $paths);
+		$this->assertContains('scripts/game/top-nav.js', $paths);
 		$this->assertContains('scripts/game/overview.js', $paths);
+		$this->assertContains('scripts/game/overview-planet-loader-utils.js', $paths);
+		$this->assertContains('scripts/game/overview-planet-loader.js', $paths);
+		$this->assertContains('scripts/game/overview-planet.js', $paths);
 		$this->assertContains('scripts/game/element-focus.js', $paths);
 		$this->assertContains('scripts/game/techtree.js', $paths);
 		$this->assertContains('scripts/game/techtree-nudge.js', $paths);
+		$this->assertContains('styles/resource/css/login/main.css', $paths);
+		$this->assertContains('scripts/login/main.js', $paths);
+	}
+
+	public function testFingerprintPathsIncludeRegisterStylesheet(): void
+	{
+		$this->assertContains('styles/resource/css/login/register.css', AssetRevision::fingerprintPaths());
+	}
+
+	public function testFingerprintPathsIncludeLoginStylesheet(): void
+	{
+		$this->assertContains('styles/resource/css/login/main.css', AssetRevision::fingerprintPaths());
 	}
 
 	public function testFingerprintPathsExistOnDisk(): void

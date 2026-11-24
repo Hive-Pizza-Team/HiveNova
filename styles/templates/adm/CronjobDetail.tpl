@@ -44,7 +44,7 @@
 </tr>
 <tr>
 	<td>{$LNG.cronjob_class}</td>
-	<td>{html_options name="class" output=$avalibleCrons values=$avalibleCrons selected=$class}</td>
+	<td>{html_options name="class" options=$cronClassOptions selected=$class}</td>
 	<td><img src="./styles/resource/images/admin/i.gif" width="16" height="16" alt="" class="tooltip" data-tooltip-content="{$LNG.cronjob_desc_class}"></td>
 </tr>
 <tr>

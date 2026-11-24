@@ -6,6 +6,7 @@ use HiveNova\Core\Database;
 use HiveNova\Core\Config;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\GalaxyRows;
+use HiveNova\Core\GalaxyViewChargeService;
 use HiveNova\Core\FleetFunctions;
 
 /**
@@ -49,28 +50,48 @@ class ShowGalaxyPage extends AbstractGamePage
 		$planet			= min(max(HTTP::_GP('planet', (int) $PLANET['planet']), 1), $config->max_planets);
 		$type			= HTTP::_GP('type', 1);
 		$current		= HTTP::_GP('current', 0);
-		
-        if (!empty($galaxyLeft))
-            $galaxy	= max($galaxy - 1, 1);
-        elseif (!empty($galaxyRight))
-            $galaxy	= min($galaxy + 1, $config->max_galaxy);
 
-        if (!empty($systemLeft))
-            $system	= max($system - 1, 1);
-        elseif (!empty($systemRight))
-            $system	= min($system + 1, $config->max_system);
+		$isNavigation	= GalaxyViewChargeService::isNavigationRequest($_REQUEST);
+		$resolved		= GalaxyViewChargeService::resolveCoordinates(
+			$galaxy,
+			$system,
+			(int) $config->max_galaxy,
+			(int) $config->max_system,
+			$galaxyLeft,
+			$galaxyRight,
+			$systemLeft,
+			$systemRight
+		);
+		$galaxy			= $resolved['galaxy'];
+		$system			= $resolved['system'];
 
-		if ($galaxy != $PLANET['galaxy'] || $system != $PLANET['system'])
-		{
-			if($PLANET['deuterium'] < $config->deuterium_cost_galaxy)
-			{	
+		$paidSet		= $_SESSION[GalaxyViewChargeService::SESSION_KEY] ?? [];
+		if (!is_array($paidSet)) {
+			$paidSet = [];
+		}
+
+		if (GalaxyViewChargeService::shouldCharge(
+			$galaxy,
+			$system,
+			(int) $PLANET['galaxy'],
+			(int) $PLANET['system'],
+			$isNavigation,
+			$paidSet
+		)) {
+			if ($PLANET['deuterium'] < $config->deuterium_cost_galaxy) {
 				$this->printMessage($LNG['gl_no_deuterium_to_view_galaxy'], array(array(
 					'label'	=> $LNG['sys_back'],
 					'url'	=> 'game.php?page=galaxy'
 				)));
 			} else {
 				$PLANET['deuterium']	-= $config->deuterium_cost_galaxy;
-            }
+				$paidSet = GalaxyViewChargeService::markPaid($paidSet, $galaxy, $system);
+				$_SESSION[GalaxyViewChargeService::SESSION_KEY] = $paidSet;
+			}
+		}
+
+		if ($isNavigation) {
+			$this->redirectTo(GalaxyViewChargeService::cleanUrl($galaxy, $system));
 		}
 
         $targetDefensive    = $reslist['defense'];
