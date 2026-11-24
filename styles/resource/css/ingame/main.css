@@ -763,6 +763,32 @@ div#disclamer a {
     max-width: 500px;
 }
 
+/* Tap menus (Galaxy fleet actions, etc.) use this class at any viewport width.
+   Landscape phones are often ≥700px, so these rules must not live in the
+   max-width: 699px block or the overlay is position:absolute and scrolls away. */
+#tooltip.tooltip-mobile-active {
+    position: fixed;
+    width: max-content;
+    height: auto;
+    bottom: auto;
+    max-width: calc(100vw - 24px);
+    max-height: 70vh;
+    overflow: auto;
+    z-index: 300;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    text-align: left;
+}
+
+#tooltip.tooltip-mobile-active table {
+    width: auto;
+    max-width: 100%;
+}
+
 .tip.notify {
     position: fixed;
     top: 200px;
@@ -1376,10 +1402,12 @@ table.tablesorter thead tr .headerSortDown {
     z-index: 1;
 }
 
+/* Keep the static JPG visible while WebGL boots so a failed/slow canvas
+   never leaves an empty black square in the planet slot. */
 .overview-planet-visual--loading .overview-planet-fallback {
-    opacity: 0;
-    visibility: hidden;
-    z-index: 0;
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
     pointer-events: none;
 }
 
@@ -1581,6 +1609,16 @@ table.tablesorter thead tr .headerSortDown {
     flex-direction: column;
 }
 
+/* Opaque plate so planet art cannot wash out rows/footer (border-spacing gaps
+   otherwise show the page background through translucent --color-bg-surface). */
+.galaxy-system-table {
+    background: var(--color-bg-surface-dark);
+}
+
+.galaxy-system-table > tbody > tr > td {
+    background: var(--color-bg-surface-dark);
+}
+
 .galaxy-coords-picker {
     width: 324px;
     min-width: 324px;
@@ -1780,7 +1818,7 @@ table.tablesorter thead tr .headerSortDown {
         align-self: start;
         justify-content: flex-start;
         gap: 0;
-        padding: 0 12px 0 0;
+        padding: 0 8px 0 4px;
         overflow-x: auto;
         scroll-padding-inline: 8px;
         overflow-y: hidden;
@@ -1791,18 +1829,29 @@ table.tablesorter thead tr .headerSortDown {
 
     #resource_mobile,
     .resource-cell {
-        flex: 1 1 0;
+        /* Content-sized cells: long amounts stay fully readable; strip scrolls. */
+        flex: 0 0 auto;
+        width: max-content;
         min-width: 56px;
         min-height: 44px;
-        padding: 4px 8px;
-        font-size: 12px;
+        padding: 4px 6px;
+        font-size: 11px;
         line-height: 1.2;
         scroll-snap-align: start;
+        box-sizing: border-box;
     }
 
     .resource-cell a {
         min-height: 44px;
         justify-content: center;
+    }
+
+    #resources_mobile .mobile .res_current {
+        /* Global .res_current min-width:90px is for desktop columns; drop it here. */
+        display: inline-block;
+        min-width: 0;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
     }
 
     #resource_mobile img,
@@ -1848,9 +1897,11 @@ table.tablesorter thead tr .headerSortDown {
         top: 0;
         left: 0;
         right: 0;
+        width: 100%;
         bottom: calc(56px + env(safe-area-inset-bottom, 0px));
         z-index: 200;
         overflow-y: auto;
+        overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         background: var(--color-bg-surface);
         border-top: none;
@@ -1866,8 +1917,8 @@ table.tablesorter thead tr .headerSortDown {
         top: auto;
         bottom: auto;
         width: 100%;
-        max-width: 480px;
-        margin: 0 auto;
+        max-width: none;
+        margin: 0;
         overflow: visible;
         max-height: none;
         padding-bottom: 0;
@@ -1901,6 +1952,11 @@ table.tablesorter thead tr .headerSortDown {
         border-left: 3px solid transparent;
     }
 
+    /* Flex blockifies #newmes; preserve the leading space before "(N)". */
+    #menu a #newmes {
+        white-space: pre;
+    }
+
     #menu a:hover,
     #menu a.active {
         background: var(--color-chrome-menu-active-bg);
@@ -1924,6 +1980,12 @@ table.tablesorter thead tr .headerSortDown {
 
     #toggle-menu:checked ~ menu {
         display: block !important;
+    }
+
+    /* Lock page scroll while the drawer is open (avoids double scrollbars). */
+    html:has(#toggle-menu:checked),
+    body:has(#toggle-menu:checked) {
+        overflow: hidden;
     }
 
     .buildl img {
@@ -1962,29 +2024,6 @@ table.tablesorter thead tr .headerSortDown {
         background-repeat: no-repeat;
         background-origin: content-box;
         background-clip: content-box;
-    }
-
-    #tooltip.tooltip-mobile-active {
-        position: fixed;
-        width: max-content;
-        height: auto;
-        bottom: auto;
-        max-width: calc(100vw - 24px);
-        max-height: 70vh;
-        overflow: auto;
-        z-index: 300;
-        box-sizing: border-box;
-        padding: 10px 12px;
-        background: var(--color-bg-surface);
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-        text-align: left;
-    }
-
-    #tooltip.tooltip-mobile-active table {
-        width: auto;
-        max-width: 100%;
     }
 
     .galaxy-system-table a.tooltip {
@@ -2132,7 +2171,7 @@ table.tablesorter thead tr .headerSortDown {
         border: 1px solid var(--color-border);
         border-radius: 4px;
         padding: 3px 5px;
-        background: var(--color-bg-surface);
+        background: var(--color-bg-surface-dark);
     }
 
     .galaxy-system-table tr:not(.galaxy-planet-row) {
@@ -2188,7 +2227,8 @@ table.tablesorter thead tr .headerSortDown {
 
     .galaxy-planet-row td:nth-child(2) {
         order: 1;
-        flex: 0 0 22px;
+        /* Match the 32px planet-icon hit area so the thumb does not cover the name. */
+        flex: 0 0 32px;
         align-self: center;
         padding-top: 0;
     }
@@ -2229,12 +2269,13 @@ table.tablesorter thead tr .headerSortDown {
         min-width: 0;
         max-width: 38%;
         padding-left: 0;
-        font-size: 10px;
+        /* Match other mobile galaxy body text (was 10px / faded). */
+        font-size: 12px;
         line-height: 1.1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        opacity: 0.85;
+        opacity: 1;
     }
 
     .galaxy-planet-row td:nth-child(4),
@@ -2272,7 +2313,18 @@ table.tablesorter thead tr .headerSortDown {
         display: inline-flex;
         flex-wrap: nowrap;
         align-items: center;
-        gap: 0;
+        gap: 4px;
+    }
+
+    /* ~44×44 tap targets; keep Spy/Message/Buddy artwork at native size. */
+    .galaxy-planet-row .galaxy-card-actions-cell a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 12px;
     }
 
     .galaxy-planet-row .galaxy-card-actions-cell img {
@@ -2280,7 +2332,7 @@ table.tablesorter thead tr .headerSortDown {
         min-height: 20px;
         width: 20px;
         height: 20px;
-        padding: 1px;
+        padding: 0;
     }
 
     .galaxy-coords-picker {
@@ -2393,6 +2445,59 @@ table.tablesorter thead tr .headerSortDown {
         width: 100% !important;
     }
 
+    /* Keep ship rows within the viewport: name/count + (- input + +10 max)
+       otherwise force ~419px min content and horizontal scroll at 390px.
+       colgroup sizes columns (first body row is colspan, so fixed layout
+       alone cannot infer widths). */
+    .fleet-select-table {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+
+    .fleet-select-table .fleet-select-col-type {
+        width: 22%;
+    }
+
+    .fleet-select-table .fleet-select-col-avail {
+        width: 16%;
+    }
+
+    .fleet-select-table .fleet-select-col-amount {
+        width: 62%;
+    }
+
+    .fleet-select-table th,
+    .fleet-select-table td {
+        box-sizing: border-box;
+        overflow-wrap: break-word;
+    }
+
+    .fleet-select-table tr:nth-child(2) th {
+        font-size: 11px;
+        line-height: 1.25;
+        padding-left: 2px;
+        padding-right: 2px;
+        overflow-wrap: normal;
+    }
+
+    .fleet-ship-stepper {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 3px;
+        max-width: 100%;
+        min-width: 0;
+        vertical-align: middle;
+    }
+
+    .fleet-select-table #fleetContinueRow input[type="submit"] {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
     .fleet-mobile-list {
         display: block;
     }
@@ -2454,20 +2559,29 @@ table.tablesorter thead tr .headerSortDown {
 
     .fleet-ship-stepper .fleet-ship-input {
         width: 2.75rem;
+        min-width: 2.5rem;
+        max-width: 4rem;
         min-height: 36px;
     }
 
-    .fleet-ship-bulk-actions {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
+    /* Flex on the td itself breaks colspan under table-layout:fixed; wrap
+       the buttons with inline-flex sizing instead. */
+    .fleet-select-table td.fleet-ship-bulk-actions {
+        text-align: center;
     }
 
-    .fleet-ship-bulk-actions button.fleet-ship-btn {
-        flex: 1 1 calc(50% - 8px);
-        max-width: calc(50% - 8px);
+    .fleet-ship-bulk-actions {
+        display: table-cell;
+    }
+
+    .fleet-select-table .fleet-ship-bulk-actions button.fleet-ship-btn {
+        display: inline-flex;
+        width: calc(50% - 10px);
+        max-width: calc(50% - 10px);
         min-height: 44px;
-        margin: 0;
+        margin: 0 4px;
+        box-sizing: border-box;
+        vertical-align: middle;
     }
 
     .overview-mobile-shortcuts {
@@ -3340,6 +3454,11 @@ table.tablesorter thead tr .headerSortDown {
 	pointer-events: none;
 }
 
+/* Author display:flex would otherwise override the hidden attribute. */
+.achievement-celebration[hidden] {
+	display: none !important;
+}
+
 .achievement-celebration.is-active {
 	pointer-events: auto;
 }
@@ -3612,6 +3731,15 @@ table.tablesorter thead tr .headerSortDown {
 	text-align: left;
 }
 
+/* One requirement per line; the first sits beside the "Requires:" label. */
+.element-requirement {
+	display: block;
+}
+
+.element-requirements__list > .element-requirement:first-child {
+	display: inline;
+}
+
 .requirement-link {
 	text-decoration: underline;
 	cursor: pointer;
@@ -3627,6 +3755,67 @@ table.tablesorter thead tr .headerSortDown {
 
 .requirement-level {
 	margin-left: 0.25em;
+	white-space: nowrap;
+}
+
+/* Element cards (#736): stretch both .buildl columns to equal height when :has is supported */
+.infos:has(> .buildl),
+.infoso:has(> .buildl),
+.infos > form:has(> .buildl) {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+}
+
+.infos:has(> .buildl) > :not(.buildl),
+.infoso:has(> .buildl) > :not(.buildl),
+.infos > form:has(> .buildl) > :not(.buildl) {
+	flex: 1 1 100%;
+}
+
+/* Element cards (#736): Requires is a full-width row under both columns.
+   Phones keep one requirement per line; wider screens flow them in a row. */
+.infos > .element-requirements,
+.infoso > .element-requirements,
+.infos > form > .element-requirements {
+	clear: both;
+	flex: 0 0 100%;
+	margin: 0;
+	padding: 5px 10px 7px;
+	border-top: 1px solid #3a4048;
+	line-height: 1.4;
+}
+
+@media screen and (min-width: 700px) {
+	.infos > .element-requirements,
+	.infoso > .element-requirements,
+	.infos > form > .element-requirements {
+		display: flex;
+		align-items: baseline;
+		padding: 5px 12px 6px;
+	}
+
+	.infos > .element-requirements .element-requirements__label,
+	.infoso > .element-requirements .element-requirements__label,
+	.infos > form > .element-requirements .element-requirements__label {
+		flex: none;
+		margin-right: 10px;
+	}
+
+	.infos > .element-requirements .element-requirements__list,
+	.infoso > .element-requirements .element-requirements__list,
+	.infos > form > .element-requirements .element-requirements__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2px 20px;
+		min-width: 0;
+	}
+
+	.infos > .element-requirements .element-requirement,
+	.infoso > .element-requirements .element-requirement,
+	.infos > form > .element-requirements .element-requirement {
+		max-width: 100%;
+	}
 }
 
 .element-locked {
@@ -3640,4 +3829,598 @@ table.tablesorter thead tr .headerSortDown {
 .infoso:target {
 	outline: 2px solid var(--color-accent, #9b6dff);
 	box-shadow: 0 0 0 2px rgba(155, 109, 255, 0.35);
+}
+
+/* What's New (#734) */
+
+.whats-new {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 720px;
+	margin: 0 auto;
+	padding: 0 8px 24px;
+	overflow-wrap: anywhere;
+}
+
+.whats-new__title {
+	margin: 0 0 0.35em;
+	color: var(--color-text-bright);
+	font-size: 1.35em;
+}
+
+.whats-new__intro {
+	margin: 0 0 1.1em;
+	color: var(--color-chrome-res-label);
+	font-size: 0.95em;
+	line-height: 1.45;
+}
+
+.whats-new__empty {
+	margin: 0.75em 0;
+	color: var(--color-chrome-res-label);
+}
+
+.whats-new__release {
+	box-sizing: border-box;
+	margin: 0 0 0.9em;
+	padding: 0.75em 0.85em;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-radius: 4px;
+	background: var(--color-bg-surface);
+}
+
+.whats-new__release--unseen {
+	border-color: var(--color-accent);
+	box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.whats-new__release-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.45em 0.7em;
+	margin: 0 0 0.55em;
+}
+
+.whats-new__version {
+	margin: 0;
+	color: var(--color-text-bright);
+	font-size: 1.05em;
+}
+
+.whats-new__new-label {
+	display: inline-block;
+	padding: 0.1em 0.5em;
+	border-radius: 0.35em;
+	background: var(--color-accent);
+	color: var(--color-text-bright);
+	font-size: 0.75em;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.whats-new__items {
+	margin: 0;
+	padding: 0 0 0 1.15em;
+	color: var(--color-text);
+	line-height: 1.5;
+}
+
+.whats-new__items li {
+	margin: 0 0 0.4em;
+}
+
+.whats-new__items li:last-child {
+	margin-bottom: 0;
+}
+
+@media screen and (max-width: 699px) {
+	.whats-new {
+		padding: 0 4px 16px;
+	}
+
+	.whats-new__release {
+		padding: 0.65em 0.7em;
+	}
+}
+
+/* What's New one-time release dialog */
+.whats-new-dialog {
+	box-sizing: border-box;
+	width: min(560px, 94vw);
+	max-width: 94vw;
+	padding: 0;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-radius: 8px;
+	background: var(--color-bg-surface-dark);
+	color: var(--color-text);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+	overflow: hidden;
+}
+.whats-new-dialog::backdrop {
+	background: rgba(0, 0, 0, 0.72);
+}
+.whats-new-dialog__panel {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	max-width: 100%;
+}
+.whats-new-dialog__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.9rem 1rem 0.55rem;
+	border-bottom: 1px solid var(--color-chrome-res-divider);
+}
+.whats-new-dialog__heading {
+	min-width: 0;
+}
+.whats-new-dialog__title {
+	margin: 0;
+	color: var(--color-text-bright);
+	font-size: 1.2em;
+}
+.whats-new-dialog__subtitle {
+	margin: 0.25em 0 0;
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+.whats-new-dialog__close {
+	flex: 0 0 auto;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font-size: 1.4rem;
+	line-height: 1;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0.35rem 0.6rem;
+	cursor: pointer;
+}
+.whats-new-dialog__body {
+	box-sizing: border-box;
+	max-height: 60vh;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding: 0.75rem 1rem;
+}
+.whats-new-dialog__release {
+	margin: 0 0 0.85em;
+}
+.whats-new-dialog__release:last-child {
+	margin-bottom: 0;
+}
+.whats-new-dialog__version {
+	margin: 0 0 0.35em;
+	color: var(--color-text-bright);
+	font-size: 1em;
+}
+.whats-new-dialog__items {
+	margin: 0;
+	padding: 0 0 0 1.15em;
+	color: var(--color-text);
+	line-height: 1.45;
+	overflow-wrap: anywhere;
+}
+.whats-new-dialog__items li {
+	margin: 0 0 0.3em;
+}
+.whats-new-dialog__footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.65rem 1rem;
+	padding: 0.75rem 1rem 1rem;
+	border-top: 1px solid var(--color-chrome-res-divider);
+}
+.whats-new-dialog__see-all {
+	color: var(--color-text-bright);
+	text-decoration: underline;
+}
+.whats-new-dialog__got-it {
+	min-height: 44px;
+	min-width: 7em;
+}
+@media screen and (max-width: 699px) {
+	.whats-new-dialog__footer {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.whats-new-dialog__got-it,
+	.whats-new-dialog__see-all {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+}
+
+/* Marketplace (game.php?page=marketPlace) */
+
+.market {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 0 8px 24px;
+	text-align: left;
+}
+
+.market [hidden] {
+	display: none !important;
+}
+
+.market__title {
+	margin: 0 0 0.35em;
+	color: var(--color-text-bright);
+	font-size: 1.35em;
+}
+
+.market__intro,
+.market__pay-help,
+.market__ratio p {
+	margin: 0 0 0.8em;
+	color: var(--color-chrome-res-label);
+	line-height: 1.45;
+}
+
+.market__cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5em 0.9em;
+	margin: 0 0 0.8em;
+}
+
+.market__cta-hint {
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
+.market__how,
+.market__ratio {
+	box-sizing: border-box;
+	margin: 0 0 0.9em;
+	padding: 0.5em 0.8em;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-radius: 4px;
+	background: var(--color-bg-surface);
+}
+
+.market__how summary,
+.market__ratio summary {
+	cursor: pointer;
+	color: var(--color-text-bright);
+	font-weight: 600;
+}
+
+.market__steps {
+	margin: 0.6em 0 0.2em;
+	padding: 0 0 0 1.3em;
+	line-height: 1.5;
+}
+
+.market__steps li {
+	margin: 0 0 0.35em;
+}
+
+.market__fuel-hint {
+	margin: 0.4em 0 0.2em;
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
+.market-offer p {
+	margin: 0.3em 0;
+	font-size: 0.9em;
+}
+
+.market-offer__range--out {
+	color: var(--color-danger);
+	font-weight: bold;
+}
+
+.market__notice {
+	margin: 0 0 0.9em;
+	padding: 0.65em 0.85em;
+	border: 1px solid var(--color-chrome-res-divider);
+	border-left-width: 4px;
+	border-radius: 4px;
+	background: var(--color-bg-surface);
+	color: var(--color-text-bright);
+}
+
+.market__notice--ok {
+	border-left-color: var(--color-chrome-res-max);
+}
+
+.market__notice--error {
+	border-left-color: var(--color-danger);
+}
+
+.market__mine {
+	margin: 0 0 0.8em;
+	color: var(--color-ally-trade);
+}
+
+.market__tabs {
+	margin-top: 0.4em;
+}
+
+.market__count {
+	display: inline-block;
+	min-width: 1.4em;
+	margin-left: 0.3em;
+	padding: 0 0.35em;
+	border-radius: 0.7em;
+	background: var(--color-chrome-res-divider);
+	color: var(--color-text-bright);
+	font-size: 0.8em;
+	text-align: center;
+}
+
+.market__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 0.6em 1em;
+	margin: 0 0 0.4em;
+}
+
+.market__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2em;
+	font-size: 0.9em;
+	color: var(--color-chrome-res-label);
+}
+
+.market__field select {
+	min-width: 9em;
+	text-align: left;
+}
+
+.market__check {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding-bottom: 0.2em;
+	font-size: 0.9em;
+}
+
+.market__pay-help {
+	font-size: 0.85em;
+}
+
+.market__ratio-inputs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6em 1em;
+}
+
+.market__ratio-inputs label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2em;
+	font-size: 0.9em;
+}
+
+.market__ratio-inputs input {
+	width: 6em;
+}
+
+.market__subtitle {
+	margin: 1.4em 0 0.5em;
+	color: var(--color-text-bright);
+	font-size: 1.05em;
+}
+
+.market-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.market-table th,
+.market-table td {
+	padding: 0.45em 0.55em;
+	vertical-align: middle;
+	text-align: left;
+}
+
+.market-table td {
+	border-top: 1px solid var(--color-chrome-res-divider);
+}
+
+.market-goods {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.market-goods li,
+.market-price {
+	display: flex;
+	align-items: center;
+	gap: 0.35em;
+	white-space: nowrap;
+}
+
+.market-goods img,
+.market-price img {
+	flex: 0 0 auto;
+	width: 20px;
+	height: 20px;
+}
+
+.market-goods__name {
+	color: var(--color-chrome-res-label);
+	font-size: 0.9em;
+}
+
+.market-deal {
+	white-space: nowrap;
+}
+
+.market-deal--good {
+	color: var(--color-chrome-res-max);
+}
+
+.market-deal--fair {
+	color: var(--color-ally-trade);
+}
+
+.market-deal--bad {
+	color: var(--color-chrome-res-over);
+}
+
+.market-cost small,
+.market-offer__reason {
+	color: var(--color-chrome-res-label);
+}
+
+.market-action {
+	min-width: 8.5em;
+	text-align: right;
+}
+
+.market-action form {
+	margin: 0;
+}
+
+.market-offer__reason {
+	display: block;
+	margin-top: 0.25em;
+	font-size: 0.85em;
+	white-space: normal;
+}
+
+.market-offer__reason:empty {
+	display: none;
+}
+
+.market-offer--own > td {
+	background: var(--color-chrome-menu-active-bg);
+}
+
+.market-offer--expired {
+	opacity: 0.55;
+}
+
+.market-badge {
+	display: inline-block;
+	margin: 0 0 0.35em;
+	padding: 0.1em 0.5em;
+	border-radius: 0.35em;
+	background: var(--color-chrome-menu-active-bar);
+	color: var(--color-bg-page);
+	font-size: 0.8em;
+	font-weight: 700;
+}
+
+.market-empty {
+	margin: 0.5em 0 0;
+	padding: 1em;
+	border: 1px dashed var(--color-chrome-res-divider);
+	border-radius: 4px;
+	color: var(--color-chrome-res-label);
+	text-align: center;
+}
+
+.market-empty__title {
+	margin: 0 0 0.3em;
+	color: var(--color-text-bright);
+	font-weight: 600;
+}
+
+.market-empty p {
+	margin: 0 0 0.6em;
+}
+
+.market-sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+@media screen and (max-width: 699px) {
+	/* Keep the last rows (history) clear of the fixed #bottom-nav. */
+	.market {
+		padding: 0 4px calc(56px + env(safe-area-inset-bottom, 0px) + 16px);
+	}
+
+	.market__toolbar {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.market__field select {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.market__check {
+		grid-column: 1 / -1;
+	}
+
+	/* Offer rows become cards; each cell shows its column label. */
+	.market-table thead {
+		display: none;
+	}
+
+	.market-table,
+	.market-table tbody,
+	.market-table tr,
+	.market-table td {
+		display: block;
+		width: auto;
+	}
+
+	.market-table tr {
+		margin: 0 0 0.7em;
+		border: 1px solid var(--color-chrome-res-divider);
+		border-radius: 4px;
+		background: var(--color-bg-surface);
+	}
+
+	.market-table td {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 0.8em;
+		border-top: 1px solid var(--color-chrome-res-divider);
+		text-align: right;
+	}
+
+	.market-table tr > td:first-child {
+		border-top: 0;
+	}
+
+	.market-table td[data-label]::before {
+		content: attr(data-label);
+		flex: 0 0 auto;
+		color: var(--color-chrome-res-label);
+		font-size: 0.85em;
+		text-align: left;
+	}
+
+	.market-goods li,
+	.market-price {
+		justify-content: flex-end;
+	}
+
+	.market-action {
+		display: block !important;
+		text-align: center;
+	}
+
+	.market-action .btn {
+		width: 100%;
+	}
 }

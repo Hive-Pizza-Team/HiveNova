@@ -45,4 +45,73 @@
 .prestige-badge--pizza_grand_barony { color: #ffb703; }
 
 .prestige-badge--season,
-.prestige-badge--season_winner { color: #ffd166; }
+.prestige-badge--season_winner,
+[class*="prestige-badge--season_winner"] { color: #ffd166; }
+
+[class*="prestige-badge--season_top"] { color: #90be6d; }
+[class*="prestige-badge--season_participant"] { color: #8ecae6; }
+[class*="prestige-badge--season_feat"] { color: #f4a261; }
+
+.medals-page .medals-lookup {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem 1rem;
+	align-items: center;
+}
+
+.medals-page .medals-lookup input[type="number"],
+.medals-page .medals-lookup input[type="text"] {
+	width: 9rem;
+	max-width: 40vw;
+}
+
+.medals-page .medals-self {
+	margin-left: 0.5rem;
+	opacity: 0.75;
+	font-size: 0.9em;
+}
+
+.medals-page .medals-art {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.medals-page .medals-art img {
+	display: block;
+	margin: 0 auto 0.35rem;
+	border-radius: 4px;
+}
+
+.medals-page .medals-title {
+	font-size: 0.9em;
+}
+
+.medals-page .medals-retro {
+	display: inline-block;
+	margin-top: 0.25rem;
+	font-size: 0.75em;
+	opacity: 0.8;
+}
+
+.medals-page .medals-empty {
+	text-align: center;
+	padding: 1.2rem;
+	opacity: 0.9;
+}
+
+.medals-page .medals-note {
+	max-width: 40rem;
+	margin: 0.8rem auto 0;
+	opacity: 0.75;
+	font-size: 0.9em;
+	text-align: center;
+}
+
+.medals-page .medals-game-name {
+	opacity: 0.75;
+	font-size: 0.85em;
+}
+
+.medals-page .medals-legend-glyph {
+	text-align: center;
+}
