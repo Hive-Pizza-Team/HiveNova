@@ -91,5 +91,6 @@ $dbTableNames	= array(
 	'SEASON_ENTRIES'		=> DB_PREFIX.'season_entries',
 	'SEASON_SNAPSHOTS'		=> DB_PREFIX.'season_snapshots',
 	'SEASON_PAYOUTS'		=> DB_PREFIX.'season_payouts',
+	'SEASON_SBT_GRANTS'		=> DB_PREFIX.'season_sbt_grants',
 );
 // MOD-TABLES
