@@ -39,6 +39,7 @@
 		{if allowedTo('ShowLogPage')}<li><a href="?page=log" target="Hauptframe">{$LNG.mu_logs}</a></li>{/if}
 		{if allowedTo('ShowTransactionsPage')}<li><a href="?page=transactions" target="Hauptframe">{$LNG.mu_transactions}</a></li>{/if}
 		{if allowedTo('ShowReferralStatsPage')}<li><a href="?page=referrals" target="Hauptframe">{$LNG.mu_referrals}</a></li>{/if}
+		{if allowedTo('ShowHiveCreateRequestsPage')}<li><a href="?page=hivecreaterequests" target="Hauptframe">{$LNG.mu_hive_create_requests}</a></li>{/if}
 		{if allowedTo('ShowBuildLogPage')}<li><a href="?page=buildlog" target="Hauptframe">{$LNG.mu_build_log}</a></li>{/if}
 		{if allowedTo('ShowDestructionPage')}<li><a href="?page=destruction" target="Hauptframe">{$LNG.mu_destruction}</a></li>{/if}
 		{if allowedTo('ShowSendMessagesPage')}<li><a href="?page=globalmessage" target="Hauptframe">{$LNG.mu_global_message}</a></li>{/if}

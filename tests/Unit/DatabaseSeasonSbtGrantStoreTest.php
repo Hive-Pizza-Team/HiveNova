@@ -165,7 +165,7 @@ class DatabaseSeasonSbtGrantStoreTest extends TestCase
 
 final class SeasonSbtScriptedDb implements DatabaseInterface
 {
-	public int $dbVersion = 57;
+	public int $dbVersion = 58;
 
 	/** @var list<mixed> */
 	public array $tables = [['uni1_season_sbt_grants']];

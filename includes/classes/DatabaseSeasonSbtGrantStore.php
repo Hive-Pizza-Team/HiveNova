@@ -9,8 +9,8 @@ use Throwable;
  */
 class DatabaseSeasonSbtGrantStore implements SeasonSbtGrantStore
 {
-	/** DB version that introduced season_sbt_grants (install/migrations/migration_57.sql). */
-	public const SCHEMA_DB_VERSION = 57;
+	/** DB version that introduced season_sbt_grants (install/migrations/migration_58.sql). */
+	public const SCHEMA_DB_VERSION = 58;
 
 	/** @var bool|null */
 	private static $schemaReadyCache = null;

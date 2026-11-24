@@ -1,27 +1,15 @@
--- Season prestige SBT grants cache (#628 / #630). Cosmetics only; no combat power.
-CREATE TABLE `%PREFIX%season_sbt_grants` (
+-- Admin-gated Hive account create requests (#638 P1; migration 57 (56 is signup_src)).
+CREATE TABLE IF NOT EXISTS `%PREFIX%hive_account_create_requests` (
 	`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-	`universe` int(10) unsigned NOT NULL DEFAULT 0,
-	`user_id` int(10) unsigned NOT NULL DEFAULT 0,
-	`hive_user` varchar(16) NOT NULL DEFAULT '',
-	`season_id` varchar(32) NOT NULL,
-	`tier` varchar(16) NOT NULL,
-	`rank` int(10) unsigned DEFAULT NULL,
-	`feat_id` varchar(32) NOT NULL DEFAULT '',
-	`nft_namespace` varchar(16) NOT NULL DEFAULT '',
-	`nft_symbol` varchar(10) NOT NULL DEFAULT '',
-	`instance_id` varchar(64) NOT NULL DEFAULT '',
-	`trx_id` varchar(64) NOT NULL DEFAULT '',
-	`recap_url` varchar(512) NOT NULL DEFAULT '',
-	`image_url` varchar(512) NOT NULL DEFAULT '',
-	`game_name` varchar(64) NOT NULL DEFAULT '',
-	`data_json` mediumtext,
-	`retroactive` tinyint(1) unsigned NOT NULL DEFAULT 0,
-	`issued_at` int(10) unsigned NOT NULL DEFAULT 0,
+	`user_id` int(10) unsigned NOT NULL,
+	`universe` tinyint(3) unsigned NOT NULL,
+	`desired_name` varchar(16) NOT NULL,
+	`status` varchar(16) NOT NULL DEFAULT 'pending',
+	`reject_reason` varchar(255) NOT NULL DEFAULT '',
+	`created_at` int(10) unsigned NOT NULL,
+	`reviewed_at` int(10) unsigned NOT NULL DEFAULT 0,
+	`reviewed_by` int(10) unsigned NOT NULL DEFAULT 0,
 	PRIMARY KEY (`id`),
-	UNIQUE KEY `uniq_season_hive_tier_feat` (`season_id`, `hive_user`, `tier`, `feat_id`),
-	KEY `user_id` (`user_id`),
-	KEY `hive_user` (`hive_user`),
-	KEY `universe_user` (`universe`, `user_id`),
-	KEY `season_id` (`season_id`)
+	KEY `status_created` (`status`, `created_at`),
+	KEY `user_universe_status` (`user_id`, `universe`, `status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
