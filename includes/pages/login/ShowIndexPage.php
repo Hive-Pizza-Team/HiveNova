@@ -12,6 +12,7 @@ use HiveNova\Core\LobbyActivityFeed;
 use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\PublicSeo;
 use HiveNova\Core\ReferralCaptureService;
+use HiveNova\Core\RememberUsernameService;
 use HiveNova\Core\SeasonService;
 use HiveNova\Core\Universe;
 
@@ -58,13 +59,17 @@ class ShowIndexPage extends AbstractLoginPage
 
 		$config				= Config::get();
 		$referralCapture	= new ReferralCaptureService();
+		$referralRequest	= ReferralCaptureService::requestBag();
 		$referral			= $referralCapture->capture(
 			Database::get(),
-			ReferralCaptureService::requestBag(),
+			$referralRequest,
 			$_COOKIE
 		);
+		$signupSrc			= ReferralCaptureService::sourceFrom($referralRequest, $_COOKIE);
 		$registerUrl		= $referralCapture->registerUrl(
-			(int) ($referral['code'] ?? $referral['id'])
+			(int) ($referral['code'] ?? $referral['id']),
+			$referralCapture->registrationUniverseId($referral),
+			$signupSrc
 		);
 
 		$universeSelect	= array();
@@ -202,6 +207,8 @@ class ShowIndexPage extends AbstractLoginPage
 			}
 		}
 
+		$rememberedUsernames = RememberUsernameService::readAll($_COOKIE);
+
 		$this->assign(array(
 			'lobbyFaq'				=> $lobbyFaq,
 			'faqJsonLd'				=> PublicSeo::faqJsonLd($lobbyFaq),
@@ -228,6 +235,8 @@ class ShowIndexPage extends AbstractLoginPage
 			'lobbyVizMtime'			=> (string) (@filemtime(ROOT_PATH . 'scripts/login/lobby-viz.js') ?: 0),
 			'lobbyCssMtime'			=> (string) (@filemtime(ROOT_PATH . 'styles/resource/css/login/lobby.css') ?: 0),
 			'registerUrl'			=> $registerUrl,
+			'rememberedEmailUsername'	=> $rememberedUsernames[RememberUsernameService::KIND_EMAIL],
+			'rememberedHiveUsername'	=> $rememberedUsernames[RememberUsernameService::KIND_HIVE],
 		));
 
 		if ($loginErrorMessage) {

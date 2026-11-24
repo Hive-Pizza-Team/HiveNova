@@ -13,6 +13,7 @@
 	<th>{$LNG.cronjob_inActive}</th>
 	<th>{$LNG.cronjob_lock}</th>
 	<th>{$LNG.cronjob_edit}</th>
+	<th>{$LNG.cronjob_make_due}</th>
 	<th>{$LNG.cronjob_delete}</th>
 </tr>
 {foreach item=CronjobInfo from=$CronjobArray}
@@ -53,6 +54,13 @@
 	</td>
 	<td><a href="admin.php?page=cronjob&amp;action=detail&amp;id={$CronjobInfo.id}"><img src="./styles/resource/images/admin/GO.png"></a></td>
 	<td>
+		<form method="post" action="admin.php?page=cronjob" style="display:inline">
+			<input type="hidden" name="action" value="makedue">
+			<input type="hidden" name="id" value="{$CronjobInfo.id}">
+			<button type="submit" style="background:none;border:0;padding:0;cursor:pointer">{$LNG.cronjob_make_due}</button>
+		</form>
+	</td>
+	<td>
 		<form method="post" action="admin.php?page=cronjob" style="display:inline" onsubmit="return confirm('{$LNG.cronjob_delete}');">
 			<input type="hidden" name="action" value="delete">
 			<input type="hidden" name="id" value="{$CronjobInfo.id}">
@@ -62,7 +70,7 @@
 </tr>
 {/foreach}
 <tr>
-<td colspan="13"><a href="admin.php?page=cronjob&amp;action=detail">{$LNG.cronjob_new}</a></td>
+<td colspan="14"><a href="admin.php?page=cronjob&amp;action=detail">{$LNG.cronjob_new}</a></td>
 </tr>
 </table>
 </body>

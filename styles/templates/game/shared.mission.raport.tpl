@@ -265,36 +265,47 @@
 
 <div class="battle-report__details">
 {if $Raport.mode == 1}
-	{* Destruction *}
+	{* Moon destruction — compact two-dice / repel tree (Lane C default) *}
+	{if !empty($Raport.moon.moonDestroyBranch)}
+		{if $Raport.moon.moonDestroyBranch == 'pyrrhic'}
+			{$LNG.sys_destruc_tree_pyrrhic}<br>
+		{elseif $Raport.moon.moonDestroyBranch == 'clean'}
+			{$LNG.sys_destruc_tree_clean}<br>
+		{elseif $Raport.moon.moonDestroyBranch == 'held_bled'}
+			{$LNG.sys_destruc_tree_held_bled}<br>
+		{elseif $Raport.moon.moonDestroyBranch == 'held_intact'}
+			{$LNG.sys_destruc_tree_held_intact}<br>
+		{else}
+			{$LNG.sys_destruc_tree_repelled}<br>
+		{/if}
+		{$LNG.sys_destruc_surviving_line|sprintf:$Raport.moon.survivingDestroyers}<br>
+		{$LNG.sys_destruc_moon_line|sprintf:$Raport.moon.moonDestroyedLabel}<br>
+		{$LNG.sys_destruc_fortress_line|sprintf:$Raport.moon.fortressLossLabel}<br>
+	{/if}
 	{if $Raport.moon.moonDestroySuccess == -1}
-		{* Attack not win *}
+		{* Combat repel / no Stage-2 *}
 		{$LNG.sys_destruc_stop}<br>
 	{else}
-		{* Attack win *}
+		{* Stage-2 narrative (HiveNova live chances — not OGame folklore) *}
 		{$LNG.sys_destruc_lune|sprintf:$Raport.moon.moonDestroyChance}<br>{$LNG.sys_destruc_mess1}
 		{if $Raport.moon.moonDestroySuccess == 1}
-			{* Destroy success *}
 			{$LNG.sys_destruc_reussi}
 		{elseif $Raport.moon.moonDestroySuccess == 0}
-			{* Destroy failed *}
-			{$LNG.sys_destruc_null}			
+			{$LNG.sys_destruc_null}
 		{/if}
 		<br>
 		{$LNG.sys_destruc_rip|sprintf:$Raport.moon.fleetDestroyChance}
 		{if $Raport.moon.fleetDestroySuccess == 1}
-			{* Fleet destroyed *}
 			<br>{$LNG.sys_destruc_echec}
-		{/if}			
+		{/if}
 	{/if}
 {else}
-	{* Normal Attack *}
+	{* Normal Attack — moon creation append *}
 	{$LNG.sys_moonproba} {$Raport.moon.moonChance} %<br>
 	{if !empty($Raport.moon.moonName)}
 		{if isset($Info)}
-			{* Moon created (HoF Mode) *}
 			{$LNG.sys_moonbuilt|sprintf:$Raport.moon.moonName:"XX":"XX":"XX"}
 		{else}
-			{* Moon created *}
 			{$LNG.sys_moonbuilt|sprintf:$Raport.moon.moonName:$Raport.koords[0]:$Raport.koords[1]:$Raport.koords[2]}
 		{/if}
 	{/if}

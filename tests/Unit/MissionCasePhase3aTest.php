@@ -152,6 +152,19 @@ class MissionCasePhase3aTest extends TestCase
         $this->assertNotEmpty($combatFake->achievement->deleteLog);
         $this->assertSame(FLEET_RETURN, $mission->_fleet['fleet_mess']);
         $this->assertSame('Win', missionCombatReportClass($combatFake, 1));
+
+        $moonEvents = array_values(array_filter(
+            $combatFake->achievement->universeEvents,
+            static fn (array $row): bool => ($row['event_type'] ?? '') === 'moon'
+        ));
+        $this->assertNotEmpty($moonEvents);
+        $this->assertSame('destroyed', $moonEvents[0]['outcome']);
+
+        $subjects = array_map(
+            static fn (array $msg): string => (string) ($msg[':subject'] ?? ''),
+            $combatFake->achievement->messages
+        );
+        $this->assertContains('Report: Moon destruction', $subjects);
     }
 
     public function test_destruction_moon_destroy_fails_with_fixed_seed(): void

@@ -13,6 +13,7 @@ class DiscordWebhookService
 	private const AVATAR_URL = 'https://moon.hive.pizza/styles/resource/images/login/HiveNova.png';
 	private const COLOR_INCOMING = 0xE74C3C;
 	private const COLOR_COMBAT = 0x3498DB;
+	private const COLOR_MOON_DESTRUCTION = 0xE67E22;
 	private const CONNECT_TIMEOUT = 1;
 	private const TIMEOUT = 1;
 
@@ -252,6 +253,84 @@ class DiscordWebhookService
 				'avatar_url'       => self::AVATAR_URL,
 				'allowed_mentions' => ['parse' => []],
 				'content'          => $text,
+			]);
+		} catch (\Throwable) {
+			return;
+		}
+	}
+
+	/**
+	 * Universe feat webhook: every moon-destruction attempt (not HoF-gated).
+	 * Fail-open when webhook unset/invalid.
+	 *
+	 * @param array{
+	 *   branch?: string,
+	 *   survivingDestroyers?: int,
+	 *   moonDestroySuccess?: int,
+	 *   fleetDestroySuccess?: bool,
+	 *   moonDestroyedLabel?: string,
+	 *   fortressLossLabel?: string,
+	 *   moonName?: string,
+	 *   moonDiameter?: int,
+	 *   coords?: string
+	 * } $snapshot From MoonDestructionReportService::snapshot()
+	 */
+	public static function notifyMoonDestructionAttempt(
+		int $universe,
+		string $attackerName,
+		string $reportId,
+		array $snapshot
+	): void {
+		try {
+			$raw = (string) (Config::get($universe)->discord_feat_webhook ?? '');
+			$webhook = self::normalizeUrl($raw);
+			if ($webhook === null) {
+				return;
+			}
+
+			$attacker = trim($attackerName) !== '' ? trim($attackerName) : 'Unknown';
+			$coords = (string) ($snapshot['coords'] ?? '[?:?:?] (moon)');
+			$moonName = trim((string) ($snapshot['moonName'] ?? ''));
+			if ($moonName === '') {
+				$moonName = 'Moon';
+			}
+			$diameter = (int) ($snapshot['moonDiameter'] ?? 0);
+			$surviving = (int) ($snapshot['survivingDestroyers'] ?? 0);
+			$moonYn = (string) ($snapshot['moonDestroyedLabel'] ?? '—');
+			$fortYn = (string) ($snapshot['fortressLossLabel'] ?? '—');
+			$branch = (string) ($snapshot['branch'] ?? MoonDestructionReportService::BRANCH_REPELLED);
+			$reportUrl = MoonDestructionReportService::reportUrl($reportId);
+
+			$description = sprintf(
+				'Moon destruction attempt by %s at %s',
+				$attacker,
+				$coords
+			);
+
+			$fields = [
+				['name' => 'Attacker', 'value' => $attacker, 'inline' => true],
+				['name' => 'Location', 'value' => $coords, 'inline' => true],
+				['name' => 'Moon', 'value' => $moonName . ($diameter > 0 ? sprintf(' (%d km)', $diameter) : ''), 'inline' => true],
+				['name' => 'Surviving Battle Fortresses', 'value' => (string) $surviving, 'inline' => true],
+				['name' => 'Moon destroyed', 'value' => $moonYn, 'inline' => true],
+				['name' => 'Fortresses lost (destruction roll)', 'value' => $fortYn, 'inline' => true],
+				['name' => 'Outcome', 'value' => $branch, 'inline' => true],
+			];
+			if ($reportUrl !== '') {
+				$fields[] = ['name' => 'Report', 'value' => $reportUrl, 'inline' => false];
+			}
+
+			self::post($webhook, [
+				'username'         => self::botUsername($universe),
+				'avatar_url'       => self::AVATAR_URL,
+				'allowed_mentions' => ['parse' => []],
+				'embeds'           => [[
+					'title'       => 'Moon destruction attempt',
+					'description' => $description,
+					'color'       => self::COLOR_MOON_DESTRUCTION,
+					'thumbnail'   => ['url' => self::AVATAR_URL],
+					'fields'      => $fields,
+				]],
 			]);
 		} catch (\Throwable) {
 			return;

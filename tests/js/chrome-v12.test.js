@@ -75,7 +75,12 @@ describe('chrome-v1.2 sidebar', () => {
 		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?overflow-y:\s*auto/);
 		assert.match(desktopCss, /menu \.fixed \{[\s\S]*?overscroll-behavior:\s*contain/);
 		assert.match(mobileCss, /menu \{[\s\S]*?overflow-y:\s*auto/);
+		assert.match(mobileCss, /menu \{[\s\S]*?overscroll-behavior:\s*contain/);
+		assert.match(mobileCss, /menu \{[\s\S]*?width:\s*100%/);
 		assert.match(mobileCss, /menu \.fixed \{[\s\S]*?overflow:\s*visible/);
+		assert.match(mobileCss, /menu \.fixed \{[\s\S]*?max-width:\s*none/);
+		assert.match(mobileCss, /#menu a #newmes \{[\s\S]*?white-space:\s*pre/);
+		assert.match(mobileCss, /html:has\(#toggle-menu:checked\),\s*body:has\(#toggle-menu:checked\) \{[\s\S]*?overflow:\s*hidden/);
 	});
 
 	it('left-aligns items with 8–10px pad, section headers, and active bar', () => {
@@ -190,8 +195,13 @@ describe('chrome-v1.2 sidebar', () => {
 describe('chrome-v1.2 mobile', () => {
 	it('snap-scrolls the top strip instead of shrinking type unreadably', () => {
 		assert.match(mobileCss, /#resources_mobile \{[\s\S]*?scroll-snap-type:\s*x mandatory/);
+		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?flex:\s*0 0 auto/);
+		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?width:\s*max-content/);
 		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-height:\s*44px/);
 		assert.match(mobileCss, /\.resource-cell \{[\s\S]*?min-width:\s*56px/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?min-width:\s*0/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?white-space:\s*nowrap/);
+		assert.match(mobileCss, /#resources_mobile \.mobile \.res_current \{[\s\S]*?font-variant-numeric:\s*tabular-nums/);
 	});
 
 	it('reuses desktop sidebar tokens in the hamburger drawer', () => {
@@ -201,13 +211,18 @@ describe('chrome-v1.2 mobile', () => {
 	});
 
 	it('stacks #414 Resources at mobile width and keeps Apply reachable', () => {
-		assert.match(mobileCss, /body#resources \.resources-table__row \{[\s\S]*?display:\s*block/);
+		assert.match(mobileCss, /body#resources \.resources-table tbody,\s*body#resources \.resources-table__title,\s*body#resources \.resources-table__row \{[\s\S]*?display:\s*block/);
+		assert.match(mobileCss, /body#resources \.resources-table__row td \{[\s\S]*?display:\s*flex/);
+		assert.match(mobileCss, /body#resources \.resources-table__factor select[\s\S]*?min-width:\s*0/);
 		assert.match(mobileCss, /body#resources[\s\S]*overflow-x:\s*hidden/);
 		assert.match(mobileCss, /body#resources \.resources-apply-bar \{[\s\S]*?display:\s*block/);
+		assert.match(mobileCss, /body#resources \.resources-apply-bar \{[\s\S]*?max-width:\s*100%/);
 		assert.match(resourcesTpl, /class="resources-form"/);
 		assert.match(resourcesTpl, /class="resources-table"/);
+		assert.match(resourcesTpl, /colspan="6"/);
 		assert.match(resourcesTpl, /resources-apply-bar/);
 		assert.match(resourcesTpl, /data-label="\{\$LNG\.tech\.901\}"/);
+		assert.match(resourcesTpl, /\{\$LNG\.rs_prod_factor\}/);
 	});
 
 	it('collapses extra Buildings queue rows on mobile so the list can scroll', () => {
