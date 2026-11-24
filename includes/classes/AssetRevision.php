@@ -28,6 +28,7 @@ class AssetRevision
 			'scripts/game/push-subscribe.js',
 			'scripts/game/hive-keychain.js',
 			'scripts/game/base.js',
+			'scripts/game/menu-sections.js',
 			'scripts/game/top-nav.js',
 			'scripts/game/pwa-install.js',
 			'scripts/game/message.js',

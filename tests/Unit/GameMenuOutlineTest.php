@@ -151,6 +151,26 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertStringContainsString('page=techtree', $nudge);
 	}
 
+	public function test_sidebar_sections_are_collapsible_and_pin_logout(): void
+	{
+		$layout = file_get_contents(__DIR__ . '/../../styles/templates/game/layout.full.tpl');
+		$this->assertNotFalse($layout);
+		$this->assertStringContainsString('menu-section__toggle', $this->nav);
+		$this->assertStringContainsString('data-menu-group="basics"', $this->nav);
+		$this->assertStringContainsString('data-menu-group="empire"', $this->nav);
+		$this->assertStringContainsString('data-menu-group="account"', $this->nav);
+		$this->assertStringContainsString('class="menu-pin"', $this->nav);
+
+		$accountItems = strpos($this->nav, 'id="menu-group-account"');
+		$accountItemsEnd = strpos($this->nav, '</ul>', $accountItems);
+		$logout = strpos($this->nav, 'page=logout');
+		$this->assertNotFalse($accountItems);
+		$this->assertNotFalse($accountItemsEnd);
+		$this->assertNotFalse($logout);
+		$this->assertGreaterThan($accountItemsEnd, $logout);
+		$this->assertStringContainsString('scripts/game/menu-sections.js', $layout);
+	}
+
 	public function test_whats_new_is_not_a_main_menu_item(): void
 	{
 		$this->assertDoesNotMatchRegularExpression(
