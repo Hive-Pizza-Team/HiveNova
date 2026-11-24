@@ -39,7 +39,7 @@ class CommanderBriefingLanguageTest extends TestCase
 		$this->assertStringNotContainsString('window.location.reload()', $js);
 	}
 
-	public function testDefensiveCopyStatesShipyardRulesAndNamesHoldAsNonScoring(): void
+	public function testDefensiveCopyStatesShipyardRulesAndHold(): void
 	{
 		$lng = new Language('en');
 		$lng->includeData(['INGAME']);
@@ -54,11 +54,15 @@ class CommanderBriefingLanguageTest extends TestCase
 		$this->assertMatchesRegularExpression('/Hold \(mission 5/i', $desc);
 		$this->assertMatchesRegularExpression('/buddy or ally/i', $desc);
 		$this->assertMatchesRegularExpression('/1 hour/i', $desc);
-		$this->assertMatchesRegularExpression('/does not score/i', $desc);
+		$this->assertDoesNotMatchRegularExpression('/does not score/i', $desc);
 		$this->assertStringContainsString($need, $suggest);
 		$this->assertDoesNotMatchRegularExpression('/\bqueue\b/i', $suggest);
 		$this->assertMatchesRegularExpression('/\bfinish\b/i', $suggest);
-		$this->assertSame(['defense_complete' => 6], DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']);
+		$this->assertMatchesRegularExpression('/Hold \(A\)/i', $suggest);
+		$this->assertSame(
+			['defense_complete' => 6, 'hold_success' => 1],
+			DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']
+		);
 	}
 
 	public function testTradeCopyStatesThresholdForeignAndQuota(): void

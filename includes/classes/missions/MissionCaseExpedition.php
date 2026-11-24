@@ -721,22 +721,49 @@ HTML;
 			ExpeditionMessageBuilder::withDestination($Message, $this->_fleet, $LNG['sys_expe_destination']),
 			$this->_fleet['fleet_end_stay'], NULL, 1, $this->_fleet['fleet_universe']);
 
-		PushNotificationService::notifyExpeditionResult((int) $this->_fleet['fleet_owner'], $pendingChoice);
+		// Return first so push/achievement/directive failures cannot leave the
+		// expedition locked under FlyingFleetHandler's failed-event policy, and
+		// so a due Return can chain in the same request for a fresh briefing.
+		$this->setState(FLEET_RETURN);
+		$this->SaveFleet();
 
-		\HiveNova\Core\AchievementHooks::afterExpeditionInUniverse(
-			(int) $this->_fleet['fleet_owner'],
-			(int) $this->_fleet['fleet_universe']
-		);
+		try {
+			PushNotificationService::notifyExpeditionResult((int) $this->_fleet['fleet_owner'], $pendingChoice);
+		} catch (\Throwable $e) {
+			error_log(sprintf(
+				'MissionCaseExpedition: notifyExpeditionResult fleet %s: %s',
+				$this->_fleet['fleet_id'] ?? '?',
+				$e->getMessage()
+			));
+		}
 
-		if (\HiveNova\Core\DirectiveHooks::enabled()) {
-			\HiveNova\Core\DirectiveHooks::afterExpeditionDispatch(
+		try {
+			\HiveNova\Core\AchievementHooks::afterExpeditionInUniverse(
 				(int) $this->_fleet['fleet_owner'],
 				(int) $this->_fleet['fleet_universe']
 			);
+		} catch (\Throwable $e) {
+			error_log(sprintf(
+				'MissionCaseExpedition: afterExpeditionInUniverse fleet %s: %s',
+				$this->_fleet['fleet_id'] ?? '?',
+				$e->getMessage()
+			));
 		}
 
-		$this->setState(FLEET_RETURN);
-		$this->SaveFleet();
+		try {
+			if (\HiveNova\Core\DirectiveHooks::enabled()) {
+				\HiveNova\Core\DirectiveHooks::afterExpeditionDispatch(
+					(int) $this->_fleet['fleet_owner'],
+					(int) $this->_fleet['fleet_universe']
+				);
+			}
+		} catch (\Throwable $e) {
+			error_log(sprintf(
+				'MissionCaseExpedition: afterExpeditionDispatch fleet %s: %s',
+				$this->_fleet['fleet_id'] ?? '?',
+				$e->getMessage()
+			));
+		}
 	}
 	
 	function ReturnEvent()

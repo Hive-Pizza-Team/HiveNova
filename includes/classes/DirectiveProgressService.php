@@ -20,8 +20,8 @@ class DirectiveProgressService
 		}
 
 		$db = Database::get();
-		$db->beginTransaction();
 		try {
+			$db->beginTransaction();
 			$row = $db->selectSingle(
 				'SELECT id, user_id, period_id, directive_key, progress_json, completed_at, reward_claimed_at
 				FROM %%USER_DIRECTIVES%%
