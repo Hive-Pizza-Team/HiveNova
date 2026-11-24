@@ -87,6 +87,10 @@ class FakeAchievementDatabase implements DatabaseInterface
 
     public bool $cronjobLockCleared = false;
 
+    public ?string $cronjobLock = null;
+
+    public int $cronjobRowCount = 1;
+
     /** @var array<string, array{status: string, winner_id: int, claimed_at: int}> */
     public array $featStates = [];
 
@@ -239,6 +243,23 @@ class FakeAchievementDatabase implements DatabaseInterface
 
         if (str_contains($qry, 'FROM %%USERS%%') && str_contains($qry, 'authlevel')) {
             return [];
+        }
+
+        if (str_contains($qry, 'FROM %%CRONJOBS%%') && str_contains($qry, 'nextTime')) {
+            $now = (int) ($params[':time'] ?? (defined('TIMESTAMP') ? TIMESTAMP : time()));
+            $rows = [];
+            foreach ($this->cronjobRows as $row) {
+                $active = (int) ($row['isActive'] ?? ($this->cronjobActive ? 1 : 0));
+                $nextTime = (int) ($row['nextTime'] ?? 0);
+                if ($active !== 1 || $nextTime >= $now) {
+                    continue;
+                }
+                $rows[] = [
+                    'cronjobID' => $row['cronjobID'],
+                    'lock' => $row['lock'] ?? $this->cronjobLock,
+                ];
+            }
+            return $rows;
         }
 
         if (str_contains($qry, 'FROM %%CRONJOBS%%') && str_contains($qry, 'min')) {
@@ -406,7 +427,13 @@ class FakeAchievementDatabase implements DatabaseInterface
             if ($field === 'class') {
                 return $this->cronjobClass;
             }
-            return $field === false ? ['class' => $this->cronjobClass] : ($this->cronjobClass ?? false);
+            if ($field === 'lock') {
+                return $this->cronjobLock;
+            }
+            if ($field === false) {
+                return ['class' => $this->cronjobClass, 'lock' => $this->cronjobLock];
+            }
+            return $this->cronjobClass ?? false;
         }
 
         if (str_contains($qry, 'FROM %%STATPOINTS%%')) {
@@ -617,8 +644,18 @@ class FakeAchievementDatabase implements DatabaseInterface
         }
 
         if (str_contains($qry, 'CRONJOBS%%')) {
-            if (str_contains($qry, 'lock') && str_contains($qry, 'NULL')) {
+            if (preg_match('/SET\s+`?lock`?\s*=\s*NULL/i', $qry)) {
                 $this->cronjobLockCleared = true;
+                $this->cronjobLock = null;
+                $this->cronjobRowCount = 1;
+            } elseif (str_contains($qry, '`lock` = :lock') || str_contains($qry, "lock` = :lock")) {
+                if (!\HiveNova\Core\Cronjob::isLockAcquirable($this->cronjobLock)) {
+                    $this->cronjobRowCount = 0;
+                    return true;
+                }
+                $this->cronjobLock = (string) ($params[':lock'] ?? '');
+                $this->cronjobLockCleared = false;
+                $this->cronjobRowCount = 1;
             }
             return true;
         }
@@ -671,7 +708,7 @@ class FakeAchievementDatabase implements DatabaseInterface
     }
 
     public function lastInsertId() { return 99; }
-    public function rowCount() { return 1; }
+    public function rowCount() { return $this->cronjobRowCount; }
     public function getQueryCounter() { return 0; }
     public function quote($str) { return "'" . addslashes((string) $str) . "'"; }
     public function disconnect() {}

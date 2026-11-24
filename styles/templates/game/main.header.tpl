@@ -33,6 +33,7 @@
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/tokens.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="{$dpath}formate.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/ingame/buttons.css?v={$REV}">
+	<link rel="stylesheet" type="text/css" href="./styles/resource/css/feedback.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/fontawesome/css/ingame-icons.css?v={$REV}">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 	{assign var="ingamePage" value=$smarty.get.page|default:'overview'}
@@ -55,6 +56,8 @@
 	var isPlayerCardActive	= "{$isPlayerCardActive|json}";
 	var numberFormat	= "{$USER.number_format|default:'auto'}";
 	var needHiveForDeposit = "{$LNG.js_need_hive_for_deposit|escape:'javascript'}";
+	var hiveNeedKeychain = "{$LNG.js_hive_need_keychain|escape:'javascript'}";
+	var hiveAskAccount = "{$LNG.js_hive_ask_account|escape:'javascript'}";
 	var relativeTime = Math.floor(Date.now() / 1000);
 
 	function syncGameClockToWall() {
@@ -65,13 +68,28 @@
 			relativeTime = nowSec;
 		}
 	}
+	// Expose for topnav / countdown scripts after background tab freezes.
+	window.syncGameClockToWall = syncGameClockToWall;
 
 	setInterval(syncGameClockToWall, 1000);
+
+	function onGameClockResume() {
+		syncGameClockToWall();
+	}
+	document.addEventListener('visibilitychange', function () {
+		if (!document.hidden) {
+			onGameClockResume();
+		}
+	});
+	window.addEventListener('pageshow', onGameClockResume);
+	window.addEventListener('focus', onGameClockResume);
 	</script>
 	<script type="text/javascript" src="./scripts/base/jquery.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/jquery.cookie.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/base/tooltip.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/hive-keychain.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/game/history-nav.js?v={$REV}"></script>
+	<script type="text/javascript" src="./scripts/game/top-nav.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/base.js?v={$REV}"></script>
 	<script type="text/javascript" src="./scripts/game/pwa-install.js?v={$REV}" defer></script>
 	{foreach item=scriptname from=$scripts}

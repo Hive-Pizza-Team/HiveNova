@@ -17,6 +17,11 @@
 	var READY = 'overview-planet-visual--ready';
 	var FALLBACK = 'overview-planet-visual--fallback';
 	var VISUAL_SIZE_CAP = 280;
+	// If WebGL never reaches --ready, flip to the static JPG instead of a black square.
+	var BOOT_WATCHDOG_MS = 5000;
+	var PAINT_MIN_CHANNEL_SUM = 40;
+	var PAINT_MIN_ALPHA = 8;
+	var PAINT_MIN_LIT_SAMPLES = 1;
 
 	function getVisualSlotSide(wrap, cap) {
 		cap = cap || VISUAL_SIZE_CAP;
@@ -131,6 +136,8 @@
 			wrap.classList.add(LOADING);
 			wrap.classList.remove(READY, FALLBACK);
 		}
+		// Promote the static JPG during boot so a slow/failed canvas is never an empty black square.
+		resolveFallbackSrc(fallbackImg);
 	}
 
 	function hasOverviewPlanetDom(doc) {
@@ -150,11 +157,51 @@
 		return typeof dpath === 'string' && dpath.indexOf('/hive/') !== -1;
 	}
 
+	function shouldFallbackAfterBoot(success) {
+		return !success;
+	}
+
+	function isRgbaSampleLit(rgba, minSum, minAlpha) {
+		minSum = minSum == null ? PAINT_MIN_CHANNEL_SUM : minSum;
+		minAlpha = minAlpha == null ? PAINT_MIN_ALPHA : minAlpha;
+		if (!rgba || rgba.length < 4) {
+			return false;
+		}
+		return rgba[3] > minAlpha && (rgba[0] + rgba[1] + rgba[2]) > minSum;
+	}
+
+	function countLitRgbaSamples(samples, minSum, minAlpha) {
+		var lit = 0;
+		if (!samples || !samples.length) {
+			return 0;
+		}
+		for (var i = 0; i < samples.length; i++) {
+			if (isRgbaSampleLit(samples[i], minSum, minAlpha)) {
+				lit += 1;
+			}
+		}
+		return lit;
+	}
+
+	/**
+	 * True when post-render WebGL readPixels samples look empty/near-black.
+	 * Callers that cannot sample should skip this check rather than force fallback.
+	 */
+	function canvasSamplesLookBlank(samples, opts) {
+		opts = opts || {};
+		var minLit = opts.minLit != null ? opts.minLit : PAINT_MIN_LIT_SAMPLES;
+		return countLitRgbaSamples(samples, opts.minSum, opts.minAlpha) < minLit;
+	}
+
 	return {
 		LOADING: LOADING,
 		READY: READY,
 		FALLBACK: FALLBACK,
 		VISUAL_SIZE_CAP: VISUAL_SIZE_CAP,
+		BOOT_WATCHDOG_MS: BOOT_WATCHDOG_MS,
+		PAINT_MIN_CHANNEL_SUM: PAINT_MIN_CHANNEL_SUM,
+		PAINT_MIN_ALPHA: PAINT_MIN_ALPHA,
+		PAINT_MIN_LIT_SAMPLES: PAINT_MIN_LIT_SAMPLES,
 		getVisualSlotSide: getVisualSlotSide,
 		reserveOverviewCanvasSlot: reserveOverviewCanvasSlot,
 		watchOverviewVisualSlot: watchOverviewVisualSlot,
@@ -163,6 +210,10 @@
 		applyLoadingVisual: applyLoadingVisual,
 		hasOverviewPlanetDom: hasOverviewPlanetDom,
 		isLoaderConfigValid: isLoaderConfigValid,
-		isHiveThemePath: isHiveThemePath
+		isHiveThemePath: isHiveThemePath,
+		shouldFallbackAfterBoot: shouldFallbackAfterBoot,
+		isRgbaSampleLit: isRgbaSampleLit,
+		countLitRgbaSamples: countLitRgbaSamples,
+		canvasSamplesLookBlank: canvasSamplesLookBlank
 	};
 }));

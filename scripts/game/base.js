@@ -281,9 +281,15 @@ var Dialog	= {
 					if (isMobileViewport()) {
 						$('#fancybox-wrap').addClass('mobile-dialog');
 					}
+					if (window.HiveNovaHistoryNav) {
+						HiveNovaHistoryNav.recordDialogOpen(window.history);
+					}
 				},
 				onClosed: function() {
 					$('#fancybox-wrap').removeClass('mobile-dialog');
+					if (window.HiveNovaHistoryNav) {
+						HiveNovaHistoryNav.recordDialogClose(window.history);
+					}
 				}
 			});
 		});
@@ -456,15 +462,28 @@ const resolveHiveKeychain = async () => {
 };
 
 const HiveKeychainLogin = async () => {
+	const keychainMissing = (typeof hiveNeedKeychain !== 'undefined' && hiveNeedKeychain)
+		? hiveNeedKeychain
+		: 'Install the Hive Keychain browser extension, or use HiveSigner from Settings.';
+	const askName = (typeof hiveAskAccount !== 'undefined' && hiveAskAccount)
+		? hiveAskAccount
+		: 'Enter hive account name:';
 	const keychain = await resolveHiveKeychain();
 	if (!keychain || typeof keychain.requestSignBuffer !== 'function') {
-		alert('You must install HiveKeychain extension first');
+		const signerLink = document.querySelector('a[title][href*="hivesigner.com"]');
+		if (signerLink && signerLink.href) {
+			if (window.confirm(keychainMissing)) {
+				window.location.href = signerLink.href;
+			}
+			return;
+		}
+		alert(keychainMissing);
 		return;
 	}
 
 	try
   	{
-		const entered = prompt("Enter hive account name: ");
+		const entered = prompt(askName);
 		if (entered === null) {
 			return;
 		}
