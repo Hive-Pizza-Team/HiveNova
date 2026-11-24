@@ -38,7 +38,10 @@ class EnergyBalanceService
 	}
 
 	/**
-	 * Top-bar fields: available vs produced (same pair Empire uses).
+	 * Shared energy fields for the top bar (and callers that need the same pair).
+	 *
+	 * Top bar displays leftover (`available`) / produced (`max`), red when
+	 * `inDeficit`. Resources and Empire keep showing consumed / produced.
 	 *
 	 * @return array{
 	 *   name: string,
