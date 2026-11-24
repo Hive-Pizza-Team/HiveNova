@@ -281,9 +281,15 @@ var Dialog	= {
 					if (isMobileViewport()) {
 						$('#fancybox-wrap').addClass('mobile-dialog');
 					}
+					if (window.HiveNovaHistoryNav) {
+						HiveNovaHistoryNav.recordDialogOpen(window.history);
+					}
 				},
 				onClosed: function() {
 					$('#fancybox-wrap').removeClass('mobile-dialog');
+					if (window.HiveNovaHistoryNav) {
+						HiveNovaHistoryNav.recordDialogClose(window.history);
+					}
 				}
 			});
 		});

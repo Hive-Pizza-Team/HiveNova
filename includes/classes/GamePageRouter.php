@@ -9,9 +9,12 @@ class GamePageRouter
 {
 	/** @var array<string, string> */
 	private const ALIASES = [
-		'empire' => 'imperium',
-		'nfts'   => 'medals',
-		'nft'    => 'medals',
+		'empire'   => 'imperium',
+		'faq'      => 'questions',
+		'officers' => 'officier',
+		'officer'  => 'officier',
+		'nfts'     => 'medals',
+		'nft'      => 'medals',
 	];
 
 	public static function resolve(string $page): string

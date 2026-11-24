@@ -1,56 +1,138 @@
 /**
  * PWA install prompts: platform-specific steps and beforeinstallprompt on Chromium.
+ * "Not now" is stored in localStorage for DISMISS_MS; fleet dispatch pages never show the banner.
  */
-(function () {
+(function (root) {
+	'use strict';
+
 	var DISMISS_KEY = 'hivenova_pwa_install_dismissed';
 	var DISMISS_MS = 30 * 24 * 60 * 60 * 1000;
+	var FLEET_BANNER_PAGES = {
+		fleetTable: true,
+		fleetStep1: true,
+		fleetStep2: true,
+		fleetStep3: true
+	};
 	var deferredPrompt = null;
 
+	function getStorage() {
+		try {
+			return root.localStorage || null;
+		} catch (e) {
+			return null;
+		}
+	}
+
 	function isStandalone() {
-		return window.matchMedia('(display-mode: standalone)').matches
-			|| window.navigator.standalone === true;
+		return root.matchMedia('(display-mode: standalone)').matches
+			|| root.navigator.standalone === true;
 	}
 
 	function isIos() {
-		return (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream)
-			|| (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+		return (/iPad|iPhone|iPod/.test(root.navigator.userAgent) && !root.MSStream)
+			|| (root.navigator.platform === 'MacIntel' && root.navigator.maxTouchPoints > 1);
 	}
 
 	function isAndroid() {
-		return /Android/i.test(navigator.userAgent);
+		return /Android/i.test(root.navigator.userAgent);
 	}
 
 	function isFirefox() {
-		return /Firefox|FxiOS/i.test(navigator.userAgent);
+		return /Firefox|FxiOS/i.test(root.navigator.userAgent);
 	}
 
 	function isEdge() {
-		return /Edg/i.test(navigator.userAgent);
+		return /Edg/i.test(root.navigator.userAgent);
 	}
 
 	function isChromium() {
-		return /Chrome|CriOS|Edg|OPR|SamsungBrowser/i.test(navigator.userAgent)
+		return /Chrome|CriOS|Edg|OPR|SamsungBrowser/i.test(root.navigator.userAgent)
 			&& !isFirefox();
 	}
 
 	function isSafari() {
-		return /Safari/i.test(navigator.userAgent) && !isChromium();
+		return /Safari/i.test(root.navigator.userAgent) && !isChromium();
 	}
 
 	function isMobileViewport() {
-		return window.matchMedia('(max-width: 699px)').matches;
+		return root.matchMedia('(max-width: 699px)').matches;
 	}
 
-	function isDismissed() {
+	function isDismissed(now, storage) {
+		storage = storage === undefined ? getStorage() : storage;
+		now = now == null ? Date.now() : now;
+		if (!storage || typeof storage.getItem !== 'function') {
+			return false;
+		}
 		try {
-			var raw = localStorage.getItem(DISMISS_KEY);
+			var raw = storage.getItem(DISMISS_KEY);
 			if (!raw) {
 				return false;
 			}
-			return Date.now() - parseInt(raw, 10) < DISMISS_MS;
+			var ts = parseInt(raw, 10);
+			if (!isFinite(ts)) {
+				return false;
+			}
+			return now - ts < DISMISS_MS;
 		} catch (e) {
 			return false;
 		}
+	}
+
+	function writeDismiss(now, storage) {
+		storage = storage === undefined ? getStorage() : storage;
+		now = now == null ? Date.now() : now;
+		if (!storage || typeof storage.setItem !== 'function') {
+			return false;
+		}
+		try {
+			storage.setItem(DISMISS_KEY, String(now));
+			return true;
+		} catch (e) {
+			return false;
+		}
+	}
+
+	function pageFromSearch(search) {
+		var query = String(search == null ? '' : search).replace(/^\?/, '');
+		var parts = query.split('&');
+		var i;
+		for (i = 0; i < parts.length; i++) {
+			var pair = parts[i].split('=');
+			if (decodeURIComponent(pair[0] || '') === 'page') {
+				return decodeURIComponent(pair[1] || '');
+			}
+		}
+		return '';
+	}
+
+	function getGamePage(doc, search) {
+		doc = doc || (typeof document !== 'undefined' ? document : null);
+		if (doc && doc.body && doc.body.id) {
+			return String(doc.body.id);
+		}
+		if (search == null && root.location) {
+			search = root.location.search;
+		}
+		return pageFromSearch(search);
+	}
+
+	function isFleetDispatchPage(page) {
+		return !!FLEET_BANNER_PAGES[page];
+	}
+
+	function shouldShowInstallBanner(opts) {
+		opts = opts || {};
+		if (opts.standalone) {
+			return false;
+		}
+		if (opts.dismissed) {
+			return false;
+		}
+		if (isFleetDispatchPage(opts.page)) {
+			return false;
+		}
+		return true;
 	}
 
 	function platformToDatasetKey(platform) {
@@ -98,18 +180,16 @@
 		return banner.dataset[key] || banner.dataset.hintFallback || '';
 	}
 
-	function dismiss() {
-		try {
-			localStorage.setItem(DISMISS_KEY, String(Date.now()));
-		} catch (e) {}
-		hideBanner();
-	}
-
 	function hideBanner() {
 		var banner = document.getElementById('pwa-install-banner');
 		if (banner) {
 			banner.hidden = true;
 		}
+	}
+
+	function dismiss() {
+		writeDismiss();
+		hideBanner();
 	}
 
 	function updateInstructions() {
@@ -131,7 +211,11 @@
 	}
 
 	function showBanner() {
-		if (isStandalone() || isDismissed()) {
+		if (!shouldShowInstallBanner({
+			standalone: isStandalone(),
+			dismissed: isDismissed(),
+			page: getGamePage()
+		})) {
 			return;
 		}
 		var banner = document.getElementById('pwa-install-banner');
@@ -148,13 +232,6 @@
 
 		banner.hidden = false;
 	}
-
-	window.addEventListener('beforeinstallprompt', function (e) {
-		e.preventDefault();
-		deferredPrompt = e;
-		showBanner();
-		updateSettingsInstallButton();
-	});
 
 	function install() {
 		if (!deferredPrompt) {
@@ -216,15 +293,39 @@
 		}
 	}
 
-	window.HiveNovaPwaInstall = {
+	var api = {
+		DISMISS_KEY: DISMISS_KEY,
+		DISMISS_MS: DISMISS_MS,
 		install: install,
 		isStandalone: isStandalone,
 		dismiss: dismiss,
+		isDismissed: isDismissed,
+		writeDismiss: writeDismiss,
+		getGamePage: getGamePage,
+		pageFromSearch: pageFromSearch,
+		isFleetDispatchPage: isFleetDispatchPage,
+		shouldShowInstallBanner: shouldShowInstallBanner,
 		getInstallPlatform: getInstallPlatform
 	};
 
-	$(function () {
-		initBanner();
-		initSettings();
-	});
-})();
+	root.HiveNovaPwaInstall = api;
+	if (typeof module !== 'undefined' && module.exports) {
+		module.exports = api;
+	}
+
+	if (typeof root.addEventListener === 'function') {
+		root.addEventListener('beforeinstallprompt', function (e) {
+			e.preventDefault();
+			deferredPrompt = e;
+			showBanner();
+			updateSettingsInstallButton();
+		});
+	}
+
+	if (typeof root.$ === 'function') {
+		root.$(function () {
+			initBanner();
+			initSettings();
+		});
+	}
+})(typeof window !== 'undefined' ? window : globalThis);

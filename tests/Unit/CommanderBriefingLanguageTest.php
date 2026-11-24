@@ -33,6 +33,10 @@ class CommanderBriefingLanguageTest extends TestCase
 		$this->assertStringContainsString("page=commanderAjax&mode=' + mode + '&ajax=1'", $js);
 		$this->assertStringContainsString("btn.addClass('is-pending')", $js);
 		$this->assertStringContainsString("btn.attr('data-key')", $js);
+		$this->assertStringContainsString("btn.attr('data-token')", $js);
+		$this->assertStringContainsString('replaceBriefing', $js);
+		$this->assertStringContainsString("window.location.assign('game.php?page=overview')", $js);
+		$this->assertStringNotContainsString('window.location.reload()', $js);
 	}
 
 	public function testDefensiveCopyIsShipyardDefensesOnly(): void

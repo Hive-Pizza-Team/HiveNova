@@ -46,7 +46,7 @@
 	{if $seoPage == 'index' && !empty($faqJsonLd)}
 	<script type="application/ld+json">{$faqJsonLd nofilter}</script>
 	{/if}
-	<script src="scripts/login/main.js" defer></script>
+	<script src="scripts/login/main.js?v={$REV}" defer></script>
 	<script src="scripts/login/remember-username.js?v={$REV}" defer></script>
 	<script>{if isset($code)}var loginError = {$code|json};{/if}</script>
 	{block name="script"}{/block}
