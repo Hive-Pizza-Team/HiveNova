@@ -21,11 +21,11 @@
 
 	<tr>
 		<td>{$LNG.pl_homeplanet}</td>
-		<td colspan="2">{$homeplanet} <a href="game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}" target="_top">[{$galaxy}:{$system}:{$planet}]</a></td>
+		<td colspan="2">{$homeplanet} <a href="game.php?page=galaxy&amp;galaxy={$galaxy}&amp;system={$system}" target="_top" data-top-nav>[{$galaxy}:{$system}:{$planet}]</a></td>
 	</tr>
 	<tr>
 		<td>{$LNG.pl_ally}</td>
-		<td colspan="2">{if $allyname}<a href="game.php?page=alliance&amp;mode=info&amp;id={$allyid}" target="_top">{$allyname}</a>{else}-{/if}</td>
+		<td colspan="2">{if $allyname}<a href="game.php?page=alliance&amp;mode=info&amp;id={$allyid}" target="_top" data-top-nav>{$allyname}</a>{else}-{/if}</td>
 	</tr>
 	{if $publicMessage}
 	<tr>

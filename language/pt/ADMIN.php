@@ -1402,6 +1402,7 @@ $LNG['cronjob_is_unlock']			= 'Não';
 
 $LNG['cronjob_inactive']			= 'Yes';
 $LNG['cronjob_active']				= 'No';
+$LNG['cronjob_make_due'] = 'Tornar devido agora';
 
 // SQL-Dumper
 $LNG['du_header']					= 'Backup de Base de Dados';
@@ -1597,6 +1598,7 @@ $LNG['ref_stats_recruits']            = 'Recruits';
 $LNG['ref_stats_qualified']           = 'Qualified';
 $LNG['ref_stats_link']                = 'Referral link';
 $LNG['ref_stats_registered']          = 'Registered';
+$LNG['ref_stats_source']              = 'Source';
 $LNG['ref_stats_points']              = 'Points';
 $LNG['ref_stats_bonus_status']        = 'Bonus status';
 $LNG['ref_stats_status_pending']      = 'Pending (below threshold)';

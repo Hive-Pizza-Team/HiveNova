@@ -236,4 +236,62 @@ class PublicSeoTest extends TestCase
 		$this->assertArrayNotHasKey('reviewCount', $data);
 		$this->assertStringNotContainsString('\\/', $json);
 	}
+
+	public function testCanonicalBaseIsMoonsiege(): void
+	{
+		$this->assertSame('https://moonsiege.com/', PublicSeo::CANONICAL_BASE);
+		$this->assertSame(PublicSeo::CANONICAL_BASE, PublicSeo::seoBasePath());
+	}
+
+	public function testSeoTagsOnCanonicalHostIgnoreRequestHostAndStripRef(): void
+	{
+		// AbstractLoginPage always passes seoBasePath() into canonical/hreflang,
+		// so a request on moon.hive.pizza still canonicalizes to moonsiege.com.
+		// Extra query params such as ?ref=1 and ?src= are never part of the URL.
+		$base = PublicSeo::seoBasePath();
+		$this->assertSame('https://moonsiege.com/', PublicSeo::canonicalUrl($base, 'index', 'en'));
+		$this->assertSame('https://moonsiege.com/index.php?lang=de', PublicSeo::canonicalUrl($base, 'index', 'de'));
+		$this->assertSame('https://moonsiege.com/index.php?page=battleHall', PublicSeo::canonicalUrl($base, 'battleHall', 'en'));
+		$this->assertSame(
+			'https://moonsiege.com/index.php?page=battleHall&lang=de',
+			PublicSeo::canonicalUrl($base, 'battleHall', 'de')
+		);
+
+		$urls = PublicSeo::hreflangUrls($base, 'index', ['en' => 'English', 'de' => 'Deutsch']);
+		$this->assertSame('https://moonsiege.com/', $urls['en']);
+		$this->assertSame('https://moonsiege.com/', $urls['x-default']);
+		$this->assertSame('https://moonsiege.com/index.php?lang=de', $urls['de']);
+		foreach ($urls as $href) {
+			$this->assertStringNotContainsString('ref=', $href);
+			$this->assertStringNotContainsString('src=', $href);
+			$this->assertStringNotContainsString('moon.hive.pizza', $href);
+		}
+	}
+
+	public function testLoginPageSeoTagsUseCanonicalBaseNotRequestHost(): void
+	{
+		$src = file_get_contents(ROOT_PATH.'includes/pages/login/AbstractLoginPage.php');
+		$this->assertIsString($src);
+		$this->assertStringContainsString("\$seoBasePath\t\t= PublicSeo::seoBasePath();", $src);
+		$this->assertStringContainsString('PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang)', $src);
+		$this->assertStringContainsString('PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages)', $src);
+		$this->assertStringContainsString('$basePath = PROTOCOL.HTTP_HOST.HTTP_BASE', $src);
+		$this->assertStringContainsString("'basepath'\t\t\t=> \$basePath", $src);
+		$this->assertStringNotContainsString('PublicSeo::canonicalUrl($basePath', $src);
+		$this->assertStringNotContainsString('PublicSeo::hreflangUrls($basePath', $src);
+	}
+
+	public function testSitemapIndexXmlUsesCanonicalHost(): void
+	{
+		$xml = PublicSeo::sitemapIndexXml('https://moonsiege.com');
+		$this->assertSame(
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			."<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n"
+			."\t<sitemap>\n"
+			."\t\t<loc>https://moonsiege.com/sitemap.xml</loc>\n"
+			."\t</sitemap>\n"
+			."</sitemapindex>\n",
+			$xml
+		);
+	}
 }

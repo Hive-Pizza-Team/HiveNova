@@ -7,6 +7,7 @@ use HiveNova\Core\Config;
 use HiveNova\Core\FeedbackService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
+use HiveNova\Core\LoginLanguageResolver;
 use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\PublicSeo;
 use HiveNova\Core\ReferralCaptureService;
@@ -202,8 +203,10 @@ abstract class AbstractLoginPage
 		$languages		= Language::getAllowedLangs(false);
 		$documentTitle		= PublicSeo::documentTitle($seoPage, $gameName, $LNG);
 		$metaDescription	= PublicSeo::metaDescription($seoPage, $gameName, $LNG);
-		$canonicalUrl		= PublicSeo::canonicalUrl($basePath, $seoPage, $lang);
-		$hreflangUrls		= PublicSeo::hreflangUrls($basePath, $seoPage, $languages);
+		$seoBasePath		= PublicSeo::seoBasePath();
+		$canonicalUrl		= PublicSeo::canonicalUrl($seoBasePath, $seoPage, $lang);
+		$hreflangUrls		= PublicSeo::hreflangUrls($seoBasePath, $seoPage, $languages);
+		$languageSwitchUrls	= LoginLanguageResolver::switchUrls($languages, $_GET);
 		$pageHeading		= PublicSeo::pageHeading($seoPage, $gameName, $LNG);
 		$robotsContent		= PublicSeo::robotsContent($seoPage, $this->seoAllowIndex);
 		$ogImageUrl			= $basePath.'styles/resource/images/login/HiveNova.png';
@@ -222,6 +225,7 @@ abstract class AbstractLoginPage
 			'metaDescription'	=> $metaDescription,
 			'canonicalUrl'		=> $canonicalUrl,
 			'hreflangUrls'		=> $hreflangUrls,
+			'languageSwitchUrls'	=> $languageSwitchUrls,
 			'pageHeading'		=> $pageHeading,
 			'robotsContent'		=> $robotsContent,
 			'ogImageUrl'		=> $ogImageUrl,

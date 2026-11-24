@@ -15,6 +15,7 @@
  * @link https://github.com/jkroepke/2Moons
  */
 
+use HiveNova\Core\Cronjob;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Template;
 
@@ -67,6 +68,7 @@ function ShowCronjob()
         'delete' => ShowCronjobDelete($cronId),
         'lock' => ShowCronjobLock($cronId),
         'unlock' => ShowCronjobUnlock($cronId),
+        'makedue' => ShowCronjobMakeDue($cronId),
         'detail' => ShowCronjobDetail($cronId),
         'enable' => ShowCronjobEnable($cronId),
         default => ShowCronjobOverview(),
@@ -98,17 +100,18 @@ function ShowCronjobEdit($post_id)
 		$error_msg[] = $LNG['cronjob_error_dow'];
 	if ($post_dom === false)
 		$error_msg[] = $LNG['cronjob_error_dom'];
-	if ($post_class == '')
+	$resolvedClass	= Cronjob::resolveClassName($post_class);
+	if ($post_class == '' || $resolvedClass === null)
 		$error_msg[] = $LNG['cronjob_error_class'];
-	elseif (!file_exists('includes/classes/cronjob/'.$post_class.'.class.php')) 
-		$error_msg[] = $LNG['cronjob_error_filenotfound'].'includes/classes/cronjobs/'.$post_class.'.class.php';
 	
 	if ($_POST && count($error_msg) == 0)
 	{
+		$post_class 	= $resolvedClass;
+		$nextTime		= Cronjob::calculateNextTime($post_min, $post_hours, $post_dom, $post_month, $post_dow);
 		if ($post_id != 0)
-			$GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET name = '".$GLOBALS['DATABASE']->sql_escape($post_name)."', min = '".$post_min."', hours = '".$post_hours."', month = '".$post_month."', dow = '".$post_dow."', dom = '".$post_dom."', class = '".$GLOBALS['DATABASE']->sql_escape($post_class)."' WHERE cronjobID = $post_id;");
+			$GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET name = '".$GLOBALS['DATABASE']->sql_escape($post_name)."', min = '".$post_min."', hours = '".$post_hours."', month = '".$post_month."', dow = '".$post_dow."', dom = '".$post_dom."', class = '".$GLOBALS['DATABASE']->sql_escape($post_class)."', nextTime = ".(int) $nextTime." WHERE cronjobID = $post_id;");
 		else
-			$GLOBALS['DATABASE']->query("INSERT INTO ".CRONJOBS." SET name = '".$GLOBALS['DATABASE']->sql_escape($post_name)."', min = '".$post_min."', hours = '".$post_hours."', month = '".$post_month."', dow = '".$post_dow."', dom = '".$post_dom."', class = '".$GLOBALS['DATABASE']->sql_escape($post_class)."';");
+			$GLOBALS['DATABASE']->query("INSERT INTO ".CRONJOBS." SET name = '".$GLOBALS['DATABASE']->sql_escape($post_name)."', min = '".$post_min."', hours = '".$post_hours."', month = '".$post_month."', dow = '".$post_dow."', dom = '".$post_dom."', class = '".$GLOBALS['DATABASE']->sql_escape($post_class)."', nextTime = ".(int) $nextTime.";");
 
 		HTTP::redirectTo('admin.php?page=cronjob');
 	} else {
@@ -132,7 +135,7 @@ function ShowCronjobDelete($cronjobId) {
 
 function ShowCronjobLock($cronjobId) {
     cronjobRequirePost();
-    $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = MD5(UNIX_TIMESTAMP()) WHERE cronjobID = ".$cronjobId.";");
+    $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = '".$GLOBALS['DATABASE']->sql_escape(Cronjob::LOCK_MANUAL)."' WHERE cronjobID = ".$cronjobId.";");
     HTTP::redirectTo('admin.php?page=cronjob');
 }
 
@@ -145,6 +148,16 @@ function ShowCronjobUnlock($cronjobId) {
 function ShowCronjobEnable($cronjobId) {
     cronjobRequirePost();
     $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `isActive` = ".HTTP::_GP('enable', 0)." WHERE cronjobID = ".$cronjobId.";");
+    HTTP::redirectTo('admin.php?page=cronjob');
+}
+
+function ShowCronjobMakeDue($cronjobId) {
+    cronjobRequirePost();
+    if ($cronjobId <= 0) {
+        HTTP::redirectTo('admin.php?page=cronjob');
+    }
+    $nextTime = Cronjob::dueImmediatelyAt();
+    $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET nextTime = ".(int) $nextTime." WHERE cronjobID = ".(int) $cronjobId.";");
     HTTP::redirectTo('admin.php?page=cronjob');
 }
 
@@ -185,17 +198,10 @@ function ShowCronjobDetail($detail,$error_msg=NULL)
 	$template	= new Template();
 	
 	
-	$avalibleCrons	= array();
-	
-	$dir = new DirectoryIterator('includes/classes/cronjob/');
-	foreach ($dir as $fileinfo) {
-		if ($fileinfo->isFile() && $fileinfo->getBasename('.class.php') != $fileinfo->getFilename()) {
-			$avalibleCrons[]	= $fileinfo->getBasename('.class.php');
-		}
-	}
+	$cronClassOptions	= Cronjob::listAvailableClassOptions('includes/classes/cronjob');
 	
 	$template->assign_vars(array(	
-		'avalibleCrons' => $avalibleCrons
+		'cronClassOptions' => $cronClassOptions
 	));
 	
 	if ($detail != 0)
@@ -209,7 +215,7 @@ function ShowCronjobDetail($detail,$error_msg=NULL)
 			'dom'			=> isset($_POST['dom_all'])?array(0 => '*'):(isset($_POST['dom'])?HTTP::_GP('dom', array()):getCronjobTimes($CronjobRow['dom'],31)),
 			'month'			=> isset($_POST['month_all'])?array(0 => '*'):(isset($_POST['month'])?HTTP::_GP('month', array()):getCronjobTimes($CronjobRow['month'],12)),
 			'dow'			=> isset($_POST['dow_all'])?array(0 => '*'):(isset($_POST['dow'])?HTTP::_GP('dow', array()):getCronjobTimes($CronjobRow['dow'],6)),
-			'class'			=> isset($_POST['class'])?HTTP::_GP('class', ''):$CronjobRow['class'],
+			'class'			=> Cronjob::resolveClassName(isset($_POST['class'])?HTTP::_GP('class', ''):$CronjobRow['class']) ?? '',
 			'error_msg'		=> $error_msg,
 		));
 	} else {
@@ -221,7 +227,7 @@ function ShowCronjobDetail($detail,$error_msg=NULL)
 			'dom'			=> isset($_POST['dom_all'])?array(0 => '*'):HTTP::_GP('dom', array()),
 			'month'			=> isset($_POST['month_all'])?array(0 => '*'):HTTP::_GP('month', array()),
 			'dow'			=> isset($_POST['dow_all'])?array(0 => '*'):HTTP::_GP('dow', array()),
-			'class'			=> HTTP::_GP('class', ''),
+			'class'			=> Cronjob::resolveClassName(HTTP::_GP('class', '')) ?? HTTP::_GP('class', ''),
 			'error_msg'		=> $error_msg,
 		));
 	}

@@ -64,6 +64,43 @@ class StatBuilder
 			$config->save();
 		}
 	}
+
+	/**
+	 * Persist the stats rebuild time used by Statistics / Records "Updated" labels.
+	 * Prefer this over cronjobs_log: admin MakeStats and signup-injected ranks can
+	 * leave the cron log stale while rankings still change.
+	 */
+	private function persistLastUpdateTime(): void
+	{
+		if (empty($this->Unis)) {
+			return;
+		}
+
+		$config = Config::get($this->Unis[0]);
+		$config->stat_last_update = $this->time;
+		$config->save();
+	}
+
+	/**
+	 * Unix timestamp of the last completed stats rebuild.
+	 * Uses config written by MakeStats; falls back to the statistic cron log for
+	 * universes that have not rebuilt since this field started being maintained.
+	 */
+	public static function getLastUpdateTime(): int
+	{
+		try {
+			$configTime = (int) Config::get()->stat_last_update;
+		} catch (\Throwable) {
+			$configTime = 0;
+		}
+
+		if ($configTime > 0) {
+			return $configTime;
+		}
+
+		$cronTime = Cronjob::getLastExecutionTime('statistic');
+		return $cronTime !== false ? (int) $cronTime : 0;
+	}
 	
 	private function GetUsersInfosFromDB()
 	{
@@ -463,6 +500,7 @@ class StatBuilder
 
 		$this->CheckUniverseAccounts($UniData);		
 		$this->writeRecordData();
+		$this->persistLastUpdateTime();
 
 		return $this->SomeStatsInfos();
 	}

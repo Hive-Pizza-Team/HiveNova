@@ -22,8 +22,12 @@ class AssetRevision
 			'styles/resource/css/ingame/main.css',
 			'styles/resource/css/feedback.css',
 			'scripts/game/feedback.js',
+			'styles/resource/css/login/main.css',
+			'styles/resource/css/login/register.css',
+			'scripts/login/main.js',
 			'scripts/game/push-subscribe.js',
 			'scripts/game/base.js',
+			'scripts/game/top-nav.js',
 			'scripts/game/pwa-install.js',
 			'scripts/game/message.js',
 			'scripts/game/battlesim.js',
@@ -31,9 +35,15 @@ class AssetRevision
 			'scripts/game/flotten.js',
 			'scripts/game/galaxy.js',
 			'scripts/game/overview.js',
+			'scripts/game/overview-planet-loader-utils.js',
+			'scripts/game/overview-planet-loader.js',
+			'scripts/game/overview-planet.js',
 			'scripts/game/element-focus.js',
 			'scripts/game/techtree.js',
 			'scripts/game/techtree-nudge.js',
+			'scripts/game/marketplace.js',
+			'scripts/game/market-offer.js',
+			'styles/resource/css/login/main.css',
 		];
 	}
 

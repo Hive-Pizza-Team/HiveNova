@@ -1364,6 +1364,7 @@ $LNG['cronjob_is_unlock'] = 'Nein';
 
 $LNG['cronjob_inactive'] = 'Ja';
 $LNG['cronjob_active'] = 'Nein';
+$LNG['cronjob_make_due'] = 'Jetzt fällig';
 
 // Giveaway
 $LNG['ga_success'] = 'Erfolgreich!';
@@ -1590,6 +1591,7 @@ $LNG['ref_stats_recruits']            = 'Recruits';
 $LNG['ref_stats_qualified']           = 'Qualified';
 $LNG['ref_stats_link']                = 'Referral link';
 $LNG['ref_stats_registered']          = 'Registered';
+$LNG['ref_stats_source']              = 'Source';
 $LNG['ref_stats_points']              = 'Points';
 $LNG['ref_stats_bonus_status']        = 'Bonus status';
 $LNG['ref_stats_status_pending']      = 'Pending (below threshold)';
