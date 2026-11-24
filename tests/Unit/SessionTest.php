@@ -459,6 +459,41 @@ class SessionTest extends TestCase
         $this->assertSame(PHP_SESSION_NONE, session_status());
     }
 
+    public function testDeleteDropsEverySessionForTheUserAndDoesNotSaveAgain(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        session_id('logout-current');
+        session_start();
+
+        $this->dbStub->session->sessionRows = [
+            'logout-current' => ['userID' => 7, 'lastonline' => TIMESTAMP],
+            'logout-other'   => ['userID' => 7, 'lastonline' => TIMESTAMP],
+            'other-user'     => ['userID' => 9, 'lastonline' => TIMESTAMP],
+        ];
+
+        $session = $this->newSession();
+        $this->setSessionData($session, [
+            'userId'       => 7,
+            'lastActivity' => TIMESTAMP,
+            'sessionId'    => 'logout-current',
+        ]);
+
+        $session->delete();
+        $session->save();
+
+        $this->assertArrayNotHasKey('logout-current', $this->dbStub->session->sessionRows);
+        $this->assertArrayNotHasKey('logout-other', $this->dbStub->session->sessionRows);
+        $this->assertArrayHasKey('other-user', $this->dbStub->session->sessionRows);
+        $this->assertSame(0, $this->dbStub->session->replaceCalls);
+        $this->assertSame(PHP_SESSION_NONE, session_status());
+
+        $paths = $this->invokePrivate($session, 'logoutCookiePaths');
+        $this->assertContains('/', $paths);
+    }
+
     public function testSelectActivePlanetUpdatesPlanetWhenOwned(): void
     {
         $_GET['cp'] = 99;
