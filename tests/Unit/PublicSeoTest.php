@@ -288,6 +288,39 @@ class PublicSeoTest extends TestCase
 		$this->assertStringContainsString('488.7M', PublicSeo::battleReportMetaDescription('alice', 'bob', '488.7M', '2026-01-01', 'Moon', $lng));
 	}
 
+	public function testSignupCtaRejectsEmptySourceAndNegativeRef(): void
+	{
+		$url = PublicSeo::signupCtaUrl('!!!', -4);
+		$this->assertStringContainsString('src=battlehall', $url);
+		$this->assertStringContainsString('ref=0', $url);
+	}
+
+	public function testBattleMetaFallsBackWhenLanguageAndNamesAreEmpty(): void
+	{
+		$this->assertSame(
+			'Battle Hall — Universe | Moon',
+			PublicSeo::battleHallDocumentTitle('', 'Moon', [])
+		);
+		$this->assertStringContainsString(
+			'Universe',
+			PublicSeo::battleHallMetaDescription('', 'Moon', [])
+		);
+		$this->assertSame(
+			'Attacker vs Defender: 0 units destroyed | Moon Battle Hall',
+			PublicSeo::battleReportDocumentTitle('', '', '', 'Moon', [])
+		);
+		$this->assertStringContainsString(
+			'unknown date',
+			PublicSeo::battleReportMetaDescription('', '', '', '', 'Moon', [])
+		);
+		$this->assertSame(
+			'Hall in Universe',
+			PublicSeo::battleHallMetaDescription('Universe', 'Moon', [
+				'metaDescriptionBattleHallUni' => 'Hall in %s',
+			])
+		);
+	}
+
 	public function testBattleIsIndexable(): void
 	{
 		$this->assertSame('index, follow', PublicSeo::robotsContent('battle'));
