@@ -40,6 +40,97 @@ describe('mobile tooltip helpers', () => {
 		assert.equal(tooltip.isStationaryTooltipTouch(start, { x: 40, y: 80 }), false);
 		assert.equal(tooltip.isStationaryTooltipTouch(null, { x: 0, y: 0 }), true);
 	});
+
+	it('keeps hover tooltips for a fine pointer and suppresses them after a tap', () => {
+		assert.equal(tooltip.shouldUseHoverTooltip(false, false), true);
+		assert.equal(tooltip.shouldUseHoverTooltip(true, false), false);
+		assert.equal(tooltip.shouldUseHoverTooltip(false, true), false);
+		assert.equal(tooltip.isRecentTooltipTouch(1_000, 0), false);
+		assert.equal(
+			tooltip.isRecentTooltipTouch(1_100, 1_000, tooltip.TOOLTIP_TOUCH_HOVER_GUARD_MS),
+			true
+		);
+		assert.equal(
+			tooltip.isRecentTooltipTouch(1_000 + tooltip.TOOLTIP_TOUCH_HOVER_GUARD_MS, 1_000),
+			false
+		);
+	});
+
+	it('swallows the synthesized click after touchend on a wide fine-pointer viewport', () => {
+		assert.equal(tooltip.tooltipClickAction(true, false, false), 'swallow');
+		assert.equal(tooltip.tooltipClickAction(false, true, false), 'swallow');
+		assert.equal(tooltip.tooltipClickAction(false, false, false), 'ignore');
+		assert.equal(tooltip.tooltipClickAction(false, false, true), 'open');
+	});
+
+	it('reads tooltip HTML from the data attribute and skips empty tips', () => {
+		const el = {
+			getAttribute(name) {
+				return name === 'data-tooltip-content' ? '<table><tr><td>ok</td></tr></table>' : null;
+			}
+		};
+		assert.equal(
+			tooltip.tooltipContentFromTrigger(el),
+			'<table><tr><td>ok</td></tr></table>'
+		);
+		assert.equal(tooltip.tooltipContentFromTrigger({ getAttribute() { return null; } }), '');
+		assert.equal(tooltip.tooltipContentFromTrigger(null), '');
+	});
+
+	it('resets toast chrome before filling a hover tip and rejects blank content', () => {
+		const calls = [];
+		const tip = {
+			length: 1,
+			html(value) {
+				calls.push(['html', value]);
+				return tip;
+			},
+			hide() {
+				calls.push(['hide']);
+				return tip;
+			},
+			removeData() {
+				calls.push(['removeData']);
+				return tip;
+			},
+			stop() {
+				calls.push(['stop']);
+				return tip;
+			},
+			removeClass() {
+				calls.push(['removeClass']);
+				return tip;
+			},
+			css() {
+				calls.push(['css']);
+				return tip;
+			}
+		};
+
+		assert.equal(tooltip.prepareHoverTooltip(tip, ''), false);
+		assert.ok(calls.some((c) => c[0] === 'hide'));
+
+		calls.length = 0;
+		assert.equal(tooltip.prepareHoverTooltip(tip, '<b>hi</b>'), true);
+		assert.deepEqual(
+			calls.filter((c) => c[0] === 'html'),
+			[['html', '<b>hi</b>']]
+		);
+		assert.ok(calls.some((c) => c[0] === 'removeClass'));
+		assert.ok(calls.some((c) => c[0] === 'css'));
+	});
+});
+
+describe('tooltip.js hover cleanup bindings', () => {
+	const src = fs.readFileSync(
+		path.join(__dirname, '../../scripts/base/tooltip.js'),
+		'utf8'
+	);
+
+	it('resets overlay chrome before desktop hover/sticky tips', () => {
+		assert.match(src, /prepareHoverTooltip\(tip, tooltipContentFromTrigger\(this\)\)/);
+		assert.match(src, /clearFancyboxChrome/);
+	});
 });
 
 describe('tooltip.js mobile bindings', () => {
@@ -52,10 +143,35 @@ describe('tooltip.js mobile bindings', () => {
 		assert.match(src, /\.live\('touchend'/);
 		assert.match(src, /\.live\('click'/);
 		assert.match(src, /openMobileTooltip/);
+		assert.match(src, /position:\s*'fixed'/);
+	});
+
+	it('does not gate touchend on the width breakpoint', () => {
+		const touchend = src.slice(src.indexOf(".live('touchend'"), src.indexOf(".live('click'"));
+		assert.doesNotMatch(touchend, /if\s*\(\s*!isMobileTooltip\(\)\s*\)/);
+		assert.match(touchend, /openMobileTooltip/);
 	});
 
 	it('does not assign href="#" on tooltip triggers', () => {
 		assert.doesNotMatch(src, /attr\('href',\s*'#'\)/);
 		assert.match(src, /javascript:void\(0\)/);
+	});
+});
+
+describe('mobile tooltip overlay css', () => {
+	const css = fs.readFileSync(
+		path.join(__dirname, '../../styles/resource/css/ingame/main.css'),
+		'utf8'
+	);
+
+	it('applies the fixed tap overlay outside the 699px breakpoint', () => {
+		const ruleAt = css.indexOf('#tooltip.tooltip-mobile-active');
+		const mobileAt = css.indexOf('@media screen and (max-width: 699px)');
+		assert.ok(ruleAt !== -1);
+		assert.ok(mobileAt !== -1);
+		assert.ok(ruleAt < mobileAt);
+		const rule = css.slice(ruleAt, css.indexOf('#tooltip.tooltip-mobile-active table'));
+		assert.match(rule, /position:\s*fixed/);
+		assert.match(rule, /max-height:\s*70vh/);
 	});
 });

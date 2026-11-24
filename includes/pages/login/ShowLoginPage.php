@@ -9,6 +9,7 @@ use HiveNova\Core\HiveUtil;
 use HiveNova\Core\RememberUsernameService;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
+use HiveNova\Core\UserLanguageService;
 
 /**
  *  2Moons 
@@ -46,7 +47,7 @@ class ShowLoginPage extends AbstractLoginPage
 		$username = HTTP::_GP('username', '', UTF8_SUPPORT);
 		$password = HTTP::_GP('password', '', true);
 
-		$sql = "SELECT id, password, hive_account FROM %%USERS%% WHERE universe = :universe AND (username = :username OR hive_account = BINARY :username);";
+		$sql = "SELECT id, password, hive_account, lang FROM %%USERS%% WHERE universe = :universe AND (username = :username OR hive_account = BINARY :username);";
 		$loginData = $db->selectSingle($sql, array(
 			':universe'	=> Universe::current(),
 			':username'	=> $username
@@ -94,6 +95,11 @@ class ShowLoginPage extends AbstractLoginPage
 			$session->adminAccess	= 0;
 			Session::regenerateId();
 			$session->save();
+
+			UserLanguageService::syncFromLobbyOnLogin(
+				(int) $loginData['id'],
+				isset($loginData['lang']) ? (string) $loginData['lang'] : null
+			);
 
 			HTTP::redirectTo('game.php');
 		}

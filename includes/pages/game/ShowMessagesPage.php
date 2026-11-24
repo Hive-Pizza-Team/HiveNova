@@ -284,6 +284,39 @@ class ShowMessagesPage extends AbstractGamePage
         $this->display('page.messages.write.tpl');
     }
 
+    /**
+     * Compose entry: ask for a commander name, then open the write popup.
+     */
+    function compose()
+    {
+        global $LNG, $USER;
+
+        $this->setWindow('popup');
+        $this->initTemplate();
+
+        $username = trim((string) HTTP::_GP('username', '', true));
+        $error = '';
+
+        if ($username !== '') {
+            $receiverId = MessageInboxService::findUserIdByUsername($username, (int) $USER['universe']);
+            if ($receiverId === null || $receiverId === (int) $USER['id']) {
+                $error = $LNG['mg_error'];
+            } else {
+                // Re-enter write() with the resolved recipient id.
+                $_GET['id'] = $receiverId;
+                $_REQUEST['id'] = $receiverId;
+                $this->write();
+                return;
+            }
+        }
+
+        $this->assign(array(
+            'composeUsername' => $username,
+            'composeError' => $error,
+        ));
+        $this->display('page.messages.compose.tpl');
+    }
+
     function show()
     {
         global $LNG, $USER;
@@ -297,44 +330,29 @@ class ShowMessagesPage extends AbstractGamePage
         $MessageList	= array();
         $MessagesID		= array();
 
-        $TitleColor    	= array ( 0 => '#FFFF00', 1 => '#FF6699', 2 => '#FF3300', 3 => '#FF9900', 4 => '#773399', 5 => '#009933', 15 => '#6495ed', 50 => '#666600', 99 => '#007070', 100 => '#ABABAB', 999 => '#CCCCCC');
-
         $sql = "SELECT COUNT(*) as state FROM %%MESSAGES%% WHERE message_sender = :userID AND message_type != 50 AND message_universe = :universe;";
         $MessOut = $db->selectSingle($sql, array(
             ':userID'   => $USER['id'],
             ':universe' => (int) $USER['universe'],
         ), 'state');
 
-        $Total			= array(0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 15 => 0, 50 => 0, 99 => 0, 100 => 0, 999 => 0);
-        $UnRead			= array(0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 15 => 0, 50 => 0, 99 => 0, 100 => 0, 999 => 0);
-
-        $sql = "SELECT message_type, SUM(message_unread) as message_unread, COUNT(*) as count FROM %%MESSAGES%% WHERE message_owner = :userID AND message_deleted IS NULL AND message_universe = :universe GROUP BY message_type;";
+        // Count unread rows (not SUM of flags) so tiles match the nav badge.
+        $sql = "SELECT message_type,
+                       SUM(CASE WHEN message_unread = 1 THEN 1 ELSE 0 END) as message_unread,
+                       COUNT(*) as count
+                FROM %%MESSAGES%%
+                WHERE message_owner = :userID AND message_deleted IS NULL AND message_universe = :universe
+                GROUP BY message_type;";
         $CategoryResult = $db->select($sql, array(
             ':userID'   => $USER['id'],
             ':universe' => (int) $USER['universe'],
         ));
 
-        foreach ($CategoryResult as $CategoryRow)
-        {
-            $UnRead[$CategoryRow['message_type']]	= $CategoryRow['message_unread'];
-            $Total[$CategoryRow['message_type']]	= $CategoryRow['count'];
-        }
-
-        $UnRead[100]	= array_sum($UnRead);
-        $Total[100]		= array_sum($Total);
-        $Total[999]		= $MessOut;
+        $stats = MessageInboxService::buildCategoryStats($CategoryResult ?: [], (int) $MessOut);
+        $UnRead = $stats['unread'];
+        $CategoryList = $stats['categories'];
 
         $MessCategory	= MessageInboxService::resolveCategory($MessCategory, $UnRead);
-
-        $CategoryList        = array();
-
-        foreach($TitleColor as $CategoryID => $CategoryColor) {
-            $CategoryList[$CategoryID]	= array(
-                'color'		=> $CategoryColor,
-                'unread'	=> $UnRead[$CategoryID],
-                'total'		=> $Total[$CategoryID],
-            );
-        }
 
 		//// view()
 
@@ -362,12 +380,8 @@ class ShowMessagesPage extends AbstractGamePage
             );
         }
 
-        if(!empty($MessagesID) && $MessCategory != 999) {
-            $sql = 'UPDATE %%MESSAGES%% SET message_unread = 0 WHERE message_id IN ('.implode(',', $MessagesID).') AND message_owner = :userID;';
-            $db->update($sql, array(
-                ':userID'       => $USER['id'],
-            ));
-        }
+        // Mark-as-read happens in bodies() after hydrate so category tiles keep
+        // correct unread counts on first paint (see issue #409).
 
         $this->tplObj->loadscript('message.js');
         $this->assign(array(
@@ -387,7 +401,7 @@ class ShowMessagesPage extends AbstractGamePage
     }
 
     /**
-     * AJAX: hydrate message bodies after first paint.
+     * AJAX: hydrate message bodies after first paint, then mark those rows read.
      */
     function bodies()
     {
@@ -404,15 +418,22 @@ class ShowMessagesPage extends AbstractGamePage
 
         $rows = MessageRepository::getMessageBodies((int) $USER['id'], $ids, $outbox, (int) $USER['universe']);
         $bodies = [];
+        $ownedIds = [];
         foreach ($rows as $row) {
             $type = (int) $row['message_type'];
             $text = (string) $row['message_text'];
-            $bodies[(string) $row['message_id']] = CombatReportMessageBuilder::sameTabHtml(
+            $messageId = (int) $row['message_id'];
+            $ownedIds[] = $messageId;
+            $bodies[(string) $messageId] = CombatReportMessageBuilder::sameTabHtml(
                 in_array($type, [1, 50], true) ? nl2br($text) : $text
             );
         }
 
+        if (!$outbox && $ownedIds !== []) {
+            MessageRepository::markIdsAsRead((int) $USER['id'], $ownedIds, (int) $USER['universe']);
+        }
+
         HTTP::sendHeader('Content-Type', 'application/json; charset=UTF-8');
-        $this->sendJSON(['bodies' => $bodies]);
+        $this->sendJSON(['bodies' => $bodies, 'markedRead' => !$outbox ? $ownedIds : []]);
     }
 }

@@ -33,9 +33,13 @@ class CommanderBriefingLanguageTest extends TestCase
 		$this->assertStringContainsString("page=commanderAjax&mode=' + mode + '&ajax=1'", $js);
 		$this->assertStringContainsString("btn.addClass('is-pending')", $js);
 		$this->assertStringContainsString("btn.attr('data-key')", $js);
+		$this->assertStringContainsString("btn.attr('data-token')", $js);
+		$this->assertStringContainsString('replaceBriefing', $js);
+		$this->assertStringContainsString("window.location.assign('game.php?page=overview')", $js);
+		$this->assertStringNotContainsString('window.location.reload()', $js);
 	}
 
-	public function testDefensiveCopyIsShipyardDefensesOnly(): void
+	public function testDefensiveCopyStatesShipyardRulesAndNamesHoldAsNonScoring(): void
 	{
 		$lng = new Language('en');
 		$lng->includeData(['INGAME']);
@@ -45,8 +49,15 @@ class CommanderBriefingLanguageTest extends TestCase
 		$need = (string) DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']['defense_complete'];
 
 		$this->assertStringContainsString($need, $desc);
-		$this->assertDoesNotMatchRegularExpression('/hold/i', $desc);
-		$this->assertDoesNotMatchRegularExpression('/hold/i', $suggest);
+		$this->assertMatchesRegularExpression('/Missile Launchers/i', $desc);
+		$this->assertMatchesRegularExpression('/finish(?:es)? building/i', $desc);
+		$this->assertMatchesRegularExpression('/Hold \(mission 5/i', $desc);
+		$this->assertMatchesRegularExpression('/buddy or ally/i', $desc);
+		$this->assertMatchesRegularExpression('/1 hour/i', $desc);
+		$this->assertMatchesRegularExpression('/does not score/i', $desc);
+		$this->assertStringContainsString($need, $suggest);
+		$this->assertDoesNotMatchRegularExpression('/\bqueue\b/i', $suggest);
+		$this->assertMatchesRegularExpression('/\bfinish\b/i', $suggest);
 		$this->assertSame(['defense_complete' => 6], DirectiveCatalog::get(DirectiveCatalog::DEFENSIVE)['targets']);
 	}
 
