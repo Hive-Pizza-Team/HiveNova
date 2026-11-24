@@ -34,8 +34,9 @@ class EnergyBalanceServiceTest extends TestCase
 		$this->assertSame(50.0, EnergyBalanceService::consumed(50));
 	}
 
-	public function test_header_resource_fields_expose_consumption_vs_production(): void
+	public function test_header_resource_fields_expose_leftover_and_consumed(): void
 	{
+		// Zero-production deficit: leftover is −1100 (not a sign-flipped consumed value).
 		$fields = EnergyBalanceService::headerResourceFields(0, -1100);
 
 		$this->assertSame('energy', $fields['name']);
@@ -44,6 +45,17 @@ class EnergyBalanceServiceTest extends TestCase
 		$this->assertSame(-1100.0, $fields['available']);
 		$this->assertTrue($fields['inDeficit']);
 		$this->assertSame(-1100.0, $fields['used']);
+	}
+
+	public function test_header_surplus_planet_leftover_for_top_bar(): void
+	{
+		// 10k produced, 9k consumed → leftover 1k (mobile top bar at-a-glance value).
+		$fields = EnergyBalanceService::headerResourceFields(10000, -9000);
+
+		$this->assertSame(9000.0, $fields['consumed']);
+		$this->assertSame(10000.0, $fields['max']);
+		$this->assertSame(1000.0, $fields['available']);
+		$this->assertFalse($fields['inDeficit']);
 	}
 
 	public function test_header_balanced_planet_is_not_in_deficit(): void
