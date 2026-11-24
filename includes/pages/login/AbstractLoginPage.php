@@ -278,7 +278,7 @@ abstract class AbstractLoginPage
 			'ogImageHeight'		=> $seoVars['ogImageHeight'],
 			'twitterSite'		=> PublicSeo::TWITTER_SITE,
 			'seoPage'			=> $seoPage,
-			'footerLinks'		=> PublicSeo::footerLinks($seoBasePath, $lang, $LNG),
+			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
 			'jsonLd'			=> $seoVars['jsonLd'],
 			'feedbackConfig'		=> FeedbackService::clientConfig(
 				'index.php?page=feedback&mode=submit&ajax=1',
