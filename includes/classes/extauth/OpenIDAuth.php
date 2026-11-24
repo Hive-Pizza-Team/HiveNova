@@ -123,7 +123,7 @@ class OpenIDAuth implements externalAuth
 		$user	= $this->oidObj->getAttributes();
 
 		$sql	= 'SELECT
-		user.id, user.username, user.dpath, user.authlevel, user.id_planet
+		user.id, user.username, user.dpath, user.authlevel, user.id_planet, user.lang
 		FROM %%USERS_AUTH%%
 		INNER JOIN %%USERS%% user ON auth.id = user.id AND user.universe = :universe
 		WHERE auth.account = :email AND mode = :mode;';

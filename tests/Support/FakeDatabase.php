@@ -33,6 +33,12 @@ class FakeDatabase implements DatabaseInterface
     /** @var list<int> */
     public array $accusedDestIds = [];
 
+    /** @var list<array<string, mixed>> completed marketplace trades (MarketTradeLedger::completedSince) */
+    public array $marketTrades = [];
+
+    /** @var list<array<string, mixed>> MarketTradeLedger::soldToBuyer rows */
+    public array $soldToBuyerRows = [];
+
     public int $lastFleetInsertId = 0;
 
     /** @var list<array<string, mixed>> */
@@ -119,8 +125,24 @@ class FakeDatabase implements DatabaseInterface
         if (str_contains($qry, '%%SALVAGE_PACKAGES%%')) {
             return $this->salvageSelect($qry, $params);
         }
+        if (str_contains($qry, '%%TRADES%%') && str_contains($qry, 'seller_points')) {
+            return $this->marketTrades;
+        }
+        if (str_contains($qry, '%%TRADES%%') && str_contains($qry, 'buyer.fleet_owner = :buyerId')) {
+            return $this->soldToBuyerRows;
+        }
         if (str_contains($qry, '%%LOG_FLEETS%%') && str_contains($qry, 'dest_id')) {
-            return array_map(static fn (int $id): array => ['dest_id' => $id], $this->accusedDestIds);
+            // PushingAccusationQuery::transportPairs(): one over-threshold pair per accused id.
+            return array_map(static fn (int $id): array => [
+                'source_id' => 1000000 + $id,
+                'dest_id' => $id,
+                'source_name' => 'src' . $id,
+                'dest_name' => 'dst' . $id,
+                'fleet_count' => 6,
+                'metal' => 4000000, // 1M units: over the per-pair value threshold
+                'crystal' => 0,
+                'deuterium' => 0,
+            ], $this->accusedDestIds);
         }
         if ($this->isFlyingFleetsTableQuery($qry)) {
             return $this->flyingFleetsTableSelect($qry, $params);
@@ -446,7 +468,9 @@ class FakeDatabase implements DatabaseInterface
                 'id' => $this->lastUserInsertId,
                 'username' => $params[':username'] ?? '',
                 'universe' => (int) ($params[':universe'] ?? 1),
-                'lang' => $params[':language'] ?? 'en',
+				'lang' => $params[':language'] ?? 'en',
+                'signup_src' => $params[':signupSrc'] ?? null,
+                'last_seen_release' => $params[':lastSeenRelease'] ?? null,
             ];
 
             return true;

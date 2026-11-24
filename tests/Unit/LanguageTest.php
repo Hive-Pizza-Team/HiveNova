@@ -225,7 +225,7 @@ class LanguageTest extends TestCase
         $savedRequest = $_REQUEST;
         $savedCookie = $_COOKIE;
         $savedServer = $_SERVER;
-        unset($_REQUEST['lang'], $_COOKIE['lang']);
+        unset($_REQUEST['lang'], $_COOKIE['lang'], $_COOKIE['lang_choice']);
         $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'de-DE,de;q=0.9,en;q=0.5';
 
         try {
@@ -240,19 +240,45 @@ class LanguageTest extends TestCase
         }
     }
 
-    public function testGetUserAgentLanguageReturnsFalseWhenAcceptLanguageMisses(): void
+    public function testGetUserAgentLanguageFallsBackToEnglishWhenAcceptLanguageMisses(): void
     {
         $savedRequest = $_REQUEST;
         $savedCookie = $_COOKIE;
         $savedServer = $_SERVER;
-        unset($_REQUEST['lang'], $_COOKIE['lang']);
+        unset($_REQUEST['lang'], $_COOKIE['lang'], $_COOKIE['lang_choice']);
         $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ja-JP,ja;q=0.9';
 
         try {
             $lng = new Language(null);
-            $this->assertFalse($lng->getUserAgentLanguage());
+            $this->assertSame('en', $lng->getUserAgentLanguage());
+            $this->assertSame('en', $lng->getLanguage());
         } finally {
             $_REQUEST = $savedRequest;
+            $_COOKIE = $savedCookie;
+            $_SERVER = $savedServer;
+        }
+    }
+
+    public function testGetUserAgentLanguageIgnoresLegacyLangCookie(): void
+    {
+        $savedRequest = $_REQUEST;
+        $savedGet = $_GET;
+        $savedCookie = $_COOKIE;
+        $savedServer = $_SERVER;
+        unset($_REQUEST['lang'], $_GET['lang'], $_COOKIE['lang_choice']);
+        $_COOKIE['lang'] = 'de';
+        // PHP merges cookies into $_REQUEST by default — ensure that cannot
+        // masquerade as an explicit query choice.
+        $_REQUEST['lang'] = 'de';
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'en-US,en;q=0.9';
+
+        try {
+            $lng = new Language(null);
+            $this->assertSame('en', $lng->getUserAgentLanguage());
+            $this->assertSame('en', $lng->getLanguage());
+        } finally {
+            $_REQUEST = $savedRequest;
+            $_GET = $savedGet;
             $_COOKIE = $savedCookie;
             $_SERVER = $savedServer;
         }

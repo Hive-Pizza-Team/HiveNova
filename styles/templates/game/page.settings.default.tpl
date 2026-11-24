@@ -46,8 +46,41 @@
 			<input id="hiveAccount" name="hiveAccount" maxlength="16" size="16" value="{$hiveAccount}" placeholder="⬇⬇⬇⬇⬇" readonly>
 			<input id="hivesign" name="hivesign" type="hidden">
 			<button type="button" onclick="HiveKeychainLogin()" class="login-button button_standard" title="{$LNG.op_link_hive_account}">{$LNG.op_link_hive_account}</button>
+			{if $hiveCanHiveSigner && $hiveSignerUrl}
+			<a class="login-button button_standard" href="{$hiveSignerUrl|escape:'html'}" title="{$LNG.op_hive_link_hivesigner}">{$LNG.op_hive_link_hivesigner}</a>
+			{/if}
 		</td>
 	</tr>
+	{if $hiveNeedsUpgrade}
+	<tr id="hive-upgrade">
+		<th colspan="2">{$LNG.op_hive_upgrade_title}</th>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<p>{$LNG.op_hive_upgrade_intro}</p>
+			<ol>
+				<li>{$LNG.op_hive_upgrade_step_keychain}</li>
+				<li>{$LNG.op_hive_upgrade_step_hivesigner}</li>
+				<li>{$LNG.op_hive_upgrade_step_create}</li>
+			</ol>
+			<p><small>{$LNG.op_hive_upgrade_keep_playing}</small></p>
+			{if $hiveCreatePending}
+			{if $hiveCreatePending.status == 'approved'}
+			<p><strong>{$LNG.op_hive_create_approved}</strong> (@{$hiveCreatePending.desired_name|escape:'html'})</p>
+			{else}
+			<p><strong>{$LNG.op_hive_create_pending}</strong> (@{$hiveCreatePending.desired_name|escape:'html'})</p>
+			{/if}
+			{elseif $hiveCreateAvailable}
+			<div style="margin-top:0.75em">
+				<label for="desiredHiveName">{$LNG.op_hive_create_label}</label>
+				<input id="desiredHiveName" name="desiredHiveName" form="hive-create-request" maxlength="16" size="16" type="text" autocomplete="off">
+				<button type="submit" form="hive-create-request" class="login-button button_standard">{$LNG.op_hive_create_submit}</button>
+				<br><small>{$LNG.op_hive_create_help}</small>
+			</div>
+			{/if}
+		</td>
+	</tr>
+	{/if}
 	<tr>
 		<td style="height:22px;">{$LNG.op_deposit_pizza}</td>
 		<td>
@@ -77,12 +110,16 @@
 			</td>
 		</tr>
 		<tr id="pwa-install-settings" hidden>
-			<td colspan="2">
-				<strong>{$LNG.op_install_app_title}</strong>
-				<p>{$LNG.op_install_app_desc|sprintf:$game_name|escape:'html'}</p>
+			<td>{$LNG.op_install_app_title}</td>
+			<td>
+				{$LNG.op_install_app_desc|sprintf:$game_name|escape:'html'}
 				<p data-pwa-settings-instructions hidden></p>
 				<button type="button" id="pwa-install-settings-btn" class="button" hidden>{$LNG.pwa_install_button}</button>
 			</td>
+		</tr>
+		<tr>
+			<td>{$LNG.whats_new_settings_label}</td>
+			<td><a href="game.php?page=whatsNew">{$LNG.whats_new_settings_link}</a></td>
 		</tr>
 		<tr>
 			<td>{$LNG.op_timezone}</td>
@@ -221,6 +258,9 @@
 		</tbody>
 	</table>
 	</form>
+	{if $hiveNeedsUpgrade && $hiveCreateAvailable}
+	<form id="hive-create-request" action="game.php?page=settings&amp;mode=requestHiveCreate" method="post"></form>
+	{/if}
 <script>
 (function () {
 	var banner = document.getElementById('userbanner-details');
@@ -273,6 +313,7 @@
 			.then(function (r) { return r.json(); })
 			.then(function (groups) {
 				tzSelect.innerHTML = '';
+				var found = false;
 				Object.keys(groups).forEach(function (continent) {
 					var optgroup = document.createElement('optgroup');
 					optgroup.label = continent;
@@ -281,11 +322,24 @@
 						var opt = document.createElement('option');
 						opt.value = value;
 						opt.textContent = cities[value];
-						if (value === selected) opt.selected = true;
+						if (value === selected) {
+							opt.selected = true;
+							found = true;
+						}
 						optgroup.appendChild(opt);
 					});
 					tzSelect.appendChild(optgroup);
 				});
+				// Keep the stored zone if it is missing from the continent list
+				// (e.g. older values) so opening the picker does not silently
+				// change the selection to the first America/* option.
+				if (!found && selected) {
+					var keep = document.createElement('option');
+					keep.value = selected;
+					keep.textContent = selected;
+					keep.selected = true;
+					tzSelect.insertBefore(keep, tzSelect.firstChild);
+				}
 			})
 			.catch(function () {
 				tzDetails.dataset.loaded = '0';

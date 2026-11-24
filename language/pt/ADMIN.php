@@ -1402,6 +1402,7 @@ $LNG['cronjob_is_unlock']			= 'Não';
 
 $LNG['cronjob_inactive']			= 'Yes';
 $LNG['cronjob_active']				= 'No';
+$LNG['cronjob_make_due'] = 'Tornar devido agora';
 
 // SQL-Dumper
 $LNG['du_header']					= 'Backup de Base de Dados';
@@ -1597,6 +1598,7 @@ $LNG['ref_stats_recruits']            = 'Recruits';
 $LNG['ref_stats_qualified']           = 'Qualified';
 $LNG['ref_stats_link']                = 'Referral link';
 $LNG['ref_stats_registered']          = 'Registered';
+$LNG['ref_stats_source']              = 'Source';
 $LNG['ref_stats_points']              = 'Points';
 $LNG['ref_stats_bonus_status']        = 'Bonus status';
 $LNG['ref_stats_status_pending']      = 'Pending (below threshold)';
@@ -1607,3 +1609,18 @@ $LNG['ref_stats_no_recruits']         = 'No recruits found.';
 $LNG['ref_stats_note']                = 'Tracks signup attribution via ?ref= links only. Link clicks and Hive post views are not recorded.';
 $LNG['ad_authlevel_pp'] = '[See Promoters]';
 $LNG['modul_43'] = 'Unused';
+$LNG['mip_missing_user'] = 'Deleted / unknown (#%s)';
+$LNG['mu_hive_create_requests'] = 'Hive create requests';
+$LNG['hive_create_admin_title'] = 'Hive account create requests';
+$LNG['hive_create_admin_help'] = 'Approve records ops intent only in this release — claim-ticket broadcast is a follow-up. Reject stores your reason on the request.';
+$LNG['hive_create_admin_player'] = 'Player';
+$LNG['hive_create_admin_desired'] = 'Desired @name';
+$LNG['hive_create_admin_requested'] = 'Requested';
+$LNG['hive_create_admin_approve'] = 'Approve';
+$LNG['hive_create_admin_reject'] = 'Reject';
+$LNG['hive_create_admin_reason_ph'] = 'Reject reason';
+$LNG['hive_create_admin_empty'] = 'No pending create requests.';
+$LNG['hive_create_admin_approved'] = 'Request approved (claim-ticket broadcast is a follow-up).';
+$LNG['hive_create_admin_rejected'] = 'Request rejected.';
+$LNG['hive_create_admin_need_reason'] = 'A reject reason is required.';
+$LNG['hive_create_admin_failed'] = 'Could not update that request.';
