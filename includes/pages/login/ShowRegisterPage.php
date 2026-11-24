@@ -8,6 +8,7 @@ use HiveNova\Core\EmailRegistrationService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\ReferralCaptureService;
 use HiveNova\Core\RememberUsernameService;
+use HiveNova\Core\NicknameSuggestionService;
 use HiveNova\Core\Session;
 use HiveNova\Core\Universe;
 use HiveNova\Core\PlayerUtil;
@@ -18,6 +19,7 @@ use HiveNova\Core\RegisterUsernameCheckAccess;
 use HiveNova\Core\HiveUtil;
 use HiveNova\Core\LoginUniverseDefaults;
 use HiveNova\Core\Mail;
+use HiveNova\Core\UserLanguageService;
 
 /**
  *  2Moons 
@@ -60,11 +62,13 @@ class ShowRegisterPage extends AbstractLoginPage
 			$referralPublicCode
 		);
 		// Refresh cookies / validate public code without locking the universe dropdown.
+		// Also refreshes the independent signup-source cookie.
 		$referralCapture->resolveForRegister(
 			Database::get(),
 			$referralRequest,
 			$_COOKIE
 		);
+		$signupSrc	= ReferralCaptureService::sourceFrom($referralRequest, $_COOKIE);
 
 		foreach(array_reverse(Universe::availableUniverses()) as $uniId)
 		{
@@ -109,7 +113,11 @@ class ShowRegisterPage extends AbstractLoginPage
 			$accountName	= $accountData['name'];
 		}
 
-		$defaultEmailUniverse = $this->getDefaultEmailUniverseId(true);
+		$defaultEmailUniverse = LoginUniverseDefaults::preferReferralUniverse(
+			$this->getDefaultEmailUniverseId(true),
+			$referralByUniverse,
+			true
+		);
 		$defaultHiveUniverse = $this->getDefaultHiveUniverseId(true);
 		$referralSeed = $referralByUniverse[$defaultEmailUniverse] ?? array('id' => 0, 'name' => '', 'status' => '');
 		$referralInactive = ($referralSeed['status'] ?? '') === ReferralCaptureService::STATUS_INACTIVE;
@@ -132,11 +140,14 @@ class ShowRegisterPage extends AbstractLoginPage
 		}
 		
 		$rememberedUsernames = RememberUsernameService::readAll($_COOKIE);
+		$suggestedEmailUsername = NicknameSuggestionService::fromDefaults(Database::get())
+			->suggest((int) $defaultEmailUniverse);
 
 		$this->assign(array(
 			'referralData'		=> $referralData,
 			'referralByUniverse'	=> $referralByUniverse,
 			'referralInactive'	=> $referralInactive,
+			'signupSrc'			=> $signupSrc ?? '',
 			'accountName'		=> $accountName,
 			'externalAuth'		=> $externalAuth,
 			'universeSelect'	=> $universeSelect,
@@ -149,7 +160,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			'registerTabEmail'			=> $LNG['registerTabEmail'],
 			'registerTabHive'			=> $LNG['registerTabHive'],
 			'registerHiveKeychainInfo'	=> $LNG['registerHiveKeychainInfo'],
-			'rememberedEmailUsername'	=> $rememberedUsernames[RememberUsernameService::KIND_EMAIL],
+			'suggestedEmailUsername'	=> $suggestedEmailUsername,
 			'rememberedHiveUsername'	=> $rememberedUsernames[RememberUsernameService::KIND_HIVE],
 			'registerUsernameCheckConfig'	=> array(
 				'url'         => 'index.php?page=register&mode=checkUsername&ajax=1',
@@ -268,15 +279,20 @@ class ShowRegisterPage extends AbstractLoginPage
 		$mailAddress 	= HTTP::_GP('email', '');
 		$mailAddress2	= HTTP::_GP('emailReplay', '');
 		$rulesChecked	= HTTP::_GP('rules', 0);
-		$language 		= HTTP::_GP('lang', '');
+		$language 		= UserLanguageService::resolveForRegister(
+			HTTP::_GP('lang', ''),
+			$LNG->getLanguage()
+		);
 		
+		$referralRequest	= ReferralCaptureService::requestBag();
 		$referralResolved	= (new ReferralCaptureService())->resolveForRegister(
 			Database::get(),
-			ReferralCaptureService::requestBag(),
+			$referralRequest,
 			$_COOKIE,
 			(int) Universe::current()
 		);
 		$referralID 	= (int) $referralResolved['id'];
+		$signupSrc		= ReferralCaptureService::sourceFrom($referralRequest, $_COOKIE);
 
 		$externalAuth	= HTTP::_GP('externalAuth', array());
 		if(!isset($externalAuth['account'], $externalAuth['method']))
@@ -455,6 +471,7 @@ class ShowRegisterPage extends AbstractLoginPage
 				`language` = :language,
 				`universe` = :universe,
 				`referralID` = :referralID,
+				`signup_src` = :signupSrc,
 				`externalAuthUID` = :externalAuthUID,
 				`externalAuthMethod` = :externalAuthMethod,
 				`hive_account` = :hiveAccount;";
@@ -470,6 +487,7 @@ class ShowRegisterPage extends AbstractLoginPage
 			':language'				=> $language,
 			':universe'				=> Universe::current(),
 			':referralID'			=> $referralID,
+			':signupSrc'			=> $signupSrc,
 			':externalAuthUID'		=> $externalAuthUID,
 			':externalAuthMethod'	=> $externalAuthMethod,
 			':hiveAccount'          => $hiveAccount

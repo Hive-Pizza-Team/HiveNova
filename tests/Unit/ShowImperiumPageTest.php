@@ -179,6 +179,7 @@ class ShowImperiumPageTest extends TestCase
 		$this->assertStringContainsString('empire-overview', $tpl);
 		$this->assertStringContainsString('empire-resource-row', $tpl);
 		$this->assertStringContainsString('energyAvailable', $tpl);
+		$this->assertStringContainsString('energyConsumed', $tpl);
 		$this->assertStringContainsString('matrixPayloadJson', $tpl);
 	}
 
