@@ -32,4 +32,30 @@ final class AdminPageSidAuthTest extends TestCase
 		$this->assertFalse(AdminPageSidAuth::canAccessRoot(1, 1, 'other', 'sess-token'));
 		$this->assertFalse(AdminPageSidAuth::canAccessRoot(1, 1, 'sess-token', ''));
 	}
+
+	public function testDenyBuildsPermissionMessageBeforeRender(): void
+	{
+		$GLOBALS['LNG'] = ['404_page' => 'Permission error!', 'fcm_info' => ''];
+		$GLOBALS['THEME'] = null;
+
+		try {
+			AdminPageSidAuth::deny();
+			self::fail('deny should not return');
+		} catch (\Throwable $e) {
+			$this->assertNotSame('', $e->getMessage());
+		}
+	}
+
+	public function testDenyFallsBackWhenLanguageKeyMissing(): void
+	{
+		$GLOBALS['LNG'] = ['fcm_info' => ''];
+		$GLOBALS['THEME'] = null;
+
+		try {
+			AdminPageSidAuth::deny();
+			self::fail('deny should not return');
+		} catch (\Throwable $e) {
+			$this->assertNotSame('', $e->getMessage());
+		}
+	}
 }
