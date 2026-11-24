@@ -5,8 +5,13 @@ declare(strict_types=1);
 use HiveNova\Core\HiveAccountCreateRequestService;
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__.'/../Support/FakeDatabase.php';
+require_once __DIR__.'/../Support/SwapDatabaseInstance.php';
+
 class HiveAccountCreateRequestServiceTest extends TestCase
 {
+	use SwapDatabaseInstance;
+
 	/** @var list<array<string, mixed>> */
 	private array $rows = [];
 
@@ -226,5 +231,45 @@ class HiveAccountCreateRequestServiceTest extends TestCase
 		$this->assertStringContainsString('requestHiveCreate', $page);
 		$this->assertStringContainsString('hiveSignerState', $page);
 		$this->assertStringContainsString('HiveAccountCreateRequestService', $admin);
+	}
+
+	public function testDefaultClosuresHitTheDatabaseWithoutAnRpc(): void
+	{
+		$this->swapDatabaseInstance(new FakeDatabase());
+		try {
+			$service = new HiveAccountCreateRequestService();
+			$this->assertTrue($service->isEligible([
+				'email' => 'pilot@example.com',
+				'hive_account' => '',
+			]));
+			$this->assertFalse($service->isEligible([
+				'email' => 'pilot@hive.blog',
+				'hive_account' => '',
+			]));
+
+			$ref = new ReflectionClass($service);
+			$call = static function (string $name, array $args) use ($ref, $service) {
+				$prop = $ref->getProperty($name);
+				$prop->setAccessible(true);
+
+				return $prop->getValue($service)(...$args);
+			};
+
+			$this->assertFalse($call('hiveExistsChecker', ['!!!']));
+			$this->assertNull($call('pendingLookup', [4, 1]));
+			$this->assertIsInt($call('inserter', [[
+				'user_id' => 4,
+				'universe' => 1,
+				'desired_name' => 'alice',
+				'status' => HiveAccountCreateRequestService::STATUS_PENDING,
+				'reject_reason' => '',
+				'created_at' => 10,
+			]]));
+			$this->assertNull($call('requestLookup', [4]));
+			$this->assertIsBool($call('statusUpdater', [4, HiveAccountCreateRequestService::STATUS_REJECTED, 9, 'no']));
+			$this->assertIsArray($call('pendingLister', [1]));
+		} finally {
+			$this->restoreDatabaseInstance();
+		}
 	}
 }

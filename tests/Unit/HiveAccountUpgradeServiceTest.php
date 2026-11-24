@@ -5,8 +5,12 @@ declare(strict_types=1);
 use HiveNova\Core\HiveAccountUpgradeService;
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__.'/../Support/FakeDatabase.php';
+require_once __DIR__.'/../Support/SwapDatabaseInstance.php';
+
 class HiveAccountUpgradeServiceTest extends TestCase
 {
+	use SwapDatabaseInstance;
 	/** @var list<array{userId: int, account: string}> */
 	private array $binds = [];
 
@@ -225,5 +229,33 @@ class HiveAccountUpgradeServiceTest extends TestCase
 			1
 		);
 		$this->assertSame(HiveAccountUpgradeService::ERR_ALREADY_LINKED, $linked['error']);
+	}
+
+	public function testDefaultClosuresAndUnreachableHiveSigner(): void
+	{
+		$this->swapDatabaseInstance(new FakeDatabase());
+		try {
+			$service = new HiveAccountUpgradeService(null, null, null, null, [
+				'meUrl' => 'http://127.0.0.1:1',
+			]);
+			$ref = new ReflectionClass($service);
+			$call = static function (string $name, array $args) use ($ref, $service) {
+				$prop = $ref->getProperty($name);
+				$prop->setAccessible(true);
+
+				return $prop->getValue($service)(...$args);
+			};
+
+			$this->assertFalse($call('isSignValid', ['!!!', 'short']));
+			$this->assertIsInt($call('countLinked', ['alice', 1]));
+			try {
+				$call('bindAccount', [7, 'alice']);
+			} catch (Throwable) {
+			}
+			$this->assertNull($call('fetchHiveSignerUser', ['tok']));
+			$this->assertNull($call('fetchHiveSignerUser', ['Bearer tok']));
+		} finally {
+			$this->restoreDatabaseInstance();
+		}
 	}
 }
