@@ -139,6 +139,7 @@ abstract class AbstractLoginPage
 		global $LNG;
 
 		$config	= Config::get();
+		$productVersion = \HiveNova\Core\ProductVersion::displayed((string) $config->VERSION);
 
         $this->tplObj->assign_vars(array(
 			'recaptchaEnable'		=> $config->capaktiv,
@@ -154,8 +155,8 @@ abstract class AbstractLoginPage
 			'lang'					=> $LNG->getLanguage(),
 			'langExplicit'			=> UserLanguageService::hasExplicitLobbyLanguageChoice(),
 			'UNI'					=> Universe::current(),
-			'VERSION'				=> $config->VERSION,
-			'REV'					=> AssetRevision::fromFilesystem((string) $config->VERSION),
+			'VERSION'				=> $productVersion,
+			'REV'					=> AssetRevision::fromFilesystem($productVersion),
 			'languages'				=> Language::getAllowedLangs(false),
 		));
 	}
@@ -211,6 +212,7 @@ abstract class AbstractLoginPage
 		}
 
 		$config			= Config::get();
+		$productVersion		= \HiveNova\Core\ProductVersion::displayed((string) $config->VERSION);
 		$lang			= $LNG->getLanguage();
 		$seoPage		= PublicSeo::normalizePage(HTTP::_GP('page', ''));
 		$gameName		= (string) $config->game_name;
@@ -281,7 +283,7 @@ abstract class AbstractLoginPage
 				[],
 				null,
 				(string) $lang,
-				(string) $config->VERSION,
+				$productVersion,
 				(int) Universe::current(),
 				[
 					'successNoScreenshot' => (string) ($LNG['fb_success_no_screenshot']

@@ -66,7 +66,7 @@ function ShowInformationPage()
 		'info'				=> $_SERVER['SERVER_SOFTWARE'],
 		'vPHP'				=> PHP_VERSION,
 		'vAPI'				=> PHP_SAPI,
-		'vGame'				=> $config->VERSION.(file_exists(ROOT_PATH.'/.git/ORIG_HEAD') ? ' ('.trim(file_get_contents(ROOT_PATH.'/.git/ORIG_HEAD')).')': ''),
+		'vGame'				=> \HiveNova\Core\ProductVersion::displayed((string) $config->VERSION).(file_exists(ROOT_PATH.'/.git/ORIG_HEAD') ? ' ('.trim(file_get_contents(ROOT_PATH.'/.git/ORIG_HEAD')).')': ''),
 		'vMySQLc'			=> $GLOBALS['DATABASE']->getVersion(),
 		'vMySQLs'			=> $GLOBALS['DATABASE']->getServerVersion(),
 		'root'				=> $_SERVER['SERVER_NAME'],

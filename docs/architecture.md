@@ -67,7 +67,7 @@ Trajectory: carve god-objects (`FleetFunctions`, `ResourceUpdate`, `ShowAlliance
 
 - Prefer `Database::get()` with `%%TABLE%%` placeholders from `includes/dbtables.php`.
 - Grow repositories for fleets / alliance / messages when touching those paths; one-off admin SQL can stay inline.
-- Schema changes: `install/migrations/migration_N.sql` + bump `install/VERSION`; apply with `php migrate.php`.
+- Schema changes: `install/migrations/migration_N.sql` + bump `DB_VERSION_REQUIRED` in `includes/dbtables.php`; apply with `php migrate.php`. `install/VERSION` is the product release (`vX.Y.Z`), not the schema counter.
 
 ## Templates and themes
 

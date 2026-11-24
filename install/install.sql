@@ -155,7 +155,7 @@ CREATE TABLE `%PREFIX%chat_online` (
 
 CREATE TABLE `%PREFIX%config` (
   `uni` int(11) NOT NULL AUTO_INCREMENT,
-  `VERSION` varchar(8) NOT NULL,
+  `VERSION` varchar(32) NOT NULL,
   `sql_revision` INT NOT NULL DEFAULT  '0',
   `users_amount` int(11) unsigned NOT NULL DEFAULT '1',
   `game_speed` bigint(20) unsigned NOT NULL DEFAULT '2500',

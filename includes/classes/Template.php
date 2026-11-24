@@ -108,16 +108,17 @@ class Template extends Smarty
 		}
 
 		$config	= Config::get();
+		$productVersion = ProductVersion::displayed((string) $config->VERSION);
 
 		$this->assign_vars(array(
 			'scripts'			=> $this->script,
 			'title'				=> $config->game_name.' - '.$LNG['adm_cp_title'],
 			'fcm_info'			=> $LNG['fcm_info'],
             'lang'    			=> $LNG->getLanguage(),
-			'REV'				=> AssetRevision::fromFilesystem((string) $config->VERSION),
+			'REV'				=> AssetRevision::fromFilesystem($productVersion),
 			'date'				=> explode("|", date('Y\|n\|j\|G\|i\|s\|Z', TIMESTAMP)),
 			'Offset'			=> $dateTimeUser->getOffset() - $dateTimeServer->getOffset(),
-			'VERSION'			=> $config->VERSION,
+			'VERSION'			=> $productVersion,
 			'dpath'				=> 'styles/theme/' . DEFAULT_THEME . '/',
 			'bodyclass'			=> 'full',
 			'admin_csrf'		=> AdminCsrf::token(),
