@@ -5,10 +5,12 @@
    <a href="#" onclick="return Dialog.Playercard({$userID});"><img src="{$avatar}" width="50" height="50"></a>
    <div>{$LNG.tech.615}</div>
    <div><a href="#" onclick="return Dialog.Playercard({$userID});"><b>{$username}</b></a></div>
+   <div><a href="game.php?page=universeSwitch" title="{$LNG.lm_universe_switch}">{$uni_name}</a></div>
    {else}
    <img src="{$avatar}" width="50" height="50">
    <div>{$LNG.tech.615}</div>
    <div><a href="game.php?page=settings"><b>{$username}</b></a></div>
+   <div><a href="game.php?page=universeSwitch" title="{$LNG.lm_universe_switch}">{$uni_name}</a></div>
    {/if}
 </div>
 

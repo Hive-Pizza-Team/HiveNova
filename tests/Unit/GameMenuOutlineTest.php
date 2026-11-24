@@ -181,6 +181,23 @@ class GameMenuOutlineTest extends TestCase
 		$this->assertStringContainsString('disclamer-whats-new', $this->nav);
 	}
 
+	public function test_universe_switch_sits_in_account_section(): void
+	{
+		$account = strpos($this->nav, 'lm_menu_section_account');
+		$settings = strpos($this->nav, 'page=settings');
+		$switch = strpos($this->nav, 'page=universeSwitch');
+		$logout = strpos($this->nav, 'page=logout');
+
+		$this->assertNotFalse($account);
+		$this->assertNotFalse($settings);
+		$this->assertNotFalse($switch);
+		$this->assertNotFalse($logout);
+		$this->assertGreaterThan($account, $switch);
+		$this->assertGreaterThan($settings, $switch);
+		$this->assertLessThan($logout, $switch);
+		$this->assertStringContainsString('lm_universe_switch', $this->nav);
+	}
+
 	public function test_marketplace_link_is_gated_like_the_page(): void
 	{
 		$this->assertMatchesRegularExpression(

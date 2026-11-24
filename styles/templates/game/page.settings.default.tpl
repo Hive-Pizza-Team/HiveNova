@@ -17,6 +17,10 @@
 			<th colspan="2">{$LNG.op_user_data}</th>
 		</tr>
 		<tr>
+			<td>{$LNG.lm_universe_switch}</td>
+			<td><a href="game.php?page=universeSwitch">{$LNG.us_title}</a></td>
+		</tr>
+		<tr>
 			<td width="50%">{$LNG.op_username}</td>
 	    <td width="50%" style="height:22px;">{if $changeNickTime < 0 && !$isHiveKeychainAct}<input name="username" size="20" value="{$username}" type="text">{else}{$username}{/if}</td>
 	</tr>
