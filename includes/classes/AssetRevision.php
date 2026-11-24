@@ -26,6 +26,7 @@ class AssetRevision
 			'styles/resource/css/login/register.css',
 			'scripts/login/main.js',
 			'scripts/game/push-subscribe.js',
+			'scripts/game/hive-keychain.js',
 			'scripts/game/base.js',
 			'scripts/game/top-nav.js',
 			'scripts/game/pwa-install.js',
