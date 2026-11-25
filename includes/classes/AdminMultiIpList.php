@@ -8,6 +8,30 @@ namespace HiveNova\Core;
 final class AdminMultiIpList
 {
 	/**
+	 * Parse and validate a Multi-IP known/unknown toggle POST payload.
+	 *
+	 * @param array<string, mixed> $post
+	 * @return array{action: 'known'|'unknown', userId: int}|null
+	 */
+	public static function parseToggleAction(array $post): ?array
+	{
+		$action = isset($post['action']) ? trim((string) $post['action']) : '';
+		if ($action !== 'known' && $action !== 'unknown') {
+			return null;
+		}
+
+		$userId = isset($post['id']) ? (int) $post['id'] : 0;
+		if ($userId <= 0) {
+			return null;
+		}
+
+		return [
+			'action' => $action,
+			'userId' => $userId,
+		];
+	}
+
+	/**
 	 * Resolve the owner label for a Multi-IP row.
 	 * Empty/missing usernames get a clear fallback (never a cryptic "(?)").
 	 */
