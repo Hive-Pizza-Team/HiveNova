@@ -27,8 +27,8 @@ $LNG['questions'][1][1]['body']		= <<<BODY
 <p>W celu wytwarzania surowców tak bardzo potrzebnych twojemu rozwijającemu się imperium, pierwsze co musisz zrobić to zbudować elektrownię. Produkuje ona energię, która jest potrzebna do produkcji zasobów przez kopalnię. Ilość energii możesz sprawdzić w zakładce zasoby. Dowiesz się tam ile produkujesz i jakie są twoje potrzeby.</p>
 <h3>Kopalnia metalu:</h3>
 <p>Metal jest jednym z trzech zasobów wydobywalnych w grze. Jest najszybciej i najtaniej produkowany, ale że jest używany do budowy praktycznie wszystkiego na planecie, rozwój tej kopalni jest wskazany! W początkowym etapie gry warto, by poziom kopalni metalu był o kilka leveli wyższy.</p>
-<h3>Kopalnia kryształu i ekstraktor deuterium:</h3>
-<p>Kryształ również jest bardzo ważnym elementem do budowy budynków, statków czy odkrywania nowych technologii. Jego wydobycie jest znacząco mniejsze, dlatego jedna jednostka kryształu odpowiada dwóm jednostkom metalu. Deuterium to głównie paliwo dla floty, jest również wymagany podczas prowadzenia ważnych badań. Jego wydobycie jest również znacząco mniejsze w stosunku do metalu, jak i kryształu!</p>
+<h3>Kopalnia kryształu i ekstraktor uranu:</h3>
+<p>Kryształ również jest bardzo ważnym elementem do budowy budynków, statków czy odkrywania nowych technologii. Jego wydobycie jest znacząco mniejsze, dlatego jedna jednostka kryształu odpowiada dwóm jednostkom metalu. Uran to głównie paliwo dla floty, jest również wymagany podczas prowadzenia ważnych badań. Jego wydobycie jest również znacząco mniejsze w stosunku do metalu, jak i kryształu!</p>
 BODY;
 $LNG['questions'][1][2]['title']	= 'Część 2';
 $LNG['questions'][1][2]['body']		= <<<BODY
@@ -105,7 +105,7 @@ $LNG['questions'][2][2]['body']		= <<<BODY
 <b>Uwaga:</b> jeśli jedna z flot zostanie zawrócona, to reszta poleci dalej!!</p>
 <h3>Obrona  AKS</h3>
 <p>Tak samo jak i atakować, to wspólnie można również się bronić celem minimalizacji strat. Widząc, że leci na ciebie atak, możesz poprosić albo kogoś z listy twoich znajomych lub kogoś z sojuszu, by podesłał Ci flotę. Ważne jednak, byś na planecie, na którą ma zostać wysłana flota, miał zbudowany depozyt sojuszniczy. W innym wypadku nie będzie możliwe wysłanie floty na twoją planetę z misją "zostań"! Jeśli kogoś prosisz o wsparcie należy postarać się o to, by flota sojusznika pojawiła się kilka sekund przed atakiem - w innym wypadku atakujący gracz sprawdzając siły na planecie może stwierdzić, że atak mu się nie opłaca i lepiej wycofać swoje jednostki.</p>
-<h3>Zapotrzebowanie na deuterium w czasie postoju na obcej planecie (1h postoju) to ilość jednostek :</h3>
+<h3>Zapotrzebowanie na uran w czasie postoju na obcej planecie (1h postoju) to ilość jednostek :</h3>
 <p>Mały transporter: 5<br>
 Duży transporter: 5<br>
 Lekki myśliwiec: 2<br>
