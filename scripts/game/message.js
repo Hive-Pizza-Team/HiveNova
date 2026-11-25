@@ -32,7 +32,9 @@ Message	= {
 	},
 
 	/**
-	 * After bodies hydrate, drop unread counts for rows that were marked read.
+	 * After bodies hydrate (and DB mark-as-read), sync category/nav unread
+	 * counters. Keep mes_unread on the current page so rows stay bold for
+	 * this visit — classic inbox UX (#788).
 	 */
 	applyMarkedRead: function(ids) {
 		if (!ids || !ids.length) {
@@ -45,9 +47,6 @@ Message	= {
 				return;
 			}
 			dropped += 1;
-			document.querySelectorAll('.message_' + id).forEach(function (el) {
-				el.className = el.className.replace(/\bmes_unread\b/g, '').replace(/\s+/g, ' ').trim();
-			});
 		});
 		if (dropped <= 0) {
 			return;

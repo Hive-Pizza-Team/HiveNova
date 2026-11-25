@@ -89,15 +89,15 @@ function loadMessageScript() {
 }
 
 describe('Message.applyMarkedRead', () => {
-	it('decrements unread counters and clears mes_unread', () => {
+	it('decrements unread counters but keeps mes_unread for this visit', () => {
 		const { Message, unread, newmes, row, body } = loadMessageScript();
 		Message.MessID = 1;
 		Message.applyMarkedRead([10]);
 		assert.equal(unread[1].text, '0');
 		assert.equal(unread[100].text, '0');
 		assert.equal(newmes.text, '');
-		assert.equal(row.className.includes('mes_unread'), false);
-		assert.equal(body.className.includes('mes_unread'), false);
+		assert.equal(row.className.includes('mes_unread'), true);
+		assert.equal(body.className.includes('mes_unread'), true);
 	});
 
 	it('ignores ids that were already read', () => {

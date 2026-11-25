@@ -381,7 +381,8 @@ class ShowMessagesPage extends AbstractGamePage
         }
 
         // Mark-as-read happens in bodies() after hydrate so category tiles keep
-        // correct unread counts on first paint (see issue #409).
+        // correct unread counts on first paint (see issue #409). Rows keep
+        // mes_unread styling for this visit (#788); counters update via JS.
 
         $this->tplObj->loadscript('message.js');
         $this->assign(array(
@@ -401,7 +402,8 @@ class ShowMessagesPage extends AbstractGamePage
     }
 
     /**
-     * AJAX: hydrate message bodies after first paint, then mark those rows read.
+     * AJAX: hydrate message bodies after first paint, then mark those rows read
+     * in the DB. Client keeps mes_unread bold for the current page view.
      */
     function bodies()
     {
