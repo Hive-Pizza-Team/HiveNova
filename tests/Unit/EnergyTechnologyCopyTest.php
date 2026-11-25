@@ -25,9 +25,10 @@ class EnergyTechnologyCopyTest extends TestCase
 			$this->assertArrayHasKey(113, $LNG['longDescription'], $locale . ' longDescription');
 			$this->assertStringContainsString(self::SHIPYARD_SENTENCE, $LNG['longDescription'][113], $locale . ' longDescription');
 
+			$energyName = $LNG['tech'][113];
 			$LNG = [];
 			include $root . '/' . $locale . '/INGAME.php';
-			$this->assertStringContainsString('Energy Technology', $LNG['bd_shipyard_required'], $locale . ' bd_shipyard_required');
+			$this->assertStringContainsString($energyName, $LNG['bd_shipyard_required'], $locale . ' bd_shipyard_required');
 		}
 	}
 
