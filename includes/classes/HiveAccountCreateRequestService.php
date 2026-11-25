@@ -47,6 +47,9 @@ class HiveAccountCreateRequestService
 	/** @var callable(int): list<array<string, mixed>> */
 	private $pendingLister;
 
+	/** @var callable(int, int): ?array */
+	private $latestRejectedLookup;
+
 	/**
 	 * @param callable(array<string, mixed>): bool|null $eligibilityChecker
 	 * @param callable(string): bool|null $hiveExistsChecker
@@ -55,6 +58,7 @@ class HiveAccountCreateRequestService
 	 * @param callable(int): ?array|null $requestLookup
 	 * @param callable(int, string, int, string): bool|null $statusUpdater
 	 * @param callable(int): list<array<string, mixed>>|null $pendingLister
+	 * @param callable(int, int): ?array|null $latestRejectedLookup
 	 */
 	public function __construct(
 		?callable $eligibilityChecker = null,
@@ -63,7 +67,8 @@ class HiveAccountCreateRequestService
 		?callable $inserter = null,
 		?callable $requestLookup = null,
 		?callable $statusUpdater = null,
-		?callable $pendingLister = null
+		?callable $pendingLister = null,
+		?callable $latestRejectedLookup = null
 	) {
 		$this->eligibilityChecker = $eligibilityChecker ?? static function (array $user): bool {
 			return self::defaultIsEligible($user);
@@ -151,6 +156,20 @@ class HiveAccountCreateRequestService
 			]);
 
 			return is_array($rows) ? $rows : [];
+		};
+		$this->latestRejectedLookup = $latestRejectedLookup ?? static function (int $userId, int $universeId): ?array {
+			$sql = 'SELECT id, user_id, universe, desired_name, status, reject_reason, created_at, reviewed_at, reviewed_by
+				FROM %%HIVE_ACCOUNT_CREATE_REQUESTS%%
+				WHERE user_id = :userId AND universe = :universe
+					AND status = :rejected
+				ORDER BY id DESC LIMIT 1;';
+			$row = Database::get()->selectSingle($sql, [
+				':userId' => $userId,
+				':universe' => $universeId,
+				':rejected' => self::STATUS_REJECTED,
+			]);
+
+			return is_array($row) ? $row : null;
 		};
 	}
 
@@ -288,6 +307,14 @@ class HiveAccountCreateRequestService
 	public function findPendingForUser(int $userId, int $universeId): ?array
 	{
 		return ($this->pendingLookup)($userId, $universeId);
+	}
+
+	/**
+	 * @return ?array<string, mixed>
+	 */
+	public function findLatestRejectedForUser(int $userId, int $universeId): ?array
+	{
+		return ($this->latestRejectedLookup)($userId, $universeId);
 	}
 
 	/**

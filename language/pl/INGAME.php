@@ -1743,3 +1743,4 @@ $LNG['us_universe_id'] = 'Universe %s';
 $LNG['us_col_id'] = 'ID';
 $LNG['mg_unread'] = 'Unread';
 $LNG['mg_compose_recipient'] = 'Recipient';
+$LNG['op_hive_create_rejected'] = 'Twoja poprzednia prośba o konto Hive została odrzucona.';
