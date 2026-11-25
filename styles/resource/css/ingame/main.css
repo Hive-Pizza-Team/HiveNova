@@ -1776,8 +1776,47 @@ table.tablesorter thead tr .headerSortDown {
     min-height: 44px;
 }
 
-.buildlist-more-toggle {
+/* #784: keep one queue row reserved so the card list does not jump */
+#buildlist.build-queue-slot {
+    box-sizing: border-box;
+    min-height: 6.75rem;
+}
+
+#buildlist.buildlist--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#buildlist .build-queue-slot__empty {
+    margin: 0;
+    padding: 12px;
+}
+
+#buildlist.buildlist--collapsible:not(.is-expanded) .buildlist-item--queued,
+#buildlist.buildlist--collapsible:not(.is-expanded) .queue-total {
     display: none;
+}
+
+#buildlist .buildlist-more-toggle {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px 12px;
+    min-height: 44px;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    background: var(--color-card-header-bg);
+    color: var(--color-text);
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+}
+
+#buildlist .buildlist-more-toggle[aria-expanded="true"] {
+    border-bottom-color: rgba(0, 210, 190, 0.45);
 }
 
 @media screen and (max-width: 699px) {
@@ -3107,31 +3146,6 @@ table.tablesorter thead tr .headerSortDown {
     #buildlist #progressbar {
         margin-top: 4px;
     }
-
-    #buildlist.buildlist--collapsible:not(.is-expanded) .buildlist-item--queued {
-        display: none;
-    }
-
-    #buildlist .buildlist-more-toggle {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-        margin: 0;
-        padding: 10px 12px;
-        min-height: 44px;
-        border: 0;
-        border-bottom: 1px solid var(--color-border);
-        border-radius: 0;
-        background: var(--color-card-header-bg);
-        color: var(--color-text);
-        font-size: 13px;
-        text-align: center;
-        cursor: pointer;
-    }
-
-    #buildlist .buildlist-more-toggle[aria-expanded="true"] {
-        border-bottom-color: rgba(0, 210, 190, 0.45);
-    }
 }
 
 #overview .commander-briefing {
@@ -3744,7 +3758,44 @@ table.tablesorter thead tr .headerSortDown {
 	}
 }
 
-/* Empire / Imperium overview */
+/* Empire / Imperium overview (#783): one column scheme across every section table */
+.empire-sheet {
+	overflow-x: auto;
+	max-width: 100%;
+}
+
+.empire-overview,
+.empire-matrix {
+	table-layout: fixed;
+	border-collapse: collapse;
+	width: max(100%, calc(11rem + 8rem + (var(--empire-planets, 1) * 6.5rem)));
+}
+
+.empire-col-label {
+	width: 11rem;
+}
+
+.empire-col-total {
+	width: 8rem;
+}
+
+.empire-col-planet {
+	width: 6.5rem;
+}
+
+.empire-overview td,
+.empire-overview th,
+.empire-matrix td,
+.empire-matrix th {
+	overflow-wrap: anywhere;
+	vertical-align: top;
+}
+
+.empire-matrix thead th {
+	font-size: 0.85em;
+	font-weight: 700;
+}
+
 .empire-overview td,
 .empire-section table td {
 	background-color: var(--color-bg-surface-dark);
@@ -3886,6 +3937,16 @@ table.tablesorter thead tr .headerSortDown {
 .requirement-level {
 	margin-left: 0.25em;
 	white-space: nowrap;
+}
+
+/* #785: demolish cost table stays inside the strip instead of opening a nested scroller */
+.build-dismantle {
+	max-width: 100%;
+}
+
+.build-dismantle__table {
+	width: 100%;
+	max-width: 100%;
 }
 
 /* Element cards (#736): stretch both .buildl columns to equal height when :has is supported */

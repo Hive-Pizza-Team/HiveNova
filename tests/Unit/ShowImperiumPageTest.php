@@ -177,6 +177,10 @@ class ShowImperiumPageTest extends TestCase
 		$this->assertStringNotContainsString('&Sigma;', $tpl);
 		$this->assertStringContainsString('{$LNG.lv_total}', $tpl);
 		$this->assertStringContainsString('empire-overview', $tpl);
+		$this->assertStringContainsString('empire-sheet', $tpl);
+		$this->assertStringContainsString('shared.empire-cols.tpl', $tpl);
+		$this->assertStringContainsString('shared.empire-matrix.tpl', $tpl);
+		$this->assertStringNotContainsString('style="width:100px"', $tpl);
 		$this->assertStringContainsString('empire-resource-row', $tpl);
 		$this->assertStringContainsString('energyAvailable', $tpl);
 		$this->assertStringContainsString('energyConsumed', $tpl);

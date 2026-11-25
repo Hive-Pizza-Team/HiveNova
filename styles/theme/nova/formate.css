@@ -609,21 +609,23 @@ margin: 0;
 }
 
 .infos {
+    display: flow-root;
     text-align: center;
     background: var(--color-bg-surface);
     border: 1px solid #3a4048;
     border-radius: 15px;
     margin-top: 10px;
-    overflow: auto;
+    overflow: visible;
 }
 
 .infoso {
+    display: flow-root;
     text-align: center;
     background: var(--color-bg-surface-dark);
     border: 1px solid #3a4048;
     border-radius: 15px;
     margin-top: 10px;
-    overflow: auto;
+    overflow: visible;
 }
 
 
