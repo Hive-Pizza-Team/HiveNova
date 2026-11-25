@@ -4,7 +4,6 @@ namespace HiveNova\Page\Login;
 
 use HiveNova\Core\AssetRevision;
 use HiveNova\Core\Config;
-use HiveNova\Core\FeedbackService;
 use HiveNova\Core\HTTP;
 use HiveNova\Core\Language;
 use HiveNova\Core\LoginLanguageResolver;
@@ -212,7 +211,6 @@ abstract class AbstractLoginPage
 		}
 
 		$config			= Config::get();
-		$productVersion		= \HiveNova\Core\ProductVersion::displayed((string) $config->VERSION);
 		$lang			= $LNG->getLanguage();
 		$seoPage		= PublicSeo::normalizePage(HTTP::_GP('page', ''));
 		$gameName		= (string) $config->game_name;
@@ -278,18 +276,6 @@ abstract class AbstractLoginPage
 			'seoPage'			=> $seoPage,
 			'footerLinks'		=> PublicSeo::footerLinks($basePath, $lang, $LNG),
 			'jsonLd'			=> $seoVars['jsonLd'],
-			'feedbackConfig'		=> FeedbackService::clientConfig(
-				'index.php?page=feedback&mode=submit&ajax=1',
-				[],
-				null,
-				(string) $lang,
-				$productVersion,
-				(int) Universe::current(),
-				[
-					'successNoScreenshot' => (string) ($LNG['fb_success_no_screenshot']
-						?? 'Thanks! Your report was sent without a screenshot. Reference: %s'),
-				]
-			),
 		));
 
 		$this->assign(array(
