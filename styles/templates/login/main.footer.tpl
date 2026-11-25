@@ -28,7 +28,6 @@ var LoginConfig = {
 };
 </script>
 <script src="scripts/login/pwa-register.js?v={$REV}"></script>
-{include file="shared.feedback.tpl"}
 {if $analyticsEnable}
 <script type="text/javascript" src="https://www.google-analytics.com/ga.js"></script>
 <script type="text/javascript">
