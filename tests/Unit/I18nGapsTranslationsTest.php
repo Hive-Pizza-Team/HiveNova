@@ -71,6 +71,25 @@ final class I18nGapsTranslationsTest extends TestCase
 		$this->assertSame('Nächste Stufe:', $de['bd_next_level']);
 	}
 
+	public function testShipyardRequiredHasNoLeftoverEnglishSentence(): void
+	{
+		$needle = 'If the Shipyard is still locked and Energy Technology is missing, it is listed below.';
+		foreach (self::NON_EN_LANGS as $lang) {
+			$loc = $this->loadLangFile(__DIR__ . '/../../language/' . $lang . '/INGAME.php');
+			$this->assertArrayHasKey('bd_shipyard_required', $loc, "$lang missing bd_shipyard_required");
+			$this->assertStringNotContainsString(
+				$needle,
+				(string) $loc['bd_shipyard_required'],
+				"$lang/INGAME.php bd_shipyard_required still has the English shipyard sentence"
+			);
+			$this->assertNotSame(
+				'',
+				trim((string) $loc['bd_shipyard_required']),
+				"$lang/INGAME.php bd_shipyard_required is empty"
+			);
+		}
+	}
+
 	public function testResource903LocalizedName(): void
 	{
 		$expected = [
