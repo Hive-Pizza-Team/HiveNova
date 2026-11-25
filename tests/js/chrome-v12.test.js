@@ -247,19 +247,27 @@ describe('chrome-v1.2 mobile', () => {
 		assert.match(mobileCss, /body#resources \.resources-table__factor select \{[\s\S]*?border:\s*1px solid var\(--color-accent\)/);
 	});
 
-	it('collapses extra Buildings queue rows on mobile so the list can scroll', () => {
+	it('keeps the Buildings queue to one row until expanded', () => {
 		assert.match(buildingsTpl, /id="buildlist"/);
+		assert.match(buildingsTpl, /build-queue-slot/);
+		assert.match(buildingsTpl, /buildlist--empty/);
+		assert.match(buildingsTpl, /bd_queue_empty/);
 		assert.match(buildingsTpl, /buildlist--collapsible/);
 		assert.match(buildingsTpl, /buildlist-item--queued/);
 		assert.match(buildingsTpl, /id="buildlistMoreToggle"/);
 		assert.match(buildingsTpl, /bd_queue_more/);
+		assert.match(ingameEn, /bd_queue_empty'\]\s*=\s*'Nothing in the queue'/);
 		assert.match(ingameEn, /bd_queue_more'\]\s*=\s*'Show remaining queue'/);
 		assert.match(ingameEn, /bd_queue_less'\]\s*=\s*'Hide remaining queue'/);
+		assert.match(desktopCss, /#buildlist\.build-queue-slot \{[\s\S]*?min-height:\s*6\.75rem/);
+		assert.match(desktopCss, /#buildlist\.buildlist--collapsible:not\(\.is-expanded\) \.buildlist-item--queued/);
+		assert.match(desktopCss, /#buildlist \.buildlist-more-toggle \{[\s\S]*?min-height:\s*44px/);
 		assert.match(mobileCss, /#buildlist\.infos1 \{[\s\S]*?overflow:\s*visible/);
 		assert.match(mobileCss, /#buildlist\.infos1 \{[\s\S]*?max-height:\s*none/);
-		assert.match(mobileCss, /#buildlist\.buildlist--collapsible:not\(\.is-expanded\) \.buildlist-item--queued/);
-		assert.match(mobileCss, /#buildlist \.buildlist-more-toggle \{[\s\S]*?min-height:\s*44px/);
-		assert.match(desktopCss, /\.buildlist-more-toggle \{[\s\S]*?display:\s*none/);
+		assert.match(buildingsTpl, /build-dismantle__table/);
+		assert.doesNotMatch(buildingsTpl, /width:300px/);
+		assert.match(hiveCss, /\.infos \{[\s\S]*?overflow:\s*visible/);
+		assert.match(mainCss, /\.build-dismantle__table \{[\s\S]*?width:\s*100%/);
 	});
 
 	it('keeps bottom-nav IA and 44px tap targets', () => {

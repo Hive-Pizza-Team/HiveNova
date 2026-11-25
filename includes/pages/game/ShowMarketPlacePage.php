@@ -70,7 +70,8 @@ class ShowMarketPlacePage extends AbstractGamePage
 			return sprintf(
 				$LNG[$key],
 				pretty_number_plain(MarketAbuseRules::dailyCapLeft($pairTraded)),
-				pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE)
+				pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE),
+				(string) ($LNG['tech'][RESOURCE_DEUTERIUM] ?? '')
 			);
 		}
 		if ($key === 'market_reason_band') {
@@ -172,40 +173,24 @@ class ShowMarketPlacePage extends AbstractGamePage
 		);
 	}
 
-	private function getResourceTradeHistory(): array
+	private function getResourceTradeHistory(int $universe): array
 	{
-		$sql = 'SELECT
-			buy_time as time,
-			ex_resource_type as res_type,
-			ex_resource_amount as amount,
-			seller.fleet_resource_metal as metal,
-			seller.fleet_resource_crystal as crystal,
-			seller.fleet_resource_deuterium as deuterium
-			FROM %%TRADES%%
-			JOIN %%LOG_FLEETS%% seller ON seller.fleet_id = seller_fleet_id
-			JOIN %%LOG_FLEETS%% buyer ON buyer.fleet_id = buyer_fleet_id
-			WHERE transaction_type = 0 ORDER BY time DESC LIMIT :limit;';
-		$trades = Database::get()->select($sql, array(
-			':limit' => MarketPlaceResource::historyLimit(),
-		));
+		$trades = MarketPlaceService::resourceTradeHistory(
+			Database::get(),
+			$universe,
+			MarketPlaceResource::historyLimit()
+		);
 		return array_map(array($this, 'formatHistoryTime'), $trades);
 	}
 
-	private function getFleetTradeHistory(): array
+	private function getFleetTradeHistory(int $universe): array
 	{
 		global $LNG;
-		$sql = 'SELECT
-			seller.fleet_array as fleet,
-			buy_time as time,
-			ex_resource_type as res_type,
-			ex_resource_amount as amount
-			FROM %%TRADES%%
-			JOIN %%LOG_FLEETS%% seller ON seller.fleet_id = seller_fleet_id
-			JOIN %%LOG_FLEETS%% buyer ON buyer.fleet_id = buyer_fleet_id
-			WHERE transaction_type = 1 ORDER BY time DESC LIMIT :limit;';
-		$trades = Database::get()->select($sql, array(
-			':limit' => MarketPlaceResource::historyLimit(),
-		));
+		$trades = MarketPlaceService::fleetTradeHistory(
+			Database::get(),
+			$universe,
+			MarketPlaceResource::historyLimit()
+		);
 		foreach ($trades as $i => $trade) {
 			$trades[$i]['ships'] = $this->shipList(FleetFunctions::unserialize($trade['fleet']), $LNG);
 			$trades[$i] = $this->formatHistoryTime($trades[$i]);
@@ -242,19 +227,17 @@ class ShowMarketPlacePage extends AbstractGamePage
 		$db = Database::get();
 		$fail = static fn(string $message): array => array('ok' => false, 'message' => $message);
 
+		$universe = (int) $USER['universe'];
+
 		if (!$this->hasFreeSlot($USER)) {
 			return $fail($LNG['fl_no_slots']);
 		}
 
 		//Get trade fleet
-		$sql = "SELECT * FROM %%FLEETS%% JOIN %%TRADES%% ON fleet_id = seller_fleet_id JOIN %%USERS%% ON fleet_owner = id WHERE fleet_id = :fleet_id AND fleet_mess = 2;";
-		$fleetResult = $db->select($sql, array(
-			':fleet_id' => $FleetID,
-		));
-		if ($db->rowCount() == 0) {
+		$fleetResult = MarketPlaceService::findBuyableOffer($db, (int) $FleetID, $universe);
+		if ($fleetResult === null) {
 			return $fail($LNG['market_p_msg_not_found']);
 		}
-		$fleetResult = $fleetResult[0];
 
 		// Never let a seller buy (and burn fuel on) their own offer.
 		if (MarketPlaceService::isOwnOffer($fleetResult, (int) $USER['id'])) {
@@ -334,13 +317,7 @@ class ShowMarketPlacePage extends AbstractGamePage
 
 		$db->beginTransaction();
 		try {
-			$sql = 'SELECT f.*, t.* FROM %%FLEETS%% f
-			JOIN %%TRADES%% t ON f.fleet_id = t.seller_fleet_id
-			WHERE f.fleet_id = :fleet_id AND f.fleet_mess = 2 AND t.buyer_fleet_id IS NULL
-			FOR UPDATE';
-			$lockedTrade = $db->selectSingle($sql, array(
-				':fleet_id' => $FleetID,
-			));
+			$lockedTrade = MarketPlaceService::lockBuyableOffer($db, (int) $FleetID, $universe);
 			if (!is_array($lockedTrade) || MarketPlaceService::isOwnOffer($lockedTrade, (int) $USER['id'])) {
 				$db->rollback();
 				return $fail($LNG['market_p_msg_not_found']);
@@ -479,30 +456,7 @@ class ShowMarketPlacePage extends AbstractGamePage
 		global $LNG;
 		$db = Database::get();
 
-		// One pact level per alliance (war wins), so two-way or duplicate pact rows
-		// no longer duplicate offers in the list.
-		// u.* is needed: seller drive/armour techs feed delivery time and the fleet-market tech rule.
-		$sql = 'SELECT f.*, t.*, u.*, packts.level AS diplo_level
-			FROM %%FLEETS%% f
-			JOIN %%USERS%% u ON f.fleet_owner = u.id
-			JOIN %%TRADES%% t ON f.fleet_id = t.seller_fleet_id
-			LEFT JOIN (
-				SELECT al, CASE WHEN MAX(level = :war) = 1 THEN :war ELSE MIN(level) END AS level
-				FROM (
-					SELECT owner_2 AS al, level FROM %%DIPLO%% WHERE owner_1 = :al AND accept = 1
-					UNION ALL
-					SELECT owner_1 AS al, level FROM %%DIPLO%% WHERE owner_2 = :al AND accept = 1
-				) pacts
-				GROUP BY al
-			) packts ON packts.al = u.ally_id AND u.ally_id <> 0
-			WHERE f.fleet_mission = :mission AND f.fleet_mess = :hold AND t.buyer_fleet_id IS NULL
-			ORDER BY f.fleet_end_stay ASC;';
-		$rows = $db->select($sql, array(
-			':al' => (int) $USER['ally_id'],
-			':war' => MarketPlaceService::DIPLO_WAR,
-			':mission' => FLEET_MISSION_TRADE,
-			':hold' => FLEET_HOLD,
-		));
+		$rows = MarketPlaceService::listActiveOffers($db, (int) $USER['universe'], (int) $USER['ally_id']);
 
 		$hasFreeSlot = $this->hasFreeSlot($USER);
 		$pricelist = $this->pricelist();
@@ -654,8 +608,8 @@ class ShowMarketPlacePage extends AbstractGamePage
 			'resourceOffers'  => $resourceOffers,
 			'fleetOffers'     => $fleetOffers,
 			'myOfferCount'    => $myOffers,
-			'resourceHistory' => $this->getResourceTradeHistory(),
-			'fleetHistory'    => $this->getFleetTradeHistory(),
+			'resourceHistory' => $this->getResourceTradeHistory((int) $USER['universe']),
+			'fleetHistory'    => $this->getFleetTradeHistory((int) $USER['universe']),
 			'refRatio'        => self::DEFAULT_RATIO,
 			'rulesText'       => sprintf(
 				$LNG['market_how_rules'],
@@ -663,7 +617,8 @@ class ShowMarketPlacePage extends AbstractGamePage
 				MarketAbuseRules::BAND_MAX,
 				(string) (MarketAbuseRules::LISTING_FEE_RATE * 100),
 				MarketAbuseRules::maxHoldHours(),
-				pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE)
+				pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE),
+				(string) ($LNG['tech'][RESOURCE_DEUTERIUM] ?? '')
 			),
 			'tradeZone'       => array(
 				'galaxy' => (int) $PLANET['galaxy'],

@@ -15,8 +15,8 @@ $LNG['questions'][1][1]['body']		= <<<BODY
 <p>Afin de produire des ressources il est necessaire d'avoir un niveau d'énergie positif. Pour cela contruisez une centrale solaire.</p>
 <h3>Mine de métal:</h3>
 <p>Le métal est l'un des trois éléments qui seront disponibles dans le jeu. Le métal est utilisé pour presque tout ce que vous pouvez construire ou de rechercher. Par conséquent, une bonne expansion de cette mine est conseillé.</p>
-<h3>Mine de Crystal et de Deuterium: des syntétiseurs</h3>
-<p>Le Crystal est une ressources importante pour les bâtiments, les vaisseaux et la recherche. Il est produit dans une moindre meusure que le métal, ce qui le rendre plus chére. En progressant dans le jeu, vous verrez la façon dont le cristal est nécessaire. Le deuterium est une sources d'énergie, il est a la base des ressources de carburant et des recherche importante dans le laboratoire.</p>
+<h3>Mine de Crystal et centrifugeuse d'uranium</h3>
+<p>Le Crystal est une ressources importante pour les bâtiments, les vaisseaux et la recherche. Il est produit dans une moindre meusure que le métal, ce qui le rendre plus chére. En progressant dans le jeu, vous verrez la façon dont le cristal est nécessaire. L'uranium est une source d'énergie, il est a la base des ressources de carburant et des recherche importante dans le laboratoire.</p>
 BODY;
 $LNG['questions'][1][2]['title']	= 'Etape 2 : Recherche et déploiment de vaisseaux';
 $LNG['questions'][1][2]['body']		= <<<BODY
@@ -43,7 +43,7 @@ $LNG['questions'][1][3]['body']		= <<<BODY
 </div>
 </p>
 <h3>L'envoi de flotte de combat</h3>
-<p>Les flottes peuvent etre utilisé a différentes fin. Les missions proposée sont "Attaquer", "Coloniser", "Transferer", "Detruire", "Stationner" mais encore "Recycler". Chaque vaisseaux ayant des spécification données, ils ne peuvent pas tous exécutées toutes les missions. Par exemple seul le Recycleur et le Recycleur Ultime peuvent "Recycler", c'est a dire récupérer les ressources a l'état de débrit en orbite autour d'une planete lorsqu'un combat a eu lieu. Dans tout les cas des coordonnées de destionnation doivent etre renseignées. Tel que [1:12:5]. Comme dit précedement les flottes peuvent etre envoyé soit par le menu "Galaxie" soit par le menu "Flotte". L'envoie de flotte a un coup en Deuterieum. La vitesse peut y etre défini ainsi que les matiéres devant etre transporté si la mission s'y porte.
+<p>Les flottes peuvent etre utilisé a différentes fin. Les missions proposée sont "Attaquer", "Coloniser", "Transferer", "Detruire", "Stationner" mais encore "Recycler". Chaque vaisseaux ayant des spécification données, ils ne peuvent pas tous exécutées toutes les missions. Par exemple seul le Recycleur et le Recycleur Ultime peuvent "Recycler", c'est a dire récupérer les ressources a l'état de débrit en orbite autour d'une planete lorsqu'un combat a eu lieu. Dans tout les cas des coordonnées de destionnation doivent etre renseignées. Tel que [1:12:5]. Comme dit précedement les flottes peuvent etre envoyé soit par le menu "Galaxie" soit par le menu "Flotte". L'envoie de flotte a un coût en uranium. La vitesse peut y etre défini ainsi que les matiéres devant etre transporté si la mission s'y porte.
 <div class="btn-group">
   <a class="btn btn-primary" href="#"><i class="icon-user icon-white"></i>Vous voulez vous diriger vers ?</a>
   <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>

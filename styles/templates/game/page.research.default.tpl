@@ -4,8 +4,10 @@
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
 	
 	{/if}
-{if !empty($Queue)}
-<div id="buildlist" class="infos1">
+<div id="buildlist" class="infos1 build-queue-slot{if empty($Queue)} buildlist--empty{/if}">
+{if empty($Queue)}
+	<p class="build-queue-slot__empty">{$LNG.bd_queue_empty}</p>
+{else}
 		{foreach $Queue as $List}
 		{$ID = $List.element}
 		<div class="buildlist-item">
@@ -51,12 +53,12 @@
 		{$LNG.bd_queue_total}: <span id="total-queue-time"></span>
 	</div>
 	{/if}
-</div>
 {/if}
+</div>
 
 {if $IsLabinBuild}<div class="hidden-div">{$LNG.bd_building_lab}</div>{/if}
 <div>
-<div class="planeto"> <button type="button" id="lab1" class="btn btn--secondary btn--compact">Imperial</button> | <button type="button" id="lab2" class="btn btn--secondary btn--compact">Military</button> | <button type="button" id="lab3" class="btn btn--secondary btn--compact">Engines</button> | <button type="button" id="lab4" class="btn btn--secondary btn--compact">Mining</button> | <button type="button" id="lab5" class="btn btn--secondary btn--compact selected">All</button></div>		
+<div class="planeto"> <button type="button" id="lab1" class="btn btn--secondary btn--compact">{$LNG.bd_filter_imperial}</button> | <button type="button" id="lab2" class="btn btn--secondary btn--compact">{$LNG.bd_filter_military}</button> | <button type="button" id="lab3" class="btn btn--secondary btn--compact">{$LNG.bd_filter_engines}</button> | <button type="button" id="lab4" class="btn btn--secondary btn--compact">{$LNG.bd_filter_mining}</button> | <button type="button" id="lab5" class="btn btn--secondary btn--compact selected">{$LNG.bd_filter_all}</button></div>		
 
 	{foreach $ResearchList as $ID => $Element}
 	<div class="infos{if !$Element.techAccessible} element-locked{/if}" id="t{$ID}">

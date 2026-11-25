@@ -6,7 +6,7 @@ namespace HiveNova\Core;
  * Marketplace (Trade mission 16) rules shared by the page, the buy path and tests.
  *
  * Offers are seller fleets holding in a trading zone with a %%TRADES%% row.
- * Everything here is pure except cancelOffer(), which takes the database explicitly.
+ * Pure rules plus database queries that take DatabaseInterface explicitly.
  */
 class MarketPlaceService
 {
@@ -36,6 +36,152 @@ class MarketPlaceService
 	public static function isOwnOffer(array $offer, int $userId): bool
 	{
 		return (int) ($offer['fleet_owner'] ?? 0) === $userId;
+	}
+
+	/**
+	 * Active unsold Trade offers holding in the given universe, with the buyer's
+	 * resolved alliance pact level (war wins, deduplicated per alliance).
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	public static function listActiveOffers(DatabaseInterface $db, int $universe, int $buyerAllyId): array
+	{
+		// u.* is needed: seller drive/armour techs feed delivery time and the fleet-market tech rule.
+		$sql = 'SELECT f.*, t.*, u.*, packts.level AS diplo_level
+			FROM %%FLEETS%% f
+			JOIN %%USERS%% u ON f.fleet_owner = u.id
+			JOIN %%TRADES%% t ON f.fleet_id = t.seller_fleet_id
+			LEFT JOIN (
+				SELECT al, CASE WHEN MAX(level = :war) = 1 THEN :war ELSE MIN(level) END AS level
+				FROM (
+					SELECT owner_2 AS al, level FROM %%DIPLO%% WHERE owner_1 = :al AND accept = 1
+					UNION ALL
+					SELECT owner_1 AS al, level FROM %%DIPLO%% WHERE owner_2 = :al AND accept = 1
+				) pacts
+				GROUP BY al
+			) packts ON packts.al = u.ally_id AND u.ally_id <> 0
+			WHERE f.fleet_mission = :mission
+			  AND f.fleet_mess = :hold
+			  AND f.fleet_universe = :universe
+			  AND t.buyer_fleet_id IS NULL
+			ORDER BY f.fleet_end_stay ASC;';
+		return $db->select($sql, array(
+			':al' => $buyerAllyId,
+			':war' => self::DIPLO_WAR,
+			':mission' => FLEET_MISSION_TRADE,
+			':hold' => FLEET_HOLD,
+			':universe' => $universe,
+		));
+	}
+
+	/**
+	 * Pre-lock lookup of an active, unsold Trade offer in the buyer's universe.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public static function findBuyableOffer(DatabaseInterface $db, int $fleetId, int $universe): ?array
+	{
+		if ($fleetId <= 0) {
+			return null;
+		}
+		$row = $db->selectSingle(
+			'SELECT f.*, t.*, u.*
+			FROM %%FLEETS%% f
+			JOIN %%TRADES%% t ON f.fleet_id = t.seller_fleet_id
+			JOIN %%USERS%% u ON f.fleet_owner = u.id
+			WHERE f.fleet_id = :fleet_id
+			  AND f.fleet_mission = :mission
+			  AND f.fleet_mess = :hold
+			  AND f.fleet_universe = :universe
+			  AND t.buyer_fleet_id IS NULL;',
+			array(
+				':fleet_id' => $fleetId,
+				':mission' => FLEET_MISSION_TRADE,
+				':hold' => FLEET_HOLD,
+				':universe' => $universe,
+			)
+		);
+		return is_array($row) ? $row : null;
+	}
+
+	/**
+	 * Row-locked lookup of an active, unsold Trade offer in the buyer's universe.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public static function lockBuyableOffer(DatabaseInterface $db, int $fleetId, int $universe): ?array
+	{
+		if ($fleetId <= 0) {
+			return null;
+		}
+		$row = $db->selectSingle(
+			'SELECT f.*, t.*
+			FROM %%FLEETS%% f
+			JOIN %%TRADES%% t ON f.fleet_id = t.seller_fleet_id
+			WHERE f.fleet_id = :fleet_id
+			  AND f.fleet_mission = :mission
+			  AND f.fleet_mess = :hold
+			  AND f.fleet_universe = :universe
+			  AND t.buyer_fleet_id IS NULL
+			FOR UPDATE;',
+			array(
+				':fleet_id' => $fleetId,
+				':mission' => FLEET_MISSION_TRADE,
+				':hold' => FLEET_HOLD,
+				':universe' => $universe,
+			)
+		);
+		return is_array($row) ? $row : null;
+	}
+
+	/**
+	 * Recent completed resource trades in the given universe.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	public static function resourceTradeHistory(DatabaseInterface $db, int $universe, int $limit): array
+	{
+		$sql = 'SELECT
+			buy_time as time,
+			ex_resource_type as res_type,
+			ex_resource_amount as amount,
+			seller.fleet_resource_metal as metal,
+			seller.fleet_resource_crystal as crystal,
+			seller.fleet_resource_deuterium as deuterium
+			FROM %%TRADES%%
+			JOIN %%LOG_FLEETS%% seller ON seller.fleet_id = seller_fleet_id
+			JOIN %%LOG_FLEETS%% buyer ON buyer.fleet_id = buyer_fleet_id
+			WHERE transaction_type = 0
+			  AND seller.fleet_universe = :universe
+			ORDER BY time DESC LIMIT :limit;';
+		return $db->select($sql, array(
+			':universe' => $universe,
+			':limit' => $limit,
+		));
+	}
+
+	/**
+	 * Recent completed fleet trades in the given universe.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	public static function fleetTradeHistory(DatabaseInterface $db, int $universe, int $limit): array
+	{
+		$sql = 'SELECT
+			seller.fleet_array as fleet,
+			buy_time as time,
+			ex_resource_type as res_type,
+			ex_resource_amount as amount
+			FROM %%TRADES%%
+			JOIN %%LOG_FLEETS%% seller ON seller.fleet_id = seller_fleet_id
+			JOIN %%LOG_FLEETS%% buyer ON buyer.fleet_id = buyer_fleet_id
+			WHERE transaction_type = 1
+			  AND seller.fleet_universe = :universe
+			ORDER BY time DESC LIMIT :limit;';
+		return $db->select($sql, array(
+			':universe' => $universe,
+			':limit' => $limit,
+		));
 	}
 
 	/**

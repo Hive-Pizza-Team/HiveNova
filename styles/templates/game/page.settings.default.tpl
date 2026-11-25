@@ -75,6 +75,9 @@
 			<p><strong>{$LNG.op_hive_create_pending}</strong> (@{$hiveCreatePending.desired_name|escape:'html'})</p>
 			{/if}
 			{elseif $hiveCreateAvailable}
+			{if $hiveCreateRejected}
+			<p class="hive-create-rejected"><strong>{$LNG.op_hive_create_rejected}</strong> (@{$hiveCreateRejected.desired_name|escape:'html'}){if $hiveCreateRejected.reject_reason} — {$hiveCreateRejected.reject_reason|escape:'html'}{/if}</p>
+			{/if}
 			<div style="margin-top:0.75em">
 				<label for="desiredHiveName">{$LNG.op_hive_create_label}</label>
 				<input id="desiredHiveName" name="desiredHiveName" form="hive-create-request" maxlength="16" size="16" type="text" autocomplete="off">

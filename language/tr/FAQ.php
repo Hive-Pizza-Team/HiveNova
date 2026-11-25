@@ -34,8 +34,8 @@ $LNG['questions'][1][1]['body']		= <<<BODY
 <p>Eksiksiz, doğru ve tam kapasiteli ham madde üretmek icin Solar Enerji Santralinizin sağladığı enerji, maden binalarının sağladığı enerjiden daha fazla olmak zorunda. Eğer, enerjiniz negatifte olursa, maden üretiminde enerjiye bağlı bir üretim düşüşü görülür</p>
 <h3>Metal Madeni:</h3>
 <p> Metal, evrende hemen her gezegende olan 3 madenden bir tanesi. Metal neredeyse her şeyin üretiminde kullanılır. O yüzden metal madeninizin diğer madenlerden daha yüksek kademelerde olması tavsiye edilir..</p>
-<h3>Kristal Madeni ve Deuterium Sentezleyicisi</h3>
-<p> Kristal, gemiler, araştırmalar ve binalar için hayati önem taşıyan bir madendir. Üretim kapasitesi metale göre daha düşüktür. Oyuna devam ettikçe Kristal ihtiyacının ne kadar önemli olduğunu göreceksiniz. Kristal ihtiyacı da maliyeti de oyunla beraber artacak. Deuterium evrendeki en büyük enerji kaynağı. Temel kullanım amacı gemi yakıtlari olmakla beraber bazı araştırmalarda da Deuterium ihtiyacı duyulmaktadır..</p>
+<h3>Kristal Madeni ve Uranyum Santrifüjü</h3>
+<p> Kristal, gemiler, araştırmalar ve binalar için hayati önem taşıyan bir madendir. Üretim kapasitesi metale göre daha düşüktür. Oyuna devam ettikçe Kristal ihtiyacının ne kadar önemli olduğunu göreceksiniz. Kristal ihtiyacı da maliyeti de oyunla beraber artacak. Uranyum evrendeki en büyük enerji kaynaklarından biridir. Temel kullanım amacı gemi yakıtları olmakla beraber bazı araştırmalarda da uranyum ihtiyacı duyulmaktadır.</p>
 BODY;
 $LNG['questions'][1][2]['title']	= '2. Adım';
 $LNG['questions'][1][2]['body']		= <<<BODY

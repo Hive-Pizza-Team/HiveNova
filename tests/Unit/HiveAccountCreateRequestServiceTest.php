@@ -83,6 +83,18 @@ class HiveAccountCreateRequestServiceTest extends TestCase
 				}
 
 				return $out;
+			},
+			function (int $userId, int $universeId): ?array {
+				foreach (array_reverse($this->rows) as $row) {
+					if ((int) $row['user_id'] === $userId
+						&& (int) $row['universe'] === $universeId
+						&& $row['status'] === HiveAccountCreateRequestService::STATUS_REJECTED
+					) {
+						return $row;
+					}
+				}
+
+				return null;
 			}
 		);
 	}
@@ -187,6 +199,12 @@ class HiveAccountCreateRequestServiceTest extends TestCase
 		$this->assertSame(HiveAccountCreateRequestService::STATUS_REJECTED, $rejected['request']['status']);
 		$this->assertSame('Name reserved', $rejected['request']['reject_reason']);
 
+		$latestRejected = $service2->findLatestRejectedForUser(5, 2);
+		$this->assertNotNull($latestRejected);
+		$this->assertSame('queueuser2', $latestRejected['desired_name']);
+		$this->assertSame('Name reserved', $latestRejected['reject_reason']);
+		$this->assertNull($service2->findLatestRejectedForUser(999, 2));
+
 		$emptyReason = $service2->reject($id2, 7, '  ');
 		$this->assertSame(HiveAccountCreateRequestService::CODE_EMPTY_REASON, $emptyReason['code']);
 	}
@@ -227,8 +245,11 @@ class HiveAccountCreateRequestServiceTest extends TestCase
 		$this->assertStringContainsString('form="hive-create-request"', $tpl);
 		$this->assertStringContainsString('id="hive-create-request"', $tpl);
 		$this->assertStringContainsString('op_hive_create_approved', $tpl);
+		$this->assertStringContainsString('hiveCreateRejected', $tpl);
+		$this->assertStringContainsString('op_hive_create_rejected', $tpl);
 		$this->assertStringNotContainsString('window.location.search', $signerTpl);
 		$this->assertStringContainsString('requestHiveCreate', $page);
+		$this->assertStringContainsString('findLatestRejectedForUser', $page);
 		$this->assertStringContainsString('hiveSignerState', $page);
 		$this->assertStringContainsString('HiveAccountCreateRequestService', $admin);
 	}
@@ -268,6 +289,7 @@ class HiveAccountCreateRequestServiceTest extends TestCase
 			$this->assertNull($call('requestLookup', [4]));
 			$this->assertIsBool($call('statusUpdater', [4, HiveAccountCreateRequestService::STATUS_REJECTED, 9, 'no']));
 			$this->assertIsArray($call('pendingLister', [1]));
+			$this->assertNull($call('latestRejectedLookup', [4, 1]));
 		} finally {
 			$this->restoreDatabaseInstance();
 		}

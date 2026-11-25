@@ -85,4 +85,33 @@ final class AdminMultiIpListTest extends TestCase
 		$this->assertSame('t210', $groups['1.2.3.4'][2]['onlinetime']);
 		$this->assertSame('Carol', $groups['9.9.9.9'][3]['username']);
 	}
+
+	public function testParseToggleActionAcceptsKnownAndUnknownWithPositiveId(): void
+	{
+		$this->assertSame(
+			['action' => 'known', 'userId' => 79],
+			AdminMultiIpList::parseToggleAction(['action' => 'known', 'id' => '79'])
+		);
+		$this->assertSame(
+			['action' => 'unknown', 'userId' => 12],
+			AdminMultiIpList::parseToggleAction(['action' => ' unknown ', 'id' => 12])
+		);
+	}
+
+	public function testParseToggleActionRejectsInvalidActionOrId(): void
+	{
+		$this->assertNull(AdminMultiIpList::parseToggleAction([]));
+		$this->assertNull(AdminMultiIpList::parseToggleAction(['action' => 'delete', 'id' => 5]));
+		$this->assertNull(AdminMultiIpList::parseToggleAction(['action' => 'known', 'id' => 0]));
+		$this->assertNull(AdminMultiIpList::parseToggleAction(['action' => 'unknown', 'id' => -3]));
+	}
+
+	public function testMultiIpsTemplatePostsToggleWithAdminCsrf(): void
+	{
+		$tpl = (string) file_get_contents(__DIR__ . '/../../styles/templates/adm/MultiIPs.tpl');
+		$this->assertStringContainsString('method="post"', $tpl);
+		$this->assertStringContainsString('name="admin_csrf"', $tpl);
+		$this->assertStringNotContainsString('action=known&amp;id=', $tpl);
+		$this->assertStringNotContainsString('action=unknown&amp;id=', $tpl);
+	}
 }

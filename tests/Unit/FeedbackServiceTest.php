@@ -344,6 +344,18 @@ class FeedbackServiceTest extends TestCase
 		$paths = AssetRevision::fingerprintPaths();
 		$this->assertContains('styles/resource/css/feedback.css', $paths);
 
+		$feedbackCss = file_get_contents(ROOT_PATH . 'styles/resource/css/feedback.css');
+		$this->assertIsString($feedbackCss);
+		$this->assertMatchesRegularExpression(
+			'/\.feedback-fab__icon\s*\{[^}]*background:\s*var\(--color-feedback-fab/s',
+			$feedbackCss,
+			'FAB ? icon must not use theme --color-accent (Hive red reads as error; #787)'
+		);
+		$this->assertDoesNotMatchRegularExpression(
+			'/\.feedback-fab__icon\s*\{[^}]*background:\s*var\(--color-accent/s',
+			$feedbackCss
+		);
+
 		$png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
 		$tmp = tempnam(sys_get_temp_dir(), 'fb');
 		$this->assertNotFalse($tmp);
@@ -402,5 +414,31 @@ class FeedbackServiceTest extends TestCase
 
 		$root = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__, 2).'/';
 		@unlink($root.$stored);
+	}
+
+	public function testFeedbackChromeIsInGameOnlyNotLobby(): void
+	{
+		$loginFooter = file_get_contents(ROOT_PATH . 'styles/templates/login/main.footer.tpl');
+		$loginHeader = file_get_contents(ROOT_PATH . 'styles/templates/login/main.header.tpl');
+		$loginAbstract = file_get_contents(ROOT_PATH . 'includes/pages/login/AbstractLoginPage.php');
+		$loginFeedbackPage = file_get_contents(ROOT_PATH . 'includes/pages/login/ShowFeedbackPage.php');
+		$gameLayout = file_get_contents(ROOT_PATH . 'styles/templates/game/layout.full.tpl');
+		$gameHeader = file_get_contents(ROOT_PATH . 'styles/templates/game/main.header.tpl');
+
+		$this->assertIsString($loginFooter);
+		$this->assertIsString($loginHeader);
+		$this->assertIsString($loginAbstract);
+		$this->assertIsString($loginFeedbackPage);
+		$this->assertIsString($gameLayout);
+		$this->assertIsString($gameHeader);
+
+		$this->assertStringNotContainsString('shared.feedback.tpl', $loginFooter);
+		$this->assertStringNotContainsString('feedback.css', $loginHeader);
+		$this->assertStringNotContainsString('feedbackConfig', $loginAbstract);
+		$this->assertStringContainsString('401 Unauthorized', $loginFeedbackPage);
+		$this->assertStringContainsString('auth_required', $loginFeedbackPage);
+
+		$this->assertStringContainsString('shared.feedback.tpl', $gameLayout);
+		$this->assertStringContainsString('feedback.css', $gameHeader);
 	}
 }

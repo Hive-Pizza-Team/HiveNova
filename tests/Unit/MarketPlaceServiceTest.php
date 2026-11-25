@@ -336,4 +336,172 @@ class MarketPlaceServiceTest extends TestCase
 		$this->assertSame('', S::diploClass(4, 4, 9));
 		$this->assertSame('trade-enemy', S::diploClass(5, 4, 9));
 	}
+
+	public function testListActiveOffersFiltersByUniverse(): void
+	{
+		$captured = [];
+		$db = new class($captured) implements DatabaseInterface {
+			/** @var array<string, mixed> */
+			public array $captured;
+			public function __construct(array &$captured) { $this->captured = &$captured; }
+			public function select($qry, array $params = array())
+			{
+				$this->captured = ['sql' => $qry, 'params' => $params];
+				return [['fleet_id' => 11, 'fleet_universe' => 2]];
+			}
+			public function selectSingle($qry, array $params = array(), $field = false) { return false; }
+			public function insert($qry, array $params = array()) { return true; }
+			public function update($qry, array $params = array()) { return true; }
+			public function delete($qry, array $params = array()) { return true; }
+			public function replace($qry, array $params = array()) { return true; }
+			public function query($qry) { return true; }
+			public function nativeQuery($qry) { return []; }
+			public function lastInsertId() { return 0; }
+			public function rowCount() { return 0; }
+			public function getQueryCounter() { return 0; }
+			public function quote($str) { return "'" . $str . "'"; }
+			public function disconnect() {}
+			public function getHandle(): ?PDO { return null; }
+			public function beginTransaction(): void {}
+			public function commit(): void {}
+			public function rollback(): void {}
+		};
+
+		$rows = S::listActiveOffers($db, 2, 15);
+		$this->assertSame([['fleet_id' => 11, 'fleet_universe' => 2]], $rows);
+		$this->assertStringContainsString('f.fleet_universe = :universe', $captured['sql']);
+		$this->assertStringContainsString('f.fleet_mission = :mission', $captured['sql']);
+		$this->assertStringContainsString('f.fleet_mess = :hold', $captured['sql']);
+		$this->assertStringContainsString('t.buyer_fleet_id IS NULL', $captured['sql']);
+		$this->assertSame([
+			':al' => 15,
+			':war' => S::DIPLO_WAR,
+			':mission' => FLEET_MISSION_TRADE,
+			':hold' => FLEET_HOLD,
+			':universe' => 2,
+		], $captured['params']);
+	}
+
+	public function testFindAndLockBuyableOfferScopeToUniverseAndGuardInvalidIds(): void
+	{
+		$queries = [];
+		$nextRow = false;
+		$db = new class($queries, $nextRow) implements DatabaseInterface {
+			/** @var list<array{sql: string, params: array<string, mixed>}> */
+			public array $queries;
+			/** @var array<string, mixed>|false */
+			public $nextRow;
+			public function __construct(array &$queries, &$nextRow)
+			{
+				$this->queries = &$queries;
+				$this->nextRow = &$nextRow;
+			}
+			public function select($qry, array $params = array()) { return []; }
+			public function selectSingle($qry, array $params = array(), $field = false)
+			{
+				$this->queries[] = ['sql' => $qry, 'params' => $params];
+				return $this->nextRow;
+			}
+			public function insert($qry, array $params = array()) { return true; }
+			public function update($qry, array $params = array()) { return true; }
+			public function delete($qry, array $params = array()) { return true; }
+			public function replace($qry, array $params = array()) { return true; }
+			public function query($qry) { return true; }
+			public function nativeQuery($qry) { return []; }
+			public function lastInsertId() { return 0; }
+			public function rowCount() { return 0; }
+			public function getQueryCounter() { return 0; }
+			public function quote($str) { return "'" . $str . "'"; }
+			public function disconnect() {}
+			public function getHandle(): ?PDO { return null; }
+			public function beginTransaction(): void {}
+			public function commit(): void {}
+			public function rollback(): void {}
+		};
+
+		// Non-positive fleet IDs short-circuit without querying the database.
+		$this->assertNull(S::findBuyableOffer($db, 0, 2));
+		$this->assertNull(S::lockBuyableOffer($db, -5, 2));
+		$this->assertSame([], $queries);
+
+		// Miss (e.g. offer belongs to another universe) returns null.
+		$nextRow = false;
+		$this->assertNull(S::findBuyableOffer($db, 42, 2));
+		$this->assertNull(S::lockBuyableOffer($db, 42, 2));
+		$this->assertCount(2, $queries);
+
+		// Hit returns the row array and both queries enforce universe, mission, hold, and unsold state.
+		$nextRow = $this->holdingOffer(['fleet_universe' => 2]);
+		$this->assertSame($nextRow, S::findBuyableOffer($db, 42, 2));
+		$this->assertSame($nextRow, S::lockBuyableOffer($db, 42, 2));
+
+		$findQuery = $queries[0];
+		$this->assertStringContainsString('f.fleet_universe = :universe', $findQuery['sql']);
+		$this->assertStringContainsString('f.fleet_mission = :mission', $findQuery['sql']);
+		$this->assertStringContainsString('f.fleet_mess = :hold', $findQuery['sql']);
+		$this->assertStringContainsString('t.buyer_fleet_id IS NULL', $findQuery['sql']);
+		$this->assertStringNotContainsString('FOR UPDATE', $findQuery['sql']);
+		$this->assertSame([
+			':fleet_id' => 42,
+			':mission' => FLEET_MISSION_TRADE,
+			':hold' => FLEET_HOLD,
+			':universe' => 2,
+		], $findQuery['params']);
+
+		$lockQuery = $queries[1];
+		$this->assertStringContainsString('f.fleet_universe = :universe', $lockQuery['sql']);
+		$this->assertStringContainsString('f.fleet_mission = :mission', $lockQuery['sql']);
+		$this->assertStringContainsString('f.fleet_mess = :hold', $lockQuery['sql']);
+		$this->assertStringContainsString('t.buyer_fleet_id IS NULL', $lockQuery['sql']);
+		$this->assertStringContainsString('FOR UPDATE', $lockQuery['sql']);
+		$this->assertSame([
+			':fleet_id' => 42,
+			':mission' => FLEET_MISSION_TRADE,
+			':hold' => FLEET_HOLD,
+			':universe' => 2,
+		], $lockQuery['params']);
+	}
+
+	public function testTradeHistoryQueriesFilterByUniverse(): void
+	{
+		$queries = [];
+		$db = new class($queries) implements DatabaseInterface {
+			/** @var list<array{sql: string, params: array<string, mixed>}> */
+			public array $queries;
+			public function __construct(array &$queries) { $this->queries = &$queries; }
+			public function select($qry, array $params = array())
+			{
+				$this->queries[] = ['sql' => $qry, 'params' => $params];
+				return [['amount' => 500]];
+			}
+			public function selectSingle($qry, array $params = array(), $field = false) { return false; }
+			public function insert($qry, array $params = array()) { return true; }
+			public function update($qry, array $params = array()) { return true; }
+			public function delete($qry, array $params = array()) { return true; }
+			public function replace($qry, array $params = array()) { return true; }
+			public function query($qry) { return true; }
+			public function nativeQuery($qry) { return []; }
+			public function lastInsertId() { return 0; }
+			public function rowCount() { return 0; }
+			public function getQueryCounter() { return 0; }
+			public function quote($str) { return "'" . $str . "'"; }
+			public function disconnect() {}
+			public function getHandle(): ?PDO { return null; }
+			public function beginTransaction(): void {}
+			public function commit(): void {}
+			public function rollback(): void {}
+		};
+
+		$this->assertSame([['amount' => 500]], S::resourceTradeHistory($db, 3, 25));
+		$this->assertSame([['amount' => 500]], S::fleetTradeHistory($db, 3, 25));
+		$this->assertCount(2, $queries);
+
+		$this->assertStringContainsString('transaction_type = 0', $queries[0]['sql']);
+		$this->assertStringContainsString('seller.fleet_universe = :universe', $queries[0]['sql']);
+		$this->assertSame([':universe' => 3, ':limit' => 25], $queries[0]['params']);
+
+		$this->assertStringContainsString('transaction_type = 1', $queries[1]['sql']);
+		$this->assertStringContainsString('seller.fleet_universe = :universe', $queries[1]['sql']);
+		$this->assertSame([':universe' => 3, ':limit' => 25], $queries[1]['params']);
+	}
 }

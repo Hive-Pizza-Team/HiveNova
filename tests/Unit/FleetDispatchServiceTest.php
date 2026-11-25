@@ -989,8 +989,8 @@ class FleetDispatchServiceTest extends TestCase
         $GLOBALS['LNG']['market_p_msg_wrong_resource_type'] = 'Wrong resource type';
         $GLOBALS['LNG']['market_band_error'] = 'Ask %1$s to %2$s %3$s';
         $GLOBALS['LNG']['market_reason_band'] = 'Out of band';
-        $GLOBALS['LNG']['market_fee_not_enough'] = 'Fee %s';
-        $GLOBALS['LNG']['tech'] = [901 => 'Metal', 902 => 'Crystal', 903 => 'Deuterium'];
+        $GLOBALS['LNG']['market_fee_not_enough'] = 'Fee %1$s %2$s';
+        $GLOBALS['LNG']['tech'] = [901 => 'Metal', 902 => 'Crystal', 903 => 'Uranium'];
         $GLOBALS['pricelist'][202]['cost'] = [901 => 3000, 902 => 1000, 903 => 0];
     }
 
@@ -1040,7 +1040,7 @@ class FleetDispatchServiceTest extends TestCase
         $this->withMarketLanguage();
         $this->expectException(\RuntimeException::class);
         // 1 LC (1250 units) + 4000 metal (1000 units) => 1% = 22.5 -> 23 deuterium.
-        $this->expectExceptionMessage('Fee 23');
+        $this->expectExceptionMessage('Fee 23 Uranium');
 
         FleetDispatchService::validateTarget($this->tradeParams(), ['id' => 1], $this->basePlanet(['galaxy' => 2, 'deuterium' => 30]));
     }

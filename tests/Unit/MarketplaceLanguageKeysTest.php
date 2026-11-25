@@ -154,11 +154,11 @@ class MarketplaceLanguageKeysTest extends TestCase
 
 		$sprintfArgs = [
 			'market_band_error' => ['2.000', '8.000', 'Metal'],
-			'market_fee_not_enough' => ['23'],
+			'market_fee_not_enough' => ['23', 'Uranium'],
 			'market_hold_hint' => ['24'],
 			'market_reason_band' => ['0.5', '2'],
-			'market_reason_daily_cap' => ['10', '1.000.000'],
-			'market_how_rules' => ['0.5', '2', '1', '24', '1.000.000'],
+			'market_reason_daily_cap' => ['10', '1.000.000', 'Uranium'],
+			'market_how_rules' => ['0.5', '2', '1', '24', '1.000.000', 'Uranium'],
 		];
 		foreach ($sprintfArgs as $key => $args) {
 			$out = vsprintf((string) $lng[$key], $args);
@@ -173,6 +173,21 @@ class MarketplaceLanguageKeysTest extends TestCase
 			sort($got[0]);
 			$this->assertSame($want[0], $got[0], "{$key} ({$lang}) placeholders");
 		}
+	}
+
+	public function testEnglishFeeCopyNamesTheResourceInsteadOfDeuterium(): void
+	{
+		$lng = new Language('en');
+		$lng->includeData(['INGAME']);
+
+		foreach (['market_fee_not_enough', 'market_fee_hint', 'market_reason_daily_cap', 'market_how_rules'] as $key) {
+			$this->assertStringNotContainsStringIgnoringCase('deuterium', (string) $lng[$key], $key);
+		}
+
+		$this->assertSame(
+			'Not enough Uranium for the 23 Uranium listing fee. Keep it on the planet on top of the fuel.',
+			vsprintf((string) $lng['market_fee_not_enough'], ['23', 'Uranium'])
+		);
 	}
 
 	public function testBuyMessagesRetainSprintfPlaceholdersInEnglish(): void

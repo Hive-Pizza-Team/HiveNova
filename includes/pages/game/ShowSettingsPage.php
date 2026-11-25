@@ -92,6 +92,9 @@ class ShowSettingsPage extends AbstractGamePage
 			$createService = new HiveAccountCreateRequestService();
 			$pendingCreate = $createService->findPendingForUser((int) $USER['id'], (int) Universe::current());
 			$createAvailable = $upgrade['needsUpgrade'] && $createService->isEligible($USER) && $pendingCreate === null;
+			$rejectedCreate = $createAvailable
+				? $createService->findLatestRejectedForUser((int) $USER['id'], (int) Universe::current())
+				: null;
 
 			$this->assign(array(
 				'Selectors'			=> array(
@@ -150,6 +153,7 @@ class ShowSettingsPage extends AbstractGamePage
 				'hiveSignerUrl'     => $upgrade['hiveSignerUrl'],
 				'hiveCreateAvailable' => $createAvailable,
 				'hiveCreatePending' => $pendingCreate,
+				'hiveCreateRejected' => $rejectedCreate,
 			));
 			
 			$this->display('page.settings.default.tpl');

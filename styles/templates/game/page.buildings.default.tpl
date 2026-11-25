@@ -5,8 +5,10 @@
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
 	
 	{/if}
-{if !empty($Queue)}
-<div id="buildlist" class="infos1{if $Queue|count > 1} buildlist--collapsible{/if}">
+<div id="buildlist" class="infos1 build-queue-slot{if empty($Queue)} buildlist--empty{elseif $Queue|count > 1} buildlist--collapsible{/if}">
+{if empty($Queue)}
+	<p class="build-queue-slot__empty">{$LNG.bd_queue_empty}</p>
+{else}
 	
 		{foreach $Queue as $List}
 		{$ID = $List.element}
@@ -51,12 +53,11 @@
 		{$LNG.bd_queue_total}: <span id="total-queue-time"></span>
 	</div>
 	{/if}
-</div >
-
 {/if}
+</div>
 
 	<div>
-<div class="planeto"> <button type="button" id="btn1" class="btn btn--secondary btn--compact">Mining</button> | <button type="button" id="btn2" class="btn btn--secondary btn--compact">Other</button> | <button type="button" id="btn3" class="btn btn--secondary btn--compact selected">All</button></div>		
+<div class="planeto"> <button type="button" id="btn1" class="btn btn--secondary btn--compact">{$LNG.bd_filter_mining}</button> | <button type="button" id="btn2" class="btn btn--secondary btn--compact">{$LNG.bd_filter_other}</button> | <button type="button" id="btn3" class="btn btn--secondary btn--compact selected">{$LNG.bd_filter_all}</button></div>		
 
 {foreach $BuildInfoList as $ID => $Element}
 {if ($ID == 1 || $ID == 2 || $ID == 3 || $ID == 4 || $ID == 12 || $ID == 22 || $ID == 23 || $ID == 24)}
@@ -119,7 +120,7 @@
 							{if ($ID == 44 && !$HaveMissiles) ||  $ID != 44}<br>
 							<details class="build-dismantle">
 								<summary>{$LNG.bd_dismantle}</summary>
-								<table style="width:300px">
+								<table class="build-dismantle__table">
 									<tr>
 										<th colspan="2">{$LNG.bd_price_for_destroy} {$LNG.tech.{$ID}} {$Element.level}</th>
 									</tr>
@@ -210,7 +211,7 @@
 							{if ($ID == 44 && !$HaveMissiles) ||  $ID != 44}<br>
 							<details class="build-dismantle">
 								<summary>{$LNG.bd_dismantle}</summary>
-								<table style="width:300px">
+								<table class="build-dismantle__table">
 									<tr>
 										<th colspan="2">{$LNG.bd_price_for_destroy} {$LNG.tech.{$ID}} {$Element.level}</th>
 									</tr>

@@ -121,7 +121,7 @@
 				$range.text($box.attr('data-range-empty') || '').removeClass('market-offer__range--out');
 			}
 			var fee = listingFee(shipValue, load, ratio, feeRate);
-			$('#marketOfferFee').text(fillTemplate($box.attr('data-fee-text') || '', [formatNumber(fee), String(Math.round(feeRate * 1000) / 10)]));
+			$('#marketOfferFee').text(fillTemplate($box.attr('data-fee-text') || '', [formatNumber(fee), String(Math.round(feeRate * 1000) / 10), $box.attr('data-name-3') || '']));
 		}
 
 		$form.on('input change', 'input[name=metal], input[name=crystal], input[name=deuterium], input[name=exchange], select[name=resEx], select[name=markettype]', update);

@@ -191,7 +191,11 @@ class FleetDispatchService
 
         $fee = MarketAbuseRules::listingFee($fleetArray, $fleetResource, $pricelist, $ratio);
         if ($deuteriumAfterFuel < $fee + (float) $fleetResource[903]) {
-            throw new \RuntimeException(sprintf($LNG['market_fee_not_enough'], pretty_number_plain($fee)));
+            throw new \RuntimeException(sprintf(
+                $LNG['market_fee_not_enough'],
+                pretty_number_plain($fee),
+                (string) ($LNG['tech'][RESOURCE_DEUTERIUM] ?? '')
+            ));
         }
     }
 

@@ -21,7 +21,8 @@
 
 .feedback-fab:hover,
 .feedback-fab:focus-visible {
-	outline: 2px solid var(--color-accent, #c9a227);
+	/* Help/feedback cue — not theme accent (Hive red reads as error). */
+	outline: 2px solid var(--color-feedback-fab, #c9a227);
 	outline-offset: 2px;
 }
 
@@ -32,7 +33,8 @@
 	width: 1.4em;
 	height: 1.4em;
 	border-radius: 50%;
-	background: var(--color-accent, #c9a227);
+	/* Dedicated gold; do not inherit --color-accent (red on hive). */
+	background: var(--color-feedback-fab, #c9a227);
 	color: #111;
 	font-weight: 700;
 }

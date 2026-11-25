@@ -14,9 +14,12 @@ use HiveNova\Core\SeasonSbtIssuerService;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../Support/FakeDatabase.php';
+require_once __DIR__ . '/../Support/SwapDatabaseInstance.php';
 
 class SeasonSbtInventoryServiceTest extends TestCase
 {
+	use SwapDatabaseInstance;
 	protected function tearDown(): void
 	{
 		NftTrackerClient::setFetcher(null);
@@ -149,6 +152,51 @@ class SeasonSbtInventoryServiceTest extends TestCase
 		$this->assertSame('frugal-fun', $view['owner']['hiveAccount']);
 		$this->assertCount(1, $view['medals']);
 		$this->assertSame('Uni3 Season 2 Winner', $view['medals'][0]['title']);
+	}
+
+	public function testUnknownHiveNameWithoutGrantsReturnsNotFound(): void
+	{
+		$service = new SeasonSbtInventoryService(
+			new ArraySeasonSbtGrantStore(),
+			null,
+			static fn (): ?array => null,
+			static fn (): ?array => null,
+			false
+		);
+
+		$view = $service->inventory(1, 1, null, 'zzqanotreal999', [
+			'empty_not_found' => 'Player not found.',
+			'empty_none' => 'No season medals yet.',
+		]);
+		$this->assertSame(0, $view['owner']['userId']);
+		$this->assertSame('', $view['owner']['username']);
+		$this->assertSame('', $view['owner']['hiveAccount']);
+		$this->assertSame([], $view['medals']);
+		$this->assertSame('Player not found.', $view['emptyReason']);
+
+		$withAt = $service->inventory(1, 1, null, '@zzqanotreal999', [
+			'empty_not_found' => 'Player not found.',
+			'empty_none' => 'No season medals yet.',
+		]);
+		$this->assertSame('Player not found.', $withAt['emptyReason']);
+		$this->assertSame('', $withAt['owner']['username']);
+
+		$unknownId = $service->inventory(1, 1, 999999, null, [
+			'empty_not_found' => 'Player not found.',
+			'empty_none' => 'No season medals yet.',
+		]);
+		$this->assertSame('Player not found.', $unknownId['emptyReason']);
+
+		$this->swapDatabaseInstance(new FakeDatabase());
+		try {
+			$defaultService = new SeasonSbtInventoryService(new ArraySeasonSbtGrantStore(), null, null, null, false);
+			$dbMiss = $defaultService->inventory(1, 1, null, '@zzqanotreal999', [
+				'empty_not_found' => 'Player not found.',
+			]);
+			$this->assertSame('Player not found.', $dbMiss['emptyReason']);
+		} finally {
+			$this->restoreDatabaseInstance();
+		}
 	}
 
 	public function testSoftVerifyMarksMedalWhenTrackerReturnsInstance(): void
