@@ -1,15 +1,17 @@
 {block name="title" prepend}{$LNG.lm_empire}{/block}
 {block name="content"}
+<div class="empire-sheet" style="--empire-planets: {$planetList.image|count}">
 <table class="empire-overview">
+	{include file="shared.empire-cols.tpl"}
 	<tbody>
 		<tr>
 			<th colspan="{$colspan}">{$LNG.lv_imperium_title}</th>
 		</tr>
 		<tr>
-			<td style="width:100px">{$LNG.lv_planet}</td>
-			<td class="empire-total-col" style="width:100px">{$LNG.lv_total}</td>
+			<td>{$LNG.lv_planet}</td>
+			<td class="empire-total-col">{$LNG.lv_total}</td>
 			{foreach $planetList.image as $planetID => $image}
-			<td class="empire-planet-thumb" style="width:100px"><a href="game.php?page=overview&amp;cp={$planetID}">{include file="shared.planet-thumb.tpl" texture=$image dpath=$dpath width=48 height=48 border=0 preferLite=true loading="lazy"}</a></td>
+			<td class="empire-planet-thumb"><a href="game.php?page=overview&amp;cp={$planetID}">{include file="shared.planet-thumb.tpl" texture=$image dpath=$dpath width=48 height=48 border=0 preferLite=true loading="lazy"}</a></td>
 			{/foreach}
 		</tr>
 		<tr>
@@ -62,24 +64,25 @@
 
 <details id="empire-details-build" class="empire-section">
 	<summary><strong>{$LNG.lv_buildings}</strong></summary>
-	<table><tbody id="empire-build"></tbody></table>
+	{include file="shared.empire-matrix.tpl" sectionId="build" techSection=false}
 </details>
 <details id="empire-details-fleet" class="empire-section">
 	<summary><strong>{$LNG.lv_ships}</strong></summary>
-	<table><tbody id="empire-fleet"></tbody></table>
+	{include file="shared.empire-matrix.tpl" sectionId="fleet" techSection=false}
 </details>
 <details id="empire-details-defense" class="empire-section">
 	<summary><strong>{$LNG.lv_defenses}</strong></summary>
-	<table><tbody id="empire-defense"></tbody></table>
+	{include file="shared.empire-matrix.tpl" sectionId="defense" techSection=false}
 </details>
 <details id="empire-details-missiles" class="empire-section">
 	<summary><strong>{$LNG.tech.500}</strong></summary>
-	<table><tbody id="empire-missiles"></tbody></table>
+	{include file="shared.empire-matrix.tpl" sectionId="missiles" techSection=false}
 </details>
 <details id="empire-details-tech" class="empire-section">
 	<summary><strong>{$LNG.lv_technology}</strong></summary>
-	<table><tbody id="empire-tech"></tbody></table>
+	{include file="shared.empire-matrix.tpl" sectionId="tech" techSection=true}
 </details>
+</div>
 
 <script type="application/json" id="empire-matrix-config" data-url="game.php?page=imperium&amp;mode=matrix&amp;ajax=1">{$matrixPayloadJson nofilter}</script>
 <script src="./scripts/game/imperium.js?v={$REV}"></script>

@@ -4,8 +4,10 @@
 	<div class="message"><a href="?page=messages">{$messages}</a></div>
 	
 	{/if}
-{if !empty($Queue)}
-<div id="buildlist" class="infos1">
+<div id="buildlist" class="infos1 build-queue-slot{if empty($Queue)} buildlist--empty{/if}">
+{if empty($Queue)}
+	<p class="build-queue-slot__empty">{$LNG.bd_queue_empty}</p>
+{else}
 		{foreach $Queue as $List}
 		{$ID = $List.element}
 		<div class="buildlist-item">
@@ -51,8 +53,8 @@
 		{$LNG.bd_queue_total}: <span id="total-queue-time"></span>
 	</div>
 	{/if}
-</div>
 {/if}
+</div>
 
 {if $IsLabinBuild}<div class="hidden-div">{$LNG.bd_building_lab}</div>{/if}
 <div>

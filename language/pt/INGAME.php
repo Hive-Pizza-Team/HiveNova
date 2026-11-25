@@ -1746,3 +1746,4 @@ $LNG['us_col_id'] = 'ID';
 $LNG['mg_unread'] = 'Unread';
 $LNG['mg_compose_recipient'] = 'Recipient';
 $LNG['op_hive_create_rejected'] = 'Seu pedido anterior de conta Hive foi rejeitado.';
+$LNG['bd_queue_empty'] = 'Nothing in the queue';
