@@ -38,7 +38,7 @@ class SeasonSbtInventoryService
 			return is_array($row) ? $row : null;
 		};
 		$this->userByHive = $userByHive ?? static function (string $hive, int $universe): ?array {
-			$hive = strtolower(trim($hive));
+			$hive = ltrim(strtolower(trim($hive)), '@');
 			if ($hive === '' || !HiveUtil::isAccountValid($hive)) {
 				return null;
 			}
@@ -108,9 +108,12 @@ class SeasonSbtInventoryService
 		$medals = array_map(static fn (array $row): array => $row['medal'], $scoredMedals);
 
 		$emptyReason = '';
+		$ownerUsername = (string) $owner['username'];
 		if ($medals === []) {
-			if ((int) $owner['userId'] <= 0 && $hiveAccount === '') {
+			if ((int) $owner['userId'] <= 0) {
 				$emptyReason = (string) ($copy['empty_not_found'] ?? 'Player not found.');
+				$ownerUsername = '';
+				$hiveAccount = '';
 			} elseif ($hiveAccount === '') {
 				$emptyReason = (string) ($copy['empty_no_hive'] ?? 'This commander has no linked Hive account yet.');
 			} else {
@@ -128,7 +131,7 @@ class SeasonSbtInventoryService
 		return [
 			'owner' => [
 				'userId'          => (int) $owner['userId'],
-				'username'        => (string) $owner['username'],
+				'username'        => $ownerUsername,
 				'hiveAccount'     => $hiveAccount,
 				'registerTime'    => (int) ($owner['registerTime'] ?? 0),
 				'memberSinceDate' => $memberSinceDate,
@@ -173,7 +176,7 @@ class SeasonSbtInventoryService
 	private function resolveOwner(int $universe, int $viewerId, ?int $targetUserId, ?string $targetHive): array
 	{
 		$userId = $targetUserId !== null && $targetUserId > 0 ? $targetUserId : 0;
-		$hive = strtolower(trim((string) $targetHive));
+		$hive = ltrim(strtolower(trim((string) $targetHive)), '@');
 
 		if ($userId <= 0 && $hive === '') {
 			$userId = $viewerId;
