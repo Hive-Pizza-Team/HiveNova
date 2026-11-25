@@ -34,7 +34,7 @@
 {/foreach}
 </div>
 {/if}
-{if $mode != "defense"}<div class="planeto"> <button type="button" id="ship1" class="btn btn--secondary btn--compact">Civil</button> | <button type="button" id="ship2" class="btn btn--secondary btn--compact">Military</button> | <button type="button" id="ship3" class="btn btn--secondary btn--compact selected">All</button></div>{/if}
+{if $mode != "defense"}<div class="planeto"> <button type="button" id="ship1" class="btn btn--secondary btn--compact">{$LNG.bd_filter_civil}</button> | <button type="button" id="ship2" class="btn btn--secondary btn--compact">{$LNG.bd_filter_military}</button> | <button type="button" id="ship3" class="btn btn--secondary btn--compact selected">{$LNG.bd_filter_all}</button></div>{/if}
 </div>
 	{foreach $elementList as $ID => $Element}
 	
