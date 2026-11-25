@@ -344,6 +344,18 @@ class FeedbackServiceTest extends TestCase
 		$paths = AssetRevision::fingerprintPaths();
 		$this->assertContains('styles/resource/css/feedback.css', $paths);
 
+		$feedbackCss = file_get_contents(ROOT_PATH . 'styles/resource/css/feedback.css');
+		$this->assertIsString($feedbackCss);
+		$this->assertMatchesRegularExpression(
+			'/\.feedback-fab__icon\s*\{[^}]*background:\s*var\(--color-feedback-fab/s',
+			$feedbackCss,
+			'FAB ? icon must not use theme --color-accent (Hive red reads as error; #787)'
+		);
+		$this->assertDoesNotMatchRegularExpression(
+			'/\.feedback-fab__icon\s*\{[^}]*background:\s*var\(--color-accent/s',
+			$feedbackCss
+		);
+
 		$png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
 		$tmp = tempnam(sys_get_temp_dir(), 'fb');
 		$this->assertNotFalse($tmp);
