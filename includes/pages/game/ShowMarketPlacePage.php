@@ -69,8 +69,8 @@ class ShowMarketPlacePage extends AbstractGamePage
 		if ($key === 'market_reason_daily_cap') {
 			return sprintf(
 				$LNG[$key],
-				pretty_number_plain(MarketAbuseRules::dailyCapLeft($pairTraded)),
-				pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE),
+				pretty_number(MarketAbuseRules::dailyCapLeft($pairTraded)),
+				pretty_number(MarketAbuseRules::DAILY_CAP_VALUE),
 				(string) ($LNG['tech'][RESOURCE_DEUTERIUM] ?? '')
 			);
 		}
@@ -617,7 +617,7 @@ class ShowMarketPlacePage extends AbstractGamePage
 				MarketAbuseRules::BAND_MAX,
 				(string) (MarketAbuseRules::LISTING_FEE_RATE * 100),
 				MarketAbuseRules::maxHoldHours(),
-				pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE),
+				pretty_number(MarketAbuseRules::DAILY_CAP_VALUE),
 				(string) ($LNG['tech'][RESOURCE_DEUTERIUM] ?? '')
 			),
 			'tradeZone'       => array(
