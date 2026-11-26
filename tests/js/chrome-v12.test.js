@@ -245,6 +245,10 @@ describe('chrome-v1.2 mobile', () => {
 		assert.match(mobileCss, /body#resources \.resources-table__row td\.resources-table__zero \{[\s\S]*?display:\s*none/);
 		assert.match(mobileCss, /body#resources \.resources-table__row\.resources-table__prod \{[\s\S]*?flex-wrap:\s*wrap/);
 		assert.match(mobileCss, /body#resources \.resources-table__factor select \{[\s\S]*?border:\s*1px solid var\(--color-accent\)/);
+		assert.match(mobileCss, /body#resources \.resources-table__row td\.resources-table__label \{[\s\S]*?text-align:\s*left/);
+		assert.match(mobileCss, /body#resources \.resources-table__row td\.resources-table__label::before \{[\s\S]*?content:\s*none/);
+		assert.match(mobileCss, /body#resources \.resources-table__prod::after \{[\s\S]*?flex:\s*0 0 100%/);
+		assert.match(mobileCss, /body#resources \.resources-table__prod::after \{[\s\S]*?order:\s*2/);
 	});
 
 	it('keeps the Buildings queue to one row until expanded', () => {

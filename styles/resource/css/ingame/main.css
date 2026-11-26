@@ -2847,8 +2847,9 @@ table.tablesorter thead tr .headerSortDown {
         max-width: 100%;
     }
 
-    body#resources .resources-table__label {
+    body#resources .resources-table__row td.resources-table__label {
         display: block;
+        justify-content: flex-start;
         width: 100%;
         font-weight: 700;
         padding-bottom: 4px;
@@ -2858,8 +2859,10 @@ table.tablesorter thead tr .headerSortDown {
         overflow-wrap: anywhere;
     }
 
-    body#resources .resources-table__label::before {
+    body#resources .resources-table__row td.resources-table__label::before {
         content: none;
+        display: none;
+        flex: 0 0 auto;
     }
 
     body#resources .resources-table__factor {
@@ -2911,12 +2914,27 @@ table.tablesorter thead tr .headerSortDown {
         row-gap: 4px;
     }
 
-    body#resources .resources-table__prod .resources-table__label {
+    body#resources .resources-table__row.resources-table__prod td.resources-table__label {
         flex: 1 1 12rem;
         width: auto;
         margin: 0;
         padding: 0;
         border-bottom: 0;
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+    /* #796: force outputs onto line 2 so short and long names share one layout. */
+    body#resources .resources-table__prod::after {
+        content: "";
+        flex: 0 0 100%;
+        order: 2;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        pointer-events: none;
     }
 
     body#resources .resources-table__prod .resources-table__factor {
@@ -2924,6 +2942,7 @@ table.tablesorter thead tr .headerSortDown {
         order: 2;
         width: auto;
         padding: 0;
+        margin-left: auto;
     }
 
     body#resources .resources-table__prod .resources-table__factor::before {
