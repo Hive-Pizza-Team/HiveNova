@@ -188,6 +188,50 @@ class GalaxyRowsTest extends TestCase
         $this->assertSame('3 Members', $data[8]['alliance']['member']);
     }
 
+    public function test_get_galaxy_data_does_not_double_escape_alliance_name_or_tag(): void
+    {
+        $this->seedGalaxyRow([
+            'planet' => 8,
+            'id_owner' => 2,
+            'userid' => 2,
+            'allyid' => 10,
+            'ally_id' => 10,
+            'ally_name' => '&lt;i&gt;Test&lt;/i&gt;',
+            'ally_tag' => '&lt;i&gt;Test&lt;/i&gt;',
+            'ally_web' => '',
+            'ally_members' => 1,
+            'ally_rank' => 1,
+            'diploLevel' => 0,
+        ]);
+
+        $data = $this->galaxyRows()->setGalaxy(1)->setSystem(5)->getGalaxyData();
+
+        $this->assertSame('&lt;i&gt;Test&lt;/i&gt;', $data[8]['alliance']['name']);
+        $this->assertSame('&lt;i&gt;Test&lt;/i&gt;', $data[8]['alliance']['tag']);
+    }
+
+    public function test_get_galaxy_data_escapes_raw_alliance_markup_as_text(): void
+    {
+        $this->seedGalaxyRow([
+            'planet' => 8,
+            'id_owner' => 2,
+            'userid' => 2,
+            'allyid' => 10,
+            'ally_id' => 10,
+            'ally_name' => '<i>Test</i>',
+            'ally_tag' => '<script>x</script>',
+            'ally_web' => '',
+            'ally_members' => 1,
+            'ally_rank' => 1,
+            'diploLevel' => 0,
+        ]);
+
+        $data = $this->galaxyRows()->setGalaxy(1)->setSystem(5)->getGalaxyData();
+
+        $this->assertSame('&lt;i&gt;Test&lt;/i&gt;', $data[8]['alliance']['name']);
+        $this->assertSame('&lt;script&gt;x&lt;/script&gt;', $data[8]['alliance']['tag']);
+    }
+
     public function test_get_galaxy_data_own_alliance_marks_member_class(): void
     {
         $GLOBALS['USER']['ally_id'] = 10;

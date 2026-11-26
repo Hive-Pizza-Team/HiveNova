@@ -182,6 +182,7 @@ class ShowImperiumPageTest extends TestCase
 		$this->assertStringContainsString('shared.empire-matrix.tpl', $tpl);
 		$this->assertStringNotContainsString('style="width:100px"', $tpl);
 		$this->assertStringContainsString('empire-resource-row', $tpl);
+		$this->assertStringContainsString('empire-resource-rate', $tpl);
 		$this->assertStringContainsString('energyAvailable', $tpl);
 		$this->assertStringContainsString('energyConsumed', $tpl);
 		$this->assertStringContainsString('matrixPayloadJson', $tpl);

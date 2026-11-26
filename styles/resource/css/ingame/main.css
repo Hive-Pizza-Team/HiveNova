@@ -2847,8 +2847,9 @@ table.tablesorter thead tr .headerSortDown {
         max-width: 100%;
     }
 
-    body#resources .resources-table__label {
+    body#resources .resources-table__row td.resources-table__label {
         display: block;
+        justify-content: flex-start;
         width: 100%;
         font-weight: 700;
         padding-bottom: 4px;
@@ -2858,8 +2859,10 @@ table.tablesorter thead tr .headerSortDown {
         overflow-wrap: anywhere;
     }
 
-    body#resources .resources-table__label::before {
+    body#resources .resources-table__row td.resources-table__label::before {
         content: none;
+        display: none;
+        flex: 0 0 auto;
     }
 
     body#resources .resources-table__factor {
@@ -2911,12 +2914,27 @@ table.tablesorter thead tr .headerSortDown {
         row-gap: 4px;
     }
 
-    body#resources .resources-table__prod .resources-table__label {
+    body#resources .resources-table__row.resources-table__prod td.resources-table__label {
         flex: 1 1 12rem;
         width: auto;
         margin: 0;
         padding: 0;
         border-bottom: 0;
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+    /* #796: force outputs onto line 2 so short and long names share one layout. */
+    body#resources .resources-table__prod::after {
+        content: "";
+        flex: 0 0 100%;
+        order: 2;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        pointer-events: none;
     }
 
     body#resources .resources-table__prod .resources-table__factor {
@@ -2924,6 +2942,7 @@ table.tablesorter thead tr .headerSortDown {
         order: 2;
         width: auto;
         padding: 0;
+        margin-left: auto;
     }
 
     body#resources .resources-table__prod .resources-table__factor::before {
@@ -2975,6 +2994,34 @@ table.tablesorter thead tr .headerSortDown {
         padding: 8px 0;
         background: var(--color-bg-surface);
         border-top: 1px solid var(--color-border);
+    }
+
+    /* #801: reserve space *above* the sticky Apply bar so Weekly Production
+       can scroll clear of it. Padding after the bar would give sticky room
+       to climb over the last row. */
+    body#resources .resources-table {
+        padding-bottom: calc(44px + 24px);
+    }
+
+    /* #801: Player's Banner image and embed fields must fit ~390px when expanded. */
+    body#settings #userbanner-details,
+    body#settings #userbanner-details table {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    body#settings #userpic {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        height: auto;
+    }
+
+    body#settings #userbanner-details input[type="text"] {
+        width: 100%;
+        max-width: 450px;
+        box-sizing: border-box;
     }
 
     body#messages content {
@@ -3762,6 +3809,9 @@ table.tablesorter thead tr .headerSortDown {
 .empire-sheet {
 	overflow-x: auto;
 	max-width: 100%;
+	width: 100%;
+	box-sizing: border-box;
+	min-width: 0;
 }
 
 .empire-overview,
@@ -3826,6 +3876,127 @@ table.tablesorter thead tr .headerSortDown {
 .empire-section summary {
 	cursor: pointer;
 	padding: 4px 6px;
+}
+
+/* #799: a 1-planet table used a 25.5rem (~408px) min-width, which stretched
+   the page to ~425px at a 390px viewport. Shrink the column floor so 1–2
+   planets fit; more planets scroll inside the sheet, not the page. */
+@media screen and (max-width: 699px) {
+	content:has(.empire-sheet) {
+		min-width: 0;
+		max-width: 100%;
+		overflow-x: hidden;
+	}
+
+	.empire-overview,
+	.empire-matrix {
+		width: 100%;
+		min-width: calc(6.5rem + 5.25rem + (var(--empire-planets, 1) * 5.25rem));
+	}
+
+	.empire-col-label {
+		width: 6.5rem;
+	}
+
+	.empire-col-total,
+	.empire-col-planet {
+		width: 5.25rem;
+	}
+
+	.empire-resource-row .empire-resource-rate {
+		display: block;
+	}
+}
+
+/* Statistics (#805): 12+ digit point totals widen .table519 past a 390px
+   viewport. Contain page overflow; reserve a Points column so totals stay
+   on one line; names wrap at word boundaries. The sheet scrolls only if
+   content still cannot fit. */
+.statistics-sheet {
+	max-width: 100%;
+	width: 100%;
+	box-sizing: border-box;
+	min-width: 0;
+}
+
+@media screen and (max-width: 699px) {
+	body#statistics content {
+		min-width: 0;
+		max-width: 100%;
+		overflow-x: hidden;
+	}
+
+	body#statistics .table519 {
+		max-width: 100% !important;
+		width: 100%;
+	}
+
+	body#statistics .statistics-sheet {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	body#statistics .statistics-sheet .table519 {
+		table-layout: fixed;
+	}
+
+	body#statistics .statistics-sheet .table519 th,
+	body#statistics .statistics-sheet .table519 td {
+		padding: 2px 3px;
+		box-sizing: border-box;
+	}
+
+	body#statistics .statistics-sheet .table519 th {
+		white-space: nowrap;
+	}
+
+	body#statistics .statistics-sheet .table519 td {
+		overflow-wrap: break-word;
+	}
+
+	body#statistics .statistics-sheet .table519 th:first-child,
+	body#statistics .statistics-sheet .table519 td:first-child {
+		width: 2.5rem;
+	}
+
+	body#statistics .statistics-table--players th:nth-child(2),
+	body#statistics .statistics-table--players td:nth-child(2) {
+		width: 7rem;
+	}
+
+	body#statistics .statistics-table--players th:nth-child(3),
+	body#statistics .statistics-table--players td:nth-child(3),
+	body#statistics .statistics-table--players th:nth-child(4),
+	body#statistics .statistics-table--players td:nth-child(4) {
+		width: 1.25rem;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	body#statistics .statistics-table--players th:last-child,
+	body#statistics .statistics-table--players td:last-child {
+		width: 5.75rem;
+	}
+
+	body#statistics .statistics-table--players td:last-child,
+	body#statistics .statistics-table--alliances td:nth-child(4),
+	body#statistics .statistics-table--alliances td:nth-child(5) {
+		font-size: 0.8em;
+		letter-spacing: -0.03em;
+		white-space: nowrap;
+	}
+
+	body#statistics .statistics-table--alliances th:nth-child(3),
+	body#statistics .statistics-table--alliances td:nth-child(3) {
+		width: 4.5rem;
+	}
+
+	body#statistics .statistics-table--alliances th:nth-child(4),
+	body#statistics .statistics-table--alliances td:nth-child(4),
+	body#statistics .statistics-table--alliances th:nth-child(5),
+	body#statistics .statistics-table--alliances td:nth-child(5) {
+		width: 5.5rem;
+	}
 }
 
 /* Tech Tree discoverability — next unlock + first-session nudge */

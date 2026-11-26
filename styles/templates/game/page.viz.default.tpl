@@ -1,3 +1,4 @@
+{block name="title" prepend}{$LNG.lm_viz}{/block}
 {block name="content"}
 
 <div id="threejs-container">

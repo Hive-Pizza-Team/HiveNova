@@ -11,11 +11,11 @@
 	{/if}
 	<tr>
 		<td style="width:50%">{$LNG.al_ally_info_tag}</td>
-		<td style="width:50%">{$ally_tag|htmlspecialchars}</td>
+		<td style="width:50%">{$ally_tag|alliance_plain}</td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_ally_info_name}</td>
-		<td>{$ally_name|htmlspecialchars}</td>
+		<td>{$ally_name|alliance_plain}</td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_ally_info_members}</td>

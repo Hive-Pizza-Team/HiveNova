@@ -45,7 +45,7 @@
 				{if $elementID == $energyElementId}
 					<span{if ($planetList.energyAvailable|array_sum) < 0} class="is-energy-deficit"{/if}>{$planetList.energyConsumed|array_sum|number}</span> / {$resourceArray|array_sum|number}
 				{else}
-					{$resourceArray|array_sum|number} <span style="color:lime">{$planetList.resourcePerHour[$elementID]|array_sum|number}/h</span>
+					{$resourceArray|array_sum|number} <span class="empire-resource-rate" style="color:lime">{$planetList.resourcePerHour[$elementID]|array_sum|number}/h</span>
 				{/if}
 			</td>
 			{foreach $resourceArray as $planetID => $resource}
@@ -53,7 +53,7 @@
 					{if $elementID == $energyElementId}
 						<span{if $planetList.energyAvailable[$planetID] < 0} class="is-energy-deficit"{/if}>{$planetList.energyConsumed[$planetID]|number}</span> / {$resource|number}
 					{else}
-						{$resource|number}{if $planetList.planet_type[$planetID] == 1} <span style="color:lime">{$planetList.resourcePerHour[$elementID][$planetID]|number}/h</span>{/if}
+						{$resource|number}{if $planetList.planet_type[$planetID] == 1} <span class="empire-resource-rate" style="color:lime">{$planetList.resourcePerHour[$elementID][$planetID]|number}/h</span>{/if}
 					{/if}
 				</td>
 			{/foreach}

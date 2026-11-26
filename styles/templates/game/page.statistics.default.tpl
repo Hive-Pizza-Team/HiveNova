@@ -15,11 +15,13 @@
 		</tr>
 	</table>
 </form>
-<table class="table519">
+<div class="statistics-sheet">
+<table class="table519 statistics-table{if $who == 1} statistics-table--players{elseif $who == 2} statistics-table--alliances{/if}">
 {if $who == 1}
 	{include file="shared.statistics.playerTable.tpl"}
 {elseif $who == 2}
 	{include file="shared.statistics.allianceTable.tpl"}
 {/if}
 </table>
+</div>
 {/block}
