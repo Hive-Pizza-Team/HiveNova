@@ -328,10 +328,10 @@ class GalaxyRows
 			
 			$this->galaxyData[$this->galaxyRow['planet']]['alliance']	= array(
 				'id'		=> $this->galaxyRow['allyid'],
-				'name'		=> htmlspecialchars((string) $this->galaxyRow['ally_name'], ENT_QUOTES, "UTF-8"),
+				'name'		=> AllianceNameDisplay::plain($this->galaxyRow['ally_name']),
 				'member'	=> sprintf(($this->galaxyRow['ally_members'] == 1) ? $LNG['gl_member_add'] : $LNG['gl_member'], $this->galaxyRow['ally_members']),
 				'web'		=> $this->galaxyRow['ally_web'],
-				'tag'		=> $this->galaxyRow['ally_tag'],
+				'tag'		=> AllianceNameDisplay::plain($this->galaxyRow['ally_tag']),
 				'rank'		=> $this->galaxyRow['ally_rank'],
 				'class'		=> $Class,
 			);
