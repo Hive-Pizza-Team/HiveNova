@@ -3908,6 +3908,97 @@ table.tablesorter thead tr .headerSortDown {
 	}
 }
 
+/* Statistics (#805): 12+ digit point totals widen .table519 past a 390px
+   viewport. Contain page overflow; reserve a Points column so totals stay
+   on one line; names wrap at word boundaries. The sheet scrolls only if
+   content still cannot fit. */
+.statistics-sheet {
+	max-width: 100%;
+	width: 100%;
+	box-sizing: border-box;
+	min-width: 0;
+}
+
+@media screen and (max-width: 699px) {
+	body#statistics content {
+		min-width: 0;
+		max-width: 100%;
+		overflow-x: hidden;
+	}
+
+	body#statistics .table519 {
+		max-width: 100% !important;
+		width: 100%;
+	}
+
+	body#statistics .statistics-sheet {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	body#statistics .statistics-sheet .table519 {
+		table-layout: fixed;
+	}
+
+	body#statistics .statistics-sheet .table519 th,
+	body#statistics .statistics-sheet .table519 td {
+		padding: 2px 3px;
+		box-sizing: border-box;
+	}
+
+	body#statistics .statistics-sheet .table519 th {
+		white-space: nowrap;
+	}
+
+	body#statistics .statistics-sheet .table519 td {
+		overflow-wrap: break-word;
+	}
+
+	body#statistics .statistics-sheet .table519 th:first-child,
+	body#statistics .statistics-sheet .table519 td:first-child {
+		width: 2.5rem;
+	}
+
+	body#statistics .statistics-table--players th:nth-child(2),
+	body#statistics .statistics-table--players td:nth-child(2) {
+		width: 7rem;
+	}
+
+	body#statistics .statistics-table--players th:nth-child(3),
+	body#statistics .statistics-table--players td:nth-child(3),
+	body#statistics .statistics-table--players th:nth-child(4),
+	body#statistics .statistics-table--players td:nth-child(4) {
+		width: 1.25rem;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	body#statistics .statistics-table--players th:last-child,
+	body#statistics .statistics-table--players td:last-child {
+		width: 5.75rem;
+	}
+
+	body#statistics .statistics-table--players td:last-child,
+	body#statistics .statistics-table--alliances td:nth-child(4),
+	body#statistics .statistics-table--alliances td:nth-child(5) {
+		font-size: 0.8em;
+		letter-spacing: -0.03em;
+		white-space: nowrap;
+	}
+
+	body#statistics .statistics-table--alliances th:nth-child(3),
+	body#statistics .statistics-table--alliances td:nth-child(3) {
+		width: 4.5rem;
+	}
+
+	body#statistics .statistics-table--alliances th:nth-child(4),
+	body#statistics .statistics-table--alliances td:nth-child(4),
+	body#statistics .statistics-table--alliances th:nth-child(5),
+	body#statistics .statistics-table--alliances td:nth-child(5) {
+		width: 5.5rem;
+	}
+}
+
 /* Tech Tree discoverability — next unlock + first-session nudge */
 .techtree-next {
 	margin: 0 0 12px;
