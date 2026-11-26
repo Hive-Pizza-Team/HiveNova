@@ -13,6 +13,8 @@ const topnav = fs.readFileSync(path.join(root, 'styles/templates/game/main.topna
 const nav = fs.readFileSync(path.join(root, 'styles/templates/game/main.navigation.tpl'), 'utf8');
 const faqTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.questions.default.tpl'), 'utf8');
 const resourcesTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.resources.default.tpl'), 'utf8');
+const settingsTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.settings.default.tpl'), 'utf8');
+const vizTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.viz.default.tpl'), 'utf8');
 const buildingsTpl = fs.readFileSync(path.join(root, 'styles/templates/game/page.buildings.default.tpl'), 'utf8');
 const ingameEn = fs.readFileSync(path.join(root, 'language/en/INGAME.php'), 'utf8');
 const varsPhp = fs.readFileSync(path.join(root, 'includes/vars.php'), 'utf8');
@@ -249,6 +251,22 @@ describe('chrome-v1.2 mobile', () => {
 		assert.match(mobileCss, /body#resources \.resources-table__row td\.resources-table__label::before \{[\s\S]*?content:\s*none/);
 		assert.match(mobileCss, /body#resources \.resources-table__prod::after \{[\s\S]*?flex:\s*0 0 100%/);
 		assert.match(mobileCss, /body#resources \.resources-table__prod::after \{[\s\S]*?order:\s*2/);
+		assert.match(mobileCss, /body#resources \.resources-table \{[\s\S]*?padding-bottom:\s*calc\(44px \+ 24px\)/);
+	});
+
+	it('fits the Settings banner image and embed fields at mobile width', () => {
+		assert.match(settingsTpl, /id="userpic"/);
+		assert.match(settingsTpl, /class="userpic"/);
+		assert.match(settingsTpl, /width="590"/);
+		assert.match(settingsTpl, /max-width:450px/);
+		assert.equal(settingsTpl.includes('style="width:450px;"'), false);
+		assert.match(mobileCss, /body#settings #userpic \{[\s\S]*?max-width:\s*100%/);
+		assert.match(mobileCss, /body#settings #userpic \{[\s\S]*?height:\s*auto/);
+		assert.match(mobileCss, /body#settings #userbanner-details input\[type="text"\] \{[\s\S]*?max-width:\s*450px/);
+	});
+
+	it('gives the Map page a title block', () => {
+		assert.match(vizTpl, /\{block name="title" prepend\}\{\$LNG\.lm_viz\}\{\/block\}/);
 	});
 
 	it('keeps the Buildings queue to one row until expanded', () => {

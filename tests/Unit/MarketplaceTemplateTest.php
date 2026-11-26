@@ -227,4 +227,40 @@ class MarketplaceTemplateTest extends TestCase
 		$html = $this->render([]);
 		$this->assertStringContainsString('Fuel for the flight is carried in the cargo hold', $html);
 	}
+
+	public function testHowItWorksDailyCapNumberIsLocalizable(): void
+	{
+		$prev = $GLOBALS['userNumberFormat'] ?? null;
+		$GLOBALS['userNumberFormat'] = 'auto';
+		try {
+			$rules = sprintf(
+				'Fair-play rules: worth up to %5$s %6$s per 24 hours.',
+				'0.5',
+				'2',
+				'1',
+				'24',
+				pretty_number(1000000),
+				'Uranium'
+			);
+			$html = $this->render(['rulesText' => $rules]);
+		} finally {
+			if ($prev === null) {
+				unset($GLOBALS['userNumberFormat']);
+			} else {
+				$GLOBALS['userNumberFormat'] = $prev;
+			}
+		}
+
+		$this->assertStringContainsString("class='ln'", $html);
+		$this->assertStringContainsString("data-n='1000000'", $html);
+		$this->assertStringContainsString('1.000.000', $html);
+		$this->assertStringNotContainsString('class="market__rules">&lt;span', $html);
+
+		$src = (string) file_get_contents(ROOT_PATH . 'includes/pages/game/ShowMarketPlacePage.php');
+		$this->assertStringContainsString('pretty_number(MarketAbuseRules::DAILY_CAP_VALUE)', $src);
+		$this->assertStringContainsString('pretty_number(MarketAbuseRules::dailyCapLeft', $src);
+		$this->assertStringNotContainsString('pretty_number_plain(MarketAbuseRules::DAILY_CAP_VALUE)', $src);
+		$this->assertStringContainsString("'payLabel' => pretty_number_plain(", $src);
+	}
+
 }
