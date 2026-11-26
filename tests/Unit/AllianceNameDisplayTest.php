@@ -21,18 +21,45 @@ class AllianceNameDisplayTest extends TestCase
 		$this->assertSame('Test', AllianceNameDisplay::plain('Test'));
 	}
 
-	public function testPlainStripsTagsFromItalicName(): void
+	public function testPlainEscapesRawTagsSoTheyShowAsText(): void
 	{
-		$this->assertSame('Test', AllianceNameDisplay::plain('<i>Test</i>'));
+		$this->assertSame('&lt;i&gt;Test&lt;/i&gt;', AllianceNameDisplay::plain('<i>Test</i>'));
 	}
 
-	public function testPlainStripsScriptTags(): void
+	public function testPlainDoesNotDoubleEscapeStoredEntities(): void
 	{
-		$this->assertSame('x', AllianceNameDisplay::plain('<script>x</script>'));
+		$this->assertSame('&lt;i&gt;Test&lt;/i&gt;', AllianceNameDisplay::plain('&lt;i&gt;Test&lt;/i&gt;'));
+	}
+
+	public function testPlainFlattensDoubleStoredEntities(): void
+	{
+		$this->assertSame(
+			'&lt;i&gt;Test&lt;/i&gt;',
+			AllianceNameDisplay::plain('&amp;lt;i&amp;gt;Test&amp;lt;/i&amp;gt;')
+		);
+	}
+
+	public function testPlainEscapesScriptTagsWithoutExecuting(): void
+	{
+		$this->assertSame('&lt;script&gt;x&lt;/script&gt;', AllianceNameDisplay::plain('<script>x</script>'));
 	}
 
 	public function testPlainEscapesQuotes(): void
 	{
 		$this->assertSame('O&#039;Brien &quot;Fleet&quot;', AllianceNameDisplay::plain('O\'Brien "Fleet"'));
+	}
+
+	public function testPlainDoesNotDoubleEscapeStoredQuotes(): void
+	{
+		$this->assertSame(
+			'O&#039;Brien &quot;Fleet&quot;',
+			AllianceNameDisplay::plain('O&#039;Brien &quot;Fleet&quot;')
+		);
+	}
+
+	public function testPlainEscapesAmpersandsOnce(): void
+	{
+		$this->assertSame('Tom &amp; Jerry', AllianceNameDisplay::plain('Tom & Jerry'));
+		$this->assertSame('Tom &amp; Jerry', AllianceNameDisplay::plain('Tom &amp; Jerry'));
 	}
 }

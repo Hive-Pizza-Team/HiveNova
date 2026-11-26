@@ -46,11 +46,11 @@
 	</tr>
 	<tr>
 		<td>{$LNG.al_tag}</td>
-		<td><input type="text" name="ally_tag" value="{$ally_tag|htmlspecialchars}" size="8" maxlength="8" required></td>
+		<td><input type="text" name="ally_tag" value="{$ally_tag|alliance_plain}" size="8" maxlength="8" required></td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_name}</td>
-		<td><input type="text" name="ally_name" value="{$ally_name|htmlspecialchars}" size="20" maxlength="30" required></td>
+		<td><input type="text" name="ally_name" value="{$ally_name|alliance_plain}" size="20" maxlength="30" required></td>
 	</tr>
 	<tr>
 		<td>{$LNG.al_manage_founder_rank}</td>
