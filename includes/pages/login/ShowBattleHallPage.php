@@ -30,7 +30,8 @@ class ShowBattleHallPage extends AbstractLoginPage
 		$seoBase = PublicSeo::canonicalBasePath();
 		$lang = $LNG->getLanguage();
 
-		$hallRaw = (new BattleHallService())->listTopBattles($universe, 100);
+		$missingName = (string) ($LNG['tkb_deleted_player'] ?? BattleHallService::MISSING_NAME);
+		$hallRaw = (new BattleHallService())->listTopBattles($universe, 100, $missingName);
 
 		$hallList = [];
 		foreach ($hallRaw as $hallRow) {

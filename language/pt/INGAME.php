@@ -1144,6 +1144,7 @@ $LNG['tkb_gewinner']                        = '<b>-Vencedores</b>';
 $LNG['tkb_verlierer']                       = '<b>-Derrotados</b>';
 $LNG['tkb_unentschieden']                   = '<b>-Empates </b>';
 $LNG['tkb_missing']                         = '<br>Desaparecido em Combate: A conta do jogador já nao existe.';
+$LNG['tkb_deleted_player']                  = '(apagado)';
 
 //----------------------------------------------------------------------------//
 // Perfil de Jogador

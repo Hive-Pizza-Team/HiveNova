@@ -1106,6 +1106,7 @@ $LNG['tkb_gewinner']                      = '<b>-Победитель-</b>';
 $LNG['tkb_verlierer']                     = '<b>-Проигравший-</b>';
 $LNG['tkb_unentschieden']                 = '<b>-Ничья- </b>';
 $LNG['tkb_missing']                       = '<br>Аккаунт не существует.';
+$LNG['tkb_deleted_player']                = '(удалён)';
 
 // Карточка игрока
 $LNG['pl_overview']                       = 'Игрок';

@@ -1138,6 +1138,7 @@ $LNG['tkb_gewinner']              		 	= 'wygrał';
 $LNG['tkb_verlierer']              			= 'przegrał';
 $LNG['tkb_unentschieden']         			= 'remis';
 $LNG['tkb_missing']              		  	= 'Tego konta już nie ma.';
+$LNG['tkb_deleted_player']         			= '(usunięty)';
 
 //----------------------------------------------------------------------------//
 // playercard.php
