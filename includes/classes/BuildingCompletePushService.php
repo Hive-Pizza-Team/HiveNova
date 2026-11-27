@@ -329,7 +329,9 @@ class BuildingCompletePushService
 				foreach ($claimed as $job) {
 					$this->releaseClaim($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
 				}
-				PushNotificationService::logFailure('BuildingCompletePushService: delivery failed user=' . $userId);
+				if (is_callable($this->notifier)) {
+					PushNotificationService::logFailure('BuildingCompletePushService: delivery failed user=' . $userId);
+				}
 
 				return 0;
 			}
@@ -528,8 +530,31 @@ class BuildingCompletePushService
 		}
 
 		$result = PushNotificationService::notifyUser($userId, $message['title'], $message['body'], $message['data']);
+		if (empty($result['ok'])) {
+			PushNotificationService::logFailure(
+				'BuildingCompletePushService: delivery failed user=' . $userId
+				. ' reason=' . self::deliveryFailureReason($result)
+			);
+		}
 
 		return PushNotificationService::shouldStopRetrying($result);
+	}
+
+	/**
+	 * @param array<string, mixed> $result
+	 */
+	private static function deliveryFailureReason(array $result): string
+	{
+		$skipped = $result['skipped'] ?? null;
+		if (is_string($skipped) && $skipped !== '') {
+			return $skipped;
+		}
+		$lastError = $result['lastError'] ?? null;
+		if (is_string($lastError) && $lastError !== '') {
+			return $lastError;
+		}
+
+		return 'delivery_failed';
 	}
 
 	/**
