@@ -1134,6 +1134,7 @@ $LNG['tkb_gewinner']              		 	= '<b>-Ganador-</b>';
 $LNG['tkb_verlierer']              			= '<b>-Perdedaor-</b>';
 $LNG['tkb_unentschieden']         			= '<b>-Empatado- </b>';
 $LNG['tkb_missing']              		  	= '<br>Desaparecido en Acción: La cuenta de usuario ya no existe.';
+$LNG['tkb_deleted_player']            = '(eliminado)';
 
 //----------------------------------------------------------------------------//
 // playercard.php

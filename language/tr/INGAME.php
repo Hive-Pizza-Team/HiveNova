@@ -1147,6 +1147,7 @@ $LNG['tkb_gewinner']						= '<b>-Kazanan-</b>';
 $LNG['tkb_verlierer']						= '<b>-Kaybeden-</b>';
 $LNG['tkb_unentschieden']					= '<b>-Berabere- </b>';
 $LNG['tkb_missing']							= '<br>Oyuncu artık mevcut değil.';
+$LNG['tkb_deleted_player'] = '(silindi)';
 
 //----------------------------------------------------------------------------//
 //Profil

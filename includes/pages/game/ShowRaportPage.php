@@ -2,6 +2,7 @@
 
 namespace HiveNova\Page\Game;
 
+use HiveNova\Core\BattleHallService;
 use HiveNova\Core\BattleShareComposer;
 use HiveNova\Core\Config;
 use HiveNova\Core\Database;
@@ -209,22 +210,7 @@ class ShowRaportPage extends AbstractGamePage
 
 		$RID		= HTTP::_GP('raport', '');
 
-		$sql = "SELECT 
-			raport, time,
-			(
-				SELECT
-				GROUP_CONCAT(username SEPARATOR ' & ') as attacker
-				FROM %%USERS%%
-				WHERE id IN (SELECT uid FROM %%TOPKB_USERS%% WHERE %%TOPKB_USERS%%.rid = %%RW%%.rid AND role = 1)
-			) as attacker,
-			(
-				SELECT
-				GROUP_CONCAT(username SEPARATOR ' & ') as defender
-				FROM %%USERS%%
-				WHERE id IN (SELECT uid FROM %%TOPKB_USERS%% WHERE %%TOPKB_USERS%%.rid = %%RW%%.rid AND role = 2)
-			) as defender
-			FROM %%RW%%
-			WHERE rid = :reportID;";
+		$sql = "SELECT raport, time FROM %%RW%% WHERE rid = :reportID;";
 		$reportData = $db->selectSingle($sql, array(
 			':reportID'	=> $RID
 		));
@@ -247,12 +233,14 @@ class ShowRaportPage extends AbstractGamePage
 		$formattedTime = _date($LNG['php_tdformat'], $rawTime, $USER['timezone']);
 		$combatReport['time'] = $formattedTime;
 
-		$attackerName = (string) ($reportData['attacker'] ?? '');
-		$defenderName = (string) ($reportData['defender'] ?? '');
+		$missingName = (string) ($LNG['tkb_deleted_player'] ?? BattleHallService::MISSING_NAME);
+		$sides = (new BattleHallService($db))->participantNames([$RID], $missingName)[$RID] ?? ['attacker' => '', 'defender' => ''];
+		$attackerName = $sides['attacker'];
+		$defenderName = $sides['defender'];
 
 		$this->assign(array(
 			'Raport'	=> $combatReport,
-			'Info'		=> array($reportData["attacker"], $reportData["defender"]),
+			'Info'		=> array($attackerName, $defenderName),
 			'pageTitle'	=> $LNG['lm_topkb'],
 			'hideSidebarMenu' => !$showMenus,
 		) + $this->battleShareAssignVars(
