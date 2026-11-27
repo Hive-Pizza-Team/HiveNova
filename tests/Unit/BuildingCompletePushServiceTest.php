@@ -455,6 +455,56 @@ class BuildingCompletePushServiceTest extends TestCase
 		$this->assertGreaterThan(0, $this->db->notified['3:1:10:100']['notified_at']);
 	}
 
+	public function testNotifyJobsReleasesClaimWhenNotifierThrows(): void
+	{
+		$logs = [];
+		PushNotificationService::setErrorLogger(static function (string $line) use (&$logs): void {
+			$logs[] = $line;
+		});
+		try {
+			$throwing = new BuildingCompletePushService(
+				notifier: static function (): never {
+					throw new RuntimeException('gateway timeout');
+				},
+				configured: true,
+				languageLoader: static fn (): array => ['tech' => [1 => 'Ore Extractor']],
+			);
+			$this->assertSame(0, $throwing->notifyJobs(7, [[
+				'planetId'   => 3,
+				'planetName' => 'Home',
+				'elementId'  => 1,
+				'level'      => 10,
+				'buildEnd'   => 100,
+			]], 'en'));
+			$this->assertSame(0, $this->db->notified['3:1:10:100']['notified_at']);
+			$this->assertNotEmpty($logs);
+			$this->assertStringContainsString('notifyJobs', $logs[0]);
+			$this->assertStringContainsString('gateway timeout', $logs[0]);
+
+			$sent = [];
+			$retry = new BuildingCompletePushService(
+				notifier: static function () use (&$sent): void {
+					$sent[] = 1;
+				},
+				configured: true,
+				languageLoader: static fn (): array => [
+					'push_building_body' => '%s (level %d) finished on %s',
+					'tech'               => [1 => 'Ore Extractor'],
+				],
+			);
+			$this->assertSame(1, $retry->notifyJobs(7, [[
+				'planetId'   => 3,
+				'planetName' => 'Home',
+				'elementId'  => 1,
+				'level'      => 10,
+				'buildEnd'   => 100,
+			]], 'en'));
+			$this->assertCount(1, $sent);
+		} finally {
+			PushNotificationService::setErrorLogger(null);
+		}
+	}
+
 	public function testRunRetriesPendingAfterQueueWasCleared(): void
 	{
 		$this->db->notified['3:1:10:100'] = [

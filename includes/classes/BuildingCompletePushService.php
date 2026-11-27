@@ -288,6 +288,7 @@ class BuildingCompletePushService
 			return 0;
 		}
 
+		$claimed = [];
 		try {
 			$pending = [];
 			foreach ($jobs as $job) {
@@ -314,7 +315,6 @@ class BuildingCompletePushService
 				return 0;
 			}
 
-			$claimed = [];
 			foreach ($pending as $job) {
 				if ($this->claimPending($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd'])) {
 					$claimed[] = $job;
@@ -338,6 +338,9 @@ class BuildingCompletePushService
 
 			return 1;
 		} catch (Throwable $e) {
+			foreach ($claimed as $job) {
+				$this->releaseClaim($job['planetId'], $job['elementId'], $job['level'], $job['buildEnd']);
+			}
 			PushNotificationService::logFailure('BuildingCompletePushService::notifyJobs: ' . $e->getMessage());
 
 			return 0;
