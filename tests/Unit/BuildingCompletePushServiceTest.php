@@ -1,6 +1,7 @@
 <?php
 
 use HiveNova\Core\BuildingCompletePushService;
+use HiveNova\Core\PushNotificationService;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../Support/BuildingCompletePushDatabaseStub.php';
@@ -336,11 +337,31 @@ class BuildingCompletePushServiceTest extends TestCase
 		$this->assertFalse($service->isConfigured());
 	}
 
+	public function testDeliveryFailureReasonPrefersSkipThenLastError(): void
+	{
+		$method = new ReflectionMethod(BuildingCompletePushService::class, 'deliveryFailureReason');
+		$method->setAccessible(true);
+
+		$this->assertSame('not_configured', $method->invoke(null, ['skipped' => 'not_configured', 'lastError' => 'ignored']));
+		$this->assertSame('gateway down', $method->invoke(null, ['skipped' => null, 'lastError' => 'gateway down']));
+		$this->assertSame('delivery_failed', $method->invoke(null, []));
+	}
+
 	public function testNotifyJobDefaultNotifierDoesNotMarkSentWhenPushServiceNoops(): void
 	{
-		$service = new BuildingCompletePushService(configured: true);
-		$this->assertFalse($service->notifyJob(1, 2, 'Home', 1, 5, 100, 'en'));
-		$this->assertSame(0, $this->db->notified['2:1:5:100']['notified_at'] ?? 1);
+		$logs = [];
+		PushNotificationService::setErrorLogger(static function (string $line) use (&$logs): void {
+			$logs[] = $line;
+		});
+		try {
+			$service = new BuildingCompletePushService(configured: true);
+			$this->assertFalse($service->notifyJob(1, 2, 'Home', 1, 5, 100, 'en'));
+			$this->assertSame(0, $this->db->notified['2:1:5:100']['notified_at'] ?? 1);
+			$this->assertNotEmpty($logs);
+			$this->assertStringContainsString('reason=not_configured', $logs[0]);
+		} finally {
+			PushNotificationService::setErrorLogger(null);
+		}
 	}
 
 	public function testNotifyJobsMarksSentWhenEndpointIsExpired(): void
@@ -432,6 +453,56 @@ class BuildingCompletePushServiceTest extends TestCase
 		]], 'en'));
 		$this->assertCount(1, $sent);
 		$this->assertGreaterThan(0, $this->db->notified['3:1:10:100']['notified_at']);
+	}
+
+	public function testNotifyJobsReleasesClaimWhenNotifierThrows(): void
+	{
+		$logs = [];
+		PushNotificationService::setErrorLogger(static function (string $line) use (&$logs): void {
+			$logs[] = $line;
+		});
+		try {
+			$throwing = new BuildingCompletePushService(
+				notifier: static function (): never {
+					throw new RuntimeException('gateway timeout');
+				},
+				configured: true,
+				languageLoader: static fn (): array => ['tech' => [1 => 'Ore Extractor']],
+			);
+			$this->assertSame(0, $throwing->notifyJobs(7, [[
+				'planetId'   => 3,
+				'planetName' => 'Home',
+				'elementId'  => 1,
+				'level'      => 10,
+				'buildEnd'   => 100,
+			]], 'en'));
+			$this->assertSame(0, $this->db->notified['3:1:10:100']['notified_at']);
+			$this->assertNotEmpty($logs);
+			$this->assertStringContainsString('notifyJobs', $logs[0]);
+			$this->assertStringContainsString('gateway timeout', $logs[0]);
+
+			$sent = [];
+			$retry = new BuildingCompletePushService(
+				notifier: static function () use (&$sent): void {
+					$sent[] = 1;
+				},
+				configured: true,
+				languageLoader: static fn (): array => [
+					'push_building_body' => '%s (level %d) finished on %s',
+					'tech'               => [1 => 'Ore Extractor'],
+				],
+			);
+			$this->assertSame(1, $retry->notifyJobs(7, [[
+				'planetId'   => 3,
+				'planetName' => 'Home',
+				'elementId'  => 1,
+				'level'      => 10,
+				'buildEnd'   => 100,
+			]], 'en'));
+			$this->assertCount(1, $sent);
+		} finally {
+			PushNotificationService::setErrorLogger(null);
+		}
 	}
 
 	public function testRunRetriesPendingAfterQueueWasCleared(): void

@@ -3,6 +3,7 @@
 namespace HiveNova\Cronjob;
 
 use HiveNova\Core\BuildingCompletePushService;
+use HiveNova\Core\PushNotificationService;
 use Throwable;
 
 class BuildingCompletePushCronjob implements CronjobTask
@@ -17,7 +18,7 @@ class BuildingCompletePushCronjob implements CronjobTask
 		try {
 			($this->service ?? new BuildingCompletePushService())->run();
 		} catch (Throwable $e) {
-			return;
+			PushNotificationService::logFailure('BuildingCompletePushCronjob: ' . $e->getMessage());
 		}
 	}
 }
